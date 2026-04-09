@@ -169,3 +169,51 @@ Create `.env` file with:
 - `NEXT_PUBLIC_CLERK_SIGN_UP_URL`
 - `NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL`
 - `NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL`
+
+## Development Guidelines
+
+### Code Conventions
+
+Tham khảo bộ quy tắc chuẩn tại: `.agents/rules/main.md`
+
+#### Tóm tắt các quy tắc chính:
+
+1. **Cấu trúc thư mục**: Feature components phải nằm trong thư mục feature
+
+   ```
+   app/(main)/[feature]/
+   ├── page.tsx              # Server Component: Fetch data + Suspense
+   ├── [id]/page.tsx         # Trang chi tiết/chỉnh sửa
+   ├── error.tsx             # Error handling cục bộ
+   ├── [feature]-list.tsx    # Client Component: Danh sách
+   ├── [feature]-form.tsx    # Client Component: Form
+   └── [feature]-search.tsx  # Client Component: Search
+   ```
+
+2. **URL-as-State**: Filter/Pagination phải nằm trên URL
+
+3. **UI Components**:
+   - Luôn dùng `@/components/ui/` cho shadcn primitives
+   - Không dùng `@workspace/ui`
+
+4. **UX Rules**:
+   - Button Submit phải có Spinner khi loading
+   - Toast notifications cho mọi action (sonner)
+   - Delete phải có AlertDialog xác nhận
+   - Form phải có nút Hủy
+
+5. **Ngôn ngữ**: Tiếng Việt thuần túy cho tất cả UI
+
+6. **API Layer**:
+   - Server Actions tại `app/api/[feature]/action.ts`
+   - Dùng `fetchAuthenticated` để đính kèm Clerk JWT
+
+### Checklist trước khi Done một Feature
+
+- [ ] Trang Page chính có `Suspense` và `Skeleton` khớp layout chưa?
+- [ ] Có `error.tsx` để handle lỗi server chưa?
+- [ ] Thanh tìm kiếm có `debounce` chưa?
+- [ ] Ngôn ngữ đã được dịch sang **Tiếng Việt thuần túy** chưa?
+- [ ] Các Button Submit đã có **Spinner** và **Disabled state** chưa?
+- [ ] Hành động Xoá đã có **AlertDialog** chưa?
+- [ ] Sau khi tạo/sửa đã có `router.refresh()` và Redirect chưa?

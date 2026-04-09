@@ -60,12 +60,8 @@ Dựa trên quá trình refactor phân hệ Blog và tối ưu bộ Core, đây 
 
 ---
 
-## 5. Ngôn ngữ Giao diện (Thuần Việt)
-- LUÔN sử dụng **Tiếng Việt chuyên nghiệp** cho tất cả nội dung hiển thị (Label, Placeholder, Toast, Metadata).
-- Dịch thoát ý các thuật ngữ kỹ thuật:
-    - Crawler -> Bộ thu thập / Nguồn tin.
-    - Prompt -> Mẫu AI.
-    - Trade -> Giao dịch.
+## 5. Ngôn ngữ Giao diện (Thuần Anh)
+- LUÔN sử dụng **Tiếng Anh chuyên nghiệp** cho tất cả nội dung hiển thị (Label, Placeholder, Toast, Metadata).
 - Tuyệt đối không để xảy ra tình trạng "nửa Việt nửa Anh".
 
 ---
@@ -95,7 +91,7 @@ Dựa trên quá trình refactor phân hệ Blog và tối ưu bộ Core, đây 
 > - [ ] Trang Page chính có `Suspense` và `Skeleton` khớp layout chưa?
 > - [ ] Có `error.tsx` để handle lỗi server chưa?
 > - [ ] Thanh tìm kiếm có `debounce` chưa?
-> - [ ] Ngôn ngữ đã được dịch sang **Tiếng Việt thuần túy** chưa?
+> - [ ] Ngôn ngữ đã được dịch sang **Tiếng Anh chuyên nghiệp** chưa?
 > - [ ] Các Button Submit đã có **Spinner** và **Disabled state** chưa?
 > - [ ] Hành động Xoá đã có **AlertDialog** chưa?
 > - [ ] Sau khi tạo/sửa đã có `router.refresh()` và Redirect chưa?

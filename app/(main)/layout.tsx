@@ -4,6 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { ModeToggle } from '@/components/mode-toggle';
 import { AppBreadcrumb } from '@/components/app-breadcrumbs';
 import { AppSidebar } from '@/components/app-sidebar';
+import { cookies } from "next/headers"
 
 export default async function Layout({
   children,
@@ -20,8 +21,12 @@ export default async function Layout({
     fullName: user.fullName,
     username: user.username
   } : null;
+
+  const cookieStore = await cookies()
+  const defaultOpen = cookieStore.get("sidebar_state")?.value === "true"
+
   return (
-    <SidebarProvider >
+    <SidebarProvider defaultOpen={defaultOpen}>
       <AppSidebar user={simpleUser} isAuthenticated={isAuthenticated} />
       <SidebarInset>
         <header className="flex h-18 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 border-b">
