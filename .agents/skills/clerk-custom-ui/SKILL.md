@@ -1,29 +1,18 @@
 ---
 name: clerk-custom-ui
-description: Custom authentication flows and component appearance - hooks (useSignIn, useSignUp), themes, colors, fonts, CSS. Use for custom sign-in/sign-up flows, appearance styling, visual customization, branding.
+description: Custom authentication flows and component appearance - hooks (useSignIn,
+  useSignUp), themes, colors, fonts, CSS. Use for custom sign-in/sign-up flows, appearance
+  styling, visual customization, branding.
 allowed-tools: WebFetch
 license: MIT
-inputs:
-  - name: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-    description: Clerk publishable key from dashboard
-    required: true
-  - name: CLERK_SECRET_KEY
-    description: Clerk secret key for server-side operations
-    required: true
-references:
-  - core-2/custom-sign-in.md
-  - core-2/custom-sign-up.md
-  - core-3/custom-sign-in.md
-  - core-3/custom-sign-up.md
-  - core-3/show-component.md
 metadata:
   author: clerk
-  version: "2.2.0"
+  version: 2.3.0
 ---
 
 # Custom UI
 
-> **Prerequisite**: Ensure `ClerkProvider` wraps your app. See `setup/`.
+> **Prerequisite**: Ensure `ClerkProvider` wraps your app. See `clerk-setup` skill.
 >
 > **Version**: Check `package.json` for the SDK version — see `clerk` skill for the version table. This determines which custom flow references to use below.
 
@@ -136,7 +125,7 @@ import { dark, neobrutalism } from '@clerk/ui/themes'
 
 **Available themes:** `dark`, `neobrutalism`, `shadcn`, `simple`
 
-#### shadcn Theme (HIGH PRIORITY)
+#### shadcn Theme
 
 > **IMPORTANT:** If the project has `components.json` (shadcn/ui installed), ALWAYS apply the shadcn theme as the FIRST customization step. This ensures Clerk components visually match the existing shadcn design system. Skip this only if the user explicitly requests a different theme.
 
@@ -178,3 +167,9 @@ Also import shadcn CSS in your global styles:
 | Social buttons wrong | Add `socialButtonsVariant: 'iconButton'` in `options` (or `layout` in Core 2) |
 | Styling not working | Use appearance prop, not direct CSS (unless with bring-your-own-css) |
 | Hook returns different shape | Check SDK version — Core 2 and current have completely different `useSignIn`/`useSignUp` APIs |
+
+## See Also
+
+- `clerk-setup` - Initial Clerk install
+- `clerk-nextjs-patterns` - Next.js patterns
+- `clerk-orgs` - B2B organizations

@@ -3,6 +3,7 @@ import "./globals.css"
 import { cn } from "@/lib/utils";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Providers } from "@/components/providers";
+import NextTopLoader from 'nextjs-toploader';
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-sans' })
 
@@ -23,6 +24,7 @@ export default function RootLayout({
       className={cn("antialiased", fontMono.variable, "font-sans", geist.variable)}
     >
       <body>
+        <NextTopLoader color="var(--primary)" showSpinner={false} height={3} />
         <ClerkProvider>
           <Providers>
             {children}

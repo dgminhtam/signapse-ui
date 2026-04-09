@@ -1,4 +1,13 @@
-import { BookOpen, Bot, GalleryVerticalEnd, LayoutDashboard, Newspaper, Settings2, SquareTerminal, TrendingUp, FileBarChart } from "lucide-react"
+import {
+    Bot,
+    FileBarChart,
+    GalleryVerticalEnd,
+    LayoutDashboard,
+    Newspaper,
+    Settings2,
+    TrendingUp,
+    ServerCrash,
+} from "lucide-react"
 
 export const siteConfig = {
     teams: [
@@ -33,10 +42,33 @@ export const siteConfig = {
                     title: "Bài viết",
                     url: "/articles",
                 },
+                {
+                    title: "Quản lý Blog",
+                    url: "/blogs",
+                },
+                {
+                    title: "Đăng tải Wordpress",
+                    url: "/wordpress",
+                },
             ],
         },
         {
-            title: "AI & Tự động hóa",
+            title: "Giao dịch & Tín hiệu",
+            url: "#",
+            icon: TrendingUp,
+            items: [
+                {
+                    title: "Cấu hình Trade",
+                    url: "/settings/trade",
+                },
+                {
+                    title: "Danh sách theo dõi",
+                    url: "/watchlist",
+                },
+            ],
+        },
+        {
+            title: "AI & Tương tác",
             url: "#",
             icon: Bot,
             items: [
@@ -48,31 +80,24 @@ export const siteConfig = {
                     title: "Kênh Telegram",
                     url: "/telegram",
                 },
-                {
-                    title: "Trang Wordpress",
-                    url: "/wordpress",
-                },
             ],
         },
         {
-            title: "Giao dịch Bot",
+            title: "Hệ thống & Báo cáo",
             url: "#",
-            icon: TrendingUp,
+            icon: Settings2,
             items: [
                 {
-                    title: "Cấu hình Trade",
-                    url: "/settings/trade",
-                },
-            ],
-        },
-        {
-            title: "Báo cáo",
-            url: "#",
-            icon: FileBarChart,
-            items: [
-                {
-                    title: "Danh sách báo cáo",
+                    title: "Thống kê & Báo cáo",
                     url: "/reports",
+                },
+                {
+                    title: "Quản trị Dịch vụ",
+                    url: "/system",
+                },
+                {
+                    title: "Cài đặt chung",
+                    url: "/settings",
                 },
             ],
         },
