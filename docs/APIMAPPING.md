@@ -83,7 +83,20 @@ CONTENT_EXTRACTION, SENTIMENT_ANALYSIS, TITLE_GENERATION, SUMMARY_GENERATION
 
 ---
 
-## 6. User API
+## 6. Economic Calendar API ⭐ NEW
+
+| Method | Backend Endpoint                          | Frontend Action                           | Description                       |
+| ------ | ----------------------------------------- | ----------------------------------------- | --------------------------------- |
+| GET    | `/economic-calendar`                      | `getEconomicEvents(searchParams)`         | Lấy tất cả sự kiện kinh tế        |
+| GET    | `/economic-calendar/{id}`                 | `getEconomicEventById(id)`                | Lấy sự kiện theo ID               |
+| GET    | `/economic-calendar/impact/{impact}`      | `getEconomicEventsByImpact(impact, searchParams)` | Lọc sự kiện theo mức độ tác động |
+| GET    | `/economic-calendar/country/{country}`    | `getEconomicEventsByCountry(country, searchParams)` | Lọc sự kiện theo quốc gia       |
+| POST   | `/economic-calendar/crawl`                | `crawlEconomicCalendar()`                 | Crawl dữ liệu lịch kinh tế        |
+| DELETE | `/economic-calendar/{id}`                 | `deleteEconomicEvent(id)`                 | Xóa sự kiện kinh tế               |
+
+---
+
+## 7. User API
 
 | Method | Backend Endpoint            | Frontend Action    | Description                |
 | ------ | --------------------------- | ------------------ | -------------------------- |
@@ -91,7 +104,7 @@ CONTENT_EXTRACTION, SENTIMENT_ANALYSIS, TITLE_GENERATION, SUMMARY_GENERATION
 
 ---
 
-## 7. Webhooks
+## 8. Webhooks
 
 | Method | Backend Endpoint  | Description                |
 | ------ | ----------------- | -------------------------- |
@@ -99,7 +112,7 @@ CONTENT_EXTRACTION, SENTIMENT_ANALYSIS, TITLE_GENERATION, SUMMARY_GENERATION
 
 ---
 
-## 8. Health Check
+## 9. Health Check
 
 | Method | Backend Endpoint | Frontend Action | Description                  |
 | ------ | ---------------- | --------------- | ---------------------------- |
@@ -173,6 +186,16 @@ interface NewsSourceResponse {
   createdDate: string
   lastModifiedDate: string
 }
+
+interface NewsSourceListResponse {
+  id: number
+  name: string
+  description: string
+  url: string
+  active: boolean
+  createdDate: string
+  // Note: no lastModifiedDate in list response
+}
 ```
 
 ### Article
@@ -212,9 +235,9 @@ interface ArticleListResponse {
 interface CreateBlogPostRequest {
   title: string
   slug: string
-  content: string
-  shortDescription: string
-  isVisible: boolean
+  content?: string
+  shortDescription?: string
+  visible?: boolean  // ⚠️ field name is "visible" (not "isVisible")
 }
 
 interface UpdateBlogPostRequest {
@@ -226,13 +249,13 @@ interface UpdateBlogPostRequest {
 }
 
 // Response
-interface BlogPost {
+interface BlogPostResponse {
   id: number
   title: string
   slug: string
   content: string
   shortDescription: string
-  isVisible: boolean
+  visible: boolean  // ⚠️ field name is "visible" (not "isVisible")
   publishedAt: string
   createdDate: string
   lastModifiedDate: string
@@ -243,7 +266,7 @@ interface BlogPostListResponse {
   title: string
   slug: string
   shortDescription: string
-  isVisible: boolean
+  visible: boolean  // ⚠️ field name is "visible" (not "isVisible")
   publishedAt: string
   createdDate: string
 }
@@ -271,6 +294,40 @@ interface CronjobResponse {
   description: string
   expressionDescription: string
   nextTriggeredTime?: string
+}
+```
+
+### EconomicEvent ⭐ NEW
+
+```typescript
+// Response (detail)
+interface EconomicEventResponse {
+  id: number
+  title: string
+  country: string
+  eventDate: string
+  impact: string       // e.g. "HIGH", "MEDIUM", "LOW"
+  forecast?: string
+  previous?: string
+  actual?: string
+  externalKey?: string
+  description?: string
+  createdDate: string
+  lastModifiedDate: string
+}
+
+// Response (list)
+interface EconomicEventListResponse {
+  id: number
+  title: string
+  country: string
+  eventDate: string
+  impact: string
+  forecast?: string
+  previous?: string
+  actual?: string
+  description?: string
+  createdDate: string
 }
 ```
 
@@ -333,8 +390,10 @@ app/
 │   │   └── action.ts           # Blogs API
 │   ├── cronjobs/
 │   │   └── action.ts           # Cronjobs API
-│   └── prompts/
-│       └── action.ts           # System Prompts API
+│   ├── prompts/
+│   │   └── action.ts           # System Prompts API
+│   └── economic-calendar/
+│       └── action.ts           # Economic Calendar API ⭐ NEW
 │
 └── lib/
     ├── definitions.ts          # Base types (SearchParams, Page, etc.)
@@ -346,6 +405,8 @@ app/
     │   └── definitions.ts      # Blog types
     ├── cronjobs/
     │   └── definitions.ts      # Cronjob types
-    └── prompts/
-        └── definitions.ts      # Prompt types
+    ├── prompts/
+    │   └── definitions.ts      # Prompt types
+    └── economic-calendar/
+        └── definitions.ts      # Economic Event types ⭐ NEW
 ```

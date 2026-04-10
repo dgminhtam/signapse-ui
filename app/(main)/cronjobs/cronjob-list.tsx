@@ -267,39 +267,36 @@ function StatusActions({ id, status }: { id: number; status: string }) {
 
   const handleStart = () => {
     startTransition(async () => {
-      try {
-        await startCronjob(id)
+      const result = await startCronjob(id)
+      if (result.success) {
         toast.success("Cronjob started successfully")
         router.refresh()
-      } catch (error) {
-        toast.error("Failed to start cronjob")
-        console.error(error)
+      } else {
+        toast.error(result.error || "Failed to start cronjob")
       }
     })
   }
 
   const handlePause = () => {
     startTransition(async () => {
-      try {
-        await pauseCronjob(id)
+      const result = await pauseCronjob(id)
+      if (result.success) {
         toast.success("Cronjob paused successfully")
         router.refresh()
-      } catch (error) {
-        toast.error("Failed to pause cronjob")
-        console.error(error)
+      } else {
+        toast.error(result.error || "Failed to pause cronjob")
       }
     })
   }
 
   const handleResume = () => {
     startTransition(async () => {
-      try {
-        await resumeCronjob(id)
+      const result = await resumeCronjob(id)
+      if (result.success) {
         toast.success("Cronjob resumed successfully")
         router.refresh()
-      } catch (error) {
-        toast.error("Failed to resume cronjob")
-        console.error(error)
+      } else {
+        toast.error(result.error || "Failed to resume cronjob")
       }
     })
   }
@@ -359,14 +356,13 @@ function DeleteCronjobButton({ id }: { id: number }) {
 
   const handleDelete = async () => {
     startTransition(async () => {
-      try {
-        await deleteCronjob(id)
+      const result = await deleteCronjob(id)
+      if (result.success) {
         toast.success("Cronjob deleted successfully")
         setOpen(false)
         router.refresh()
-      } catch (error) {
-        toast.error("Failed to delete cronjob")
-        console.error(error)
+      } else {
+        toast.error(result.error || "Failed to delete cronjob")
       }
     })
   }

@@ -34,4 +34,8 @@ export interface Pageable {
 export interface Option {
   value: string;
   label: string;
-}
+}
+
+export type ActionResult<T = void> =
+  | { success: true; data: T }
+  | { success: false; error: string };
