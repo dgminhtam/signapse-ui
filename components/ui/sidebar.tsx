@@ -129,7 +129,6 @@ function SidebarProvider({
     <SidebarContext.Provider value={contextValue}>
       <div
         data-slot="sidebar-wrapper"
-        suppressHydrationWarning
         style={
           {
             "--sidebar-width": SIDEBAR_WIDTH,
@@ -213,7 +212,6 @@ function Sidebar({
       data-variant={variant}
       data-side={side}
       data-slot="sidebar"
-      suppressHydrationWarning
     >
       {/* This is what handles the sidebar gap on desktop */}
       <div
@@ -590,11 +588,9 @@ function SidebarMenuSkeleton({
   showIcon?: boolean
 }) {
   // Random width between 50 to 90%.
-  const [width, setWidth] = React.useState("80%")
-
-  React.useEffect(() => {
-    setWidth(`${Math.floor(Math.random() * 40) + 50}%`)
-  }, [])
+  const [width] = React.useState(() => {
+    return `${Math.floor(Math.random() * 40) + 50}%`
+  })
 
   return (
     <div
