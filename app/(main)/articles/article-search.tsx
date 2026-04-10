@@ -19,9 +19,9 @@ export function ArticleSearch() {
       const params = new URLSearchParams(searchParams)
       params.set("page", "1")
       if (term) {
-        params.set("filter", term)
+        params.set("title[containsIgnoreCase]", term)
       } else {
-        params.delete("filter")
+        params.delete("title[containsIgnoreCase]")
       }
       replace(`${pathname}?${params.toString()}`)
     })

@@ -129,6 +129,7 @@ function SidebarProvider({
     <SidebarContext.Provider value={contextValue}>
       <div
         data-slot="sidebar-wrapper"
+        suppressHydrationWarning
         style={
           {
             "--sidebar-width": SIDEBAR_WIDTH,
@@ -212,6 +213,7 @@ function Sidebar({
       data-variant={variant}
       data-side={side}
       data-slot="sidebar"
+      suppressHydrationWarning
     >
       {/* This is what handles the sidebar gap on desktop */}
       <div

@@ -31,7 +31,6 @@ import {
   FileClock,
   Play,
   Pause,
-  StopCircle,
   RotateCcw,
   CheckCircle,
   Clock,
@@ -41,7 +40,6 @@ import { format } from "date-fns"
 import {
   deleteCronjob,
   startCronjob,
-  stopCronjob,
   pauseCronjob,
   resumeCronjob,
 } from "@/app/api/cronjobs/action"
@@ -280,19 +278,6 @@ function StatusActions({ id, status }: { id: number; status: string }) {
     })
   }
 
-  const handleStop = () => {
-    startTransition(async () => {
-      try {
-        await stopCronjob(id)
-        toast.success("Cronjob stopped successfully")
-        router.refresh()
-      } catch (error) {
-        toast.error("Failed to stop cronjob")
-        console.error(error)
-      }
-    })
-  }
-
   const handlePause = () => {
     startTransition(async () => {
       try {
@@ -323,43 +308,29 @@ function StatusActions({ id, status }: { id: number; status: string }) {
 
   return (
     <>
-      {(statusValue === "SCHEDULED" ||
-        statusValue === "COMPLETE" ||
-        statusValue === "PAUSED") && (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 text-green-600 hover:bg-green-500/10 hover:text-green-700"
-          title="Start"
-          disabled={isPending}
-          onClick={handleStart}
-        >
-          {isPending ? <Spinner size="sm" /> : <Play className="h-4 w-4" />}
-        </Button>
-      )}
-      {statusValue === "RUNNING" && (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 text-yellow-600 hover:bg-yellow-500/10 hover:text-yellow-700"
-          title="Pause"
-          disabled={isPending}
-          onClick={handlePause}
-        >
-          {isPending ? <Spinner size="sm" /> : <Pause className="h-4 w-4" />}
-        </Button>
-      )}
-      {statusValue === "RUNNING" && (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 text-red-600 hover:bg-red-500/10 hover:text-red-700"
-          title="Stop"
-          disabled={isPending}
-          onClick={handleStop}
-        >
-          {isPending ? <Spinner size="sm" /> : <StopCircle className="h-4 w-4" />}
-        </Button>
+      {(statusValue === "SCHEDULED" || statusValue === "COMPLETE") && (
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-green-600 hover:bg-green-500/10 hover:text-green-700"
+            title="Start"
+            disabled={isPending}
+            onClick={handleStart}
+          >
+            {isPending ? <Spinner size="sm" /> : <Play className="h-4 w-4" />}
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-yellow-600 hover:bg-yellow-500/10 hover:text-yellow-700"
+            title="Pause"
+            disabled={isPending}
+            onClick={handlePause}
+          >
+            {isPending ? <Spinner size="sm" /> : <Pause className="h-4 w-4" />}
+          </Button>
+        </div>
       )}
       {statusValue === "PAUSED" && (
         <Button
@@ -370,7 +341,11 @@ function StatusActions({ id, status }: { id: number; status: string }) {
           disabled={isPending}
           onClick={handleResume}
         >
-          {isPending ? <Spinner size="sm" /> : <RotateCcw className="h-4 w-4" />}
+          {isPending ? (
+            <Spinner size="sm" />
+          ) : (
+            <RotateCcw className="h-4 w-4" />
+          )}
         </Button>
       )}
     </>

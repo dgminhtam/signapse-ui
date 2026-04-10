@@ -64,17 +64,6 @@ export async function startCronjob(id: number): Promise<CronjobResponse> {
   return cronjob
 }
 
-export async function stopCronjob(id: number): Promise<CronjobResponse> {
-  const cronjob = await fetchAuthenticated<CronjobResponse>(
-    `/cronjobs/${id}/stop`,
-    {
-      method: "POST",
-    }
-  )
-  revalidatePath("/cronjobs")
-  return cronjob
-}
-
 export async function pauseCronjob(id: number): Promise<CronjobResponse> {
   const cronjob = await fetchAuthenticated<CronjobResponse>(
     `/cronjobs/${id}/pause`,

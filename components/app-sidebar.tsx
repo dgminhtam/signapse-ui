@@ -82,10 +82,10 @@ export function NavMain({
           {items.map((item) => {
             const isActive = hasActiveSubItem(item.items)
             return (
-              <Collapsible key={item.title} asChild defaultOpen={item.isActive} className="group/collapsible">
+              <Collapsible key={item.title} asChild defaultOpen={item.isActive ?? isActive} className="group/collapsible">
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
-                    <SidebarMenuButton tooltip={item.title}>
+                    <SidebarMenuButton tooltip={item.title} isActive={isActive}>
                       {item.icon && <item.icon />}
                       <span>{item.title}</span>
                       <ChevronRightIcon className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />

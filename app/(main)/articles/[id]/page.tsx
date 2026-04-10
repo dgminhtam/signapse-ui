@@ -27,23 +27,11 @@ export default async function ArticleDetailPage({ params }: PageProps) {
   const articleId = Number(id)
 
   return (
-    <div className="flex flex-col gap-6 ">
-       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon-sm" asChild>
-          <Link href="/articles">
-            <ArrowLeft className="h-4 w-4" />
-            <span className="sr-only">Back</span>
-          </Link>
-        </Button>
-        <h1 className="text-2xl font-semibold tracking-tight">Article Details</h1>
-      </div>
-
-      <Card>
-        <Suspense fallback={<ArticleDetailSkeleton />}>
-          <FetchArticleData id={articleId} />
-        </Suspense>
-      </Card>
-    </div>
+    <Card>
+      <Suspense fallback={<ArticleDetailSkeleton />}>
+        <FetchArticleData id={articleId} />
+      </Suspense>
+    </Card>
   )
 }
 
