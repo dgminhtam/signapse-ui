@@ -62,15 +62,14 @@ export function ArticleList({ articlePage }: ArticleListProps) {
   const handleDelete = async (id: number) => {
     setDeletingId(id)
     startTransition(async () => {
-      try {
-        await deleteArticle(id)
+      const result = await deleteArticle(id)
+      if (result.success) {
         toast.success("Article deleted successfully")
         router.refresh()
-      } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Failed to delete article")
-      } finally {
-        setDeletingId(null)
+      } else {
+        toast.error(result.error || "Failed to delete article")
       }
+      setDeletingId(null)
     })
   }
 
@@ -166,7 +165,7 @@ export function ArticleList({ articlePage }: ArticleListProps) {
                                 disabled={isPending && deletingId === article.id}
                               >
                                 {isPending && deletingId === article.id ? (
-                                  <Spinner size="sm" />
+                                  <Spinner className="size-4" />
                                 ) : (
                                   <>
                                     <Trash2 className="h-4 w-4 mr-2" />

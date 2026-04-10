@@ -12,6 +12,7 @@ export interface CronjobResponse {
   id: number
   jobName: string
   jobGroup: string
+  jobClass: string
   jobStatus: CronjobStatus
   cronExpression: string
   description: string
@@ -23,6 +24,7 @@ export interface CronjobListResponse {
   id: number
   jobName: string
   jobGroup: string
+  jobClass: string
   jobStatus: CronjobStatus
   cronExpression: string
   description: string

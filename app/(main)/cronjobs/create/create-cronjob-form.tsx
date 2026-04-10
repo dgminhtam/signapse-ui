@@ -59,8 +59,8 @@ export function CreateCronjobForm() {
   })
 
   async function onSubmit(data: CreateCronjobRequest) {
-    try {
-      await createCronjob(data)
+    const result = await createCronjob(data)
+    if (result.success) {
       toast.success("Cronjob created successfully")
 
       form.reset({
@@ -73,12 +73,8 @@ export function CreateCronjobForm() {
 
       router.push("/cronjobs")
       router.refresh()
-    } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message)
-      } else {
-        toast.error("An unexpected error occurred. Please try again.")
-      }
+    } else {
+      toast.error(result.error || "An unexpected error occurred. Please try again.")
     }
   }
 
@@ -193,7 +189,7 @@ export function CreateCronjobForm() {
         <Button disabled={form.formState.isSubmitting} type="submit">
           {form.formState.isSubmitting ? (
             <>
-              <Spinner size="sm" data-icon="inline-start" /> Creating...
+              <Spinner className="size-4 mr-2" /> Creating...
             </>
           ) : (
             "Create Cronjob"

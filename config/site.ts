@@ -66,6 +66,10 @@ export const siteConfig = {
           title: "Danh sách theo dõi",
           url: "/watchlist",
         },
+        {
+          title: "Economic Calendar",
+          url: "/economic-calendar",
+        },
       ],
     },
     {

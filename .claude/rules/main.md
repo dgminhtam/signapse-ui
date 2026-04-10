@@ -20,10 +20,10 @@ Dựa trên quá trình refactor phân hệ Blog và tối ưu bộ Core, đây 
 - **Cấu trúc mẫu:**
   ```text
   app/(main)/[feature]/
-  ├── page.tsx               # Server Component: Fetch data + Suspense boundaries
-  ├── [id]/page.tsx          # Trang chi tiết/chỉnh sửa
+  ├── page.tsx               # Server Component: Shell bọc Card + Suspense boundaries
+  ├── [id]/page.tsx          # Trang chi tiết: Bọc Card + Back button chuẩn
   ├── error.tsx              # Bắt lỗi cục bộ cho riêng feature
-  ├── [feature]-list.tsx     # Client Component: Hiển thị bảng/danh sách
+  ├── [feature]-list.tsx     # Client Component: Table + Search/Filter Bar
   ├── [feature]-form.tsx     # Client Component: Form tạo/sửa
   └── [feature]-search.tsx   # Client Component: Thanh tìm kiếm debounce
   ```
@@ -44,6 +44,21 @@ Dựa trên quá trình refactor phân hệ Blog và tối ưu bộ Core, đây 
 - **Icons:** Sử dụng thuộc tính `data-icon="inline-start"` cho icon trong Button để có khoảng cách chuẩn.
 - **Spacing:** Sử dụng `gap-*` trong flex/grid, tránh dùng `space-y-*` vốn dễ gây lỗi layout khi có phần tử ẩn/hiện.
 - **Empty State:** Khi không có dữ liệu, luôn dùng component `<Empty>` thay vì chỉ hiện text lẻ loi.
+
+### 3.1. Standard Page Layout (Card Shell)
+- **Danh sách chính:** PHẢI được bọc trong component `<Card>`.
+- **Header:** Phải có `<CardHeader>` chứa `<CardTitle>` (Tên feature) và `<CardDescription>` (Mô tả ngắn gọn).
+- **Phân tách:** Dùng `<Separator />` ngay sau header trước khi vào nội dung danh sách.
+
+### 3.2. Synchronized Controls (Toolbar Layout)
+Để đảm bảo tính nhất quán, thanh điều khiển trên đầu bảng phải tuân thủ:
+- **Bên trái (Left Group):** Nút hành động chính (Crawl, Create) + Thanh Search (Input).
+- **Bên phải (Right Group):** Nút Sort (Sắp xếp) hoặc các Select lọc dữ liệu tĩnh.
+- **Responsive:** Sử dụng `flex-col sm:flex-row sm:justify-between`.
+
+### 3.3. Detail Page Standard
+- Luôn có nút **"Quay lại"** (Back button) nằm phía trên thẻ Card.
+- Nội dung chi tiết phải bọc trong `<Card>` kèm `<Separator />` tương tự trang danh sách.
 
 ---
 
@@ -95,6 +110,7 @@ Dựa trên quá trình refactor phân hệ Blog và tối ưu bộ Core, đây 
 
 > [!TIP]
 > **Checklist trước khi Done một Feature:**
+> - [ ] Trang Page chính có cấu trúc **Card/CardHeader/Separator** chưa?
 > - [ ] Trang Page chính có `Suspense` và `Skeleton` khớp layout chưa?
 > - [ ] Có `error.tsx` để handle lỗi server chưa?
 > - [ ] Thanh tìm kiếm có `debounce` chưa?

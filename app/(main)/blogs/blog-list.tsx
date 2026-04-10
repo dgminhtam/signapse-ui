@@ -192,14 +192,13 @@ function DeleteBlogButton({ id }: { id: number }) {
 
   const handleDelete = async () => {
     startTransition(async () => {
-      try {
-        await deleteBlog(id)
+      const result = await deleteBlog(id)
+      if (result.success) {
         toast.success("Xóa bài viết thành công")
         setOpen(false)
         router.refresh()
-      } catch (error) {
-        toast.error("Có lỗi xảy ra khi xóa bài viết")
-        console.error(error)
+      } else {
+        toast.error(result.error || "Có lỗi xảy ra khi xóa bài viết")
       }
     })
   }

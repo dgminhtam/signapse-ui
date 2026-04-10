@@ -82,17 +82,13 @@ export function UpdateBlogForm({ blog }: UpdateBlogFormProps) {
 
   // --- SUBMIT ---
   async function onSubmit(data: UpdateBlogRequest) {
-    try {
-      await updateBlog(blog.id, data)
+    const result = await updateBlog(blog.id, data)
+    if (result.success) {
       toast.success("Cập nhật bài viết thành công")
       router.push("/blogs")
       router.refresh()
-    } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message)
-      } else {
-        toast.error("Đã có lỗi không mong muốn xảy ra. Vui lòng thử lại.")
-      }
+    } else {
+      toast.error(result.error || "Đã có lỗi không mong muốn xảy ra. Vui lòng thử lại.")
     }
   }
 

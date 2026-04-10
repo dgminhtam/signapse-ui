@@ -315,7 +315,7 @@ function StatusActions({ id, status }: { id: number; status: string }) {
             disabled={isPending}
             onClick={handleStart}
           >
-            {isPending ? <Spinner size="sm" /> : <Play className="h-4 w-4" />}
+            {isPending ? <Spinner className="size-4" /> : <Play className="h-4 w-4" />}
           </Button>
           <Button
             variant="ghost"
@@ -325,7 +325,7 @@ function StatusActions({ id, status }: { id: number; status: string }) {
             disabled={isPending}
             onClick={handlePause}
           >
-            {isPending ? <Spinner size="sm" /> : <Pause className="h-4 w-4" />}
+            {isPending ? <Spinner className="size-4" /> : <Pause className="h-4 w-4" />}
           </Button>
         </div>
       )}
@@ -339,7 +339,7 @@ function StatusActions({ id, status }: { id: number; status: string }) {
           onClick={handleResume}
         >
           {isPending ? (
-            <Spinner size="sm" />
+            <Spinner className="size-4" />
           ) : (
             <RotateCcw className="h-4 w-4" />
           )}

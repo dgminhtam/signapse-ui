@@ -28,23 +28,19 @@ export const updateCronjobSchema = z.object({
   jobName: z
     .string()
     .min(1, "Job name cannot be empty")
-    .max(255, "Job name is too long")
-    .optional(),
+    .max(255, "Job name is too long"),
   jobGroup: z
     .string()
     .min(1, "Job group cannot be empty")
-    .max(255, "Job group is too long")
-    .optional(),
+    .max(255, "Job group is too long"),
   jobClass: z
     .string()
     .min(1, "Job class cannot be empty")
-    .max(255, "Job class is too long")
-    .optional(),
+    .max(255, "Job class is too long"),
   expression: z
     .string()
     .min(1, "Cron expression cannot be empty")
-    .max(100, "Cron expression is too long")
-    .optional(),
+    .max(100, "Cron expression is too long"),
   description: z.string().max(500, "Description is too long").optional(),
 })
 
@@ -68,17 +64,13 @@ export function UpdateCronjobForm({ cronjob }: UpdateCronjobFormProps) {
   })
 
   async function onSubmit(data: UpdateCronjobRequest) {
-    try {
-      await updateCronjob(cronjob.id, data)
+    const result = await updateCronjob(cronjob.id, data)
+    if (result.success) {
       toast.success("Cronjob updated successfully")
       router.push("/cronjobs")
       router.refresh()
-    } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message)
-      } else {
-        toast.error("An unexpected error occurred. Please try again.")
-      }
+    } else {
+      toast.error(result.error || "An unexpected error occurred. Please try again.")
     }
   }
 
@@ -193,7 +185,7 @@ export function UpdateCronjobForm({ cronjob }: UpdateCronjobFormProps) {
         <Button disabled={form.formState.isSubmitting} type="submit">
           {form.formState.isSubmitting ? (
             <>
-              <Spinner size="sm" data-icon="inline-start" /> Updating...
+              <Spinner className="size-4 mr-2" /> Updating...
             </>
           ) : (
             "Update Cronjob"

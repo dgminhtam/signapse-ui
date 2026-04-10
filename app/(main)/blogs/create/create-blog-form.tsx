@@ -72,8 +72,8 @@ export function CreateBlogForm() {
   }, [titleValue, form])
 
   async function onSubmit(data: CreateBlogRequest) {
-    try {
-      await createBlog(data)
+    const result = await createBlog(data)
+    if (result.success) {
       toast.success("Tạo bài viết thành công")
 
       form.reset({
@@ -86,12 +86,8 @@ export function CreateBlogForm() {
 
       router.push("/blogs")
       router.refresh()
-    } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message)
-      } else {
-        toast.error("Đã có lỗi không mong muốn xảy ra. Vui lòng thử lại.")
-      }
+    } else {
+      toast.error(result.error || "Đã có lỗi không mong muốn xảy ra. Vui lòng thử lại.")
     }
   }
 
