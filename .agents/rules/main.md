@@ -8,6 +8,13 @@ Dựa trên quá trình refactor phân hệ Blog và tối ưu bộ Core, đây 
 
 ---
 
+## 0. Bảo Tồn Thành Phần Cốt Lõi (Core Components)
+- **Nguyên tắc:** Các thành phần UI nền tảng nằm trong `@/components/ui/` (đặc biệt là các component phức tạp như `sidebar.tsx`) phải được giữ nguyên bản từ shadcn/ui.
+- **Tại sao:** Để dễ dàng cập nhật bản vá từ shadcn, giữ cho mã nguồn sạch và tránh các side-effect không mong muốn trong hệ thống UI.
+- **Ngoại lệ:** Chỉ thực hiện thay đổi nếu có yêu cầu nghiệp vụ đặc thù mà không thể xử lý thông qua Props hoặc Wrapper component. Nếu gặp lỗi kỹ thuật (như Hydration Mismatch), hãy tìm cách xử lý tại nơi sử dụng component (ví dụ: `app-sidebar.tsx`) thay vì sửa file gốc trong `ui/`.
+
+---
+
 ## 1. Cấu Trúc Thư Mục & Co-location
 - **Nguyên tắc:** Các thành phần chỉ dùng riêng cho một Feature phải nằm "trong" thư mục của Feature đó.
 - **Cấu trúc mẫu:**
