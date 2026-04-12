@@ -6,7 +6,6 @@ import { AppPagination } from "@/components/app-pagination"
 import { AppSelectPageSize } from "@/components/app-select-page-size"
 import { SortSelect } from "@/components/sort-select"
 import { ArticleSearch } from "./article-search"
-import { Card } from "@/components/ui/card"
 import {
   Table,
   TableBody,
@@ -49,6 +48,8 @@ import {
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { Badge } from "@/components/ui/badge"
+import { AnalyzeButton } from "./analyze-button"
+import { IngestWikiButton } from "./ingest-wiki-button"
 
 interface ArticleListProps {
   articlePage: Page<ArticleListResponse>
@@ -133,6 +134,8 @@ export function ArticleList({ articlePage }: ArticleListProps) {
                             <span className="sr-only">View</span>
                           </Link>
                         </Button>
+                        <AnalyzeButton id={article.id} />
+                        <IngestWikiButton articleId={article.id} />
                         <Button variant="ghost" size="icon" asChild className="h-8 w-8 text-muted-foreground hover:text-foreground">
                            <a href={article.url} target="_blank" rel="noopener noreferrer">
                               <ExternalLink className="h-4 w-4" />

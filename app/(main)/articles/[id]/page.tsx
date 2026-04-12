@@ -10,11 +10,12 @@ import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { notFound } from "next/navigation"
 import { Suspense } from "react"
-import { Badge } from "@/components/ui/badge"
 import { Calendar, User, Newspaper, ExternalLink, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
+import { AnalyzeButton } from "../analyze-button"
+import { IngestWikiButton } from "../ingest-wiki-button"
 
 interface PageProps {
   params: Promise<{
@@ -27,11 +28,21 @@ export default async function ArticleDetailPage({ params }: PageProps) {
   const articleId = Number(id)
 
   return (
-    <Card>
-      <Suspense fallback={<ArticleDetailSkeleton />}>
-        <FetchArticleData id={articleId} />
-      </Suspense>
-    </Card>
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center">
+        <Button asChild variant="ghost" size="sm" className="-ml-2">
+          <Link href="/articles">
+            <ArrowLeft className="mr-2 h-4 w-4" data-icon="inline-start" /> Back to list
+          </Link>
+        </Button>
+      </div>
+
+      <Card>
+        <Suspense fallback={<ArticleDetailSkeleton />}>
+          <FetchArticleData id={articleId} />
+        </Suspense>
+      </Card>
+    </div>
   )
 }
 
@@ -65,12 +76,23 @@ async function FetchArticleData({ id }: { id: number }) {
               )}
             </CardDescription>
           </div>
-          <Button variant="outline" size="sm" asChild className="shrink-0">
-             <a href={article.url} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="h-4 w-4" data-icon="inline-start" />
-                View Original
-             </a>
-          </Button>
+          <div className="flex items-center gap-2">
+            <AnalyzeButton id={article.id} variant="outline" size="sm" showText className="shrink-0" />
+            <IngestWikiButton
+              articleId={article.id}
+              variant="outline"
+              size="sm"
+              showText
+              redirectToWikiOnSuccess
+              className="shrink-0"
+            />
+            <Button variant="outline" size="sm" asChild className="shrink-0">
+               <a href={article.url} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="h-4 w-4" data-icon="inline-start" />
+                  View Original
+               </a>
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <Separator />

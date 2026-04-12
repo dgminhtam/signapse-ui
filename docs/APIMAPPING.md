@@ -1,412 +1,222 @@
-# API Mapping Document
+﻿# Tài liệu ánh xạ API
 
-Document này map các API endpoints từ Backend (http://localhost:8484/v3/api-docs) sang Frontend actions.
+Tài liệu này ánh xạ đặc tả OpenAPI backend đang chạy tại `http://localhost:8484/v3/api-docs` tới các điểm tích hợp frontend trong repository này.
 
----
+Xác minh lần cuối: ngày 12 tháng 4 năm 2026
 
-## Base Configuration
+## Cấu hình cơ sở
 
-| Env Variable | Value                   |
-| ------------ | ----------------------- |
-| API_BASE_URL | `http://localhost:8484` |
+| Mục | Giá trị |
+| --- | --- |
+| URL gốc API | `http://localhost:8484` |
+| Nguồn chuẩn | OpenAPI live tại `http://localhost:8484/v3/api-docs` |
+| Hàm hỗ trợ xác thực | `fetchAuthenticated()` trong `app/api/auth/action.ts` |
+| Hàm hỗ trợ public | `fetchPublic()` trong `app/api/auth/action.ts` |
+| Kiểu bọc kết quả mutation | `ActionResult<T>` từ `app/lib/definitions.ts` |
 
----
+## Quy ước dùng chung
 
-## 1. System Prompts API
+- Các lời gọi backend được bảo vệ dự kiến đi qua `fetchAuthenticated()`.
+- `apiFetch()` đọc `response.text()` trước khi `JSON.parse()`, phù hợp với quy tắc của repo khi backend trả về body rỗng hoặc không hợp lệ.
+- Các truy vấn danh sách ở frontend được serialize bằng `queryParamsToString()` thành `$filter`, `page`, `size` và `sort`.
+- Đặc tả OpenAPI mô tả phân trang dưới dạng đối tượng query `Pageable`, trong khi frontend hiện đang gửi các query param phẳng.
 
-| Method | Backend Endpoint               | Frontend Action                     | Description                    |
-| ------ | ------------------------------ | ----------------------------------- | ------------------------------ |
-| GET    | `/system-prompts`              | `getPrompts(searchParams)`          | Lấy tất cả prompts (paginated) |
-| GET    | `/system-prompts/{promptType}` | `getPromptByType(promptType)`       | Lấy prompt theo loại           |
-| POST   | `/system-prompts`              | `createPrompt(request)`             | Tạo prompt mới                 |
-| PUT    | `/system-prompts/{promptType}` | `updatePrompt(promptType, request)` | Cập nhật prompt                |
-| DELETE | `/system-prompts/{promptType}` | `deletePrompt(promptType)`          | Xóa prompt                     |
+## Phạm vi endpoint
 
-**Prompt Types:**
+### 1. API lời nhắc hệ thống
 
-```
-NEWS_FILTER, NEWS_ANALYSIS, SIGNAL_GENERATION, DECISION_MAKING,
-CONTENT_EXTRACTION, SENTIMENT_ANALYSIS, TITLE_GENERATION, SUMMARY_GENERATION
-```
+| Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
+| --- | --- | --- | --- | --- | --- |
+| GET | `/system-prompts` | `getSystemPrompts` | `-` | Chưa triển khai | Repo này chưa có `app/api/system-prompts/action.ts`. |
+| POST | `/system-prompts` | `createSystemPrompt` | `-` | Chưa triển khai | Schema request của backend: `CreateSystemPromptRequest`. |
+| GET | `/system-prompts/{promptType}` | `getSystemPrompt` | `-` | Chưa triển khai | Enum của path param đã được mở rộng ở backend. |
+| PUT | `/system-prompts/{promptType}` | `updateSystemPrompt` | `-` | Chưa triển khai | Schema request của backend: `UpdateSystemPromptRequest`. |
+| DELETE | `/system-prompts/{promptType}` | `deleteSystemPrompt` | `-` | Chưa triển khai | Backend có endpoint này nhưng frontend chưa có action tương ứng. |
 
----
+Các giá trị `promptType` được hỗ trợ theo live spec:
 
-## 2. News Sources API
+`NEWS_FILTER`, `NEWS_ANALYSIS`, `SIGNAL_GENERATION`, `DECISION_MAKING`, `CONTENT_EXTRACTION`, `SENTIMENT_ANALYSIS`, `TITLE_GENERATION`, `SUMMARY_GENERATION`, `CONTENT_CLEANING`, `WIKI_SOURCE_SUMMARY`, `WIKI_INDEX_REBUILD`
 
-| Method | Backend Endpoint                   | Frontend Action                      | Description                  |
-| ------ | ---------------------------------- | ------------------------------------ | ---------------------------- |
-| GET    | `/news-sources`                    | `getNewsSources(searchParams)`       | Lấy tất cả nguồn tin         |
-| GET    | `/news-sources/active`             | `getActiveNewsSources(searchParams)` | Lấy nguồn tin đang hoạt động |
-| GET    | `/news-sources/{id}`               | `getNewsSourceById(id)`              | Lấy nguồn tin theo ID        |
-| POST   | `/news-sources`                    | `createNewsSource(request)`          | Tạo nguồn tin mới            |
-| PUT    | `/news-sources/{id}`               | `updateNewsSource(id, request)`      | Cập nhật nguồn tin           |
-| PATCH  | `/news-sources/{id}/toggle-active` | `toggleNewsSourceActive(id)`         | Bật/tắt trạng thái           |
-| DELETE | `/news-sources/{id}`               | `deleteNewsSource(id)`               | Xóa nguồn tin                |
+### 2. API nguồn tin
 
----
+| Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
+| --- | --- | --- | --- | --- | --- |
+| GET | `/news-sources` | `getNewsSources` | `getNewsSources(searchParams)` | Đã triển khai | Được định nghĩa trong `app/api/news-sources/action.ts`. |
+| POST | `/news-sources` | `createNewsSource` | `createNewsSource(request)` | Đã triển khai | Sử dụng `NewsSourceRequest`. |
+| GET | `/news-sources/{id}` | `getNewsSource` | `getNewsSourceById(id)` | Đã triển khai | Trả về `NewsSourceResponse`. |
+| PUT | `/news-sources/{id}` | `updateNewsSource` | `updateNewsSource(id, request)` | Đã triển khai | Sử dụng `NewsSourceRequest` cho cập nhật. |
+| DELETE | `/news-sources/{id}` | `deleteNewsSource` | `deleteNewsSource(id)` | Đã triển khai | Được bọc trong `ActionResult`. |
+| PATCH | `/news-sources/{id}/toggle-active` | `toggleActive` | `toggleNewsSourceActive(id)` | Đã triển khai | Trả về `NewsSourceResponse` sau khi cập nhật. |
+| GET | `/news-sources/active` | `getActiveNewsSources` | `getActiveNewsSources()` | Lệch một phần | Backend hiện trả về `PageNewsSourceListResponse`, nhưng frontend đang kỳ vọng `NewsSourceListResponse[]` và không gửi tham số phân trang. |
 
-## 3. Articles API
+### 3. API bài viết
 
-| Method | Backend Endpoint | Frontend Action             | Description          |
-| ------ | ---------------- | --------------------------- | -------------------- |
-| GET    | `/articles`      | `getArticles(searchParams)` | Lấy tất cả bài viết  |
-| GET    | `/articles/{id}` | `getArticleById(id)`        | Lấy bài viết theo ID |
-| DELETE | `/articles/{id}` | `deleteArticle(id)`         | Xóa bài viết         |
+| Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
+| --- | --- | --- | --- | --- | --- |
+| GET | `/articles` | `getArticles` | `getArticles(searchParams)` | Đã triển khai | Trả về `Page<ArticleListResponse>`. |
+| GET | `/articles/{id}` | `getArticle` | `getArticleById(id)` | Đã triển khai | Trả về `ArticleResponse`. |
+| DELETE | `/articles/{id}` | `deleteArticle` | `deleteArticle(id)` | Đã triển khai | Được bọc trong `ActionResult`. |
+| POST | `/articles/{id}/analyze` | `analyzeContent` | `analyzeArticle(id)` | Đã triển khai | Trả về `ArticleResponse` sau khi cập nhật. |
 
----
+### 4. API blog
 
-## 4. Blogs API
+| Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
+| --- | --- | --- | --- | --- | --- |
+| GET | `/blogs` | `getBlogPosts` | `getBlogs(searchParams)` | Đã triển khai | Trả về `Page<BlogPostListResponse>`. |
+| POST | `/blogs` | `createBlogPost` | `createBlog(request)` | Đã triển khai nhưng có rủi ro lệch contract | Kiểu request ở frontend dùng `isVisible`, nhưng schema tạo mới trong live spec lại dùng `visible`. |
+| GET | `/blogs/{id}` | `getBlogPost` | `getBlogById(id)` | Đã triển khai nhưng có rủi ro lệch contract | Schema response của backend dùng `visible`, trong khi frontend hiện dùng `isVisible`. |
+| PUT | `/blogs/{id}` | `updateBlogPost` | `updateBlog(id, request)` | Đã triển khai | Schema cập nhật trong live spec dùng `isVisible`. |
+| DELETE | `/blogs/{id}` | `deleteBlogPost` | `deleteBlog(id)` | Đã triển khai | Được bọc trong `ActionResult`. |
 
-| Method | Backend Endpoint | Frontend Action           | Description              |
-| ------ | ---------------- | ------------------------- | ------------------------ |
-| GET    | `/blogs`         | `getBlogs(searchParams)`  | Lấy tất cả bài viết blog |
-| GET    | `/blogs/{id}`    | `getBlogById(id)`         | Lấy blog theo ID         |
-| POST   | `/blogs`         | `createBlog(request)`     | Tạo bài viết blog mới    |
-| PUT    | `/blogs/{id}`    | `updateBlog(id, request)` | Cập nhật bài viết blog   |
-| DELETE | `/blogs/{id}`    | `deleteBlog(id)`          | Xóa bài viết blog        |
+### 5. API cronjob
 
----
+| Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
+| --- | --- | --- | --- | --- | --- |
+| GET | `/cronjobs` | `list` | `getCronjobs(searchParams)` | Đã triển khai | Trả về `Page<CronjobListResponse>`. |
+| POST | `/cronjobs` | `create` | `createCronjob(request)` | Đã triển khai | Sử dụng `CronjobRequest`. |
+| GET | `/cronjobs/{id}` | `get` | `getCronjobById(id)` | Đã triển khai | Trả về `CronjobResponse`. |
+| PATCH | `/cronjobs/{id}` | `update` | `updateCronjob(id, request)` | Đã triển khai | Cả backend và frontend đều dùng `PATCH`. |
+| DELETE | `/cronjobs/{id}` | `delete` | `deleteCronjob(id)` | Đã triển khai | Được bọc trong `ActionResult`. |
+| POST | `/cronjobs/{id}/start` | `start` | `startCronjob(id)` | Đã triển khai | Trả về `CronjobResponse` sau khi cập nhật. |
+| POST | `/cronjobs/{id}/pause` | `pause` | `pauseCronjob(id)` | Đã triển khai | Trả về `CronjobResponse` sau khi cập nhật. |
+| POST | `/cronjobs/{id}/resume` | `resume` | `resumeCronjob(id)` | Đã triển khai | Trả về `CronjobResponse` sau khi cập nhật. |
+| POST | `/cronjobs/{id}/stop` | `stop` | `-` | Chưa triển khai | Backend có endpoint này nhưng frontend chưa có `stopCronjob()`. |
 
-## 5. Cronjobs API
+### 6. API lịch kinh tế
 
-| Method | Backend Endpoint        | Frontend Action              | Description         |
-| ------ | ----------------------- | ---------------------------- | ------------------- |
-| GET    | `/cronjobs`             | `getCronjobs(searchParams)`  | Lấy tất cả cronjobs |
-| GET    | `/cronjobs/{id}`        | `getCronjobById(id)`         | Lấy cronjob theo ID |
-| POST   | `/cronjobs`             | `createCronjob(request)`     | Tạo cronjob mới     |
-| PATCH  | `/cronjobs/{id}`        | `updateCronjob(id, request)` | Cập nhật cronjob    |
-| DELETE | `/cronjobs/{id}`        | `deleteCronjob(id)`          | Xóa cronjob         |
-| POST   | `/cronjobs/{id}/start`  | `startCronjob(id)`           | Bắt đầu cronjob     |
-| POST   | `/cronjobs/{id}/stop`   | `stopCronjob(id)`            | Dừng cronjob        |
-| POST   | `/cronjobs/{id}/pause`  | `pauseCronjob(id)`           | Tạm dừng cronjob    |
-| POST   | `/cronjobs/{id}/resume` | `resumeCronjob(id)`          | Tiếp tục cronjob    |
+| Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
+| --- | --- | --- | --- | --- | --- |
+| GET | `/economic-calendar` | `getEvents` | `getEconomicEvents(searchParams)` | Đã triển khai | Trả về `Page<EconomicEventListResponse>`. |
+| GET | `/economic-calendar/{id}` | `getEvent` | `getEconomicEventById(id)` | Đã triển khai | Trả về `EconomicEventResponse`. |
+| DELETE | `/economic-calendar/{id}` | `deleteEvent` | `deleteEconomicEvent(id)` | Đã triển khai | Được bọc trong `ActionResult`. |
+| POST | `/economic-calendar/crawl` | `crawl` | `crawlEconomicEvents()` | Đã triển khai | Trả về số bản ghi đã crawl dưới dạng `number`. |
+| GET | `/economic-calendar/impact/{impact}` | `getEventsByImpact` | `-` | Chưa triển khai | Backend có endpoint lọc này nhưng frontend chưa có action tương ứng. |
+| GET | `/economic-calendar/country/{country}` | `getEventsByCountry` | `-` | Chưa triển khai | Backend có endpoint lọc này nhưng frontend chưa có action tương ứng. |
 
----
+### 7. API cấu hình AI provider
 
-## 6. Economic Calendar API ⭐ NEW
+| Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
+| --- | --- | --- | --- | --- | --- |
+| GET | `/ai-provider-configs` | `getAiProviderConfigs` | `getAiProviderConfigs(searchParams)` | Đã triển khai | Trả về `Page<AiProviderConfigListResponse>`. |
+| POST | `/ai-provider-configs` | `createAiProviderConfig` | `createAiProviderConfig(request)` | Đã triển khai | Sử dụng `AiProviderConfigRequest`. |
+| GET | `/ai-provider-configs/{id}` | `getAiProviderConfig` | `getAiProviderConfigById(id)` | Đã triển khai | Trả về `AiProviderConfigResponse`. |
+| PUT | `/ai-provider-configs/{id}` | `updateAiProviderConfig` | `updateAiProviderConfig(id, request)` | Đã triển khai | Sử dụng `AiProviderConfigRequest`. |
+| DELETE | `/ai-provider-configs/{id}` | `deleteAiProviderConfig` | `deleteAiProviderConfig(id)` | Đã triển khai | Được bọc trong `ActionResult`. |
+| PATCH | `/ai-provider-configs/{id}/toggle-active` | `toggleActive_1` | `toggleAiProviderConfigActive(id)` | Đã triển khai | Trả về `AiProviderConfigResponse` sau khi cập nhật. |
+| PATCH | `/ai-provider-configs/{id}/set-default` | `setDefault` | `setAiProviderConfigDefault(id)` | Đã triển khai | Trả về `AiProviderConfigResponse` sau khi cập nhật. |
+| GET | `/ai-provider-configs/active` | `getActiveAiProviderConfigs` | `getActiveAiProviderConfigs()` | Đã triển khai | Trả về `AiProviderConfigResponse[]`. |
 
-| Method | Backend Endpoint                          | Frontend Action                           | Description                       |
-| ------ | ----------------------------------------- | ----------------------------------------- | --------------------------------- |
-| GET    | `/economic-calendar`                      | `getEconomicEvents(searchParams)`         | Lấy tất cả sự kiện kinh tế        |
-| GET    | `/economic-calendar/{id}`                 | `getEconomicEventById(id)`                | Lấy sự kiện theo ID               |
-| GET    | `/economic-calendar/impact/{impact}`      | `getEconomicEventsByImpact(impact, searchParams)` | Lọc sự kiện theo mức độ tác động |
-| GET    | `/economic-calendar/country/{country}`    | `getEconomicEventsByCountry(country, searchParams)` | Lọc sự kiện theo quốc gia       |
-| POST   | `/economic-calendar/crawl`                | `crawlEconomicCalendar()`                 | Crawl dữ liệu lịch kinh tế        |
-| DELETE | `/economic-calendar/{id}`                 | `deleteEconomicEvent(id)`                 | Xóa sự kiện kinh tế               |
+Các giá trị `providerType` được hỗ trợ theo live spec:
 
----
+`GEMINI`, `OPENAI`
 
-## 7. User API
+### 8. API người dùng
 
-| Method | Backend Endpoint            | Frontend Action    | Description                |
-| ------ | --------------------------- | ------------------ | -------------------------- |
-| GET    | `/storefront/users/profile` | `getUserProfile()` | Lấy thông tin user profile |
+| Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
+| --- | --- | --- | --- | --- | --- |
+| GET | `/storefront/users/profile` | `getProfile` | `-` | Chưa triển khai | Repo hiện expose `app/api/user/route.ts`, route này trả về `currentUser()` từ Clerk trực tiếp thay vì gọi endpoint backend này. |
 
----
+### 9. API wiki
 
-## 8. Webhooks
+| Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
+| --- | --- | --- | --- | --- | --- |
+| POST | `/wiki/ingest/articles/{articleId}` | `ingestArticle` | `ingestArticleToWiki(articleId)` | Đã triển khai | Trả về `WikiPageResponse` và được dùng từ các màn bài viết. |
+| GET | `/wiki/pages/{slug}` | `getPageBySlug` | `getWikiPageBySlug(slug)` | Đã triển khai | Dùng cho route `/wiki/[slug]`. |
+| GET | `/wiki/pages/{id}/sources` | `getPageSources` | `getWikiPageSources(id)` | Đã triển khai | Dùng để hiển thị source references trên trang wiki. |
 
-| Method | Backend Endpoint  | Description                |
-| ------ | ----------------- | -------------------------- |
-| POST   | `/webhooks/clerk` | Xử lý Clerk webhook events |
+Các giá trị `pageType` được hỗ trợ theo live spec:
 
----
+`INDEX`, `SOURCE_SUMMARY`
 
-## 9. Health Check
+### 10. Webhook
 
-| Method | Backend Endpoint | Frontend Action | Description                  |
-| ------ | ---------------- | --------------- | ---------------------------- |
-| GET    | `/health`        | `healthCheck()` | Kiểm tra trạng thái hệ thống |
+| Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
+| --- | --- | --- | --- | --- | --- |
+| POST | `/webhooks/clerk` | `handleClerkWebhook` | `-` | Chỉ backend | Đây là endpoint backend nhận request đi vào nên không kỳ vọng có frontend caller tương ứng. |
 
----
+### 11. Kiểm tra sức khỏe hệ thống
 
-## Type Definitions
+| Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
+| --- | --- | --- | --- | --- | --- |
+| GET | `/health` | `healthCheck` | `-` | Chưa triển khai | Repo hiện chưa có action riêng cho health check. |
 
-### Search Parameters
+## Các kiểu dùng chung ở frontend
 
-```typescript
+### SearchParams
+
+```ts
 interface SearchParams {
-  page: number // Page number (0-indexed)
-  size: number // Page size
-  sort?: string[] // Sort criteria e.g. ["createdDate,desc"]
-  filter?: string // Filter expression
+  filter: string
+  page: number
+  size: number
+  sort: {
+    field: string
+    direction: "asc" | "desc"
+  }[]
 }
 ```
 
-### Paginated Response
+Được `queryParamsToString()` serialize thành:
 
-```typescript
+- `$filter`
+- `page`
+- `size`
+- `sort=field,direction`
+
+### Page<T>
+
+```ts
 interface Page<T> {
   content: T[]
+  pageable: {
+    pageNumber: number
+    pageSize: number
+    offset: number
+    paged: boolean
+    unpaged: boolean
+  }
+  last: boolean
   totalElements: number
   totalPages: number
   size: number
   number: number
   first: boolean
-  last: boolean
   numberOfElements: number
   empty: boolean
-  pageable: {
-    pageNumber: number
-    pageSize: number
-    offset: number
-  }
 }
 ```
 
----
+### ActionResult<T>
 
-## Request/Response Types
-
-### NewsSource
-
-```typescript
-// Request
-interface CreateNewsSourceRequest {
-  name: string
-  description?: string
-  url: string
-  active?: boolean
-}
-
-interface UpdateNewsSourceRequest {
-  name?: string
-  description?: string
-  url?: string
-  active?: boolean
-}
-
-// Response
-interface NewsSourceResponse {
-  id: number
-  name: string
-  description: string
-  url: string
-  active: boolean
-  createdDate: string
-  lastModifiedDate: string
-}
-
-interface NewsSourceListResponse {
-  id: number
-  name: string
-  description: string
-  url: string
-  active: boolean
-  createdDate: string
-  // Note: no lastModifiedDate in list response
-}
+```ts
+type ActionResult<T = void> =
+  | { success: true; data: T }
+  | { success: false; error: string }
 ```
 
-### Article
+## Các file type/action phía frontend
 
-```typescript
-// Response
-interface ArticleResponse {
-  id: number
-  title: string
-  description: string
-  content?: string
-  url: string
-  imageUrl?: string
-  author?: string
-  sourceName: string
-  publishedAt: string
-  createdDate: string
-  lastModifiedDate?: string
-}
+| Khu vực | File frontend |
+| --- | --- |
+| Helper dùng chung | `app/lib/definitions.ts`, `app/lib/utils.ts` |
+| Tầng vận chuyển auth | `app/api/auth/action.ts` |
+| Nguồn tin | `app/api/news-sources/action.ts`, `app/lib/news-sources/definitions.ts` |
+| Bài viết | `app/api/articles/action.ts`, `app/lib/articles/definitions.ts` |
+| Blog | `app/api/blogs/action.ts`, `app/lib/blogs/definitions.ts` |
+| Cronjob | `app/api/cronjobs/action.ts`, `app/lib/cronjobs/definitions.ts` |
+| Lịch kinh tế | `app/api/economic-calendar/action.ts`, `app/lib/economic-calendar/definitions.ts` |
+| Cấu hình AI provider | `app/api/ai-provider-configs/action.ts`, `app/lib/ai-provider-configs/definitions.ts` |
+| Wiki | `app/api/wiki/action.ts`, `app/lib/wiki/definitions.ts` |
+| Route người dùng cục bộ | `app/api/user/route.ts` |
 
-interface ArticleListResponse {
-  id: number
-  title: string
-  description: string
-  url: string
-  imageUrl?: string
-  sourceName: string
-  publishedAt: string
-  createdDate: string
-}
-```
+## Các điểm lệch contract đã biết
 
-### BlogPost
-
-```typescript
-// Request
-interface CreateBlogPostRequest {
-  title: string
-  slug: string
-  content?: string
-  shortDescription?: string
-  visible?: boolean  // ⚠️ field name is "visible" (not "isVisible")
-}
-
-interface UpdateBlogPostRequest {
-  title?: string
-  slug?: string
-  content?: string
-  shortDescription?: string
-  isVisible?: boolean
-}
-
-// Response
-interface BlogPostResponse {
-  id: number
-  title: string
-  slug: string
-  content: string
-  shortDescription: string
-  visible: boolean  // ⚠️ field name is "visible" (not "isVisible")
-  publishedAt: string
-  createdDate: string
-  lastModifiedDate: string
-}
-
-interface BlogPostListResponse {
-  id: number
-  title: string
-  slug: string
-  shortDescription: string
-  visible: boolean  // ⚠️ field name is "visible" (not "isVisible")
-  publishedAt: string
-  createdDate: string
-}
-```
-
-### Cronjob
-
-```typescript
-// Request
-interface CronjobRequest {
-  jobName: string
-  jobGroup: string
-  jobClass: string
-  expression: string // Cron expression
-  description?: string
-}
-
-// Response
-interface CronjobResponse {
-  id: number
-  jobName: string
-  jobGroup: string
-  jobStatus: string
-  cronExpression: string
-  description: string
-  expressionDescription: string
-  nextTriggeredTime?: string
-}
-```
-
-### EconomicEvent ⭐ NEW
-
-```typescript
-// Response (detail)
-interface EconomicEventResponse {
-  id: number
-  title: string
-  country: string
-  eventDate: string
-  impact: string       // e.g. "HIGH", "MEDIUM", "LOW"
-  forecast?: string
-  previous?: string
-  actual?: string
-  externalKey?: string
-  description?: string
-  createdDate: string
-  lastModifiedDate: string
-}
-
-// Response (list)
-interface EconomicEventListResponse {
-  id: number
-  title: string
-  country: string
-  eventDate: string
-  impact: string
-  forecast?: string
-  previous?: string
-  actual?: string
-  description?: string
-  createdDate: string
-}
-```
-
-### SystemPrompt
-
-```typescript
-// Request
-interface CreateSystemPromptRequest {
-  promptType: PromptType
-  content: string
-}
-
-interface UpdateSystemPromptRequest {
-  content: string
-}
-
-// Response
-interface SystemPromptResponse {
-  id: number
-  promptType: PromptType
-  content: string
-  createdDate: string
-  lastModifiedDate: string
-}
-```
-
-### User
-
-```typescript
-interface UserResponse {
-  id: number
-  email: string
-  firstName: string
-  lastName: string
-}
-```
-
----
-
-## Authentication
-
-- Sử dụng Clerk JWT token
-- Token được lấy qua `getClerkToken()` từ `@/app/api/auth/action`
-- Header: `Authorization: Bearer {token}`
-
----
-
-## File Structure Convention
-
-```
-app/
-├── api/
-│   ├── auth/
-│   │   └── action.ts          # Auth utilities (fetchAuthenticated, getClerkToken)
-│   ├── news-sources/
-│   │   └── action.ts          # News Sources API
-│   ├── articles/
-│   │   └── action.ts           # Articles API
-│   ├── blogs/
-│   │   └── action.ts           # Blogs API
-│   ├── cronjobs/
-│   │   └── action.ts           # Cronjobs API
-│   ├── prompts/
-│   │   └── action.ts           # System Prompts API
-│   └── economic-calendar/
-│       └── action.ts           # Economic Calendar API ⭐ NEW
-│
-└── lib/
-    ├── definitions.ts          # Base types (SearchParams, Page, etc.)
-    ├── news-sources/
-    │   └── definitions.ts      # News Source types
-    ├── articles/
-    │   └── definitions.ts      # Article types
-    ├── blogs/
-    │   └── definitions.ts      # Blog types
-    ├── cronjobs/
-    │   └── definitions.ts      # Cronjob types
-    ├── prompts/
-    │   └── definitions.ts      # Prompt types
-    └── economic-calendar/
-        └── definitions.ts      # Economic Event types ⭐ NEW
-```
+- `/news-sources/active` được phân trang trong live spec của backend, nhưng helper hiện tại ở frontend vẫn đang kỳ vọng một mảng thuần.
+- Trường hiển thị của blog đang không nhất quán giữa các lớp:
+  - Schema tạo mới trong OpenAPI dùng `visible`
+  - Schema cập nhật trong OpenAPI dùng `isVisible`
+  - Schema response trong OpenAPI dùng `visible`
+  - Definitions blog ở frontend hiện dùng `isVisible`
+- Các endpoint system prompt đã có ở backend, nhưng frontend vẫn chưa có action file tương ứng.
+- `/cronjobs/{id}/stop` đã có ở backend, nhưng frontend chưa có `stopCronjob()` tương ứng.
+- `/storefront/users/profile` đã có ở backend, nhưng repo hiện đang đọc người dùng Clerk trực tiếp qua `app/api/user/route.ts`.

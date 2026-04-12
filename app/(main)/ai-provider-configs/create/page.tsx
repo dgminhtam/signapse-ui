@@ -1,0 +1,36 @@
+import Link from "next/link"
+import { ArrowLeft } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
+
+import { AiProviderConfigForm } from "../ai-provider-config-form"
+
+export default function CreateAiProviderConfigPage() {
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center">
+        <Button asChild variant="ghost" size="sm" className="-ml-2">
+          <Link href="/ai-provider-configs">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to list
+          </Link>
+        </Button>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Add AI Provider Config</CardTitle>
+          <CardDescription>
+            Create a new AI provider configuration with provider credentials, model, and activation settings.
+          </CardDescription>
+        </CardHeader>
+        <Separator />
+        <CardContent className="pt-6">
+          <AiProviderConfigForm />
+        </CardContent>
+      </Card>
+    </div>
+  )
+}

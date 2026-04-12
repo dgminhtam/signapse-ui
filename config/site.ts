@@ -1,13 +1,10 @@
 import {
   Bot,
-  FileBarChart,
   GalleryVerticalEnd,
   LayoutDashboard,
   Newspaper,
   Settings2,
   TrendingUp,
-  ServerCrash,
-  Clock,
 } from "lucide-react"
 
 export const siteConfig = {
@@ -15,23 +12,28 @@ export const siteConfig = {
     {
       name: "Signapse",
       logo: GalleryVerticalEnd,
-      plan: "Enterprise",
+      plan: "Trang quản trị",
     },
   ],
+  brand: {
+    name: "Signapse",
+    logo: GalleryVerticalEnd,
+    subtitle: "Trang quản trị",
+  },
   navMain: [
     {
-      title: "Bảng điều khiển",
+      title: "Tổng quan",
       url: "#",
       icon: LayoutDashboard,
       items: [
         {
-          title: "Tổng quan",
+          title: "Trang chủ",
           url: "/",
         },
       ],
     },
     {
-      title: "Quản lý nội dung",
+      title: "Nội dung",
       url: "#",
       icon: Newspaper,
       items: [
@@ -44,69 +46,45 @@ export const siteConfig = {
           url: "/articles",
         },
         {
-          title: "Quản lý Blog",
+          title: "Chuyên mục blog",
           url: "/blogs",
         },
         {
-          title: "Đăng tải Wordpress",
-          url: "/wordpress",
+          title: "Kho kiến thức",
+          url: "/wiki",
         },
       ],
     },
     {
-      title: "Giao dịch & Tín hiệu",
+      title: "AI",
+      url: "#",
+      icon: Bot,
+      items: [
+        {
+          title: "Nhà cung cấp AI",
+          url: "/ai-provider-configs",
+        },
+      ],
+    },
+    {
+      title: "Thị trường",
       url: "#",
       icon: TrendingUp,
       items: [
         {
-          title: "Cấu hình Trade",
-          url: "/settings/trade",
-        },
-        {
-          title: "Danh sách theo dõi",
-          url: "/watchlist",
-        },
-        {
-          title: "Economic Calendar",
+          title: "Lịch kinh tế",
           url: "/economic-calendar",
         },
       ],
     },
     {
-      title: "AI & Tương tác",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Mẫu AI (Prompts)",
-          url: "/prompts",
-        },
-        {
-          title: "Kênh Telegram",
-          url: "/telegram",
-        },
-      ],
-    },
-    {
-      title: "Hệ thống & Báo cáo",
+      title: "Vận hành",
       url: "#",
       icon: Settings2,
       items: [
         {
-          title: "Cronjob",
+          title: "Tác vụ định kỳ",
           url: "/cronjobs",
-        },
-        {
-          title: "Thống kê & Báo cáo",
-          url: "/reports",
-        },
-        {
-          title: "Quản trị Dịch vụ",
-          url: "/system",
-        },
-        {
-          title: "Cài đặt chung",
-          url: "/settings",
         },
       ],
     },

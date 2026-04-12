@@ -21,7 +21,20 @@ export async function deleteArticle(id: number): Promise<ActionResult> {
         });
         revalidatePath("/articles");
         return { success: true, data: undefined };
-    } catch (error: any) {
-        return { success: false, error: error.message || "Failed to delete article" };
+    } catch (error: unknown) {
+        return { success: false, error: error instanceof Error ? error.message : "Failed to delete article" };
+    }
+}
+
+export async function analyzeArticle(id: number): Promise<ActionResult<ArticleResponse>> {
+    try {
+        const data = await fetchAuthenticated<ArticleResponse>(`/articles/${id}/analyze`, {
+            method: "POST",
+        });
+        revalidatePath("/articles");
+        revalidatePath(`/articles/${id}`);
+        return { success: true, data };
+    } catch (error: unknown) {
+        return { success: false, error: error instanceof Error ? error.message : "Failed to analyze article" };
     }
 }
