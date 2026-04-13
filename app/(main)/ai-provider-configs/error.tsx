@@ -25,15 +25,15 @@ export default function Error({
           <EmptyMedia variant="icon" className="bg-destructive/10 text-destructive">
             <AlertCircle />
           </EmptyMedia>
-          <EmptyTitle>Something went wrong</EmptyTitle>
+          <EmptyTitle>Đã xảy ra lỗi</EmptyTitle>
           <EmptyDescription>
-            {error.message || "Could not load AI provider configs due to an internal error."}
+            {error.message || "Không thể tải cấu hình nhà cung cấp AI do lỗi hệ thống."}
           </EmptyDescription>
         </EmptyHeader>
         <div className="mt-4 flex justify-center">
           <Button onClick={() => reset()} variant="outline">
             <RefreshCcw data-icon="inline-start" />
-            Try Again
+            Thử lại
           </Button>
         </div>
       </Empty>

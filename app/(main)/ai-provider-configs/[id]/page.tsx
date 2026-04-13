@@ -28,17 +28,18 @@ export default async function EditAiProviderConfigPage({
       <div className="flex items-center">
         <Button asChild variant="ghost" size="sm" className="-ml-2">
           <Link href="/ai-provider-configs">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to list
+            <ArrowLeft data-icon="inline-start" />
+            Quay lại danh sách
           </Link>
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Edit AI Provider Config</CardTitle>
+          <CardTitle>Chỉnh sửa cấu hình nhà cung cấp AI</CardTitle>
           <CardDescription>
-            Update configuration for <span className="font-semibold text-foreground">{providerConfig.name}</span>.
+            Cập nhật cấu hình cho{" "}
+            <span className="font-semibold text-foreground">{providerConfig.name}</span>.
           </CardDescription>
         </CardHeader>
         <Separator />

@@ -57,7 +57,7 @@ export async function getAiProviderModelCatalog(
   } catch (error: unknown) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Failed to load provider models",
+      error: error instanceof Error ? error.message : "Không thể xác thực và tải danh sách model",
     }
   }
 }
@@ -75,7 +75,7 @@ export async function createAiProviderConfig(
   } catch (error: unknown) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Failed to create AI provider config",
+      error: error instanceof Error ? error.message : "Không thể tạo cấu hình nhà cung cấp AI",
     }
   }
 }
@@ -98,7 +98,7 @@ export async function updateAiProviderConfig(
   } catch (error: unknown) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Failed to update AI provider config",
+      error: error instanceof Error ? error.message : "Không thể cập nhật cấu hình nhà cung cấp AI",
     }
   }
 }
@@ -119,7 +119,7 @@ export async function setAiProviderConfigDefault(
   } catch (error: unknown) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Failed to set default AI provider",
+      error: error instanceof Error ? error.message : "Không thể đặt nhà cung cấp AI mặc định",
     }
   }
 }
@@ -134,7 +134,7 @@ export async function deleteAiProviderConfig(id: number): Promise<ActionResult> 
   } catch (error: unknown) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Failed to delete AI provider config",
+      error: error instanceof Error ? error.message : "Không thể xóa cấu hình nhà cung cấp AI",
     }
   }
 }

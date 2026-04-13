@@ -29,11 +29,11 @@ export function AiProviderConfigSearch() {
   }, 300)
 
   return (
-    <div className="relative flex-1 max-w-sm">
+    <div className="relative max-w-sm flex-1">
       <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
       <Input
         type="search"
-        placeholder="Search provider configs..."
+        placeholder="Tìm theo tên cấu hình..."
         className="pl-8"
         defaultValue={searchParams.get("name[containsIgnoreCase]")?.toString()}
         onChange={(e) => handleSearch(e.target.value)}

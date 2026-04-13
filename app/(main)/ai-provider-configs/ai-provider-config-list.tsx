@@ -62,7 +62,7 @@ export function AiProviderConfigListPage({ providerPage }: AiProviderConfigListP
           <Button asChild>
             <Link href="/ai-provider-configs/create">
               <Plus data-icon="inline-start" />
-              Add provider config
+              Tạo cấu hình
             </Link>
           </Button>
           <AiProviderConfigSearch />
@@ -70,12 +70,12 @@ export function AiProviderConfigListPage({ providerPage }: AiProviderConfigListP
         <div className="flex items-center gap-2">
           <SortSelect
             options={[
-              { label: "Latest", value: "id_desc" },
-              { label: "Oldest", value: "id_asc" },
-              { label: "Name (A-Z)", value: "name_asc" },
-              { label: "Name (Z-A)", value: "name_desc" },
+              { label: "Mới nhất", value: "id_desc" },
+              { label: "Cũ nhất", value: "id_asc" },
+              { label: "Tên (A-Z)", value: "name_asc" },
+              { label: "Tên (Z-A)", value: "name_desc" },
             ]}
-            placeholder="Sort by"
+            placeholder="Sắp xếp theo"
           />
         </div>
       </div>
@@ -83,13 +83,13 @@ export function AiProviderConfigListPage({ providerPage }: AiProviderConfigListP
       <div className="rounded-md border border-border bg-card">
         <Table>
           <TableHeader>
-            <TableRow className="border-border hover:bg-transparent">
-              <TableHead className="font-semibold text-foreground">Name</TableHead>
-              <TableHead className="font-semibold text-foreground">Provider</TableHead>
+            <TableRow className="border-border bg-muted">
+              <TableHead className="font-semibold text-foreground">Tên cấu hình</TableHead>
+              <TableHead className="font-semibold text-foreground">Nhà cung cấp</TableHead>
               <TableHead className="font-semibold text-foreground">Model</TableHead>
-              <TableHead className="text-center font-semibold text-foreground">Default</TableHead>
-              <TableHead className="font-semibold text-foreground">Created Date</TableHead>
-              <TableHead className="text-right font-semibold text-foreground">Actions</TableHead>
+              <TableHead className="text-center font-semibold text-foreground">Mặc định</TableHead>
+              <TableHead className="font-semibold text-foreground">Ngày tạo</TableHead>
+              <TableHead className="text-right font-semibold text-foreground">Thao tác</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -105,7 +105,7 @@ export function AiProviderConfigListPage({ providerPage }: AiProviderConfigListP
                         {provider.name}
                       </Link>
                       <span className="line-clamp-1 text-xs text-muted-foreground">
-                        {provider.description || "No description provided"}
+                        {provider.description || "Chưa có mô tả"}
                       </span>
                     </div>
                   </TableCell>
@@ -128,8 +128,8 @@ export function AiProviderConfigListPage({ providerPage }: AiProviderConfigListP
                         className="h-8 w-8 text-muted-foreground hover:text-foreground"
                       >
                         <Link href={`/ai-provider-configs/${provider.id}`}>
-                          <Edit2 className="h-4 w-4" />
-                          <span className="sr-only">Edit</span>
+                          <Edit2 />
+                          <span className="sr-only">Chỉnh sửa</span>
                         </Link>
                       </Button>
                       <DeleteProviderButton provider={provider} />
@@ -145,9 +145,9 @@ export function AiProviderConfigListPage({ providerPage }: AiProviderConfigListP
                       <EmptyMedia variant="icon">
                         <Bot />
                       </EmptyMedia>
-                      <EmptyTitle>No provider configs found</EmptyTitle>
+                      <EmptyTitle>Chưa có cấu hình nào</EmptyTitle>
                       <EmptyDescription>
-                        Add your first AI provider configuration to start managing AI integrations.
+                        Tạo cấu hình nhà cung cấp AI đầu tiên để bắt đầu quản lý tích hợp AI.
                       </EmptyDescription>
                     </EmptyHeader>
                   </Empty>
@@ -162,7 +162,8 @@ export function AiProviderConfigListPage({ providerPage }: AiProviderConfigListP
         <AppSelectPageSize />
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">
-            Page {providerPage.number + 1} of {providerPage.totalPages} ({providerPage.totalElements} configs)
+            Trang {providerPage.number + 1} / {providerPage.totalPages} ({providerPage.totalElements}{" "}
+            cấu hình)
           </span>
         </div>
         <div className="flex gap-2">
@@ -190,7 +191,7 @@ function SetDefaultButton({
     startTransition(async () => {
       const result = await setAiProviderConfigDefault(provider.id)
       if (result.success) {
-        toast.success("Default AI provider updated successfully")
+        toast.success("Đã cập nhật nhà cung cấp AI mặc định")
         router.refresh()
       } else {
         toast.error(result.error)
@@ -201,8 +202,8 @@ function SetDefaultButton({
   if (provider.defaultProvider) {
     return (
       <Badge className="gap-1">
-        <ShieldCheck className="h-3 w-3" />
-        Default
+        <ShieldCheck data-icon="inline-start" />
+        Mặc định
       </Badge>
     )
   }
@@ -217,7 +218,7 @@ function SetDefaultButton({
       className="h-8"
     >
       {isPending ? <Spinner className="size-4" /> : <Star data-icon="inline-start" />}
-      Set default
+      Đặt mặc định
     </Button>
   )
 }
@@ -235,7 +236,7 @@ function DeleteProviderButton({
     startTransition(async () => {
       const result = await deleteAiProviderConfig(provider.id)
       if (result.success) {
-        toast.success(`Provider config "${provider.name}" deleted successfully`)
+        toast.success(`Đã xóa cấu hình "${provider.name}"`)
         setOpen(false)
         router.refresh()
       } else {
@@ -252,20 +253,20 @@ function DeleteProviderButton({
           size="icon"
           className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
         >
-          <Trash2 className="h-4 w-4" />
-          <span className="sr-only">Delete</span>
+          <Trash2 />
+          <span className="sr-only">Xóa</span>
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogTitle>Bạn có chắc chắn muốn xóa?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete the AI provider
-            config <strong>{provider.name}</strong>.
+            Hành động này không thể hoàn tác. Cấu hình nhà cung cấp AI{" "}
+            <strong>{provider.name}</strong> sẽ bị xóa vĩnh viễn.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending}>Hủy</AlertDialogCancel>
           <AlertDialogAction
             onClick={(event) => {
               event.preventDefault()
@@ -277,10 +278,10 @@ function DeleteProviderButton({
             {isPending ? (
               <>
                 <Spinner className="size-4" />
-                Deleting...
+                Đang xóa...
               </>
             ) : (
-              "Delete"
+              "Xóa cấu hình"
             )}
           </AlertDialogAction>
         </AlertDialogFooter>

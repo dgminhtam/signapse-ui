@@ -22,9 +22,9 @@ export default async function AiProviderConfigsPage({ searchParams }: PageProps)
   return (
     <Card>
       <CardHeader>
-        <CardTitle>AI Provider Configs</CardTitle>
+        <CardTitle>Cấu hình nhà cung cấp AI</CardTitle>
         <CardDescription>
-          Manage provider credentials, model selection, and the default AI provider.
+          Quản lý thông tin xác thực, model đã chọn và nhà cung cấp AI mặc định.
         </CardDescription>
       </CardHeader>
 
@@ -82,7 +82,7 @@ function ListSkeleton() {
           </div>
           {Array.from({ length: 5 }).map((_, index) => (
             <div key={index} className="grid grid-cols-6 gap-4 border-b px-4 py-4 last:border-0">
-              <div className="space-y-2">
+              <div className="flex flex-col gap-2">
                 <Skeleton className="h-4 w-32" />
                 <Skeleton className="h-3 w-44" />
               </div>

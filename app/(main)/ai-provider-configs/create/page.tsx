@@ -13,17 +13,17 @@ export default function CreateAiProviderConfigPage() {
       <div className="flex items-center">
         <Button asChild variant="ghost" size="sm" className="-ml-2">
           <Link href="/ai-provider-configs">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to list
+            <ArrowLeft data-icon="inline-start" />
+            Quay lại danh sách
           </Link>
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Add AI Provider Config</CardTitle>
+          <CardTitle>Tạo cấu hình nhà cung cấp AI</CardTitle>
           <CardDescription>
-            Create a new AI provider configuration with provider credentials, model selection, and default settings.
+            Khai báo nhà cung cấp AI mới với thông tin xác thực, model và thiết lập mặc định.
           </CardDescription>
         </CardHeader>
         <Separator />
