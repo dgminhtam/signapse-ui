@@ -2,7 +2,7 @@
 
 Tài liệu này ánh xạ đặc tả OpenAPI backend đang chạy tại `http://localhost:8484/v3/api-docs` tới các điểm tích hợp frontend trong repository này.
 
-Xác minh lần cuối: ngày 12 tháng 4 năm 2026
+Xác minh lần cuối: ngày 13 tháng 4 năm 2026
 
 ## Cấu hình cơ sở
 
@@ -35,7 +35,7 @@ Xác minh lần cuối: ngày 12 tháng 4 năm 2026
 
 Các giá trị `promptType` được hỗ trợ theo live spec:
 
-`NEWS_FILTER`, `NEWS_ANALYSIS`, `SIGNAL_GENERATION`, `DECISION_MAKING`, `CONTENT_EXTRACTION`, `SENTIMENT_ANALYSIS`, `TITLE_GENERATION`, `SUMMARY_GENERATION`, `CONTENT_CLEANING`, `WIKI_SOURCE_SUMMARY`, `WIKI_INDEX_REBUILD`
+`NEWS_FILTER`, `NEWS_ANALYSIS`, `SIGNAL_GENERATION`, `DECISION_MAKING`, `CONTENT_EXTRACTION`, `SENTIMENT_ANALYSIS`, `TITLE_GENERATION`, `SUMMARY_GENERATION`, `CONTENT_CLEANING`, `FIRECRAWL_ARTICLE_FILTER`, `WIKI_SOURCE_SUMMARY`, `WIKI_PAGE_UPDATE`, `WIKI_INDEX_REBUILD`, `WIKI_QUERY_ANSWER`
 
 ### 2. API nguồn tin
 
@@ -97,18 +97,25 @@ Các giá trị `promptType` được hỗ trợ theo live spec:
 
 | Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
 | --- | --- | --- | --- | --- | --- |
-| GET | `/ai-provider-configs` | `getAiProviderConfigs` | `getAiProviderConfigs(searchParams)` | Đã triển khai | Trả về `Page<AiProviderConfigListResponse>`. |
-| POST | `/ai-provider-configs` | `createAiProviderConfig` | `createAiProviderConfig(request)` | Đã triển khai | Sử dụng `AiProviderConfigRequest`. |
-| GET | `/ai-provider-configs/{id}` | `getAiProviderConfig` | `getAiProviderConfigById(id)` | Đã triển khai | Trả về `AiProviderConfigResponse`. |
-| PUT | `/ai-provider-configs/{id}` | `updateAiProviderConfig` | `updateAiProviderConfig(id, request)` | Đã triển khai | Sử dụng `AiProviderConfigRequest`. |
+| GET | `/ai-provider-configs` | `getAiProviderConfigs` | `getAiProviderConfigs(searchParams)` | Đã triển khai nhưng có lệch contract | Frontend/runtime đang gửi query phẳng `$filter`, `page`, `size`, `sort`; live spec vẫn mô tả `specification` và `pageable`. Response raw từ backend được sanitize trước khi truyền xuống client để loại `apiKey`. |
+| POST | `/ai-provider-configs` | `createAiProviderConfig` | `createAiProviderConfig(request)` | Đã triển khai | Frontend dùng `AiProviderConfigCreateRequest`; response raw được sanitize để không hydrate `apiKey` xuống browser. |
+| GET | `/ai-provider-configs/{id}` | `getAiProviderConfig` | `getAiProviderConfigById(id)` | Đã triển khai nhưng có lệch contract | Frontend trả về `AiProviderConfigResponse` đã sanitize, không chứa `apiKey` dù live spec hiện vẫn expose field này. |
+| PUT | `/ai-provider-configs/{id}` | `updateAiProviderConfig` | `updateAiProviderConfig(id, request)` | Đã triển khai | Frontend dùng `AiProviderConfigUpdateRequest`; `apiKey` chỉ được gửi khi người dùng nhập giá trị mới. |
+| POST | `/ai-provider-configs/model-catalog` | `getModelCatalog` | `getAiProviderModelCatalog(request)` | Đã triển khai | Dùng để tải danh sách model động từ `providerType + apiKey + baseUrl`. Response trả về `models[]` với `id` và `label`. |
 | DELETE | `/ai-provider-configs/{id}` | `deleteAiProviderConfig` | `deleteAiProviderConfig(id)` | Đã triển khai | Được bọc trong `ActionResult`. |
-| PATCH | `/ai-provider-configs/{id}/toggle-active` | `toggleActive_1` | `toggleAiProviderConfigActive(id)` | Đã triển khai | Trả về `AiProviderConfigResponse` sau khi cập nhật. |
-| PATCH | `/ai-provider-configs/{id}/set-default` | `setDefault` | `setAiProviderConfigDefault(id)` | Đã triển khai | Trả về `AiProviderConfigResponse` sau khi cập nhật. |
-| GET | `/ai-provider-configs/active` | `getActiveAiProviderConfigs` | `getActiveAiProviderConfigs()` | Đã triển khai | Trả về `AiProviderConfigResponse[]`. |
+| PATCH | `/ai-provider-configs/{id}/set-default` | `setDefault` | `setAiProviderConfigDefault(id)` | Đã triển khai | Trả về response đã sanitize sau khi cập nhật. |
 
 Các giá trị `providerType` được hỗ trợ theo live spec:
 
-`GEMINI`, `OPENAI`
+`GEMINI`, `OPENAI`, `ZAI`
+
+Effective contract frontend hiện tại cho danh sách AI providers:
+
+- Query danh sách dùng `$filter`, `page`, `size`, `sort`.
+- Search UI hiện map vào `name[containsIgnoreCase]`.
+- Sort UI hiện expose `id` và `name`.
+- Backend đã bỏ field `active`; frontend không còn render trạng thái bật/tắt cho AI providers.
+- Model được chọn động qua endpoint `model-catalog`, nhưng người dùng vẫn có thể nhập tay nếu cần.
 
 ### 8. API người dùng
 
@@ -126,7 +133,7 @@ Các giá trị `providerType` được hỗ trợ theo live spec:
 
 Các giá trị `pageType` được hỗ trợ theo live spec:
 
-`INDEX`, `SOURCE_SUMMARY`
+`INDEX`, `SOURCE_SUMMARY`, `TOPIC`, `ENTITY`, `LINT_REPORT`, `QUERY_RESULT`
 
 ### 10. Webhook
 
@@ -217,6 +224,8 @@ type ActionResult<T = void> =
   - Schema cập nhật trong OpenAPI dùng `isVisible`
   - Schema response trong OpenAPI dùng `visible`
   - Definitions blog ở frontend hiện dùng `isVisible`
+- `ai-provider-configs` trong live spec hiện vẫn expose `apiKey` ở response list/detail/mutation; frontend đã sanitize để tránh hydrate secret xuống browser.
+- `ai-provider-configs` trong live spec mô tả truy vấn theo `specification` và `pageable`, nhưng contract hiệu lực của frontend/runtime đang dùng `$filter`, `page`, `size`, `sort`.
 - Các endpoint system prompt đã có ở backend, nhưng frontend vẫn chưa có action file tương ứng.
 - `/cronjobs/{id}/stop` đã có ở backend, nhưng frontend chưa có `stopCronjob()` tương ứng.
 - `/storefront/users/profile` đã có ở backend, nhưng repo hiện đang đọc người dùng Clerk trực tiếp qua `app/api/user/route.ts`.

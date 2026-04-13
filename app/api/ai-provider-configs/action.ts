@@ -4,39 +4,74 @@ import { revalidatePath } from "next/cache"
 
 import { fetchAuthenticated } from "@/app/api/auth/action"
 import {
+  AiProviderConfigCreateRequest,
   AiProviderConfigListResponse,
-  AiProviderConfigRequest,
+  AiProviderModelCatalogRequest,
+  AiProviderModelCatalogResponse,
   AiProviderConfigResponse,
+  AiProviderConfigServerResponse,
+  AiProviderConfigUpdateRequest,
+  sanitizeAiProviderConfig,
+  sanitizeAiProviderConfigListItem,
 } from "@/app/lib/ai-provider-configs/definitions"
 import { ActionResult, Page, SearchParams } from "@/app/lib/definitions"
 import { queryParamsToString } from "@/app/lib/utils"
 
+function sanitizeAiProviderConfigPage(
+  page: Page<AiProviderConfigServerResponse>
+): Page<AiProviderConfigListResponse> {
+  return {
+    ...page,
+    content: page.content.map(sanitizeAiProviderConfigListItem),
+  }
+}
+
 export async function getAiProviderConfigs(
   searchParams: SearchParams
 ): Promise<Page<AiProviderConfigListResponse>> {
-  return fetchAuthenticated<Page<AiProviderConfigListResponse>>(
+  const response = await fetchAuthenticated<Page<AiProviderConfigServerResponse>>(
     `/ai-provider-configs?${queryParamsToString(searchParams)}`
   )
-}
-
-export async function getActiveAiProviderConfigs(): Promise<AiProviderConfigResponse[]> {
-  return fetchAuthenticated<AiProviderConfigResponse[]>("/ai-provider-configs/active")
+  return sanitizeAiProviderConfigPage(response)
 }
 
 export async function getAiProviderConfigById(id: number): Promise<AiProviderConfigResponse> {
-  return fetchAuthenticated<AiProviderConfigResponse>(`/ai-provider-configs/${id}`)
+  const response = await fetchAuthenticated<AiProviderConfigServerResponse>(
+    `/ai-provider-configs/${id}`
+  )
+  return sanitizeAiProviderConfig(response)
+}
+
+export async function getAiProviderModelCatalog(
+  request: AiProviderModelCatalogRequest
+): Promise<ActionResult<AiProviderModelCatalogResponse>> {
+  try {
+    const data = await fetchAuthenticated<AiProviderModelCatalogResponse>(
+      "/ai-provider-configs/model-catalog",
+      {
+        method: "POST",
+        body: JSON.stringify(request),
+      }
+    )
+    return { success: true, data }
+  } catch (error: unknown) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to load provider models",
+    }
+  }
 }
 
 export async function createAiProviderConfig(
-  request: AiProviderConfigRequest
+  request: AiProviderConfigCreateRequest
 ): Promise<ActionResult<AiProviderConfigResponse>> {
   try {
-    const data = await fetchAuthenticated<AiProviderConfigResponse>("/ai-provider-configs", {
+    const data = await fetchAuthenticated<AiProviderConfigServerResponse>("/ai-provider-configs", {
       method: "POST",
       body: JSON.stringify(request),
     })
     revalidatePath("/ai-provider-configs")
-    return { success: true, data }
+    return { success: true, data: sanitizeAiProviderConfig(data) }
   } catch (error: unknown) {
     return {
       success: false,
@@ -47,16 +82,19 @@ export async function createAiProviderConfig(
 
 export async function updateAiProviderConfig(
   id: number,
-  request: AiProviderConfigRequest
+  request: AiProviderConfigUpdateRequest
 ): Promise<ActionResult<AiProviderConfigResponse>> {
   try {
-    const data = await fetchAuthenticated<AiProviderConfigResponse>(`/ai-provider-configs/${id}`, {
-      method: "PUT",
-      body: JSON.stringify(request),
-    })
+    const data = await fetchAuthenticated<AiProviderConfigServerResponse>(
+      `/ai-provider-configs/${id}`,
+      {
+        method: "PUT",
+        body: JSON.stringify(request),
+      }
+    )
     revalidatePath("/ai-provider-configs")
     revalidatePath(`/ai-provider-configs/${id}`)
-    return { success: true, data }
+    return { success: true, data: sanitizeAiProviderConfig(data) }
   } catch (error: unknown) {
     return {
       success: false,
@@ -65,32 +103,11 @@ export async function updateAiProviderConfig(
   }
 }
 
-export async function toggleAiProviderConfigActive(
-  id: number
-): Promise<ActionResult<AiProviderConfigResponse>> {
-  try {
-    const data = await fetchAuthenticated<AiProviderConfigResponse>(
-      `/ai-provider-configs/${id}/toggle-active`,
-      {
-        method: "PATCH",
-      }
-    )
-    revalidatePath("/ai-provider-configs")
-    revalidatePath(`/ai-provider-configs/${id}`)
-    return { success: true, data }
-  } catch (error: unknown) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to update provider status",
-    }
-  }
-}
-
 export async function setAiProviderConfigDefault(
   id: number
 ): Promise<ActionResult<AiProviderConfigResponse>> {
   try {
-    const data = await fetchAuthenticated<AiProviderConfigResponse>(
+    const data = await fetchAuthenticated<AiProviderConfigServerResponse>(
       `/ai-provider-configs/${id}/set-default`,
       {
         method: "PATCH",
@@ -98,7 +115,7 @@ export async function setAiProviderConfigDefault(
     )
     revalidatePath("/ai-provider-configs")
     revalidatePath(`/ai-provider-configs/${id}`)
-    return { success: true, data }
+    return { success: true, data: sanitizeAiProviderConfig(data) }
   } catch (error: unknown) {
     return {
       success: false,

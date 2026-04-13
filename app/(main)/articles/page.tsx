@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
@@ -37,7 +38,10 @@ export default async function ArticlesPage({ searchParams }: PageProps) {
           View and manage articles aggregated from your news sources.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+
+      <Separator />
+
+      <CardContent className="pt-6">
         <Suspense fallback={<ArticleListSkeleton />}>
           <ArticleListContent
             page={page}

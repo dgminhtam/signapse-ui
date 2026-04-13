@@ -1,39 +1,71 @@
-export type AiProviderType = "GEMINI" | "OPENAI"
+export type AiProviderType = "GEMINI" | "OPENAI" | "ZAI"
 
-export interface AiProviderConfigRequest {
-  providerType?: AiProviderType
+export interface AiProviderConfigCreateRequest {
+  providerType: AiProviderType
   name: string
   description?: string
-  apiKey?: string
+  apiKey: string
   model: string
   baseUrl?: string
-  active?: boolean
   defaultProvider?: boolean
 }
 
-export interface AiProviderConfigResponse {
+export interface AiProviderConfigUpdateRequest {
+  providerType?: AiProviderType
+  name?: string
+  description?: string
+  apiKey?: string
+  model?: string
+  baseUrl?: string
+  defaultProvider?: boolean
+}
+
+interface AiProviderConfigPublicFields {
   id: number
   providerType: AiProviderType
   name: string
   description: string
-  apiKey: string
   model: string
   baseUrl: string
-  active: boolean
   defaultProvider: boolean
   createdDate: string
   lastModifiedDate: string
 }
 
-export interface AiProviderConfigListResponse {
-  id: number
+export interface AiProviderConfigResponse extends AiProviderConfigPublicFields {}
+
+export interface AiProviderConfigListResponse extends AiProviderConfigPublicFields {}
+
+export interface AiProviderConfigServerResponse extends AiProviderConfigPublicFields {
+  apiKey: string
+}
+
+export function sanitizeAiProviderConfig(
+  config: AiProviderConfigServerResponse
+): AiProviderConfigResponse {
+  const { apiKey: _apiKey, ...publicConfig } = config
+  return publicConfig
+}
+
+export function sanitizeAiProviderConfigListItem(
+  config: AiProviderConfigServerResponse
+): AiProviderConfigListResponse {
+  const { apiKey: _apiKey, ...publicConfig } = config
+  return publicConfig
+}
+
+export interface AiProviderModelCatalogRequest {
   providerType: AiProviderType
-  name: string
-  description: string
-  model: string
-  baseUrl: string
-  active: boolean
-  defaultProvider: boolean
-  createdDate: string
-  lastModifiedDate: string
+  apiKey: string
+  baseUrl?: string
+}
+
+export interface AiProviderModelOptionResponse {
+  id: string
+  label: string
+}
+
+export interface AiProviderModelCatalogResponse {
+  providerType: AiProviderType
+  models: AiProviderModelOptionResponse[]
 }

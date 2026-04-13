@@ -10,7 +10,6 @@ import { toast } from "sonner"
 import {
   deleteAiProviderConfig,
   setAiProviderConfigDefault,
-  toggleAiProviderConfigActive,
 } from "@/app/api/ai-provider-configs/action"
 import { AiProviderConfigListResponse } from "@/app/lib/ai-provider-configs/definitions"
 import { Page } from "@/app/lib/definitions"
@@ -38,7 +37,6 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { Spinner } from "@/components/ui/spinner"
-import { Switch } from "@/components/ui/switch"
 import {
   Table,
   TableBody,
@@ -89,7 +87,6 @@ export function AiProviderConfigListPage({ providerPage }: AiProviderConfigListP
               <TableHead className="font-semibold text-foreground">Name</TableHead>
               <TableHead className="font-semibold text-foreground">Provider</TableHead>
               <TableHead className="font-semibold text-foreground">Model</TableHead>
-              <TableHead className="text-center font-semibold text-foreground">Status</TableHead>
               <TableHead className="text-center font-semibold text-foreground">Default</TableHead>
               <TableHead className="font-semibold text-foreground">Created Date</TableHead>
               <TableHead className="text-right font-semibold text-foreground">Actions</TableHead>
@@ -117,9 +114,6 @@ export function AiProviderConfigListPage({ providerPage }: AiProviderConfigListP
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">{provider.model}</TableCell>
                   <TableCell className="text-center">
-                    <ToggleProviderStatusButton provider={provider} />
-                  </TableCell>
-                  <TableCell className="text-center">
                     <SetDefaultButton provider={provider} />
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground tabular-nums">
@@ -145,7 +139,7 @@ export function AiProviderConfigListPage({ providerPage }: AiProviderConfigListP
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={7} className="py-24 text-center">
+                <TableCell colSpan={6} className="py-24 text-center">
                   <Empty>
                     <EmptyHeader>
                       <EmptyMedia variant="icon">
@@ -178,36 +172,6 @@ export function AiProviderConfigListPage({ providerPage }: AiProviderConfigListP
           />
         </div>
       </div>
-    </div>
-  )
-}
-
-function ToggleProviderStatusButton({
-  provider,
-}: {
-  provider: AiProviderConfigListResponse
-}) {
-  const [isPending, startTransition] = useTransition()
-  const router = useRouter()
-
-  const handleToggle = () => {
-    startTransition(async () => {
-      const result = await toggleAiProviderConfigActive(provider.id)
-      if (result.success) {
-        toast.success(
-          `Provider config ${provider.active ? "disabled" : "enabled"} successfully`
-        )
-        router.refresh()
-      } else {
-        toast.error(result.error)
-      }
-    })
-  }
-
-  return (
-    <div className="flex items-center justify-center gap-2">
-      <Switch checked={provider.active} onCheckedChange={handleToggle} disabled={isPending} />
-      {isPending && <Spinner className="size-3" />}
     </div>
   )
 }

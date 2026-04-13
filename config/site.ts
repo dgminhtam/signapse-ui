@@ -1,10 +1,8 @@
 import {
-  Bot,
   GalleryVerticalEnd,
   LayoutDashboard,
   Newspaper,
   Settings2,
-  TrendingUp,
 } from "lucide-react"
 
 export const siteConfig = {
@@ -22,15 +20,9 @@ export const siteConfig = {
   },
   navMain: [
     {
-      title: "Tổng quan",
-      url: "#",
+      title: "Đồ thị kiến thức",
+      url: "/",
       icon: LayoutDashboard,
-      items: [
-        {
-          title: "Trang chủ",
-          url: "/",
-        },
-      ],
     },
     {
       title: "Nội dung",
@@ -46,44 +38,30 @@ export const siteConfig = {
           url: "/articles",
         },
         {
-          title: "Chuyên mục blog",
+          title: "Blog",
           url: "/blogs",
         },
         {
-          title: "Kho kiến thức",
+          title: "Lịch kinh tế",
+          url: "/economic-calendar",
+        },
+        {
+          title: "Wiki",
           url: "/wiki",
         },
       ],
     },
     {
-      title: "AI",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Nhà cung cấp AI",
-          url: "/ai-provider-configs",
-        },
-      ],
-    },
-    {
-      title: "Thị trường",
-      url: "#",
-      icon: TrendingUp,
-      items: [
-        {
-          title: "Lịch kinh tế",
-          url: "/economic-calendar",
-        },
-      ],
-    },
-    {
-      title: "Vận hành",
+      title: "Setting",
       url: "#",
       icon: Settings2,
       items: [
         {
-          title: "Tác vụ định kỳ",
+          title: "AI providers",
+          url: "/ai-provider-configs",
+        },
+        {
+          title: "cronjob",
           url: "/cronjobs",
         },
       ],

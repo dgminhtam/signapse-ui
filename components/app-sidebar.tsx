@@ -11,7 +11,6 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
@@ -27,6 +26,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { siteConfig } from "@/config/site"
 import { SignOutButton } from "@clerk/nextjs"
 import { usePathname } from "next/navigation"
+import Link from "next/link"
 
 type SimpleUser = {
   imageUrl: string
@@ -80,7 +80,22 @@ export function NavMain({
       <SidebarGroupContent>
         <SidebarMenu>
           {items.map((item) => {
-            const isActive = hasActiveSubItem(item.items)
+            const hasSubItems = (item.items?.length ?? 0) > 0
+            const isActive = hasSubItems ? hasActiveSubItem(item.items) : pathname === item.url
+
+            if (!hasSubItems) {
+              return (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild tooltip={item.title} isActive={isActive}>
+                    <Link href={item.url}>
+                      {item.icon && <item.icon />}
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )
+            }
+
             return (
               <Collapsible key={item.title} asChild defaultOpen={item.isActive ?? isActive} className="group/collapsible">
                 <SidebarMenuItem>

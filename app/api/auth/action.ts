@@ -3,6 +3,7 @@
 import { auth } from '@clerk/nextjs/server';
 
 const API_TIMEOUT_MS = 60000;
+type ApiFetchError = Error & { status?: number };
 
 async function apiFetch<T>(
   urlPath: string,
@@ -56,7 +57,9 @@ async function apiFetch<T>(
       } catch (e) {
         errorMessage = errorText || errorMessage;
       }
-      throw new Error(errorMessage);
+      const apiError = new Error(errorMessage) as ApiFetchError;
+      apiError.status = response.status;
+      throw apiError;
     }
 
     if (response.status === 204) {
@@ -73,6 +76,13 @@ async function apiFetch<T>(
 
   } catch (error) {
     clearTimeout(timeout);
+    const isNotFoundError =
+      error instanceof Error &&
+      ((error as ApiFetchError).status === 404 ||
+        /(?:^|\b)(?:404|not[\s-]?found)(?:\b|$)/i.test(error.message));
+    if (isNotFoundError) {
+      throw error;
+    }
     console.error("Lỗi apiFetch:", error);
     throw error;
   }

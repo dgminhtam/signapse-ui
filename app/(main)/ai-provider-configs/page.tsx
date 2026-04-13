@@ -24,7 +24,7 @@ export default async function AiProviderConfigsPage({ searchParams }: PageProps)
       <CardHeader>
         <CardTitle>AI Provider Configs</CardTitle>
         <CardDescription>
-          Manage provider credentials, model selection, activation state, and the default AI provider.
+          Manage provider credentials, model selection, and the default AI provider.
         </CardDescription>
       </CardHeader>
 
@@ -72,24 +72,22 @@ function ListSkeleton() {
         </div>
 
         <div className="rounded-md border">
-          <div className="grid grid-cols-7 gap-4 border-b bg-muted/50 px-4 py-3">
+          <div className="grid grid-cols-6 gap-4 border-b bg-muted/50 px-4 py-3">
             <Skeleton className="h-4 w-24" />
             <Skeleton className="h-4 w-20" />
             <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-4 w-16" />
             <Skeleton className="h-4 w-16" />
             <Skeleton className="h-4 w-20" />
             <Skeleton className="h-4 w-20" />
           </div>
           {Array.from({ length: 5 }).map((_, index) => (
-            <div key={index} className="grid grid-cols-7 gap-4 border-b px-4 py-4 last:border-0">
+            <div key={index} className="grid grid-cols-6 gap-4 border-b px-4 py-4 last:border-0">
               <div className="space-y-2">
                 <Skeleton className="h-4 w-32" />
                 <Skeleton className="h-3 w-44" />
               </div>
               <Skeleton className="h-6 w-20 rounded-full" />
               <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-6 w-12 rounded-full" />
               <Skeleton className="h-6 w-12 rounded-full" />
               <Skeleton className="h-4 w-28" />
               <div className="flex justify-end gap-2">

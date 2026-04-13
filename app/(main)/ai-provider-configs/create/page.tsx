@@ -23,7 +23,7 @@ export default function CreateAiProviderConfigPage() {
         <CardHeader>
           <CardTitle>Add AI Provider Config</CardTitle>
           <CardDescription>
-            Create a new AI provider configuration with provider credentials, model, and activation settings.
+            Create a new AI provider configuration with provider credentials, model selection, and default settings.
           </CardDescription>
         </CardHeader>
         <Separator />

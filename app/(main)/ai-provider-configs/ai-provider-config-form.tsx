@@ -2,22 +2,28 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useRouter } from "next/navigation"
+import { useState, useTransition } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import * as z from "zod"
 
 import {
   createAiProviderConfig,
+  getAiProviderModelCatalog,
   updateAiProviderConfig,
 } from "@/app/api/ai-provider-configs/action"
 import {
-  AiProviderConfigRequest,
+  AiProviderConfigCreateRequest,
+  AiProviderModelCatalogRequest,
+  AiProviderModelOptionResponse,
   AiProviderConfigResponse,
   AiProviderType,
+  AiProviderConfigUpdateRequest,
 } from "@/app/lib/ai-provider-configs/definitions"
 import { Button } from "@/components/ui/button"
 import {
   Field,
+  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -39,16 +45,16 @@ import { Textarea } from "@/components/ui/textarea"
 const providerOptions: { value: AiProviderType; label: string }[] = [
   { value: "GEMINI", label: "Gemini" },
   { value: "OPENAI", label: "OpenAI" },
+  { value: "ZAI", label: "ZAI" },
 ]
 
 const aiProviderConfigSchema = z.object({
-  providerType: z.enum(["GEMINI", "OPENAI"]),
+  providerType: z.enum(["GEMINI", "OPENAI", "ZAI"]),
   name: z.string().min(1, "Name is required").max(255, "Name is too long"),
   description: z.string().max(500, "Description is too long").optional().or(z.literal("")),
   apiKey: z.string(),
   model: z.string().min(1, "Model is required").max(255, "Model is too long"),
-  baseUrl: z.string().url("Invalid base URL").optional().or(z.literal("")),
-  active: z.boolean().default(true),
+  baseUrl: z.string().max(500, "Base URL is too long").optional().or(z.literal("")),
   defaultProvider: z.boolean().default(false),
 })
 
@@ -61,6 +67,9 @@ interface AiProviderConfigFormProps {
 export function AiProviderConfigForm({ initialData }: AiProviderConfigFormProps) {
   const router = useRouter()
   const isEdit = !!initialData
+  const [modelOptions, setModelOptions] = useState<AiProviderModelOptionResponse[]>([])
+  const [hasLoadedCatalog, setHasLoadedCatalog] = useState(false)
+  const [isLoadingModels, startLoadingModels] = useTransition()
 
   const form = useForm<AiProviderConfigFormValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -72,29 +81,86 @@ export function AiProviderConfigForm({ initialData }: AiProviderConfigFormProps)
       apiKey: "",
       model: initialData?.model ?? "",
       baseUrl: initialData?.baseUrl ?? "",
-      active: initialData?.active ?? true,
       defaultProvider: initialData?.defaultProvider ?? false,
     },
   })
 
+  function resetModelCatalog() {
+    setHasLoadedCatalog(false)
+    setModelOptions([])
+
+    if (!isEdit) {
+      form.setValue("model", "", {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true,
+      })
+    }
+  }
+
+  async function handleLoadModels() {
+    const values = form.getValues()
+    const apiKey = values.apiKey.trim()
+
+    if (!apiKey) {
+      form.setError("apiKey", { message: "API key is required to load models" })
+      return
+    }
+
+    form.clearErrors("apiKey")
+
+    const request: AiProviderModelCatalogRequest = {
+      providerType: values.providerType,
+      apiKey,
+      baseUrl: values.baseUrl?.trim() || undefined,
+    }
+
+    startLoadingModels(async () => {
+      const result = await getAiProviderModelCatalog(request)
+
+      if (result.success) {
+        const fetchedOptions = result.data.models
+        const currentModel = form.getValues("model")
+        const hasCurrentModelInCatalog = fetchedOptions.some((option) => option.id === currentModel)
+        const fallbackOption =
+          isEdit && currentModel && !hasCurrentModelInCatalog
+            ? [{ id: currentModel, label: currentModel }]
+            : []
+
+        setHasLoadedCatalog(true)
+        setModelOptions([...fallbackOption, ...fetchedOptions])
+        form.clearErrors("apiKey")
+        toast.success(
+          fetchedOptions.length > 0
+            ? `Loaded ${fetchedOptions.length} models`
+            : "No models were returned for this provider"
+        )
+        return
+      }
+
+      toast.error(result.error)
+    })
+  }
+
   async function onSubmit(values: AiProviderConfigFormValues) {
-    const request: AiProviderConfigRequest = {
+    const baseRequest = {
       providerType: values.providerType,
       name: values.name,
       description: values.description || "",
       model: values.model,
       baseUrl: values.baseUrl || "",
-      active: values.active,
       defaultProvider: values.defaultProvider,
     }
 
-    if (!isEdit || values.apiKey.trim()) {
-      request.apiKey = values.apiKey.trim()
-    }
-
     const result = isEdit
-      ? await updateAiProviderConfig(initialData.id, request)
-      : await createAiProviderConfig(request)
+      ? await updateAiProviderConfig(initialData.id, {
+          ...baseRequest,
+          ...(values.apiKey.trim() ? { apiKey: values.apiKey.trim() } : {}),
+        } satisfies AiProviderConfigUpdateRequest)
+      : await createAiProviderConfig({
+          ...baseRequest,
+          apiKey: values.apiKey.trim(),
+        } satisfies AiProviderConfigCreateRequest)
 
     if (result.success) {
       toast.success(
@@ -121,7 +187,13 @@ export function AiProviderConfigForm({ initialData }: AiProviderConfigFormProps)
               <FieldLabel htmlFor="providerType">
                 Provider Type <span className="text-destructive">*</span>
               </FieldLabel>
-              <Select value={field.value} onValueChange={field.onChange}>
+              <Select
+                value={field.value}
+                onValueChange={(value) => {
+                  resetModelCatalog()
+                  field.onChange(value)
+                }}
+              >
                 <SelectTrigger id="providerType">
                   <SelectValue placeholder="Select provider type" />
                 </SelectTrigger>
@@ -155,20 +227,6 @@ export function AiProviderConfigForm({ initialData }: AiProviderConfigFormProps)
         />
 
         <Controller
-          name="model"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="model">
-                Model <span className="text-destructive">*</span>
-              </FieldLabel>
-              <Input {...field} id="model" placeholder="e.g. gpt-4o-mini or gemini-1.5-pro" />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
-
-        <Controller
           name="apiKey"
           control={form.control}
           rules={{
@@ -184,11 +242,21 @@ export function AiProviderConfigForm({ initialData }: AiProviderConfigFormProps)
                 {...field}
                 id="apiKey"
                 type="password"
+                onChange={(event) => {
+                  form.clearErrors("apiKey")
+                  resetModelCatalog()
+                  field.onChange(event)
+                }}
                 placeholder={
                   isEdit ? "Leave blank to keep the current API key" : "Paste provider API key"
                 }
                 autoComplete="new-password"
               />
+              <FieldDescription>
+                {isEdit
+                  ? "Nhập API key mới rồi bấm Load models để tải lại danh sách model."
+                  : "Nhập API key rồi bấm Load models để lấy danh sách model."}
+              </FieldDescription>
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
@@ -200,7 +268,101 @@ export function AiProviderConfigForm({ initialData }: AiProviderConfigFormProps)
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel htmlFor="baseUrl">Base URL</FieldLabel>
-              <Input {...field} id="baseUrl" placeholder="https://api.example.com/v1" />
+              <Input
+                {...field}
+                id="baseUrl"
+                onChange={(event) => {
+                  resetModelCatalog()
+                  field.onChange(event)
+                }}
+                placeholder="https://api.example.com/v1"
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+
+        <Controller
+          name="model"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div className="space-y-1">
+                  <FieldLabel htmlFor="model">
+                    Model <span className="text-destructive">*</span>
+                  </FieldLabel>
+                  <FieldDescription>
+                    Chọn model từ danh sách sau khi load catalog từ provider.
+                  </FieldDescription>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="sm:w-auto"
+                  onClick={handleLoadModels}
+                  disabled={
+                    isLoadingModels ||
+                    !form.getValues("providerType") ||
+                    !form.getValues("apiKey").trim()
+                  }
+                >
+                  {isLoadingModels ? (
+                    <>
+                      <Spinner data-icon="inline-start" />
+                      Loading models...
+                    </>
+                  ) : (
+                    "Load models"
+                  )}
+                </Button>
+              </div>
+
+              <Select
+                value={hasLoadedCatalog ? field.value || undefined : undefined}
+                onValueChange={(value) =>
+                  form.setValue("model", value, {
+                    shouldDirty: true,
+                    shouldTouch: true,
+                    shouldValidate: true,
+                  })
+                }
+                disabled={isLoadingModels || !hasLoadedCatalog}
+              >
+                <SelectTrigger id="model">
+                  <SelectValue
+                    placeholder={
+                      hasLoadedCatalog
+                        ? "Choose a model"
+                        : isEdit
+                          ? "Current model is shown below. Enter API key and load catalog to change it."
+                          : "Enter API key and load models first"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {modelOptions.map((option) => (
+                      <SelectItem key={option.id} value={option.id}>
+                        {option.label || option.id}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+
+              {!hasLoadedCatalog && isEdit && field.value && (
+                <div className="rounded-md border border-dashed px-3 py-2 text-sm text-muted-foreground">
+                  Current model: <span className="font-medium text-foreground">{field.value}</span>
+                </div>
+              )}
+
+              {hasLoadedCatalog && modelOptions.length === 0 && (
+                <div className="rounded-md border border-dashed px-3 py-2 text-sm text-muted-foreground">
+                  Provider did not return any models for the current credentials.
+                </div>
+              )}
+
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
@@ -219,22 +381,6 @@ export function AiProviderConfigForm({ initialData }: AiProviderConfigFormProps)
                 rows={4}
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
-
-        <Controller
-          name="active"
-          control={form.control}
-          render={({ field }) => (
-            <Field className="flex flex-row items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <FieldLabel className="text-base">Active</FieldLabel>
-                <div className="text-sm text-muted-foreground">
-                  Allow this provider config to be used by the system.
-                </div>
-              </div>
-              <Switch checked={field.value} onCheckedChange={field.onChange} />
             </Field>
           )}
         />
@@ -283,12 +429,15 @@ export function AiProviderConfigForm({ initialData }: AiProviderConfigFormProps)
                 apiKey: "",
                 model: initialData.model,
                 baseUrl: initialData.baseUrl || "",
-                active: initialData.active,
                 defaultProvider: initialData.defaultProvider,
               })
+              setHasLoadedCatalog(false)
+              setModelOptions([])
               return
             }
             form.reset()
+            setHasLoadedCatalog(false)
+            setModelOptions([])
           }}
         >
           Cancel

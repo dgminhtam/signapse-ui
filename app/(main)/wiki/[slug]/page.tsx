@@ -14,6 +14,7 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 
 import { getWikiPageBySlug, getWikiPageSources } from "@/app/api/wiki/action"
+import { WikiPageResponse, WikiPageSourceRefResponse } from "@/app/lib/wiki/definitions"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -21,6 +22,8 @@ import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 
 import { WikiSourceReferences } from "../wiki-source-references"
+
+type ApiLikeError = Error & { status?: number }
 
 interface PageProps {
   params: Promise<{
@@ -48,7 +51,15 @@ function getPageTypeLabel(pageType: string) {
 }
 
 function isNotFoundError(error: unknown) {
-  return error instanceof Error && /not[\s-]?found|404/i.test(error.message)
+  if (!(error instanceof Error)) {
+    return false
+  }
+
+  if ((error as ApiLikeError).status === 404) {
+    return true
+  }
+
+  return /(?:^|\b)(?:404|not[\s-]?found)(?:\b|$)/i.test(error.message)
 }
 
 export default async function WikiDetailPage({ params }: PageProps) {
@@ -75,7 +86,7 @@ export default async function WikiDetailPage({ params }: PageProps) {
 }
 
 async function FetchWikiData({ slug }: { slug: string }) {
-  let page
+  let page: WikiPageResponse
 
   try {
     page = await getWikiPageBySlug(slug)
@@ -87,7 +98,14 @@ async function FetchWikiData({ slug }: { slug: string }) {
     throw error
   }
 
-  const sources = await getWikiPageSources(page.id)
+  let sources: WikiPageSourceRefResponse[] = []
+  try {
+    sources = await getWikiPageSources(page.id)
+  } catch (error) {
+    if (!isNotFoundError(error)) {
+      throw error
+    }
+  }
 
   return (
     <>
