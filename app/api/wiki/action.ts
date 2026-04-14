@@ -4,31 +4,10 @@ import { revalidatePath } from "next/cache"
 
 import { fetchAuthenticated } from "@/app/api/auth/action"
 import { ActionResult } from "@/app/lib/definitions"
-import { WikiPageResponse, WikiPageSourceRefResponse, WikiPageType } from "@/app/lib/wiki/definitions"
+import { WikiPageResponse, WikiPageSourceRefResponse } from "@/app/lib/wiki/definitions"
 
-interface GetWikiPagesParams {
-  pageType?: WikiPageType
-  active?: boolean
-  q?: string
-}
-
-export async function getWikiPages(params: GetWikiPagesParams = {}): Promise<WikiPageResponse[]> {
-  const query = new URLSearchParams()
-
-  if (params.pageType) {
-    query.set("pageType", params.pageType)
-  }
-  if (params.active !== undefined) {
-    query.set("active", String(params.active))
-  }
-  if (params.q?.trim()) {
-    query.set("q", params.q.trim())
-  }
-
-  const queryString = query.toString()
-  const path = queryString ? `/wiki/pages?${queryString}` : "/wiki/pages"
-
-  return fetchAuthenticated<WikiPageResponse[]>(path)
+export async function getWikiPages(): Promise<WikiPageResponse[]> {
+  return fetchAuthenticated<WikiPageResponse[]>("/wiki/pages")
 }
 
 export async function getWikiPageBySlug(slug: string): Promise<WikiPageResponse> {

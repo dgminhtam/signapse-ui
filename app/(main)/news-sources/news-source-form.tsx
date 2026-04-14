@@ -29,6 +29,7 @@ const newsSourceSchema = z.object({
     .string()
     .url("Invalid URL format")
     .min(1, "URL is required"),
+  rssUrl: z.union([z.literal(""), z.string().url("Invalid RSS URL format")]),
   description: z
     .string()
     .max(500, "Description is too long")
@@ -53,6 +54,7 @@ export function NewsSourceForm({ initialData }: NewsSourceFormProps) {
     defaultValues: {
       name: initialData?.name || "",
       url: initialData?.url || "",
+      rssUrl: initialData?.rssUrl || "",
       description: initialData?.description || "",
       active: initialData?.active ?? true,
     },
@@ -61,6 +63,7 @@ export function NewsSourceForm({ initialData }: NewsSourceFormProps) {
   async function onSubmit(data: NewsSourceFormValues) {
     const request: NewsSourceRequest = {
       ...data,
+      rssUrl: data.rssUrl || "",
       description: data.description || "",
     }
 
@@ -99,23 +102,40 @@ export function NewsSourceForm({ initialData }: NewsSourceFormProps) {
           )}
         />
 
-        <Controller
-          name="url"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="url">
-                RSS Feed or Web URL <span className="text-destructive">*</span>
-              </FieldLabel>
-              <Input
-                {...field}
-                id="url"
-                placeholder="https://..."
-                autoComplete="off"
-              />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
+      <Controller
+        name="url"
+        control={form.control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor="url">
+              Website URL <span className="text-destructive">*</span>
+            </FieldLabel>
+            <Input
+              {...field}
+              id="url"
+              placeholder="https://example.com"
+              autoComplete="off"
+            />
+            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+          </Field>
+        )}
+      />
+
+      <Controller
+        name="rssUrl"
+        control={form.control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor="rssUrl">RSS URL</FieldLabel>
+            <Input
+              {...field}
+              id="rssUrl"
+              placeholder="https://example.com/rss.xml"
+              autoComplete="off"
+            />
+            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+          </Field>
+        )}
         />
 
         <Controller

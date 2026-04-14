@@ -27,6 +27,8 @@ import { siteConfig } from "@/config/site"
 import { SignOutButton } from "@clerk/nextjs"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
+import { WorkspaceResponse } from "@/app/lib/workspaces/definitions"
+import { WorkspaceSwitcher } from "./workspace-switcher"
 
 type SimpleUser = {
   imageUrl: string
@@ -37,13 +39,21 @@ type SimpleUser = {
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   user: SimpleUser,
   isAuthenticated: boolean
+  workspaces: WorkspaceResponse[]
 }
 
-export function AppSidebar({ user, isAuthenticated, ...props }: AppSidebarProps) {
+export function AppSidebar({ user, isAuthenticated, workspaces, ...props }: AppSidebarProps) {
+  const activeWorkspace =
+    workspaces.find((workspace) => workspace.defaultWorkspace) ?? workspaces[0] ?? null
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={siteConfig.teams} />
+        <WorkspaceSwitcher
+          workspaces={workspaces}
+          activeWorkspace={activeWorkspace}
+          logo={siteConfig.brand.logo}
+        />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={siteConfig.navMain} />

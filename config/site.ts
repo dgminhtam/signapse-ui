@@ -34,6 +34,10 @@ export const siteConfig = {
           url: "/news-sources",
         },
         {
+          title: "Topics",
+          url: "/topics",
+        },
+        {
           title: "Bài viết",
           url: "/articles",
         },

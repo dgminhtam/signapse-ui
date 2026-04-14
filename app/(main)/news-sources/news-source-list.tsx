@@ -29,6 +29,7 @@ import {
   Trash2,
   Newspaper,
   Globe,
+  Rss,
   ExternalLink,
 } from "lucide-react"
 import Link from "next/link"
@@ -99,14 +100,30 @@ export function NewsSourceListPage({ newsSourcePage }: NewsSourceListProps) {
                         <Link href={`/news-sources/${source.id}`} className="hover:underline flex items-center gap-1.5">
                           {source.name}
                         </Link>
-                        <a 
-                          href={source.url} 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1 mt-0.5"
+                        <a
+                          href={source.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground hover:text-primary"
                         >
-                          <Globe className="h-3 w-3" /> {source.url} <ExternalLink className="h-2 w-2" />
+                          <Globe className="h-3 w-3" /> Website: {source.url}{" "}
+                          <ExternalLink className="h-2 w-2" />
                         </a>
+                        {source.rssUrl ? (
+                          <a
+                            href={source.rssUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground hover:text-primary"
+                          >
+                            <Rss className="h-3 w-3" /> RSS: {source.rssUrl}{" "}
+                            <ExternalLink className="h-2 w-2" />
+                          </a>
+                        ) : (
+                          <span className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+                            <Rss className="h-3 w-3" /> RSS: -
+                          </span>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell className="text-center">

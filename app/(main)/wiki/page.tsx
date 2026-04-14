@@ -14,10 +14,6 @@ import {
 } from "@/components/ui/empty"
 import { Separator } from "@/components/ui/separator"
 
-interface WikiPageProps {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
-}
-
 function formatDateTime(value?: string) {
   if (!value) {
     return "N/A"
@@ -26,28 +22,8 @@ function formatDateTime(value?: string) {
   return format(new Date(value), "dd/MM/yyyy HH:mm")
 }
 
-export default async function WikiPage({ searchParams }: WikiPageProps) {
-  const params = await searchParams
-
-  const activeParam = params.active
-  const active =
-    activeParam === undefined
-      ? undefined
-      : typeof activeParam === "string"
-        ? activeParam === "true"
-        : activeParam[0] === "true"
-
-  const qParam = params.q
-  const q = typeof qParam === "string" ? qParam : qParam?.[0]
-
-  const pageTypeParam = params.pageType
-  const pageType = typeof pageTypeParam === "string" ? pageTypeParam : pageTypeParam?.[0]
-
-  const pages = await getWikiPages({
-    pageType: pageType as "INDEX" | "SOURCE_SUMMARY" | undefined,
-    active,
-    q,
-  })
+export default async function WikiPage() {
+  const pages = await getWikiPages()
 
   return (
     <Card>

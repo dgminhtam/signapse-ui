@@ -2,7 +2,7 @@
 
 Tài liệu này ánh xạ đặc tả OpenAPI backend đang chạy tại `http://localhost:8484/v3/api-docs` tới các điểm tích hợp frontend trong repository này.
 
-Xác minh lần cuối: ngày 13 tháng 4 năm 2026
+Xác minh lần cuối: ngày 14 tháng 4 năm 2026
 
 ## Cấu hình cơ sở
 
@@ -41,10 +41,10 @@ Các giá trị `promptType` được hỗ trợ theo live spec:
 
 | Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
 | --- | --- | --- | --- | --- | --- |
-| GET | `/news-sources` | `getNewsSources` | `getNewsSources(searchParams)` | Đã triển khai | Được định nghĩa trong `app/api/news-sources/action.ts`. |
-| POST | `/news-sources` | `createNewsSource` | `createNewsSource(request)` | Đã triển khai | Sử dụng `NewsSourceRequest`. |
-| GET | `/news-sources/{id}` | `getNewsSource` | `getNewsSourceById(id)` | Đã triển khai | Trả về `NewsSourceResponse`. |
-| PUT | `/news-sources/{id}` | `updateNewsSource` | `updateNewsSource(id, request)` | Đã triển khai | Sử dụng `NewsSourceRequest` cho cập nhật. |
+| GET | `/news-sources` | `getNewsSources` | `getNewsSources(searchParams)` | Đã triển khai nhưng có lệch contract | Frontend list hiện hiển thị cả `url` và `rssUrl`; live spec của `NewsSourceListResponse` hiện mới mô tả `url`. |
+| POST | `/news-sources` | `createNewsSource` | `createNewsSource(request)` | Đã triển khai | Sử dụng `NewsSourceRequest`, bao gồm cả `url` và `rssUrl`. |
+| GET | `/news-sources/{id}` | `getNewsSource` | `getNewsSourceById(id)` | Đã triển khai | Trả về `NewsSourceResponse`; form edit hiện hydrate cả `url` và `rssUrl`. |
+| PUT | `/news-sources/{id}` | `updateNewsSource` | `updateNewsSource(id, request)` | Đã triển khai | Sử dụng `NewsSourceRequest` cho cập nhật, bao gồm cả `rssUrl`. |
 | DELETE | `/news-sources/{id}` | `deleteNewsSource` | `deleteNewsSource(id)` | Đã triển khai | Được bọc trong `ActionResult`. |
 | PATCH | `/news-sources/{id}/toggle-active` | `toggleActive` | `toggleNewsSourceActive(id)` | Đã triển khai | Trả về `NewsSourceResponse` sau khi cập nhật. |
 | GET | `/news-sources/active` | `getActiveNewsSources` | `getActiveNewsSources()` | Lệch một phần | Backend hiện trả về `PageNewsSourceListResponse`, nhưng frontend đang kỳ vọng `NewsSourceListResponse[]` và không gửi tham số phân trang. |
@@ -117,13 +117,43 @@ Effective contract frontend hiện tại cho danh sách AI providers:
 - Backend đã bỏ field `active`; frontend không còn render trạng thái bật/tắt cho AI providers.
 - Model được chọn động qua endpoint `model-catalog`, nhưng người dùng vẫn có thể nhập tay nếu cần.
 
-### 8. API người dùng
+### 8. API chủ đề
+
+| Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
+| --- | --- | --- | --- | --- | --- |
+| GET | `/topics` | `getTopics` | `getTopics(searchParams)` | Đã triển khai | Được dùng cho route `/topics` với search, sort, pagination theo core của repo. |
+| POST | `/topics` | `createTopic` | `createTopic(request)` | Đã triển khai | Schema request của frontend map từ form `TopicForm`, bao gồm keywords/entities dạng `string[]`. |
+| GET | `/topics/{id}` | `getTopic` | `getTopicById(id)` | Đã triển khai | Trả về `TopicResponse` cho màn edit `/topics/{id}`. |
+| PUT | `/topics/{id}` | `updateTopic` | `updateTopic(id, request)` | Đã triển khai | Schema request của frontend map từ `TopicForm`. |
+| DELETE | `/topics/{id}` | `deleteTopic` | `deleteTopic(id)` | Đã triển khai | Được bọc trong `ActionResult`. |
+| PATCH | `/topics/{id}/toggle-active` | `toggleActive` | `toggleTopicActive(id)` | Đã triển khai | Dùng cho toggle active inline ở bảng danh sách. |
+
+### 9. API media
+
+| Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
+| --- | --- | --- | --- | --- | --- |
+| GET | `/medias` | `getMedias` | `-` | Chưa triển khai | Backend đã có endpoint danh sách media, frontend hiện chưa có `app/api/medias/action.ts`. |
+| GET | `/medias/{id}` | `getMedia` | `-` | Chưa triển khai | Trả về `MediaResponse`. |
+| DELETE | `/medias/{id}` | `deleteMedia` | `-` | Chưa triển khai | Backend đã có endpoint xóa media nhưng frontend chưa tích hợp. |
+| POST | `/medias/upload` | `upload` | `-` | Chưa triển khai | Backend đã có endpoint upload media nhưng frontend chưa có action/page tương ứng. |
+
+### 10. API workspace
+
+| Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
+| --- | --- | --- | --- | --- | --- |
+| GET | `/me/workspaces` | `getMyWorkspaces` | `getMyWorkspaces(searchParams)` | Đã triển khai | Dữ liệu được nạp ở `app/(main)/layout.tsx` để render Workspace Switcher trên sidebar (không có list page riêng). |
+| POST | `/me/workspaces` | `createWorkspace` | `createWorkspace(request)` | Đã triển khai | Được gọi từ dialog inline trong Workspace Switcher ở sidebar. |
+| PUT | `/me/workspaces/{id}` | `updateWorkspace` | `updateWorkspace(id, request)` | Đã triển khai | Dùng cho flow đổi tên workspace active (không áp dụng cho personal workspace). |
+| DELETE | `/me/workspaces/{id}` | `softDeleteWorkspace` | `-` | Chưa triển khai | V1 chưa hỗ trợ delete workspace trong UI sidebar. |
+| PATCH | `/me/workspaces/{id}/set-default` | `setDefaultWorkspace` | `setDefaultWorkspace(id)` | Đã triển khai | Chọn workspace sẽ gọi API này và `router.refresh()` để đồng bộ toàn app. |
+
+### 11. API người dùng
 
 | Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
 | --- | --- | --- | --- | --- | --- |
 | GET | `/storefront/users/profile` | `getProfile` | `-` | Chưa triển khai | Repo hiện expose `app/api/user/route.ts`, route này trả về `currentUser()` từ Clerk trực tiếp thay vì gọi endpoint backend này. |
 
-### 9. API wiki
+### 12. API wiki
 
 | Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
 | --- | --- | --- | --- | --- | --- |
@@ -135,13 +165,13 @@ Các giá trị `pageType` được hỗ trợ theo live spec:
 
 `INDEX`, `SOURCE_SUMMARY`, `TOPIC`, `ENTITY`, `LINT_REPORT`, `QUERY_RESULT`
 
-### 10. Webhook
+### 13. Webhook
 
 | Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
 | --- | --- | --- | --- | --- | --- |
 | POST | `/webhooks/clerk` | `handleClerkWebhook` | `-` | Chỉ backend | Đây là endpoint backend nhận request đi vào nên không kỳ vọng có frontend caller tương ứng. |
 
-### 11. Kiểm tra sức khỏe hệ thống
+### 14. Kiểm tra sức khỏe hệ thống
 
 | Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
 | --- | --- | --- | --- | --- | --- |
@@ -213,12 +243,17 @@ type ActionResult<T = void> =
 | Cronjob | `app/api/cronjobs/action.ts`, `app/lib/cronjobs/definitions.ts` |
 | Lịch kinh tế | `app/api/economic-calendar/action.ts`, `app/lib/economic-calendar/definitions.ts` |
 | Cấu hình AI provider | `app/api/ai-provider-configs/action.ts`, `app/lib/ai-provider-configs/definitions.ts` |
+| Topics | `app/api/topics/action.ts`, `app/lib/topics/definitions.ts` |
+| Media | `-` |
+| Workspace | `-` |
 | Wiki | `app/api/wiki/action.ts`, `app/lib/wiki/definitions.ts` |
 | Route người dùng cục bộ | `app/api/user/route.ts` |
 
 ## Các điểm lệch contract đã biết
 
 - `/news-sources/active` được phân trang trong live spec của backend, nhưng helper hiện tại ở frontend vẫn đang kỳ vọng một mảng thuần.
+- `news-sources` create/update/detail đã tích hợp `rssUrl`, nhưng live spec của `NewsSourceListResponse` hiện chưa mô tả field này cho endpoint danh sách.
+- Backend hỗ trợ `topicIds` ở create/update và `topics` ở response của `news-sources`, nhưng frontend hiện vẫn chưa có UI để gán topic trực tiếp cho news source.
 - Trường hiển thị của blog đang không nhất quán giữa các lớp:
   - Schema tạo mới trong OpenAPI dùng `visible`
   - Schema cập nhật trong OpenAPI dùng `isVisible`
@@ -226,6 +261,8 @@ type ActionResult<T = void> =
   - Definitions blog ở frontend hiện dùng `isVisible`
 - `ai-provider-configs` trong live spec hiện vẫn expose `apiKey` ở response list/detail/mutation; frontend đã sanitize để tránh hydrate secret xuống browser.
 - `ai-provider-configs` trong live spec mô tả truy vấn theo `specification` và `pageable`, nhưng contract hiệu lực của frontend/runtime đang dùng `$filter`, `page`, `size`, `sort`.
+- Các endpoint `medias` đã có ở backend, nhưng frontend vẫn chưa có action/page tương ứng.
+- Frontend đã tích hợp workspace theo mô hình sidebar switcher (switch/create/rename), chưa có route list CRUD riêng và chưa tích hợp delete workspace.
 - Các endpoint system prompt đã có ở backend, nhưng frontend vẫn chưa có action file tương ứng.
 - `/cronjobs/{id}/stop` đã có ở backend, nhưng frontend chưa có `stopCronjob()` tương ứng.
 - `/storefront/users/profile` đã có ở backend, nhưng repo hiện đang đọc người dùng Clerk trực tiếp qua `app/api/user/route.ts`.
