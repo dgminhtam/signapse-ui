@@ -1,7 +1,9 @@
-import { Button } from "@/components/ui/button"
+import { auth } from "@clerk/nextjs/server";
 
+const { getToken, userId } = await auth();
+const jwtToken = await getToken({ template: 'aflower' });
 export default function Page() {
   return (
-    <p>Hello world</p>
+    <p>Token: {jwtToken}</p>
   )
 }

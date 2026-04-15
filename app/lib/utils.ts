@@ -65,7 +65,7 @@ export const convertSearchCondition = (key: string, operator: string, term: stri
     case 'endsWith':
     case 'endsWithIgnoreCase':
       safeTerm = Array.isArray(term) ? term[0] ?? "" : term;
-      return `${operator}(${key}, '${sanitize(safeTerm)}')`;
+      return `${operator}(${key},'${sanitize(safeTerm)}')`;
     case 'null':
     case 'notNull':
     case 'empty':

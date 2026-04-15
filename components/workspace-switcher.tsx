@@ -133,9 +133,6 @@ export function WorkspaceSwitcher({
     })
   }
 
-  if (!activeWorkspace) {
-    return null
-  }
 
   return (
     <>
@@ -151,9 +148,13 @@ export function WorkspaceSwitcher({
                   <Logo />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{activeWorkspace.name}</span>
+                  <span className="truncate font-medium">
+                    {activeWorkspace?.name ?? "No Workspace selected"}
+                  </span>
                   <span className="truncate text-xs">
-                    {activeWorkspace.personal ? "Personal workspace" : activeWorkspace.slug}
+                    {activeWorkspace
+                      ? (activeWorkspace.personal ? "Personal workspace" : activeWorkspace.slug)
+                      : "Please select or create one"}
                   </span>
                 </div>
                 <ChevronsUpDownIcon className="ml-auto" />
@@ -170,7 +171,7 @@ export function WorkspaceSwitcher({
               </DropdownMenuLabel>
               <DropdownMenuGroup>
                 {workspaces.map((workspace) => {
-                  const isSelected = workspace.id === activeWorkspace.id
+                  const isSelected = activeWorkspace?.id === workspace.id
                   return (
                     <DropdownMenuItem
                       key={workspace.id}
@@ -207,7 +208,7 @@ export function WorkspaceSwitcher({
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="gap-2 p-2"
-                disabled={activeWorkspace.personal}
+                disabled={!activeWorkspace || activeWorkspace.personal}
                 onSelect={(event) => {
                   event.preventDefault()
                   setIsRenameOpen(true)

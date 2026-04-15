@@ -1,8 +1,8 @@
-﻿# Tài liệu ánh xạ API
+# Tài liệu ánh xạ API
 
 Tài liệu này ánh xạ đặc tả OpenAPI backend đang chạy tại `http://localhost:8484/v3/api-docs` tới các điểm tích hợp frontend trong repository này.
 
-Xác minh lần cuối: ngày 14 tháng 4 năm 2026
+Xác minh lần cuối: ngày 15 tháng 4 năm 2026
 
 ## Cấu hình cơ sở
 
@@ -48,6 +48,9 @@ Các giá trị `promptType` được hỗ trợ theo live spec:
 | DELETE | `/news-sources/{id}` | `deleteNewsSource` | `deleteNewsSource(id)` | Đã triển khai | Được bọc trong `ActionResult`. |
 | PATCH | `/news-sources/{id}/toggle-active` | `toggleActive` | `toggleNewsSourceActive(id)` | Đã triển khai | Trả về `NewsSourceResponse` sau khi cập nhật. |
 | GET | `/news-sources/active` | `getActiveNewsSources` | `getActiveNewsSources()` | Lệch một phần | Backend hiện trả về `PageNewsSourceListResponse`, nhưng frontend đang kỳ vọng `NewsSourceListResponse[]` và không gửi tham số phân trang. |
+| DELETE | `/news-sources/{id}` | `deleteNewsSource` | `deleteNewsSource(id)` | Đã triển khai | Được bọc trong `ActionResult`. |
+| PATCH | `/news-sources/{id}/toggle-active` | `toggleActive` | `toggleNewsSourceActive(id)` | Đã triển khai | Trả về `NewsSourceResponse` sau khi cập nhật. |
+| GET | `/news-sources/active` | `getActiveNewsSources` | `getActiveNewsSources()` | Lệch một phần | Backend hiện trả về `PageNewsSourceListResponse`, nhưng frontend đang kỳ vọng `NewsSourceListResponse[]` và không gửi tham số phân trang. |
 
 ### 3. API bài viết
 
@@ -57,6 +60,7 @@ Các giá trị `promptType` được hỗ trợ theo live spec:
 | GET | `/articles/{id}` | `getArticle` | `getArticleById(id)` | Đã triển khai | Trả về `ArticleResponse`. |
 | DELETE | `/articles/{id}` | `deleteArticle` | `deleteArticle(id)` | Đã triển khai | Được bọc trong `ActionResult`. |
 | POST | `/articles/{id}/analyze` | `analyzeContent` | `analyzeArticle(id)` | Đã triển khai | Trả về `ArticleResponse` sau khi cập nhật. |
+| PATCH | `/articles/{id}/feature-image` | `updateFeatureImage` | `-` | Chưa triển khai | Cập nhật ảnh đại diện cho bài viết. |
 
 ### 4. API blog
 
@@ -144,14 +148,15 @@ Effective contract frontend hiện tại cho danh sách AI providers:
 | GET | `/me/workspaces` | `getMyWorkspaces` | `getMyWorkspaces(searchParams)` | Đã triển khai | Dữ liệu được nạp ở `app/(main)/layout.tsx` để render Workspace Switcher trên sidebar (không có list page riêng). |
 | POST | `/me/workspaces` | `createWorkspace` | `createWorkspace(request)` | Đã triển khai | Được gọi từ dialog inline trong Workspace Switcher ở sidebar. |
 | PUT | `/me/workspaces/{id}` | `updateWorkspace` | `updateWorkspace(id, request)` | Đã triển khai | Dùng cho flow đổi tên workspace active (không áp dụng cho personal workspace). |
-| DELETE | `/me/workspaces/{id}` | `softDeleteWorkspace` | `-` | Chưa triển khai | V1 chưa hỗ trợ delete workspace trong UI sidebar. |
+| DELETE | `/me/workspaces/{id}` | `deleteWorkspace` | `-` | Chưa triển khai | V1 chưa hỗ trợ delete workspace trong UI sidebar. Endpoint backend là `deleteWorkspace`. |
 | PATCH | `/me/workspaces/{id}/set-default` | `setDefaultWorkspace` | `setDefaultWorkspace(id)` | Đã triển khai | Chọn workspace sẽ gọi API này và `router.refresh()` để đồng bộ toàn app. |
 
 ### 11. API người dùng
 
 | Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
 | --- | --- | --- | --- | --- | --- |
-| GET | `/storefront/users/profile` | `getProfile` | `-` | Chưa triển khai | Repo hiện expose `app/api/user/route.ts`, route này trả về `currentUser()` từ Clerk trực tiếp thay vì gọi endpoint backend này. |
+| GET | `/me` | `getProfile` | `-` | Chưa triển khai | Repo hiện expose `app/api/user/route.ts`, route này trả về `currentUser()` từ Clerk trực tiếp thay vì gọi endpoint backend này. |
+| PATCH | `/me/main-image` | `updateMainImage` | `-` | Chưa triển khai | Cập nhật ảnh đại diện người dùng. |
 
 ### 12. API wiki
 
@@ -160,6 +165,7 @@ Effective contract frontend hiện tại cho danh sách AI providers:
 | POST | `/wiki/ingest/articles/{articleId}` | `ingestArticle` | `ingestArticleToWiki(articleId)` | Đã triển khai | Trả về `WikiPageResponse` và được dùng từ các màn bài viết. |
 | GET | `/wiki/pages/{slug}` | `getPageBySlug` | `getWikiPageBySlug(slug)` | Đã triển khai | Dùng cho route `/wiki/[slug]`. |
 | GET | `/wiki/pages/{id}/sources` | `getPageSources` | `getWikiPageSources(id)` | Đã triển khai | Dùng để hiển thị source references trên trang wiki. |
+| GET | `/wiki/logs` | `getLogs` | `-` | Chưa triển khai | Xem lịch sử hoạt động wiki. |
 
 Các giá trị `pageType` được hỗ trợ theo live spec:
 
@@ -176,6 +182,15 @@ Các giá trị `pageType` được hỗ trợ theo live spec:
 | Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
 | --- | --- | --- | --- | --- | --- |
 | GET | `/health` | `healthCheck` | `-` | Chưa triển khai | Repo hiện chưa có action riêng cho health check. |
+
+### 15. API Quản trị (Admin)
+
+| Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
+| --- | --- | --- | --- | --- | --- |
+| GET | `/admin/users/{userId}/workspaces` | `getUserWorkspaces` | `-` | Chưa triển khai | Lấy danh sách workspace của một người dùng bất kỳ. |
+| DELETE | `/admin/workspaces/{id}` | `deleteWorkspace_1` | `-` | Chưa triển khai | Xóa workspace bất kỳ theo ID. |
+| POST | `/admin/workspaces/{workspaceId}/news-sources` | `createNewsSource_1` | `-` | Chưa triển khai | Tạo nguồn tin cho workspace cụ thể. |
+| POST | `/admin/workspaces/{workspaceId}/topics` | `createTopic_1` | `-` | Chưa triển khai | Tạo chủ đề cho workspace cụ thể. |
 
 ## Các kiểu dùng chung ở frontend
 
