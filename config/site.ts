@@ -68,6 +68,10 @@ export const siteConfig = {
           title: "cronjob",
           url: "/cronjobs",
         },
+        {
+          title: "Developer Token",
+          url: "/developer-token",
+        },
       ],
     },
   ],

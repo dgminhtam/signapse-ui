@@ -15,6 +15,7 @@ function formatSegment(segment: string, index: number, allSegments: string[]) {
   const friendlyNames: { [key: string]: string } = {
     categories: "Danh mục",
     create: "Tạo mới",
+    "developer-token": "Developer Token",
   }
 
   if (friendlyNames[decodedSegment]) {

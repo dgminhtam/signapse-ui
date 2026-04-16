@@ -2,7 +2,7 @@
 
 Tài liệu này ánh xạ đặc tả OpenAPI backend đang chạy tại `http://localhost:8484/v3/api-docs` tới các điểm tích hợp frontend trong repository này.
 
-Xác minh lần cuối: ngày 15 tháng 4 năm 2026
+Xác minh lần cuối: ngày 16 tháng 4 năm 2026
 
 ## Cấu hình cơ sở
 
@@ -40,14 +40,12 @@ Các giá trị `promptType` được hỗ trợ theo live spec:
 ### 2. API nguồn tin
 
 | Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
+
 | --- | --- | --- | --- | --- | --- |
 | GET | `/news-sources` | `getNewsSources` | `getNewsSources(searchParams)` | Đã triển khai nhưng có lệch contract | Frontend list hiện hiển thị cả `url` và `rssUrl`; live spec của `NewsSourceListResponse` hiện mới mô tả `url`. |
 | POST | `/news-sources` | `createNewsSource` | `createNewsSource(request)` | Đã triển khai | Sử dụng `NewsSourceRequest`, bao gồm cả `url` và `rssUrl`. |
 | GET | `/news-sources/{id}` | `getNewsSource` | `getNewsSourceById(id)` | Đã triển khai | Trả về `NewsSourceResponse`; form edit hiện hydrate cả `url` và `rssUrl`. |
 | PUT | `/news-sources/{id}` | `updateNewsSource` | `updateNewsSource(id, request)` | Đã triển khai | Sử dụng `NewsSourceRequest` cho cập nhật, bao gồm cả `rssUrl`. |
-| DELETE | `/news-sources/{id}` | `deleteNewsSource` | `deleteNewsSource(id)` | Đã triển khai | Được bọc trong `ActionResult`. |
-| PATCH | `/news-sources/{id}/toggle-active` | `toggleActive` | `toggleNewsSourceActive(id)` | Đã triển khai | Trả về `NewsSourceResponse` sau khi cập nhật. |
-| GET | `/news-sources/active` | `getActiveNewsSources` | `getActiveNewsSources()` | Lệch một phần | Backend hiện trả về `PageNewsSourceListResponse`, nhưng frontend đang kỳ vọng `NewsSourceListResponse[]` và không gửi tham số phân trang. |
 | DELETE | `/news-sources/{id}` | `deleteNewsSource` | `deleteNewsSource(id)` | Đã triển khai | Được bọc trong `ActionResult`. |
 | PATCH | `/news-sources/{id}/toggle-active` | `toggleActive` | `toggleNewsSourceActive(id)` | Đã triển khai | Trả về `NewsSourceResponse` sau khi cập nhật. |
 | GET | `/news-sources/active` | `getActiveNewsSources` | `getActiveNewsSources()` | Lệch một phần | Backend hiện trả về `PageNewsSourceListResponse`, nhưng frontend đang kỳ vọng `NewsSourceListResponse[]` và không gửi tham số phân trang. |
@@ -67,9 +65,9 @@ Các giá trị `promptType` được hỗ trợ theo live spec:
 | Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
 | --- | --- | --- | --- | --- | --- |
 | GET | `/blogs` | `getBlogPosts` | `getBlogs(searchParams)` | Đã triển khai | Trả về `Page<BlogPostListResponse>`. |
-| POST | `/blogs` | `createBlogPost` | `createBlog(request)` | Đã triển khai nhưng có rủi ro lệch contract | Kiểu request ở frontend dùng `isVisible`, nhưng schema tạo mới trong live spec lại dùng `visible`. |
-| GET | `/blogs/{id}` | `getBlogPost` | `getBlogById(id)` | Đã triển khai nhưng có rủi ro lệch contract | Schema response của backend dùng `visible`, trong khi frontend hiện dùng `isVisible`. |
-| PUT | `/blogs/{id}` | `updateBlogPost` | `updateBlog(id, request)` | Đã triển khai | Schema cập nhật trong live spec dùng `isVisible`. |
+| POST | `/blogs` | `createBlogPost` | `createBlog(request)` | Đã triển khai nhưng có rủi ro lệch contract | Schema request của backend dùng `visible`. |
+| GET | `/blogs/{id}` | `getBlogPost` | `getBlogById(id)` | Đã triển khai nhưng có rủi ro lệch contract | Schema response của backend dùng `visible`. |
+| PUT | `/blogs/{id}` | `updateBlogPost` | `updateBlog(id, request)` | Đã triển khai | Schema cập nhật của backend dùng `isVisible`. |
 | DELETE | `/blogs/{id}` | `deleteBlogPost` | `deleteBlog(id)` | Đã triển khai | Được bọc trong `ActionResult`. |
 
 ### 5. API cronjob
@@ -84,7 +82,7 @@ Các giá trị `promptType` được hỗ trợ theo live spec:
 | POST | `/cronjobs/{id}/start` | `start` | `startCronjob(id)` | Đã triển khai | Trả về `CronjobResponse` sau khi cập nhật. |
 | POST | `/cronjobs/{id}/pause` | `pause` | `pauseCronjob(id)` | Đã triển khai | Trả về `CronjobResponse` sau khi cập nhật. |
 | POST | `/cronjobs/{id}/resume` | `resume` | `resumeCronjob(id)` | Đã triển khai | Trả về `CronjobResponse` sau khi cập nhật. |
-| POST | `/cronjobs/{id}/stop` | `stop` | `-` | Chưa triển khai | Backend có endpoint này nhưng frontend chưa có `stopCronjob()`. |
+| POST | `/cronjobs/{id}/stop` | `stop` | `-` | Chưa triển khai | Đã có spec backend nhưng frontend chưa có `stopCronjob()`. |
 
 ### 6. API lịch kinh tế
 
@@ -121,17 +119,6 @@ Effective contract frontend hiện tại cho danh sách AI providers:
 - Backend đã bỏ field `active`; frontend không còn render trạng thái bật/tắt cho AI providers.
 - Model được chọn động qua endpoint `model-catalog`, nhưng người dùng vẫn có thể nhập tay nếu cần.
 
-### 8. API chủ đề
-
-| Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
-| --- | --- | --- | --- | --- | --- |
-| GET | `/topics` | `getTopics` | `getTopics(searchParams)` | Đã triển khai | Được dùng cho route `/topics` với search, sort, pagination theo core của repo. |
-| POST | `/topics` | `createTopic` | `createTopic(request)` | Đã triển khai | Schema request của frontend map từ form `TopicForm`, bao gồm keywords/entities dạng `string[]`. |
-| GET | `/topics/{id}` | `getTopic` | `getTopicById(id)` | Đã triển khai | Trả về `TopicResponse` cho màn edit `/topics/{id}`. |
-| PUT | `/topics/{id}` | `updateTopic` | `updateTopic(id, request)` | Đã triển khai | Schema request của frontend map từ `TopicForm`. |
-| DELETE | `/topics/{id}` | `deleteTopic` | `deleteTopic(id)` | Đã triển khai | Được bọc trong `ActionResult`. |
-| PATCH | `/topics/{id}/toggle-active` | `toggleActive` | `toggleTopicActive(id)` | Đã triển khai | Dùng cho toggle active inline ở bảng danh sách. |
-
 ### 9. API media
 
 | Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
@@ -155,8 +142,7 @@ Effective contract frontend hiện tại cho danh sách AI providers:
 
 | Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
 | --- | --- | --- | --- | --- | --- |
-| GET | `/me` | `getProfile` | `-` | Chưa triển khai | Repo hiện expose `app/api/user/route.ts`, route này trả về `currentUser()` từ Clerk trực tiếp thay vì gọi endpoint backend này. |
-| PATCH | `/me/main-image` | `updateMainImage` | `-` | Chưa triển khai | Cập nhật ảnh đại diện người dùng. |
+| GET | `/me` | `me` | `-` | Chưa triển khai | Repo hiện expose `app/api/user/route.ts`, route này trả về `currentUser()` từ Clerk trực tiếp thay vì gọi endpoint backend này. |
 
 ### 12. API wiki
 
@@ -165,6 +151,11 @@ Effective contract frontend hiện tại cho danh sách AI providers:
 | POST | `/wiki/ingest/articles/{articleId}` | `ingestArticle` | `ingestArticleToWiki(articleId)` | Đã triển khai | Trả về `WikiPageResponse` và được dùng từ các màn bài viết. |
 | GET | `/wiki/pages/{slug}` | `getPageBySlug` | `getWikiPageBySlug(slug)` | Đã triển khai | Dùng cho route `/wiki/[slug]`. |
 | GET | `/wiki/pages/{id}/sources` | `getPageSources` | `getWikiPageSources(id)` | Đã triển khai | Dùng để hiển thị source references trên trang wiki. |
+| GET | `/wiki/pages` | `getPages` | `-` | Chưa triển khai | Danh sách các trang wiki. |
+| POST | `/wiki/rebuild-index` | `rebuildIndex` | `-` | Chưa triển khai | Xây dựng lại vector index cho wiki. |
+| POST | `/wiki/query` | `query` | `-` | Chưa triển khai | Truy vấn RAG trên wiki. |
+| POST | `/wiki/query/save` | `saveQueryResult` | `-` | Chưa triển khai | Lưu kết quả truy vấn thành một trang wiki mới. |
+| POST | `/wiki/lint` | `lint` | `-` | Chưa triển khai | Kiểm tra tính nhất quán của các trang wiki. |
 | GET | `/wiki/logs` | `getLogs` | `-` | Chưa triển khai | Xem lịch sử hoạt động wiki. |
 
 Các giá trị `pageType` được hỗ trợ theo live spec:
@@ -176,21 +167,13 @@ Các giá trị `pageType` được hỗ trợ theo live spec:
 | Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
 | --- | --- | --- | --- | --- | --- |
 | POST | `/webhooks/clerk` | `handleClerkWebhook` | `-` | Chỉ backend | Đây là endpoint backend nhận request đi vào nên không kỳ vọng có frontend caller tương ứng. |
+| --- | --- | --- | --- | --- | --- |
 
 ### 14. Kiểm tra sức khỏe hệ thống
 
 | Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
 | --- | --- | --- | --- | --- | --- |
 | GET | `/health` | `healthCheck` | `-` | Chưa triển khai | Repo hiện chưa có action riêng cho health check. |
-
-### 15. API Quản trị (Admin)
-
-| Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
-| --- | --- | --- | --- | --- | --- |
-| GET | `/admin/users/{userId}/workspaces` | `getUserWorkspaces` | `-` | Chưa triển khai | Lấy danh sách workspace của một người dùng bất kỳ. |
-| DELETE | `/admin/workspaces/{id}` | `deleteWorkspace_1` | `-` | Chưa triển khai | Xóa workspace bất kỳ theo ID. |
-| POST | `/admin/workspaces/{workspaceId}/news-sources` | `createNewsSource_1` | `-` | Chưa triển khai | Tạo nguồn tin cho workspace cụ thể. |
-| POST | `/admin/workspaces/{workspaceId}/topics` | `createTopic_1` | `-` | Chưa triển khai | Tạo chủ đề cho workspace cụ thể. |
 
 ## Các kiểu dùng chung ở frontend
 
@@ -258,7 +241,6 @@ type ActionResult<T = void> =
 | Cronjob | `app/api/cronjobs/action.ts`, `app/lib/cronjobs/definitions.ts` |
 | Lịch kinh tế | `app/api/economic-calendar/action.ts`, `app/lib/economic-calendar/definitions.ts` |
 | Cấu hình AI provider | `app/api/ai-provider-configs/action.ts`, `app/lib/ai-provider-configs/definitions.ts` |
-| Topics | `app/api/topics/action.ts`, `app/lib/topics/definitions.ts` |
 | Media | `-` |
 | Workspace | `-` |
 | Wiki | `app/api/wiki/action.ts`, `app/lib/wiki/definitions.ts` |
@@ -268,16 +250,14 @@ type ActionResult<T = void> =
 
 - `/news-sources/active` được phân trang trong live spec của backend, nhưng helper hiện tại ở frontend vẫn đang kỳ vọng một mảng thuần.
 - `news-sources` create/update/detail đã tích hợp `rssUrl`, nhưng live spec của `NewsSourceListResponse` hiện chưa mô tả field này cho endpoint danh sách.
-- Backend hỗ trợ `topicIds` ở create/update và `topics` ở response của `news-sources`, nhưng frontend hiện vẫn chưa có UI để gán topic trực tiếp cho news source.
-- Trường hiển thị của blog đang không nhất quán giữa các lớp:
-  - Schema tạo mới trong OpenAPI dùng `visible`
-  - Schema cập nhật trong OpenAPI dùng `isVisible`
-  - Schema response trong OpenAPI dùng `visible`
-  - Definitions blog ở frontend hiện dùng `isVisible`
+- Trường hiển thị của blog đang không nhất quán ở backend:
+  - Schema tạo mới (`CreateBlogPostRequest`) dùng `visible`
+  - Schema cập nhật (`UpdateBlogPostRequest`) dùng `isVisible`
+  - Schema response (`BlogPostResponse`) dùng `visible`
 - `ai-provider-configs` trong live spec hiện vẫn expose `apiKey` ở response list/detail/mutation; frontend đã sanitize để tránh hydrate secret xuống browser.
 - `ai-provider-configs` trong live spec mô tả truy vấn theo `specification` và `pageable`, nhưng contract hiệu lực của frontend/runtime đang dùng `$filter`, `page`, `size`, `sort`.
 - Các endpoint `medias` đã có ở backend, nhưng frontend vẫn chưa có action/page tương ứng.
 - Frontend đã tích hợp workspace theo mô hình sidebar switcher (switch/create/rename), chưa có route list CRUD riêng và chưa tích hợp delete workspace.
-- Các endpoint system prompt đã có ở backend, nhưng frontend vẫn chưa có action file tương ứng.
+- Các endpoint system prompt, wiki query, wiki index đã có ở backend, nhưng frontend vẫn chưa có action file tương ứng.
 - `/cronjobs/{id}/stop` đã có ở backend, nhưng frontend chưa có `stopCronjob()` tương ứng.
-- `/storefront/users/profile` đã có ở backend, nhưng repo hiện đang đọc người dùng Clerk trực tiếp qua `app/api/user/route.ts`.
+- `/me` trả về thông tin người dùng hiện tại từ backend, nhưng repo hiện đang ưu tiên dùng Clerk API trực tiếp.
