@@ -4,6 +4,7 @@ import { ArticleListResponse } from "@/app/lib/articles/definitions"
 import { Page } from "@/app/lib/definitions"
 import { AppPagination } from "@/components/app-pagination"
 import { AppSelectPageSize } from "@/components/app-select-page-size"
+import { useHasPermission } from "@/components/permission-provider"
 import { SortSelect } from "@/components/sort-select"
 import { ArticleSearch } from "./article-search"
 import {
@@ -59,6 +60,7 @@ export function ArticleList({ articlePage }: ArticleListProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [deletingId, setDeletingId] = useState<number | null>(null)
+  const canDeleteArticle = useHasPermission("article:delete")
 
   const handleDelete = async (id: number) => {
     setDeletingId(id)
@@ -142,43 +144,45 @@ export function ArticleList({ articlePage }: ArticleListProps) {
                               <span className="sr-only">External Link</span>
                            </a>
                         </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                              <span className="sr-only">Delete</span>
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete the article.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDelete(article.id)}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                disabled={isPending && deletingId === article.id}
+                        {canDeleteArticle ? (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
                               >
-                                {isPending && deletingId === article.id ? (
-                                  <Spinner className="size-4" />
-                                ) : (
-                                  <>
-                                    <Trash2 className="h-4 w-4 mr-2" />
-                                    Delete
-                                  </>
-                                )}
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
+                                <Trash2 className="h-4 w-4" />
+                                <span className="sr-only">Delete</span>
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone. This will permanently delete the article.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDelete(article.id)}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  disabled={isPending && deletingId === article.id}
+                                >
+                                  {isPending && deletingId === article.id ? (
+                                    <Spinner className="size-4" />
+                                  ) : (
+                                    <>
+                                      <Trash2 className="h-4 w-4 mr-2" />
+                                      Delete
+                                    </>
+                                  )}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        ) : null}
                       </div>
                     </TableCell>
                   </TableRow>

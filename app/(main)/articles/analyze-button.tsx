@@ -3,10 +3,11 @@
 import { Button } from "@/components/ui/button"
 import { Sparkles } from "lucide-react"
 import { analyzeArticle } from "@/app/api/articles/action"
-import { useState, useTransition } from "react"
+import { useTransition } from "react"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { Spinner } from "@/components/ui/spinner"
+import { useHasPermission } from "@/components/permission-provider"
 import { cn } from "@/lib/utils"
 
 interface AnalyzeButtonProps {
@@ -24,6 +25,7 @@ export function AnalyzeButton({
   showText = false,
   className
 }: AnalyzeButtonProps) {
+  const canAnalyzeArticle = useHasPermission("article:analyze")
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
@@ -37,6 +39,10 @@ export function AnalyzeButton({
         toast.error(result.error || "Failed to analyze article")
       }
     })
+  }
+
+  if (!canAnalyzeArticle) {
+    return null
   }
 
   return (

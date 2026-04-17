@@ -1,7 +1,10 @@
 import { Suspense } from "react"
 import { getEconomicEvents } from "@/app/api/economic-calendar/action"
 import { EconomicCalendarList } from "./economic-calendar-list"
+import { hasPermission } from "@/app/lib/permissions"
+import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { buildFilterQuery, buildSortQuery } from "@/app/lib/utils"
+import { AccessDenied } from "@/components/access-denied"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Card,
@@ -17,6 +20,30 @@ interface PageProps {
 }
 
 export default async function EconomicCalendarPage({ searchParams }: PageProps) {
+  const permissions = await getCurrentPermissions()
+
+  if (!hasPermission(permissions, "event:read")) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Economic Calendar</CardTitle>
+          <CardDescription>
+            Track and manage international economic events that impact the financial markets.
+          </CardDescription>
+        </CardHeader>
+
+        <Separator />
+
+        <CardContent className="pt-6">
+          <AccessDenied
+            description="You do not have permission to view economic calendar data."
+            permission="event:read"
+          />
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <Card>
       <CardHeader>

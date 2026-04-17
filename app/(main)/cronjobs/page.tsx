@@ -1,7 +1,10 @@
 import { Suspense } from "react"
 import { CronjobListPage } from "@/app/(main)/cronjobs/cronjob-list"
 import { getCronjobs } from "@/app/api/cronjobs/action"
+import { hasPermission } from "@/app/lib/permissions"
+import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { buildSortQuery, buildFilterQuery } from "@/app/lib/utils"
+import { AccessDenied } from "@/components/access-denied"
 import {
   Card,
   CardContent,
@@ -17,6 +20,30 @@ interface CronjobPageProps {
 }
 
 export default async function Page({ searchParams }: CronjobPageProps) {
+  const permissions = await getCurrentPermissions()
+
+  if (!hasPermission(permissions, "cronjob:read")) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Cronjob Management</CardTitle>
+          <CardDescription>
+            List, search, and manage all system cronjobs.
+          </CardDescription>
+        </CardHeader>
+
+        <Separator />
+
+        <CardContent className="pt-6">
+          <AccessDenied
+            description="You do not have permission to view cronjobs."
+            permission="cronjob:read"
+          />
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <Card>
       <CardHeader>

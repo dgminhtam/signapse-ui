@@ -1,4 +1,7 @@
 import { getBlogById } from "@/app/api/blogs/action";
+import { hasPermission } from "@/app/lib/permissions";
+import { getCurrentPermissions } from "@/app/lib/permissions-server";
+import { AccessDenied } from "@/components/access-denied";
 import {
     Card,
     CardContent,
@@ -19,6 +22,30 @@ interface PageProps {
 }
 
 export default async function EditBlogPage({ params }: PageProps) {
+    const permissions = await getCurrentPermissions();
+
+    if (!hasPermission(permissions, "blog:update")) {
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Chá»‰nh sá»­a bÃ i viáº¿t</CardTitle>
+                    <CardDescription>
+                        Cáº­p nháº­t thÃ´ng tin chi tiáº¿t, ná»™i dung vÃ  hÃ¬nh áº£nh bÃ i viáº¿t.
+                    </CardDescription>
+                </CardHeader>
+
+                <Separator />
+
+                <CardContent className="pt-6">
+                    <AccessDenied
+                        description="Báº¡n khÃ´ng cÃ³ quyá»n chá»‰nh sá»­a bÃ i viáº¿t."
+                        permission="blog:update"
+                    />
+                </CardContent>
+            </Card>
+        )
+    }
+
     const { id } = await params;
     const blogId = Number(id);
 

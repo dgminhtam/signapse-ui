@@ -148,12 +148,12 @@
                 }
             }
         },
-        "/news-sources/{id}": {
+        "/sources/{id}": {
             "get": {
                 "tags": [
-                    "news-source-controller"
+                    "source-controller"
                 ],
-                "operationId": "getNewsSource",
+                "operationId": "getSource",
                 "parameters": [
                     {
                         "name": "id",
@@ -171,7 +171,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/NewsSourceResponse"
+                                    "$ref": "#/components/schemas/SourceResponse"
                                 }
                             }
                         }
@@ -180,9 +180,9 @@
             },
             "put": {
                 "tags": [
-                    "news-source-controller"
+                    "source-controller"
                 ],
-                "operationId": "updateNewsSource",
+                "operationId": "updateSource",
                 "parameters": [
                     {
                         "name": "id",
@@ -198,7 +198,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/UpdateNewsSourceRequest"
+                                "$ref": "#/components/schemas/UpdateSourceRequest"
                             }
                         }
                     },
@@ -210,7 +210,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/NewsSourceResponse"
+                                    "$ref": "#/components/schemas/SourceResponse"
                                 }
                             }
                         }
@@ -219,9 +219,9 @@
             },
             "delete": {
                 "tags": [
-                    "news-source-controller"
+                    "source-controller"
                 ],
-                "operationId": "deleteNewsSource",
+                "operationId": "deleteSource",
                 "parameters": [
                     {
                         "name": "id",
@@ -236,6 +236,46 @@
                 "responses": {
                     "200": {
                         "description": "OK"
+                    }
+                }
+            }
+        },
+        "/roles/{roleKey}/permissions": {
+            "put": {
+                "tags": [
+                    "role-controller"
+                ],
+                "operationId": "updateRolePermissions",
+                "parameters": [
+                    {
+                        "name": "roleKey",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateRolePermissionsRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RoleResponse"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -626,6 +666,72 @@
                 }
             }
         },
+        "/watchlists": {
+            "get": {
+                "tags": [
+                    "watchlist-controller"
+                ],
+                "operationId": "getWatchlist",
+                "parameters": [
+                    {
+                        "name": "specification",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/SpecificationWatchlist"
+                        }
+                    },
+                    {
+                        "name": "pageable",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/Pageable"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PageWatchlistListResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "watchlist-controller"
+                ],
+                "operationId": "createWatchlist",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateWatchlistRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WatchlistResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/system-prompts": {
             "get": {
                 "tags": [
@@ -692,19 +798,19 @@
                 }
             }
         },
-        "/news-sources": {
+        "/sources": {
             "get": {
                 "tags": [
-                    "news-source-controller"
+                    "source-controller"
                 ],
-                "operationId": "getNewsSources",
+                "operationId": "getSources",
                 "parameters": [
                     {
                         "name": "specification",
                         "in": "query",
                         "required": true,
                         "schema": {
-                            "$ref": "#/components/schemas/SpecificationNewsSource"
+                            "$ref": "#/components/schemas/SpecificationSource"
                         }
                     },
                     {
@@ -722,7 +828,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/PageNewsSourceListResponse"
+                                    "$ref": "#/components/schemas/PageSourceListResponse"
                                 }
                             }
                         }
@@ -731,14 +837,14 @@
             },
             "post": {
                 "tags": [
-                    "news-source-controller"
+                    "source-controller"
                 ],
-                "operationId": "createNewsSource",
+                "operationId": "createSource",
                 "requestBody": {
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/CreateNewsSourceRequest"
+                                "$ref": "#/components/schemas/CreateSourceRequest"
                             }
                         }
                     },
@@ -750,7 +856,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/NewsSourceResponse"
+                                    "$ref": "#/components/schemas/SourceResponse"
                                 }
                             }
                         }
@@ -1272,10 +1378,10 @@
                 }
             }
         },
-        "/news-sources/{id}/toggle-active": {
+        "/sources/{id}/toggle-active": {
             "patch": {
                 "tags": [
-                    "news-source-controller"
+                    "source-controller"
                 ],
                 "operationId": "toggleActive",
                 "parameters": [
@@ -1295,7 +1401,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/NewsSourceResponse"
+                                    "$ref": "#/components/schemas/SourceResponse"
                                 }
                             }
                         }
@@ -1643,19 +1749,19 @@
                 }
             }
         },
-        "/news-sources/active": {
+        "/sources/active": {
             "get": {
                 "tags": [
-                    "news-source-controller"
+                    "source-controller"
                 ],
-                "operationId": "getActiveNewsSources",
+                "operationId": "getActiveSources",
                 "parameters": [
                     {
                         "name": "specification",
                         "in": "query",
                         "required": true,
                         "schema": {
-                            "$ref": "#/components/schemas/SpecificationNewsSource"
+                            "$ref": "#/components/schemas/SpecificationSource"
                         }
                     },
                     {
@@ -1673,7 +1779,53 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/PageNewsSourceListResponse"
+                                    "$ref": "#/components/schemas/PageSourceListResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/roles": {
+            "get": {
+                "tags": [
+                    "role-controller"
+                ],
+                "operationId": "getRoles",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/RoleResponse"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/permissions": {
+            "get": {
+                "tags": [
+                    "permission-controller"
+                ],
+                "operationId": "getPermissions",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/PermissionResponse"
+                                    }
                                 }
                             }
                         }
@@ -1995,6 +2147,75 @@
                 }
             }
         },
+        "/assets": {
+            "get": {
+                "tags": [
+                    "asset-controller"
+                ],
+                "operationId": "getAssets",
+                "parameters": [
+                    {
+                        "name": "specification",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/SpecificationAsset"
+                        }
+                    },
+                    {
+                        "name": "pageable",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/Pageable"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PageAssetListResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/assets/{id}": {
+            "get": {
+                "tags": [
+                    "asset-controller"
+                ],
+                "operationId": "getAsset",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AssetResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/articles": {
             "get": {
                 "tags": [
@@ -2085,6 +2306,30 @@
                     }
                 }
             }
+        },
+        "/watchlists/assets/{assetId}": {
+            "delete": {
+                "tags": [
+                    "watchlist-controller"
+                ],
+                "operationId": "deleteByAssetId",
+                "parameters": [
+                    {
+                        "name": "assetId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -2138,7 +2383,7 @@
                     }
                 }
             },
-            "UpdateNewsSourceRequest": {
+            "UpdateSourceRequest": {
                 "type": "object",
                 "properties": {
                     "name": {
@@ -2158,7 +2403,7 @@
                     }
                 }
             },
-            "NewsSourceResponse": {
+            "SourceResponse": {
                 "type": "object",
                 "properties": {
                     "id": {
@@ -2187,6 +2432,64 @@
                     "lastModifiedDate": {
                         "type": "string",
                         "format": "date-time"
+                    }
+                }
+            },
+            "UpdateRolePermissionsRequest": {
+                "type": "object",
+                "properties": {
+                    "permissionKeys": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "uniqueItems": true
+                    }
+                },
+                "required": [
+                    "permissionKeys"
+                ]
+            },
+            "PermissionResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "key": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    }
+                }
+            },
+            "RoleResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "key": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "permissions": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PermissionResponse"
+                        },
+                        "uniqueItems": true
                     }
                 }
             },
@@ -2577,6 +2880,54 @@
                     }
                 }
             },
+            "CreateWatchlistRequest": {
+                "type": "object",
+                "properties": {
+                    "assetId": {
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                },
+                "required": [
+                    "assetId"
+                ]
+            },
+            "WatchlistResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "assetId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "assetName": {
+                        "type": "string"
+                    },
+                    "assetSymbol": {
+                        "type": "string"
+                    },
+                    "assetType": {
+                        "type": "string",
+                        "enum": [
+                            "COMMODITY",
+                            "CRYPTO",
+                            "FX",
+                            "INDEX"
+                        ]
+                    },
+                    "createdDate": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "lastModifiedDate": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
             "CreateSystemPromptRequest": {
                 "type": "object",
                 "properties": {
@@ -2610,7 +2961,7 @@
                     "promptType"
                 ]
             },
-            "CreateNewsSourceRequest": {
+            "CreateSourceRequest": {
                 "type": "object",
                 "properties": {
                     "name": {
@@ -2626,13 +2977,6 @@
                     },
                     "rssUrl": {
                         "type": "string"
-                    },
-                    "topicIds": {
-                        "type": "array",
-                        "items": {
-                            "type": "integer",
-                            "format": "int64"
-                        }
                     },
                     "active": {
                         "type": "boolean"
@@ -2955,15 +3299,6 @@
                         "type": "integer",
                         "format": "int32"
                     },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
                     "size": {
                         "type": "integer",
                         "format": "int32"
@@ -2981,6 +3316,15 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
+                    },
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
@@ -2993,8 +3337,12 @@
             "PageableObject": {
                 "type": "object",
                 "properties": {
-                    "paged": {
-                        "type": "boolean"
+                    "offset": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "sort": {
+                        "$ref": "#/components/schemas/SortObject"
                     },
                     "pageNumber": {
                         "type": "integer",
@@ -3004,28 +3352,24 @@
                         "type": "integer",
                         "format": "int32"
                     },
-                    "unpaged": {
+                    "paged": {
                         "type": "boolean"
                     },
-                    "offset": {
-                        "type": "integer",
-                        "format": "int64"
-                    },
-                    "sort": {
-                        "$ref": "#/components/schemas/SortObject"
+                    "unpaged": {
+                        "type": "boolean"
                     }
                 }
             },
             "SortObject": {
                 "type": "object",
                 "properties": {
-                    "unsorted": {
+                    "empty": {
                         "type": "boolean"
                     },
                     "sorted": {
                         "type": "boolean"
                     },
-                    "empty": {
+                    "unsorted": {
                         "type": "boolean"
                     }
                 }
@@ -3083,6 +3427,85 @@
                     }
                 }
             },
+            "SpecificationWatchlist": {},
+            "PageWatchlistListResponse": {
+                "type": "object",
+                "properties": {
+                    "totalElements": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "size": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "content": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/WatchlistListResponse"
+                        }
+                    },
+                    "number": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "sort": {
+                        "$ref": "#/components/schemas/SortObject"
+                    },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
+                    },
+                    "numberOfElements": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "empty": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "WatchlistListResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "assetId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "assetName": {
+                        "type": "string"
+                    },
+                    "assetSymbol": {
+                        "type": "string"
+                    },
+                    "assetType": {
+                        "type": "string",
+                        "enum": [
+                            "COMMODITY",
+                            "CRYPTO",
+                            "FX",
+                            "INDEX"
+                        ]
+                    },
+                    "createdDate": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
             "SpecificationSystemPrompt": {},
             "PageSystemPromptResponse": {
                 "type": "object",
@@ -3094,15 +3517,6 @@
                     "totalPages": {
                         "type": "integer",
                         "format": "int32"
-                    },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
                     },
                     "size": {
                         "type": "integer",
@@ -3121,6 +3535,15 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
+                    },
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
@@ -3130,8 +3553,54 @@
                     }
                 }
             },
-            "SpecificationNewsSource": {},
-            "NewsSourceListResponse": {
+            "SpecificationSource": {},
+            "PageSourceListResponse": {
+                "type": "object",
+                "properties": {
+                    "totalElements": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "size": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "content": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SourceListResponse"
+                        }
+                    },
+                    "number": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "sort": {
+                        "$ref": "#/components/schemas/SortObject"
+                    },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
+                    },
+                    "numberOfElements": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "empty": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "SourceListResponse": {
                 "type": "object",
                 "properties": {
                     "id": {
@@ -3159,52 +3628,6 @@
                     }
                 }
             },
-            "PageNewsSourceListResponse": {
-                "type": "object",
-                "properties": {
-                    "totalElements": {
-                        "type": "integer",
-                        "format": "int64"
-                    },
-                    "totalPages": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
-                    "size": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "content": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/NewsSourceListResponse"
-                        }
-                    },
-                    "number": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "sort": {
-                        "$ref": "#/components/schemas/SortObject"
-                    },
-                    "numberOfElements": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "empty": {
-                        "type": "boolean"
-                    }
-                }
-            },
             "SpecificationMedia": {},
             "PageMediaResponse": {
                 "type": "object",
@@ -3216,15 +3639,6 @@
                     "totalPages": {
                         "type": "integer",
                         "format": "int32"
-                    },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
                     },
                     "size": {
                         "type": "integer",
@@ -3242,6 +3656,15 @@
                     },
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
+                    },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "numberOfElements": {
                         "type": "integer",
@@ -3310,15 +3733,6 @@
                         "type": "integer",
                         "format": "int32"
                     },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
                     "size": {
                         "type": "integer",
                         "format": "int32"
@@ -3335,6 +3749,15 @@
                     },
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
+                    },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "numberOfElements": {
                         "type": "integer",
@@ -3395,15 +3818,6 @@
                         "type": "integer",
                         "format": "int32"
                     },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
                     "size": {
                         "type": "integer",
                         "format": "int32"
@@ -3420,6 +3834,15 @@
                     },
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
+                    },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "numberOfElements": {
                         "type": "integer",
@@ -3487,15 +3910,6 @@
                         "type": "integer",
                         "format": "int32"
                     },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
                     "size": {
                         "type": "integer",
                         "format": "int32"
@@ -3512,6 +3926,15 @@
                     },
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
+                    },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "numberOfElements": {
                         "type": "integer",
@@ -3563,15 +3986,6 @@
                         "type": "integer",
                         "format": "int32"
                     },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
                     "size": {
                         "type": "integer",
                         "format": "int32"
@@ -3589,12 +4003,124 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
+                    },
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
                     },
                     "empty": {
                         "type": "boolean"
+                    }
+                }
+            },
+            "SpecificationAsset": {},
+            "AssetListResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "symbol": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "COMMODITY",
+                            "CRYPTO",
+                            "FX",
+                            "INDEX"
+                        ]
+                    }
+                }
+            },
+            "PageAssetListResponse": {
+                "type": "object",
+                "properties": {
+                    "totalElements": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "size": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "content": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AssetListResponse"
+                        }
+                    },
+                    "number": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "sort": {
+                        "$ref": "#/components/schemas/SortObject"
+                    },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
+                    },
+                    "numberOfElements": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "empty": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "AssetResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "symbol": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "COMMODITY",
+                            "CRYPTO",
+                            "FX",
+                            "INDEX"
+                        ]
+                    },
+                    "createdDate": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "lastModifiedDate": {
+                        "type": "string",
+                        "format": "date-time"
                     }
                 }
             },
@@ -3642,15 +4168,6 @@
                         "type": "integer",
                         "format": "int32"
                     },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
                     "size": {
                         "type": "integer",
                         "format": "int32"
@@ -3667,6 +4184,15 @@
                     },
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
+                    },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "numberOfElements": {
                         "type": "integer",
@@ -3689,15 +4215,6 @@
                         "type": "integer",
                         "format": "int32"
                     },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
                     "size": {
                         "type": "integer",
                         "format": "int32"
@@ -3714,6 +4231,15 @@
                     },
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
+                    },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "numberOfElements": {
                         "type": "integer",

@@ -1,4 +1,4 @@
-export interface NewsSourceRequest {
+export interface SourceRequest {
   name: string
   description?: string
   url: string
@@ -6,7 +6,7 @@ export interface NewsSourceRequest {
   active?: boolean
 }
 
-export interface NewsSourceResponse {
+export interface SourceResponse {
   id: number
   name: string
   description: string
@@ -17,7 +17,7 @@ export interface NewsSourceResponse {
   lastModifiedDate: string
 }
 
-export interface NewsSourceListResponse {
+export interface SourceListResponse {
   id: number
   name: string
   description: string

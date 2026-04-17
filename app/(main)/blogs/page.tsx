@@ -1,7 +1,10 @@
 import { Suspense } from "react";
 import { BlogListPage } from "@/app/(main)/blogs/blog-list";
 import { getBlogs } from "@/app/api/blogs/action";
+import { hasPermission } from "@/app/lib/permissions";
+import { getCurrentPermissions } from "@/app/lib/permissions-server";
 import { buildSortQuery, buildFilterQuery } from "@/app/lib/utils";
+import { AccessDenied } from "@/components/access-denied";
 import {
     Card,
     CardContent,
@@ -17,6 +20,30 @@ interface BlogPageProps {
 }
 
 export default async function Page({ searchParams }: BlogPageProps) {
+    const permissions = await getCurrentPermissions();
+
+    if (!hasPermission(permissions, "blog:read")) {
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Quáº£n lÃ½ bÃ i viáº¿t</CardTitle>
+                    <CardDescription>
+                        Danh sÃ¡ch, tÃ¬m kiáº¿m vÃ  quáº£n lÃ½ toÃ n bá»™ bÃ i viáº¿t trong há»‡ thá»‘ng.
+                    </CardDescription>
+                </CardHeader>
+
+                <Separator />
+
+                <CardContent className="pt-6">
+                    <AccessDenied
+                        description="Báº¡n khÃ´ng cÃ³ quyá»n xem danh sÃ¡ch bÃ i viáº¿t."
+                        permission="blog:read"
+                    />
+                </CardContent>
+            </Card>
+        );
+    }
+
     return (
         <Card>
             <CardHeader>

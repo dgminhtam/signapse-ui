@@ -15,6 +15,7 @@ import { AiProviderConfigListResponse } from "@/app/lib/ai-provider-configs/defi
 import { Page } from "@/app/lib/definitions"
 import { AppPagination } from "@/components/app-pagination"
 import { AppSelectPageSize } from "@/components/app-select-page-size"
+import { useHasPermission } from "@/components/permission-provider"
 import { SortSelect } from "@/components/sort-select"
 import {
   AlertDialog,
@@ -54,28 +55,33 @@ interface AiProviderConfigListProps {
 
 export function AiProviderConfigListPage({ providerPage }: AiProviderConfigListProps) {
   const providers = providerPage?.content || []
+  const canCreateProvider = useHasPermission("ai-provider-config:create")
+  const canUpdateProvider = useHasPermission("ai-provider-config:update")
+  const canDeleteProvider = useHasPermission("ai-provider-config:delete")
+  const canSetDefaultProvider = useHasPermission("ai-provider-config:set-default")
 
   return (
     <div className="w-full">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex w-full flex-1 items-center gap-4 sm:w-auto">
-          <Button asChild>
-            <Link href="/ai-provider-configs/create">
-              <Plus data-icon="inline-start" />
-              Tạo cấu hình
-            </Link>
-          </Button>
+          {canCreateProvider ? (
+            <Button asChild>
+              <Link href="/ai-provider-configs/create">
+                <Plus data-icon="inline-start" /> Create config
+              </Link>
+            </Button>
+          ) : null}
           <AiProviderConfigSearch />
         </div>
         <div className="flex items-center gap-2">
           <SortSelect
             options={[
-              { label: "Mới nhất", value: "id_desc" },
-              { label: "Cũ nhất", value: "id_asc" },
-              { label: "Tên (A-Z)", value: "name_asc" },
-              { label: "Tên (Z-A)", value: "name_desc" },
+              { label: "Newest", value: "id_desc" },
+              { label: "Oldest", value: "id_asc" },
+              { label: "Name (A-Z)", value: "name_asc" },
+              { label: "Name (Z-A)", value: "name_desc" },
             ]}
-            placeholder="Sắp xếp theo"
+            placeholder="Sort by"
           />
         </div>
       </div>
@@ -84,12 +90,12 @@ export function AiProviderConfigListPage({ providerPage }: AiProviderConfigListP
         <Table>
           <TableHeader>
             <TableRow className="border-border bg-muted">
-              <TableHead className="font-semibold text-foreground">Tên cấu hình</TableHead>
-              <TableHead className="font-semibold text-foreground">Nhà cung cấp</TableHead>
+              <TableHead className="font-semibold text-foreground">Config name</TableHead>
+              <TableHead className="font-semibold text-foreground">Provider</TableHead>
               <TableHead className="font-semibold text-foreground">Model</TableHead>
-              <TableHead className="text-center font-semibold text-foreground">Mặc định</TableHead>
-              <TableHead className="font-semibold text-foreground">Ngày tạo</TableHead>
-              <TableHead className="text-right font-semibold text-foreground">Thao tác</TableHead>
+              <TableHead className="text-center font-semibold text-foreground">Default</TableHead>
+              <TableHead className="font-semibold text-foreground">Created</TableHead>
+              <TableHead className="text-right font-semibold text-foreground">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -105,7 +111,7 @@ export function AiProviderConfigListPage({ providerPage }: AiProviderConfigListP
                         {provider.name}
                       </Link>
                       <span className="line-clamp-1 text-xs text-muted-foreground">
-                        {provider.description || "Chưa có mô tả"}
+                        {provider.description || "No description provided"}
                       </span>
                     </div>
                   </TableCell>
@@ -114,25 +120,27 @@ export function AiProviderConfigListPage({ providerPage }: AiProviderConfigListP
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">{provider.model}</TableCell>
                   <TableCell className="text-center">
-                    <SetDefaultButton provider={provider} />
+                    {canSetDefaultProvider ? <SetDefaultButton provider={provider} /> : null}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground tabular-nums">
                     {format(new Date(provider.createdDate), "dd/MM/yyyy HH:mm")}
                   </TableCell>
                   <TableCell>
                     <div className="flex justify-end gap-1">
-                      <Button
-                        asChild
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                      >
-                        <Link href={`/ai-provider-configs/${provider.id}`}>
-                          <Edit2 />
-                          <span className="sr-only">Chỉnh sửa</span>
-                        </Link>
-                      </Button>
-                      <DeleteProviderButton provider={provider} />
+                      {canUpdateProvider ? (
+                        <Button
+                          asChild
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                        >
+                          <Link href={`/ai-provider-configs/${provider.id}`}>
+                            <Edit2 />
+                            <span className="sr-only">Edit</span>
+                          </Link>
+                        </Button>
+                      ) : null}
+                      {canDeleteProvider ? <DeleteProviderButton provider={provider} /> : null}
                     </div>
                   </TableCell>
                 </TableRow>
@@ -145,9 +153,9 @@ export function AiProviderConfigListPage({ providerPage }: AiProviderConfigListP
                       <EmptyMedia variant="icon">
                         <Bot />
                       </EmptyMedia>
-                      <EmptyTitle>Chưa có cấu hình nào</EmptyTitle>
+                      <EmptyTitle>No AI provider configs found</EmptyTitle>
                       <EmptyDescription>
-                        Tạo cấu hình nhà cung cấp AI đầu tiên để bắt đầu quản lý tích hợp AI.
+                        Add your first AI provider config to start managing AI integrations.
                       </EmptyDescription>
                     </EmptyHeader>
                   </Empty>
@@ -162,8 +170,7 @@ export function AiProviderConfigListPage({ providerPage }: AiProviderConfigListP
         <AppSelectPageSize />
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">
-            Trang {providerPage.number + 1} / {providerPage.totalPages} ({providerPage.totalElements}{" "}
-            cấu hình)
+            Page {providerPage.number + 1} / {providerPage.totalPages} ({providerPage.totalElements} total)
           </span>
         </div>
         <div className="flex gap-2">
@@ -191,7 +198,7 @@ function SetDefaultButton({
     startTransition(async () => {
       const result = await setAiProviderConfigDefault(provider.id)
       if (result.success) {
-        toast.success("Đã cập nhật nhà cung cấp AI mặc định")
+        toast.success("Updated the default AI provider")
         router.refresh()
       } else {
         toast.error(result.error)
@@ -203,7 +210,7 @@ function SetDefaultButton({
     return (
       <Badge className="gap-1">
         <ShieldCheck data-icon="inline-start" />
-        Mặc định
+        Default
       </Badge>
     )
   }
@@ -218,7 +225,7 @@ function SetDefaultButton({
       className="h-8"
     >
       {isPending ? <Spinner className="size-4" /> : <Star data-icon="inline-start" />}
-      Đặt mặc định
+      Set default
     </Button>
   )
 }
@@ -236,7 +243,7 @@ function DeleteProviderButton({
     startTransition(async () => {
       const result = await deleteAiProviderConfig(provider.id)
       if (result.success) {
-        toast.success(`Đã xóa cấu hình "${provider.name}"`)
+        toast.success(`Deleted config "${provider.name}"`)
         setOpen(false)
         router.refresh()
       } else {
@@ -254,19 +261,18 @@ function DeleteProviderButton({
           className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
         >
           <Trash2 />
-          <span className="sr-only">Xóa</span>
+          <span className="sr-only">Delete</span>
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Bạn có chắc chắn muốn xóa?</AlertDialogTitle>
+          <AlertDialogTitle>Delete this config?</AlertDialogTitle>
           <AlertDialogDescription>
-            Hành động này không thể hoàn tác. Cấu hình nhà cung cấp AI{" "}
-            <strong>{provider.name}</strong> sẽ bị xóa vĩnh viễn.
+            This action cannot be undone. The AI provider config <strong>{provider.name}</strong> will be permanently removed.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>Hủy</AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={(event) => {
               event.preventDefault()
@@ -278,10 +284,10 @@ function DeleteProviderButton({
             {isPending ? (
               <>
                 <Spinner className="size-4" />
-                Đang xóa...
+                Deleting...
               </>
             ) : (
-              "Xóa cấu hình"
+              "Delete config"
             )}
           </AlertDialogAction>
         </AlertDialogFooter>

@@ -14,7 +14,10 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 
 import { getWikiPageBySlug, getWikiPageSources } from "@/app/api/wiki/action"
+import { hasPermission } from "@/app/lib/permissions"
+import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { WikiPageResponse, WikiPageSourceRefResponse } from "@/app/lib/wiki/definitions"
+import { AccessDenied } from "@/components/access-denied"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -63,6 +66,28 @@ function isNotFoundError(error: unknown) {
 }
 
 export default async function WikiDetailPage({ params }: PageProps) {
+  const permissions = await getCurrentPermissions()
+
+  if (!hasPermission(permissions, "wiki:read")) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Wiki Detail</CardTitle>
+          <CardDescription>
+            View synthesized wiki content and the source articles used to build this page.
+          </CardDescription>
+        </CardHeader>
+        <Separator />
+        <CardContent className="pt-6">
+          <AccessDenied
+            description="You do not have permission to view wiki details."
+            permission="wiki:read"
+          />
+        </CardContent>
+      </Card>
+    )
+  }
+
   const { slug } = await params
 
   return (

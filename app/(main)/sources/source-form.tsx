@@ -6,8 +6,8 @@ import { toast } from "sonner"
 import * as z from "zod"
 import { useRouter } from "next/navigation"
 
-import { createNewsSource, updateNewsSource } from "@/app/api/news-sources/action"
-import { NewsSourceResponse, NewsSourceRequest } from "@/app/lib/news-sources/definitions"
+import { createSource, updateSource } from "@/app/api/sources/action"
+import { SourceResponse, SourceRequest } from "@/app/lib/sources/definitions"
 import { Button } from "@/components/ui/button"
 import {
   Field,
@@ -20,7 +20,7 @@ import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
 import { Spinner } from "@/components/ui/spinner"
 
-const newsSourceSchema = z.object({
+const sourceSchema = z.object({
   name: z
     .string()
     .min(1, "Name is required")
@@ -38,19 +38,19 @@ const newsSourceSchema = z.object({
   active: z.boolean().default(true),
 })
 
-type NewsSourceFormValues = z.infer<typeof newsSourceSchema>
+type SourceFormValues = z.infer<typeof sourceSchema>
 
-interface NewsSourceFormProps {
-  initialData?: NewsSourceResponse
+interface SourceFormProps {
+  initialData?: SourceResponse
 }
 
-export function NewsSourceForm({ initialData }: NewsSourceFormProps) {
+export function SourceForm({ initialData }: SourceFormProps) {
   const router = useRouter()
   const isEdit = !!initialData
 
-  const form = useForm<NewsSourceFormValues>({
+  const form = useForm<SourceFormValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(newsSourceSchema as any),
+    resolver: zodResolver(sourceSchema as any),
     defaultValues: {
       name: initialData?.name || "",
       url: initialData?.url || "",
@@ -60,20 +60,20 @@ export function NewsSourceForm({ initialData }: NewsSourceFormProps) {
     },
   })
 
-  async function onSubmit(data: NewsSourceFormValues) {
-    const request: NewsSourceRequest = {
+  async function onSubmit(data: SourceFormValues) {
+    const request: SourceRequest = {
       ...data,
       rssUrl: data.rssUrl || "",
       description: data.description || "",
     }
 
-    const result = isEdit 
-      ? await updateNewsSource(initialData.id, request)
-      : await createNewsSource(request)
+    const result = isEdit
+      ? await updateSource(initialData.id, request)
+      : await createSource(request)
 
     if (result.success) {
-      toast.success(isEdit ? "News source updated successfully" : "News source created successfully")
-      router.push("/news-sources")
+      toast.success(isEdit ? "Source updated successfully" : "Source created successfully")
+      router.push("/sources")
       router.refresh()
     } else {
       toast.error(result.error)
@@ -102,40 +102,40 @@ export function NewsSourceForm({ initialData }: NewsSourceFormProps) {
           )}
         />
 
-      <Controller
-        name="url"
-        control={form.control}
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor="url">
-              Website URL <span className="text-destructive">*</span>
-            </FieldLabel>
-            <Input
-              {...field}
-              id="url"
-              placeholder="https://example.com"
-              autoComplete="off"
-            />
-            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-          </Field>
-        )}
-      />
+        <Controller
+          name="url"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="url">
+                Website URL <span className="text-destructive">*</span>
+              </FieldLabel>
+              <Input
+                {...field}
+                id="url"
+                placeholder="https://example.com"
+                autoComplete="off"
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
 
-      <Controller
-        name="rssUrl"
-        control={form.control}
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor="rssUrl">RSS URL</FieldLabel>
-            <Input
-              {...field}
-              id="rssUrl"
-              placeholder="https://example.com/rss.xml"
-              autoComplete="off"
-            />
-            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-          </Field>
-        )}
+        <Controller
+          name="rssUrl"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="rssUrl">RSS URL</FieldLabel>
+              <Input
+                {...field}
+                id="rssUrl"
+                placeholder="https://example.com/rss.xml"
+                autoComplete="off"
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
         />
 
         <Controller
@@ -163,13 +163,13 @@ export function NewsSourceForm({ initialData }: NewsSourceFormProps) {
               <div className="space-y-0.5">
                 <FieldLabel className="text-base">Active Status</FieldLabel>
                 <div className="text-sm text-muted-foreground">
-                  Allow system to crawl articles from this source.
+                  Allow the system to crawl articles from this source.
                 </div>
               </div>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
+              <Switch
+                checked={field.value}
+                onCheckedChange={field.onChange}
+              />
             </Field>
           )}
         />
@@ -181,7 +181,7 @@ export function NewsSourceForm({ initialData }: NewsSourceFormProps) {
         <Button disabled={form.formState.isSubmitting} type="submit">
           {form.formState.isSubmitting ? (
             <>
-              <Spinner className="size-4 mr-2" /> {isEdit ? "Updating..." : "Creating..."}
+              <Spinner className="mr-2 size-4" /> {isEdit ? "Updating..." : "Creating..."}
             </>
           ) : (
             isEdit ? "Update Source" : "Create Source"
@@ -190,7 +190,7 @@ export function NewsSourceForm({ initialData }: NewsSourceFormProps) {
         <Button
           type="button"
           variant="ghost"
-          onClick={() => router.push("/news-sources")}
+          onClick={() => router.push("/sources")}
         >
           Cancel
         </Button>

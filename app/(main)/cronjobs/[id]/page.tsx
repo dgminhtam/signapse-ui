@@ -1,4 +1,7 @@
 import { getCronjobById } from "@/app/api/cronjobs/action"
+import { hasPermission } from "@/app/lib/permissions"
+import { getCurrentPermissions } from "@/app/lib/permissions-server"
+import { AccessDenied } from "@/components/access-denied"
 import {
   Card,
   CardContent,
@@ -19,6 +22,30 @@ interface PageProps {
 }
 
 export default async function EditCronjobPage({ params }: PageProps) {
+  const permissions = await getCurrentPermissions()
+
+  if (!hasPermission(permissions, "cronjob:update")) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Edit Cronjob</CardTitle>
+          <CardDescription>
+            Update detailed information and cronjob configuration.
+          </CardDescription>
+        </CardHeader>
+
+        <Separator />
+
+        <CardContent className="pt-6">
+          <AccessDenied
+            description="You do not have permission to update cronjobs."
+            permission="cronjob:update"
+          />
+        </CardContent>
+      </Card>
+    )
+  }
+
   const { id } = await params
   const cronjobId = Number(id)
 

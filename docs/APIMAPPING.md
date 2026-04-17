@@ -1,181 +1,195 @@
-# Tài liệu ánh xạ API
+﻿# Tai lieu anh xa API
 
-Tài liệu này ánh xạ đặc tả OpenAPI backend đang chạy tại `http://localhost:8484/v3/api-docs` tới các điểm tích hợp frontend trong repository này.
+Tai lieu nay anh xa snapshot OpenAPI backend trong `docs/api_mapping.json` toi cac diem tich hop frontend cua repo.
 
-Xác minh lần cuối: ngày 16 tháng 4 năm 2026
+Xac minh lan cuoi: ngay 17 thang 4 nam 2026
 
-## Cấu hình cơ sở
+## Cau hinh co so
 
-| Mục | Giá trị |
+| Muc | Gia tri |
 | --- | --- |
-| URL gốc API | `http://localhost:8484` |
-| Nguồn chuẩn | OpenAPI live tại `http://localhost:8484/v3/api-docs` |
-| Hàm hỗ trợ xác thực | `fetchAuthenticated()` trong `app/api/auth/action.ts` |
-| Hàm hỗ trợ public | `fetchPublic()` trong `app/api/auth/action.ts` |
-| Kiểu bọc kết quả mutation | `ActionResult<T>` từ `app/lib/definitions.ts` |
+| URL goc API | `http://localhost:8484` |
+| Nguon chuan | `docs/api_mapping.json` |
+| Ham ho tro xac thuc | `fetchAuthenticated()` trong `app/api/auth/action.ts` |
+| Ham ho tro public | `fetchPublic()` trong `app/api/auth/action.ts` |
+| Kieu boc ket qua mutation | `ActionResult<T>` tu `app/lib/definitions.ts` |
 
-## Quy ước dùng chung
+## Quy uoc dung chung
 
-- Các lời gọi backend được bảo vệ dự kiến đi qua `fetchAuthenticated()`.
-- `apiFetch()` đọc `response.text()` trước khi `JSON.parse()`, phù hợp với quy tắc của repo khi backend trả về body rỗng hoặc không hợp lệ.
-- Các truy vấn danh sách ở frontend được serialize bằng `queryParamsToString()` thành `$filter`, `page`, `size` và `sort`.
-- Đặc tả OpenAPI mô tả phân trang dưới dạng đối tượng query `Pageable`, trong khi frontend hiện đang gửi các query param phẳng.
+- Cac request duoc bao ve di qua `fetchAuthenticated()`.
+- `apiFetch()` doc `response.text()` truoc khi parse JSON, phu hop voi backend co the tra body rong hoac JSON khong hop le.
+- Frontend runtime hien serialize query list thanh `$filter`, `page`, `size`, `sort` thong qua `queryParamsToString()`.
+- OpenAPI van mo ta list query bang `specification` va `pageable`, nen can tach biet giua spec contract va effective runtime contract.
 
-## Phạm vi endpoint
+## Pham vi endpoint
 
-### 1. API lời nhắc hệ thống
+### 1. API system prompts
 
-| Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
+| Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai | Ghi chu |
 | --- | --- | --- | --- | --- | --- |
-| GET | `/system-prompts` | `getSystemPrompts` | `-` | Chưa triển khai | Repo này chưa có `app/api/system-prompts/action.ts`. |
-| POST | `/system-prompts` | `createSystemPrompt` | `-` | Chưa triển khai | Schema request của backend: `CreateSystemPromptRequest`. |
-| GET | `/system-prompts/{promptType}` | `getSystemPrompt` | `-` | Chưa triển khai | Enum của path param đã được mở rộng ở backend. |
-| PUT | `/system-prompts/{promptType}` | `updateSystemPrompt` | `-` | Chưa triển khai | Schema request của backend: `UpdateSystemPromptRequest`. |
-| DELETE | `/system-prompts/{promptType}` | `deleteSystemPrompt` | `-` | Chưa triển khai | Backend có endpoint này nhưng frontend chưa có action tương ứng. |
+| GET | `/system-prompts` | `getSystemPrompts` | `-` | Chua trien khai | Chua co `app/api/system-prompts/action.ts`. |
+| POST | `/system-prompts` | `createSystemPrompt` | `-` | Chua trien khai | Backend da co schema `CreateSystemPromptRequest`. |
+| GET | `/system-prompts/{promptType}` | `getSystemPrompt` | `-` | Chua trien khai | Frontend chua tich hop. |
+| PUT | `/system-prompts/{promptType}` | `updateSystemPrompt` | `-` | Chua trien khai | Frontend chua tich hop. |
+| DELETE | `/system-prompts/{promptType}` | `deleteSystemPrompt` | `-` | Chua trien khai | Frontend chua tich hop. |
 
-Các giá trị `promptType` được hỗ trợ theo live spec:
+### 2. API sources
 
-`NEWS_FILTER`, `NEWS_ANALYSIS`, `SIGNAL_GENERATION`, `DECISION_MAKING`, `CONTENT_EXTRACTION`, `SENTIMENT_ANALYSIS`, `TITLE_GENERATION`, `SUMMARY_GENERATION`, `CONTENT_CLEANING`, `FIRECRAWL_ARTICLE_FILTER`, `WIKI_SOURCE_SUMMARY`, `WIKI_PAGE_UPDATE`, `WIKI_INDEX_REBUILD`, `WIKI_QUERY_ANSWER`
+Frontend da duoc doi naming sang `sources` de khop backend `/sources`.
 
-### 2. API nguồn tin
-
-| Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
-
+| Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai | Ghi chu |
 | --- | --- | --- | --- | --- | --- |
-| GET | `/news-sources` | `getNewsSources` | `getNewsSources(searchParams)` | Đã triển khai nhưng có lệch contract | Frontend list hiện hiển thị cả `url` và `rssUrl`; live spec của `NewsSourceListResponse` hiện mới mô tả `url`. |
-| POST | `/news-sources` | `createNewsSource` | `createNewsSource(request)` | Đã triển khai | Sử dụng `NewsSourceRequest`, bao gồm cả `url` và `rssUrl`. |
-| GET | `/news-sources/{id}` | `getNewsSource` | `getNewsSourceById(id)` | Đã triển khai | Trả về `NewsSourceResponse`; form edit hiện hydrate cả `url` và `rssUrl`. |
-| PUT | `/news-sources/{id}` | `updateNewsSource` | `updateNewsSource(id, request)` | Đã triển khai | Sử dụng `NewsSourceRequest` cho cập nhật, bao gồm cả `rssUrl`. |
-| DELETE | `/news-sources/{id}` | `deleteNewsSource` | `deleteNewsSource(id)` | Đã triển khai | Được bọc trong `ActionResult`. |
-| PATCH | `/news-sources/{id}/toggle-active` | `toggleActive` | `toggleNewsSourceActive(id)` | Đã triển khai | Trả về `NewsSourceResponse` sau khi cập nhật. |
-| GET | `/news-sources/active` | `getActiveNewsSources` | `getActiveNewsSources()` | Lệch một phần | Backend hiện trả về `PageNewsSourceListResponse`, nhưng frontend đang kỳ vọng `NewsSourceListResponse[]` và không gửi tham số phân trang. |
+| GET | `/sources` | `getSources` | `getSources(searchParams)` | Da trien khai | UI route/module da dung `sources`; list hien thi ca `url` va `rssUrl`. |
+| POST | `/sources` | `createSource` | `createSource(request)` | Da trien khai | Frontend gui request qua module `sources`. |
+| GET | `/sources/{id}` | `getSource` | `getSourceById(id)` | Da trien khai | Frontend hydrate ca `url` va `rssUrl`. |
+| PUT | `/sources/{id}` | `updateSource` | `updateSource(id, request)` | Da trien khai | UI va API client dung naming `source`. |
+| DELETE | `/sources/{id}` | `deleteSource` | `deleteSource(id)` | Da trien khai | Duoc boc trong `ActionResult`. |
+| PATCH | `/sources/{id}/toggle-active` | `toggleActive` | `toggleSourceActive(id)` | Da trien khai | Toggle active inline. |
+| GET | `/sources/active` | `getActiveSources` | `getActiveSources()` | Lech mot phan | Frontend helper da rename; can tiep tuc theo doi shape page vs array cua BE runtime. |
 
-### 3. API bài viết
+### 3. API articles
 
-| Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
+| Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai | Ghi chu |
 | --- | --- | --- | --- | --- | --- |
-| GET | `/articles` | `getArticles` | `getArticles(searchParams)` | Đã triển khai | Trả về `Page<ArticleListResponse>`. |
-| GET | `/articles/{id}` | `getArticle` | `getArticleById(id)` | Đã triển khai | Trả về `ArticleResponse`. |
-| DELETE | `/articles/{id}` | `deleteArticle` | `deleteArticle(id)` | Đã triển khai | Được bọc trong `ActionResult`. |
-| POST | `/articles/{id}/analyze` | `analyzeContent` | `analyzeArticle(id)` | Đã triển khai | Trả về `ArticleResponse` sau khi cập nhật. |
-| PATCH | `/articles/{id}/feature-image` | `updateFeatureImage` | `-` | Chưa triển khai | Cập nhật ảnh đại diện cho bài viết. |
+| GET | `/articles` | `getArticles` | `getArticles(searchParams)` | Da trien khai | Tra ve `Page<ArticleListResponse>`. |
+| GET | `/articles/{id}` | `getArticle` | `getArticleById(id)` | Da trien khai | Tra ve `ArticleResponse`. |
+| DELETE | `/articles/{id}` | `deleteArticle` | `deleteArticle(id)` | Da trien khai | Duoc boc trong `ActionResult`. |
+| POST | `/articles/{id}/analyze` | `analyzeContent` | `analyzeArticle(id)` | Da trien khai | Analyze article tu UI. |
+| PATCH | `/articles/{id}/feature-image` | `updateFeatureImage` | `-` | Chua trien khai | API moi trong spec, frontend chua co action/page. |
 
-### 4. API blog
+### 4. API blogs
 
-| Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
+| Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai | Ghi chu |
 | --- | --- | --- | --- | --- | --- |
-| GET | `/blogs` | `getBlogPosts` | `getBlogs(searchParams)` | Đã triển khai | Trả về `Page<BlogPostListResponse>`. |
-| POST | `/blogs` | `createBlogPost` | `createBlog(request)` | Đã triển khai nhưng có rủi ro lệch contract | Schema request của backend dùng `visible`. |
-| GET | `/blogs/{id}` | `getBlogPost` | `getBlogById(id)` | Đã triển khai nhưng có rủi ro lệch contract | Schema response của backend dùng `visible`. |
-| PUT | `/blogs/{id}` | `updateBlogPost` | `updateBlog(id, request)` | Đã triển khai | Schema cập nhật của backend dùng `isVisible`. |
-| DELETE | `/blogs/{id}` | `deleteBlogPost` | `deleteBlog(id)` | Đã triển khai | Được bọc trong `ActionResult`. |
+| GET | `/blogs` | `getBlogPosts` | `getBlogs(searchParams)` | Da trien khai | Tra ve `Page<BlogPostListResponse>`. |
+| POST | `/blogs` | `createBlogPost` | `createBlog(request)` | Da trien khai nhung co lech contract | Backend create schema dung `visible`. |
+| GET | `/blogs/{id}` | `getBlogPost` | `getBlogById(id)` | Da trien khai nhung co lech contract | Backend response dung `visible`. |
+| PUT | `/blogs/{id}` | `updateBlogPost` | `updateBlog(id, request)` | Da trien khai | Backend update schema dung `isVisible`. |
+| DELETE | `/blogs/{id}` | `deleteBlogPost` | `deleteBlog(id)` | Da trien khai | Duoc boc trong `ActionResult`. |
 
-### 5. API cronjob
+### 5. API cronjobs
 
-| Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
+| Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai | Ghi chu |
 | --- | --- | --- | --- | --- | --- |
-| GET | `/cronjobs` | `list` | `getCronjobs(searchParams)` | Đã triển khai | Trả về `Page<CronjobListResponse>`. |
-| POST | `/cronjobs` | `create` | `createCronjob(request)` | Đã triển khai | Sử dụng `CronjobRequest`. |
-| GET | `/cronjobs/{id}` | `get` | `getCronjobById(id)` | Đã triển khai | Trả về `CronjobResponse`. |
-| PATCH | `/cronjobs/{id}` | `update` | `updateCronjob(id, request)` | Đã triển khai | Cả backend và frontend đều dùng `PATCH`. |
-| DELETE | `/cronjobs/{id}` | `delete` | `deleteCronjob(id)` | Đã triển khai | Được bọc trong `ActionResult`. |
-| POST | `/cronjobs/{id}/start` | `start` | `startCronjob(id)` | Đã triển khai | Trả về `CronjobResponse` sau khi cập nhật. |
-| POST | `/cronjobs/{id}/pause` | `pause` | `pauseCronjob(id)` | Đã triển khai | Trả về `CronjobResponse` sau khi cập nhật. |
-| POST | `/cronjobs/{id}/resume` | `resume` | `resumeCronjob(id)` | Đã triển khai | Trả về `CronjobResponse` sau khi cập nhật. |
-| POST | `/cronjobs/{id}/stop` | `stop` | `-` | Chưa triển khai | Đã có spec backend nhưng frontend chưa có `stopCronjob()`. |
+| GET | `/cronjobs` | `list` | `getCronjobs(searchParams)` | Da trien khai | Tra ve `Page<CronjobListResponse>`. |
+| POST | `/cronjobs` | `create` | `createCronjob(request)` | Da trien khai | Dung `CronjobRequest`. |
+| GET | `/cronjobs/{id}` | `get` | `getCronjobById(id)` | Da trien khai | Tra ve `CronjobResponse`. |
+| PATCH | `/cronjobs/{id}` | `update` | `updateCronjob(id, request)` | Da trien khai | Frontend va backend deu dung `PATCH`. |
+| DELETE | `/cronjobs/{id}` | `delete` | `deleteCronjob(id)` | Da trien khai | Duoc boc trong `ActionResult`. |
+| POST | `/cronjobs/{id}/start` | `start` | `startCronjob(id)` | Da trien khai | Da tich hop. |
+| POST | `/cronjobs/{id}/pause` | `pause` | `pauseCronjob(id)` | Da trien khai | Da tich hop. |
+| POST | `/cronjobs/{id}/resume` | `resume` | `resumeCronjob(id)` | Da trien khai | Da tich hop. |
+| POST | `/cronjobs/{id}/stop` | `stop` | `-` | Chua trien khai | Backend da co spec, frontend chua co `stopCronjob()`. |
 
-### 6. API lịch kinh tế
+### 6. API economic calendar
 
-| Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
+| Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai | Ghi chu |
 | --- | --- | --- | --- | --- | --- |
-| GET | `/economic-calendar` | `getEvents` | `getEconomicEvents(searchParams)` | Đã triển khai | Trả về `Page<EconomicEventListResponse>`. |
-| GET | `/economic-calendar/{id}` | `getEvent` | `getEconomicEventById(id)` | Đã triển khai | Trả về `EconomicEventResponse`. |
-| DELETE | `/economic-calendar/{id}` | `deleteEvent` | `deleteEconomicEvent(id)` | Đã triển khai | Được bọc trong `ActionResult`. |
-| POST | `/economic-calendar/crawl` | `crawl` | `crawlEconomicEvents()` | Đã triển khai | Trả về số bản ghi đã crawl dưới dạng `number`. |
-| GET | `/economic-calendar/impact/{impact}` | `getEventsByImpact` | `-` | Chưa triển khai | Backend có endpoint lọc này nhưng frontend chưa có action tương ứng. |
-| GET | `/economic-calendar/country/{country}` | `getEventsByCountry` | `-` | Chưa triển khai | Backend có endpoint lọc này nhưng frontend chưa có action tương ứng. |
+| GET | `/economic-calendar` | `getEvents` | `getEconomicEvents(searchParams)` | Da trien khai | Tra ve `Page<EconomicEventListResponse>`. |
+| GET | `/economic-calendar/{id}` | `getEvent` | `getEconomicEventById(id)` | Da trien khai | Tra ve `EconomicEventResponse`. |
+| DELETE | `/economic-calendar/{id}` | `deleteEvent` | `deleteEconomicEvent(id)` | Da trien khai | Duoc boc trong `ActionResult`. |
+| POST | `/economic-calendar/crawl` | `crawl` | `crawlEconomicEvents()` | Da trien khai | Tra ve `number`. |
+| GET | `/economic-calendar/impact/{impact}` | `getEventsByImpact` | `-` | Chua trien khai | Chua co action frontend. |
+| GET | `/economic-calendar/country/{country}` | `getEventsByCountry` | `-` | Chua trien khai | Chua co action frontend. |
 
-### 7. API cấu hình AI provider
+### 7. API AI provider configs
 
-| Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
+| Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai | Ghi chu |
 | --- | --- | --- | --- | --- | --- |
-| GET | `/ai-provider-configs` | `getAiProviderConfigs` | `getAiProviderConfigs(searchParams)` | Đã triển khai nhưng có lệch contract | Frontend/runtime đang gửi query phẳng `$filter`, `page`, `size`, `sort`; live spec vẫn mô tả `specification` và `pageable`. Response raw từ backend được sanitize trước khi truyền xuống client để loại `apiKey`. |
-| POST | `/ai-provider-configs` | `createAiProviderConfig` | `createAiProviderConfig(request)` | Đã triển khai | Frontend dùng `AiProviderConfigCreateRequest`; response raw được sanitize để không hydrate `apiKey` xuống browser. |
-| GET | `/ai-provider-configs/{id}` | `getAiProviderConfig` | `getAiProviderConfigById(id)` | Đã triển khai nhưng có lệch contract | Frontend trả về `AiProviderConfigResponse` đã sanitize, không chứa `apiKey` dù live spec hiện vẫn expose field này. |
-| PUT | `/ai-provider-configs/{id}` | `updateAiProviderConfig` | `updateAiProviderConfig(id, request)` | Đã triển khai | Frontend dùng `AiProviderConfigUpdateRequest`; `apiKey` chỉ được gửi khi người dùng nhập giá trị mới. |
-| POST | `/ai-provider-configs/model-catalog` | `getModelCatalog` | `getAiProviderModelCatalog(request)` | Đã triển khai | Dùng để tải danh sách model động từ `providerType + apiKey + baseUrl`. Response trả về `models[]` với `id` và `label`. |
-| DELETE | `/ai-provider-configs/{id}` | `deleteAiProviderConfig` | `deleteAiProviderConfig(id)` | Đã triển khai | Được bọc trong `ActionResult`. |
-| PATCH | `/ai-provider-configs/{id}/set-default` | `setDefault` | `setAiProviderConfigDefault(id)` | Đã triển khai | Trả về response đã sanitize sau khi cập nhật. |
+| GET | `/ai-provider-configs` | `getAiProviderConfigs` | `getAiProviderConfigs(searchParams)` | Da trien khai nhung co lech contract | Runtime dung `$filter/page/size/sort`; response raw duoc sanitize truoc khi truyen xuong client. |
+| POST | `/ai-provider-configs` | `createAiProviderConfig` | `createAiProviderConfig(request)` | Da trien khai | Frontend dung `AiProviderConfigCreateRequest`. |
+| GET | `/ai-provider-configs/{id}` | `getAiProviderConfig` | `getAiProviderConfigById(id)` | Da trien khai nhung co lech contract | Frontend tra DTO da sanitize, khong hydrate `apiKey`. |
+| PUT | `/ai-provider-configs/{id}` | `updateAiProviderConfig` | `updateAiProviderConfig(id, request)` | Da trien khai | `apiKey` chi gui khi user nhap gia tri moi. |
+| DELETE | `/ai-provider-configs/{id}` | `deleteAiProviderConfig` | `deleteAiProviderConfig(id)` | Da trien khai | Duoc boc trong `ActionResult`. |
+| PATCH | `/ai-provider-configs/{id}/set-default` | `setDefault` | `setAiProviderConfigDefault(id)` | Da trien khai | Da tich hop. |
+| POST | `/ai-provider-configs/model-catalog` | `getModelCatalog` | `getAiProviderModelCatalog(request)` | Da trien khai | Tai danh sach model dong theo provider credentials. |
 
-Các giá trị `providerType` được hỗ trợ theo live spec:
+### 8. API assets
 
-`GEMINI`, `OPENAI`, `ZAI`
-
-Effective contract frontend hiện tại cho danh sách AI providers:
-
-- Query danh sách dùng `$filter`, `page`, `size`, `sort`.
-- Search UI hiện map vào `name[containsIgnoreCase]`.
-- Sort UI hiện expose `id` và `name`.
-- Backend đã bỏ field `active`; frontend không còn render trạng thái bật/tắt cho AI providers.
-- Model được chọn động qua endpoint `model-catalog`, nhưng người dùng vẫn có thể nhập tay nếu cần.
+| Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai | Ghi chu |
+| --- | --- | --- | --- | --- | --- |
+| GET | `/assets` | `getAssets` | `getAssets(searchParams)` | Da trien khai | Asset catalog chi doc, duoc dung cho multi-select trong workspace watchlist editor. |
+| GET | `/assets/{id}` | `getAsset` | `getAssetById(id)` | Da trien khai | Frontend co helper hydrate chi tiet khi can. |
 
 ### 9. API media
 
-| Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
+| Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai | Ghi chu |
 | --- | --- | --- | --- | --- | --- |
-| GET | `/medias` | `getMedias` | `-` | Chưa triển khai | Backend đã có endpoint danh sách media, frontend hiện chưa có `app/api/medias/action.ts`. |
-| GET | `/medias/{id}` | `getMedia` | `-` | Chưa triển khai | Trả về `MediaResponse`. |
-| DELETE | `/medias/{id}` | `deleteMedia` | `-` | Chưa triển khai | Backend đã có endpoint xóa media nhưng frontend chưa tích hợp. |
-| POST | `/medias/upload` | `upload` | `-` | Chưa triển khai | Backend đã có endpoint upload media nhưng frontend chưa có action/page tương ứng. |
+| GET | `/medias` | `getMedias` | `-` | Chua trien khai | Chua co `app/api/medias/action.ts`. |
+| GET | `/medias/{id}` | `getMedia` | `-` | Chua trien khai | Chua co tich hop. |
+| DELETE | `/medias/{id}` | `deleteMedia` | `-` | Chua trien khai | Chua co tich hop. |
+| POST | `/medias/upload` | `upload` | `-` | Chua trien khai | Chua co tich hop. |
 
 ### 10. API workspace
 
-| Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
+| Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai | Ghi chu |
 | --- | --- | --- | --- | --- | --- |
-| GET | `/me/workspaces` | `getMyWorkspaces` | `getMyWorkspaces(searchParams)` | Đã triển khai | Dữ liệu được nạp ở `app/(main)/layout.tsx` để render Workspace Switcher trên sidebar (không có list page riêng). |
-| POST | `/me/workspaces` | `createWorkspace` | `createWorkspace(request)` | Đã triển khai | Được gọi từ dialog inline trong Workspace Switcher ở sidebar. |
-| PUT | `/me/workspaces/{id}` | `updateWorkspace` | `updateWorkspace(id, request)` | Đã triển khai | Dùng cho flow đổi tên workspace active (không áp dụng cho personal workspace). |
-| DELETE | `/me/workspaces/{id}` | `deleteWorkspace` | `-` | Chưa triển khai | V1 chưa hỗ trợ delete workspace trong UI sidebar. Endpoint backend là `deleteWorkspace`. |
-| PATCH | `/me/workspaces/{id}/set-default` | `setDefaultWorkspace` | `setDefaultWorkspace(id)` | Đã triển khai | Chọn workspace sẽ gọi API này và `router.refresh()` để đồng bộ toàn app. |
+| GET | `/me/workspaces` | `getMyWorkspaces` | `getMyWorkspaces(searchParams)` | Da trien khai | Du lieu nap o `app/(main)/layout.tsx` de render workspace switcher va watchlist editor theo workspace active. |
+| POST | `/me/workspaces` | `createWorkspace` | `createWorkspace(request)` | Da trien khai | Dialog tao workspace chi xu ly metadata `name` va `slug`. |
+| PUT | `/me/workspaces/{id}` | `updateWorkspace` | `updateWorkspace(id, request)` | Da trien khai | Dung cho rename workspace active, khong gui watchlist trong body. |
+| PATCH | `/me/workspaces/{id}/set-default` | `setDefaultWorkspace` | `setDefaultWorkspace(id)` | Da trien khai | Chon workspace goi API nay va `router.refresh()`; user doi workspace truoc khi mo watchlist editor cho workspace khac. |
+| DELETE | `/me/workspaces/{id}` | `-` | `-` | Chua duoc document trong file tich hop | Snapshot path hien tai khong con xuat hien trong `api_mapping.json`. |
 
-### 11. API người dùng
+Watchlist khong nam trong `CreateWorkspaceRequest` hay `UpdateWorkspaceRequest`. Frontend chinh
+asset theo doi bang action rieng trong menu workspace sau khi workspace da duoc chon.
 
-| Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
+### 11. API user
+
+| Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai | Ghi chu |
 | --- | --- | --- | --- | --- | --- |
-| GET | `/me` | `me` | `-` | Chưa triển khai | Repo hiện expose `app/api/user/route.ts`, route này trả về `currentUser()` từ Clerk trực tiếp thay vì gọi endpoint backend này. |
+| GET | `/me` | `me` | `getMe()` | Da trien khai | Dung de lay `permissions[]` cho left menu va workspace actions. |
 
 ### 12. API wiki
 
-| Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
+| Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai | Ghi chu |
 | --- | --- | --- | --- | --- | --- |
-| POST | `/wiki/ingest/articles/{articleId}` | `ingestArticle` | `ingestArticleToWiki(articleId)` | Đã triển khai | Trả về `WikiPageResponse` và được dùng từ các màn bài viết. |
-| GET | `/wiki/pages/{slug}` | `getPageBySlug` | `getWikiPageBySlug(slug)` | Đã triển khai | Dùng cho route `/wiki/[slug]`. |
-| GET | `/wiki/pages/{id}/sources` | `getPageSources` | `getWikiPageSources(id)` | Đã triển khai | Dùng để hiển thị source references trên trang wiki. |
-| GET | `/wiki/pages` | `getPages` | `-` | Chưa triển khai | Danh sách các trang wiki. |
-| POST | `/wiki/rebuild-index` | `rebuildIndex` | `-` | Chưa triển khai | Xây dựng lại vector index cho wiki. |
-| POST | `/wiki/query` | `query` | `-` | Chưa triển khai | Truy vấn RAG trên wiki. |
-| POST | `/wiki/query/save` | `saveQueryResult` | `-` | Chưa triển khai | Lưu kết quả truy vấn thành một trang wiki mới. |
-| POST | `/wiki/lint` | `lint` | `-` | Chưa triển khai | Kiểm tra tính nhất quán của các trang wiki. |
-| GET | `/wiki/logs` | `getLogs` | `-` | Chưa triển khai | Xem lịch sử hoạt động wiki. |
+| POST | `/wiki/ingest/articles/{articleId}` | `ingestArticle` | `ingestArticleToWiki(articleId)` | Da trien khai | Dang duoc dung tu man articles. |
+| GET | `/wiki/pages/{slug}` | `getPageBySlug` | `getWikiPageBySlug(slug)` | Da trien khai | Dung cho route `/wiki/[slug]`. |
+| GET | `/wiki/pages/{id}/sources` | `getPageSources` | `getWikiPageSources(id)` | Da trien khai | Hien thi source references cho page detail. |
+| GET | `/wiki/pages` | `getPages` | `-` | Chua trien khai | Chua co action list wiki pages. |
+| POST | `/wiki/rebuild-index` | `rebuildIndex` | `-` | Chua trien khai | Chua co action frontend. |
+| POST | `/wiki/query` | `query` | `-` | Chua trien khai | Chua co action frontend. |
+| POST | `/wiki/query/save` | `saveQueryResult` | `-` | Chua trien khai | Chua co action frontend. |
+| POST | `/wiki/lint` | `lint` | `-` | Chua trien khai | Chua co action frontend. |
+| GET | `/wiki/logs` | `getLogs` | `-` | Chua trien khai | Chua co action frontend. |
 
-Các giá trị `pageType` được hỗ trợ theo live spec:
+### 13. API roles
 
-`INDEX`, `SOURCE_SUMMARY`, `TOPIC`, `ENTITY`, `LINT_REPORT`, `QUERY_RESULT`
-
-### 13. Webhook
-
-| Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
+| Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai | Ghi chu |
 | --- | --- | --- | --- | --- | --- |
-| POST | `/webhooks/clerk` | `handleClerkWebhook` | `-` | Chỉ backend | Đây là endpoint backend nhận request đi vào nên không kỳ vọng có frontend caller tương ứng. |
+| GET | `/roles` | `getRoles` | `-` | Chua trien khai | Chua co module frontend. |
+| PUT | `/roles/{roleKey}/permissions` | `updateRolePermissions` | `-` | Chua trien khai | Chua co module frontend. |
+
+### 14. API permissions
+
+| Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai | Ghi chu |
 | --- | --- | --- | --- | --- | --- |
+| GET | `/permissions` | `getPermissions` | `-` | Chua trien khai | Chua co module frontend. |
 
-### 14. Kiểm tra sức khỏe hệ thống
+### 15. API watchlists
 
-| Phương thức | Endpoint backend | OpenAPI operationId | Tích hợp frontend | Trạng thái | Ghi chú |
+| Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai | Ghi chu |
 | --- | --- | --- | --- | --- | --- |
-| GET | `/health` | `healthCheck` | `-` | Chưa triển khai | Repo hiện chưa có action riêng cho health check. |
+| GET | `/watchlists` | `getWatchlist` | `getWatchlists(searchParams)` | Da trien khai | Editor load danh sach asset theo doi cua workspace dang active. |
+| POST | `/watchlists` | `createWatchlist` | `addAssetToWatchlist({ assetId })` | Da trien khai | Frontend sync multi-select theo diff add. |
+| DELETE | `/watchlists/assets/{assetId}` | `deleteByAssetId` | `deleteWatchlistAsset(assetId)` | Da trien khai | Frontend sync multi-select theo diff remove. |
 
-## Các kiểu dùng chung ở frontend
+Watchlist backend hien phu thuoc workspace dang duoc selected/current. Frontend khong con menu
+hoac route watchlist rieng; user chinh danh sach asset theo doi tu context workspace.
+
+### 16. Webhook
+
+| Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai | Ghi chu |
+| --- | --- | --- | --- | --- | --- |
+| POST | `/webhooks/clerk` | `handleClerkWebhook` | `-` | Chi backend | Endpoint backend nhan request di vao, khong ky vong co frontend caller. |
+
+### 17. Health check
+
+| Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai | Ghi chu |
+| --- | --- | --- | --- | --- | --- |
+| GET | `/health` | `healthCheck` | `-` | Chua trien khai | Chua co action rieng. |
+
+## Cac kieu dung chung o frontend
 
 ### SearchParams
 
@@ -191,7 +205,7 @@ interface SearchParams {
 }
 ```
 
-Được `queryParamsToString()` serialize thành:
+Duoc `queryParamsToString()` serialize thanh:
 
 - `$filter`
 - `page`
@@ -229,35 +243,39 @@ type ActionResult<T = void> =
   | { success: false; error: string }
 ```
 
-## Các file type/action phía frontend
+## Cac file type/action phia frontend
 
-| Khu vực | File frontend |
+| Khu vuc | File frontend |
 | --- | --- |
-| Helper dùng chung | `app/lib/definitions.ts`, `app/lib/utils.ts` |
-| Tầng vận chuyển auth | `app/api/auth/action.ts` |
-| Nguồn tin | `app/api/news-sources/action.ts`, `app/lib/news-sources/definitions.ts` |
-| Bài viết | `app/api/articles/action.ts`, `app/lib/articles/definitions.ts` |
-| Blog | `app/api/blogs/action.ts`, `app/lib/blogs/definitions.ts` |
-| Cronjob | `app/api/cronjobs/action.ts`, `app/lib/cronjobs/definitions.ts` |
-| Lịch kinh tế | `app/api/economic-calendar/action.ts`, `app/lib/economic-calendar/definitions.ts` |
-| Cấu hình AI provider | `app/api/ai-provider-configs/action.ts`, `app/lib/ai-provider-configs/definitions.ts` |
-| Media | `-` |
-| Workspace | `-` |
+| Helper dung chung | `app/lib/definitions.ts`, `app/lib/utils.ts` |
+| Tang van chuyen auth | `app/api/auth/action.ts` |
+| Sources | `app/api/sources/action.ts`, `app/lib/sources/definitions.ts` |
+| Articles | `app/api/articles/action.ts`, `app/lib/articles/definitions.ts` |
+| Blogs | `app/api/blogs/action.ts`, `app/lib/blogs/definitions.ts` |
+| Cronjobs | `app/api/cronjobs/action.ts`, `app/lib/cronjobs/definitions.ts` |
+| Economic calendar | `app/api/economic-calendar/action.ts`, `app/lib/economic-calendar/definitions.ts` |
+| AI provider configs | `app/api/ai-provider-configs/action.ts`, `app/lib/ai-provider-configs/definitions.ts` |
+| Assets | `app/api/assets/action.ts`, `app/lib/assets/definitions.ts` |
+| User profile | `app/api/user/action.ts`, `app/lib/users/definitions.ts` |
+| Workspace | `app/api/workspaces/action.ts`, `app/lib/workspaces/definitions.ts` |
+| Watchlists | `app/api/watchlists/action.ts`, `app/lib/watchlists/definitions.ts`, `components/workspace-watchlist-editor.tsx`, `components/asset-multi-select-combobox.tsx` |
 | Wiki | `app/api/wiki/action.ts`, `app/lib/wiki/definitions.ts` |
-| Route người dùng cục bộ | `app/api/user/route.ts` |
+| Route user cuc bo | `app/api/user/route.ts` |
+| Media | `-` |
+| Roles | `-` |
+| Permissions | `-` |
+| System prompts | `-` |
 
-## Các điểm lệch contract đã biết
+## Cac diem lech contract da biet
 
-- `/news-sources/active` được phân trang trong live spec của backend, nhưng helper hiện tại ở frontend vẫn đang kỳ vọng một mảng thuần.
-- `news-sources` create/update/detail đã tích hợp `rssUrl`, nhưng live spec của `NewsSourceListResponse` hiện chưa mô tả field này cho endpoint danh sách.
-- Trường hiển thị của blog đang không nhất quán ở backend:
-  - Schema tạo mới (`CreateBlogPostRequest`) dùng `visible`
-  - Schema cập nhật (`UpdateBlogPostRequest`) dùng `isVisible`
-  - Schema response (`BlogPostResponse`) dùng `visible`
-- `ai-provider-configs` trong live spec hiện vẫn expose `apiKey` ở response list/detail/mutation; frontend đã sanitize để tránh hydrate secret xuống browser.
-- `ai-provider-configs` trong live spec mô tả truy vấn theo `specification` và `pageable`, nhưng contract hiệu lực của frontend/runtime đang dùng `$filter`, `page`, `size`, `sort`.
-- Các endpoint `medias` đã có ở backend, nhưng frontend vẫn chưa có action/page tương ứng.
-- Frontend đã tích hợp workspace theo mô hình sidebar switcher (switch/create/rename), chưa có route list CRUD riêng và chưa tích hợp delete workspace.
-- Các endpoint system prompt, wiki query, wiki index đã có ở backend, nhưng frontend vẫn chưa có action file tương ứng.
-- `/cronjobs/{id}/stop` đã có ở backend, nhưng frontend chưa có `stopCronjob()` tương ứng.
-- `/me` trả về thông tin người dùng hiện tại từ backend, nhưng repo hiện đang ưu tiên dùng Clerk API trực tiếp.
+- `/sources/active`: spec tra ve page, frontend helper hien van ky vong mang thuan.
+- `blogs`: backend create dung `visible`, update dung `isVisible`, response dung `visible`.
+- `ai-provider-configs`: spec van mo ta query theo `specification/pageable`, trong khi runtime frontend dang dung `$filter/page/size/sort`.
+- `ai-provider-configs`: spec van expose `apiKey` trong response raw; frontend da sanitize de tranh hydrate secret xuong browser.
+- `assets`: frontend da tich hop list/detail cho workspace watchlist editor, nhung hien moi dung nhu read-only catalog.
+- `/me`: da duoc tich hop de lay permission/menu state, nhung profile display va auth session van doc tu Clerk trong layout.
+- `workspace`: create/update request hien chi chua `name` va `slug`; asset theo doi duoc chinh bang action rieng trong workspace menu.
+- `watchlists`: backend resolve theo current selected workspace. Frontend da bo menu/module doc lap va chuyen sang workspace-context editor.
+- `wiki query/lint/rebuild-index/logs`: da co trong spec nhung frontend chua co action/page.
+- `roles`, `permissions`, `medias`, `articles/{id}/feature-image`, `system-prompts`: da co trong spec nhung frontend chua co action/page tuong ung.
+- Workspace da duoc tich hop theo sidebar switcher (switch/create/rename/watchlist editor), nhung chua co route list CRUD rieng.

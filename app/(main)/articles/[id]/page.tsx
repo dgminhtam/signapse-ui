@@ -1,4 +1,7 @@
 import { getArticleById } from "@/app/api/articles/action"
+import { hasPermission } from "@/app/lib/permissions"
+import { getCurrentPermissions } from "@/app/lib/permissions-server"
+import { AccessDenied } from "@/components/access-denied"
 import {
   Card,
   CardContent,
@@ -24,6 +27,30 @@ interface PageProps {
 }
 
 export default async function ArticleDetailPage({ params }: PageProps) {
+  const permissions = await getCurrentPermissions()
+
+  if (!hasPermission(permissions, "article:read")) {
+    return (
+      <div className="flex flex-col gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Article Detail</CardTitle>
+            <CardDescription>
+              Review article content and available actions.
+            </CardDescription>
+          </CardHeader>
+          <Separator />
+          <CardContent className="pt-6">
+            <AccessDenied
+              description="You do not have permission to view article details."
+              permission="article:read"
+            />
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
   const { id } = await params
   const articleId = Number(id)
 

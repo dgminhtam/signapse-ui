@@ -8,6 +8,7 @@ import { toast } from "sonner"
 import { ingestArticleToWiki } from "@/app/api/wiki/action"
 import { Spinner } from "@/components/ui/spinner"
 import { Button } from "@/components/ui/button"
+import { useHasPermission } from "@/components/permission-provider"
 import { cn } from "@/lib/utils"
 
 interface IngestWikiButtonProps {
@@ -27,6 +28,7 @@ export function IngestWikiButton({
   redirectToWikiOnSuccess = false,
   className,
 }: IngestWikiButtonProps) {
+  const canIngestWiki = useHasPermission("wiki:ingest")
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
@@ -49,6 +51,10 @@ export function IngestWikiButton({
 
       toast.error(result.error || "Failed to add article to wiki")
     })
+  }
+
+  if (!canIngestWiki) {
+    return null
   }
 
   return (

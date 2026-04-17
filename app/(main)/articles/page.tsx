@@ -1,6 +1,9 @@
 import { Suspense } from "react"
 import { getArticles } from "@/app/api/articles/action"
+import { hasPermission } from "@/app/lib/permissions"
+import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { ArticleList } from "./article-list"
+import { AccessDenied } from "@/components/access-denied"
 import {
   Card,
   CardContent,
@@ -25,6 +28,30 @@ interface PageProps {
 }
 
 export default async function ArticlesPage({ searchParams }: PageProps) {
+  const permissions = await getCurrentPermissions()
+
+  if (!hasPermission(permissions, "article:read")) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Article Management</CardTitle>
+          <CardDescription>
+            View and manage articles aggregated from your sources.
+          </CardDescription>
+        </CardHeader>
+
+        <Separator />
+
+        <CardContent className="pt-6">
+          <AccessDenied
+            description="You do not have permission to view the article management area."
+            permission="article:read"
+          />
+        </CardContent>
+      </Card>
+    )
+  }
+
   const params = await searchParams
   const page = Number(params.page) || 1
   const size = Number(params.size) || 10
@@ -35,7 +62,7 @@ export default async function ArticlesPage({ searchParams }: PageProps) {
       <CardHeader>
         <CardTitle>Article Management</CardTitle>
         <CardDescription>
-          View and manage articles aggregated from your news sources.
+          View and manage articles aggregated from your sources.
         </CardDescription>
       </CardHeader>
 

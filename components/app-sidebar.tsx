@@ -23,12 +23,13 @@ import { ChevronsUpDownIcon, SparklesIcon, BadgeCheckIcon, CreditCardIcon, BellI
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./ui/collapsible"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuTrigger } from "./ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
-import { siteConfig } from "@/config/site"
+import { NavItem, filterNavItemsByPermissions, siteConfig } from "@/config/site"
 import { SignOutButton } from "@clerk/nextjs"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 import { WorkspaceResponse } from "@/app/lib/workspaces/definitions"
-import { WorkspaceSwitcher } from "./workspace-switcher"
+import { resolveActiveWorkspace } from "@/app/lib/workspaces/active"
+import { WorkspaceSwitcherV2 } from "./workspace-switcher-v2"
 
 type SimpleUser = {
   imageUrl: string
@@ -39,24 +40,35 @@ type SimpleUser = {
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   user: SimpleUser,
   isAuthenticated: boolean
+  permissions: string[]
   workspaces: WorkspaceResponse[]
 }
 
-export function AppSidebar({ user, isAuthenticated, workspaces, ...props }: AppSidebarProps) {
-  const activeWorkspace =
-    workspaces.find((workspace) => workspace.defaultWorkspace) ?? workspaces[0] ?? null
+export function AppSidebar({ user, isAuthenticated, permissions, workspaces, ...props }: AppSidebarProps) {
+  const activeWorkspace = resolveActiveWorkspace(workspaces)
+  const visibleNavItems = filterNavItemsByPermissions(siteConfig.navMain, permissions)
+  const canReadWorkspace = permissions.includes("workspace:read")
 
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <WorkspaceSwitcher
-          workspaces={workspaces}
-          activeWorkspace={activeWorkspace}
-          logo={siteConfig.brand.logo}
-        />
+        {canReadWorkspace ? (
+          <WorkspaceSwitcherV2
+            workspaces={workspaces}
+            activeWorkspace={activeWorkspace}
+            logo={siteConfig.brand.logo}
+            canCreateWorkspace={permissions.includes("workspace:create")}
+            canRenameWorkspace={permissions.includes("workspace:update")}
+            canSetDefaultWorkspace={permissions.includes("workspace:set-default")}
+            canReadAsset={permissions.includes("asset:read")}
+            canReadWatchlist={permissions.includes("watchlist:read")}
+            canCreateWatchlist={permissions.includes("watchlist:create")}
+            canDeleteWatchlist={permissions.includes("watchlist:delete")}
+          />
+        ) : null}
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={siteConfig.navMain} />
+        <NavMain items={visibleNavItems} />
       </SidebarContent>
       <SidebarFooter>
         {isAuthenticated && <NavUser user={user} />}
@@ -69,16 +81,7 @@ export function AppSidebar({ user, isAuthenticated, workspaces, ...props }: AppS
 export function NavMain({
   items,
 }: {
-  items: {
-    title: string
-    url: string
-    icon?: React.ElementType
-    isActive?: boolean
-    items?: {
-      title: string
-      url: string
-    }[]
-  }[]
+  items: NavItem[]
 }) {
   const pathname = usePathname()
   const hasActiveSubItem = (subItems?: { title: string; url: string }[]) => {
@@ -225,6 +228,7 @@ function NavUser({ user }: NavUserProps) {
   )
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function TeamSwitcher({
   teams,
 }: {

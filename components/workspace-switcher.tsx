@@ -29,12 +29,18 @@ interface WorkspaceSwitcherProps {
   workspaces: WorkspaceResponse[]
   activeWorkspace: WorkspaceResponse | null
   logo: React.ElementType
+  canCreateWorkspace: boolean
+  canRenameWorkspace: boolean
+  canSetDefaultWorkspace: boolean
 }
 
 export function WorkspaceSwitcher({
   workspaces,
   activeWorkspace,
   logo: Logo,
+  canCreateWorkspace,
+  canRenameWorkspace,
+  canSetDefaultWorkspace,
 }: WorkspaceSwitcherProps) {
   const router = useRouter()
   const { isMobile } = useSidebar()
@@ -55,7 +61,7 @@ export function WorkspaceSwitcher({
   }, [activeWorkspace, isRenameOpen])
 
   async function handleSwitchWorkspace(workspace: WorkspaceResponse) {
-    if (!activeWorkspace || workspace.id === activeWorkspace.id) {
+    if (!canSetDefaultWorkspace || !activeWorkspace || workspace.id === activeWorkspace.id) {
       return
     }
 
@@ -71,6 +77,10 @@ export function WorkspaceSwitcher({
   }
 
   async function handleCreateWorkspace() {
+    if (!canCreateWorkspace) {
+      return
+    }
+
     const name = createName.trim()
     const slug = createSlug.trim()
 
@@ -99,7 +109,7 @@ export function WorkspaceSwitcher({
   }
 
   async function handleRenameWorkspace() {
-    if (!activeWorkspace) {
+    if (!canRenameWorkspace || !activeWorkspace) {
       return
     }
 
@@ -175,7 +185,7 @@ export function WorkspaceSwitcher({
                   return (
                     <DropdownMenuItem
                       key={workspace.id}
-                      disabled={isPending}
+                      disabled={isPending || !canSetDefaultWorkspace}
                       onClick={() => handleSwitchWorkspace(workspace)}
                       className="gap-2 p-2"
                     >
@@ -193,9 +203,9 @@ export function WorkspaceSwitcher({
                   )
                 })}
               </DropdownMenuGroup>
-              <DropdownMenuSeparator />
+              <DropdownMenuSeparator className={!canCreateWorkspace && !canRenameWorkspace ? "hidden" : ""} />
               <DropdownMenuItem
-                className="gap-2 p-2"
+                className={canCreateWorkspace ? "gap-2 p-2" : "hidden"}
                 onSelect={(event) => {
                   event.preventDefault()
                   setIsCreateOpen(true)
@@ -207,8 +217,8 @@ export function WorkspaceSwitcher({
                 <div className="font-medium">Tạo workspace</div>
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="gap-2 p-2"
-                disabled={!activeWorkspace || activeWorkspace.personal}
+                className={canRenameWorkspace ? "gap-2 p-2" : "hidden"}
+                disabled={!canRenameWorkspace || !activeWorkspace || activeWorkspace.personal}
                 onSelect={(event) => {
                   event.preventDefault()
                   setIsRenameOpen(true)
@@ -224,7 +234,7 @@ export function WorkspaceSwitcher({
         </SidebarMenuItem>
       </SidebarMenu>
 
-      <DialogPrimitive.Root open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+      <DialogPrimitive.Root open={canCreateWorkspace && isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogPrimitive.Portal>
           <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/10 backdrop-blur-xs data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0" />
           <DialogPrimitive.Content className="fixed top-1/2 left-1/2 z-50 w-[min(520px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-xl border bg-popover text-popover-foreground shadow-lg data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0">
@@ -276,7 +286,7 @@ export function WorkspaceSwitcher({
         </DialogPrimitive.Portal>
       </DialogPrimitive.Root>
 
-      <DialogPrimitive.Root open={isRenameOpen} onOpenChange={setIsRenameOpen}>
+      <DialogPrimitive.Root open={canRenameWorkspace && isRenameOpen} onOpenChange={setIsRenameOpen}>
         <DialogPrimitive.Portal>
           <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/10 backdrop-blur-xs data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0" />
           <DialogPrimitive.Content className="fixed top-1/2 left-1/2 z-50 w-[min(520px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-xl border bg-popover text-popover-foreground shadow-lg data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0">
@@ -322,7 +332,7 @@ export function WorkspaceSwitcher({
               </Button>
               <Button
                 type="button"
-                disabled={isPending || !activeWorkspace || activeWorkspace.personal}
+                disabled={isPending || !canRenameWorkspace || !activeWorkspace || activeWorkspace.personal}
                 onClick={handleRenameWorkspace}
               >
                 Lưu thay đổi

@@ -1,12 +1,36 @@
 "use client"
 
-import { NewsSourceListResponse } from "@/app/lib/news-sources/definitions"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
+import { format } from "date-fns"
+import { useState, useTransition } from "react"
+import { toast } from "sonner"
+import {
+  Edit2,
+  ExternalLink,
+  Globe,
+  Newspaper,
+  Plus,
+  Rss,
+  Trash2,
+} from "lucide-react"
+
+import { deleteSource, toggleSourceActive } from "@/app/api/sources/action"
 import { Page } from "@/app/lib/definitions"
-import { Button } from "@/components/ui/button"
+import { SourceListResponse } from "@/app/lib/sources/definitions"
 import { AppPagination } from "@/components/app-pagination"
 import { AppSelectPageSize } from "@/components/app-select-page-size"
+import { useHasPermission } from "@/components/permission-provider"
 import { SortSelect } from "@/components/sort-select"
-import { NewsSourceSearch } from "./news-source-search"
+import { Button } from "@/components/ui/button"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
+import { Spinner } from "@/components/ui/spinner"
 import { Switch } from "@/components/ui/switch"
 import {
   Table,
@@ -16,28 +40,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import {
-  Empty,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-  EmptyDescription,
-} from "@/components/ui/empty"
-import {
-  Edit2,
-  Plus,
-  Trash2,
-  Newspaper,
-  Globe,
-  Rss,
-  ExternalLink,
-} from "lucide-react"
-import Link from "next/link"
-import { format } from "date-fns"
-import { deleteNewsSource, toggleNewsSourceActive } from "@/app/api/news-sources/action"
-import { useRouter } from "next/navigation"
-import { useTransition, useState } from "react"
-import { toast } from "sonner"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -49,25 +51,31 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Spinner } from "@/components/ui/spinner"
 
-interface NewsSourceListProps {
-  newsSourcePage: Page<NewsSourceListResponse>
+import { SourceSearch } from "./source-search"
+
+interface SourceListProps {
+  sourcePage: Page<SourceListResponse>
 }
 
-export function NewsSourceListPage({ newsSourcePage }: NewsSourceListProps) {
-  const newsSources = newsSourcePage?.content || []
+export function SourceListPage({ sourcePage }: SourceListProps) {
+  const sources = sourcePage?.content || []
+  const canCreateSource = useHasPermission("source:create")
+  const canUpdateSource = useHasPermission("source:update")
+  const canDeleteSource = useHasPermission("source:delete")
 
   return (
     <div className="w-full">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex w-full flex-1 items-center gap-4 sm:w-auto">
-          <Button asChild>
-            <Link href="/news-sources/create">
-              <Plus data-icon="inline-start" /> Add news source
-            </Link>
-          </Button>
-          <NewsSourceSearch />
+          {canCreateSource ? (
+            <Button asChild>
+              <Link href="/sources/create">
+                <Plus data-icon="inline-start" /> Add source
+              </Link>
+            </Button>
+          ) : null}
+          <SourceSearch />
         </div>
         <div className="flex items-center gap-2">
           <SortSelect
@@ -92,12 +100,12 @@ export function NewsSourceListPage({ newsSourcePage }: NewsSourceListProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {newsSources.length > 0 ? (
-                newsSources.map((source) => (
+              {sources.length > 0 ? (
+                sources.map((source) => (
                   <TableRow key={source.id} className="border-border transition-colors hover:bg-muted/50">
                     <TableCell className="font-medium text-foreground">
                       <div className="flex flex-col">
-                        <Link href={`/news-sources/${source.id}`} className="hover:underline flex items-center gap-1.5">
+                        <Link href={`/sources/${source.id}`} className="flex items-center gap-1.5 hover:underline">
                           {source.name}
                         </Link>
                         <a
@@ -128,7 +136,11 @@ export function NewsSourceListPage({ newsSourcePage }: NewsSourceListProps) {
                     </TableCell>
                     <TableCell className="text-center">
                       <div className="flex justify-center">
-                        <ToggleActiveSwitch id={source.id} active={source.active} />
+                        <ToggleActiveSwitch
+                          id={source.id}
+                          active={source.active}
+                          canUpdate={canUpdateSource}
+                        />
                       </div>
                     </TableCell>
                     <TableCell className="text-center text-sm text-muted-foreground tabular-nums">
@@ -136,12 +148,16 @@ export function NewsSourceListPage({ newsSourcePage }: NewsSourceListProps) {
                     </TableCell>
                     <TableCell className="text-center">
                       <div className="flex items-center justify-center gap-1">
-                        <Button asChild variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
-                          <Link href={`/news-sources/${source.id}`}>
-                            <Edit2 className="h-4 w-4" />
-                          </Link>
-                        </Button>
-                        <DeleteNewsSourceButton id={source.id} name={source.name} />
+                        {canUpdateSource ? (
+                          <Button asChild variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                            <Link href={`/sources/${source.id}`}>
+                              <Edit2 className="h-4 w-4" />
+                            </Link>
+                          </Button>
+                        ) : null}
+                        {canDeleteSource ? (
+                          <DeleteSourceButton id={source.id} name={source.name} />
+                        ) : null}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -152,8 +168,8 @@ export function NewsSourceListPage({ newsSourcePage }: NewsSourceListProps) {
                     <Empty>
                       <EmptyHeader>
                         <EmptyMedia variant="icon"><Newspaper /></EmptyMedia>
-                        <EmptyTitle>No news sources found</EmptyTitle>
-                        <EmptyDescription>Add your first news source to start collecting articles.</EmptyDescription>
+                        <EmptyTitle>No sources found</EmptyTitle>
+                        <EmptyDescription>Add your first source to start collecting articles.</EmptyDescription>
                       </EmptyHeader>
                     </Empty>
                   </TableCell>
@@ -164,17 +180,17 @@ export function NewsSourceListPage({ newsSourcePage }: NewsSourceListProps) {
         </div>
       </div>
 
-      <div className="my-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-t pt-4">
+      <div className="my-4 flex flex-col gap-4 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
         <AppSelectPageSize />
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">
-             Page {(newsSourcePage?.number ?? 0) + 1} of {newsSourcePage?.totalPages ?? 0} ({newsSourcePage?.totalElements ?? 0} sources)
+            Page {(sourcePage?.number ?? 0) + 1} of {sourcePage?.totalPages ?? 0} ({sourcePage?.totalElements ?? 0} sources)
           </span>
         </div>
         <div className="flex gap-2">
           <AppPagination
-            totalElements={newsSourcePage?.totalElements ?? 0}
-            itemsPerPage={newsSourcePage?.size ?? 12}
+            totalElements={sourcePage?.totalElements ?? 0}
+            itemsPerPage={sourcePage?.size ?? 12}
           />
         </div>
       </div>
@@ -182,15 +198,23 @@ export function NewsSourceListPage({ newsSourcePage }: NewsSourceListProps) {
   )
 }
 
-function ToggleActiveSwitch({ id, active }: { id: number; active: boolean }) {
+function ToggleActiveSwitch({
+  id,
+  active,
+  canUpdate,
+}: {
+  id: number
+  active: boolean
+  canUpdate: boolean
+}) {
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
   const handleToggle = () => {
     startTransition(async () => {
-      const result = await toggleNewsSourceActive(id)
+      const result = await toggleSourceActive(id)
       if (result.success) {
-        toast.success(`Source ${active ? 'disabled' : 'enabled'} successfully`)
+        toast.success(`Source ${active ? "disabled" : "enabled"} successfully`)
         router.refresh()
       } else {
         toast.error(result.error)
@@ -200,26 +224,26 @@ function ToggleActiveSwitch({ id, active }: { id: number; active: boolean }) {
 
   return (
     <div className="flex items-center gap-2">
-      <Switch 
-        checked={active} 
-        onCheckedChange={handleToggle} 
-        disabled={isPending}
+      <Switch
+        checked={active}
+        onCheckedChange={handleToggle}
+        disabled={isPending || !canUpdate}
       />
       {isPending && <Spinner className="size-3" />}
     </div>
   )
 }
 
-function DeleteNewsSourceButton({ id, name }: { id: number; name: string }) {
+function DeleteSourceButton({ id, name }: { id: number; name: string }) {
   const [isPending, startTransition] = useTransition()
   const [open, setOpen] = useState(false)
   const router = useRouter()
 
   const handleDelete = () => {
     startTransition(async () => {
-      const result = await deleteNewsSource(id)
+      const result = await deleteSource(id)
       if (result.success) {
-        toast.success(`News source "${name}" deleted successfully`)
+        toast.success(`Source "${name}" deleted successfully`)
         setOpen(false)
         router.refresh()
       } else {
@@ -231,10 +255,10 @@ function DeleteNewsSourceButton({ id, name }: { id: number; name: string }) {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive" 
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
           title="Delete"
         >
           <Trash2 className="h-4 w-4" />
@@ -244,14 +268,14 @@ function DeleteNewsSourceButton({ id, name }: { id: number; name: string }) {
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete the news source <strong>{name}</strong> and potentially affect associated articles.
+            This action cannot be undone. This will permanently delete the source <strong>{name}</strong> and potentially affect associated articles.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
-          <AlertDialogAction 
-            onClick={(e) => { e.preventDefault(); handleDelete(); }} 
-            disabled={isPending} 
+          <AlertDialogAction
+            onClick={(e) => { e.preventDefault(); handleDelete() }}
+            disabled={isPending}
             className="bg-red-500 hover:bg-red-600"
           >
             {isPending ? "Deleting..." : "Delete"}

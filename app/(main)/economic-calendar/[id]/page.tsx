@@ -1,5 +1,8 @@
 import { getEconomicEventById } from "@/app/api/economic-calendar/action"
 import { notFound } from "next/navigation"
+import { hasPermission } from "@/app/lib/permissions"
+import { getCurrentPermissions } from "@/app/lib/permissions-server"
+import { AccessDenied } from "@/components/access-denied"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Calendar, Globe, AlertTriangle, Minus, TrendingDown, Info, Clock, RefreshCcw } from "lucide-react"
@@ -38,6 +41,28 @@ function getImpactBadge(impact: string) {
 }
 
 export default async function EconomicEventDetailPage({ params }: DetailPageProps) {
+  const permissions = await getCurrentPermissions()
+
+  if (!hasPermission(permissions, "event:read")) {
+    return (
+      <Card className="border-border bg-card">
+        <CardHeader>
+          <CardTitle>Economic Event Detail</CardTitle>
+          <CardDescription>
+            Review the details of a single economic calendar event.
+          </CardDescription>
+        </CardHeader>
+        <Separator />
+        <CardContent className="pt-6">
+          <AccessDenied
+            description="You do not have permission to view economic event details."
+            permission="event:read"
+          />
+        </CardContent>
+      </Card>
+    )
+  }
+
   const { id } = await params
   const event = await getEconomicEventById(Number(id))
 

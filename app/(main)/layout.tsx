@@ -1,11 +1,12 @@
 import { auth, currentUser } from '@clerk/nextjs/server'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { Separator } from "@/components/ui/separator";
 import { ModeToggle } from '@/components/mode-toggle';
 import { AppBreadcrumb } from '@/components/app-breadcrumbs';
 import { AppSidebar } from '@/components/app-sidebar';
+import { PermissionProvider } from '@/components/permission-provider';
 import { cookies } from "next/headers"
 import { getMyWorkspaces } from '@/app/api/workspaces/action';
+import { getCurrentPermissions } from '@/app/lib/permissions-server';
 import { WorkspaceResponse } from '@/app/lib/workspaces/definitions';
 
 export default async function Layout({
@@ -27,38 +28,44 @@ export default async function Layout({
   const cookieStore = await cookies()
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "true"
   let workspaces: WorkspaceResponse[] = []
+  const permissions = await getCurrentPermissions()
 
-  try {
-    const workspacePage = await getMyWorkspaces({
-      filter: "",
-      page: 0,
-      size: 100,
-      sort: [{ field: "id", direction: "asc" }],
-    })
-    workspaces = workspacePage.content ?? []
-  } catch {
-    workspaces = []
+  if (permissions.includes("workspace:read")) {
+    try {
+      const workspacePage = await getMyWorkspaces({
+        filter: "",
+        page: 0,
+        size: 100,
+        sort: [{ field: "id", direction: "asc" }],
+      })
+      workspaces = workspacePage.content ?? []
+    } catch {
+      workspaces = []
+    }
   }
 
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
-      <AppSidebar
-        user={simpleUser}
-        isAuthenticated={isAuthenticated}
-        workspaces={workspaces}
-      />
-      <SidebarInset>
-        <header className="flex h-18 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 border-b">
-          <div className="flex items-center gap-2 px-4">
-            <SidebarTrigger />
-            <ModeToggle />
-            <AppBreadcrumb />
+      <PermissionProvider permissions={permissions}>
+        <AppSidebar
+          user={simpleUser}
+          isAuthenticated={isAuthenticated}
+          permissions={permissions}
+          workspaces={workspaces}
+        />
+        <SidebarInset>
+          <header className="flex h-18 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 border-b">
+            <div className="flex items-center gap-2 px-4">
+              <SidebarTrigger />
+              <ModeToggle />
+              <AppBreadcrumb />
+            </div>
+          </header>
+          <div className="flex flex-1 flex-col gap-4 p-5">
+            {children}
           </div>
-        </header>
-        <div className="flex flex-1 flex-col gap-4 p-5">
-          {children}
-        </div>
-      </SidebarInset>
+        </SidebarInset>
+      </PermissionProvider>
     </SidebarProvider>
   );
 }

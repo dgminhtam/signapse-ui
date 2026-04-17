@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { AppPagination } from "@/components/app-pagination"
 import { AppSelectPageSize } from "@/components/app-select-page-size"
+import { useHasPermission } from "@/components/permission-provider"
 import { SortSelect } from "@/components/sort-select"
 import { EconomicCalendarSearch } from "./economic-calendar-search"
 import {
@@ -82,12 +83,14 @@ function getImpactBadge(impact: string) {
 
 export function EconomicCalendarList({ eventPage }: EconomicCalendarListProps) {
   const events = eventPage?.content || []
+  const canCrawlEvents = useHasPermission("event:crawl")
+  const canDeleteEvent = useHasPermission("event:delete")
 
   return (
     <div className="w-full">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex w-full flex-1 items-center gap-4 sm:w-auto">
-          <CrawlButton />
+          {canCrawlEvents ? <CrawlButton /> : null}
           <EconomicCalendarSearch />
         </div>
         <div className="flex items-center gap-2">
@@ -148,7 +151,7 @@ export function EconomicCalendarList({ eventPage }: EconomicCalendarListProps) {
                             <Eye className="h-4 w-4" />
                           </Link>
                         </Button>
-                        <DeleteEventButton id={event.id} />
+                        {canDeleteEvent ? <DeleteEventButton id={event.id} /> : null}
                       </div>
                     </TableCell>
                   </TableRow>

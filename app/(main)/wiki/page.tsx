@@ -3,6 +3,9 @@ import Link from "next/link"
 import { BookOpen, FileText } from "lucide-react"
 
 import { getWikiPages } from "@/app/api/wiki/action"
+import { hasPermission } from "@/app/lib/permissions"
+import { getCurrentPermissions } from "@/app/lib/permissions-server"
+import { AccessDenied } from "@/components/access-denied"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -23,6 +26,30 @@ function formatDateTime(value?: string) {
 }
 
 export default async function WikiPage() {
+  const permissions = await getCurrentPermissions()
+
+  if (!hasPermission(permissions, "wiki:read")) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Wiki Pages</CardTitle>
+          <CardDescription>
+            Browse all wiki pages currently available in the knowledge base.
+          </CardDescription>
+        </CardHeader>
+
+        <Separator />
+
+        <CardContent className="pt-6">
+          <AccessDenied
+            description="You do not have permission to view wiki pages."
+            permission="wiki:read"
+          />
+        </CardContent>
+      </Card>
+    )
+  }
+
   const pages = await getWikiPages()
 
   return (

@@ -4,6 +4,7 @@ import { CronjobListResponse } from "@/app/lib/cronjobs/definitions"
 import { Page } from "@/app/lib/definitions"
 import { AppPagination } from "@/components/app-pagination"
 import { AppSelectPageSize } from "@/components/app-select-page-size"
+import { useHasPermission } from "@/components/permission-provider"
 import { SortSelect } from "@/components/sort-select"
 import { CronjobSearch } from "./cronjob-search"
 import { Badge } from "@/components/ui/badge"
@@ -113,16 +114,21 @@ function getStatusBadge(status: string | undefined) {
 
 export function CronjobListPage({ cronjobPage }: CronjobListProps) {
   const cronjobs = cronjobPage.content
+  const canCreateCronjob = useHasPermission("cronjob:create")
+  const canUpdateCronjob = useHasPermission("cronjob:update")
+  const canDeleteCronjob = useHasPermission("cronjob:delete")
 
   return (
     <div className="w-full">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex w-full flex-1 items-center gap-4 sm:w-auto">
-          <Button asChild>
-            <Link href="/cronjobs/create">
-              <Plus data-icon="inline-start" /> Create new cronjob
-            </Link>
-          </Button>
+          {canCreateCronjob ? (
+            <Button asChild>
+              <Link href="/cronjobs/create">
+                <Plus data-icon="inline-start" /> Create new cronjob
+              </Link>
+            </Button>
+          ) : null}
           <CronjobSearch />
         </div>
         <div className="flex items-center gap-2">
@@ -205,18 +211,20 @@ export function CronjobListPage({ cronjobPage }: CronjobListProps) {
                           id={cronjob.id}
                           status={cronjob.jobStatus}
                         />
-                        <Button
-                          asChild
-                          variant="ghost"
-                          size="icon"
-                          className="text-muted-foreground hover:text-foreground"
-                          title="Edit"
-                        >
-                          <Link href={`/cronjobs/${cronjob.id}`}>
-                            <Edit2 />
-                          </Link>
-                        </Button>
-                        <DeleteCronjobButton id={cronjob.id} />
+                        {canUpdateCronjob ? (
+                          <Button
+                            asChild
+                            variant="ghost"
+                            size="icon"
+                            className="text-muted-foreground hover:text-foreground"
+                            title="Edit"
+                          >
+                            <Link href={`/cronjobs/${cronjob.id}`}>
+                              <Edit2 />
+                            </Link>
+                          </Button>
+                        ) : null}
+                        {canDeleteCronjob ? <DeleteCronjobButton id={cronjob.id} /> : null}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -262,6 +270,9 @@ export function CronjobListPage({ cronjobPage }: CronjobListProps) {
 }
 
 function StatusActions({ id, status }: { id: number; status: string }) {
+  const canStartCronjob = useHasPermission("cronjob:start")
+  const canPauseCronjob = useHasPermission("cronjob:pause")
+  const canResumeCronjob = useHasPermission("cronjob:resume")
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
@@ -307,29 +318,33 @@ function StatusActions({ id, status }: { id: number; status: string }) {
     <>
       {(statusValue === "SCHEDULED" || statusValue === "COMPLETE") && (
         <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-green-600 hover:bg-green-500/10 hover:text-green-700"
-            title="Start"
-            disabled={isPending}
-            onClick={handleStart}
-          >
-            {isPending ? <Spinner className="size-4" /> : <Play className="h-4 w-4" />}
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-yellow-600 hover:bg-yellow-500/10 hover:text-yellow-700"
-            title="Pause"
-            disabled={isPending}
-            onClick={handlePause}
-          >
-            {isPending ? <Spinner className="size-4" /> : <Pause className="h-4 w-4" />}
-          </Button>
+          {canStartCronjob ? (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-green-600 hover:bg-green-500/10 hover:text-green-700"
+              title="Start"
+              disabled={isPending}
+              onClick={handleStart}
+            >
+              {isPending ? <Spinner className="size-4" /> : <Play className="h-4 w-4" />}
+            </Button>
+          ) : null}
+          {canPauseCronjob ? (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-yellow-600 hover:bg-yellow-500/10 hover:text-yellow-700"
+              title="Pause"
+              disabled={isPending}
+              onClick={handlePause}
+            >
+              {isPending ? <Spinner className="size-4" /> : <Pause className="h-4 w-4" />}
+            </Button>
+          ) : null}
         </div>
       )}
-      {statusValue === "PAUSED" && (
+      {(statusValue === "PAUSED" && canResumeCronjob) ? (
         <Button
           variant="ghost"
           size="icon"
@@ -344,7 +359,7 @@ function StatusActions({ id, status }: { id: number; status: string }) {
             <RotateCcw className="h-4 w-4" />
           )}
         </Button>
-      )}
+      ) : null}
     </>
   )
 }

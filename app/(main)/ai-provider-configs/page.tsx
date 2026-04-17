@@ -1,7 +1,10 @@
 import { Suspense } from "react"
 
 import { getAiProviderConfigs } from "@/app/api/ai-provider-configs/action"
+import { hasPermission } from "@/app/lib/permissions"
+import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { buildFilterQuery, buildSortQuery } from "@/app/lib/utils"
+import { AccessDenied } from "@/components/access-denied"
 import {
   Card,
   CardContent,
@@ -19,6 +22,30 @@ interface PageProps {
 }
 
 export default async function AiProviderConfigsPage({ searchParams }: PageProps) {
+  const permissions = await getCurrentPermissions()
+
+  if (!hasPermission(permissions, "ai-provider-config:read")) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Cáº¥u hÃ¬nh nhÃ  cung cáº¥p AI</CardTitle>
+          <CardDescription>
+            Quáº£n lÃ½ thÃ´ng tin xÃ¡c thá»±c, model Ä‘Ã£ chá»n vÃ  nhÃ  cung cáº¥p AI máº·c Ä‘á»‹nh.
+          </CardDescription>
+        </CardHeader>
+
+        <Separator />
+
+        <CardContent className="pt-6">
+          <AccessDenied
+            description="Báº¡n khÃ´ng cÃ³ quyá»n xem cáº¥u hÃ¬nh nhÃ  cung cáº¥p AI."
+            permission="ai-provider-config:read"
+          />
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <Card>
       <CardHeader>

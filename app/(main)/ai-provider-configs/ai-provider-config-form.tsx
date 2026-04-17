@@ -22,6 +22,7 @@ import {
   AiProviderType,
 } from "@/app/lib/ai-provider-configs/definitions"
 import { Button } from "@/components/ui/button"
+import { useHasPermission } from "@/components/permission-provider"
 import {
   Field,
   FieldDescription,
@@ -78,6 +79,7 @@ interface AiProviderConfigFormProps {
 export function AiProviderConfigForm({ initialData }: AiProviderConfigFormProps) {
   const router = useRouter()
   const isEdit = !!initialData
+  const canFetchModelCatalog = useHasPermission("ai-provider-config:model-catalog")
   const [modelOptions, setModelOptions] = useState<AiProviderModelOptionResponse[]>([])
   const [isModelDialogOpen, setIsModelDialogOpen] = useState(false)
   const [hasAuthenticatedCatalog, setHasAuthenticatedCatalog] = useState(false)
@@ -98,6 +100,7 @@ export function AiProviderConfigForm({ initialData }: AiProviderConfigFormProps)
     },
   })
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const selectedModel = form.watch("model")
 
   function invalidateAuthenticatedCatalog() {
@@ -333,6 +336,7 @@ export function AiProviderConfigForm({ initialData }: AiProviderConfigFormProps)
                     className="sm:w-auto"
                     onClick={handleAuthenticateAndSelectModel}
                     disabled={
+                      !canFetchModelCatalog ||
                       isAuthenticatingModels ||
                       !form.getValues("providerType") ||
                       !form.getValues("apiKey").trim()
