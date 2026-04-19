@@ -129,7 +129,9 @@ export function WorkspaceSwitcherV2({
         return
       }
 
-      toast.success("Tao workspace thanh cong. Ban co the switch sang workspace moi de chinh asset theo doi.")
+      toast.success(
+        "Tạo workspace thành công. Bạn có thể chuyển sang workspace mới để quản lý danh sách theo dõi."
+      )
       setCreateName("")
       setCreateSlug("")
       setIsCreateOpen(false)
@@ -271,7 +273,7 @@ export function WorkspaceSwitcherV2({
                 <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
                   <ListPlusIcon className="size-4" />
                 </div>
-                <div className="font-medium">Chinh asset theo doi</div>
+                <div className="font-medium">Chỉnh danh sách theo dõi</div>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -288,8 +290,8 @@ export function WorkspaceSwitcherV2({
                   Tao workspace moi
                 </DialogPrimitive.Title>
                 <DialogPrimitive.Description className="text-sm text-muted-foreground">
-                  Nhap ten va slug tuy chon de tao workspace moi. Asset theo doi duoc chinh
-                  sau khi workspace duoc chon.
+                  Nhập tên và slug tùy chọn để tạo workspace mới. Danh sách theo dõi sẽ được
+                  quản lý sau khi workspace được chọn.
                 </DialogPrimitive.Description>
               </div>
               <DialogPrimitive.Close asChild>
@@ -341,8 +343,8 @@ export function WorkspaceSwitcherV2({
                   Doi ten workspace
                 </DialogPrimitive.Title>
                 <DialogPrimitive.Description className="text-sm text-muted-foreground">
-                  Cap nhat ten hoac slug cho workspace dang chon. Asset theo doi duoc chinh
-                  bang action rieng trong menu workspace.
+                  Cập nhật tên hoặc slug cho workspace đang chọn. Danh sách theo dõi được quản lý
+                  bằng hành động riêng trong menu workspace.
                 </DialogPrimitive.Description>
               </div>
               <DialogPrimitive.Close asChild>

@@ -10,8 +10,7 @@ import { toast } from "sonner"
 import { deleteTopic, toggleTopicActive } from "@/app/api/topics/action"
 import { Page } from "@/app/lib/definitions"
 import { TopicListResponse } from "@/app/lib/topics/definitions"
-import { AppPagination } from "@/components/app-pagination"
-import { AppSelectPageSize } from "@/components/app-select-page-size"
+import { AppPaginationControls } from "@/components/app-pagination-controls"
 import { SortSelect } from "@/components/sort-select"
 import { Button } from "@/components/ui/button"
 import {
@@ -151,20 +150,7 @@ export function TopicListPage({ topicPage }: TopicListPageProps) {
         </div>
       </div>
 
-      <div className="my-4 flex flex-col gap-4 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
-        <AppSelectPageSize />
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">
-            Page {(topicPage?.number ?? 0) + 1} of {topicPage?.totalPages ?? 0} ({topicPage?.totalElements ?? 0} topics)
-          </span>
-        </div>
-        <div className="flex gap-2">
-          <AppPagination
-            totalElements={topicPage?.totalElements ?? 0}
-            itemsPerPage={topicPage?.size ?? 12}
-          />
-        </div>
-      </div>
+      <AppPaginationControls page={topicPage} className="mt-4" />
     </div>
   )
 }

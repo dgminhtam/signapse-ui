@@ -2,8 +2,7 @@
 
 import { CronjobListResponse } from "@/app/lib/cronjobs/definitions"
 import { Page } from "@/app/lib/definitions"
-import { AppPagination } from "@/components/app-pagination"
-import { AppSelectPageSize } from "@/components/app-select-page-size"
+import { AppPaginationControls } from "@/components/app-pagination-controls"
 import { useHasPermission } from "@/components/permission-provider"
 import { SortSelect } from "@/components/sort-select"
 import { CronjobSearch } from "./cronjob-search"
@@ -251,20 +250,7 @@ export function CronjobListPage({ cronjobPage }: CronjobListProps) {
         </Card>
       </div>
 
-      <div className="my-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <AppSelectPageSize />
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">
-             Page {cronjobPage.number + 1} of {cronjobPage.totalPages} ({cronjobPage.totalElements} total)
-          </span>
-        </div>
-        <div className="flex gap-2">
-          <AppPagination
-            totalElements={cronjobPage.totalElements}
-            itemsPerPage={cronjobPage.size}
-          />
-        </div>
-      </div>
+      <AppPaginationControls page={cronjobPage} className="mt-4" />
     </div>
   )
 }

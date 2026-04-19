@@ -10,8 +10,7 @@ import { toast } from "sonner"
 import { deleteBlog } from "@/app/api/blogs/action"
 import { BlogPostListResponse } from "@/app/lib/blogs/definitions"
 import { Page } from "@/app/lib/definitions"
-import { AppPagination } from "@/components/app-pagination"
-import { AppSelectPageSize } from "@/components/app-select-page-size"
+import { AppPaginationControls } from "@/components/app-pagination-controls"
 import { useHasPermission } from "@/components/permission-provider"
 import { SortSelect } from "@/components/sort-select"
 import {
@@ -164,20 +163,7 @@ export function BlogListPage({ blogPage }: BlogListProps) {
         </Card>
       </div>
 
-      <div className="my-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <AppSelectPageSize />
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">
-            Page {blogPage.number + 1} of {blogPage.totalPages} ({blogPage.totalElements} total)
-          </span>
-        </div>
-        <div className="flex gap-2">
-          <AppPagination
-            totalElements={blogPage.totalElements}
-            itemsPerPage={blogPage.size}
-          />
-        </div>
-      </div>
+      <AppPaginationControls page={blogPage} className="mt-4" />
     </div>
   )
 }

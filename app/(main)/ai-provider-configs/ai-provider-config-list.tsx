@@ -13,8 +13,7 @@ import {
 } from "@/app/api/ai-provider-configs/action"
 import { AiProviderConfigListResponse } from "@/app/lib/ai-provider-configs/definitions"
 import { Page } from "@/app/lib/definitions"
-import { AppPagination } from "@/components/app-pagination"
-import { AppSelectPageSize } from "@/components/app-select-page-size"
+import { AppPaginationControls } from "@/components/app-pagination-controls"
 import { useHasPermission } from "@/components/permission-provider"
 import { SortSelect } from "@/components/sort-select"
 import {
@@ -166,20 +165,7 @@ export function AiProviderConfigListPage({ providerPage }: AiProviderConfigListP
         </Table>
       </div>
 
-      <div className="my-4 flex flex-col gap-4 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
-        <AppSelectPageSize />
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">
-            Page {providerPage.number + 1} / {providerPage.totalPages} ({providerPage.totalElements} total)
-          </span>
-        </div>
-        <div className="flex gap-2">
-          <AppPagination
-            totalElements={providerPage.totalElements}
-            itemsPerPage={providerPage.size}
-          />
-        </div>
-      </div>
+      <AppPaginationControls page={providerPage} className="mt-4" />
     </div>
   )
 }

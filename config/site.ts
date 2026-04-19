@@ -5,10 +5,13 @@ import {
   Settings2,
 } from "lucide-react"
 
+import { EVENT_NAV_PERMISSIONS } from "@/app/lib/events/permissions"
+import { SOURCE_DOCUMENT_NAV_PERMISSIONS } from "@/app/lib/source-documents/permissions"
+
 export interface NavSubItem {
   title: string
   url: string
-  permission?: string
+  permission?: string | readonly string[]
 }
 
 export interface NavItem {
@@ -16,8 +19,23 @@ export interface NavItem {
   url: string
   icon?: React.ElementType
   isActive?: boolean
-  permission?: string
+  permission?: string | readonly string[]
   items?: NavSubItem[]
+}
+
+function hasPermissionMatch(
+  permissions: string[],
+  requirement?: string | readonly string[]
+): boolean {
+  if (!requirement) {
+    return true
+  }
+
+  if (typeof requirement === "string") {
+    return permissions.includes(requirement)
+  }
+
+  return requirement.some((permission) => permissions.includes(permission))
 }
 
 export const siteConfig = {
@@ -35,7 +53,7 @@ export const siteConfig = {
   },
   navMain: [
     {
-      title: "Đồ thị kiến thức",
+      title: "Biểu đồ tri thức",
       url: "/",
       icon: LayoutDashboard,
     },
@@ -45,54 +63,49 @@ export const siteConfig = {
       icon: Newspaper,
       items: [
         {
-          title: "Nguồn tin",
+          title: "Nguồn dữ liệu",
           url: "/sources",
           permission: "source:read",
         },
         {
-          title: "Bài viết",
-          url: "/articles",
-          permission: "article:read",
+          title: "Tài liệu nguồn",
+          url: "/source-documents",
+          permission: SOURCE_DOCUMENT_NAV_PERMISSIONS,
+        },
+        {
+          title: "Sự kiện",
+          url: "/events",
+          permission: EVENT_NAV_PERMISSIONS,
         },
         {
           title: "Blog",
           url: "/blogs",
           permission: "blog:read",
         },
-        {
-          title: "Lịch kinh tế",
-          url: "/economic-calendar",
-          permission: "event:read",
-        },
-        {
-          title: "Wiki",
-          url: "/wiki",
-          permission: "wiki:read",
-        },
       ],
     },
     {
-      title: "Setting",
+      title: "Cài đặt",
       url: "#",
       icon: Settings2,
       items: [
         {
-          title: "AI providers",
+          title: "Nhà cung cấp AI",
           url: "/ai-provider-configs",
           permission: "ai-provider-config:read",
         },
         {
-          title: "cronjob",
+          title: "Tác vụ định kỳ",
           url: "/cronjobs",
           permission: "cronjob:read",
         },
         {
-          title: "Roles",
+          title: "Vai trò",
           url: "/roles",
           permission: "role:update",
         },
         {
-          title: "Developer Token",
+          title: "Token nhà phát triển",
           url: "/developer-token",
           permission: "system:admin",
         },
@@ -106,9 +119,9 @@ export function filterNavItemsByPermissions(
   permissions: string[]
 ): NavItem[] {
   return items.flatMap((item) => {
-    const hasDirectPermission = !item.permission || permissions.includes(item.permission)
-    const filteredSubItems = item.items?.filter(
-      (subItem) => !subItem.permission || permissions.includes(subItem.permission)
+    const hasDirectPermission = hasPermissionMatch(permissions, item.permission)
+    const filteredSubItems = item.items?.filter((subItem) =>
+      hasPermissionMatch(permissions, subItem.permission)
     )
 
     if (filteredSubItems) {

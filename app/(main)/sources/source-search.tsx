@@ -1,8 +1,8 @@
 "use client"
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useTransition } from "react"
 import { Search } from "lucide-react"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useState, useTransition } from "react"
 import { useDebouncedCallback } from "use-debounce"
 
 import { Input } from "@/components/ui/input"
@@ -13,12 +13,15 @@ export function SourceSearch() {
   const pathname = usePathname()
   const { replace } = useRouter()
   const [isPending, startTransition] = useTransition()
+  const [value, setValue] = useState(
+    searchParams.get("name[containsIgnoreCase]")?.toString() || ""
+  )
 
   const handleSearch = useDebouncedCallback((term: string) => {
     const params = new URLSearchParams(searchParams)
     params.set("page", "1")
-    if (term) {
-      params.set("name[containsIgnoreCase]", term)
+    if (term.trim()) {
+      params.set("name[containsIgnoreCase]", term.trim())
     } else {
       params.delete("name[containsIgnoreCase]")
     }
@@ -30,19 +33,26 @@ export function SourceSearch() {
 
   return (
     <div className="relative max-w-sm flex-1">
-      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+      <label htmlFor="source-search" className="sr-only">
+        Tìm nguồn dữ liệu
+      </label>
+      <Search className="absolute top-2.5 left-2.5 h-4 w-4 text-muted-foreground" />
       <Input
+        id="source-search"
         type="search"
-        placeholder="Search sources..."
+        placeholder="Tìm theo tên nguồn..."
         className="pl-8"
-        defaultValue={searchParams.get("name[containsIgnoreCase]")?.toString()}
-        onChange={(e) => handleSearch(e.target.value)}
+        value={value}
+        onChange={(event) => {
+          setValue(event.target.value)
+          handleSearch(event.target.value)
+        }}
       />
-      {isPending && (
-        <div className="absolute right-2.5 top-2.5">
+      {isPending ? (
+        <div className="absolute top-2.5 right-2.5">
           <Spinner className="size-4" />
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

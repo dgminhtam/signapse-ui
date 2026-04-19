@@ -37,7 +37,8 @@ export async function createSource(
     revalidatePath("/sources")
     return { success: true, data: source }
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "Failed to create source"
+    const errorMessage =
+      error instanceof Error ? error.message : "Không thể tạo nguồn dữ liệu"
     return { success: false, error: errorMessage }
   }
 }
@@ -55,7 +56,8 @@ export async function updateSource(
     revalidatePath(`/sources/${id}`)
     return { success: true, data: source }
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "Failed to update source"
+    const errorMessage =
+      error instanceof Error ? error.message : "Không thể cập nhật nguồn dữ liệu"
     return { success: false, error: errorMessage }
   }
 }
@@ -71,7 +73,8 @@ export async function toggleSourceActive(id: number): Promise<ActionResult<Sourc
     revalidatePath("/sources")
     return { success: true, data: source }
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "Failed to toggle source status"
+    const errorMessage =
+      error instanceof Error ? error.message : "Không thể cập nhật trạng thái nguồn dữ liệu"
     return { success: false, error: errorMessage }
   }
 }
@@ -84,7 +87,8 @@ export async function deleteSource(id: number): Promise<ActionResult> {
     revalidatePath("/sources")
     return { success: true, data: undefined }
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "Failed to delete source"
+    const errorMessage =
+      error instanceof Error ? error.message : "Không thể xóa nguồn dữ liệu"
     return { success: false, error: errorMessage }
   }
 }

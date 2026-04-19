@@ -12,6 +12,7 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
@@ -68,7 +69,7 @@ export function AssetMultiSelectCombobox({
         }
 
         const errorMessage =
-          error instanceof Error ? error.message : "Failed to load assets"
+          error instanceof Error ? error.message : "Không thể tải danh sách tài sản"
         setLoadError(errorMessage)
         setOptions([])
       } finally {
@@ -118,8 +119,8 @@ export function AssetMultiSelectCombobox({
           >
             <span className="truncate">
               {selectedAssets.length > 0
-                ? `Da chon ${selectedAssets.length} asset`
-                : "Chon asset theo doi"}
+                ? `Đã chọn ${selectedAssets.length} tài sản`
+                : "Chọn tài sản theo dõi"}
             </span>
             {isLoading ? <Spinner className="size-4" /> : <ChevronsUpDownIcon className="size-4" />}
           </Button>
@@ -136,13 +137,13 @@ export function AssetMultiSelectCombobox({
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
                 onKeyDown={(event) => event.stopPropagation()}
-                placeholder="Tim theo ten hoac symbol"
+                placeholder="Tìm theo tên hoặc mã tài sản"
                 className="pl-8"
               />
             </div>
           </div>
 
-          <DropdownMenuLabel>Asset catalog</DropdownMenuLabel>
+          <DropdownMenuLabel>Kho tài sản</DropdownMenuLabel>
 
           {loadError ? (
             <div className="px-2 pb-2 text-sm text-destructive">{loadError}</div>
@@ -150,30 +151,32 @@ export function AssetMultiSelectCombobox({
 
           {!loadError && !isLoading && options.length === 0 ? (
             <div className="px-2 pb-2 text-sm text-muted-foreground">
-              Khong tim thay asset phu hop.
+              Không tìm thấy tài sản phù hợp.
             </div>
           ) : null}
 
           {options.length > 0 ? (
             <div className="max-h-72 overflow-y-auto">
-              {options.map((asset) => (
-                <DropdownMenuCheckboxItem
-                  key={asset.id}
-                  checked={isSelected(asset.id)}
-                  onCheckedChange={(checked) => toggleAsset(asset, checked === true)}
-                  onSelect={(event) => event.preventDefault()}
-                >
-                  <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="truncate font-medium">{asset.name}</div>
-                      <div className="truncate text-xs text-muted-foreground">
-                        {asset.symbol}
+              <DropdownMenuGroup>
+                {options.map((asset) => (
+                  <DropdownMenuCheckboxItem
+                    key={asset.id}
+                    checked={isSelected(asset.id)}
+                    onCheckedChange={(checked) => toggleAsset(asset, checked === true)}
+                    onSelect={(event) => event.preventDefault()}
+                  >
+                    <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="truncate font-medium">{asset.name}</div>
+                        <div className="truncate text-xs text-muted-foreground">
+                          {asset.symbol}
+                        </div>
                       </div>
+                      <Badge variant="outline">{asset.type}</Badge>
                     </div>
-                    <Badge variant="outline">{asset.type}</Badge>
-                  </div>
-                </DropdownMenuCheckboxItem>
-              ))}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuGroup>
             </div>
           ) : null}
         </DropdownMenuContent>
@@ -200,7 +203,7 @@ export function AssetMultiSelectCombobox({
         </div>
       ) : (
         <p className="text-sm text-muted-foreground">
-          Workspace nay chua co asset nao trong danh sach theo doi.
+          Workspace này chưa có tài sản nào trong danh sách theo dõi.
         </p>
       )}
     </div>

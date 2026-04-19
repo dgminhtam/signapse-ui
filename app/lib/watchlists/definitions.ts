@@ -1,10 +1,10 @@
 export type AssetType = "COMMODITY" | "CRYPTO" | "FX" | "INDEX" | string
 
-export interface CreateWatchlistRequest {
+export interface AddWorkspaceWatchlistAssetRequest {
   assetId: number
 }
 
-export interface WatchlistResponse {
+export interface WorkspaceWatchlistAssetResponse {
   id: number
   assetId: number
   assetName: string
@@ -14,7 +14,7 @@ export interface WatchlistResponse {
   lastModifiedDate: string
 }
 
-export interface WatchlistListResponse {
+export interface WorkspaceWatchlistAssetListItemResponse {
   id: number
   assetId: number
   assetName: string

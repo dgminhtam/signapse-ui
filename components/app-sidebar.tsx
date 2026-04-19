@@ -84,8 +84,16 @@ export function NavMain({
   items: NavItem[]
 }) {
   const pathname = usePathname()
+  const matchesPath = (url: string) => {
+    if (url === "/") {
+      return pathname === "/"
+    }
+
+    return pathname === url || pathname.startsWith(`${url}/`)
+  }
+
   const hasActiveSubItem = (subItems?: { title: string; url: string }[]) => {
-    return subItems?.some((subItem) => pathname === subItem.url) ?? false
+    return subItems?.some((subItem) => matchesPath(subItem.url)) ?? false
   }
   return (
     <SidebarGroup>
@@ -94,7 +102,7 @@ export function NavMain({
         <SidebarMenu>
           {items.map((item) => {
             const hasSubItems = (item.items?.length ?? 0) > 0
-            const isActive = hasSubItems ? hasActiveSubItem(item.items) : pathname === item.url
+            const isActive = hasSubItems ? hasActiveSubItem(item.items) : matchesPath(item.url)
 
             if (!hasSubItems) {
               return (
@@ -122,7 +130,7 @@ export function NavMain({
                   <CollapsibleContent>
                     <SidebarMenuSub>
                       {item.items?.map((subItem) => {
-                        const isSubItemActive = pathname === subItem.url
+                        const isSubItemActive = matchesPath(subItem.url)
                         return (
                           <SidebarMenuSubItem key={subItem.title}>
                             <SidebarMenuSubButton isActive={isSubItemActive} asChild>

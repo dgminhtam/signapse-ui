@@ -47,7 +47,10 @@ app/(main)/[feature]/
 
 ## Quy tắc phát triển
 
-`AGENTS.md` là file hướng dẫn repo-wide đang hoạt động duy nhất. Kiến thức tái sử dụng theo tác vụ phải nằm trong `.agents/skills`.
+`AGENTS.md` là file hướng dẫn repo-wide đang hoạt động duy nhất. Kiến thức tái sử dụng theo tác vụ phải nằm trong `.codex/skills`.
+
+- Chỉ giữ skill thật sự sát stack và workflow của Signapse trong `.codex/skills`
+- Không duy trì bộ skill vendor/community quá rộng nếu chúng không giúp Codex làm việc tốt hơn trong repo này
 
 ### Core components
 

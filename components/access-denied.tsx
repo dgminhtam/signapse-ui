@@ -15,7 +15,7 @@ interface AccessDeniedProps {
 }
 
 export function AccessDenied({
-  title = "Access denied",
+  title = "Không có quyền truy cập",
   description,
   permission,
 }: AccessDeniedProps) {
@@ -31,7 +31,7 @@ export function AccessDenied({
           {permission ? (
             <>
               {" "}
-              Required permission: <code>{permission}</code>.
+              Quyền yêu cầu: <code>{permission}</code>.
             </>
           ) : null}
         </EmptyDescription>

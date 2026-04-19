@@ -20,15 +20,16 @@ export default async function RolesPage() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Manage Roles</CardTitle>
+          <CardTitle>Quản lý vai trò</CardTitle>
           <CardDescription>
-            This screen is restricted to users who can manage role permissions.
+            Màn hình này chỉ dành cho người dùng có quyền quản trị vai trò và phân quyền.
           </CardDescription>
         </CardHeader>
         <Separator />
         <CardContent className="pt-6">
           <AccessDenied
-            description="You do not have permission to view or modify the role catalog."
+            title="Bạn không có quyền truy cập"
+            description="Bạn không có quyền xem hoặc cập nhật danh mục vai trò."
             permission="role:update"
           />
         </CardContent>
@@ -41,9 +42,9 @@ export default async function RolesPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Manage Roles</CardTitle>
+        <CardTitle>Quản lý vai trò</CardTitle>
         <CardDescription>
-          Review system roles, inspect assigned permissions, and update access for each role.
+          Rà soát vai trò trong hệ thống, kiểm tra quyền đang gán và cập nhật truy cập cho từng vai trò.
         </CardDescription>
       </CardHeader>
 

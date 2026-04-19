@@ -2,14 +2,30 @@
 
 import * as React from "react"
 import { Dialog as DialogPrimitive } from "radix-ui"
-import { RefreshCwIcon, XIcon } from "lucide-react"
+import {
+  FolderOpenIcon,
+  RefreshCwIcon,
+  ShieldAlertIcon,
+  XIcon,
+} from "lucide-react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 
-import { addAssetToWatchlist, deleteWatchlistAsset, getWatchlists } from "@/app/api/watchlists/action"
+import {
+  addAssetToWorkspaceWatchlist,
+  getWorkspaceWatchlistAssets,
+  removeAssetFromWorkspaceWatchlist,
+} from "@/app/api/watchlists/action"
 import { AssetListResponse } from "@/app/lib/assets/definitions"
 import { WorkspaceResponse } from "@/app/lib/workspaces/definitions"
 import { Button } from "@/components/ui/button"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import { Spinner } from "@/components/ui/spinner"
 
 import { AssetMultiSelectCombobox } from "./asset-multi-select-combobox"
@@ -24,7 +40,9 @@ interface WorkspaceWatchlistEditorProps {
   canDeleteWatchlist: boolean
 }
 
-function mapWatchlistToAssets(items: Awaited<ReturnType<typeof getWatchlists>>["content"]): AssetListResponse[] {
+function mapWorkspaceWatchlistAssets(
+  items: Awaited<ReturnType<typeof getWorkspaceWatchlistAssets>>["content"]
+): AssetListResponse[] {
   return items.map((item) => ({
     id: item.assetId,
     name: item.assetName,
@@ -49,15 +67,20 @@ export function WorkspaceWatchlistEditor({
   const [initialAssets, setInitialAssets] = React.useState<AssetListResponse[]>([])
   const [selectedAssets, setSelectedAssets] = React.useState<AssetListResponse[]>([])
 
-  const canManageWatchlist =
+  const canReadWorkspaceWatchlist =
+    !!workspace &&
+    canReadAsset &&
+    canReadWatchlist
+
+  const canManageWorkspaceWatchlist =
     !!workspace &&
     canReadAsset &&
     canReadWatchlist &&
     canCreateWatchlist &&
     canDeleteWatchlist
 
-  const loadWatchlistState = React.useCallback(async () => {
-    if (!workspace) {
+  const loadWorkspaceWatchlistState = React.useCallback(async () => {
+    if (!workspace || !canReadWorkspaceWatchlist) {
       return
     }
 
@@ -65,37 +88,53 @@ export function WorkspaceWatchlistEditor({
     setLoadError(null)
 
     try {
-      const response = await getWatchlists({
+      const response = await getWorkspaceWatchlistAssets({
         filter: "",
         page: 0,
         size: 200,
         sort: [{ field: "createdDate", direction: "desc" }],
       })
 
-      const assets = mapWatchlistToAssets(response.content)
+      const assets = mapWorkspaceWatchlistAssets(response.content)
       setInitialAssets(assets)
       setSelectedAssets(assets)
     } catch (error: unknown) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to load watchlist"
+        error instanceof Error ? error.message : "Không thể tải danh sách theo dõi"
       setLoadError(errorMessage)
       setInitialAssets([])
       setSelectedAssets([])
     } finally {
       setIsLoading(false)
     }
-  }, [workspace])
+  }, [canReadWorkspaceWatchlist, workspace])
 
   React.useEffect(() => {
-    if (!open || !canManageWatchlist) {
+    if (!open) {
       return
     }
 
-    void loadWatchlistState()
-  }, [canManageWatchlist, loadWatchlistState, open])
+    if (!canReadWorkspaceWatchlist) {
+      setIsLoading(false)
+      setLoadError(null)
+      setInitialAssets([])
+      setSelectedAssets([])
+      return
+    }
+
+    void loadWorkspaceWatchlistState()
+  }, [canReadWorkspaceWatchlist, loadWorkspaceWatchlistState, open])
+
+  function handleDialogOpenChange(nextOpen: boolean) {
+    if (isPending) {
+      return
+    }
+
+    onOpenChange(nextOpen)
+  }
 
   function handleSave() {
-    if (!workspace || !canManageWatchlist) {
+    if (!workspace || !canManageWorkspaceWatchlist) {
       return
     }
 
@@ -105,108 +144,177 @@ export function WorkspaceWatchlistEditor({
     const assetsToAdd = selectedAssets.filter((asset) => !initialIds.has(asset.id))
 
     if (assetsToRemove.length === 0 && assetsToAdd.length === 0) {
-      toast.success("Khong co thay doi can luu")
+      toast.success("Không có thay đổi để lưu")
       onOpenChange(false)
       return
     }
 
     startTransition(async () => {
       const removeResults = await Promise.all(
-        assetsToRemove.map((asset) => deleteWatchlistAsset(asset.id))
+        assetsToRemove.map((asset) => removeAssetFromWorkspaceWatchlist(asset.id))
       )
       const addResults = await Promise.all(
-        assetsToAdd.map((asset) => addAssetToWatchlist({ assetId: asset.id }))
+        assetsToAdd.map((asset) => addAssetToWorkspaceWatchlist({ assetId: asset.id }))
       )
 
-      const failedOperations = [...removeResults, ...addResults].filter((result) => !result.success)
+      const failedOperations = [...removeResults, ...addResults].filter(
+        (result) => !result.success
+      )
 
       if (failedOperations.length > 0) {
-        toast.error("Khong the dong bo day du danh sach asset theo doi")
-        await loadWatchlistState()
+        toast.error(
+          "Không thể đồng bộ đầy đủ danh sách theo dõi. Dữ liệu mới nhất đã được tải lại."
+        )
+        await loadWorkspaceWatchlistState()
         router.refresh()
         return
       }
 
-      setInitialAssets(selectedAssets)
-      toast.success(`Da cap nhat asset theo doi cho workspace "${workspace.name}"`)
+      setInitialAssets([...selectedAssets])
+      toast.success(`Đã cập nhật danh sách theo dõi cho workspace "${workspace.name}"`)
       onOpenChange(false)
       router.refresh()
     })
   }
 
+  const isMissingWorkspace = !workspace
+  const isBlockedByPermissions = !!workspace && !canManageWorkspaceWatchlist
+  const canShowEditorBody = !isMissingWorkspace && !isBlockedByPermissions
+
   return (
-    <DialogPrimitive.Root open={canManageWatchlist && open} onOpenChange={onOpenChange}>
+    <DialogPrimitive.Root open={open} onOpenChange={handleDialogOpenChange}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/10 backdrop-blur-xs data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0" />
         <DialogPrimitive.Content className="fixed top-1/2 left-1/2 z-50 w-[min(720px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-xl border bg-popover text-popover-foreground shadow-lg data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0">
           <div className="flex items-start justify-between gap-4 border-b px-6 py-5">
             <div className="flex flex-col gap-1">
               <DialogPrimitive.Title className="text-lg font-medium text-foreground">
-                Chinh asset theo doi
+                Chỉnh danh sách theo dõi
               </DialogPrimitive.Title>
               <DialogPrimitive.Description className="text-sm text-muted-foreground">
-                Danh sach nay duoc luu theo workspace dang active: {workspace?.name ?? "No workspace"}.
-                Neu muon chinh workspace khac, hay switch workspace truoc.
+                Danh sách này được lưu theo workspace đang hoạt động:{" "}
+                {workspace?.name ?? "chưa có workspace"}.
+                Nếu muốn quản lý workspace khác, hãy chuyển workspace trước.
               </DialogPrimitive.Description>
             </div>
             <DialogPrimitive.Close asChild>
-              <Button type="button" variant="ghost" size="icon-sm">
+              <Button type="button" variant="ghost" size="icon-sm" disabled={isPending}>
                 <XIcon />
-                <span className="sr-only">Dong</span>
+                <span className="sr-only">Đóng</span>
               </Button>
             </DialogPrimitive.Close>
           </div>
 
           <div className="flex flex-col gap-4 px-6 py-5">
-            <div className="rounded-lg border bg-muted/20 p-4 text-sm text-muted-foreground">
-              Asset catalog duoc load tu `/assets`, con thao tac them va xoa van dung current
-              workspace watchlist API cua backend.
-            </div>
-
-            {loadError ? (
-              <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4">
-                <div className="text-sm font-medium text-destructive">Khong the tai watchlist hien tai</div>
-                <div className="mt-1 text-sm text-muted-foreground">{loadError}</div>
-                <div className="mt-3">
-                  <Button type="button" variant="outline" onClick={() => void loadWatchlistState()}>
-                    <RefreshCwIcon data-icon="inline-start" />
-                    Thu lai
-                  </Button>
-                </div>
-              </div>
+            {isMissingWorkspace ? (
+              <Empty className="min-h-64 rounded-lg border border-dashed">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <FolderOpenIcon />
+                  </EmptyMedia>
+                  <EmptyTitle>Chưa có workspace đang hoạt động</EmptyTitle>
+                  <EmptyDescription>
+                    Hãy chọn một workspace trong sidebar trước khi quản lý danh sách theo dõi.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
             ) : null}
 
-            {isLoading ? (
-              <div className="flex min-h-40 items-center justify-center rounded-lg border border-dashed">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Spinner />
-                  Dang tai danh sach asset theo doi...
+            {isBlockedByPermissions ? (
+              <Empty className="min-h-64 rounded-lg border border-dashed">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <ShieldAlertIcon />
+                  </EmptyMedia>
+                  <EmptyTitle>Bạn chưa có quyền quản lý danh sách theo dõi</EmptyTitle>
+                  <EmptyDescription>
+                    Tài khoản hiện tại cần quyền đọc, thêm và gỡ tài sản trong danh sách theo dõi
+                    của workspace này.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            ) : null}
+
+            {canShowEditorBody ? (
+              <>
+                <div className="rounded-lg border bg-muted/20 p-4 text-sm text-muted-foreground">
+                  Bạn có thể tìm tài sản theo tên hoặc mã. Mọi thay đổi sẽ được đồng bộ với danh
+                  sách theo dõi của workspace hiện tại thông qua API hiện có của backend.
                 </div>
-              </div>
-            ) : (
-              <AssetMultiSelectCombobox
-                selectedAssets={selectedAssets}
-                onSelectedAssetsChange={setSelectedAssets}
-                disabled={isPending || !!loadError}
-              />
-            )}
+
+                {loadError ? (
+                  <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4">
+                    <div className="text-sm font-medium text-destructive">
+                      Không thể tải danh sách theo dõi hiện tại
+                    </div>
+                    <div className="mt-1 text-sm text-muted-foreground">{loadError}</div>
+                    <div className="mt-3">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        disabled={isLoading}
+                        onClick={() => void loadWorkspaceWatchlistState()}
+                      >
+                        {isLoading ? (
+                          <Spinner data-icon="inline-start" />
+                        ) : (
+                          <RefreshCwIcon data-icon="inline-start" />
+                        )}
+                        Thử lại
+                      </Button>
+                    </div>
+                  </div>
+                ) : null}
+
+                {isLoading ? (
+                  <div className="flex min-h-40 items-center justify-center rounded-lg border border-dashed">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Spinner />
+                      Đang tải danh sách theo dõi...
+                    </div>
+                  </div>
+                ) : (
+                  <AssetMultiSelectCombobox
+                    selectedAssets={selectedAssets}
+                    onSelectedAssetsChange={setSelectedAssets}
+                    disabled={isPending || !!loadError}
+                  />
+                )}
+              </>
+            ) : null}
           </div>
 
           <div className="flex items-center justify-between gap-3 border-t px-6 py-4">
             <p className="text-sm text-muted-foreground">
-              Da chon {selectedAssets.length} asset cho workspace nay.
+              {canShowEditorBody
+                ? `Đã chọn ${selectedAssets.length} tài sản cho workspace này.`
+                : "Chỉ có thể quản lý danh sách theo dõi khi đã chọn workspace phù hợp."}
             </p>
             <div className="flex items-center gap-3">
-              <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
-                Huy
-              </Button>
               <Button
                 type="button"
-                disabled={isPending || isLoading || !!loadError}
-                onClick={handleSave}
+                variant="ghost"
+                disabled={isPending}
+                onClick={() => onOpenChange(false)}
               >
-                {isPending ? "Dang luu..." : "Luu danh sach"}
+                {canShowEditorBody ? "Hủy" : "Đóng"}
               </Button>
+              {canManageWorkspaceWatchlist ? (
+                <Button
+                  type="button"
+                  disabled={isPending || isLoading || !!loadError}
+                  onClick={handleSave}
+                >
+                  {isPending ? (
+                    <>
+                      <Spinner data-icon="inline-start" />
+                      Đang lưu...
+                    </>
+                  ) : (
+                    "Lưu danh sách"
+                  )}
+                </Button>
+              ) : null}
             </div>
           </div>
         </DialogPrimitive.Content>

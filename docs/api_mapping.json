@@ -34,11 +34,9 @@
                                 "TITLE_GENERATION",
                                 "SUMMARY_GENERATION",
                                 "CONTENT_CLEANING",
-                                "FIRECRAWL_ARTICLE_FILTER",
-                                "WIKI_SOURCE_SUMMARY",
-                                "WIKI_PAGE_UPDATE",
-                                "WIKI_INDEX_REBUILD",
-                                "WIKI_QUERY_ANSWER"
+                                "FIRECRAWL_SOURCE_DOCUMENT_FILTER",
+                                "NEWS_PRIMARY_EVENT_DERIVATION",
+                                "EVENT_ASSET_THEME_ENRICHMENT"
                             ]
                         }
                     }
@@ -78,11 +76,9 @@
                                 "TITLE_GENERATION",
                                 "SUMMARY_GENERATION",
                                 "CONTENT_CLEANING",
-                                "FIRECRAWL_ARTICLE_FILTER",
-                                "WIKI_SOURCE_SUMMARY",
-                                "WIKI_PAGE_UPDATE",
-                                "WIKI_INDEX_REBUILD",
-                                "WIKI_QUERY_ANSWER"
+                                "FIRECRAWL_SOURCE_DOCUMENT_FILTER",
+                                "NEWS_PRIMARY_EVENT_DERIVATION",
+                                "EVENT_ASSET_THEME_ENRICHMENT"
                             ]
                         }
                     }
@@ -132,11 +128,9 @@
                                 "TITLE_GENERATION",
                                 "SUMMARY_GENERATION",
                                 "CONTENT_CLEANING",
-                                "FIRECRAWL_ARTICLE_FILTER",
-                                "WIKI_SOURCE_SUMMARY",
-                                "WIKI_PAGE_UPDATE",
-                                "WIKI_INDEX_REBUILD",
-                                "WIKI_QUERY_ANSWER"
+                                "FIRECRAWL_SOURCE_DOCUMENT_FILTER",
+                                "NEWS_PRIMARY_EVENT_DERIVATION",
+                                "EVENT_ASSET_THEME_ENRICHMENT"
                             ]
                         }
                     }
@@ -505,137 +499,6 @@
                 }
             }
         },
-        "/wiki/rebuild-index": {
-            "post": {
-                "tags": [
-                    "wiki-controller"
-                ],
-                "operationId": "rebuildIndex",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "*/*": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/WikiPageResponse"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/wiki/query": {
-            "post": {
-                "tags": [
-                    "wiki-controller"
-                ],
-                "operationId": "query",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/WikiQueryRequest"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "*/*": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/WikiQueryResponse"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/wiki/query/save": {
-            "post": {
-                "tags": [
-                    "wiki-controller"
-                ],
-                "operationId": "saveQueryResult",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/WikiSaveQueryResultRequest"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "*/*": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/WikiPageResponse"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/wiki/lint": {
-            "post": {
-                "tags": [
-                    "wiki-controller"
-                ],
-                "operationId": "lint",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "*/*": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/WikiLintResponse"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/wiki/ingest/articles/{articleId}": {
-            "post": {
-                "tags": [
-                    "wiki-controller"
-                ],
-                "operationId": "ingestArticle",
-                "parameters": [
-                    {
-                        "name": "articleId",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int64"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "*/*": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/WikiPageResponse"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/webhooks/clerk": {
             "post": {
                 "tags": [
@@ -864,6 +727,131 @@
                 }
             }
         },
+        "/source-documents/{id}/derive-primary-event": {
+            "post": {
+                "tags": [
+                    "source-document-controller"
+                ],
+                "operationId": "derivePrimaryEvent",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NewsPrimaryEventDerivationResult"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/source-documents/{id}/crawl-full-content": {
+            "post": {
+                "tags": [
+                    "source-document-controller"
+                ],
+                "operationId": "crawlFullContent",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SourceDocumentResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/source-documents/{id}/analyze": {
+            "post": {
+                "tags": [
+                    "source-document-controller"
+                ],
+                "operationId": "analyzeContent",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SourceDocumentResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/source-documents/derive-pending-news-events": {
+            "post": {
+                "tags": [
+                    "source-document-controller"
+                ],
+                "operationId": "derivePendingNewsEvents",
+                "parameters": [
+                    {
+                        "name": "batchSize",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 50
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PendingNewsEventDerivationBatchResult"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/medias/upload": {
             "post": {
                 "tags": [
@@ -968,20 +956,62 @@
                 }
             }
         },
-        "/economic-calendar/crawl": {
+        "/events/{id}/enrich-assets-and-themes": {
             "post": {
                 "tags": [
-                    "economic-calendar-controller"
+                    "event-controller"
                 ],
-                "operationId": "crawl",
+                "operationId": "enrichAssetsAndThemes",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "type": "integer",
-                                    "format": "int32"
+                                    "$ref": "#/components/schemas/EventEnrichmentResult"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/events/enrich-pending-assets-and-themes": {
+            "post": {
+                "tags": [
+                    "event-controller"
+                ],
+                "operationId": "enrichPendingAssetsAndThemes",
+                "parameters": [
+                    {
+                        "name": "batchSize",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 50
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PendingEventEnrichmentBatchResult"
                                 }
                             }
                         }
@@ -1251,37 +1281,6 @@
                 }
             }
         },
-        "/articles/{id}/analyze": {
-            "post": {
-                "tags": [
-                    "article-controller"
-                ],
-                "operationId": "analyzeContent",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int64"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "*/*": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ArticleResponse"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/ai-provider-configs": {
             "get": {
                 "tags": [
@@ -1402,6 +1401,46 @@
                             "*/*": {
                                 "schema": {
                                     "$ref": "#/components/schemas/SourceResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/source-documents/{id}/feature-image": {
+            "patch": {
+                "tags": [
+                    "source-document-controller"
+                ],
+                "operationId": "updateFeatureImage",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MediaReferenceRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SourceDocumentResponse"
                                 }
                             }
                         }
@@ -1535,46 +1574,6 @@
                 }
             }
         },
-        "/articles/{id}/feature-image": {
-            "patch": {
-                "tags": [
-                    "article-controller"
-                ],
-                "operationId": "updateFeatureImage",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int64"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/MediaReferenceRequest"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "*/*": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ArticleResponse"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/ai-provider-configs/{id}/set-default": {
             "patch": {
                 "tags": [
@@ -1599,149 +1598,6 @@
                             "*/*": {
                                 "schema": {
                                     "$ref": "#/components/schemas/AiProviderConfigResponse"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/wiki/pages": {
-            "get": {
-                "tags": [
-                    "wiki-controller"
-                ],
-                "operationId": "getPages",
-                "parameters": [
-                    {
-                        "name": "specification",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/components/schemas/SpecificationWikiPage"
-                        }
-                    },
-                    {
-                        "name": "pageable",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/components/schemas/Pageable"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "*/*": {
-                                "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/WikiPageResponse"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/wiki/pages/{slug}": {
-            "get": {
-                "tags": [
-                    "wiki-controller"
-                ],
-                "operationId": "getPageBySlug",
-                "parameters": [
-                    {
-                        "name": "slug",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "*/*": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/WikiPageResponse"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/wiki/pages/{id}/sources": {
-            "get": {
-                "tags": [
-                    "wiki-controller"
-                ],
-                "operationId": "getPageSources",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int64"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "*/*": {
-                                "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/WikiPageSourceRefResponse"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/wiki/logs": {
-            "get": {
-                "tags": [
-                    "wiki-controller"
-                ],
-                "operationId": "getLogs",
-                "parameters": [
-                    {
-                        "name": "specification",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/components/schemas/SpecificationWikiOperationLog"
-                        }
-                    },
-                    {
-                        "name": "pageable",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/components/schemas/Pageable"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "*/*": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/PageWikiOperationLogResponse"
                                 }
                             }
                         }
@@ -1783,6 +1639,97 @@
                                 }
                             }
                         }
+                    }
+                }
+            }
+        },
+        "/source-documents": {
+            "get": {
+                "tags": [
+                    "source-document-controller"
+                ],
+                "operationId": "getSourceDocuments",
+                "parameters": [
+                    {
+                        "name": "specification",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/SpecificationSourceDocument"
+                        }
+                    },
+                    {
+                        "name": "pageable",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/Pageable"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PageSourceDocumentListResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/source-documents/{id}": {
+            "get": {
+                "tags": [
+                    "source-document-controller"
+                ],
+                "operationId": "getSourceDocument",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SourceDocumentResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "source-document-controller"
+                ],
+                "operationId": "deleteSourceDocument",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
                     }
                 }
             }
@@ -1964,10 +1911,10 @@
                 }
             }
         },
-        "/economic-calendar": {
+        "/events": {
             "get": {
                 "tags": [
-                    "economic-calendar-controller"
+                    "event-controller"
                 ],
                 "operationId": "getEvents",
                 "parameters": [
@@ -1976,7 +1923,7 @@
                         "in": "query",
                         "required": true,
                         "schema": {
-                            "$ref": "#/components/schemas/SpecificationEconomicEvent"
+                            "$ref": "#/components/schemas/SpecificationEvent"
                         }
                     },
                     {
@@ -1994,7 +1941,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/PageEconomicEventListResponse"
+                                    "$ref": "#/components/schemas/PageEventListResponse"
                                 }
                             }
                         }
@@ -2002,10 +1949,10 @@
                 }
             }
         },
-        "/economic-calendar/{id}": {
+        "/events/{id}": {
             "get": {
                 "tags": [
-                    "economic-calendar-controller"
+                    "event-controller"
                 ],
                 "operationId": "getEvent",
                 "parameters": [
@@ -2025,121 +1972,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/EconomicEventResponse"
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "tags": [
-                    "economic-calendar-controller"
-                ],
-                "operationId": "deleteEvent",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int64"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
-        "/economic-calendar/impact/{impact}": {
-            "get": {
-                "tags": [
-                    "economic-calendar-controller"
-                ],
-                "operationId": "getEventsByImpact",
-                "parameters": [
-                    {
-                        "name": "impact",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "specification",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/components/schemas/SpecificationEconomicEvent"
-                        }
-                    },
-                    {
-                        "name": "pageable",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/components/schemas/Pageable"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "*/*": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/PageEconomicEventListResponse"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/economic-calendar/country/{country}": {
-            "get": {
-                "tags": [
-                    "economic-calendar-controller"
-                ],
-                "operationId": "getEventsByCountry",
-                "parameters": [
-                    {
-                        "name": "country",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "specification",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/components/schemas/SpecificationEconomicEvent"
-                        }
-                    },
-                    {
-                        "name": "pageable",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/components/schemas/Pageable"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "*/*": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/PageEconomicEventListResponse"
+                                    "$ref": "#/components/schemas/EventResponse"
                                 }
                             }
                         }
@@ -2216,97 +2049,6 @@
                 }
             }
         },
-        "/articles": {
-            "get": {
-                "tags": [
-                    "article-controller"
-                ],
-                "operationId": "getArticles",
-                "parameters": [
-                    {
-                        "name": "specification",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/components/schemas/SpecificationArticle"
-                        }
-                    },
-                    {
-                        "name": "pageable",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/components/schemas/Pageable"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "*/*": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/PageArticleListResponse"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/articles/{id}": {
-            "get": {
-                "tags": [
-                    "article-controller"
-                ],
-                "operationId": "getArticle",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int64"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "*/*": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ArticleResponse"
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "tags": [
-                    "article-controller"
-                ],
-                "operationId": "deleteArticle",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int64"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
         "/watchlists/assets/{assetId}": {
             "delete": {
                 "tags": [
@@ -2363,11 +2105,9 @@
                             "TITLE_GENERATION",
                             "SUMMARY_GENERATION",
                             "CONTENT_CLEANING",
-                            "FIRECRAWL_ARTICLE_FILTER",
-                            "WIKI_SOURCE_SUMMARY",
-                            "WIKI_PAGE_UPDATE",
-                            "WIKI_INDEX_REBUILD",
-                            "WIKI_QUERY_ANSWER"
+                            "FIRECRAWL_SOURCE_DOCUMENT_FILTER",
+                            "NEWS_PRIMARY_EVENT_DERIVATION",
+                            "EVENT_ASSET_THEME_ENRICHMENT"
                         ]
                     },
                     "content": {
@@ -2388,6 +2128,17 @@
                 "properties": {
                     "name": {
                         "type": "string"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "NEWS",
+                            "ECONOMIC_CALENDAR",
+                            "RESEARCH",
+                            "MARKET_DATA",
+                            "SENTIMENT",
+                            "OTHER"
+                        ]
                     },
                     "description": {
                         "type": "string"
@@ -2413,6 +2164,17 @@
                     "name": {
                         "type": "string"
                     },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "NEWS",
+                            "ECONOMIC_CALENDAR",
+                            "RESEARCH",
+                            "MARKET_DATA",
+                            "SENTIMENT",
+                            "OTHER"
+                        ]
+                    },
                     "description": {
                         "type": "string"
                     },
@@ -2421,6 +2183,19 @@
                     },
                     "rssUrl": {
                         "type": "string"
+                    },
+                    "lastIngestedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "lastIngestStatus": {
+                        "type": "string"
+                    },
+                    "lastIngestError": {
+                        "type": "string"
+                    },
+                    "systemManaged": {
+                        "type": "boolean"
                     },
                     "active": {
                         "type": "boolean"
@@ -2660,226 +2435,6 @@
                     }
                 }
             },
-            "WikiPageResponse": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "format": "int64"
-                    },
-                    "title": {
-                        "type": "string"
-                    },
-                    "slug": {
-                        "type": "string"
-                    },
-                    "pageType": {
-                        "type": "string",
-                        "enum": [
-                            "INDEX",
-                            "SOURCE_SUMMARY",
-                            "TOPIC",
-                            "ENTITY",
-                            "LINT_REPORT",
-                            "QUERY_RESULT"
-                        ]
-                    },
-                    "summary": {
-                        "type": "string"
-                    },
-                    "content": {
-                        "type": "string"
-                    },
-                    "sourceCount": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "lastSynthesizedAt": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "active": {
-                        "type": "boolean"
-                    },
-                    "createdDate": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "lastModifiedDate": {
-                        "type": "string",
-                        "format": "date-time"
-                    }
-                }
-            },
-            "WikiQueryRequest": {
-                "type": "object",
-                "properties": {
-                    "question": {
-                        "type": "string",
-                        "minLength": 1
-                    },
-                    "pageTypes": {
-                        "type": "array",
-                        "items": {
-                            "type": "string",
-                            "enum": [
-                                "INDEX",
-                                "SOURCE_SUMMARY",
-                                "TOPIC",
-                                "ENTITY",
-                                "LINT_REPORT",
-                                "QUERY_RESULT"
-                            ]
-                        }
-                    },
-                    "limit": {
-                        "type": "integer",
-                        "format": "int32",
-                        "maximum": 10,
-                        "minimum": 1
-                    }
-                },
-                "required": [
-                    "question"
-                ]
-            },
-            "WikiPageSourceRefResponse": {
-                "type": "object",
-                "properties": {
-                    "articleId": {
-                        "type": "integer",
-                        "format": "int64"
-                    },
-                    "articleTitle": {
-                        "type": "string"
-                    },
-                    "articleUrl": {
-                        "type": "string"
-                    },
-                    "sourceName": {
-                        "type": "string"
-                    },
-                    "publishedAt": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "referenceNote": {
-                        "type": "string"
-                    }
-                }
-            },
-            "WikiQueryResponse": {
-                "type": "object",
-                "properties": {
-                    "question": {
-                        "type": "string"
-                    },
-                    "answer": {
-                        "type": "string"
-                    },
-                    "pages": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/WikiPageResponse"
-                        }
-                    },
-                    "sources": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/WikiPageSourceRefResponse"
-                        }
-                    }
-                }
-            },
-            "WikiSaveQueryResultRequest": {
-                "type": "object",
-                "properties": {
-                    "question": {
-                        "type": "string",
-                        "minLength": 1
-                    },
-                    "pageTypes": {
-                        "type": "array",
-                        "items": {
-                            "type": "string",
-                            "enum": [
-                                "INDEX",
-                                "SOURCE_SUMMARY",
-                                "TOPIC",
-                                "ENTITY",
-                                "LINT_REPORT",
-                                "QUERY_RESULT"
-                            ]
-                        }
-                    },
-                    "limit": {
-                        "type": "integer",
-                        "format": "int32",
-                        "maximum": 10,
-                        "minimum": 1
-                    },
-                    "title": {
-                        "type": "string"
-                    }
-                },
-                "required": [
-                    "question"
-                ]
-            },
-            "WikiLintFindingResponse": {
-                "type": "object",
-                "properties": {
-                    "code": {
-                        "type": "string"
-                    },
-                    "pageId": {
-                        "type": "integer",
-                        "format": "int64"
-                    },
-                    "pageSlug": {
-                        "type": "string"
-                    },
-                    "pageType": {
-                        "type": "string",
-                        "enum": [
-                            "INDEX",
-                            "SOURCE_SUMMARY",
-                            "TOPIC",
-                            "ENTITY",
-                            "LINT_REPORT",
-                            "QUERY_RESULT"
-                        ]
-                    },
-                    "message": {
-                        "type": "string"
-                    }
-                }
-            },
-            "WikiLintResponse": {
-                "type": "object",
-                "properties": {
-                    "totalFindings": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "findingCounts": {
-                        "type": "object",
-                        "additionalProperties": {
-                            "type": "integer",
-                            "format": "int64"
-                        }
-                    },
-                    "findings": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/WikiLintFindingResponse"
-                        }
-                    },
-                    "reportPage": {
-                        "$ref": "#/components/schemas/WikiPageResponse"
-                    }
-                }
-            },
             "CreateWatchlistRequest": {
                 "type": "object",
                 "properties": {
@@ -2943,11 +2498,9 @@
                             "TITLE_GENERATION",
                             "SUMMARY_GENERATION",
                             "CONTENT_CLEANING",
-                            "FIRECRAWL_ARTICLE_FILTER",
-                            "WIKI_SOURCE_SUMMARY",
-                            "WIKI_PAGE_UPDATE",
-                            "WIKI_INDEX_REBUILD",
-                            "WIKI_QUERY_ANSWER"
+                            "FIRECRAWL_SOURCE_DOCUMENT_FILTER",
+                            "NEWS_PRIMARY_EVENT_DERIVATION",
+                            "EVENT_ASSET_THEME_ENRICHMENT"
                         ]
                     },
                     "content": {
@@ -2968,6 +2521,17 @@
                         "type": "string",
                         "minLength": 1
                     },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "NEWS",
+                            "ECONOMIC_CALENDAR",
+                            "RESEARCH",
+                            "MARKET_DATA",
+                            "SENTIMENT",
+                            "OTHER"
+                        ]
+                    },
                     "description": {
                         "type": "string"
                     },
@@ -2986,6 +2550,96 @@
                     "name",
                     "url"
                 ]
+            },
+            "NewsPrimaryEventDerivationResult": {
+                "type": "object",
+                "properties": {
+                    "sourceDocumentId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "sourceDocumentTitle": {
+                        "type": "string"
+                    },
+                    "outcome": {
+                        "type": "string",
+                        "enum": [
+                            "PENDING",
+                            "SUCCESS",
+                            "NO_EVENT",
+                            "FAILED"
+                        ]
+                    },
+                    "changeType": {
+                        "type": "string",
+                        "enum": [
+                            "CREATED",
+                            "UPDATED",
+                            "NONE"
+                        ]
+                    },
+                    "eventId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "eventCanonicalKey": {
+                        "type": "string"
+                    },
+                    "message": {
+                        "type": "string"
+                    }
+                }
+            },
+            "LinkedEventSummaryResponse": {
+                "type": "object",
+                "properties": {
+                    "eventId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "eventTitle": {
+                        "type": "string"
+                    },
+                    "eventSlug": {
+                        "type": "string"
+                    },
+                    "eventCanonicalKey": {
+                        "type": "string"
+                    },
+                    "eventStatus": {
+                        "type": "string",
+                        "enum": [
+                            "EMERGING",
+                            "CONFIRMED",
+                            "RESOLVED",
+                            "ARCHIVED"
+                        ]
+                    },
+                    "eventEnrichmentStatus": {
+                        "type": "string",
+                        "enum": [
+                            "PENDING",
+                            "SUCCESS",
+                            "NO_MATCH",
+                            "FAILED"
+                        ]
+                    },
+                    "evidenceRole": {
+                        "type": "string",
+                        "enum": [
+                            "PRIMARY",
+                            "SUPPORTING",
+                            "UPDATE",
+                            "CONTRADICTING"
+                        ]
+                    },
+                    "evidenceConfidence": {
+                        "type": "number"
+                    },
+                    "evidenceNote": {
+                        "type": "string"
+                    }
+                }
             },
             "MediaResponse": {
                 "type": "object",
@@ -3018,6 +2672,182 @@
                     }
                 }
             },
+            "SourceDocumentResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "content": {
+                        "type": "string"
+                    },
+                    "url": {
+                        "type": "string"
+                    },
+                    "featureImage": {
+                        "$ref": "#/components/schemas/MediaResponse"
+                    },
+                    "author": {
+                        "type": "string"
+                    },
+                    "sourceName": {
+                        "type": "string"
+                    },
+                    "publishedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "documentType": {
+                        "type": "string",
+                        "enum": [
+                            "NEWS",
+                            "ECONOMIC_CALENDAR",
+                            "RESEARCH",
+                            "MARKET_DATA",
+                            "SENTIMENT",
+                            "OTHER"
+                        ]
+                    },
+                    "lifecycleStatus": {
+                        "type": "string",
+                        "enum": [
+                            "DISCOVERED",
+                            "RAW_CAPTURED",
+                            "HYDRATED",
+                            "NORMALIZED",
+                            "FAILED"
+                        ]
+                    },
+                    "externalId": {
+                        "type": "string"
+                    },
+                    "externalKey": {
+                        "type": "string"
+                    },
+                    "countryCode": {
+                        "type": "string"
+                    },
+                    "importance": {
+                        "type": "string"
+                    },
+                    "scheduledAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "actualizedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "forecastValue": {
+                        "type": "string"
+                    },
+                    "previousValue": {
+                        "type": "string"
+                    },
+                    "actualValue": {
+                        "type": "string"
+                    },
+                    "contentCrawlStatus": {
+                        "type": "string",
+                        "enum": [
+                            "PENDING",
+                            "SUCCESS",
+                            "FAILED"
+                        ]
+                    },
+                    "contentCrawlAttemptedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "contentCrawlError": {
+                        "type": "string"
+                    },
+                    "eventDerivationStatus": {
+                        "type": "string",
+                        "enum": [
+                            "PENDING",
+                            "SUCCESS",
+                            "NO_EVENT",
+                            "FAILED"
+                        ]
+                    },
+                    "eventDerivationAttemptedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "eventDerivationCompletedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "eventDerivationError": {
+                        "type": "string"
+                    },
+                    "createdDate": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "lastModifiedDate": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "linkedEvents": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LinkedEventSummaryResponse"
+                        }
+                    }
+                }
+            },
+            "PendingNewsEventDerivationBatchResult": {
+                "type": "object",
+                "properties": {
+                    "requestedBatchSize": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "selectedCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "processedCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "skippedCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "createdCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "updatedCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "noEventCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "failedCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/NewsPrimaryEventDerivationResult"
+                        }
+                    }
+                }
+            },
             "CreateWorkspaceRequest": {
                 "type": "object",
                 "properties": {
@@ -3032,6 +2862,80 @@
                 "required": [
                     "name"
                 ]
+            },
+            "EventEnrichmentResult": {
+                "type": "object",
+                "properties": {
+                    "eventId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "eventTitle": {
+                        "type": "string"
+                    },
+                    "eventCanonicalKey": {
+                        "type": "string"
+                    },
+                    "outcome": {
+                        "type": "string",
+                        "enum": [
+                            "PENDING",
+                            "SUCCESS",
+                            "NO_MATCH",
+                            "FAILED"
+                        ]
+                    },
+                    "assetLinkCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "themeLinkCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string"
+                    }
+                }
+            },
+            "PendingEventEnrichmentBatchResult": {
+                "type": "object",
+                "properties": {
+                    "requestedBatchSize": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "selectedCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "processedCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "skippedCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "enrichedCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "noMatchCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "failedCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/EventEnrichmentResult"
+                        }
+                    }
+                }
             },
             "CronjobRequest": {
                 "type": "object",
@@ -3119,48 +3023,6 @@
                     "slug",
                     "title"
                 ]
-            },
-            "ArticleResponse": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "format": "int64"
-                    },
-                    "title": {
-                        "type": "string"
-                    },
-                    "description": {
-                        "type": "string"
-                    },
-                    "content": {
-                        "type": "string"
-                    },
-                    "url": {
-                        "type": "string"
-                    },
-                    "featureImage": {
-                        "$ref": "#/components/schemas/MediaResponse"
-                    },
-                    "author": {
-                        "type": "string"
-                    },
-                    "sourceName": {
-                        "type": "string"
-                    },
-                    "publishedAt": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "createdDate": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "lastModifiedDate": {
-                        "type": "string",
-                        "format": "date-time"
-                    }
-                }
             },
             "CreateAiProviderConfigRequest": {
                 "type": "object",
@@ -3265,7 +3127,7 @@
                     }
                 }
             },
-            "SpecificationWikiPage": {},
+            "SpecificationWatchlist": {},
             "Pageable": {
                 "type": "object",
                 "properties": {
@@ -3287,147 +3149,6 @@
                     }
                 }
             },
-            "SpecificationWikiOperationLog": {},
-            "PageWikiOperationLogResponse": {
-                "type": "object",
-                "properties": {
-                    "totalElements": {
-                        "type": "integer",
-                        "format": "int64"
-                    },
-                    "totalPages": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "size": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "content": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/WikiOperationLogResponse"
-                        }
-                    },
-                    "number": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "sort": {
-                        "$ref": "#/components/schemas/SortObject"
-                    },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
-                    "numberOfElements": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "empty": {
-                        "type": "boolean"
-                    }
-                }
-            },
-            "PageableObject": {
-                "type": "object",
-                "properties": {
-                    "offset": {
-                        "type": "integer",
-                        "format": "int64"
-                    },
-                    "sort": {
-                        "$ref": "#/components/schemas/SortObject"
-                    },
-                    "pageNumber": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "pageSize": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "paged": {
-                        "type": "boolean"
-                    },
-                    "unpaged": {
-                        "type": "boolean"
-                    }
-                }
-            },
-            "SortObject": {
-                "type": "object",
-                "properties": {
-                    "empty": {
-                        "type": "boolean"
-                    },
-                    "sorted": {
-                        "type": "boolean"
-                    },
-                    "unsorted": {
-                        "type": "boolean"
-                    }
-                }
-            },
-            "WikiOperationLogResponse": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "format": "int64"
-                    },
-                    "operationType": {
-                        "type": "string",
-                        "enum": [
-                            "INGEST",
-                            "SYNTHESIZE",
-                            "LINT",
-                            "REBUILD_INDEX",
-                            "QUERY",
-                            "SAVE_QUERY_RESULT"
-                        ]
-                    },
-                    "status": {
-                        "type": "string",
-                        "enum": [
-                            "SUCCESS",
-                            "FAILED"
-                        ]
-                    },
-                    "targetType": {
-                        "type": "string",
-                        "enum": [
-                            "ARTICLE",
-                            "WIKI_PAGE",
-                            "SYSTEM"
-                        ]
-                    },
-                    "targetId": {
-                        "type": "integer",
-                        "format": "int64"
-                    },
-                    "title": {
-                        "type": "string"
-                    },
-                    "details": {
-                        "type": "string"
-                    },
-                    "executedAt": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "createdDate": {
-                        "type": "string",
-                        "format": "date-time"
-                    }
-                }
-            },
-            "SpecificationWatchlist": {},
             "PageWatchlistListResponse": {
                 "type": "object",
                 "properties": {
@@ -3438,6 +3159,12 @@
                     "totalPages": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
                     },
                     "size": {
                         "type": "integer",
@@ -3456,20 +3183,54 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
                     },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
+                    },
                     "empty": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "PageableObject": {
+                "type": "object",
+                "properties": {
+                    "offset": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "sort": {
+                        "$ref": "#/components/schemas/SortObject"
+                    },
+                    "paged": {
+                        "type": "boolean"
+                    },
+                    "pageSize": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "pageNumber": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "unpaged": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "SortObject": {
+                "type": "object",
+                "properties": {
+                    "empty": {
+                        "type": "boolean"
+                    },
+                    "sorted": {
+                        "type": "boolean"
+                    },
+                    "unsorted": {
                         "type": "boolean"
                     }
                 }
@@ -3518,6 +3279,12 @@
                         "type": "integer",
                         "format": "int32"
                     },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
+                    },
                     "size": {
                         "type": "integer",
                         "format": "int32"
@@ -3535,18 +3302,12 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"
@@ -3565,6 +3326,12 @@
                         "type": "integer",
                         "format": "int32"
                     },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
+                    },
                     "size": {
                         "type": "integer",
                         "format": "int32"
@@ -3582,18 +3349,12 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"
@@ -3610,6 +3371,17 @@
                     "name": {
                         "type": "string"
                     },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "NEWS",
+                            "ECONOMIC_CALENDAR",
+                            "RESEARCH",
+                            "MARKET_DATA",
+                            "SENTIMENT",
+                            "OTHER"
+                        ]
+                    },
                     "description": {
                         "type": "string"
                     },
@@ -3619,8 +3391,135 @@
                     "rssUrl": {
                         "type": "string"
                     },
+                    "lastIngestedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "lastIngestStatus": {
+                        "type": "string"
+                    },
+                    "systemManaged": {
+                        "type": "boolean"
+                    },
                     "active": {
                         "type": "boolean"
+                    },
+                    "createdDate": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "SpecificationSourceDocument": {},
+            "PageSourceDocumentListResponse": {
+                "type": "object",
+                "properties": {
+                    "totalElements": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
+                    },
+                    "size": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "content": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SourceDocumentListResponse"
+                        }
+                    },
+                    "number": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "sort": {
+                        "$ref": "#/components/schemas/SortObject"
+                    },
+                    "numberOfElements": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
+                    },
+                    "empty": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "SourceDocumentListResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "url": {
+                        "type": "string"
+                    },
+                    "featureImage": {
+                        "$ref": "#/components/schemas/MediaResponse"
+                    },
+                    "sourceName": {
+                        "type": "string"
+                    },
+                    "publishedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "documentType": {
+                        "type": "string",
+                        "enum": [
+                            "NEWS",
+                            "ECONOMIC_CALENDAR",
+                            "RESEARCH",
+                            "MARKET_DATA",
+                            "SENTIMENT",
+                            "OTHER"
+                        ]
+                    },
+                    "lifecycleStatus": {
+                        "type": "string",
+                        "enum": [
+                            "DISCOVERED",
+                            "RAW_CAPTURED",
+                            "HYDRATED",
+                            "NORMALIZED",
+                            "FAILED"
+                        ]
+                    },
+                    "contentCrawlStatus": {
+                        "type": "string",
+                        "enum": [
+                            "PENDING",
+                            "SUCCESS",
+                            "FAILED"
+                        ]
+                    },
+                    "eventDerivationStatus": {
+                        "type": "string",
+                        "enum": [
+                            "PENDING",
+                            "SUCCESS",
+                            "NO_EVENT",
+                            "FAILED"
+                        ]
                     },
                     "createdDate": {
                         "type": "string",
@@ -3640,6 +3539,12 @@
                         "type": "integer",
                         "format": "int32"
                     },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
+                    },
                     "size": {
                         "type": "integer",
                         "format": "int32"
@@ -3657,18 +3562,12 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"
@@ -3733,6 +3632,12 @@
                         "type": "integer",
                         "format": "int32"
                     },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
+                    },
                     "size": {
                         "type": "integer",
                         "format": "int32"
@@ -3750,26 +3655,20 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"
                     }
                 }
             },
-            "SpecificationEconomicEvent": {},
-            "EconomicEventListResponse": {
+            "SpecificationEvent": {},
+            "EventListResponse": {
                 "type": "object",
                 "properties": {
                     "id": {
@@ -3779,35 +3678,66 @@
                     "title": {
                         "type": "string"
                     },
-                    "country": {
+                    "slug": {
                         "type": "string"
                     },
-                    "eventDate": {
+                    "canonicalKey": {
+                        "type": "string"
+                    },
+                    "summary": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "EMERGING",
+                            "CONFIRMED",
+                            "RESOLVED",
+                            "ARCHIVED"
+                        ]
+                    },
+                    "confidence": {
+                        "type": "number"
+                    },
+                    "active": {
+                        "type": "boolean"
+                    },
+                    "occurredAt": {
                         "type": "string",
                         "format": "date-time"
                     },
-                    "impact": {
-                        "type": "string"
+                    "confirmedAt": {
+                        "type": "string",
+                        "format": "date-time"
                     },
-                    "forecast": {
-                        "type": "string"
+                    "enrichmentStatus": {
+                        "type": "string",
+                        "enum": [
+                            "PENDING",
+                            "SUCCESS",
+                            "NO_MATCH",
+                            "FAILED"
+                        ]
                     },
-                    "previous": {
-                        "type": "string"
+                    "enrichmentAttemptedAt": {
+                        "type": "string",
+                        "format": "date-time"
                     },
-                    "actual": {
-                        "type": "string"
-                    },
-                    "description": {
-                        "type": "string"
+                    "enrichmentCompletedAt": {
+                        "type": "string",
+                        "format": "date-time"
                     },
                     "createdDate": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "lastModifiedDate": {
                         "type": "string",
                         "format": "date-time"
                     }
                 }
             },
-            "PageEconomicEventListResponse": {
+            "PageEventListResponse": {
                 "type": "object",
                 "properties": {
                     "totalElements": {
@@ -3818,6 +3748,12 @@
                         "type": "integer",
                         "format": "int32"
                     },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
+                    },
                     "size": {
                         "type": "integer",
                         "format": "int32"
@@ -3825,7 +3761,7 @@
                     "content": {
                         "type": "array",
                         "items": {
-                            "$ref": "#/components/schemas/EconomicEventListResponse"
+                            "$ref": "#/components/schemas/EventListResponse"
                         }
                     },
                     "number": {
@@ -3835,25 +3771,102 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"
                     }
                 }
             },
-            "EconomicEventResponse": {
+            "EventAssetSummaryResponse": {
+                "type": "object",
+                "properties": {
+                    "assetId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "assetName": {
+                        "type": "string"
+                    },
+                    "assetSymbol": {
+                        "type": "string"
+                    },
+                    "assetType": {
+                        "type": "string",
+                        "enum": [
+                            "COMMODITY",
+                            "CRYPTO",
+                            "FX",
+                            "INDEX"
+                        ]
+                    },
+                    "relationType": {
+                        "type": "string",
+                        "enum": [
+                            "PRIMARY_SUBJECT",
+                            "AFFECTED_ASSET",
+                            "REFERENCE_ASSET"
+                        ]
+                    },
+                    "weight": {
+                        "type": "number"
+                    }
+                }
+            },
+            "EventEvidenceSummaryResponse": {
+                "type": "object",
+                "properties": {
+                    "sourceDocumentId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "sourceDocumentTitle": {
+                        "type": "string"
+                    },
+                    "sourceDocumentUrl": {
+                        "type": "string"
+                    },
+                    "sourceName": {
+                        "type": "string"
+                    },
+                    "publishedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "documentType": {
+                        "type": "string",
+                        "enum": [
+                            "NEWS",
+                            "ECONOMIC_CALENDAR",
+                            "RESEARCH",
+                            "MARKET_DATA",
+                            "SENTIMENT",
+                            "OTHER"
+                        ]
+                    },
+                    "evidenceRole": {
+                        "type": "string",
+                        "enum": [
+                            "PRIMARY",
+                            "SUPPORTING",
+                            "UPDATE",
+                            "CONTRADICTING"
+                        ]
+                    },
+                    "confidence": {
+                        "type": "number"
+                    },
+                    "evidenceNote": {
+                        "type": "string"
+                    }
+                }
+            },
+            "EventResponse": {
                 "type": "object",
                 "properties": {
                     "id": {
@@ -3863,29 +3876,59 @@
                     "title": {
                         "type": "string"
                     },
-                    "country": {
+                    "slug": {
                         "type": "string"
                     },
-                    "eventDate": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "impact": {
-                        "type": "string"
-                    },
-                    "forecast": {
-                        "type": "string"
-                    },
-                    "previous": {
-                        "type": "string"
-                    },
-                    "actual": {
-                        "type": "string"
-                    },
-                    "externalKey": {
+                    "summary": {
                         "type": "string"
                     },
                     "description": {
+                        "type": "string"
+                    },
+                    "canonicalKey": {
+                        "type": "string"
+                    },
+                    "occurredAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "confirmedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "EMERGING",
+                            "CONFIRMED",
+                            "RESOLVED",
+                            "ARCHIVED"
+                        ]
+                    },
+                    "confidence": {
+                        "type": "number"
+                    },
+                    "active": {
+                        "type": "boolean"
+                    },
+                    "enrichmentStatus": {
+                        "type": "string",
+                        "enum": [
+                            "PENDING",
+                            "SUCCESS",
+                            "NO_MATCH",
+                            "FAILED"
+                        ]
+                    },
+                    "enrichmentAttemptedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "enrichmentCompletedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "enrichmentError": {
                         "type": "string"
                     },
                     "createdDate": {
@@ -3895,6 +3938,49 @@
                     "lastModifiedDate": {
                         "type": "string",
                         "format": "date-time"
+                    },
+                    "assets": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/EventAssetSummaryResponse"
+                        }
+                    },
+                    "themes": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/EventThemeSummaryResponse"
+                        }
+                    },
+                    "evidence": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/EventEvidenceSummaryResponse"
+                        }
+                    }
+                }
+            },
+            "EventThemeSummaryResponse": {
+                "type": "object",
+                "properties": {
+                    "themeId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "themeTitle": {
+                        "type": "string"
+                    },
+                    "themeSlug": {
+                        "type": "string"
+                    },
+                    "relationType": {
+                        "type": "string",
+                        "enum": [
+                            "PRIMARY_THEME",
+                            "SECONDARY_THEME"
+                        ]
+                    },
+                    "weight": {
+                        "type": "number"
                     }
                 }
             },
@@ -3909,6 +3995,12 @@
                     "totalPages": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
                     },
                     "size": {
                         "type": "integer",
@@ -3927,18 +4019,12 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"
@@ -3986,6 +4072,12 @@
                         "type": "integer",
                         "format": "int32"
                     },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
+                    },
                     "size": {
                         "type": "integer",
                         "format": "int32"
@@ -4003,18 +4095,12 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"
@@ -4057,6 +4143,12 @@
                         "type": "integer",
                         "format": "int32"
                     },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
+                    },
                     "size": {
                         "type": "integer",
                         "format": "int32"
@@ -4074,18 +4166,12 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"
@@ -4124,85 +4210,6 @@
                     }
                 }
             },
-            "SpecificationArticle": {},
-            "ArticleListResponse": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "format": "int64"
-                    },
-                    "title": {
-                        "type": "string"
-                    },
-                    "description": {
-                        "type": "string"
-                    },
-                    "url": {
-                        "type": "string"
-                    },
-                    "featureImage": {
-                        "$ref": "#/components/schemas/MediaResponse"
-                    },
-                    "sourceName": {
-                        "type": "string"
-                    },
-                    "publishedAt": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "createdDate": {
-                        "type": "string",
-                        "format": "date-time"
-                    }
-                }
-            },
-            "PageArticleListResponse": {
-                "type": "object",
-                "properties": {
-                    "totalElements": {
-                        "type": "integer",
-                        "format": "int64"
-                    },
-                    "totalPages": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "size": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "content": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/ArticleListResponse"
-                        }
-                    },
-                    "number": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "sort": {
-                        "$ref": "#/components/schemas/SortObject"
-                    },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
-                    "numberOfElements": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "empty": {
-                        "type": "boolean"
-                    }
-                }
-            },
             "SpecificationAiProviderConfig": {},
             "PageAiProviderConfigResponse": {
                 "type": "object",
@@ -4214,6 +4221,12 @@
                     "totalPages": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
                     },
                     "size": {
                         "type": "integer",
@@ -4232,18 +4245,12 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"

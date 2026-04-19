@@ -28,9 +28,9 @@ export default async function SourcesPage({ searchParams }: PageProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Sources</CardTitle>
+          <CardTitle>Nguồn dữ liệu</CardTitle>
           <CardDescription>
-            Manage external sources and RSS feeds for automated data collection.
+            Quản lý các nguồn dữ liệu, trạng thái ingest và quyền thao tác tương ứng.
           </CardDescription>
         </CardHeader>
 
@@ -38,7 +38,7 @@ export default async function SourcesPage({ searchParams }: PageProps) {
 
         <CardContent className="pt-6">
           <AccessDenied
-            description="You do not have permission to view source management."
+            description="Bạn không có quyền xem khu vực quản lý nguồn dữ liệu."
             permission="source:read"
           />
         </CardContent>
@@ -49,9 +49,10 @@ export default async function SourcesPage({ searchParams }: PageProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Sources</CardTitle>
+        <CardTitle>Nguồn dữ liệu</CardTitle>
         <CardDescription>
-          Manage external sources and RSS feeds for automated data collection.
+          Quản lý danh sách nguồn theo contract backend hiện tại, bao gồm trạng thái
+          ingest và nguồn do hệ thống quản lý.
         </CardDescription>
       </CardHeader>
 
@@ -70,7 +71,8 @@ async function SourceContent({
   searchParamsPromise: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const resolvedParams = await searchParamsPromise
-  const { page = "1", size = "12", sort = "id_desc", ...filterParams } = resolvedParams
+  const { page = "1", size = "12", sort = "id_desc", ...filterParams } =
+    resolvedParams
 
   const pageIndex = Math.max(0, Number(page) - 1)
   const filter = buildFilterQuery(filterParams)
@@ -92,7 +94,7 @@ async function SourceContent({
 
 function ListSkeleton() {
   return (
-    <CardContent className="space-y-6 pt-6">
+    <CardContent className="flex flex-col gap-6 pt-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:justify-between">
         <div className="flex w-full flex-1 items-center gap-4 sm:w-auto">
           <Skeleton className="h-10 w-[160px]" />
@@ -106,16 +108,24 @@ function ListSkeleton() {
           <Skeleton className="h-4 w-1/3" />
           <Skeleton className="h-4 w-20" />
           <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-4 w-20" />
           <Skeleton className="ml-auto h-4 w-20" />
         </div>
-        {[...Array(5)].map((_, i) => (
-          <div key={i} className="flex h-16 items-center justify-between gap-4 border-b px-4 last:border-0">
+        {[...Array(5)].map((_, index) => (
+          <div
+            key={index}
+            className="flex h-16 items-center justify-between gap-4 border-b px-4 last:border-0"
+          >
             <div className="w-1/3 space-y-2">
               <Skeleton className="h-4 w-3/4" />
               <Skeleton className="h-3 w-1/2" />
             </div>
-            <Skeleton className="h-6 w-12 rounded-full" />
-            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-6 w-20 rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-5 w-24 rounded-full" />
+              <Skeleton className="h-3 w-28" />
+            </div>
+            <Skeleton className="h-5 w-10 rounded-full" />
             <div className="ml-auto flex gap-2">
               <Skeleton className="h-8 w-8 rounded-full" />
               <Skeleton className="h-8 w-8 rounded-full" />

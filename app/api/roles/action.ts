@@ -40,7 +40,7 @@ export async function updateRolePermissions(
       error:
         error instanceof Error
           ? error.message
-          : "Khong the cap nhat permission cho role",
+          : "Không thể cập nhật quyền cho vai trò",
     }
   }
 }
