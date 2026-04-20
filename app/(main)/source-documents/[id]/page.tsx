@@ -27,9 +27,9 @@ import { hasAnyPermission } from "@/app/lib/permissions"
 import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import {
   LINKED_EVENT_EVIDENCE_ROLE_LABELS,
-  SOURCE_DOCUMENT_CRAWL_STATUS_LABELS,
   SOURCE_DOCUMENT_EVENT_DERIVATION_STATUS_LABELS,
   SOURCE_DOCUMENT_LIFECYCLE_LABELS,
+  SOURCE_DOCUMENT_READINESS_STATUS_LABELS,
   SOURCE_DOCUMENT_TYPE_LABELS,
   SourceDocumentResponse,
 } from "@/app/lib/source-documents/definitions"
@@ -222,8 +222,8 @@ async function FetchSourceDocumentData({
               <Badge variant={document.lifecycleStatus === "FAILED" ? "destructive" : "secondary"}>
                 {SOURCE_DOCUMENT_LIFECYCLE_LABELS[document.lifecycleStatus]}
               </Badge>
-              <Badge variant={document.contentCrawlStatus === "FAILED" ? "destructive" : "outline"}>
-                {SOURCE_DOCUMENT_CRAWL_STATUS_LABELS[document.contentCrawlStatus]}
+              <Badge variant={document.readinessStatus === "FAILED" ? "destructive" : "outline"}>
+                {SOURCE_DOCUMENT_READINESS_STATUS_LABELS[document.readinessStatus]}
               </Badge>
               <Badge variant={getSourceDocumentEventDerivationVariant(document.eventDerivationStatus)}>
                 {document.eventDerivationStatus
@@ -531,9 +531,9 @@ async function FetchSourceDocumentData({
             </div>
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               <DetailCard
-                title="External ID"
-                value={document.externalId || "Chưa có"}
-                icon={Hash}
+                title="Trạng thái sẵn sàng"
+                value={SOURCE_DOCUMENT_READINESS_STATUS_LABELS[document.readinessStatus]}
+                icon={RefreshCcw}
               />
               <DetailCard
                 title="External Key"

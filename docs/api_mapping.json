@@ -36,7 +36,8 @@
                                 "CONTENT_CLEANING",
                                 "FIRECRAWL_SOURCE_DOCUMENT_FILTER",
                                 "NEWS_PRIMARY_EVENT_DERIVATION",
-                                "EVENT_ASSET_THEME_ENRICHMENT"
+                                "EVENT_ASSET_THEME_ENRICHMENT",
+                                "EVENT_GROUNDED_MARKET_QUERY_SYNTHESIS"
                             ]
                         }
                     }
@@ -78,7 +79,8 @@
                                 "CONTENT_CLEANING",
                                 "FIRECRAWL_SOURCE_DOCUMENT_FILTER",
                                 "NEWS_PRIMARY_EVENT_DERIVATION",
-                                "EVENT_ASSET_THEME_ENRICHMENT"
+                                "EVENT_ASSET_THEME_ENRICHMENT",
+                                "EVENT_GROUNDED_MARKET_QUERY_SYNTHESIS"
                             ]
                         }
                     }
@@ -130,7 +132,8 @@
                                 "CONTENT_CLEANING",
                                 "FIRECRAWL_SOURCE_DOCUMENT_FILTER",
                                 "NEWS_PRIMARY_EVENT_DERIVATION",
-                                "EVENT_ASSET_THEME_ENRICHMENT"
+                                "EVENT_ASSET_THEME_ENRICHMENT",
+                                "EVENT_GROUNDED_MARKET_QUERY_SYNTHESIS"
                             ]
                         }
                     }
@@ -845,6 +848,36 @@
                             "*/*": {
                                 "schema": {
                                     "$ref": "#/components/schemas/PendingNewsEventDerivationBatchResult"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/query": {
+            "post": {
+                "tags": [
+                    "market-query-controller"
+                ],
+                "operationId": "query",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MarketQueryRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MarketQueryResponse"
                                 }
                             }
                         }
@@ -2107,7 +2140,8 @@
                             "CONTENT_CLEANING",
                             "FIRECRAWL_SOURCE_DOCUMENT_FILTER",
                             "NEWS_PRIMARY_EVENT_DERIVATION",
-                            "EVENT_ASSET_THEME_ENRICHMENT"
+                            "EVENT_ASSET_THEME_ENRICHMENT",
+                            "EVENT_GROUNDED_MARKET_QUERY_SYNTHESIS"
                         ]
                     },
                     "content": {
@@ -2500,7 +2534,8 @@
                             "CONTENT_CLEANING",
                             "FIRECRAWL_SOURCE_DOCUMENT_FILTER",
                             "NEWS_PRIMARY_EVENT_DERIVATION",
-                            "EVENT_ASSET_THEME_ENRICHMENT"
+                            "EVENT_ASSET_THEME_ENRICHMENT",
+                            "EVENT_GROUNDED_MARKET_QUERY_SYNTHESIS"
                         ]
                     },
                     "content": {
@@ -2725,9 +2760,6 @@
                             "FAILED"
                         ]
                     },
-                    "externalId": {
-                        "type": "string"
-                    },
                     "externalKey": {
                         "type": "string"
                     },
@@ -2741,10 +2773,6 @@
                         "type": "string",
                         "format": "date-time"
                     },
-                    "actualizedAt": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
                     "forecastValue": {
                         "type": "string"
                     },
@@ -2754,20 +2782,20 @@
                     "actualValue": {
                         "type": "string"
                     },
-                    "contentCrawlStatus": {
-                        "type": "string",
-                        "enum": [
-                            "PENDING",
-                            "SUCCESS",
-                            "FAILED"
-                        ]
-                    },
                     "contentCrawlAttemptedAt": {
                         "type": "string",
                         "format": "date-time"
                     },
                     "contentCrawlError": {
                         "type": "string"
+                    },
+                    "readinessStatus": {
+                        "type": "string",
+                        "enum": [
+                            "PENDING",
+                            "READY",
+                            "FAILED"
+                        ]
                     },
                     "eventDerivationStatus": {
                         "type": "string",
@@ -2848,6 +2876,149 @@
                     }
                 }
             },
+            "MarketQueryRequest": {
+                "type": "object",
+                "properties": {
+                    "question": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "asOfTime": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "question"
+                ]
+            },
+            "MarketQueryEvidenceResponse": {
+                "type": "object",
+                "properties": {
+                    "eventId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "eventTitle": {
+                        "type": "string"
+                    },
+                    "sourceDocumentId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "sourceDocumentTitle": {
+                        "type": "string"
+                    },
+                    "sourceDocumentUrl": {
+                        "type": "string"
+                    },
+                    "sourceName": {
+                        "type": "string"
+                    },
+                    "publishedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "documentType": {
+                        "type": "string",
+                        "enum": [
+                            "NEWS",
+                            "ECONOMIC_CALENDAR",
+                            "RESEARCH",
+                            "MARKET_DATA",
+                            "SENTIMENT",
+                            "OTHER"
+                        ]
+                    },
+                    "evidenceRole": {
+                        "type": "string",
+                        "enum": [
+                            "PRIMARY",
+                            "SUPPORTING",
+                            "UPDATE",
+                            "CONTRADICTING"
+                        ]
+                    },
+                    "evidenceConfidence": {
+                        "type": "number"
+                    }
+                }
+            },
+            "MarketQueryKeyEventResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "summary": {
+                        "type": "string"
+                    },
+                    "occurredAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "confidence": {
+                        "type": "number"
+                    },
+                    "assetSymbols": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "themeSlugs": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "MarketQueryResponse": {
+                "type": "object",
+                "properties": {
+                    "answer": {
+                        "type": "string"
+                    },
+                    "reasoningChain": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "keyEvents": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MarketQueryKeyEventResponse"
+                        }
+                    },
+                    "assetsConsidered": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "confidence": {
+                        "type": "number"
+                    },
+                    "limitations": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "evidence": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MarketQueryEvidenceResponse"
+                        }
+                    }
+                }
+            },
             "CreateWorkspaceRequest": {
                 "type": "object",
                 "properties": {
@@ -2914,6 +3085,10 @@
                         "format": "int32"
                     },
                     "skippedCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "deferredCount": {
                         "type": "integer",
                         "format": "int32"
                     },
@@ -3160,12 +3335,6 @@
                         "type": "integer",
                         "format": "int32"
                     },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
                     "size": {
                         "type": "integer",
                         "format": "int32"
@@ -3182,6 +3351,12 @@
                     },
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
+                    },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
                     },
                     "numberOfElements": {
                         "type": "integer",
@@ -3208,11 +3383,11 @@
                     "paged": {
                         "type": "boolean"
                     },
-                    "pageSize": {
+                    "pageNumber": {
                         "type": "integer",
                         "format": "int32"
                     },
-                    "pageNumber": {
+                    "pageSize": {
                         "type": "integer",
                         "format": "int32"
                     },
@@ -3279,12 +3454,6 @@
                         "type": "integer",
                         "format": "int32"
                     },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
                     "size": {
                         "type": "integer",
                         "format": "int32"
@@ -3301,6 +3470,12 @@
                     },
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
+                    },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
                     },
                     "numberOfElements": {
                         "type": "integer",
@@ -3326,12 +3501,6 @@
                         "type": "integer",
                         "format": "int32"
                     },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
                     "size": {
                         "type": "integer",
                         "format": "int32"
@@ -3348,6 +3517,12 @@
                     },
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
+                    },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
                     },
                     "numberOfElements": {
                         "type": "integer",
@@ -3422,12 +3597,6 @@
                         "type": "integer",
                         "format": "int32"
                     },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
                     "size": {
                         "type": "integer",
                         "format": "int32"
@@ -3444,6 +3613,12 @@
                     },
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
+                    },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
                     },
                     "numberOfElements": {
                         "type": "integer",
@@ -3504,11 +3679,11 @@
                             "FAILED"
                         ]
                     },
-                    "contentCrawlStatus": {
+                    "readinessStatus": {
                         "type": "string",
                         "enum": [
                             "PENDING",
-                            "SUCCESS",
+                            "READY",
                             "FAILED"
                         ]
                     },
@@ -3539,12 +3714,6 @@
                         "type": "integer",
                         "format": "int32"
                     },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
                     "size": {
                         "type": "integer",
                         "format": "int32"
@@ -3561,6 +3730,12 @@
                     },
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
+                    },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
                     },
                     "numberOfElements": {
                         "type": "integer",
@@ -3632,12 +3807,6 @@
                         "type": "integer",
                         "format": "int32"
                     },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
                     "size": {
                         "type": "integer",
                         "format": "int32"
@@ -3654,6 +3823,12 @@
                     },
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
+                    },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
                     },
                     "numberOfElements": {
                         "type": "integer",
@@ -3748,12 +3923,6 @@
                         "type": "integer",
                         "format": "int32"
                     },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
                     "size": {
                         "type": "integer",
                         "format": "int32"
@@ -3770,6 +3939,12 @@
                     },
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
+                    },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
                     },
                     "numberOfElements": {
                         "type": "integer",
@@ -3996,12 +4171,6 @@
                         "type": "integer",
                         "format": "int32"
                     },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
                     "size": {
                         "type": "integer",
                         "format": "int32"
@@ -4018,6 +4187,12 @@
                     },
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
+                    },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
                     },
                     "numberOfElements": {
                         "type": "integer",
@@ -4072,12 +4247,6 @@
                         "type": "integer",
                         "format": "int32"
                     },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
                     "size": {
                         "type": "integer",
                         "format": "int32"
@@ -4094,6 +4263,12 @@
                     },
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
+                    },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
                     },
                     "numberOfElements": {
                         "type": "integer",
@@ -4143,12 +4318,6 @@
                         "type": "integer",
                         "format": "int32"
                     },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
                     "size": {
                         "type": "integer",
                         "format": "int32"
@@ -4165,6 +4334,12 @@
                     },
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
+                    },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
                     },
                     "numberOfElements": {
                         "type": "integer",
@@ -4222,12 +4397,6 @@
                         "type": "integer",
                         "format": "int32"
                     },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
                     "size": {
                         "type": "integer",
                         "format": "int32"
@@ -4244,6 +4413,12 @@
                     },
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
+                    },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
                     },
                     "numberOfElements": {
                         "type": "integer",

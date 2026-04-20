@@ -2,7 +2,7 @@
 
 Tai lieu nay anh xa snapshot OpenAPI backend trong `docs/api_mapping.json` toi cac diem tich hop frontend hien tai cua repo.
 
-Xac minh lan cuoi: ngay 19 thang 4 nam 2026
+Xac minh lan cuoi: ngay 20 thang 4 nam 2026
 
 ## Cau hinh co so
 
@@ -25,6 +25,7 @@ Xac minh lan cuoi: ngay 19 thang 4 nam 2026
 
 - Backend da chot domain noi dung chinh la `source-documents`.
 - Backend da bo sung surface `events` cho list/detail va enrich assets/themes, va frontend nay da co module doc/van hanh rieng de tich hop.
+- Backend da bo sung surface `query` de tong hop tra loi market query dua tren event va source-document, va frontend nay da co workbench rieng de tich hop.
 - Frontend da co module `source-documents` canon va da loai bo cac route legacy `/articles` va `/economic-calendar`.
 - Frontend da loai bo toan bo surface `wiki`; content surfaces hien tai gom `sources`, `source-documents`, va `events`.
 - `sources` da duoc thu gon DTO va form theo contract backend hien tai, dong thoi UI da map `systemManaged` de khoa thao tac thu cong khi can.
@@ -43,7 +44,7 @@ Xac minh lan cuoi: ngay 19 thang 4 nam 2026
 | DELETE | `/system-prompts/{promptType}` | `deleteSystemPrompt` | `-` | Chua trien khai | Frontend chua tich hop. |
 
 Ghi chu:
-- Enum `promptType` trong snapshot hien tai da dung `FIRECRAWL_SOURCE_DOCUMENT_FILTER`, `NEWS_PRIMARY_EVENT_DERIVATION`, va `EVENT_ASSET_THEME_ENRICHMENT`.
+- Enum `promptType` trong snapshot hien tai da dung `FIRECRAWL_SOURCE_DOCUMENT_FILTER`, `NEWS_PRIMARY_EVENT_DERIVATION`, `EVENT_ASSET_THEME_ENRICHMENT`, va `EVENT_GROUNDED_MARKET_QUERY_SYNTHESIS`.
 
 ### 2. API sources
 
@@ -85,6 +86,7 @@ Frontend lien quan:
 
 Ghi chu:
 - Frontend da bo compatibility fallback `article:*` va `event:*` khoi source-document permission helper; domain nay nay dung `source-document:read`, `source-document:analyze`, `source-document:update`, va `source-document:delete`.
+- Contract response hien tai da doi `contentCrawlStatus` thanh `readinessStatus` voi enum `PENDING`, `READY`, `FAILED`; detail response khong con `externalId` va `actualizedAt`.
 - Section `linkedEvents` tren source-document detail van hien summary traceability ngay ca khi user khong co `event:read`, nhung chi bat link sang `/events/{id}` khi user co quyen do.
 
 ### 4. API events
@@ -105,8 +107,21 @@ Frontend lien quan:
 Ghi chu:
 - `event:read` dung de gate navigation, `/events`, `/events/{id}`, va cac link sang event detail.
 - Event enrich operators hien duoc gate bang `source-document:analyze` theo quyet dinh backend hien tai; frontend khong su dung `event:crawl` cho flow nay.
+- Batch enrichment result cua `/events/enrich-pending-assets-and-themes` da co them field `deferredCount` trong snapshot backend hien tai.
 
-### 5. API blogs
+### 5. API market query
+
+| Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai | Ghi chu |
+| --- | --- | --- | --- | --- | --- |
+| POST | `/query` | `query` | `queryMarket(request)` | Da trien khai | Route `/market-query` goi action co auth va render workbench briefing gom `answer`, `reasoningChain`, `keyEvents`, `assetsConsidered`, `confidence`, `limitations`, va `evidence`; deep link sang event/source-document duoc gate theo permission doc tuong ung. |
+
+Frontend lien quan:
+- `app/api/query/action.ts`
+- `app/lib/market-query/definitions.ts`
+- `app/(main)/market-query/page.tsx`
+- `app/(main)/market-query/market-query-workbench.tsx`
+
+### 6. API blogs
 
 | Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai | Ghi chu |
 | --- | --- | --- | --- | --- | --- |
@@ -116,7 +131,7 @@ Ghi chu:
 | PUT | `/blogs/{id}` | `updateBlogPost` | `updateBlog(id, request)` | Da trien khai | Backend update schema dung `isVisible`. |
 | DELETE | `/blogs/{id}` | `deleteBlogPost` | `deleteBlog(id)` | Da trien khai | Duoc boc trong `ActionResult`. |
 
-### 6. API cronjobs
+### 7. API cronjobs
 
 | Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai | Ghi chu |
 | --- | --- | --- | --- | --- | --- |
@@ -130,7 +145,7 @@ Ghi chu:
 | POST | `/cronjobs/{id}/resume` | `resume` | `resumeCronjob(id)` | Da trien khai | Co UX. |
 | POST | `/cronjobs/{id}/stop` | `stop` | `-` | Chua trien khai | Frontend chua co `stopCronjob()`. |
 
-### 7. API AI provider configs
+### 8. API AI provider configs
 
 | Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai | Ghi chu |
 | --- | --- | --- | --- | --- | --- |
@@ -142,14 +157,14 @@ Ghi chu:
 | PATCH | `/ai-provider-configs/{id}/set-default` | `setDefault` | `setAiProviderConfigDefault(id)` | Da trien khai | Da tich hop. |
 | POST | `/ai-provider-configs/model-catalog` | `getModelCatalog` | `getAiProviderModelCatalog(request)` | Da trien khai | Tai model catalog theo credentials. |
 
-### 8. API assets
+### 9. API assets
 
 | Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai | Ghi chu |
 | --- | --- | --- | --- | --- | --- |
 | GET | `/assets` | `getAssets` | `getAssets(searchParams)` | Da trien khai | Asset catalog read-only. |
 | GET | `/assets/{id}` | `getAsset` | `getAssetById(id)` | Da trien khai | Co helper hydrate detail. |
 
-### 9. API media
+### 10. API media
 
 | Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai | Ghi chu |
 | --- | --- | --- | --- | --- | --- |
@@ -158,7 +173,7 @@ Ghi chu:
 | DELETE | `/medias/{id}` | `deleteMedia` | `-` | Chua trien khai | Chua co tich hop. |
 | POST | `/medias/upload` | `upload` | `-` | Chua trien khai | Chua co tich hop. |
 
-### 10. API workspace
+### 11. API workspace
 
 | Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai | Ghi chu |
 | --- | --- | --- | --- | --- | --- |
@@ -167,13 +182,13 @@ Ghi chu:
 | PUT | `/me/workspaces/{id}` | `updateWorkspace` | `updateWorkspace(id, request)` | Da trien khai | Rename workspace. |
 | PATCH | `/me/workspaces/{id}/set-default` | `setDefaultWorkspace` | `setDefaultWorkspace(id)` | Da trien khai | Doi workspace mac dinh. |
 
-### 11. API user
+### 12. API user
 
 | Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai | Ghi chu |
 | --- | --- | --- | --- | --- | --- |
 | GET | `/me` | `me` | `getMe()` | Da trien khai | Dung de lay `permissions[]` va workspace thong qua backend profile. |
 
-### 12. API wiki
+### 13. API wiki
 
 Khong con tich hop frontend.
 
@@ -181,20 +196,20 @@ Ghi chu:
 - Toan bo route, action, definition, va UI surface `wiki` da duoc go khoi frontend.
 - Neu backend tai xuat wiki trong tuong lai, nen de xuat mot change moi thay vi tai su dung module cu.
 
-### 13. API roles
+### 14. API roles
 
 | Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai | Ghi chu |
 | --- | --- | --- | --- | --- | --- |
 | GET | `/roles` | `getRoles` | `getRoles()` | Da trien khai | Trang roles da load danh sach vai tro. |
 | PUT | `/roles/{roleKey}/permissions` | `updateRolePermissions` | `updateRolePermissions(roleKey, request)` | Da trien khai | Dialog frontend cho phep cap nhat permission keys. |
 
-### 14. API permissions
+### 15. API permissions
 
 | Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai | Ghi chu |
 | --- | --- | --- | --- | --- | --- |
 | GET | `/permissions` | `getPermissions` | `getPermissions()` | Da trien khai | Duoc dung cung role editor de build permission catalog. |
 
-### 15. API watchlists
+### 16. API watchlists
 
 | Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai | Ghi chu |
 | --- | --- | --- | --- | --- | --- |
@@ -202,13 +217,13 @@ Ghi chu:
 | POST | `/watchlists` | `createWatchlist` | `addAssetToWorkspaceWatchlist({ assetId })` | Da trien khai | Sync add theo diff trong workspace editor. |
 | DELETE | `/watchlists/assets/{assetId}` | `deleteByAssetId` | `removeAssetFromWorkspaceWatchlist(assetId)` | Da trien khai | Sync remove theo diff. |
 
-### 16. Webhook
+### 17. Webhook
 
 | Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai | Ghi chu |
 | --- | --- | --- | --- | --- | --- |
 | POST | `/webhooks/clerk` | `handleClerkWebhook` | `-` | Chi backend | Khong ky vong co frontend caller. |
 
-### 17. Health check
+### 18. Health check
 
 | Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai | Ghi chu |
 | --- | --- | --- | --- | --- | --- |
@@ -284,7 +299,8 @@ type ActionResult<T = void> =
 | Tang van chuyen auth | `app/api/auth/action.ts` |
 | Sources | `app/api/sources/action.ts`, `app/lib/sources/definitions.ts`, `app/(main)/sources/*` |
 | Source documents | `app/api/source-documents/action.ts`, `app/lib/source-documents/definitions.ts`, `app/lib/source-documents/permissions.ts`, `app/(main)/source-documents/*` |
-| Events | `-` |
+| Events | `app/api/events/action.ts`, `app/lib/events/definitions.ts`, `app/lib/events/permissions.ts`, `app/(main)/events/*` |
+| Market query | `app/api/query/action.ts`, `app/lib/market-query/definitions.ts`, `app/lib/market-query/permissions.ts`, `app/(main)/market-query/*` |
 | Blogs | `app/api/blogs/action.ts`, `app/lib/blogs/definitions.ts` |
 | Cronjobs | `app/api/cronjobs/action.ts`, `app/lib/cronjobs/definitions.ts` |
 | AI provider configs | `app/api/ai-provider-configs/action.ts`, `app/lib/ai-provider-configs/definitions.ts` |
@@ -303,8 +319,8 @@ type ActionResult<T = void> =
 - List/search runtime cua frontend dang dung `$filter/page/size/sort`, trong khi OpenAPI tiep tuc mo ta `specification/pageable` o nhieu list endpoint.
 - `/sources/active`: helper frontend van ky vong mang thuan; can tiep tuc xac nhan runtime backend neu BE doi shape.
 - `source-documents/{id}/feature-image`: da co server action nhung chua co UX thao tac media.
-- `events`: spec hien co list/detail va enrich assets/themes, nhung frontend chua co `app/api/events/action.ts`, route `app/(main)/events/*`, hoac DTO mapping cho event domain.
+- `market query`: frontend da co workbench `/market-query`; can xac nhan runtime backend on dinh cho payload `MarketQueryResponse` khi co it/no evidence de tranh drift optional fields.
 - `blogs`: create va response dung `visible`, update dung `isVisible`; frontend van can tiep tuc xu ly ky de tranh drift.
 - `ai-provider-configs`: frontend sanitize `apiKey` khoi response truoc khi dua xuong client.
-- `media` va `system-prompts`: da co trong spec nhung frontend chua co module; `system-prompts` hien tai con them enum `NEWS_PRIMARY_EVENT_DERIVATION` va `EVENT_ASSET_THEME_ENRICHMENT`.
+- `media` va `system-prompts`: da co trong spec nhung frontend chua co module; `system-prompts` hien tai con them enum `NEWS_PRIMARY_EVENT_DERIVATION`, `EVENT_ASSET_THEME_ENRICHMENT`, va `EVENT_GROUNDED_MARKET_QUERY_SYNTHESIS`.
 - `topics`: van ton tai tren frontend, nhung khong con nam trong snapshot API hien tai.

@@ -13,7 +13,7 @@ export type SourceDocumentLifecycleStatus =
   | "NORMALIZED"
   | "FAILED"
 
-export type SourceDocumentContentCrawlStatus = "PENDING" | "SUCCESS" | "FAILED"
+export type SourceDocumentReadinessStatus = "PENDING" | "READY" | "FAILED"
 
 export type SourceDocumentEventDerivationStatus =
   | "PENDING"
@@ -56,7 +56,7 @@ export interface SourceDocumentListResponse {
   publishedAt?: string
   documentType: SourceDocumentType
   lifecycleStatus: SourceDocumentLifecycleStatus
-  contentCrawlStatus: SourceDocumentContentCrawlStatus
+  readinessStatus: SourceDocumentReadinessStatus
   eventDerivationStatus?: SourceDocumentEventDerivationStatus
   createdDate: string
 }
@@ -76,12 +76,10 @@ export interface LinkedEventSummaryResponse {
 export interface SourceDocumentResponse extends SourceDocumentListResponse {
   content?: string
   author?: string
-  externalId?: string
   externalKey?: string
   countryCode?: string
   importance?: string
   scheduledAt?: string
-  actualizedAt?: string
   forecastValue?: string
   previousValue?: string
   actualValue?: string
@@ -125,12 +123,12 @@ export const SOURCE_DOCUMENT_TYPE_LABELS: Record<SourceDocumentType, string> = {
   OTHER: "Khác",
 }
 
-export const SOURCE_DOCUMENT_CRAWL_STATUS_LABELS: Record<
-  SourceDocumentContentCrawlStatus,
+export const SOURCE_DOCUMENT_READINESS_STATUS_LABELS: Record<
+  SourceDocumentReadinessStatus,
   string
 > = {
   PENDING: "Đang chờ",
-  SUCCESS: "Thành công",
+  READY: "Sẵn sàng",
   FAILED: "Thất bại",
 }
 

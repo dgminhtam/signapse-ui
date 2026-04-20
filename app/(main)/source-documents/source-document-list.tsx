@@ -11,12 +11,12 @@ import Link from "next/link"
 
 import { Page } from "@/app/lib/definitions"
 import {
-  SOURCE_DOCUMENT_CRAWL_STATUS_LABELS,
   SOURCE_DOCUMENT_LIFECYCLE_LABELS,
+  SOURCE_DOCUMENT_READINESS_STATUS_LABELS,
   SOURCE_DOCUMENT_TYPE_LABELS,
-  SourceDocumentContentCrawlStatus,
   SourceDocumentLifecycleStatus,
   SourceDocumentListResponse,
+  SourceDocumentReadinessStatus,
 } from "@/app/lib/source-documents/definitions"
 import { AppPaginationControls } from "@/components/app-pagination-controls"
 import { Badge } from "@/components/ui/badge"
@@ -67,14 +67,14 @@ function getLifecycleVariant(
   return "outline"
 }
 
-function getCrawlVariant(
-  status: SourceDocumentContentCrawlStatus
+function getReadinessVariant(
+  status: SourceDocumentReadinessStatus
 ): "outline" | "secondary" | "destructive" {
   if (status === "FAILED") {
     return "destructive"
   }
 
-  if (status === "SUCCESS") {
+  if (status === "READY") {
     return "secondary"
   }
 
@@ -172,8 +172,8 @@ export function SourceDocumentList({
                         <Badge variant={getLifecycleVariant(document.lifecycleStatus)}>
                           {SOURCE_DOCUMENT_LIFECYCLE_LABELS[document.lifecycleStatus]}
                         </Badge>
-                        <Badge variant={getCrawlVariant(document.contentCrawlStatus)}>
-                          {SOURCE_DOCUMENT_CRAWL_STATUS_LABELS[document.contentCrawlStatus]}
+                        <Badge variant={getReadinessVariant(document.readinessStatus)}>
+                          {SOURCE_DOCUMENT_READINESS_STATUS_LABELS[document.readinessStatus]}
                         </Badge>
                         <Badge
                           variant={getSourceDocumentEventDerivationVariant(

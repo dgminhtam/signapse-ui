@@ -6,6 +6,7 @@ import {
 } from "lucide-react"
 
 import { EVENT_NAV_PERMISSIONS } from "@/app/lib/events/permissions"
+import { MARKET_QUERY_NAV_PERMISSIONS } from "@/app/lib/market-query/permissions"
 import { SOURCE_DOCUMENT_NAV_PERMISSIONS } from "@/app/lib/source-documents/permissions"
 
 export interface NavSubItem {
@@ -78,6 +79,11 @@ export const siteConfig = {
           permission: EVENT_NAV_PERMISSIONS,
         },
         {
+          title: "Truy vấn thị trường",
+          url: "/market-query",
+          permission: MARKET_QUERY_NAV_PERMISSIONS,
+        },
+        {
           title: "Blog",
           url: "/blogs",
           permission: "blog:read",
@@ -107,7 +113,6 @@ export const siteConfig = {
         {
           title: "Token nhà phát triển",
           url: "/developer-token",
-          permission: "system:admin",
         },
       ],
     },
