@@ -8,6 +8,7 @@ import { useAppPaginationQuery } from "./use-app-pagination-query"
 interface AppSelectPageSizeProps {
   className?: string
   defaultSize?: number
+  label?: string
   options?: readonly number[] | number[]
   showLabel?: boolean
   triggerClassName?: string
@@ -16,6 +17,7 @@ interface AppSelectPageSizeProps {
 export function AppSelectPageSize({
   className,
   defaultSize = 12,
+  label,
   options = DEFAULT_PAGE_SIZE_OPTIONS,
   showLabel = true,
   triggerClassName,
@@ -30,6 +32,7 @@ export function AppSelectPageSize({
       value={pageSize}
       isPending={isPending}
       onValueChange={setPageSize}
+      label={label}
       options={options}
       showLabel={showLabel}
       triggerClassName={triggerClassName}

@@ -145,98 +145,6 @@
                 }
             }
         },
-        "/sources/{id}": {
-            "get": {
-                "tags": [
-                    "source-controller"
-                ],
-                "operationId": "getSource",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int64"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "*/*": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/SourceResponse"
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "put": {
-                "tags": [
-                    "source-controller"
-                ],
-                "operationId": "updateSource",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int64"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/UpdateSourceRequest"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "*/*": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/SourceResponse"
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "tags": [
-                    "source-controller"
-                ],
-                "operationId": "deleteSource",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int64"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
         "/roles/{roleKey}/permissions": {
             "put": {
                 "tags": [
@@ -273,6 +181,98 @@
                                 }
                             }
                         }
+                    }
+                }
+            }
+        },
+        "/news-outlets/{id}": {
+            "get": {
+                "tags": [
+                    "news-outlet-controller"
+                ],
+                "operationId": "getNewsOutlet",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NewsOutletResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "news-outlet-controller"
+                ],
+                "operationId": "updateNewsOutlet",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateNewsOutletRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NewsOutletResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "news-outlet-controller"
+                ],
+                "operationId": "deleteNewsOutlet",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
                     }
                 }
             }
@@ -664,19 +664,49 @@
                 }
             }
         },
-        "/sources": {
+        "/query": {
+            "post": {
+                "tags": [
+                    "market-query-controller"
+                ],
+                "operationId": "query",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MarketQueryRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MarketQueryResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/news-outlets": {
             "get": {
                 "tags": [
-                    "source-controller"
+                    "news-outlet-controller"
                 ],
-                "operationId": "getSources",
+                "operationId": "getNewsOutlets",
                 "parameters": [
                     {
                         "name": "specification",
                         "in": "query",
                         "required": true,
                         "schema": {
-                            "$ref": "#/components/schemas/SpecificationSource"
+                            "$ref": "#/components/schemas/SpecificationNewsOutlet"
                         }
                     },
                     {
@@ -694,7 +724,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/PageSourceListResponse"
+                                    "$ref": "#/components/schemas/PageNewsOutletListResponse"
                                 }
                             }
                         }
@@ -703,14 +733,14 @@
             },
             "post": {
                 "tags": [
-                    "source-controller"
+                    "news-outlet-controller"
                 ],
-                "operationId": "createSource",
+                "operationId": "createNewsOutlet",
                 "requestBody": {
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/CreateSourceRequest"
+                                "$ref": "#/components/schemas/CreateNewsOutletRequest"
                             }
                         }
                     },
@@ -722,7 +752,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/SourceResponse"
+                                    "$ref": "#/components/schemas/NewsOutletResponse"
                                 }
                             }
                         }
@@ -730,10 +760,10 @@
                 }
             }
         },
-        "/source-documents/{id}/derive-primary-event": {
+        "/news-articles/{id}/derive-primary-event": {
             "post": {
                 "tags": [
-                    "source-document-controller"
+                    "news-article-controller"
                 ],
                 "operationId": "derivePrimaryEvent",
                 "parameters": [
@@ -761,10 +791,10 @@
                 }
             }
         },
-        "/source-documents/{id}/crawl-full-content": {
+        "/news-articles/{id}/crawl-full-content": {
             "post": {
                 "tags": [
-                    "source-document-controller"
+                    "news-article-controller"
                 ],
                 "operationId": "crawlFullContent",
                 "parameters": [
@@ -784,7 +814,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/SourceDocumentResponse"
+                                    "$ref": "#/components/schemas/NewsArticleResponse"
                                 }
                             }
                         }
@@ -792,10 +822,10 @@
                 }
             }
         },
-        "/source-documents/{id}/analyze": {
+        "/news-articles/{id}/analyze": {
             "post": {
                 "tags": [
-                    "source-document-controller"
+                    "news-article-controller"
                 ],
                 "operationId": "analyzeContent",
                 "parameters": [
@@ -815,7 +845,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/SourceDocumentResponse"
+                                    "$ref": "#/components/schemas/NewsArticleResponse"
                                 }
                             }
                         }
@@ -823,10 +853,10 @@
                 }
             }
         },
-        "/source-documents/derive-pending-news-events": {
+        "/news-articles/derive-pending-news-events": {
             "post": {
                 "tags": [
-                    "source-document-controller"
+                    "news-article-controller"
                 ],
                 "operationId": "derivePendingNewsEvents",
                 "parameters": [
@@ -848,36 +878,6 @@
                             "*/*": {
                                 "schema": {
                                     "$ref": "#/components/schemas/PendingNewsEventDerivationBatchResult"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/query": {
-            "post": {
-                "tags": [
-                    "market-query-controller"
-                ],
-                "operationId": "query",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/MarketQueryRequest"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "*/*": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/MarketQueryResponse"
                                 }
                             }
                         }
@@ -1410,10 +1410,10 @@
                 }
             }
         },
-        "/sources/{id}/toggle-active": {
+        "/news-outlets/{id}/toggle-active": {
             "patch": {
                 "tags": [
-                    "source-controller"
+                    "news-outlet-controller"
                 ],
                 "operationId": "toggleActive",
                 "parameters": [
@@ -1433,7 +1433,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/SourceResponse"
+                                    "$ref": "#/components/schemas/NewsOutletResponse"
                                 }
                             }
                         }
@@ -1441,10 +1441,10 @@
                 }
             }
         },
-        "/source-documents/{id}/feature-image": {
+        "/news-articles/{id}/feature-image": {
             "patch": {
                 "tags": [
-                    "source-document-controller"
+                    "news-article-controller"
                 ],
                 "operationId": "updateFeatureImage",
                 "parameters": [
@@ -1473,7 +1473,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/SourceDocumentResponse"
+                                    "$ref": "#/components/schemas/NewsArticleResponse"
                                 }
                             }
                         }
@@ -1481,12 +1481,12 @@
                 }
             }
         },
-        "/me/workspaces/{id}/set-default": {
+        "/me/workspaces/{id}/set-current": {
             "patch": {
                 "tags": [
                     "workspace-controller"
                 ],
-                "operationId": "setDefaultWorkspace",
+                "operationId": "setCurrentWorkspace",
                 "parameters": [
                     {
                         "name": "id",
@@ -1638,135 +1638,6 @@
                 }
             }
         },
-        "/sources/active": {
-            "get": {
-                "tags": [
-                    "source-controller"
-                ],
-                "operationId": "getActiveSources",
-                "parameters": [
-                    {
-                        "name": "specification",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/components/schemas/SpecificationSource"
-                        }
-                    },
-                    {
-                        "name": "pageable",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/components/schemas/Pageable"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "*/*": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/PageSourceListResponse"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/source-documents": {
-            "get": {
-                "tags": [
-                    "source-document-controller"
-                ],
-                "operationId": "getSourceDocuments",
-                "parameters": [
-                    {
-                        "name": "specification",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/components/schemas/SpecificationSourceDocument"
-                        }
-                    },
-                    {
-                        "name": "pageable",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/components/schemas/Pageable"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "*/*": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/PageSourceDocumentListResponse"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/source-documents/{id}": {
-            "get": {
-                "tags": [
-                    "source-document-controller"
-                ],
-                "operationId": "getSourceDocument",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int64"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "*/*": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/SourceDocumentResponse"
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "tags": [
-                    "source-document-controller"
-                ],
-                "operationId": "deleteSourceDocument",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int64"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
         "/roles": {
             "get": {
                 "tags": [
@@ -1809,6 +1680,135 @@
                                 }
                             }
                         }
+                    }
+                }
+            }
+        },
+        "/news-outlets/active": {
+            "get": {
+                "tags": [
+                    "news-outlet-controller"
+                ],
+                "operationId": "getActiveNewsOutlets",
+                "parameters": [
+                    {
+                        "name": "specification",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/SpecificationNewsOutlet"
+                        }
+                    },
+                    {
+                        "name": "pageable",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/Pageable"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PageNewsOutletListResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/news-articles": {
+            "get": {
+                "tags": [
+                    "news-article-controller"
+                ],
+                "operationId": "getNewsArticles",
+                "parameters": [
+                    {
+                        "name": "specification",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/SpecificationNewsArticle"
+                        }
+                    },
+                    {
+                        "name": "pageable",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/Pageable"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PageNewsArticleListResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/news-articles/{id}": {
+            "get": {
+                "tags": [
+                    "news-article-controller"
+                ],
+                "operationId": "getNewsArticle",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NewsArticleResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "news-article-controller"
+                ],
+                "operationId": "deleteNewsArticle",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
                     }
                 }
             }
@@ -1937,6 +1937,26 @@
                             "*/*": {
                                 "schema": {
                                     "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/graph-view": {
+            "get": {
+                "tags": [
+                    "graph-view-controller"
+                ],
+                "operationId": "getGraphView",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GraphViewResponse"
                                 }
                             }
                         }
@@ -2157,93 +2177,6 @@
                     }
                 }
             },
-            "UpdateSourceRequest": {
-                "type": "object",
-                "properties": {
-                    "name": {
-                        "type": "string"
-                    },
-                    "type": {
-                        "type": "string",
-                        "enum": [
-                            "NEWS",
-                            "ECONOMIC_CALENDAR",
-                            "RESEARCH",
-                            "MARKET_DATA",
-                            "SENTIMENT",
-                            "OTHER"
-                        ]
-                    },
-                    "description": {
-                        "type": "string"
-                    },
-                    "url": {
-                        "type": "string"
-                    },
-                    "rssUrl": {
-                        "type": "string"
-                    },
-                    "active": {
-                        "type": "boolean"
-                    }
-                }
-            },
-            "SourceResponse": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "format": "int64"
-                    },
-                    "name": {
-                        "type": "string"
-                    },
-                    "type": {
-                        "type": "string",
-                        "enum": [
-                            "NEWS",
-                            "ECONOMIC_CALENDAR",
-                            "RESEARCH",
-                            "MARKET_DATA",
-                            "SENTIMENT",
-                            "OTHER"
-                        ]
-                    },
-                    "description": {
-                        "type": "string"
-                    },
-                    "url": {
-                        "type": "string"
-                    },
-                    "rssUrl": {
-                        "type": "string"
-                    },
-                    "lastIngestedAt": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "lastIngestStatus": {
-                        "type": "string"
-                    },
-                    "lastIngestError": {
-                        "type": "string"
-                    },
-                    "systemManaged": {
-                        "type": "boolean"
-                    },
-                    "active": {
-                        "type": "boolean"
-                    },
-                    "createdDate": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "lastModifiedDate": {
-                        "type": "string",
-                        "format": "date-time"
-                    }
-                }
-            },
             "UpdateRolePermissionsRequest": {
                 "type": "object",
                 "properties": {
@@ -2302,6 +2235,64 @@
                     }
                 }
             },
+            "UpdateNewsOutletRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "homepageUrl": {
+                        "type": "string"
+                    },
+                    "rssUrl": {
+                        "type": "string"
+                    },
+                    "slug": {
+                        "type": "string"
+                    },
+                    "active": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "NewsOutletResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "slug": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "homepageUrl": {
+                        "type": "string"
+                    },
+                    "rssUrl": {
+                        "type": "string"
+                    },
+                    "active": {
+                        "type": "boolean"
+                    },
+                    "createdDate": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "lastModifiedDate": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
             "UpdateWorkspaceRequest": {
                 "type": "object",
                 "properties": {
@@ -2326,7 +2317,7 @@
                     "slug": {
                         "type": "string"
                     },
-                    "defaultWorkspace": {
+                    "currentWorkspace": {
                         "type": "boolean"
                     },
                     "createdDate": {
@@ -2549,32 +2540,166 @@
                     "promptType"
                 ]
             },
-            "CreateSourceRequest": {
+            "MarketQueryRequest": {
+                "type": "object",
+                "properties": {
+                    "question": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "asOfTime": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "question"
+                ]
+            },
+            "MarketQueryEvidenceResponse": {
+                "type": "object",
+                "properties": {
+                    "eventId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "eventTitle": {
+                        "type": "string"
+                    },
+                    "artifactType": {
+                        "type": "string",
+                        "enum": [
+                            "NEWS_ARTICLE",
+                            "ECONOMIC_CALENDAR_ENTRY",
+                            "RESEARCH_DOCUMENT",
+                            "STRATEGY_PLAYBOOK",
+                            "OTHER"
+                        ]
+                    },
+                    "artifactId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "artifactTitle": {
+                        "type": "string"
+                    },
+                    "artifactUrl": {
+                        "type": "string"
+                    },
+                    "newsOutletName": {
+                        "type": "string"
+                    },
+                    "publishedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "evidenceRole": {
+                        "type": "string",
+                        "enum": [
+                            "PRIMARY",
+                            "SUPPORTING",
+                            "UPDATE",
+                            "CONTRADICTING"
+                        ]
+                    },
+                    "evidenceConfidence": {
+                        "type": "number"
+                    }
+                }
+            },
+            "MarketQueryKeyEventResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "summary": {
+                        "type": "string"
+                    },
+                    "occurredAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "confidence": {
+                        "type": "number"
+                    },
+                    "assetSymbols": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "themeSlugs": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "MarketQueryResponse": {
+                "type": "object",
+                "properties": {
+                    "answer": {
+                        "type": "string"
+                    },
+                    "reasoningChain": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "keyEvents": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MarketQueryKeyEventResponse"
+                        }
+                    },
+                    "assetsConsidered": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "confidence": {
+                        "type": "number"
+                    },
+                    "limitations": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "evidence": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MarketQueryEvidenceResponse"
+                        }
+                    }
+                }
+            },
+            "CreateNewsOutletRequest": {
                 "type": "object",
                 "properties": {
                     "name": {
                         "type": "string",
                         "minLength": 1
                     },
-                    "type": {
-                        "type": "string",
-                        "enum": [
-                            "NEWS",
-                            "ECONOMIC_CALENDAR",
-                            "RESEARCH",
-                            "MARKET_DATA",
-                            "SENTIMENT",
-                            "OTHER"
-                        ]
-                    },
                     "description": {
                         "type": "string"
                     },
-                    "url": {
+                    "homepageUrl": {
                         "type": "string",
                         "minLength": 1
                     },
                     "rssUrl": {
+                        "type": "string"
+                    },
+                    "slug": {
                         "type": "string"
                     },
                     "active": {
@@ -2582,27 +2707,29 @@
                     }
                 },
                 "required": [
-                    "name",
-                    "url"
+                    "homepageUrl",
+                    "name"
                 ]
             },
             "NewsPrimaryEventDerivationResult": {
                 "type": "object",
                 "properties": {
-                    "sourceDocumentId": {
+                    "newsArticleId": {
                         "type": "integer",
                         "format": "int64"
                     },
-                    "sourceDocumentTitle": {
+                    "newsArticleTitle": {
                         "type": "string"
                     },
-                    "outcome": {
+                    "status": {
                         "type": "string",
                         "enum": [
-                            "PENDING",
-                            "SUCCESS",
-                            "NO_EVENT",
-                            "FAILED"
+                            "INGESTED",
+                            "DERIVATION_PENDING",
+                            "EVENT_RESOLVED",
+                            "NO_PRIMARY_EVENT",
+                            "CONTENT_FAILED",
+                            "DERIVATION_FAILED"
                         ]
                     },
                     "changeType": {
@@ -2707,7 +2834,7 @@
                     }
                 }
             },
-            "SourceDocumentResponse": {
+            "NewsArticleResponse": {
                 "type": "object",
                 "properties": {
                     "id": {
@@ -2729,92 +2856,29 @@
                     "featureImage": {
                         "$ref": "#/components/schemas/MediaResponse"
                     },
-                    "author": {
-                        "type": "string"
+                    "newsOutletId": {
+                        "type": "integer",
+                        "format": "int64"
                     },
-                    "sourceName": {
+                    "newsOutletName": {
                         "type": "string"
                     },
                     "publishedAt": {
                         "type": "string",
                         "format": "date-time"
                     },
-                    "documentType": {
+                    "status": {
                         "type": "string",
                         "enum": [
-                            "NEWS",
-                            "ECONOMIC_CALENDAR",
-                            "RESEARCH",
-                            "MARKET_DATA",
-                            "SENTIMENT",
-                            "OTHER"
-                        ]
-                    },
-                    "lifecycleStatus": {
-                        "type": "string",
-                        "enum": [
-                            "DISCOVERED",
-                            "RAW_CAPTURED",
-                            "HYDRATED",
-                            "NORMALIZED",
-                            "FAILED"
+                            "INGESTED",
+                            "DERIVATION_PENDING",
+                            "EVENT_RESOLVED",
+                            "NO_PRIMARY_EVENT",
+                            "CONTENT_FAILED",
+                            "DERIVATION_FAILED"
                         ]
                     },
                     "externalKey": {
-                        "type": "string"
-                    },
-                    "countryCode": {
-                        "type": "string"
-                    },
-                    "importance": {
-                        "type": "string"
-                    },
-                    "scheduledAt": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "forecastValue": {
-                        "type": "string"
-                    },
-                    "previousValue": {
-                        "type": "string"
-                    },
-                    "actualValue": {
-                        "type": "string"
-                    },
-                    "contentCrawlAttemptedAt": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "contentCrawlError": {
-                        "type": "string"
-                    },
-                    "readinessStatus": {
-                        "type": "string",
-                        "enum": [
-                            "PENDING",
-                            "READY",
-                            "FAILED"
-                        ]
-                    },
-                    "eventDerivationStatus": {
-                        "type": "string",
-                        "enum": [
-                            "PENDING",
-                            "SUCCESS",
-                            "NO_EVENT",
-                            "FAILED"
-                        ]
-                    },
-                    "eventDerivationAttemptedAt": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "eventDerivationCompletedAt": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "eventDerivationError": {
                         "type": "string"
                     },
                     "createdDate": {
@@ -2872,149 +2936,6 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/NewsPrimaryEventDerivationResult"
-                        }
-                    }
-                }
-            },
-            "MarketQueryRequest": {
-                "type": "object",
-                "properties": {
-                    "question": {
-                        "type": "string",
-                        "minLength": 1
-                    },
-                    "asOfTime": {
-                        "type": "string",
-                        "format": "date-time"
-                    }
-                },
-                "required": [
-                    "question"
-                ]
-            },
-            "MarketQueryEvidenceResponse": {
-                "type": "object",
-                "properties": {
-                    "eventId": {
-                        "type": "integer",
-                        "format": "int64"
-                    },
-                    "eventTitle": {
-                        "type": "string"
-                    },
-                    "sourceDocumentId": {
-                        "type": "integer",
-                        "format": "int64"
-                    },
-                    "sourceDocumentTitle": {
-                        "type": "string"
-                    },
-                    "sourceDocumentUrl": {
-                        "type": "string"
-                    },
-                    "sourceName": {
-                        "type": "string"
-                    },
-                    "publishedAt": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "documentType": {
-                        "type": "string",
-                        "enum": [
-                            "NEWS",
-                            "ECONOMIC_CALENDAR",
-                            "RESEARCH",
-                            "MARKET_DATA",
-                            "SENTIMENT",
-                            "OTHER"
-                        ]
-                    },
-                    "evidenceRole": {
-                        "type": "string",
-                        "enum": [
-                            "PRIMARY",
-                            "SUPPORTING",
-                            "UPDATE",
-                            "CONTRADICTING"
-                        ]
-                    },
-                    "evidenceConfidence": {
-                        "type": "number"
-                    }
-                }
-            },
-            "MarketQueryKeyEventResponse": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "format": "int64"
-                    },
-                    "title": {
-                        "type": "string"
-                    },
-                    "summary": {
-                        "type": "string"
-                    },
-                    "occurredAt": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "confidence": {
-                        "type": "number"
-                    },
-                    "assetSymbols": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
-                    },
-                    "themeSlugs": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
-            "MarketQueryResponse": {
-                "type": "object",
-                "properties": {
-                    "answer": {
-                        "type": "string"
-                    },
-                    "reasoningChain": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
-                    },
-                    "keyEvents": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/MarketQueryKeyEventResponse"
-                        }
-                    },
-                    "assetsConsidered": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
-                    },
-                    "confidence": {
-                        "type": "number"
-                    },
-                    "limitations": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
-                    },
-                    "evidence": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/MarketQueryEvidenceResponse"
                         }
                     }
                 }
@@ -3327,13 +3248,13 @@
             "PageWatchlistListResponse": {
                 "type": "object",
                 "properties": {
-                    "totalElements": {
-                        "type": "integer",
-                        "format": "int64"
-                    },
                     "totalPages": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "totalElements": {
+                        "type": "integer",
+                        "format": "int64"
                     },
                     "size": {
                         "type": "integer",
@@ -3380,19 +3301,19 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
-                    "paged": {
+                    "unpaged": {
                         "type": "boolean"
                     },
-                    "pageNumber": {
-                        "type": "integer",
-                        "format": "int32"
+                    "paged": {
+                        "type": "boolean"
                     },
                     "pageSize": {
                         "type": "integer",
                         "format": "int32"
                     },
-                    "unpaged": {
-                        "type": "boolean"
+                    "pageNumber": {
+                        "type": "integer",
+                        "format": "int32"
                     }
                 }
             },
@@ -3402,10 +3323,10 @@
                     "empty": {
                         "type": "boolean"
                     },
-                    "sorted": {
+                    "unsorted": {
                         "type": "boolean"
                     },
-                    "unsorted": {
+                    "sorted": {
                         "type": "boolean"
                     }
                 }
@@ -3446,13 +3367,13 @@
             "PageSystemPromptResponse": {
                 "type": "object",
                 "properties": {
-                    "totalElements": {
-                        "type": "integer",
-                        "format": "int64"
-                    },
                     "totalPages": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "totalElements": {
+                        "type": "integer",
+                        "format": "int64"
                     },
                     "size": {
                         "type": "integer",
@@ -3489,54 +3410,8 @@
                     }
                 }
             },
-            "SpecificationSource": {},
-            "PageSourceListResponse": {
-                "type": "object",
-                "properties": {
-                    "totalElements": {
-                        "type": "integer",
-                        "format": "int64"
-                    },
-                    "totalPages": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "size": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "content": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/SourceListResponse"
-                        }
-                    },
-                    "number": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "sort": {
-                        "$ref": "#/components/schemas/SortObject"
-                    },
-                    "first": {
-                        "type": "boolean"
-                    },
-                    "last": {
-                        "type": "boolean"
-                    },
-                    "numberOfElements": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
-                    "empty": {
-                        "type": "boolean"
-                    }
-                }
-            },
-            "SourceListResponse": {
+            "SpecificationNewsOutlet": {},
+            "NewsOutletListResponse": {
                 "type": "object",
                 "properties": {
                     "id": {
@@ -3546,35 +3421,17 @@
                     "name": {
                         "type": "string"
                     },
-                    "type": {
-                        "type": "string",
-                        "enum": [
-                            "NEWS",
-                            "ECONOMIC_CALENDAR",
-                            "RESEARCH",
-                            "MARKET_DATA",
-                            "SENTIMENT",
-                            "OTHER"
-                        ]
+                    "slug": {
+                        "type": "string"
                     },
                     "description": {
                         "type": "string"
                     },
-                    "url": {
+                    "homepageUrl": {
                         "type": "string"
                     },
                     "rssUrl": {
                         "type": "string"
-                    },
-                    "lastIngestedAt": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "lastIngestStatus": {
-                        "type": "string"
-                    },
-                    "systemManaged": {
-                        "type": "boolean"
                     },
                     "active": {
                         "type": "boolean"
@@ -3585,17 +3442,16 @@
                     }
                 }
             },
-            "SpecificationSourceDocument": {},
-            "PageSourceDocumentListResponse": {
+            "PageNewsOutletListResponse": {
                 "type": "object",
                 "properties": {
-                    "totalElements": {
-                        "type": "integer",
-                        "format": "int64"
-                    },
                     "totalPages": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "totalElements": {
+                        "type": "integer",
+                        "format": "int64"
                     },
                     "size": {
                         "type": "integer",
@@ -3604,7 +3460,7 @@
                     "content": {
                         "type": "array",
                         "items": {
-                            "$ref": "#/components/schemas/SourceDocumentListResponse"
+                            "$ref": "#/components/schemas/NewsOutletListResponse"
                         }
                     },
                     "number": {
@@ -3632,7 +3488,8 @@
                     }
                 }
             },
-            "SourceDocumentListResponse": {
+            "SpecificationNewsArticle": {},
+            "NewsArticleListResponse": {
                 "type": "object",
                 "properties": {
                     "id": {
@@ -3651,49 +3508,26 @@
                     "featureImage": {
                         "$ref": "#/components/schemas/MediaResponse"
                     },
-                    "sourceName": {
+                    "newsOutletId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "newsOutletName": {
                         "type": "string"
                     },
                     "publishedAt": {
                         "type": "string",
                         "format": "date-time"
                     },
-                    "documentType": {
+                    "status": {
                         "type": "string",
                         "enum": [
-                            "NEWS",
-                            "ECONOMIC_CALENDAR",
-                            "RESEARCH",
-                            "MARKET_DATA",
-                            "SENTIMENT",
-                            "OTHER"
-                        ]
-                    },
-                    "lifecycleStatus": {
-                        "type": "string",
-                        "enum": [
-                            "DISCOVERED",
-                            "RAW_CAPTURED",
-                            "HYDRATED",
-                            "NORMALIZED",
-                            "FAILED"
-                        ]
-                    },
-                    "readinessStatus": {
-                        "type": "string",
-                        "enum": [
-                            "PENDING",
-                            "READY",
-                            "FAILED"
-                        ]
-                    },
-                    "eventDerivationStatus": {
-                        "type": "string",
-                        "enum": [
-                            "PENDING",
-                            "SUCCESS",
-                            "NO_EVENT",
-                            "FAILED"
+                            "INGESTED",
+                            "DERIVATION_PENDING",
+                            "EVENT_RESOLVED",
+                            "NO_PRIMARY_EVENT",
+                            "CONTENT_FAILED",
+                            "DERIVATION_FAILED"
                         ]
                     },
                     "createdDate": {
@@ -3702,17 +3536,63 @@
                     }
                 }
             },
-            "SpecificationMedia": {},
-            "PageMediaResponse": {
+            "PageNewsArticleListResponse": {
                 "type": "object",
                 "properties": {
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
                     "totalElements": {
                         "type": "integer",
                         "format": "int64"
                     },
+                    "size": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "content": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/NewsArticleListResponse"
+                        }
+                    },
+                    "number": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "sort": {
+                        "$ref": "#/components/schemas/SortObject"
+                    },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
+                    },
+                    "numberOfElements": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
+                    },
+                    "empty": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "SpecificationMedia": {},
+            "PageMediaResponse": {
+                "type": "object",
+                "properties": {
                     "totalPages": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "totalElements": {
+                        "type": "integer",
+                        "format": "int64"
                     },
                     "size": {
                         "type": "integer",
@@ -3765,7 +3645,7 @@
                     "lastName": {
                         "type": "string"
                     },
-                    "workspace": {
+                    "currentWorkspace": {
                         "$ref": "#/components/schemas/WorkspaceSummaryResponse"
                     },
                     "mainImage": {
@@ -3799,13 +3679,13 @@
             "PageWorkspaceResponse": {
                 "type": "object",
                 "properties": {
-                    "totalElements": {
-                        "type": "integer",
-                        "format": "int64"
-                    },
                     "totalPages": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "totalElements": {
+                        "type": "integer",
+                        "format": "int64"
                     },
                     "size": {
                         "type": "integer",
@@ -3839,6 +3719,126 @@
                     },
                     "empty": {
                         "type": "boolean"
+                    }
+                }
+            },
+            "GraphEdge": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "kind": {
+                        "type": "string",
+                        "enum": [
+                            "event-asset",
+                            "event-theme",
+                            "source-artifact-event"
+                        ]
+                    },
+                    "sourceNodeId": {
+                        "type": "string"
+                    },
+                    "targetNodeId": {
+                        "type": "string"
+                    },
+                    "relationType": {
+                        "type": "string"
+                    },
+                    "weight": {
+                        "type": "number"
+                    },
+                    "confidence": {
+                        "type": "number"
+                    },
+                    "note": {
+                        "type": "string"
+                    }
+                }
+            },
+            "GraphNode": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "kind": {
+                        "type": "string",
+                        "enum": [
+                            "event",
+                            "asset",
+                            "theme",
+                            "news-article"
+                        ]
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "secondaryLabel": {
+                        "type": "string"
+                    },
+                    "metadata": {
+                        "$ref": "#/components/schemas/GraphNodeMetadata"
+                    }
+                }
+            },
+            "GraphNodeMetadata": {
+                "type": "object",
+                "properties": {
+                    "slug": {
+                        "type": "string"
+                    },
+                    "canonicalKey": {
+                        "type": "string"
+                    },
+                    "symbol": {
+                        "type": "string"
+                    },
+                    "assetType": {
+                        "type": "string",
+                        "enum": [
+                            "COMMODITY",
+                            "CRYPTO",
+                            "FX",
+                            "INDEX"
+                        ]
+                    },
+                    "newsOutletName": {
+                        "type": "string"
+                    },
+                    "url": {
+                        "type": "string"
+                    },
+                    "occurredAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "publishedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "active": {
+                        "type": "boolean"
+                    },
+                    "confidence": {
+                        "type": "number"
+                    }
+                }
+            },
+            "GraphViewResponse": {
+                "type": "object",
+                "properties": {
+                    "nodes": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/GraphNode"
+                        }
+                    },
+                    "edges": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/GraphEdge"
+                        }
                     }
                 }
             },
@@ -3915,13 +3915,13 @@
             "PageEventListResponse": {
                 "type": "object",
                 "properties": {
-                    "totalElements": {
-                        "type": "integer",
-                        "format": "int64"
-                    },
                     "totalPages": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "totalElements": {
+                        "type": "integer",
+                        "format": "int64"
                     },
                     "size": {
                         "type": "integer",
@@ -3996,33 +3996,32 @@
             "EventEvidenceSummaryResponse": {
                 "type": "object",
                 "properties": {
-                    "sourceDocumentId": {
+                    "artifactType": {
+                        "type": "string",
+                        "enum": [
+                            "NEWS_ARTICLE",
+                            "ECONOMIC_CALENDAR_ENTRY",
+                            "RESEARCH_DOCUMENT",
+                            "STRATEGY_PLAYBOOK",
+                            "OTHER"
+                        ]
+                    },
+                    "artifactId": {
                         "type": "integer",
                         "format": "int64"
                     },
-                    "sourceDocumentTitle": {
+                    "artifactTitle": {
                         "type": "string"
                     },
-                    "sourceDocumentUrl": {
+                    "artifactUrl": {
                         "type": "string"
                     },
-                    "sourceName": {
+                    "newsOutletName": {
                         "type": "string"
                     },
                     "publishedAt": {
                         "type": "string",
                         "format": "date-time"
-                    },
-                    "documentType": {
-                        "type": "string",
-                        "enum": [
-                            "NEWS",
-                            "ECONOMIC_CALENDAR",
-                            "RESEARCH",
-                            "MARKET_DATA",
-                            "SENTIMENT",
-                            "OTHER"
-                        ]
                     },
                     "evidenceRole": {
                         "type": "string",
@@ -4163,13 +4162,13 @@
             "PageCronjobResponse": {
                 "type": "object",
                 "properties": {
-                    "totalElements": {
-                        "type": "integer",
-                        "format": "int64"
-                    },
                     "totalPages": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "totalElements": {
+                        "type": "integer",
+                        "format": "int64"
                     },
                     "size": {
                         "type": "integer",
@@ -4239,13 +4238,13 @@
             "PageBlogPostListResponse": {
                 "type": "object",
                 "properties": {
-                    "totalElements": {
-                        "type": "integer",
-                        "format": "int64"
-                    },
                     "totalPages": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "totalElements": {
+                        "type": "integer",
+                        "format": "int64"
                     },
                     "size": {
                         "type": "integer",
@@ -4310,13 +4309,13 @@
             "PageAssetListResponse": {
                 "type": "object",
                 "properties": {
-                    "totalElements": {
-                        "type": "integer",
-                        "format": "int64"
-                    },
                     "totalPages": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "totalElements": {
+                        "type": "integer",
+                        "format": "int64"
                     },
                     "size": {
                         "type": "integer",
@@ -4389,13 +4388,13 @@
             "PageAiProviderConfigResponse": {
                 "type": "object",
                 "properties": {
-                    "totalElements": {
-                        "type": "integer",
-                        "format": "int64"
-                    },
                     "totalPages": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "totalElements": {
+                        "type": "integer",
+                        "format": "int64"
                     },
                     "size": {
                         "type": "integer",

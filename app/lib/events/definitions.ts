@@ -1,3 +1,5 @@
+import type { ArtifactType } from "@/app/lib/artifacts/definitions"
+
 export type EventStatus = "EMERGING" | "CONFIRMED" | "RESOLVED" | "ARCHIVED"
 
 export type EventEnrichmentStatus = "PENDING" | "SUCCESS" | "NO_MATCH" | "FAILED"
@@ -11,7 +13,7 @@ export type EventAssetRelationType =
 
 export type EventThemeRelationType = "PRIMARY_THEME" | "SECONDARY_THEME"
 
-export type EventSourceDocumentEvidenceRole =
+export type EventEvidenceRole =
   | "PRIMARY"
   | "SUPPORTING"
   | "UPDATE"
@@ -55,13 +57,13 @@ export interface EventThemeSummaryResponse {
 }
 
 export interface EventEvidenceSummaryResponse {
-  sourceDocumentId?: number
-  sourceDocumentTitle?: string
-  sourceDocumentUrl?: string
-  sourceName?: string
-  publishedAt?: string
-  documentType?: "NEWS" | "ECONOMIC_CALENDAR" | "RESEARCH" | "MARKET_DATA" | "SENTIMENT" | "OTHER"
-  evidenceRole?: EventSourceDocumentEvidenceRole
+  artifactType?: ArtifactType
+  artifactId?: number
+  artifactTitle?: string
+  artifactUrl?: string
+  newsOutletName?: string
+  publishedAt?: string | null
+  evidenceRole?: EventEvidenceRole
   confidence?: number
   evidenceNote?: string
 }
@@ -127,7 +129,7 @@ export const EVENT_THEME_RELATION_LABELS: Record<EventThemeRelationType, string>
   SECONDARY_THEME: "Chủ đề phụ",
 }
 
-export const EVENT_EVIDENCE_ROLE_LABELS: Record<EventSourceDocumentEvidenceRole, string> = {
+export const EVENT_EVIDENCE_ROLE_LABELS: Record<EventEvidenceRole, string> = {
   PRIMARY: "Chính",
   SUPPORTING: "Hỗ trợ",
   UPDATE: "Cập nhật",

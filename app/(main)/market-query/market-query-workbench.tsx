@@ -17,15 +17,16 @@ import { type FormEvent, useEffect, useId, useRef, useState, useTransition } fro
 import { toast } from "sonner"
 
 import { queryMarket } from "@/app/api/query/action"
+import { isNewsArticleArtifact } from "@/app/lib/artifacts/definitions"
 import { EVENT_READ_PERMISSIONS } from "@/app/lib/events/permissions"
 import {
-  MARKET_QUERY_DOCUMENT_TYPE_LABELS,
+  MARKET_QUERY_ARTIFACT_TYPE_LABELS,
   MARKET_QUERY_EVIDENCE_ROLE_LABELS,
   MarketQueryEvidenceResponse,
   MarketQueryKeyEventResponse,
   MarketQueryResponse,
 } from "@/app/lib/market-query/definitions"
-import { SOURCE_DOCUMENT_READ_PERMISSIONS } from "@/app/lib/source-documents/permissions"
+import { NEWS_ARTICLE_READ_PERMISSIONS } from "@/app/lib/news-articles/permissions"
 import { useHasAnyPermission } from "@/components/permission-provider"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -53,9 +54,9 @@ import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 
 const EXAMPLE_PROMPTS = [
-  "Những sự kiện nào đang hỗ trợ xu hướng tăng của vàng trong 7 ngày gần đây?",
-  "Các tín hiệu hiện tại có đang nghiêng về áp lực giảm đối với dầu Brent không?",
-  "Trong tuần này, yếu tố nào đang ảnh hưởng mạnh nhất tới tâm lý thị trường tiền điện tử?",
+  "Nhá»¯ng sá»± kiá»‡n nÃ o Ä‘ang há»— trá»£ xu hÆ°á»›ng tÄƒng cá»§a vÃ ng trong 7 ngÃ y gáº§n Ä‘Ã¢y?",
+  "CÃ¡c tÃ­n hiá»‡u hiá»‡n táº¡i cÃ³ Ä‘ang nghiÃªng vá» Ã¡p lá»±c giáº£m Ä‘á»‘i vá»›i dáº§u Brent khÃ´ng?",
+  "Trong tuáº§n nÃ y, yáº¿u tá»‘ nÃ o Ä‘ang áº£nh hÆ°á»Ÿng máº¡nh nháº¥t tá»›i tÃ¢m lÃ½ thá»‹ trÆ°á»ng tiá»n Ä‘iá»‡n tá»­?",
 ] as const
 
 interface QueryFormState {
@@ -84,18 +85,18 @@ function getScrollBehavior(): ScrollBehavior {
 
 function formatTraceabilityHint(
   hasBlockedEvent: boolean,
-  hasBlockedSourceDocument: boolean
+  hasBlockedArtifact: boolean
 ) {
-  if (hasBlockedEvent && hasBlockedSourceDocument) {
-    return "Chi tiết sự kiện và tài liệu chưa mở được với quyền hiện tại."
+  if (hasBlockedEvent && hasBlockedArtifact) {
+    return "Chi tiáº¿t sá»± kiá»‡n vÃ  tÃ i liá»‡u chÆ°a má»Ÿ Ä‘Æ°á»£c vá»›i quyá»n hiá»‡n táº¡i."
   }
 
   if (hasBlockedEvent) {
-    return "Chi tiết sự kiện chưa mở được với quyền hiện tại."
+    return "Chi tiáº¿t sá»± kiá»‡n chÆ°a má»Ÿ Ä‘Æ°á»£c vá»›i quyá»n hiá»‡n táº¡i."
   }
 
-  if (hasBlockedSourceDocument) {
-    return "Chi tiết tài liệu chưa mở được với quyền hiện tại."
+  if (hasBlockedArtifact) {
+    return "Chi tiáº¿t tÃ i liá»‡u chÆ°a má»Ÿ Ä‘Æ°á»£c vá»›i quyá»n hiá»‡n táº¡i."
   }
 
   return null
@@ -103,13 +104,13 @@ function formatTraceabilityHint(
 
 function formatDateTime(value?: string | null) {
   if (!value) {
-    return "Chưa có"
+    return "ChÆ°a cÃ³"
   }
 
   const date = new Date(value)
 
   if (Number.isNaN(date.getTime())) {
-    return "Chưa có"
+    return "ChÆ°a cÃ³"
   }
 
   return format(date, "dd/MM/yyyy HH:mm")
@@ -117,7 +118,7 @@ function formatDateTime(value?: string | null) {
 
 function formatConfidence(value?: number) {
   if (typeof value !== "number") {
-    return "Chưa có"
+    return "ChÆ°a cÃ³"
   }
 
   return `${Math.round(value * 100)}%`
@@ -146,11 +147,11 @@ function getConfidenceVariant(
 }
 
 function formatEventFallbackMeta(id?: number) {
-  return typeof id === "number" ? `Mã sự kiện #${id}` : null
+  return typeof id === "number" ? `MÃ£ sá»± kiá»‡n #${id}` : null
 }
 
-function formatSourceDocumentFallbackMeta(id?: number) {
-  return typeof id === "number" ? `Mã tài liệu #${id}` : null
+function formatArtifactFallbackMeta(id?: number) {
+  return typeof id === "number" ? `MÃ£ tÃ i liá»‡u #${id}` : null
 }
 
 function getAnnouncement(
@@ -160,15 +161,15 @@ function getAnnouncement(
   failedRun: FailedQueryRun | null
 ) {
   if (phase === "running" && activeQuestion) {
-    return `Đang phân tích câu hỏi: ${activeQuestion}`
+    return `Äang phÃ¢n tÃ­ch cÃ¢u há»i: ${activeQuestion}`
   }
 
   if (phase === "success" && latestSuccessfulRun) {
-    return `Đã hoàn tất truy vấn cho câu hỏi: ${latestSuccessfulRun.question}`
+    return `ÄÃ£ hoÃ n táº¥t truy váº¥n cho cÃ¢u há»i: ${latestSuccessfulRun.question}`
   }
 
   if (phase === "error" && failedRun) {
-    return `Truy vấn thất bại cho câu hỏi: ${failedRun.question}. ${failedRun.error}`
+    return `Truy váº¥n tháº¥t báº¡i cho cÃ¢u há»i: ${failedRun.question}. ${failedRun.error}`
   }
 
   return ""
@@ -202,7 +203,7 @@ function SectionHeading({
 
 export function MarketQueryWorkbench() {
   const canReadEvents = useHasAnyPermission(EVENT_READ_PERMISSIONS)
-  const canReadSourceDocuments = useHasAnyPermission(SOURCE_DOCUMENT_READ_PERMISSIONS)
+  const canReadNewsArticles = useHasAnyPermission(NEWS_ARTICLE_READ_PERMISSIONS)
   const [isPending, startTransition] = useTransition()
   const [form, setForm] = useState<QueryFormState>({ question: "" })
   const [questionError, setQuestionError] = useState<string | null>(null)
@@ -238,7 +239,7 @@ export function MarketQueryWorkbench() {
     const question = form.question.trim()
 
     if (!question) {
-      setQuestionError("Vui lòng nhập câu hỏi cần phân tích.")
+      setQuestionError("Vui lÃ²ng nháº­p cÃ¢u há»i cáº§n phÃ¢n tÃ­ch.")
       return
     }
 
@@ -268,7 +269,7 @@ export function MarketQueryWorkbench() {
       })
       setFailedRun(null)
       setPhase("success")
-      toast.success("Đã hoàn tất truy vấn thị trường.")
+      toast.success("ÄÃ£ hoÃ n táº¥t truy váº¥n thá»‹ trÆ°á»ng.")
     })
   }
 
@@ -282,16 +283,16 @@ export function MarketQueryWorkbench() {
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-4">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="secondary">Tập trung vào một câu hỏi</Badge>
-              <Badge variant="outline">Dùng thời điểm hiện tại từ backend</Badge>
+              <Badge variant="secondary">Táº­p trung vÃ o má»™t cÃ¢u há»i</Badge>
+              <Badge variant="outline">DÃ¹ng thá»i Ä‘iá»ƒm hiá»‡n táº¡i tá»« backend</Badge>
             </div>
 
             <div className="flex flex-col gap-2">
               <h1 className="max-w-3xl text-3xl font-semibold tracking-tight text-foreground">
-                Nhận briefing thị trường có dẫn vết trên cùng một màn hình.
+                Nháº­n briefing thá»‹ trÆ°á»ng cÃ³ dáº«n váº¿t trÃªn cÃ¹ng má»™t mÃ n hÃ¬nh.
               </h1>
               <p className="max-w-3xl text-sm leading-7 text-muted-foreground">
-                Nhập một câu hỏi cụ thể để xem kết luận, độ tin cậy, giới hạn và bằng chứng liên
+                Nháº­p má»™t cÃ¢u há»i cá»¥ thá»ƒ Ä‘á»ƒ xem káº¿t luáº­n, Ä‘á»™ tin cáº­y, giá»›i háº¡n vÃ  báº±ng chá»©ng liÃªn
                 quan.
               </p>
             </div>
@@ -300,7 +301,7 @@ export function MarketQueryWorkbench() {
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <FieldGroup>
               <Field data-invalid={!!questionError}>
-                <FieldLabel htmlFor={questionId}>Câu hỏi phân tích</FieldLabel>
+                <FieldLabel htmlFor={questionId}>CÃ¢u há»i phÃ¢n tÃ­ch</FieldLabel>
                 <Textarea
                   id={questionId}
                   value={form.question}
@@ -310,26 +311,26 @@ export function MarketQueryWorkbench() {
                       setQuestionError(null)
                     }
                   }}
-                  placeholder="Ví dụ: Những sự kiện nào đang hỗ trợ xu hướng tăng của vàng trong 7 ngày gần đây?"
+                  placeholder="VÃ­ dá»¥: Nhá»¯ng sá»± kiá»‡n nÃ o Ä‘ang há»— trá»£ xu hÆ°á»›ng tÄƒng cá»§a vÃ ng trong 7 ngÃ y gáº§n Ä‘Ã¢y?"
                   className="min-h-[180px] resize-y bg-background/85"
                   aria-invalid={questionError ? true : undefined}
                   disabled={isPending}
                 />
                 <FieldDescription>
-                  Câu hỏi càng cụ thể, hệ thống càng dễ trả về kết luận và bằng chứng bám sát ngữ
-                  cảnh.
+                  CÃ¢u há»i cÃ ng cá»¥ thá»ƒ, há»‡ thá»‘ng cÃ ng dá»… tráº£ vá» káº¿t luáº­n vÃ  báº±ng chá»©ng bÃ¡m sÃ¡t ngá»¯
+                  cáº£nh.
                 </FieldDescription>
                 <FieldError>{questionError}</FieldError>
               </Field>
 
               <Field className="justify-end">
-                <FieldLabel className="sr-only">Thực thi truy vấn</FieldLabel>
+                <FieldLabel className="sr-only">Thá»±c thi truy váº¥n</FieldLabel>
                 <Button type="submit" size="lg" disabled={isPending} className="w-full md:w-auto">
                   {isPending ? <Spinner data-icon="inline-start" /> : <Sparkles data-icon="inline-start" />}
-                  {isPending ? "Đang phân tích..." : "Phân tích"}
+                  {isPending ? "Äang phÃ¢n tÃ­ch..." : "PhÃ¢n tÃ­ch"}
                 </Button>
                 <FieldDescription>
-                  Phiên bản hiện tại luôn dùng thời điểm backend nhận truy vấn.
+                  PhiÃªn báº£n hiá»‡n táº¡i luÃ´n dÃ¹ng thá»i Ä‘iá»ƒm backend nháº­n truy váº¥n.
                 </FieldDescription>
               </Field>
             </FieldGroup>
@@ -343,8 +344,8 @@ export function MarketQueryWorkbench() {
             <div className="flex flex-col gap-5">
               <SectionHeading
                 icon={SearchCheck}
-                title="Gợi ý bắt đầu"
-                description="Chọn một câu hỏi mẫu rồi chỉnh lại cho sát tài sản, giai đoạn hoặc luận điểm cần kiểm chứng."
+                title="Gá»£i Ã½ báº¯t Ä‘áº§u"
+                description="Chá»n má»™t cÃ¢u há»i máº«u rá»“i chá»‰nh láº¡i cho sÃ¡t tÃ i sáº£n, giai Ä‘oáº¡n hoáº·c luáº­n Ä‘iá»ƒm cáº§n kiá»ƒm chá»©ng."
               />
 
               <div className="grid gap-3 lg:grid-cols-3">
@@ -369,10 +370,10 @@ export function MarketQueryWorkbench() {
               <EmptyMedia variant="icon">
                 <SearchCheck className="size-5 text-muted-foreground" />
               </EmptyMedia>
-              <EmptyTitle>Chưa có briefing nào được hiển thị</EmptyTitle>
+              <EmptyTitle>ChÆ°a cÃ³ briefing nÃ o Ä‘Æ°á»£c hiá»ƒn thá»‹</EmptyTitle>
               <EmptyDescription>
-                Sau khi chạy truy vấn, phần này sẽ hiển thị kết luận, tín hiệu tin cậy, bằng chứng
-                và các sự kiện liên quan.
+                Sau khi cháº¡y truy váº¥n, pháº§n nÃ y sáº½ hiá»ƒn thá»‹ káº¿t luáº­n, tÃ­n hiá»‡u tin cáº­y, báº±ng chá»©ng
+                vÃ  cÃ¡c sá»± kiá»‡n liÃªn quan.
               </EmptyDescription>
             </EmptyHeader>
           </Empty>
@@ -400,21 +401,21 @@ export function MarketQueryWorkbench() {
                 <EmptyMedia variant="icon">
                   <Spinner className="size-5 text-muted-foreground" />
                 </EmptyMedia>
-                <EmptyTitle>Đang tổng hợp briefing mới</EmptyTitle>
+                <EmptyTitle>Äang tá»•ng há»£p briefing má»›i</EmptyTitle>
                 <EmptyDescription>
-                  Kết quả cũ đã được gỡ khỏi trạng thái hoạt động. Bản briefing mới sẽ xuất hiện tại
-                  đây ngay khi xử lý xong.
+                  Káº¿t quáº£ cÅ© Ä‘Ã£ Ä‘Æ°á»£c gá»¡ khá»i tráº¡ng thÃ¡i hoáº¡t Ä‘á»™ng. Báº£n briefing má»›i sáº½ xuáº¥t hiá»‡n táº¡i
+                  Ä‘Ã¢y ngay khi xá»­ lÃ½ xong.
                 </EmptyDescription>
               </EmptyHeader>
             </Empty>
           ) : null}
 
           {phase === "success" && latestSuccessfulRun ? (
-            <BriefingContent
-              run={latestSuccessfulRun}
-              canReadEvents={canReadEvents}
-              canReadSourceDocuments={canReadSourceDocuments}
-            />
+              <BriefingContent
+                run={latestSuccessfulRun}
+                canReadEvents={canReadEvents}
+                canReadNewsArticles={canReadNewsArticles}
+              />
           ) : null}
 
           {phase === "error" ? (
@@ -424,17 +425,17 @@ export function MarketQueryWorkbench() {
                   <div className="flex flex-col gap-4">
                     <SectionHeading
                       icon={Sparkles}
-                      title="Bản briefing thành công gần nhất"
-                      description="Giữ lại để tham chiếu sau khi truy vấn mới thất bại."
+                      title="Báº£n briefing thÃ nh cÃ´ng gáº§n nháº¥t"
+                      description="Giá»¯ láº¡i Ä‘á»ƒ tham chiáº¿u sau khi truy váº¥n má»›i tháº¥t báº¡i."
                     />
-                    <DetailValue label="Áp dụng cho câu hỏi" value={latestSuccessfulRun.question} />
+                    <DetailValue label="Ãp dá»¥ng cho cÃ¢u há»i" value={latestSuccessfulRun.question} />
                   </div>
                 </section>
 
                 <BriefingContent
                   run={latestSuccessfulRun}
                   canReadEvents={canReadEvents}
-                  canReadSourceDocuments={canReadSourceDocuments}
+                  canReadNewsArticles={canReadNewsArticles}
                 />
               </div>
             ) : (
@@ -443,9 +444,9 @@ export function MarketQueryWorkbench() {
                   <EmptyMedia variant="icon">
                     <TriangleAlert className="size-5 text-muted-foreground" />
                   </EmptyMedia>
-                  <EmptyTitle>Chưa có bản briefing thành công để tham chiếu</EmptyTitle>
+                  <EmptyTitle>ChÆ°a cÃ³ báº£n briefing thÃ nh cÃ´ng Ä‘á»ƒ tham chiáº¿u</EmptyTitle>
                   <EmptyDescription>
-                    Hãy điều chỉnh câu hỏi hoặc thử lại khi dữ liệu sẵn sàng hơn.
+                    HÃ£y Ä‘iá»u chá»‰nh cÃ¢u há»i hoáº·c thá»­ láº¡i khi dá»¯ liá»‡u sáºµn sÃ ng hÆ¡n.
                   </EmptyDescription>
                 </EmptyHeader>
               </Empty>
@@ -506,7 +507,7 @@ function KeyEventCard({
   event: MarketQueryKeyEventResponse
   canReadEvents: boolean
 }) {
-  const title = event.title?.trim() || "Sự kiện chưa có tiêu đề"
+  const title = event.title?.trim() || "Sá»± kiá»‡n chÆ°a cÃ³ tiÃªu Ä‘á»"
   const fallbackMeta = !event.title?.trim() ? formatEventFallbackMeta(event.id) : null
   const canOpenEvent = canReadEvents && typeof event.id === "number"
 
@@ -514,7 +515,7 @@ function KeyEventCard({
     <article className="flex h-full flex-col gap-4 rounded-2xl border border-border bg-background/70 p-5">
       <div className="flex flex-wrap items-center gap-2">
         <Badge variant={getConfidenceVariant(event.confidence)}>
-          Độ tin cậy {formatConfidence(event.confidence)}
+          Äá»™ tin cáº­y {formatConfidence(event.confidence)}
         </Badge>
         {event.occurredAt ? <Badge variant="outline">{formatDateTime(event.occurredAt)}</Badge> : null}
       </div>
@@ -529,14 +530,14 @@ function KeyEventCard({
         )}
         {fallbackMeta ? <p className="text-xs leading-5 text-muted-foreground">{fallbackMeta}</p> : null}
         <p className="text-sm leading-6 text-muted-foreground">
-          {event.summary?.trim() || "Chưa có tóm tắt chi tiết cho sự kiện này."}
+          {event.summary?.trim() || "ChÆ°a cÃ³ tÃ³m táº¯t chi tiáº¿t cho sá»± kiá»‡n nÃ y."}
         </p>
       </div>
 
       <div className="mt-auto flex flex-col gap-3">
         <div className="flex flex-col gap-2">
           <span className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-            Tài sản liên quan
+            TÃ i sáº£n liÃªn quan
           </span>
           {event.assetSymbols && event.assetSymbols.length > 0 ? (
             <div className="flex flex-wrap gap-2">
@@ -547,13 +548,13 @@ function KeyEventCard({
               ))}
             </div>
           ) : (
-            <span className="text-sm text-muted-foreground">Chưa có tài sản liên quan.</span>
+            <span className="text-sm text-muted-foreground">ChÆ°a cÃ³ tÃ i sáº£n liÃªn quan.</span>
           )}
         </div>
 
         <div className="flex flex-col gap-2">
           <span className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-            Mã chủ đề
+            MÃ£ chá»§ Ä‘á»
           </span>
           {event.themeSlugs && event.themeSlugs.length > 0 ? (
             <div className="flex flex-wrap gap-2">
@@ -564,7 +565,7 @@ function KeyEventCard({
               ))}
             </div>
           ) : (
-            <span className="text-sm text-muted-foreground">Chưa có chủ đề liên quan.</span>
+            <span className="text-sm text-muted-foreground">ChÆ°a cÃ³ chá»§ Ä‘á» liÃªn quan.</span>
           )}
         </div>
       </div>
@@ -575,37 +576,39 @@ function KeyEventCard({
 function EvidenceCard({
   evidence,
   canReadEvents,
-  canReadSourceDocuments,
+  canReadNewsArticles,
 }: {
   evidence: MarketQueryEvidenceResponse
   canReadEvents: boolean
-  canReadSourceDocuments: boolean
+  canReadNewsArticles: boolean
 }) {
   const eventTitle = evidence.eventTitle?.trim()
-  const sourceDocumentTitle = evidence.sourceDocumentTitle?.trim()
+  const artifactTitle = evidence.artifactTitle?.trim()
   const eventLabel =
     eventTitle ||
-    (typeof evidence.eventId === "number" ? "Sự kiện chưa có tiêu đề" : "Chưa gắn sự kiện")
-  const sourceDocumentLabel =
-    sourceDocumentTitle ||
-    (typeof evidence.sourceDocumentId === "number"
-      ? "Tài liệu chưa có tiêu đề"
-      : "Chưa có tài liệu nguồn")
+    (typeof evidence.eventId === "number" ? "Sá»± kiá»‡n chÆ°a cÃ³ tiÃªu Ä‘á»" : "ChÆ°a gáº¯n sá»± kiá»‡n")
+  const artifactLabel =
+    artifactTitle ||
+    (typeof evidence.artifactId === "number"
+      ? "TÃ i liá»‡u chÆ°a cÃ³ tiÃªu Ä‘á»"
+      : "ChÆ°a cÃ³ tÃ i liá»‡u nguá»“n")
   const eventMeta = !eventTitle ? formatEventFallbackMeta(evidence.eventId) : null
-  const sourceDocumentMeta = !sourceDocumentTitle
-    ? formatSourceDocumentFallbackMeta(evidence.sourceDocumentId)
+  const artifactMeta = !artifactTitle
+    ? formatArtifactFallbackMeta(evidence.artifactId)
     : null
   const hasBlockedEvent = typeof evidence.eventId === "number" && !canReadEvents
-  const hasBlockedSourceDocument =
-    typeof evidence.sourceDocumentId === "number" && !canReadSourceDocuments
-  const traceabilityHint = formatTraceabilityHint(hasBlockedEvent, hasBlockedSourceDocument)
+  const hasBlockedArtifact =
+    typeof evidence.artifactId === "number" &&
+    isNewsArticleArtifact(evidence.artifactType) &&
+    !canReadNewsArticles
+  const traceabilityHint = formatTraceabilityHint(hasBlockedEvent, hasBlockedArtifact)
 
   return (
     <article className="flex flex-col gap-4 rounded-2xl border border-border bg-background/80 p-5">
       <div className="flex flex-wrap items-center gap-2">
-        {evidence.documentType ? (
+        {evidence.artifactType ? (
           <Badge variant="outline">
-            {MARKET_QUERY_DOCUMENT_TYPE_LABELS[evidence.documentType]}
+            {MARKET_QUERY_ARTIFACT_TYPE_LABELS[evidence.artifactType]}
           </Badge>
         ) : null}
         {evidence.evidenceRole ? (
@@ -614,21 +617,21 @@ function EvidenceCard({
           </Badge>
         ) : null}
         <Badge variant={getConfidenceVariant(evidence.evidenceConfidence)}>
-          Độ tin cậy {formatConfidence(evidence.evidenceConfidence)}
+          Äá»™ tin cáº­y {formatConfidence(evidence.evidenceConfidence)}
         </Badge>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
         <div className="grid gap-4 md:grid-cols-2">
-          <DetailValue label="Sự kiện" value={eventLabel} meta={eventMeta} />
-          <DetailValue label="Tài liệu nguồn" value={sourceDocumentLabel} meta={sourceDocumentMeta} />
+          <DetailValue label="Sá»± kiá»‡n" value={eventLabel} meta={eventMeta} />
+          <DetailValue label="Tai lieu" value={artifactLabel} meta={artifactMeta} />
           <DetailValue
-            label="Nguồn"
-            value={evidence.sourceName?.trim() || "Chưa có"}
+            label="Nguá»“n"
+            value={evidence.newsOutletName?.trim() || "ChÆ°a cÃ³"}
             valueClassName="text-muted-foreground"
           />
           <DetailValue
-            label="Thời điểm xuất bản"
+            label="Thá»i Ä‘iá»ƒm xuáº¥t báº£n"
             value={formatDateTime(evidence.publishedAt)}
             valueClassName="text-muted-foreground"
           />
@@ -641,28 +644,29 @@ function EvidenceCard({
               <Button variant="outline" size="sm" asChild>
                 <Link href={`/events/${evidence.eventId}`}>
                   <GitBranch data-icon="inline-start" />
-                  Xem sự kiện
+                  Xem sá»± kiá»‡n
                 </Link>
               </Button>
             ) : null
           ) : null}
 
-          {typeof evidence.sourceDocumentId === "number" ? (
-            canReadSourceDocuments ? (
+          {typeof evidence.artifactId === "number" &&
+          isNewsArticleArtifact(evidence.artifactType) ? (
+            canReadNewsArticles ? (
               <Button variant="outline" size="sm" asChild>
-                <Link href={`/source-documents/${evidence.sourceDocumentId}`}>
+                <Link href={`/news-articles/${evidence.artifactId}`}>
                   <FileText data-icon="inline-start" />
-                  Xem tài liệu
+                  Xem bai viet
                 </Link>
               </Button>
             ) : null
           ) : null}
 
-          {evidence.sourceDocumentUrl ? (
+          {evidence.artifactUrl ? (
             <Button variant="outline" size="sm" asChild>
-              <a href={evidence.sourceDocumentUrl} target="_blank" rel="noopener noreferrer">
+              <a href={evidence.artifactUrl} target="_blank" rel="noopener noreferrer">
                 <ExternalLink data-icon="inline-start" />
-                Mở liên kết gốc
+                Má»Ÿ liÃªn káº¿t gá»‘c
               </a>
             </Button>
           ) : null}
@@ -693,15 +697,15 @@ function QueryStateCard({
   const isError = phase === "error"
   const badgeVariant = isError ? "destructive" : isRunning ? "outline" : "default"
   const statusLabel = isRunning
-    ? "Đang phân tích"
+    ? "Äang phÃ¢n tÃ­ch"
     : isError
-      ? "Không thể hoàn tất"
-      : "Kết quả hiện tại"
+      ? "KhÃ´ng thá»ƒ hoÃ n táº¥t"
+      : "Káº¿t quáº£ hiá»‡n táº¡i"
   const description = isRunning
-    ? "Hệ thống đang tổng hợp kết luận, độ tin cậy và bằng chứng cho câu hỏi này."
+    ? "Há»‡ thá»‘ng Ä‘ang tá»•ng há»£p káº¿t luáº­n, Ä‘á»™ tin cáº­y vÃ  báº±ng chá»©ng cho cÃ¢u há»i nÃ y."
     : isError
-      ? "Truy vấn vừa gửi chưa hoàn tất. Nội dung bên dưới, nếu có, chỉ là kết quả thành công trước đó."
-      : "Đây là câu hỏi mà bản briefing hiện tại đang trả lời."
+      ? "Truy váº¥n vá»«a gá»­i chÆ°a hoÃ n táº¥t. Ná»™i dung bÃªn dÆ°á»›i, náº¿u cÃ³, chá»‰ lÃ  káº¿t quáº£ thÃ nh cÃ´ng trÆ°á»›c Ä‘Ã³."
+      : "ÄÃ¢y lÃ  cÃ¢u há»i mÃ  báº£n briefing hiá»‡n táº¡i Ä‘ang tráº£ lá»i."
   const evidenceCount = result?.evidence?.length ?? 0
   const keyEventCount = result?.keyEvents?.length ?? 0
 
@@ -723,12 +727,12 @@ function QueryStateCard({
             {isRunning ? (
               <span className="inline-flex items-center gap-2 text-sm text-muted-foreground">
                 <Spinner className="size-4" />
-                Hệ thống đang xử lý yêu cầu mới.
+                Há»‡ thá»‘ng Ä‘ang xá»­ lÃ½ yÃªu cáº§u má»›i.
               </span>
             ) : null}
           </div>
 
-          <DetailValue label="Câu hỏi đang theo dõi" value={question} />
+          <DetailValue label="CÃ¢u há»i Ä‘ang theo dÃµi" value={question} />
           <p className="text-sm leading-6 text-muted-foreground">{description}</p>
 
           {isError && error ? (
@@ -739,8 +743,8 @@ function QueryStateCard({
 
           {isError && hasPreviousSuccess ? (
             <p className="text-sm leading-6 text-muted-foreground">
-              Bản briefing thành công gần nhất được giữ lại bên dưới để tham chiếu, không phải câu trả
-              lời cho truy vấn vừa lỗi.
+              Báº£n briefing thÃ nh cÃ´ng gáº§n nháº¥t Ä‘Æ°á»£c giá»¯ láº¡i bÃªn dÆ°á»›i Ä‘á»ƒ tham chiáº¿u, khÃ´ng pháº£i cÃ¢u tráº£
+              lá»i cho truy váº¥n vá»«a lá»—i.
             </p>
           ) : null}
         </div>
@@ -748,10 +752,10 @@ function QueryStateCard({
         {phase === "success" && result ? (
           <div className="flex flex-wrap gap-2">
             <Badge variant={getConfidenceVariant(result.confidence)}>
-              Độ tin cậy {formatConfidence(result.confidence)}
+              Äá»™ tin cáº­y {formatConfidence(result.confidence)}
             </Badge>
-            <Badge variant="outline">{evidenceCount} bằng chứng</Badge>
-            <Badge variant="outline">{keyEventCount} sự kiện</Badge>
+            <Badge variant="outline">{evidenceCount} báº±ng chá»©ng</Badge>
+            <Badge variant="outline">{keyEventCount} sá»± kiá»‡n</Badge>
           </div>
         ) : null}
       </div>
@@ -762,11 +766,11 @@ function QueryStateCard({
 function BriefingContent({
   run,
   canReadEvents,
-  canReadSourceDocuments,
+  canReadNewsArticles,
 }: {
   run: SuccessfulQueryRun
   canReadEvents: boolean
-  canReadSourceDocuments: boolean
+  canReadNewsArticles: boolean
 }) {
   const keyEvents = run.result.keyEvents ?? []
   const assetsConsidered = run.result.assetsConsidered ?? []
@@ -781,13 +785,13 @@ function BriefingContent({
           <div className="flex flex-col gap-5">
             <SectionHeading
               icon={Sparkles}
-              title="Kết luận"
-              description="Phần trả lời trực tiếp cho câu hỏi đang được hiển thị."
+              title="Káº¿t luáº­n"
+              description="Pháº§n tráº£ lá»i trá»±c tiáº¿p cho cÃ¢u há»i Ä‘ang Ä‘Æ°á»£c hiá»ƒn thá»‹."
             />
 
             <div className="rounded-2xl border border-border bg-muted/20 p-5">
               <p className="whitespace-pre-wrap text-[15px] leading-8 text-foreground">
-                {run.result.answer?.trim() || "Backend chưa trả về nội dung kết luận cụ thể."}
+                {run.result.answer?.trim() || "Backend chÆ°a tráº£ vá» ná»™i dung káº¿t luáº­n cá»¥ thá»ƒ."}
               </p>
             </div>
           </div>
@@ -797,21 +801,21 @@ function BriefingContent({
           <div className="flex flex-col gap-5">
             <SectionHeading
               icon={Layers3}
-              title="Tín hiệu tin cậy"
-              description="Độ chắc chắn, giới hạn hiện tại và phạm vi tài sản được xét."
+              title="TÃ­n hiá»‡u tin cáº­y"
+              description="Äá»™ cháº¯c cháº¯n, giá»›i háº¡n hiá»‡n táº¡i vÃ  pháº¡m vi tÃ i sáº£n Ä‘Æ°á»£c xÃ©t."
             />
 
             <div className="grid gap-4">
               <div className="rounded-2xl border border-border bg-background/85 p-5">
                 <span className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-                  Độ tin cậy
+                  Äá»™ tin cáº­y
                 </span>
                 <div className="mt-3 flex flex-wrap items-center gap-3">
                   <Badge variant={getConfidenceVariant(run.result.confidence)}>
                     {formatConfidence(run.result.confidence)}
                   </Badge>
                   <span className="text-sm text-muted-foreground">
-                    Giá trị này phản ánh mức chắc chắn của kết luận hiện tại.
+                    GiÃ¡ trá»‹ nÃ y pháº£n Ã¡nh má»©c cháº¯c cháº¯n cá»§a káº¿t luáº­n hiá»‡n táº¡i.
                   </span>
                 </div>
               </div>
@@ -819,7 +823,7 @@ function BriefingContent({
               <div className="rounded-2xl border border-border bg-background/85 p-5">
                 <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
                   <TriangleAlert className="size-4" />
-                  Giới hạn hiện tại
+                  Giá»›i háº¡n hiá»‡n táº¡i
                 </div>
 
                 {limitations.length > 0 ? (
@@ -835,14 +839,14 @@ function BriefingContent({
                   </ul>
                 ) : (
                   <p className="mt-3 text-sm text-muted-foreground">
-                    Chưa có giới hạn nào được backend trả về cho truy vấn này.
+                    ChÆ°a cÃ³ giá»›i háº¡n nÃ o Ä‘Æ°á»£c backend tráº£ vá» cho truy váº¥n nÃ y.
                   </p>
                 )}
               </div>
 
               <div className="rounded-2xl border border-border bg-background/85 p-5">
                 <span className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-                  Tài sản đã xét
+                  TÃ i sáº£n Ä‘Ã£ xÃ©t
                 </span>
                 {assetsConsidered.length > 0 ? (
                   <div className="mt-3 flex flex-wrap gap-2">
@@ -854,7 +858,7 @@ function BriefingContent({
                   </div>
                 ) : (
                   <p className="mt-3 text-sm text-muted-foreground">
-                    Chưa có danh sách tài sản được backend trả về.
+                    ChÆ°a cÃ³ danh sÃ¡ch tÃ i sáº£n Ä‘Æ°á»£c backend tráº£ vá».
                   </p>
                 )}
               </div>
@@ -867,25 +871,25 @@ function BriefingContent({
         <div className="flex flex-col gap-5">
           <SectionHeading
             icon={FileText}
-            title="Bằng chứng"
-            description="Đây là phần nên đọc đầu tiên khi cần kiểm chứng kết luận hiện tại."
+            title="Báº±ng chá»©ng"
+            description="ÄÃ¢y lÃ  pháº§n nÃªn Ä‘á»c Ä‘áº§u tiÃªn khi cáº§n kiá»ƒm chá»©ng káº¿t luáº­n hiá»‡n táº¡i."
           />
 
           {evidence.length > 0 ? (
             <div className="flex flex-col gap-4">
               {evidence.map((item, index) => (
                 <EvidenceCard
-                  key={`${item.sourceDocumentId ?? item.eventId ?? "evidence"}-${index}`}
+                  key={`${item.artifactId ?? item.eventId ?? "evidence"}-${index}`}
                   evidence={item}
                   canReadEvents={canReadEvents}
-                  canReadSourceDocuments={canReadSourceDocuments}
+                  canReadNewsArticles={canReadNewsArticles}
                 />
               ))}
             </div>
           ) : (
             <SectionEmpty
-              title="Chưa có bằng chứng"
-              description="Backend chưa trả về bằng chứng chi tiết cho truy vấn này."
+              title="ChÆ°a cÃ³ báº±ng chá»©ng"
+              description="Backend chÆ°a tráº£ vá» báº±ng chá»©ng chi tiáº¿t cho truy váº¥n nÃ y."
             />
           )}
         </div>
@@ -895,8 +899,8 @@ function BriefingContent({
         <div className="flex flex-col gap-5">
           <SectionHeading
             icon={GitBranch}
-            title="Sự kiện trọng yếu"
-            description="Những diễn biến nổi bật để đọc sâu hơn khi cần."
+            title="Sá»± kiá»‡n trá»ng yáº¿u"
+            description="Nhá»¯ng diá»…n biáº¿n ná»•i báº­t Ä‘á»ƒ Ä‘á»c sÃ¢u hÆ¡n khi cáº§n."
           />
 
           {keyEvents.length > 0 ? (
@@ -911,8 +915,8 @@ function BriefingContent({
             </div>
           ) : (
             <SectionEmpty
-              title="Chưa có sự kiện trọng yếu"
-              description="Truy vấn này chưa trả về danh sách sự kiện nổi bật để đối chiếu thêm."
+              title="ChÆ°a cÃ³ sá»± kiá»‡n trá»ng yáº¿u"
+              description="Truy váº¥n nÃ y chÆ°a tráº£ vá» danh sÃ¡ch sá»± kiá»‡n ná»•i báº­t Ä‘á»ƒ Ä‘á»‘i chiáº¿u thÃªm."
             />
           )}
         </div>
@@ -923,8 +927,8 @@ function BriefingContent({
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <SectionHeading
               icon={Layers3}
-              title="Quá trình tổng hợp"
-              description="Được thu gọn mặc định để giữ nhịp đọc khi bạn chỉ cần kết luận và bằng chứng."
+              title="QuÃ¡ trÃ¬nh tá»•ng há»£p"
+              description="ÄÆ°á»£c thu gá»n máº·c Ä‘á»‹nh Ä‘á»ƒ giá»¯ nhá»‹p Ä‘á»c khi báº¡n chá»‰ cáº§n káº¿t luáº­n vÃ  báº±ng chá»©ng."
             />
 
             <CollapsibleTrigger asChild>
@@ -934,8 +938,8 @@ function BriefingContent({
                   data-icon="inline-start"
                 />
                 {reasoningChain.length > 0
-                  ? `Xem ${reasoningChain.length} bước tổng hợp`
-                  : "Xem chi tiết tổng hợp"}
+                  ? `Xem ${reasoningChain.length} bÆ°á»›c tá»•ng há»£p`
+                  : "Xem chi tiáº¿t tá»•ng há»£p"}
               </Button>
             </CollapsibleTrigger>
           </div>
@@ -960,8 +964,8 @@ function BriefingContent({
               </ol>
             ) : (
               <SectionEmpty
-                title="Chưa có chuỗi tổng hợp"
-                description="Backend chưa trả về chuỗi tổng hợp cho truy vấn này."
+                title="ChÆ°a cÃ³ chuá»—i tá»•ng há»£p"
+                description="Backend chÆ°a tráº£ vá» chuá»—i tá»•ng há»£p cho truy váº¥n nÃ y."
               />
             )}
           </CollapsibleContent>
@@ -971,460 +975,3 @@ function BriefingContent({
   )
 }
 
-/*
-export function LegacyMarketQueryWorkbench() {
-  const canReadEvents = useHasAnyPermission(EVENT_READ_PERMISSIONS)
-  const canReadSourceDocuments = useHasAnyPermission(SOURCE_DOCUMENT_READ_PERMISSIONS)
-  const [isPending, startTransition] = useTransition()
-  const [form, setForm] = useState<QueryFormState>({ question: "" })
-  const [questionError, setQuestionError] = useState<string | null>(null)
-  const [phase, setPhase] = useState<QueryPhase>("idle")
-  const [activeQuestion, setActiveQuestion] = useState("")
-  const [latestSuccessfulRun, setLatestSuccessfulRun] = useState<SuccessfulQueryRun | null>(null)
-  const [failedRun, setFailedRun] = useState<FailedQueryRun | null>(null)
-  const questionId = useId()
-  const resultRegionRef = useRef<HTMLDivElement | null>(null)
-  const announcement = getAnnouncement(phase, activeQuestion, latestSuccessfulRun, failedRun)
-  const hasPreviousSuccess = phase === "error" && latestSuccessfulRun !== null
-
-  useEffect(() => {
-    if (phase === "idle" || !resultRegionRef.current) {
-      return
-    }
-
-    resultRegionRef.current.focus({ preventScroll: true })
-    resultRegionRef.current.scrollIntoView({
-      behavior: getScrollBehavior(),
-      block: "start",
-    })
-  }, [activeQuestion, phase])
-
-  const handleExampleClick = (prompt: string) => {
-    setForm((current) => ({ ...current, question: prompt }))
-    setQuestionError(null)
-  }
-
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-
-    const question = form.question.trim()
-
-    if (!question) {
-      setQuestionError("Vui lòng nhập câu hỏi cần phân tích.")
-      return
-    }
-
-    setQuestionError(null)
-    setActiveQuestion(question)
-    setFailedRun(null)
-    setPhase("running")
-
-    startTransition(async () => {
-      const actionResult = await queryMarket({
-        question,
-      })
-
-      if (!actionResult.success) {
-        setFailedRun({
-          question,
-          error: actionResult.error,
-        })
-        setPhase("error")
-        toast.error(actionResult.error)
-        return
-      }
-
-      setLatestSuccessfulRun({
-        question,
-        result: actionResult.data,
-      })
-      setFailedRun(null)
-      setPhase("success")
-      toast.success("Đã hoàn tất truy vấn thị trường.")
-    })
-  }
-
-  return (
-    <div className="flex flex-col gap-6">
-      <section className="grid gap-6 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,1fr)]">
-        <div className="rounded-[28px] border border-border bg-gradient-to-br from-primary/8 via-background to-secondary/15 p-6 shadow-sm">
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="secondary">Một lần hỏi, một lần trả lời</Badge>
-                <Badge variant="outline">Grounded vào sự kiện và tài liệu nguồn</Badge>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <h1 className="max-w-3xl text-3xl font-semibold tracking-tight text-foreground">
-                  Biến dữ liệu sự kiện thành một bản briefing có thể đọc và đối chiếu nhanh.
-                </h1>
-                <p className="max-w-3xl text-sm leading-7 text-muted-foreground">
-                  Tập trung vào một câu hỏi cụ thể rồi xem kết luận, bằng chứng và chuỗi tổng hợp
-                  ngay trên cùng một màn hình. V1 dùng thời điểm hiện tại do backend tự xác định cho
-                  mỗi lần truy vấn.
-                </p>
-              </div>
-            </div>
-
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-              <FieldGroup>
-                <Field data-invalid={!!questionError}>
-                  <FieldLabel htmlFor={questionId}>Câu hỏi phân tích</FieldLabel>
-                  <Textarea
-                    id={questionId}
-                    value={form.question}
-                    onChange={(event) => {
-                      setForm((current) => ({ ...current, question: event.target.value }))
-                      if (questionError) {
-                        setQuestionError(null)
-                      }
-                    }}
-                    placeholder="Ví dụ: Những sự kiện nào đang hỗ trợ xu hướng tăng của vàng trong 7 ngày gần đây?"
-                    className="min-h-[180px] resize-y bg-background/85"
-                    aria-invalid={questionError ? true : undefined}
-                    disabled={isPending}
-                  />
-                  <FieldDescription>
-                    Đặt câu hỏi càng cụ thể càng tốt để hệ thống trả về kết luận và bằng chứng
-                    bám sát ngữ cảnh.
-                  </FieldDescription>
-                  <FieldError>{questionError}</FieldError>
-                </Field>
-
-                <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_220px] md:items-end">
-                  <Field>
-                    <FieldLabel>Thời điểm phân tích</FieldLabel>
-                    <FieldDescription>
-                      Frontend không gửi mốc thời gian ở v1. Backend sẽ tự lấy thời điểm hiện tại để
-                      tổng hợp câu trả lời.
-                    </FieldDescription>
-                  </Field>
-
-                  <Field className="justify-end">
-                    <FieldLabel className="sr-only">Thực thi truy vấn</FieldLabel>
-                    <Button type="submit" size="lg" disabled={isPending} className="w-full self-end">
-                      {isPending ? <Spinner data-icon="inline-start" /> : <Sparkles data-icon="inline-start" />}
-                      {isPending ? "Đang phân tích..." : "Phân tích"}
-                    </Button>
-                    <FieldDescription>
-                      Kết quả chỉ hiển thị cho truy vấn hiện tại và không lưu lịch sử ở v1.
-                    </FieldDescription>
-                  </Field>
-                </div>
-              </FieldGroup>
-            </form>
-
-            {submitError ? (
-              <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
-                {submitError}
-              </div>
-            ) : null}
-          </div>
-        </div>
-
-        <aside className="rounded-[28px] border border-border bg-muted/20 p-6">
-          <div className="flex h-full flex-col gap-5">
-            <SectionHeading
-              icon={SearchCheck}
-              title="Nhịp làm việc"
-              description="Đây là một workbench phân tích dạng one-shot, phù hợp khi cần câu trả lời có dẫn vết nhanh."
-            />
-
-            <Separator />
-
-            {result ? (
-              <div className="flex flex-col gap-4">
-                <div className="rounded-2xl border border-border bg-background/80 p-4">
-                  <div className="flex flex-col gap-2">
-                    <span className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-                      Truy vấn gần nhất
-                    </span>
-                    <p className="text-sm leading-7 text-foreground">{submittedQuestion}</p>
-                  </div>
-                </div>
-
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-                  <div className="rounded-2xl border border-border bg-background/80 p-4">
-                    <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-                      <Clock3 className="size-4" />
-                      Thời điểm truy vấn
-                    </div>
-                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                      Backend tự lấy thời điểm hiện tại cho truy vấn này vì frontend không gửi mốc
-                      thời gian ở phiên bản hiện tại.
-                    </p>
-                  </div>
-
-                  <div className="rounded-2xl border border-border bg-background/80 p-4">
-                    <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-                      <Link2 className="size-4" />
-                      Dẫn vết
-                    </div>
-                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                      Liên kết sang sự kiện và tài liệu chỉ mở được khi bạn có quyền đọc tương ứng.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-4">
-                <div className="rounded-2xl border border-border bg-background/80 p-4">
-                  <div className="flex flex-col gap-2">
-                    <span className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-                      Gợi ý cách hỏi
-                    </span>
-                    <p className="text-sm leading-6 text-muted-foreground">
-                      Tập trung vào một tài sản, một giai đoạn hoặc một luận điểm cần kiểm chứng.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  {EXAMPLE_PROMPTS.map((prompt) => (
-                    <Button
-                      key={prompt}
-                      type="button"
-                      variant="outline"
-                      className="h-auto justify-start py-3 text-left whitespace-normal"
-                      onClick={() => handleExampleClick(prompt)}
-                    >
-                      <ChevronRight data-icon="inline-start" />
-                      {prompt}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </aside>
-      </section>
-
-      {result ? (
-        <div className="flex flex-col gap-6">
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,1fr)]">
-            <section className="rounded-[28px] border border-border bg-background p-6 shadow-sm">
-              <div className="flex flex-col gap-5">
-                <SectionHeading
-                  icon={Sparkles}
-                  title="Kết luận"
-                  description="Phần trả lời trực tiếp từ hệ thống cho câu hỏi hiện tại."
-                />
-
-                <div className="rounded-2xl border border-border bg-muted/20 p-5">
-                  <p className="whitespace-pre-wrap text-[15px] leading-8 text-foreground">
-                    {result.answer?.trim() || "Backend chưa trả về nội dung kết luận cụ thể."}
-                  </p>
-                </div>
-              </div>
-            </section>
-
-            <section className="rounded-[28px] border border-border bg-muted/20 p-6">
-              <div className="flex flex-col gap-5">
-                <SectionHeading
-                  icon={Layers3}
-                  title="Tóm tắt nhanh"
-                  description="Những tín hiệu quan trọng để đọc nhanh phạm vi và độ chắc chắn của câu trả lời."
-                />
-
-                <div className="grid gap-4">
-                  <div className="rounded-2xl border border-border bg-background/85 p-5">
-                    <span className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-                      Độ tin cậy
-                    </span>
-                    <div className="mt-3 flex items-center gap-3">
-                      <Badge variant={getConfidenceVariant(result.confidence)}>
-                        {formatConfidence(result.confidence)}
-                      </Badge>
-                      <span className="text-sm text-muted-foreground">
-                        Giá trị này phản ánh mức chắc chắn của kết luận tổng hợp.
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl border border-border bg-background/85 p-5">
-                    <span className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-                      Tài sản đã xét
-                    </span>
-                    {assetsConsidered.length > 0 ? (
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {assetsConsidered.map((asset) => (
-                          <Badge key={asset} variant="secondary">
-                            {asset}
-                          </Badge>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="mt-3 text-sm text-muted-foreground">
-                        Chưa có danh sách tài sản được backend trả về.
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="rounded-2xl border border-border bg-background/85 p-5">
-                    <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-                      <TriangleAlert className="size-4" />
-                      Giới hạn hiện tại
-                    </div>
-
-                    {limitations.length > 0 ? (
-                      <ul className="mt-3 flex flex-col gap-2 text-sm leading-6 text-muted-foreground">
-                        {limitations.map((limitation, index) => (
-                          <li
-                            key={`${limitation}-${index}`}
-                            className="rounded-xl border border-border bg-muted/30 px-3 py-2"
-                          >
-                            {limitation}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="mt-3 text-sm text-muted-foreground">
-                        Chưa có giới hạn nào được backend trả về cho truy vấn này.
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </section>
-          </div>
-
-          <section className="rounded-[28px] border border-border bg-background p-6 shadow-sm">
-            <div className="flex flex-col gap-5">
-              <SectionHeading
-                icon={GitBranch}
-                title="Sự kiện trọng yếu"
-                description="Những sự kiện mà backend coi là tác nhân nổi bật cho câu trả lời hiện tại."
-              />
-
-              {keyEvents.length > 0 ? (
-                <div className="grid gap-4 xl:grid-cols-2">
-                  {keyEvents.map((event, index) => (
-                    <KeyEventCard
-                      key={`${event.id ?? "event"}-${index}`}
-                      event={event}
-                      canReadEvents={canReadEvents}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <SectionEmpty
-                  title="Chưa có sự kiện trọng yếu"
-                  description="Truy vấn này chưa trả về danh sách sự kiện nổi bật để đối chiếu thêm."
-                />
-              )}
-            </div>
-          </section>
-
-          <section className="rounded-[28px] border border-border bg-background p-6 shadow-sm">
-            <div className="flex flex-col gap-5">
-              <SectionHeading
-                icon={FileText}
-                title="Bằng chứng"
-                description="Chuỗi tài liệu và sự kiện dùng để chống lưng cho kết luận, kèm theo quyền dẫn vết tương ứng."
-              />
-
-              {evidence.length > 0 ? (
-                <div className="flex flex-col gap-4">
-                  {evidence.map((item, index) => (
-                    <EvidenceCard
-                      key={`${item.sourceDocumentId ?? item.eventId ?? "evidence"}-${index}`}
-                      evidence={item}
-                      canReadEvents={canReadEvents}
-                      canReadSourceDocuments={canReadSourceDocuments}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <SectionEmpty
-                  title="Chưa có bằng chứng"
-                  description="Backend chưa trả về bằng chứng chi tiết cho truy vấn này."
-                />
-              )}
-            </div>
-          </section>
-
-          <Collapsible className="group/collapsible rounded-[28px] border border-border bg-background p-6 shadow-sm">
-            <div className="flex flex-col gap-5">
-              <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                <SectionHeading
-                  icon={Link2}
-                  title="Quá trình tổng hợp"
-                  description="Hiển thị cho mọi người dùng có quyền truy vấn, nhưng được thu gọn mặc định để giữ nhịp đọc."
-                />
-
-                <CollapsibleTrigger asChild>
-                  <Button variant="outline" size="sm" className="group/button">
-                    <ChevronRight
-                      className="transition-transform group-data-[state=open]/collapsible:rotate-90"
-                      data-icon="inline-start"
-                    />
-                    {reasoningChain.length > 0
-                      ? `Xem ${reasoningChain.length} bước tổng hợp`
-                      : "Xem chi tiết tổng hợp"}
-                  </Button>
-                </CollapsibleTrigger>
-              </div>
-
-              <CollapsibleContent className="overflow-hidden">
-                {reasoningChain.length > 0 ? (
-                  <ol className="flex flex-col gap-3">
-                    {reasoningChain.map((step, index) => (
-                      <li
-                        key={`${step}-${index}`}
-                        className={cn(
-                          "grid gap-3 rounded-2xl border border-border bg-muted/20 p-4",
-                          "md:grid-cols-[auto_minmax(0,1fr)] md:items-start"
-                        )}
-                      >
-                        <div className="flex size-8 items-center justify-center rounded-full border border-border bg-background text-sm font-semibold text-foreground">
-                          {index + 1}
-                        </div>
-                        <p className="text-sm leading-7 text-foreground/90">{step}</p>
-                      </li>
-                    ))}
-                  </ol>
-                ) : (
-                  <SectionEmpty
-                    title="Chưa có chuỗi tổng hợp"
-                    description="Backend chưa trả về reasoning chain cho truy vấn này."
-                  />
-                )}
-              </CollapsibleContent>
-            </div>
-          </Collapsible>
-        </div>
-      ) : (
-        <Empty className="rounded-[28px] border border-dashed border-border bg-muted/10 py-16">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <SearchCheck className="size-5 text-muted-foreground" />
-            </EmptyMedia>
-            <EmptyTitle>Chưa có kết quả phân tích</EmptyTitle>
-            <EmptyDescription>
-              Điền câu hỏi ở phía trên để tạo một bản briefing thị trường gồm kết luận, sự
-              kiện trọng yếu, bằng chứng và chuỗi tổng hợp.
-            </EmptyDescription>
-          </EmptyHeader>
-          <EmptyContent className="max-w-3xl">
-            <div className="flex flex-wrap justify-center gap-2">
-              {EXAMPLE_PROMPTS.map((prompt) => (
-                <Button
-                  key={prompt}
-                  type="button"
-                  variant="outline"
-                  className="h-auto py-3 text-left whitespace-normal"
-                  onClick={() => handleExampleClick(prompt)}
-                >
-                  <ChevronRight data-icon="inline-start" />
-                  {prompt}
-                </Button>
-              ))}
-            </div>
-          </EmptyContent>
-        </Empty>
-      )}
-    </div>
-  )
-}
-*/

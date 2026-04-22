@@ -6,8 +6,10 @@ import {
 } from "lucide-react"
 
 import { EVENT_NAV_PERMISSIONS } from "@/app/lib/events/permissions"
+import { GRAPH_VIEW_NAV_PERMISSIONS } from "@/app/lib/graph-view/permissions"
 import { MARKET_QUERY_NAV_PERMISSIONS } from "@/app/lib/market-query/permissions"
-import { SOURCE_DOCUMENT_NAV_PERMISSIONS } from "@/app/lib/source-documents/permissions"
+import { NEWS_ARTICLE_NAV_PERMISSIONS } from "@/app/lib/news-articles/permissions"
+import { NEWS_OUTLET_NAV_PERMISSIONS } from "@/app/lib/news-outlets/permissions"
 
 export interface NavSubItem {
   title: string
@@ -44,42 +46,43 @@ export const siteConfig = {
     {
       name: "Signapse",
       logo: GalleryVerticalEnd,
-      plan: "Trang quản trị",
+      plan: "Trang quan tri",
     },
   ],
   brand: {
     name: "Signapse",
     logo: GalleryVerticalEnd,
-    subtitle: "Trang quản trị",
+    subtitle: "Trang quan tri",
   },
   navMain: [
     {
-      title: "Biểu đồ tri thức",
-      url: "/",
+      title: "Bieu do tri thuc",
+      url: "/graph-view",
       icon: LayoutDashboard,
+      permission: GRAPH_VIEW_NAV_PERMISSIONS,
     },
     {
-      title: "Nội dung",
+      title: "Noi dung",
       url: "#",
       icon: Newspaper,
       items: [
         {
-          title: "Nguồn dữ liệu",
-          url: "/sources",
-          permission: "source:read",
+          title: "Nguon tin",
+          url: "/news-outlets",
+          permission: NEWS_OUTLET_NAV_PERMISSIONS,
         },
         {
-          title: "Tài liệu nguồn",
-          url: "/source-documents",
-          permission: SOURCE_DOCUMENT_NAV_PERMISSIONS,
+          title: "Bai viet tin tuc",
+          url: "/news-articles",
+          permission: NEWS_ARTICLE_NAV_PERMISSIONS,
         },
         {
-          title: "Sự kiện",
+          title: "Su kien",
           url: "/events",
           permission: EVENT_NAV_PERMISSIONS,
         },
         {
-          title: "Truy vấn thị trường",
+          title: "Truy van thi truong",
           url: "/market-query",
           permission: MARKET_QUERY_NAV_PERMISSIONS,
         },
@@ -91,27 +94,27 @@ export const siteConfig = {
       ],
     },
     {
-      title: "Cài đặt",
+      title: "Cai dat",
       url: "#",
       icon: Settings2,
       items: [
         {
-          title: "Nhà cung cấp AI",
+          title: "Nha cung cap AI",
           url: "/ai-provider-configs",
           permission: "ai-provider-config:read",
         },
         {
-          title: "Tác vụ định kỳ",
+          title: "Tac vu dinh ky",
           url: "/cronjobs",
           permission: "cronjob:read",
         },
         {
-          title: "Vai trò",
+          title: "Vai tro",
           url: "/roles",
           permission: "role:update",
         },
         {
-          title: "Token nhà phát triển",
+          title: "Token nha phat trien",
           url: "/developer-token",
         },
       ],

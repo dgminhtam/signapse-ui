@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation"
 
 export default function LegacyCreateSourcePage() {
-  redirect("/sources/create")
+  redirect("/news-outlets/create")
 }

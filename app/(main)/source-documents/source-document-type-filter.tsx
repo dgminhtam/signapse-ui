@@ -50,11 +50,15 @@ export function SourceDocumentTypeFilter() {
   return (
     <div className="flex items-center gap-2">
       <Filter className="h-4 w-4 text-muted-foreground" />
-      <Select value={currentType} onValueChange={handleValueChange}>
-        <SelectTrigger className="w-full sm:w-[220px]">
+      <Select value={currentType} onValueChange={handleValueChange} disabled={isPending}>
+        <SelectTrigger
+          size="sm"
+          className="w-full sm:w-[220px]"
+          aria-label="Lọc theo loại tài liệu"
+        >
           <SelectValue placeholder="Lọc theo loại" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent align="end">
           <SelectGroup>
             {typeOptions.map((option) => (
               <SelectItem key={option.value} value={option.value}>

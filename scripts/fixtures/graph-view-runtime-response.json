@@ -1,0 +1,108 @@
+{
+  "edges": [
+    {
+      "confidence": null,
+      "id": "event:1->asset:7:AFFECTED_ASSET",
+      "kind": "event-asset",
+      "note": null,
+      "relationType": "AFFECTED_ASSET",
+      "sourceNodeId": "event:1",
+      "targetNodeId": "asset:7",
+      "weight": 0.7
+    },
+    {
+      "confidence": null,
+      "id": "event:1->theme:10:PRIMARY_THEME",
+      "kind": "event-theme",
+      "note": null,
+      "relationType": "PRIMARY_THEME",
+      "sourceNodeId": "event:1",
+      "targetNodeId": "theme:10",
+      "weight": 0.9
+    },
+    {
+      "confidence": 0.95,
+      "id": "source-document:7->event:1:PRIMARY",
+      "kind": "source-document-event",
+      "note": "The article explicitly states that BCA Research is advising its clients to buy HUF/USD.",
+      "relationType": "PRIMARY",
+      "sourceNodeId": "source-document:7",
+      "targetNodeId": "event:1",
+      "weight": null
+    }
+  ],
+  "nodes": [
+    {
+      "id": "event:1",
+      "kind": "event",
+      "label": "BCA Research recommends buying HUF/USD",
+      "metadata": {
+        "active": true,
+        "assetType": null,
+        "canonicalKey": "bca-research-huf-usd-buy-recommendation",
+        "confidence": 0.95,
+        "occurredAt": null,
+        "publishedAt": null,
+        "slug": "bca-research-recommends-buying-huf-usd",
+        "sourceName": null,
+        "symbol": null,
+        "url": null
+      },
+      "secondaryLabel": "bca-research-huf-usd-buy-recommendation"
+    },
+    {
+      "id": "asset:7",
+      "kind": "asset",
+      "label": "DXY",
+      "metadata": {
+        "active": null,
+        "assetType": "FX",
+        "canonicalKey": null,
+        "confidence": null,
+        "occurredAt": null,
+        "publishedAt": null,
+        "slug": null,
+        "sourceName": null,
+        "symbol": "DXY",
+        "url": null
+      },
+      "secondaryLabel": "US Dollar Index"
+    },
+    {
+      "id": "theme:10",
+      "kind": "theme",
+      "label": "Geopolitics",
+      "metadata": {
+        "active": null,
+        "assetType": null,
+        "canonicalKey": null,
+        "confidence": null,
+        "occurredAt": null,
+        "publishedAt": null,
+        "slug": "geopolitics",
+        "sourceName": null,
+        "symbol": null,
+        "url": null
+      },
+      "secondaryLabel": "geopolitics"
+    },
+    {
+      "id": "source-document:7",
+      "kind": "source-document",
+      "label": "Nen mua HUF/USD, BCA khuyen nghi",
+      "metadata": {
+        "active": null,
+        "assetType": null,
+        "canonicalKey": null,
+        "confidence": null,
+        "occurredAt": null,
+        "publishedAt": null,
+        "slug": null,
+        "sourceName": "Investing VN News",
+        "symbol": null,
+        "url": "https://vn.investing.com/news/forex-news/nen-mua-hufusd-bca-khuyen-nghi-93CH-2587742"
+      },
+      "secondaryLabel": "Investing VN News"
+    }
+  ]
+}

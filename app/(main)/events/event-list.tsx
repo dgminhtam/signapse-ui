@@ -5,8 +5,17 @@ import { Calendar, Eye, GitBranch } from "lucide-react"
 import Link from "next/link"
 
 import { Page } from "@/app/lib/definitions"
-import { EVENT_ENRICHMENT_STATUS_LABELS, EventListResponse } from "@/app/lib/events/definitions"
+import {
+  EVENT_ENRICHMENT_STATUS_LABELS,
+  EventListResponse,
+} from "@/app/lib/events/definitions"
 import { AppPaginationControls } from "@/components/app-pagination-controls"
+import {
+  AppListToolbar,
+  AppListToolbarLeading,
+  AppListToolbarTrailing,
+} from "@/components/app-list-toolbar"
+import { AppSelectPageSize } from "@/components/app-select-page-size"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -59,22 +68,30 @@ export function EventList({ eventPage }: EventListProps) {
 
   return (
     <div className="w-full">
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex w-full flex-1 items-center gap-4 sm:w-auto">
+      <AppListToolbar>
+        <AppListToolbarLeading>
           <EventEnrichPendingButton />
           <EventSearch />
-        </div>
-        <div className="flex items-center gap-2">
+        </AppListToolbarLeading>
+        <AppListToolbarTrailing>
           <SortSelect
+            className="w-full sm:w-auto"
             options={[
               { label: "Mới xảy ra nhất", value: "occurredAt_desc" },
               { label: "Cũ nhất", value: "occurredAt_asc" },
               { label: "Độ tin cậy cao", value: "confidence_desc" },
               { label: "Ngày tạo", value: "createdDate_desc" },
             ]}
+            triggerClassName="w-full sm:w-[200px]"
           />
-        </div>
-      </div>
+          <AppSelectPageSize
+            className="w-full sm:w-auto"
+            defaultSize={eventPage.size}
+            showLabel={false}
+            triggerClassName="w-full sm:w-[120px]"
+          />
+        </AppListToolbarTrailing>
+      </AppListToolbar>
 
       <div className="rounded-md border border-border bg-card">
         <Table>
@@ -83,8 +100,12 @@ export function EventList({ eventPage }: EventListProps) {
               <TableHead className="font-semibold text-foreground">Sự kiện</TableHead>
               <TableHead className="font-semibold text-foreground">Trạng thái</TableHead>
               <TableHead className="font-semibold text-foreground">Thời gian</TableHead>
-              <TableHead className="font-semibold text-foreground">Độ tin cậy</TableHead>
-              <TableHead className="text-right font-semibold text-foreground">Thao tác</TableHead>
+              <TableHead className="font-semibold text-foreground">
+                Độ tin cậy
+              </TableHead>
+              <TableHead className="text-right font-semibold text-foreground">
+                Thao tác
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -150,7 +171,7 @@ export function EventList({ eventPage }: EventListProps) {
                         className="text-muted-foreground hover:text-foreground"
                       >
                         <Link href={`/events/${event.id}`}>
-                          <Eye className="h-4 w-4" data-icon="inline-start" />
+                          <Eye data-icon="inline-start" />
                           <span className="sr-only">Xem chi tiết sự kiện</span>
                         </Link>
                       </Button>
@@ -164,7 +185,7 @@ export function EventList({ eventPage }: EventListProps) {
                   <Empty>
                     <EmptyHeader>
                       <EmptyMedia variant="icon">
-                        <GitBranch className="h-12 w-12 text-muted-foreground" />
+                        <GitBranch className="text-muted-foreground" />
                       </EmptyMedia>
                       <EmptyTitle>Chưa có sự kiện</EmptyTitle>
                       <EmptyDescription>

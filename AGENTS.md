@@ -45,6 +45,19 @@ app/(main)/[feature]/
 - Dùng `useTransition` với `router.push()` hoặc `router.replace()` khi cập nhật URL
 - Ô tìm kiếm phải dùng `use-debounce` với `300ms`
 
+### Quy ước search list
+
+- Mỗi trang danh sách có search phải đặt search trong component `[feature]-search.tsx` cùng thư mục feature
+- Search mặc định là live search dùng `use-debounce` với `300ms`, không thêm nút `Tìm kiếm` nếu không có yêu cầu nghiệp vụ riêng
+- Search phải dùng controlled input, khởi tạo từ `useSearchParams()` và đồng bộ lại khi query param thay đổi; không dùng `defaultValue` cho list search
+- Khi thay đổi search, luôn reset `page` về `1`
+- Khi cập nhật URL từ search, dùng `startTransition()` với `router.replace()`
+- Giá trị search phải được `trim()` trước khi ghi lên URL; nếu rỗng sau khi trim thì phải xóa query param tương ứng
+- Search input phải có `type="search"`, `id` và `label` dạng `sr-only`
+- Search phải hiển thị `<Spinner>` inline trong lúc pending route transition
+- Nếu search theo nhiều field, khai báo query key thành hằng số cục bộ rõ nghĩa trong file search
+- Không tạo shared component search list mặc định; ưu tiên component cục bộ nhưng hành vi phải thống nhất theo các quy ước này
+
 ## Quy tắc phát triển
 
 `AGENTS.md` là file hướng dẫn repo-wide đang hoạt động duy nhất. Kiến thức tái sử dụng theo tác vụ phải nằm trong `.codex/skills`.
@@ -83,7 +96,8 @@ app/(main)/[feature]/
 ### Bố cục toolbar
 
 - Bên trái: action chính như Tạo mới/Crawl và ô tìm kiếm
-- Bên phải: điều khiển sort hoặc filter tĩnh
+- Bên phải: cụm view controls như filter tĩnh, sort và số mục mỗi trang
+- Page size selector thuộc cụm controls bên phải, không đặt lại trong footer phân trang
 - Dùng `flex-col sm:flex-row sm:justify-between` để responsive
 
 ### Yêu cầu UX
@@ -144,7 +158,7 @@ Trước khi đánh dấu một feature là xong:
 - [ ] `page.tsx` dùng `Card` shell với `CardHeader` và `Separator`
 - [ ] `page.tsx` có `Suspense` với `Skeleton` bám sát bố cục thật
 - [ ] Có `error.tsx` để xử lý local server error
-- [ ] Search dùng `use-debounce` với `300ms`
+- [ ] Search tuân thủ quy ước search list trong file này
 - [ ] Toàn bộ UI text là tiếng Việt chuyên nghiệp
 - [ ] Nút Submit và Lưu có `Spinner` và trạng thái disabled
 - [ ] Action xóa dùng `AlertDialog`

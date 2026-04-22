@@ -1,9 +1,9 @@
 import { Suspense } from "react"
 
 import { getEvents } from "@/app/api/events/action"
+import { EVENT_READ_PERMISSIONS } from "@/app/lib/events/permissions"
 import { hasAnyPermission } from "@/app/lib/permissions"
 import { getCurrentPermissions } from "@/app/lib/permissions-server"
-import { EVENT_READ_PERMISSIONS } from "@/app/lib/events/permissions"
 import { buildFilterQuery, buildSortQuery } from "@/app/lib/utils"
 import { AccessDenied } from "@/components/access-denied"
 import {
@@ -39,7 +39,8 @@ export default async function EventsPage({ searchParams }: PageProps) {
         <CardHeader>
           <CardTitle>Sự kiện</CardTitle>
           <CardDescription>
-            Theo dõi các sự kiện đã được suy diễn từ tài liệu nguồn và trạng thái làm giàu liên quan.
+            Theo dõi các sự kiện đã được suy diễn từ tài liệu nguồn và trạng thái
+            làm giàu liên quan.
           </CardDescription>
         </CardHeader>
 
@@ -65,8 +66,8 @@ export default async function EventsPage({ searchParams }: PageProps) {
       <CardHeader>
         <CardTitle>Sự kiện</CardTitle>
         <CardDescription>
-          Duyệt các sự kiện đã được tổng hợp, theo dõi trạng thái làm giàu và kiểm tra chuỗi
-          bằng chứng liên quan.
+          Duyệt các sự kiện đã được tổng hợp, theo dõi trạng thái làm giàu và kiểm
+          tra chuỗi bằng chứng liên quan.
         </CardDescription>
       </CardHeader>
 
@@ -107,13 +108,17 @@ async function EventListContent({
 function EventListSkeleton() {
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-1 gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex w-full flex-1 flex-col gap-4 sm:w-auto sm:flex-row sm:items-center">
           <Skeleton className="h-10 w-[200px]" />
           <Skeleton className="h-10 flex-1" />
         </div>
-        <Skeleton className="h-10 w-[180px]" />
+        <div className="flex w-full flex-col gap-2 rounded-xl border border-border/60 bg-muted/20 p-2 sm:w-auto sm:flex-row sm:items-center">
+          <Skeleton className="h-8 w-full sm:w-[200px]" />
+          <Skeleton className="h-8 w-full sm:w-[120px]" />
+        </div>
       </div>
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -160,6 +165,22 @@ function EventListSkeleton() {
             ))}
           </TableBody>
         </Table>
+      </div>
+
+      <div className="flex flex-col gap-3 rounded-xl border border-border/60 bg-muted/20 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <Skeleton className="h-6 w-24" />
+            <Skeleton className="h-6 w-28" />
+          </div>
+          <Skeleton className="h-4 w-56" />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Skeleton className="h-8 w-20" />
+          <Skeleton className="h-8 w-8" />
+          <Skeleton className="h-8 w-8" />
+          <Skeleton className="h-8 w-20" />
+        </div>
       </div>
     </div>
   )

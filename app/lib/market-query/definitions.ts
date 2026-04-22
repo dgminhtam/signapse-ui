@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-import type { SourceDocumentType } from "@/app/lib/source-documents/definitions"
+import { artifactTypes, type ArtifactType } from "@/app/lib/artifacts/definitions"
 
 export type MarketQueryEvidenceRole =
   | "PRIMARY"
@@ -16,12 +16,12 @@ export interface MarketQueryRequest {
 export interface MarketQueryEvidenceResponse {
   eventId?: number
   eventTitle?: string
-  sourceDocumentId?: number
-  sourceDocumentTitle?: string
-  sourceDocumentUrl?: string
-  sourceName?: string
+  artifactId?: number
+  artifactTitle?: string
+  artifactUrl?: string
+  newsOutletName?: string
   publishedAt?: string | null
-  documentType?: SourceDocumentType
+  artifactType?: ArtifactType
   evidenceRole?: MarketQueryEvidenceRole
   evidenceConfidence?: number
 }
@@ -47,21 +47,19 @@ export interface MarketQueryResponse {
 }
 
 export const marketQueryRequestSchema = z.object({
-  question: z.string().trim().min(1, "Vui lòng nhập câu hỏi."),
+  question: z.string().trim().min(1, "Vui long nhap cau hoi."),
   asOfTime: z.string().datetime().nullish(),
 }) satisfies z.ZodType<MarketQueryRequest>
 
 export const marketQueryEvidenceResponseSchema = z.object({
   eventId: z.number().int().optional(),
   eventTitle: z.string().optional(),
-  sourceDocumentId: z.number().int().optional(),
-  sourceDocumentTitle: z.string().optional(),
-  sourceDocumentUrl: z.string().optional(),
-  sourceName: z.string().optional(),
+  artifactId: z.number().int().optional(),
+  artifactTitle: z.string().optional(),
+  artifactUrl: z.string().optional(),
+  newsOutletName: z.string().optional(),
   publishedAt: z.string().nullish(),
-  documentType: z
-    .enum(["NEWS", "ECONOMIC_CALENDAR", "RESEARCH", "MARKET_DATA", "SENTIMENT", "OTHER"])
-    .optional(),
+  artifactType: z.enum(artifactTypes).optional(),
   evidenceRole: z.enum(["PRIMARY", "SUPPORTING", "UPDATE", "CONTRADICTING"]).optional(),
   evidenceConfidence: z.number().optional(),
 }) satisfies z.ZodType<MarketQueryEvidenceResponse>
@@ -86,18 +84,17 @@ export const marketQueryResponseSchema = z.object({
   evidence: z.array(marketQueryEvidenceResponseSchema).optional(),
 }) satisfies z.ZodType<MarketQueryResponse>
 
-export const MARKET_QUERY_DOCUMENT_TYPE_LABELS: Record<SourceDocumentType, string> = {
-  NEWS: "Tin tức",
-  ECONOMIC_CALENDAR: "Lịch kinh tế",
-  RESEARCH: "Nghiên cứu",
-  MARKET_DATA: "Dữ liệu thị trường",
-  SENTIMENT: "Tâm lý thị trường",
-  OTHER: "Khác",
+export const MARKET_QUERY_ARTIFACT_TYPE_LABELS: Record<ArtifactType, string> = {
+  NEWS_ARTICLE: "Bai viet tin tuc",
+  ECONOMIC_CALENDAR_ENTRY: "Muc lich kinh te",
+  RESEARCH_DOCUMENT: "Tai lieu nghien cuu",
+  STRATEGY_PLAYBOOK: "Playbook chien luoc",
+  OTHER: "Khac",
 }
 
 export const MARKET_QUERY_EVIDENCE_ROLE_LABELS: Record<MarketQueryEvidenceRole, string> = {
-  PRIMARY: "Chính",
-  SUPPORTING: "Hỗ trợ",
-  UPDATE: "Cập nhật",
-  CONTRADICTING: "Mâu thuẫn",
+  PRIMARY: "Chinh",
+  SUPPORTING: "Ho tro",
+  UPDATE: "Cap nhat",
+  CONTRADICTING: "Mau thuan",
 }

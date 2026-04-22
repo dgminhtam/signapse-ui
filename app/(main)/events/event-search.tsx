@@ -2,44 +2,51 @@
 
 import { Search } from "lucide-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useState, useTransition } from "react"
 import { useDebouncedCallback } from "use-debounce"
+import { useOptimistic, useTransition } from "react"
 
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 
 const SEARCH_PARAM_KEY = "title[containsIgnoreCase],canonicalKey[containsIgnoreCase]"
+const SEARCH_INPUT_ID = "event-search"
 
 export function EventSearch() {
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const { replace } = useRouter()
   const [isPending, startTransition] = useTransition()
-  const [value, setValue] = useState(searchParams.get(SEARCH_PARAM_KEY)?.toString() || "")
+  const currentSearch = searchParams.get(SEARCH_PARAM_KEY)?.toString() || ""
+  const [value, setValue] = useOptimistic(currentSearch)
 
   const handleSearch = useDebouncedCallback((term: string) => {
+    const trimmedTerm = term.trim()
     const params = new URLSearchParams(searchParams)
     params.set("page", "1")
+    setValue(trimmedTerm)
 
-    if (term.trim()) {
-      params.set(SEARCH_PARAM_KEY, term.trim())
+    if (trimmedTerm) {
+      params.set(SEARCH_PARAM_KEY, trimmedTerm)
     } else {
       params.delete(SEARCH_PARAM_KEY)
     }
 
+    const query = params.toString()
+
     startTransition(() => {
-      replace(`${pathname}?${params.toString()}`)
+      replace(query ? `${pathname}?${query}` : pathname)
     })
   }, 300)
 
   return (
     <div className="relative flex flex-1 shrink-0">
-      <label htmlFor="event-search" className="sr-only">
+      <label htmlFor={SEARCH_INPUT_ID} className="sr-only">
         Tìm sự kiện
       </label>
-      <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
       <Input
-        id="event-search"
+        id={SEARCH_INPUT_ID}
+        type="search"
         className="pl-9 pr-10"
         placeholder="Tìm theo tiêu đề hoặc khóa chuẩn..."
         value={value}
@@ -49,7 +56,7 @@ export function EventSearch() {
         }}
       />
       {isPending ? (
-        <Spinner className="absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Spinner className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
       ) : null}
     </div>
   )

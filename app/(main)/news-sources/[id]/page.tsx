@@ -6,5 +6,5 @@ interface LegacyEditSourcePageProps {
 
 export default async function LegacyEditSourcePage({ params }: LegacyEditSourcePageProps) {
   const { id } = await params
-  redirect(`/sources/${id}`)
+  redirect(`/news-outlets/${id}`)
 }

@@ -19,7 +19,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
 
@@ -57,13 +56,12 @@ interface AppPaginationControlsProps<T> {
     Page<T>,
     "number" | "numberOfElements" | "size" | "totalElements" | "totalPages"
   >
-  pageSizeOptions?: readonly number[] | number[]
 }
 
 export function PaginationPageSizeSelect({
   className,
   isPending,
-  label = "Số mục / trang",
+  label = "Số mục mỗi trang",
   onValueChange,
   options = DEFAULT_PAGE_SIZE_OPTIONS,
   showLabel = true,
@@ -82,7 +80,7 @@ export function PaginationPageSizeSelect({
       >
         <SelectTrigger
           size="sm"
-          className={cn("min-w-20 sm:min-w-24", triggerClassName)}
+          className={cn("w-full sm:w-[120px]", triggerClassName)}
           aria-label={label}
         >
           <SelectValue />
@@ -91,7 +89,7 @@ export function PaginationPageSizeSelect({
           <SelectGroup>
             {options.map((option) => (
               <SelectItem key={option} value={option.toString()}>
-                {option}
+                {option} / trang
               </SelectItem>
             ))}
           </SelectGroup>
@@ -139,6 +137,7 @@ export function PaginationNavigation({
             className={cn(isPreviousDisabled && "pointer-events-none opacity-50")}
             onClick={(event) => {
               event.preventDefault()
+
               if (!isPreviousDisabled) {
                 onPageChange(currentPage - 1)
               }
@@ -159,6 +158,7 @@ export function PaginationNavigation({
                 className={cn(isPending && "pointer-events-none opacity-50")}
                 onClick={(event) => {
                   event.preventDefault()
+
                   if (!isPending) {
                     onPageChange(entry)
                   }
@@ -180,6 +180,7 @@ export function PaginationNavigation({
             className={cn(isNextDisabled && "pointer-events-none opacity-50")}
             onClick={(event) => {
               event.preventDefault()
+
               if (!isNextDisabled) {
                 onPageChange(currentPage + 1)
               }
@@ -194,9 +195,8 @@ export function PaginationNavigation({
 export function AppPaginationControls<T>({
   className,
   page,
-  pageSizeOptions = DEFAULT_PAGE_SIZE_OPTIONS,
 }: AppPaginationControlsProps<T>) {
-  const { isPending, pageSize, setPage, setPageSize } = useAppPaginationQuery({
+  const { isPending, setPage } = useAppPaginationQuery({
     defaultSize: page.size,
     totalPages: page.totalPages,
   })
@@ -211,26 +211,27 @@ export function AppPaginationControls<T>({
 
   const summaryText =
     page.totalElements > 0
-      ? `Hiển thị ${visibleItems.start}-${visibleItems.end} trong ${page.totalElements} kết quả`
-      : "Không có dữ liệu để hiển thị"
+      ? `Hiển thị ${visibleItems.start}-${visibleItems.end} trên ${page.totalElements} kết quả`
+      : "Chưa có dữ liệu để hiển thị"
 
   return (
     <div
       className={cn(
-        "flex flex-col gap-4 rounded-xl border border-border bg-muted/20 p-4",
+        "flex flex-col gap-3 rounded-xl border border-border/60 bg-muted/20 px-4 py-3",
         className
       )}
     >
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 flex-col gap-1.5">
           <div className="flex flex-wrap items-center gap-2">
-            {page.totalElements > 0 ? (
-              <Badge variant="secondary">
-                Trang {currentPage}/{page.totalPages}
-              </Badge>
+            {page.totalPages > 1 ? (
+              <Badge variant="secondary">Trang {currentPage}/{page.totalPages}</Badge>
+            ) : page.totalElements > 0 ? (
+              <Badge variant="secondary">{page.totalElements} kết quả</Badge>
             ) : (
               <Badge variant="secondary">0 kết quả</Badge>
             )}
+
             {isPending ? (
               <Badge variant="outline" className="gap-1">
                 <Spinner className="size-3.5" />
@@ -238,35 +239,19 @@ export function AppPaginationControls<T>({
               </Badge>
             ) : null}
           </div>
-          <p className="text-sm font-medium text-foreground">{summaryText}</p>
+          <p className="text-sm text-muted-foreground">{summaryText}</p>
         </div>
 
-        <div className="flex flex-col gap-2 sm:items-start lg:items-end">
-          <span className="text-xs font-medium tracking-[0.16em] text-muted-foreground uppercase">
-            Tùy chọn hiển thị
-          </span>
-          <PaginationPageSizeSelect
-            value={pageSize}
-            isPending={isPending}
-            onValueChange={setPageSize}
-            options={pageSizeOptions}
-            showLabel={false}
-            triggerClassName="w-full sm:w-24"
-          />
-        </div>
-      </div>
-
-      {page.totalPages > 1 ? (
-        <>
-          <Separator />
+        {page.totalPages > 1 ? (
           <PaginationNavigation
+            className="w-full sm:w-auto"
             currentPage={currentPage}
             totalPageCount={page.totalPages}
             isPending={isPending}
             onPageChange={setPage}
           />
-        </>
-      ) : null}
+        ) : null}
+      </div>
     </div>
   )
 }

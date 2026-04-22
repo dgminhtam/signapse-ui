@@ -14,6 +14,12 @@ import {
 import { AiProviderConfigListResponse } from "@/app/lib/ai-provider-configs/definitions"
 import { Page } from "@/app/lib/definitions"
 import { AppPaginationControls } from "@/components/app-pagination-controls"
+import {
+  AppListToolbar,
+  AppListToolbarLeading,
+  AppListToolbarTrailing,
+} from "@/components/app-list-toolbar"
+import { AppSelectPageSize } from "@/components/app-select-page-size"
 import { useHasPermission } from "@/components/permission-provider"
 import { SortSelect } from "@/components/sort-select"
 import {
@@ -52,7 +58,9 @@ interface AiProviderConfigListProps {
   providerPage: Page<AiProviderConfigListResponse>
 }
 
-export function AiProviderConfigListPage({ providerPage }: AiProviderConfigListProps) {
+export function AiProviderConfigListPage({
+  providerPage,
+}: AiProviderConfigListProps) {
   const providers = providerPage?.content || []
   const canCreateProvider = useHasPermission("ai-provider-config:create")
   const canUpdateProvider = useHasPermission("ai-provider-config:update")
@@ -61,19 +69,21 @@ export function AiProviderConfigListPage({ providerPage }: AiProviderConfigListP
 
   return (
     <div className="w-full">
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex w-full flex-1 items-center gap-4 sm:w-auto">
+      <AppListToolbar>
+        <AppListToolbarLeading>
           {canCreateProvider ? (
             <Button asChild>
               <Link href="/ai-provider-configs/create">
-                <Plus data-icon="inline-start" /> Create config
+                <Plus data-icon="inline-start" />
+                Create config
               </Link>
             </Button>
           ) : null}
           <AiProviderConfigSearch />
-        </div>
-        <div className="flex items-center gap-2">
+        </AppListToolbarLeading>
+        <AppListToolbarTrailing>
           <SortSelect
+            className="w-full sm:w-auto"
             options={[
               { label: "Newest", value: "id_desc" },
               { label: "Oldest", value: "id_asc" },
@@ -81,26 +91,44 @@ export function AiProviderConfigListPage({ providerPage }: AiProviderConfigListP
               { label: "Name (Z-A)", value: "name_desc" },
             ]}
             placeholder="Sort by"
+            triggerClassName="w-full sm:w-[200px]"
           />
-        </div>
-      </div>
+          <AppSelectPageSize
+            className="w-full sm:w-auto"
+            defaultSize={providerPage.size}
+            showLabel={false}
+            triggerClassName="w-full sm:w-[120px]"
+          />
+        </AppListToolbarTrailing>
+      </AppListToolbar>
 
       <div className="rounded-md border border-border bg-card">
         <Table>
           <TableHeader>
             <TableRow className="border-border bg-muted">
-              <TableHead className="font-semibold text-foreground">Config name</TableHead>
-              <TableHead className="font-semibold text-foreground">Provider</TableHead>
+              <TableHead className="font-semibold text-foreground">
+                Config name
+              </TableHead>
+              <TableHead className="font-semibold text-foreground">
+                Provider
+              </TableHead>
               <TableHead className="font-semibold text-foreground">Model</TableHead>
-              <TableHead className="text-center font-semibold text-foreground">Default</TableHead>
+              <TableHead className="text-center font-semibold text-foreground">
+                Default
+              </TableHead>
               <TableHead className="font-semibold text-foreground">Created</TableHead>
-              <TableHead className="text-right font-semibold text-foreground">Actions</TableHead>
+              <TableHead className="text-right font-semibold text-foreground">
+                Actions
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {providers.length > 0 ? (
               providers.map((provider) => (
-                <TableRow key={provider.id} className="border-border transition-colors hover:bg-muted/50">
+                <TableRow
+                  key={provider.id}
+                  className="border-border transition-colors hover:bg-muted/50"
+                >
                   <TableCell>
                     <div className="flex flex-col gap-1">
                       <Link
@@ -117,9 +145,13 @@ export function AiProviderConfigListPage({ providerPage }: AiProviderConfigListP
                   <TableCell>
                     <Badge variant="secondary">{provider.providerType}</Badge>
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{provider.model}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {provider.model}
+                  </TableCell>
                   <TableCell className="text-center">
-                    {canSetDefaultProvider ? <SetDefaultButton provider={provider} /> : null}
+                    {canSetDefaultProvider ? (
+                      <SetDefaultButton provider={provider} />
+                    ) : null}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground tabular-nums">
                     {format(new Date(provider.createdDate), "dd/MM/yyyy HH:mm")}
@@ -139,7 +171,9 @@ export function AiProviderConfigListPage({ providerPage }: AiProviderConfigListP
                           </Link>
                         </Button>
                       ) : null}
-                      {canDeleteProvider ? <DeleteProviderButton provider={provider} /> : null}
+                      {canDeleteProvider ? (
+                        <DeleteProviderButton provider={provider} />
+                      ) : null}
                     </div>
                   </TableCell>
                 </TableRow>
@@ -154,7 +188,8 @@ export function AiProviderConfigListPage({ providerPage }: AiProviderConfigListP
                       </EmptyMedia>
                       <EmptyTitle>No AI provider configs found</EmptyTitle>
                       <EmptyDescription>
-                        Add your first AI provider config to start managing AI integrations.
+                        Add your first AI provider config to start managing AI
+                        integrations.
                       </EmptyDescription>
                     </EmptyHeader>
                   </Empty>
@@ -254,7 +289,8 @@ function DeleteProviderButton({
         <AlertDialogHeader>
           <AlertDialogTitle>Delete this config?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. The AI provider config <strong>{provider.name}</strong> will be permanently removed.
+            This action cannot be undone. The AI provider config{" "}
+            <strong>{provider.name}</strong> will be permanently removed.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

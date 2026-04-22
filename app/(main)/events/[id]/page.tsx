@@ -17,6 +17,7 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 
 import { getEventById } from "@/app/api/events/action"
+import { ARTIFACT_TYPE_LABELS, isNewsArticleArtifact } from "@/app/lib/artifacts/definitions"
 import { hasAnyPermission } from "@/app/lib/permissions"
 import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import {
@@ -27,7 +28,7 @@ import {
   EventResponse,
 } from "@/app/lib/events/definitions"
 import { EVENT_READ_PERMISSIONS } from "@/app/lib/events/permissions"
-import { SOURCE_DOCUMENT_TYPE_LABELS } from "@/app/lib/source-documents/definitions"
+import { NEWS_ARTICLE_READ_PERMISSIONS } from "@/app/lib/news-articles/permissions"
 import { AccessDenied } from "@/components/access-denied"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -58,17 +59,23 @@ interface PageProps {
 
 type ApiLikeError = Error & { status?: number }
 
-function formatDateTime(value?: string) {
+function formatDateTime(value?: string | null) {
   if (!value) {
-    return "Chưa có"
+    return "Chua co"
   }
 
-  return format(new Date(value), "dd/MM/yyyy HH:mm")
+  const date = new Date(value)
+
+  if (Number.isNaN(date.getTime())) {
+    return "Chua co"
+  }
+
+  return format(date, "dd/MM/yyyy HH:mm")
 }
 
 function formatConfidence(value?: number) {
   if (typeof value !== "number") {
-    return "Chưa có"
+    return "Chua co"
   }
 
   return `${Math.round(value * 100)}%`
@@ -133,15 +140,15 @@ export default async function EventDetailPage({ params }: PageProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Chi tiết sự kiện</CardTitle>
+          <CardTitle>Chi tiet su kien</CardTitle>
           <CardDescription>
-            Xem thông tin tổng hợp, liên kết tài sản/chủ đề và chuỗi bằng chứng của sự kiện.
+            Xem thong tin tong hop, lien ket tai san, chu de va bang chung cua su kien.
           </CardDescription>
         </CardHeader>
         <Separator />
         <CardContent className="pt-6">
           <AccessDenied
-            description="Bạn không có quyền xem chi tiết sự kiện."
+            description="Ban khong co quyen xem chi tiet su kien."
             permission={EVENT_READ_PERMISSIONS[0]}
           />
         </CardContent>
@@ -151,6 +158,7 @@ export default async function EventDetailPage({ params }: PageProps) {
 
   const { id } = await params
   const eventId = Number(id)
+  const canReadNewsArticles = hasAnyPermission(permissions, NEWS_ARTICLE_READ_PERMISSIONS)
 
   return (
     <div className="flex flex-col gap-6">
@@ -158,21 +166,27 @@ export default async function EventDetailPage({ params }: PageProps) {
         <Button asChild variant="ghost" size="sm" className="-ml-2">
           <Link href="/events">
             <ArrowLeft className="mr-2 h-4 w-4" data-icon="inline-start" />
-            Quay lại danh sách
+            Quay lai danh sach
           </Link>
         </Button>
       </div>
 
       <Card>
         <Suspense fallback={<EventDetailSkeleton />}>
-          <FetchEventData id={eventId} />
+          <FetchEventData id={eventId} canReadNewsArticles={canReadNewsArticles} />
         </Suspense>
       </Card>
     </div>
   )
 }
 
-async function FetchEventData({ id }: { id: number }) {
+async function FetchEventData({
+  id,
+  canReadNewsArticles,
+}: {
+  id: number
+  canReadNewsArticles: boolean
+}) {
   let event: EventResponse
 
   try {
@@ -202,14 +216,14 @@ async function FetchEventData({ id }: { id: number }) {
                 {getEventEnrichmentLabel(event.enrichmentStatus)}
               </Badge>
               <Badge variant={event.active ? "secondary" : "outline"}>
-                {event.active ? "Đang hoạt động" : "Không hoạt động"}
+                {event.active ? "Dang hoat dong" : "Khong hoat dong"}
               </Badge>
             </div>
 
             <div className="flex flex-col gap-1">
               <CardTitle className="text-2xl">{event.title}</CardTitle>
               <CardDescription className="pt-1">
-                {event.summary?.trim() || "Chưa có tóm tắt cho sự kiện này."}
+                {event.summary?.trim() || "Chua co tom tat cho su kien nay."}
               </CardDescription>
             </div>
           </div>
@@ -225,31 +239,27 @@ async function FetchEventData({ id }: { id: number }) {
       <CardContent className="pt-6">
         <div className="flex flex-col gap-8">
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <DetailCard title="Mã sự kiện" value={String(event.id)} icon={Hash} />
-            <DetailCard title="Slug" value={event.slug || "Chưa có"} icon={Link2} />
+            <DetailCard title="Ma su kien" value={String(event.id)} icon={Hash} />
+            <DetailCard title="Slug" value={event.slug || "Chua co"} icon={Link2} />
             <DetailCard
-              title="Khóa chuẩn"
-              value={event.canonicalKey || "Chưa có"}
+              title="Khoa chuan"
+              value={event.canonicalKey || "Chua co"}
               icon={GitBranch}
             />
             <DetailCard
-              title="Độ tin cậy"
+              title="Do tin cay"
               value={formatConfidence(event.confidence)}
               icon={Layers3}
             />
+            <DetailCard title="Xay ra luc" value={formatDateTime(event.occurredAt)} icon={Calendar} />
             <DetailCard
-              title="Xảy ra lúc"
-              value={formatDateTime(event.occurredAt)}
-              icon={Calendar}
-            />
-            <DetailCard
-              title="Xác nhận lúc"
+              title="Xac nhan luc"
               value={formatDateTime(event.confirmedAt)}
               icon={Calendar}
             />
-            <DetailCard title="Tạo lúc" value={formatDateTime(event.createdDate)} icon={Clock3} />
+            <DetailCard title="Tao luc" value={formatDateTime(event.createdDate)} icon={Clock3} />
             <DetailCard
-              title="Cập nhật"
+              title="Cap nhat"
               value={formatDateTime(event.lastModifiedDate)}
               icon={RefreshCcw}
             />
@@ -259,12 +269,12 @@ async function FetchEventData({ id }: { id: number }) {
             <div className="flex items-center gap-2">
               <FileText className="h-4 w-4 text-muted-foreground" />
               <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                Mô tả
+                Mo ta
               </h2>
             </div>
             <div className="rounded-lg border border-border bg-muted/20 p-4">
               <p className="whitespace-pre-wrap text-sm leading-7 text-foreground/90">
-                {event.description?.trim() || "Chưa có mô tả chi tiết."}
+                {event.description?.trim() || "Chua co mo ta chi tiet."}
               </p>
             </div>
           </section>
@@ -273,36 +283,36 @@ async function FetchEventData({ id }: { id: number }) {
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-muted-foreground" />
               <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                Trạng thái làm giàu
+                Trang thai lam giau
               </h2>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <DetailCard
-                title="Trạng thái"
+                title="Trang thai"
                 value={getEventEnrichmentLabel(event.enrichmentStatus)}
                 icon={Sparkles}
               />
               <DetailCard
-                title="Lần làm giàu gần nhất"
+                title="Lan lam giau gan nhat"
                 value={formatDateTime(event.enrichmentAttemptedAt)}
                 icon={Clock3}
               />
               <DetailCard
-                title="Hoàn tất lúc"
+                title="Hoan tat luc"
                 value={formatDateTime(event.enrichmentCompletedAt)}
                 icon={RefreshCcw}
               />
               <DetailCard
-                title="Hoạt động"
-                value={event.active ? "Đang hoạt động" : "Không hoạt động"}
+                title="Hoat dong"
+                value={event.active ? "Dang hoat dong" : "Khong hoat dong"}
                 icon={Layers3}
               />
             </div>
 
             {event.enrichmentError ? (
               <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
-                <div className="mb-1 font-semibold">Lỗi làm giàu gần nhất</div>
+                <div className="mb-1 font-semibold">Loi lam giau gan nhat</div>
                 <div className="whitespace-pre-wrap">{event.enrichmentError}</div>
               </div>
             ) : null}
@@ -312,7 +322,7 @@ async function FetchEventData({ id }: { id: number }) {
             <div className="flex items-center gap-2">
               <Layers3 className="h-4 w-4 text-muted-foreground" />
               <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                Tài sản liên quan
+                Tai san lien quan
               </h2>
             </div>
 
@@ -337,13 +347,14 @@ async function FetchEventData({ id }: { id: number }) {
                     </div>
                     <div className="mt-3 flex flex-col gap-1">
                       <p className="font-medium text-foreground">
-                        {asset.assetName || "Chưa có tên tài sản"}
+                        {asset.assetName || "Chua co ten tai san"}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {asset.assetSymbol || "Chưa có mã"}
+                        {asset.assetSymbol || "Chua co ma"}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        Trọng số: {typeof asset.weight === "number" ? asset.weight.toFixed(2) : "Chưa có"}
+                        Trong so:{" "}
+                        {typeof asset.weight === "number" ? asset.weight.toFixed(2) : "Chua co"}
                       </p>
                     </div>
                   </div>
@@ -351,8 +362,8 @@ async function FetchEventData({ id }: { id: number }) {
               </div>
             ) : (
               <SectionEmpty
-                title="Chưa có tài sản liên quan"
-                description="Sự kiện này chưa có liên kết tài sản trong dữ liệu hiện tại."
+                title="Chua co tai san lien quan"
+                description="Su kien nay chua co lien ket tai san trong du lieu hien tai."
               />
             )}
           </section>
@@ -361,7 +372,7 @@ async function FetchEventData({ id }: { id: number }) {
             <div className="flex items-center gap-2">
               <Layers3 className="h-4 w-4 text-muted-foreground" />
               <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                Chủ đề liên quan
+                Chu de lien quan
               </h2>
             </div>
 
@@ -381,13 +392,14 @@ async function FetchEventData({ id }: { id: number }) {
                     </div>
                     <div className="mt-3 flex flex-col gap-1">
                       <p className="font-medium text-foreground">
-                        {theme.themeTitle || "Chưa có tên chủ đề"}
+                        {theme.themeTitle || "Chua co ten chu de"}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {theme.themeSlug || "Chưa có slug"}
+                        {theme.themeSlug || "Chua co slug"}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        Trọng số: {typeof theme.weight === "number" ? theme.weight.toFixed(2) : "Chưa có"}
+                        Trong so:{" "}
+                        {typeof theme.weight === "number" ? theme.weight.toFixed(2) : "Chua co"}
                       </p>
                     </div>
                   </div>
@@ -395,8 +407,8 @@ async function FetchEventData({ id }: { id: number }) {
               </div>
             ) : (
               <SectionEmpty
-                title="Chưa có chủ đề liên quan"
-                description="Sự kiện này chưa có liên kết chủ đề trong dữ liệu hiện tại."
+                title="Chua co chu de lien quan"
+                description="Su kien nay chua co lien ket chu de trong du lieu hien tai."
               />
             )}
           </section>
@@ -405,7 +417,7 @@ async function FetchEventData({ id }: { id: number }) {
             <div className="flex items-center gap-2">
               <GitBranch className="h-4 w-4 text-muted-foreground" />
               <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                Bài viết bằng chứng
+                Bang chung
               </h2>
             </div>
 
@@ -413,15 +425,15 @@ async function FetchEventData({ id }: { id: number }) {
               <div className="flex flex-col gap-3">
                 {evidenceItems.map((evidence, index) => (
                   <div
-                    key={`${evidence.sourceDocumentId ?? "evidence"}-${index}`}
+                    key={`${evidence.artifactId ?? "evidence"}-${index}`}
                     className="rounded-lg border border-border bg-muted/20 p-4"
                   >
                     <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
                       <div className="flex flex-col gap-2">
                         <div className="flex flex-wrap items-center gap-2">
-                          {evidence.documentType ? (
+                          {evidence.artifactType ? (
                             <Badge variant="outline">
-                              {SOURCE_DOCUMENT_TYPE_LABELS[evidence.documentType]}
+                              {ARTIFACT_TYPE_LABELS[evidence.artifactType]}
                             </Badge>
                           ) : null}
                           {evidence.evidenceRole ? (
@@ -431,14 +443,12 @@ async function FetchEventData({ id }: { id: number }) {
                           ) : null}
                         </div>
                         <p className="font-medium text-foreground">
-                          {evidence.sourceDocumentTitle || "Chưa có tiêu đề tài liệu"}
+                          {evidence.artifactTitle || "Chua co tieu de tu lieu"}
                         </p>
                         <div className="flex flex-col gap-1 text-sm text-muted-foreground">
-                          <span>Nguồn: {evidence.sourceName || "Chưa có"}</span>
-                          <span>Xuất bản: {formatDateTime(evidence.publishedAt)}</span>
-                          <span>
-                            Độ tin cậy: {typeof evidence.confidence === "number" ? `${Math.round(evidence.confidence * 100)}%` : "Chưa có"}
-                          </span>
+                          <span>Nguon tin: {evidence.newsOutletName || "Chua co"}</span>
+                          <span>Xuat ban: {formatDateTime(evidence.publishedAt)}</span>
+                          <span>Do tin cay: {formatConfidence(evidence.confidence)}</span>
                         </div>
                         {evidence.evidenceNote?.trim() ? (
                           <p className="whitespace-pre-wrap text-sm text-foreground/90">
@@ -448,23 +458,21 @@ async function FetchEventData({ id }: { id: number }) {
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2">
-                        {typeof evidence.sourceDocumentId === "number" ? (
+                        {typeof evidence.artifactId === "number" &&
+                        isNewsArticleArtifact(evidence.artifactType) &&
+                        canReadNewsArticles ? (
                           <Button variant="outline" size="sm" asChild>
-                            <Link href={`/source-documents/${evidence.sourceDocumentId}`}>
+                            <Link href={`/news-articles/${evidence.artifactId}`}>
                               <FileText className="h-4 w-4" data-icon="inline-start" />
-                              Xem tài liệu
+                              Xem bai viet
                             </Link>
                           </Button>
                         ) : null}
-                        {evidence.sourceDocumentUrl ? (
+                        {evidence.artifactUrl ? (
                           <Button variant="outline" size="sm" asChild>
-                            <a
-                              href={evidence.sourceDocumentUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
+                            <a href={evidence.artifactUrl} target="_blank" rel="noopener noreferrer">
                               <ExternalLink className="h-4 w-4" data-icon="inline-start" />
-                              Mở liên kết gốc
+                              Mo lien ket goc
                             </a>
                           </Button>
                         ) : null}
@@ -475,8 +483,8 @@ async function FetchEventData({ id }: { id: number }) {
               </div>
             ) : (
               <SectionEmpty
-                title="Chưa có bằng chứng"
-                description="Sự kiện này chưa có bài viết bằng chứng trong dữ liệu hiện tại."
+                title="Chua co bang chung"
+                description="Su kien nay chua co bang chung chi tiet trong du lieu hien tai."
               />
             )}
           </section>
