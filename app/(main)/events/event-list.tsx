@@ -15,11 +15,16 @@ import {
   AppListToolbarLeading,
   AppListToolbarTrailing,
 } from "@/components/app-list-toolbar"
+import {
+  AppListTable,
+  AppListTableEmptyState,
+  AppListTableHead,
+  AppListTableHeaderRow,
+} from "@/components/app-list-table"
 import { AppSelectPageSize } from "@/components/app-select-page-size"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
-  Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
@@ -93,20 +98,20 @@ export function EventList({ eventPage }: EventListProps) {
         </AppListToolbarTrailing>
       </AppListToolbar>
 
-      <div className="rounded-md border border-border bg-card">
+      <AppListTable>
         <Table>
           <TableHeader>
-            <TableRow className="border-border hover:bg-transparent">
-              <TableHead className="font-semibold text-foreground">Sự kiện</TableHead>
-              <TableHead className="font-semibold text-foreground">Trạng thái</TableHead>
-              <TableHead className="font-semibold text-foreground">Thời gian</TableHead>
-              <TableHead className="font-semibold text-foreground">
+            <AppListTableHeaderRow>
+              <AppListTableHead>Sự kiện</AppListTableHead>
+              <AppListTableHead>Trạng thái</AppListTableHead>
+              <AppListTableHead>Thời gian</AppListTableHead>
+              <AppListTableHead>
                 Độ tin cậy
-              </TableHead>
-              <TableHead className="text-right font-semibold text-foreground">
+              </AppListTableHead>
+              <AppListTableHead className="text-right">
                 Thao tác
-              </TableHead>
-            </TableRow>
+              </AppListTableHead>
+            </AppListTableHeaderRow>
           </TableHeader>
           <TableBody>
             {events.length > 0 ? (
@@ -180,25 +185,21 @@ export function EventList({ eventPage }: EventListProps) {
                 </TableRow>
               ))
             ) : (
-              <TableRow>
-                <TableCell colSpan={5} className="py-24 text-center">
-                  <Empty>
-                    <EmptyHeader>
-                      <EmptyMedia variant="icon">
-                        <GitBranch className="text-muted-foreground" />
-                      </EmptyMedia>
-                      <EmptyTitle>Chưa có sự kiện</EmptyTitle>
-                      <EmptyDescription>
-                        Không có sự kiện nào khớp với bộ lọc hiện tại.
-                      </EmptyDescription>
-                    </EmptyHeader>
-                  </Empty>
-                </TableCell>
-              </TableRow>
+              <AppListTableEmptyState colSpan={5}>
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <GitBranch className="text-muted-foreground" />
+                  </EmptyMedia>
+                  <EmptyTitle>Chưa có sự kiện</EmptyTitle>
+                  <EmptyDescription>
+                    Không có sự kiện nào khớp với bộ lọc hiện tại.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </AppListTableEmptyState>
             )}
           </TableBody>
         </Table>
-      </div>
+      </AppListTable>
 
       <AppPaginationControls page={eventPage} className="mt-4" />
     </div>

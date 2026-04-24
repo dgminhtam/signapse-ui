@@ -106,7 +106,7 @@ The first wave should target active list pages that users can currently reach an
 Recommended first-wave pages:
 
 - `app/(main)/events/event-list.tsx`
-- `app/(main)/source-documents/source-document-list.tsx`
+- `app/(main)/news-articles/news-article-list.tsx`
 - `app/(main)/news-outlets/news-outlet-list.tsx`
 - `app/(main)/ai-provider-configs/ai-provider-config-list.tsx`
 - `app/(main)/blogs/blog-list.tsx`
@@ -116,7 +116,7 @@ Recommended first-wave pages:
 Deferred in first wave:
 
 - `topics`, because the route is currently hidden
-- legacy `sources`, because the page redirects to `news-outlets`
+- legacy `sources` and `source-documents`, because those routes now redirect to canon surfaces
 
 ## Risks / Trade-offs
 

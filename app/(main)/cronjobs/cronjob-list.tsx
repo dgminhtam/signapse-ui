@@ -3,22 +3,31 @@
 import { CronjobListResponse } from "@/app/lib/cronjobs/definitions"
 import { Page } from "@/app/lib/definitions"
 import { AppPaginationControls } from "@/components/app-pagination-controls"
+import {
+  AppListToolbar,
+  AppListToolbarLeading,
+  AppListToolbarTrailing,
+} from "@/components/app-list-toolbar"
+import {
+  AppListTable,
+  AppListTableEmptyState,
+  AppListTableHead,
+  AppListTableHeaderRow,
+} from "@/components/app-list-table"
+import { AppSelectPageSize } from "@/components/app-select-page-size"
 import { useHasPermission } from "@/components/permission-provider"
 import { SortSelect } from "@/components/sort-select"
 import { CronjobSearch } from "./cronjob-search"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
 import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
 import {
-  Empty,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
@@ -72,7 +81,7 @@ function getStatusBadge(status: string | undefined) {
           variant="default"
           className="gap-1 bg-green-500/10 text-green-700 dark:text-green-400"
         >
-          <Play className="h-3 w-3" /> Running
+          <Play className="h-3 w-3" /> Đang chạy
         </Badge>
       )
     case "PAUSED":
@@ -81,7 +90,7 @@ function getStatusBadge(status: string | undefined) {
           variant="secondary"
           className="gap-1 bg-yellow-500/10 text-yellow-700 dark:text-yellow-400"
         >
-          <Pause className="h-3 w-3" /> Paused
+          <Pause className="h-3 w-3" /> Tạm dừng
         </Badge>
       )
     case "COMPLETE":
@@ -90,7 +99,7 @@ function getStatusBadge(status: string | undefined) {
           variant="secondary"
           className="gap-1 bg-blue-500/10 text-blue-700 dark:text-blue-400"
         >
-          <CheckCircle className="h-3 w-3" /> Completed
+          <CheckCircle className="h-3 w-3" /> Hoàn tất
         </Badge>
       )
     case "SCHEDULED":
@@ -99,7 +108,7 @@ function getStatusBadge(status: string | undefined) {
           variant="secondary"
           className="gap-1 bg-gray-500/10 text-gray-700 dark:text-gray-400"
         >
-          <Clock className="h-3 w-3" /> Scheduled
+          <Clock className="h-3 w-3" /> Đã lên lịch
         </Badge>
       )
     default:
@@ -119,136 +128,128 @@ export function CronjobListPage({ cronjobPage }: CronjobListProps) {
 
   return (
     <div className="w-full">
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex w-full flex-1 items-center gap-4 sm:w-auto">
+      <AppListToolbar>
+        <AppListToolbarLeading>
           {canCreateCronjob ? (
             <Button asChild>
               <Link href="/cronjobs/create">
-                <Plus data-icon="inline-start" /> Create new cronjob
+                <Plus data-icon="inline-start" />
+                Tạo cronjob
               </Link>
             </Button>
           ) : null}
           <CronjobSearch />
-        </div>
-        <div className="flex items-center gap-2">
+        </AppListToolbarLeading>
+        <AppListToolbarTrailing>
           <SortSelect
+            className="w-full sm:w-auto"
             options={[
-              { label: "Latest", value: "id_desc" },
-              { label: "Oldest", value: "id_asc" },
-              { label: "Name (A-Z)", value: "jobName_asc" },
-              { label: "Name (Z-A)", value: "jobName_desc" },
+              { label: "Mới nhất", value: "id_desc" },
+              { label: "Cũ hơn", value: "id_asc" },
+              { label: "Tên A-Z", value: "jobName_asc" },
+              { label: "Tên Z-A", value: "jobName_desc" },
             ]}
+            triggerClassName="w-full sm:w-[200px]"
           />
-        </div>
-      </div>
+          <AppSelectPageSize
+            className="w-full sm:w-auto"
+            defaultSize={cronjobPage.size}
+            showLabel={false}
+            triggerClassName="w-full sm:w-[120px]"
+          />
+        </AppListToolbarTrailing>
+      </AppListToolbar>
 
-      <div className="space-y-4">
-        <Card className="overflow-hidden border-border bg-card">
-          <Table>
-            <TableHeader>
-              <TableRow className="border-border hover:bg-transparent">
-                <TableHead className="font-semibold text-foreground">
-                  Job Name
-                </TableHead>
-                <TableHead className="text-center font-semibold text-foreground">
-                  Group
-                </TableHead>
-                <TableHead className="text-center font-semibold text-foreground">
-                  Status
-                </TableHead>
-                <TableHead className="text-center font-semibold text-foreground">
-                  Cron Expression
-                </TableHead>
-                <TableHead className="text-center font-semibold text-foreground">
-                  Next Execution
-                </TableHead>
-                <TableHead className="text-center font-semibold text-foreground">
-                  Actions
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {cronjobs.length > 0 ? (
-                cronjobs.map((cronjob) => (
-                  <TableRow
-                    key={cronjob.id}
-                    className="border-border transition-colors hover:bg-muted/50"
-                  >
-                    <TableCell className="font-medium text-foreground">
-                      <Link href={`/cronjobs/${cronjob.id}`}>
-                        {cronjob.jobName}
-                      </Link>
-                      {cronjob.description && (
-                        <>
-                          <br />
-                          <span className="block max-w-[250px] truncate text-xs text-muted-foreground">
-                            {cronjob.description}
-                          </span>
-                        </>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-center text-muted-foreground">
-                      {cronjob.jobGroup}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {getStatusBadge(cronjob.jobStatus)}
-                    </TableCell>
-                    <TableCell className="text-center font-mono text-sm text-muted-foreground">
-                      {cronjob.cronExpression}
-                    </TableCell>
-                    <TableCell className="text-center text-sm text-muted-foreground">
-                      {cronjob.nextTriggeredTime
-                        ? format(
-                            new Date(cronjob.nextTriggeredTime),
-                            "dd/MM/yyyy HH:mm"
-                          )
-                        : "-"}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <div className="flex items-center justify-center gap-1">
-                        <StatusActions
-                          id={cronjob.id}
-                          status={cronjob.jobStatus}
-                        />
-                        {canUpdateCronjob ? (
-                          <Button
-                            asChild
-                            variant="ghost"
-                            size="icon"
-                            className="text-muted-foreground hover:text-foreground"
-                            title="Edit"
-                          >
-                            <Link href={`/cronjobs/${cronjob.id}`}>
-                              <Edit2 />
-                            </Link>
-                          </Button>
-                        ) : null}
-                        {canDeleteCronjob ? <DeleteCronjobButton id={cronjob.id} /> : null}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={6} className="py-12">
-                    <Empty>
-                      <EmptyHeader>
-                        <EmptyMedia variant="icon">
-                          <FileClock />
-                        </EmptyMedia>
-                        <EmptyTitle>No cronjobs found</EmptyTitle>
-                        <EmptyDescription>
-                          Create your first cronjob to get started.
-                        </EmptyDescription>
-                      </EmptyHeader>
-                    </Empty>
+      <AppListTable>
+        <Table>
+          <TableHeader>
+            <AppListTableHeaderRow>
+              <AppListTableHead>Tên tác vụ</AppListTableHead>
+              <AppListTableHead className="text-center">Nhóm</AppListTableHead>
+              <AppListTableHead className="text-center">Trạng thái</AppListTableHead>
+              <AppListTableHead className="text-center">Biểu thức cron</AppListTableHead>
+              <AppListTableHead className="text-center">Lần chạy kế tiếp</AppListTableHead>
+              <AppListTableHead className="text-center">Thao tác</AppListTableHead>
+            </AppListTableHeaderRow>
+          </TableHeader>
+          <TableBody>
+            {cronjobs.length > 0 ? (
+              cronjobs.map((cronjob) => (
+                <TableRow
+                  key={cronjob.id}
+                  className="border-border transition-colors hover:bg-muted/50"
+                >
+                  <TableCell className="font-medium text-foreground">
+                    <Link href={`/cronjobs/${cronjob.id}`}>
+                      {cronjob.jobName}
+                    </Link>
+                    {cronjob.description && (
+                      <>
+                        <br />
+                        <span className="block max-w-[250px] truncate text-xs text-muted-foreground">
+                          {cronjob.description}
+                        </span>
+                      </>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-center text-muted-foreground">
+                    {cronjob.jobGroup}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {getStatusBadge(cronjob.jobStatus)}
+                  </TableCell>
+                  <TableCell className="text-center font-mono text-sm text-muted-foreground">
+                    {cronjob.cronExpression}
+                  </TableCell>
+                  <TableCell className="text-center text-sm text-muted-foreground">
+                    {cronjob.nextTriggeredTime
+                      ? format(
+                          new Date(cronjob.nextTriggeredTime),
+                          "dd/MM/yyyy HH:mm"
+                        )
+                      : "-"}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <div className="flex items-center justify-center gap-1">
+                      <StatusActions
+                        id={cronjob.id}
+                        status={cronjob.jobStatus}
+                      />
+                      {canUpdateCronjob ? (
+                        <Button
+                          asChild
+                          variant="ghost"
+                          size="icon"
+                          className="text-muted-foreground hover:text-foreground"
+                          title="Chỉnh sửa cronjob"
+                        >
+                          <Link href={`/cronjobs/${cronjob.id}`}>
+                            <Edit2 />
+                            <span className="sr-only">Chỉnh sửa cronjob</span>
+                          </Link>
+                        </Button>
+                      ) : null}
+                      {canDeleteCronjob ? <DeleteCronjobButton id={cronjob.id} /> : null}
+                    </div>
                   </TableCell>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </Card>
-      </div>
+              ))
+            ) : (
+              <AppListTableEmptyState colSpan={6}>
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <FileClock />
+                  </EmptyMedia>
+                  <EmptyTitle>Chưa có cronjob</EmptyTitle>
+                  <EmptyDescription>
+                    Tạo cronjob đầu tiên để bắt đầu quản lý lịch chạy hệ thống.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </AppListTableEmptyState>
+            )}
+          </TableBody>
+        </Table>
+      </AppListTable>
 
       <AppPaginationControls page={cronjobPage} className="mt-4" />
     </div>
@@ -266,10 +267,10 @@ function StatusActions({ id, status }: { id: number; status: string }) {
     startTransition(async () => {
       const result = await startCronjob(id)
       if (result.success) {
-        toast.success("Cronjob started successfully")
+        toast.success("Đã khởi chạy cronjob.")
         router.refresh()
       } else {
-        toast.error(result.error || "Failed to start cronjob")
+        toast.error(result.error || "Không thể khởi chạy cronjob.")
       }
     })
   }
@@ -278,10 +279,10 @@ function StatusActions({ id, status }: { id: number; status: string }) {
     startTransition(async () => {
       const result = await pauseCronjob(id)
       if (result.success) {
-        toast.success("Cronjob paused successfully")
+        toast.success("Đã tạm dừng cronjob.")
         router.refresh()
       } else {
-        toast.error(result.error || "Failed to pause cronjob")
+        toast.error(result.error || "Không thể tạm dừng cronjob.")
       }
     })
   }
@@ -290,10 +291,10 @@ function StatusActions({ id, status }: { id: number; status: string }) {
     startTransition(async () => {
       const result = await resumeCronjob(id)
       if (result.success) {
-        toast.success("Cronjob resumed successfully")
+        toast.success("Đã tiếp tục cronjob.")
         router.refresh()
       } else {
-        toast.error(result.error || "Failed to resume cronjob")
+        toast.error(result.error || "Không thể tiếp tục cronjob.")
       }
     })
   }
@@ -309,11 +310,12 @@ function StatusActions({ id, status }: { id: number; status: string }) {
               variant="ghost"
               size="icon"
               className="h-8 w-8 text-green-600 hover:bg-green-500/10 hover:text-green-700"
-              title="Start"
+              title="Khởi chạy"
               disabled={isPending}
               onClick={handleStart}
             >
               {isPending ? <Spinner className="size-4" /> : <Play className="h-4 w-4" />}
+              <span className="sr-only">Khởi chạy</span>
             </Button>
           ) : null}
           {canPauseCronjob ? (
@@ -321,11 +323,12 @@ function StatusActions({ id, status }: { id: number; status: string }) {
               variant="ghost"
               size="icon"
               className="h-8 w-8 text-yellow-600 hover:bg-yellow-500/10 hover:text-yellow-700"
-              title="Pause"
+              title="Tạm dừng"
               disabled={isPending}
               onClick={handlePause}
             >
               {isPending ? <Spinner className="size-4" /> : <Pause className="h-4 w-4" />}
+              <span className="sr-only">Tạm dừng</span>
             </Button>
           ) : null}
         </div>
@@ -335,7 +338,7 @@ function StatusActions({ id, status }: { id: number; status: string }) {
           variant="ghost"
           size="icon"
           className="h-8 w-8 text-blue-600 hover:bg-blue-500/10 hover:text-blue-700"
-          title="Resume"
+          title="Tiếp tục"
           disabled={isPending}
           onClick={handleResume}
         >
@@ -344,6 +347,7 @@ function StatusActions({ id, status }: { id: number; status: string }) {
           ) : (
             <RotateCcw className="h-4 w-4" />
           )}
+          <span className="sr-only">Tiếp tục</span>
         </Button>
       ) : null}
     </>
@@ -359,11 +363,11 @@ function DeleteCronjobButton({ id }: { id: number }) {
     startTransition(async () => {
       const result = await deleteCronjob(id)
       if (result.success) {
-        toast.success("Cronjob deleted successfully")
+        toast.success("Đã xóa cronjob.")
         setOpen(false)
         router.refresh()
       } else {
-        toast.error(result.error || "Failed to delete cronjob")
+        toast.error(result.error || "Không thể xóa cronjob.")
       }
     })
   }
@@ -375,21 +379,22 @@ function DeleteCronjobButton({ id }: { id: number }) {
           variant="ghost"
           size="icon"
           className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-          title="Delete"
+          title="Xóa cronjob"
         >
           <Trash2 />
+          <span className="sr-only">Xóa cronjob</span>
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogTitle>Bạn có chắc chắn muốn xóa?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete the
-            cronjob from the system.
+            Hành động này không thể hoàn tác. Cronjob đã chọn sẽ bị xóa vĩnh viễn
+            khỏi hệ thống.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending}>Hủy</AlertDialogCancel>
           <AlertDialogAction
             onClick={(e) => {
               e.preventDefault()
@@ -398,7 +403,7 @@ function DeleteCronjobButton({ id }: { id: number }) {
             disabled={isPending}
             className="bg-red-500 hover:bg-red-600"
           >
-            {isPending ? "Deleting..." : "Delete"}
+            {isPending ? "Đang xóa..." : "Xóa cronjob"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -7,10 +7,15 @@ import {
   PermissionResponse,
   RoleResponse,
 } from "@/app/lib/roles/definitions"
+import {
+  AppListTable,
+  AppListTableEmptyState,
+  AppListTableHead,
+  AppListTableHeaderRow,
+} from "@/components/app-list-table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
-  Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
@@ -43,20 +48,16 @@ export function RoleListPage({ roles, permissions }: RoleListPageProps) {
 
   return (
     <>
-      <div className="rounded-md border border-border bg-card">
+      <AppListTable>
         <Table>
           <TableHeader>
-            <TableRow className="border-border bg-muted/40">
-              <TableHead className="font-semibold text-foreground">Vai trò</TableHead>
-              <TableHead className="font-semibold text-foreground">Key</TableHead>
-              <TableHead className="font-semibold text-foreground">Mô tả</TableHead>
-              <TableHead className="text-center font-semibold text-foreground">
-                Quyền
-              </TableHead>
-              <TableHead className="text-right font-semibold text-foreground">
-                Thao tác
-              </TableHead>
-            </TableRow>
+            <AppListTableHeaderRow>
+              <AppListTableHead>Vai trò</AppListTableHead>
+              <AppListTableHead>Key</AppListTableHead>
+              <AppListTableHead>Mô tả</AppListTableHead>
+              <AppListTableHead className="text-center">Quyền</AppListTableHead>
+              <AppListTableHead className="text-right">Thao tác</AppListTableHead>
+            </AppListTableHeaderRow>
           </TableHeader>
           <TableBody>
             {roles.length > 0 ? (
@@ -95,25 +96,21 @@ export function RoleListPage({ roles, permissions }: RoleListPageProps) {
                 </TableRow>
               ))
             ) : (
-              <TableRow>
-                <TableCell colSpan={5} className="py-24">
-                  <Empty>
-                    <EmptyHeader>
-                      <EmptyMedia variant="icon">
-                        <Shield />
-                      </EmptyMedia>
-                      <EmptyTitle>Chưa có vai trò nào</EmptyTitle>
-                      <EmptyDescription>
-                        Hệ thống chưa trả về vai trò nào để bạn quản trị quyền truy cập.
-                      </EmptyDescription>
-                    </EmptyHeader>
-                  </Empty>
-                </TableCell>
-              </TableRow>
+              <AppListTableEmptyState colSpan={5}>
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <Shield />
+                  </EmptyMedia>
+                  <EmptyTitle>Chưa có vai trò nào</EmptyTitle>
+                  <EmptyDescription>
+                    Hệ thống chưa trả về vai trò nào để bạn quản trị quyền truy cập.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </AppListTableEmptyState>
             )}
           </TableBody>
         </Table>
-      </div>
+      </AppListTable>
 
       <RolePermissionDialog
         role={selectedRole}

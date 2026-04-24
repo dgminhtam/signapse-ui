@@ -16,11 +16,16 @@ import {
   AppListToolbarLeading,
   AppListToolbarTrailing,
 } from "@/components/app-list-toolbar"
+import {
+  AppListTable,
+  AppListTableEmptyState,
+  AppListTableHead,
+  AppListTableHeaderRow,
+} from "@/components/app-list-table"
 import { AppSelectPageSize } from "@/components/app-select-page-size"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
-  Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
@@ -47,7 +52,7 @@ interface NewsArticleListProps {
 
 function formatDateTime(value?: string) {
   if (!value) {
-    return "Chua co"
+    return "Chưa có"
   }
 
   return format(new Date(value), "dd/MM/yyyy HH:mm")
@@ -67,10 +72,10 @@ export function NewsArticleList({ newsArticlePage }: NewsArticleListProps) {
           <SortSelect
             className="w-full sm:w-auto"
             options={[
-              { label: "Moi nhat", value: "publishedAt_desc" },
-              { label: "Cu nhat", value: "publishedAt_asc" },
-              { label: "Ngay tao", value: "createdDate_desc" },
-              { label: "Tieu de A-Z", value: "title_asc" },
+              { label: "Mới nhất", value: "publishedAt_desc" },
+              { label: "Cũ nhất", value: "publishedAt_asc" },
+              { label: "Ngày tạo", value: "createdDate_desc" },
+              { label: "Tiêu đề A-Z", value: "title_asc" },
             ]}
             triggerClassName="w-full sm:w-[200px]"
           />
@@ -83,18 +88,16 @@ export function NewsArticleList({ newsArticlePage }: NewsArticleListProps) {
         </AppListToolbarTrailing>
       </AppListToolbar>
 
-      <div className="rounded-md border border-border bg-card">
+      <AppListTable>
         <Table>
           <TableHeader>
-            <TableRow className="border-border hover:bg-transparent">
-              <TableHead className="font-semibold text-foreground">Bai viet</TableHead>
-              <TableHead className="font-semibold text-foreground">Nguon tin</TableHead>
-              <TableHead className="font-semibold text-foreground">Thoi gian</TableHead>
-              <TableHead className="font-semibold text-foreground">Trang thai</TableHead>
-              <TableHead className="text-right font-semibold text-foreground">
-                Thao tac
-              </TableHead>
-            </TableRow>
+            <AppListTableHeaderRow>
+              <AppListTableHead>Bài viết</AppListTableHead>
+              <AppListTableHead>Nguồn tin</AppListTableHead>
+              <AppListTableHead>Thời gian</AppListTableHead>
+              <AppListTableHead>Trạng thái</AppListTableHead>
+              <AppListTableHead className="text-right">Thao tác</AppListTableHead>
+            </AppListTableHeaderRow>
           </TableHeader>
           <TableBody>
             {articles.length > 0 ? (
@@ -112,12 +115,12 @@ export function NewsArticleList({ newsArticlePage }: NewsArticleListProps) {
                         {article.title}
                       </Link>
                       <span className="line-clamp-2 text-xs text-muted-foreground">
-                        {article.description?.trim() || "Chua co mo ta ngan."}
+                        {article.description?.trim() || "Chưa có mô tả ngắn."}
                       </span>
                     </div>
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
-                    {article.newsOutletName?.trim() || "Chua co nguon tin"}
+                    {article.newsOutletName?.trim() || "Chưa có nguồn tin"}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     <div className="flex flex-col gap-1">
@@ -126,7 +129,7 @@ export function NewsArticleList({ newsArticlePage }: NewsArticleListProps) {
                         <span>{formatDateTime(article.publishedAt)}</span>
                       </div>
                       <span className="text-xs text-muted-foreground">
-                        Tao luc {formatDateTime(article.createdDate)}
+                        Tạo lúc {formatDateTime(article.createdDate)}
                       </span>
                     </div>
                   </TableCell>
@@ -145,7 +148,7 @@ export function NewsArticleList({ newsArticlePage }: NewsArticleListProps) {
                       >
                         <Link href={`/news-articles/${article.id}`}>
                           <Eye data-icon="inline-start" />
-                          <span className="sr-only">Xem chi tiet</span>
+                          <span className="sr-only">Xem chi tiết</span>
                         </Link>
                       </Button>
                       <NewsArticleAnalyzeButton id={article.id} />
@@ -157,7 +160,7 @@ export function NewsArticleList({ newsArticlePage }: NewsArticleListProps) {
                       >
                         <a href={article.url} target="_blank" rel="noopener noreferrer">
                           <ExternalLink data-icon="inline-start" />
-                          <span className="sr-only">Mo lien ket goc</span>
+                          <span className="sr-only">Mở liên kết gốc</span>
                         </a>
                       </Button>
                       <NewsArticleDeleteButton id={article.id} title={article.title} />
@@ -166,25 +169,21 @@ export function NewsArticleList({ newsArticlePage }: NewsArticleListProps) {
                 </TableRow>
               ))
             ) : (
-              <TableRow>
-                <TableCell colSpan={5} className="py-24 text-center">
-                  <Empty>
-                    <EmptyHeader>
-                      <EmptyMedia variant="icon">
-                        <Newspaper className="text-muted-foreground" />
-                      </EmptyMedia>
-                      <EmptyTitle>Chua co bai viet tin tuc</EmptyTitle>
-                      <EmptyDescription>
-                        Khong co bai viet nao khop voi bo loc hien tai.
-                      </EmptyDescription>
-                    </EmptyHeader>
-                  </Empty>
-                </TableCell>
-              </TableRow>
+              <AppListTableEmptyState colSpan={5}>
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <Newspaper className="text-muted-foreground" />
+                  </EmptyMedia>
+                  <EmptyTitle>Chưa có bài viết tin tức</EmptyTitle>
+                  <EmptyDescription>
+                    Không có bài viết nào khớp với bộ lọc hiện tại.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </AppListTableEmptyState>
             )}
           </TableBody>
         </Table>
-      </div>
+      </AppListTable>
 
       <AppPaginationControls page={newsArticlePage} className="mt-4" />
     </div>

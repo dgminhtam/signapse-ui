@@ -100,6 +100,13 @@ app/(main)/[feature]/
 - Page size selector thuộc cụm controls bên phải, không đặt lại trong footer phân trang
 - Dùng `flex-col sm:flex-row sm:justify-between` để responsive
 
+### Bề mặt bảng danh sách
+
+- Trang list dùng bảng phải bọc phần table trong shared surface ngoài `components/ui`, không lồng thêm `Card` chỉ để lấy border, radius hoặc clipping
+- Header của bảng list phải dùng cùng một treatment nền, border và bo góc thông qua shared table surface; không tự pha trộn kiểu `plain`, `bg-muted` và shell riêng theo từng page
+- Empty state trong bảng phải dùng `<Empty>` bên trong một shared empty row của table, không tự đặt `py-12`, `py-24` hoặc wrapper rời theo từng trang
+- Skeleton của bảng list phải bám đúng shell, header treatment và footer của bảng thật; không dựng loading header bar khác với UI cuối
+
 ### Yêu cầu UX
 
 - Nút Submit và Lưu phải hiển thị `<Spinner>` trong lúc pending
@@ -126,10 +133,11 @@ app/(main)/[feature]/
 
 - Review theo các rule trong file này, không dựa trên metadata Claude cũ
 - Kiểm tra trang danh sách có Card shell, toolbar đúng bố cục và loading feedback phù hợp
+- Kiểm tra bảng list dùng shared table surface nhất quán cho shell, header và empty state
 - Kiểm tra trang chi tiết có flow quay lại chuẩn và cấu trúc Card nhất quán
 - Kiểm tra mutation có xử lý kiểu `ActionResult`, có pending state, spinner và disable control đúng lúc
 - Kiểm tra action xóa có dùng `AlertDialog`
-- Đánh dấu `any`, skeleton lệch bố cục và UI copy không phải tiếng Việt là review finding
+- Đánh dấu `any`, skeleton lệch bố cục, table surface drift và UI copy không phải tiếng Việt là review finding
 
 ## Biến môi trường
 
@@ -159,6 +167,7 @@ Trước khi đánh dấu một feature là xong:
 - [ ] `page.tsx` có `Suspense` với `Skeleton` bám sát bố cục thật
 - [ ] Có `error.tsx` để xử lý local server error
 - [ ] Search tuân thủ quy ước search list trong file này
+- [ ] Bảng list dùng shared table surface cho shell, header và empty state
 - [ ] Toàn bộ UI text là tiếng Việt chuyên nghiệp
 - [ ] Nút Submit và Lưu có `Spinner` và trạng thái disabled
 - [ ] Action xóa dùng `AlertDialog`

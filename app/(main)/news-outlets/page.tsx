@@ -9,6 +9,11 @@ import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { buildFilterQuery, buildSortQuery } from "@/app/lib/utils"
 import { AccessDenied } from "@/components/access-denied"
 import {
+  AppListTable,
+  AppListTableHead,
+  AppListTableHeaderRow,
+} from "@/components/app-list-table"
+import {
   Card,
   CardContent,
   CardDescription,
@@ -17,6 +22,11 @@ import {
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
+import {
+  TableCell,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 import { NewsOutletListPage } from "./news-outlet-list"
 
@@ -110,33 +120,49 @@ function ListSkeleton() {
         </div>
       </div>
 
-      <div className="rounded-md border">
-        <div className="flex h-10 items-center justify-between gap-4 border-b bg-muted/50 px-4">
-          <Skeleton className="h-4 w-1/3" />
-          <Skeleton className="h-4 w-20" />
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-4 w-20" />
-          <Skeleton className="ml-auto h-4 w-20" />
-        </div>
-        {[...Array(5)].map((_, index) => (
-          <div
-            key={index}
-            className="flex h-20 items-center justify-between gap-4 border-b px-4 last:border-0"
-          >
-            <div className="flex w-1/3 flex-col gap-2">
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-3 w-full" />
-            </div>
-            <Skeleton className="h-6 w-24 rounded" />
-            <Skeleton className="h-4 w-28" />
-            <Skeleton className="h-5 w-10 rounded-full" />
-            <div className="ml-auto flex gap-2">
-              <Skeleton className="h-8 w-8 rounded-full" />
-              <Skeleton className="h-8 w-8 rounded-full" />
-            </div>
-          </div>
-        ))}
-      </div>
+      <AppListTable>
+        <table className="w-full caption-bottom text-sm">
+          <TableHeader>
+            <AppListTableHeaderRow>
+              <AppListTableHead>Nguồn tin</AppListTableHead>
+              <AppListTableHead>Slug</AppListTableHead>
+              <AppListTableHead>Tạo lúc</AppListTableHead>
+              <AppListTableHead className="text-center">Kích hoạt</AppListTableHead>
+              <AppListTableHead className="text-center">Thao tác</AppListTableHead>
+            </AppListTableHeaderRow>
+          </TableHeader>
+          <tbody className="[&_tr:last-child]:border-0">
+            {[...Array(5)].map((_, index) => (
+              <TableRow key={index} className="hover:bg-transparent">
+                <TableCell>
+                  <div className="flex max-w-xl flex-col gap-2">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-3 w-5/6" />
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-6 w-24 rounded" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-28" />
+                </TableCell>
+                <TableCell className="text-center">
+                  <div className="flex justify-center">
+                    <Skeleton className="h-5 w-10 rounded-full" />
+                  </div>
+                </TableCell>
+                <TableCell className="text-center">
+                  <div className="flex justify-center gap-2">
+                    <Skeleton className="h-8 w-8 rounded-full" />
+                    <Skeleton className="h-8 w-8 rounded-full" />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </tbody>
+        </table>
+      </AppListTable>
 
       <div className="flex flex-col gap-3 rounded-xl border border-border/60 bg-muted/20 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-2">

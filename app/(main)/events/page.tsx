@@ -7,6 +7,11 @@ import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { buildFilterQuery, buildSortQuery } from "@/app/lib/utils"
 import { AccessDenied } from "@/components/access-denied"
 import {
+  AppListTable,
+  AppListTableHead,
+  AppListTableHeaderRow,
+} from "@/components/app-list-table"
+import {
   Card,
   CardContent,
   CardDescription,
@@ -119,16 +124,16 @@ function EventListSkeleton() {
         </div>
       </div>
 
-      <div className="rounded-md border">
+      <AppListTable>
         <Table>
           <TableHeader>
-            <TableRow className="hover:bg-transparent">
-              <TableHead className="w-[360px]">Sự kiện</TableHead>
-              <TableHead>Trạng thái</TableHead>
-              <TableHead>Thời gian</TableHead>
-              <TableHead>Độ tin cậy</TableHead>
-              <TableHead className="text-right">Thao tác</TableHead>
-            </TableRow>
+            <AppListTableHeaderRow>
+              <AppListTableHead className="w-[360px]">Sự kiện</AppListTableHead>
+              <AppListTableHead>Trạng thái</AppListTableHead>
+              <AppListTableHead>Thời gian</AppListTableHead>
+              <AppListTableHead>Độ tin cậy</AppListTableHead>
+              <AppListTableHead className="text-right">Thao tác</AppListTableHead>
+            </AppListTableHeaderRow>
           </TableHeader>
           <TableBody>
             {Array.from({ length: 5 }).map((_, index) => (
@@ -165,7 +170,7 @@ function EventListSkeleton() {
             ))}
           </TableBody>
         </Table>
-      </div>
+      </AppListTable>
 
       <div className="flex flex-col gap-3 rounded-xl border border-border/60 bg-muted/20 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-2">

@@ -7,6 +7,11 @@ import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { buildFilterQuery, buildSortQuery } from "@/app/lib/utils"
 import { AccessDenied } from "@/components/access-denied"
 import {
+  AppListTable,
+  AppListTableHead,
+  AppListTableHeaderRow,
+} from "@/components/app-list-table"
+import {
   Card,
   CardContent,
   CardDescription,
@@ -37,9 +42,9 @@ export default async function NewsArticlesPage({ searchParams }: PageProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Bai viet tin tuc</CardTitle>
+          <CardTitle>Bài viết tin tức</CardTitle>
           <CardDescription>
-            Xem va quan ly danh sach bai viet tin tuc theo contract backend hien tai.
+            Xem và quản lý danh sách bài viết tin tức theo contract backend hiện tại.
           </CardDescription>
         </CardHeader>
 
@@ -47,7 +52,7 @@ export default async function NewsArticlesPage({ searchParams }: PageProps) {
 
         <CardContent className="pt-6">
           <AccessDenied
-            description="Ban khong co quyen truy cap khu vuc quan ly bai viet tin tuc."
+            description="Bạn không có quyền truy cập khu vực quản lý bài viết tin tức."
             permission={NEWS_ARTICLE_READ_PERMISSIONS[0]}
           />
         </CardContent>
@@ -63,9 +68,9 @@ export default async function NewsArticlesPage({ searchParams }: PageProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Bai viet tin tuc</CardTitle>
+        <CardTitle>Bài viết tin tức</CardTitle>
         <CardDescription>
-          Theo doi noi dung da ingest, trang thai bai viet, va cac thao tac operator
+          Theo dõi nội dung đã ingest, trạng thái bài viết và các thao tác operator
           theo surface canon `news-articles`.
         </CardDescription>
       </CardHeader>
@@ -108,26 +113,26 @@ async function NewsArticleListContent({
 function NewsArticleListSkeleton() {
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-1 gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex w-full flex-1 flex-col gap-4 sm:w-auto sm:flex-row sm:items-center">
           <Skeleton className="h-10 w-[180px]" />
           <Skeleton className="h-10 flex-1" />
         </div>
-        <div className="flex gap-2">
-          <Skeleton className="h-10 w-[200px]" />
-          <Skeleton className="h-10 w-[120px]" />
+        <div className="flex w-full flex-col gap-2 rounded-xl border border-border/60 bg-muted/20 p-2 sm:w-auto sm:flex-row sm:items-center">
+          <Skeleton className="h-8 w-full sm:w-[200px]" />
+          <Skeleton className="h-8 w-full sm:w-[120px]" />
         </div>
       </div>
-      <div className="rounded-md border">
+      <AppListTable>
         <Table>
           <TableHeader>
-            <TableRow className="hover:bg-transparent">
-              <TableHead className="w-[360px]">Bai viet</TableHead>
-              <TableHead>Nguon tin</TableHead>
-              <TableHead>Thoi gian</TableHead>
-              <TableHead>Trang thai</TableHead>
-              <TableHead className="text-right">Thao tac</TableHead>
-            </TableRow>
+            <AppListTableHeaderRow>
+              <AppListTableHead className="w-[360px]">Bài viết</AppListTableHead>
+              <AppListTableHead>Nguồn tin</AppListTableHead>
+              <AppListTableHead>Thời gian</AppListTableHead>
+              <AppListTableHead>Trạng thái</AppListTableHead>
+              <AppListTableHead className="text-right">Thao tác</AppListTableHead>
+            </AppListTableHeaderRow>
           </TableHeader>
           <TableBody>
             {Array.from({ length: 5 }).map((_, index) => (
@@ -162,6 +167,22 @@ function NewsArticleListSkeleton() {
             ))}
           </TableBody>
         </Table>
+      </AppListTable>
+
+      <div className="flex flex-col gap-3 rounded-xl border border-border/60 bg-muted/20 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <Skeleton className="h-6 w-24" />
+            <Skeleton className="h-6 w-28" />
+          </div>
+          <Skeleton className="h-4 w-56" />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Skeleton className="h-8 w-20" />
+          <Skeleton className="h-8 w-8" />
+          <Skeleton className="h-8 w-8" />
+          <Skeleton className="h-8 w-20" />
+        </div>
       </div>
     </div>
   )

@@ -32,6 +32,12 @@ import {
   AppListToolbarLeading,
   AppListToolbarTrailing,
 } from "@/components/app-list-toolbar"
+import {
+  AppListTable,
+  AppListTableEmptyState,
+  AppListTableHead,
+  AppListTableHeaderRow,
+} from "@/components/app-list-table"
 import { AppSelectPageSize } from "@/components/app-select-page-size"
 import { useHasPermission } from "@/components/permission-provider"
 import { SortSelect } from "@/components/sort-select"
@@ -48,7 +54,6 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import {
-  Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
@@ -119,24 +124,24 @@ export function NewsOutletListPage({ newsOutletPage }: NewsOutletListProps) {
         </AppListToolbarTrailing>
       </AppListToolbar>
 
-      <div className="rounded-md border border-border bg-card">
+      <AppListTable>
         <Table>
           <TableHeader>
-            <TableRow className="border-border hover:bg-transparent">
-              <TableHead className="font-semibold text-foreground">
+            <AppListTableHeaderRow>
+              <AppListTableHead>
                 Nguồn tin
-              </TableHead>
-              <TableHead className="font-semibold text-foreground">Slug</TableHead>
-              <TableHead className="font-semibold text-foreground">
+              </AppListTableHead>
+              <AppListTableHead>Slug</AppListTableHead>
+              <AppListTableHead>
                 Tạo lúc
-              </TableHead>
-              <TableHead className="text-center font-semibold text-foreground">
+              </AppListTableHead>
+              <AppListTableHead className="text-center">
                 Kích hoạt
-              </TableHead>
-              <TableHead className="text-center font-semibold text-foreground">
+              </AppListTableHead>
+              <AppListTableHead className="text-center">
                 Thao tác
-              </TableHead>
-            </TableRow>
+              </AppListTableHead>
+            </AppListTableHeaderRow>
           </TableHeader>
           <TableBody>
             {newsOutlets.length > 0 ? (
@@ -233,26 +238,22 @@ export function NewsOutletListPage({ newsOutletPage }: NewsOutletListProps) {
                 </TableRow>
               ))
             ) : (
-              <TableRow>
-                <TableCell colSpan={5} className="py-24 text-center">
-                  <Empty>
-                    <EmptyHeader>
-                      <EmptyMedia variant="icon">
-                        <Newspaper />
-                      </EmptyMedia>
-                      <EmptyTitle>Chưa có nguồn tin</EmptyTitle>
-                      <EmptyDescription>
-                        Thêm nguồn tin đầu tiên để bắt đầu quản lý danh sách nội dung
-                        theo contract mới của backend.
-                      </EmptyDescription>
-                    </EmptyHeader>
-                  </Empty>
-                </TableCell>
-              </TableRow>
+              <AppListTableEmptyState colSpan={5}>
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <Newspaper />
+                  </EmptyMedia>
+                  <EmptyTitle>Chưa có nguồn tin</EmptyTitle>
+                  <EmptyDescription>
+                    Thêm nguồn tin đầu tiên để bắt đầu quản lý danh sách nội dung theo
+                    contract mới của backend.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </AppListTableEmptyState>
             )}
           </TableBody>
         </Table>
-      </div>
+      </AppListTable>
 
       <AppPaginationControls page={newsOutletPage} className="mt-4" />
     </div>

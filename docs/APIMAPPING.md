@@ -96,7 +96,8 @@ Frontend lien quan:
 - `app/lib/news-articles/definitions.ts`
 - `app/lib/news-articles/permissions.ts`
 - `app/(main)/news-articles/*`
-- `app/(main)/source-documents/*` (redirect compatibility)
+- `app/(main)/source-documents/page.tsx`
+- `app/(main)/source-documents/[id]/page.tsx` (redirect compatibility)
 
 Ghi chu:
 
@@ -282,7 +283,7 @@ Nhung nhom duoi day van ton tai tren frontend, nhung khong xuat hien trong `docs
 | Nhom             | Tinh trang frontend                                                                                                   | Ghi chu                                                                                               |
 | ---------------- | --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | Sources          | `app/api/sources/action.ts`, `app/lib/sources/definitions.ts`, `app/(main)/sources/*`                               | Chi con data layer legacy va route redirect compatibility; surface canon da la `/news-outlets`.      |
-| Source documents | `app/api/source-documents/action.ts`, `app/lib/source-documents/definitions.ts`, `app/(main)/source-documents/*`    | Chi con data layer va route redirect compatibility cho deeplink cu; surface canon da la `/news-articles`. |
+| Source documents | `app/(main)/source-documents/page.tsx`, `app/(main)/source-documents/[id]/page.tsx`                                 | Chi con route redirect compatibility cho deeplink cu; data layer canon da la `news-articles`.             |
 | Topics           | `app/api/topics/action.ts`, `app/lib/topics/definitions.ts`, `app/(main)/topics/*`                                  | Frontend van co module topics, nhung snapshot API hien tai khong co `/topics*`.                     |
 
 ## Cac kieu dung chung o frontend
@@ -348,7 +349,7 @@ type ActionResult<T = void> =
 | News outlets                              | `app/api/news-outlets/action.ts`, `app/lib/news-outlets/definitions.ts`, `app/lib/news-outlets/permissions.ts`, `app/(main)/news-outlets/*`                      |
 | News articles                             | `app/api/news-articles/action.ts`, `app/lib/news-articles/definitions.ts`, `app/lib/news-articles/permissions.ts`, `app/(main)/news-articles/*`                  |
 | Sources (legacy, ngoai snapshot)          | `app/api/sources/action.ts`, `app/lib/sources/definitions.ts`, `app/(main)/sources/*` (redirect compatibility)                                                    |
-| Source documents (legacy, ngoai snapshot) | `app/api/source-documents/action.ts`, `app/lib/source-documents/definitions.ts`, `app/lib/source-documents/permissions.ts`, `app/(main)/source-documents/*` (redirect compatibility) |
+| Source documents (legacy, ngoai snapshot) | `app/(main)/source-documents/page.tsx`, `app/(main)/source-documents/[id]/page.tsx` (redirect compatibility)                                                     |
 | Events                                    | `app/api/events/action.ts`, `app/lib/events/definitions.ts`, `app/lib/events/permissions.ts`, `app/(main)/events/*`                                               |
 | Market query                              | `app/api/query/action.ts`, `app/lib/market-query/definitions.ts`, `app/lib/market-query/permissions.ts`, `app/(main)/market-query/*`                              |
 | Graph view                                | `app/api/graph-view/action.ts`, `app/lib/graph-view/definitions.ts`, `app/lib/graph-view/permissions.ts`, `app/(main)/graph-view/*`                               |
