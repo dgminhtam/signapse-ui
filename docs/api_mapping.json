@@ -1052,6 +1052,26 @@
                 }
             }
         },
+        "/economic-calendar/sync": {
+            "post": {
+                "tags": [
+                    "economic-calendar-controller"
+                ],
+                "operationId": "syncEconomicCalendarEntries",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EconomicCalendarSyncResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/cronjobs": {
             "get": {
                 "tags": [
@@ -2026,6 +2046,75 @@
                             "*/*": {
                                 "schema": {
                                     "$ref": "#/components/schemas/EventResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/economic-calendar": {
+            "get": {
+                "tags": [
+                    "economic-calendar-controller"
+                ],
+                "operationId": "getEconomicCalendarEntries",
+                "parameters": [
+                    {
+                        "name": "specification",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/SpecificationEconomicCalendarEntry"
+                        }
+                    },
+                    {
+                        "name": "pageable",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/Pageable"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PageEconomicCalendarListResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/economic-calendar/{id}": {
+            "get": {
+                "tags": [
+                    "economic-calendar-controller"
+                ],
+                "operationId": "getEconomicCalendarEntry",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EconomicCalendarResponse"
                                 }
                             }
                         }
@@ -3033,6 +3122,31 @@
                     }
                 }
             },
+            "EconomicCalendarSyncResponse": {
+                "type": "object",
+                "properties": {
+                    "fetchedCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "createdCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "updatedCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "skippedCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "syncedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
             "CronjobRequest": {
                 "type": "object",
                 "properties": {
@@ -3301,9 +3415,6 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
-                    "unpaged": {
-                        "type": "boolean"
-                    },
                     "paged": {
                         "type": "boolean"
                     },
@@ -3314,6 +3425,9 @@
                     "pageNumber": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "unpaged": {
+                        "type": "boolean"
                     }
                 }
             },
@@ -3323,10 +3437,10 @@
                     "empty": {
                         "type": "boolean"
                     },
-                    "unsorted": {
+                    "sorted": {
                         "type": "boolean"
                     },
-                    "sorted": {
+                    "unsorted": {
                         "type": "boolean"
                     }
                 }
@@ -4155,6 +4269,165 @@
                     },
                     "weight": {
                         "type": "number"
+                    }
+                }
+            },
+            "SpecificationEconomicCalendarEntry": {},
+            "EconomicCalendarListResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "url": {
+                        "type": "string"
+                    },
+                    "externalKey": {
+                        "type": "string"
+                    },
+                    "provider": {
+                        "type": "string"
+                    },
+                    "countryCode": {
+                        "type": "string"
+                    },
+                    "importance": {
+                        "type": "string"
+                    },
+                    "forecastValue": {
+                        "type": "string"
+                    },
+                    "previousValue": {
+                        "type": "string"
+                    },
+                    "actualValue": {
+                        "type": "string"
+                    },
+                    "scheduledAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "ingestedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "createdDate": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "PageEconomicCalendarListResponse": {
+                "type": "object",
+                "properties": {
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "totalElements": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "size": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "content": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/EconomicCalendarListResponse"
+                        }
+                    },
+                    "number": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "sort": {
+                        "$ref": "#/components/schemas/SortObject"
+                    },
+                    "first": {
+                        "type": "boolean"
+                    },
+                    "last": {
+                        "type": "boolean"
+                    },
+                    "numberOfElements": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
+                    },
+                    "empty": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "EconomicCalendarResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "rawContent": {
+                        "type": "string"
+                    },
+                    "url": {
+                        "type": "string"
+                    },
+                    "externalKey": {
+                        "type": "string"
+                    },
+                    "provider": {
+                        "type": "string"
+                    },
+                    "countryCode": {
+                        "type": "string"
+                    },
+                    "importance": {
+                        "type": "string"
+                    },
+                    "forecastValue": {
+                        "type": "string"
+                    },
+                    "previousValue": {
+                        "type": "string"
+                    },
+                    "actualValue": {
+                        "type": "string"
+                    },
+                    "scheduledAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "ingestedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "rawMetadata": {
+                        "type": "string"
+                    },
+                    "createdDate": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "lastModifiedDate": {
+                        "type": "string",
+                        "format": "date-time"
                     }
                 }
             },

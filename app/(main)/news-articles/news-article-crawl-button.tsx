@@ -36,12 +36,12 @@ export function NewsArticleCrawlButton({
       const result = await crawlNewsArticleFullContent(id)
 
       if (result.success) {
-        toast.success("Da yeu cau tai lai noi dung day du.")
+        toast.success("Đã yêu cầu tải lại nội dung đầy đủ.")
         router.refresh()
         return
       }
 
-      toast.error(result.error || "Khong the tai lai noi dung day du.")
+      toast.error(result.error || "Không thể tải lại nội dung đầy đủ.")
     })
   }
 
@@ -63,9 +63,9 @@ export function NewsArticleCrawlButton({
         <RefreshCcw className="h-4 w-4" data-icon="inline-start" />
       )}
       {showText ? (
-        <span>{isPending ? "Dang tai..." : "Tai lai noi dung"}</span>
+        <span>{isPending ? "Đang tải..." : "Tải lại nội dung"}</span>
       ) : (
-        <span className="sr-only">Tai lai noi dung bai viet</span>
+        <span className="sr-only">Tải lại nội dung bài viết</span>
       )}
     </Button>
   )

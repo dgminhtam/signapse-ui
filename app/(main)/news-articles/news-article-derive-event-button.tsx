@@ -41,7 +41,7 @@ export function NewsArticleDeriveEventButton({
       const result = await derivePrimaryEventFromNewsArticle(id)
 
       if (!result.success) {
-        toast.error(result.error || "Khong the suy dien su kien chinh.")
+        toast.error(result.error || "Không thể suy diễn sự kiện chính.")
         return
       }
 
@@ -74,9 +74,9 @@ export function NewsArticleDeriveEventButton({
         <GitBranch className="h-4 w-4" data-icon="inline-start" />
       )}
       {showText ? (
-        <span>{isPending ? "Dang suy dien..." : "Suy dien su kien chinh"}</span>
+        <span>{isPending ? "Đang suy diễn..." : "Suy diễn sự kiện chính"}</span>
       ) : (
-        <span className="sr-only">Suy dien su kien chinh</span>
+        <span className="sr-only">Suy diễn sự kiện chính</span>
       )}
     </Button>
   )

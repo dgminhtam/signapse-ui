@@ -84,28 +84,28 @@ export interface PendingNewsEventDerivationBatchResult {
 }
 
 export const NEWS_ARTICLE_STATUS_LABELS: Record<NewsArticleStatus, string> = {
-  INGESTED: "Da ingest",
-  DERIVATION_PENDING: "Cho suy dien",
-  EVENT_RESOLVED: "Da gan su kien",
-  NO_PRIMARY_EVENT: "Khong co su kien chinh",
-  CONTENT_FAILED: "Loi noi dung",
-  DERIVATION_FAILED: "Loi suy dien",
+  INGESTED: "Đã nạp",
+  DERIVATION_PENDING: "Chờ suy diễn",
+  EVENT_RESOLVED: "Đã gắn sự kiện",
+  NO_PRIMARY_EVENT: "Không có sự kiện chính",
+  CONTENT_FAILED: "Lỗi nội dung",
+  DERIVATION_FAILED: "Lỗi suy diễn",
 }
 
 export const NEWS_PRIMARY_EVENT_DERIVATION_CHANGE_TYPE_LABELS: Record<
   NewsPrimaryEventDerivationChangeType,
   string
 > = {
-  CREATED: "Tao moi",
-  UPDATED: "Cap nhat",
-  NONE: "Khong doi",
+  CREATED: "Tạo mới",
+  UPDATED: "Cập nhật",
+  NONE: "Không đổi",
 }
 
 export const LINKED_EVENT_EVIDENCE_ROLE_LABELS: Record<LinkedEventEvidenceRole, string> = {
-  PRIMARY: "Chinh",
-  SUPPORTING: "Ho tro",
-  UPDATE: "Cap nhat",
-  CONTRADICTING: "Mau thuan",
+  PRIMARY: "Chính",
+  SUPPORTING: "Hỗ trợ",
+  UPDATE: "Cập nhật",
+  CONTRADICTING: "Mâu thuẫn",
 }
 
 export function getNewsArticleStatusVariant(

@@ -52,7 +52,7 @@ export function NewsArticleDeleteButton({
       const result = await deleteNewsArticle(id)
 
       if (result.success) {
-        toast.success("Da xoa bai viet tin tuc.")
+        toast.success("Đã xóa bài viết tin tức.")
         setOpen(false)
 
         if (redirectToListOnSuccess) {
@@ -65,7 +65,7 @@ export function NewsArticleDeleteButton({
         return
       }
 
-      toast.error(result.error || "Khong the xoa bai viet tin tuc.")
+      toast.error(result.error || "Không thể xóa bài viết tin tức.")
     })
   }
 
@@ -86,19 +86,19 @@ export function NewsArticleDeleteButton({
           )}
         >
           <Trash2 className="h-4 w-4" data-icon="inline-start" />
-          {showText ? <span>Xoa</span> : <span className="sr-only">Xoa bai viet</span>}
+          {showText ? <span>Xóa</span> : <span className="sr-only">Xóa bài viết</span>}
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Ban co chac chan muon xoa?</AlertDialogTitle>
+          <AlertDialogTitle>Bạn có chắc chắn muốn xóa?</AlertDialogTitle>
           <AlertDialogDescription>
-            Hanh dong nay khong the hoan tac. Bai viet <strong>{title}</strong> se bi xoa
-            vinh vien khoi he thong.
+            Hành động này không thể hoàn tác. Bài viết <strong>{title}</strong> sẽ bị
+            xóa vĩnh viễn khỏi hệ thống.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>Huy</AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending}>Hủy</AlertDialogCancel>
           <AlertDialogAction
             onClick={(event) => {
               event.preventDefault()
@@ -110,12 +110,12 @@ export function NewsArticleDeleteButton({
             {isPending ? (
               <>
                 <Spinner className="mr-2 h-4 w-4" data-icon="inline-start" />
-                Dang xoa...
+                Đang xóa...
               </>
             ) : (
               <>
                 <Trash2 className="mr-2 h-4 w-4" data-icon="inline-start" />
-                Xoa bai viet
+                Xóa bài viết
               </>
             )}
           </AlertDialogAction>

@@ -20,55 +20,55 @@ export function buildPrimaryEventDerivationSummary(
     case "EVENT_RESOLVED":
       switch (result.changeType) {
         case "CREATED":
-          parts.push("Da suy dien va tao su kien moi.")
+          parts.push("Đã suy diễn và tạo sự kiện mới.")
           break
         case "UPDATED":
-          parts.push("Da suy dien va cap nhat su kien hien co.")
+          parts.push("Đã suy diễn và cập nhật sự kiện hiện có.")
           break
         case "NONE":
-          parts.push("Da suy dien nhung khong thay doi su kien hien co.")
+          parts.push("Đã suy diễn nhưng không thay đổi sự kiện hiện có.")
           break
         default:
-          parts.push("Da suy dien su kien chinh thanh cong.")
+          parts.push("Đã suy diễn sự kiện chính thành công.")
           break
       }
       break
     case "NO_PRIMARY_EVENT":
-      parts.push("Da suy dien nhung chua tim thay su kien chinh phu hop.")
+      parts.push("Đã suy diễn nhưng chưa tìm thấy sự kiện chính phù hợp.")
       break
     case "DERIVATION_PENDING":
-      parts.push("Yeu cau suy dien da duoc tiep nhan.")
+      parts.push("Yêu cầu suy diễn đã được tiếp nhận.")
       break
     case "DERIVATION_FAILED":
-      parts.push("Suy dien su kien chinh khong thanh cong.")
+      parts.push("Suy diễn sự kiện chính không thành công.")
       break
     case "CONTENT_FAILED":
-      parts.push("Khong the suy dien vi bai viet dang loi noi dung.")
+      parts.push("Không thể suy diễn vì bài viết đang lỗi nội dung.")
       break
     case "INGESTED":
-      parts.push("Da nhan yeu cau suy dien cho bai viet.")
+      parts.push("Đã nhận yêu cầu suy diễn cho bài viết.")
       break
     default:
-      parts.push("Da nhan ket qua suy dien bai viet.")
+      parts.push("Đã nhận kết quả suy diễn bài viết.")
       break
   }
 
   if (result.changeType && result.status !== "EVENT_RESOLVED") {
     parts.push(
-      `Trang thai thay doi: ${NEWS_PRIMARY_EVENT_DERIVATION_CHANGE_TYPE_LABELS[
+      `Trạng thái thay đổi: ${NEWS_PRIMARY_EVENT_DERIVATION_CHANGE_TYPE_LABELS[
         result.changeType
       ].toLowerCase()}.`
     )
   }
 
   if (result.status) {
-    parts.push(`Trang thai bai viet: ${NEWS_ARTICLE_STATUS_LABELS[result.status].toLowerCase()}.`)
+    parts.push(`Trạng thái bài viết: ${NEWS_ARTICLE_STATUS_LABELS[result.status].toLowerCase()}.`)
   }
 
   if (result.eventCanonicalKey) {
-    parts.push(`Khoa su kien: ${result.eventCanonicalKey}.`)
+    parts.push(`Khóa sự kiện: ${result.eventCanonicalKey}.`)
   } else if (typeof result.eventId === "number") {
-    parts.push(`ID su kien: ${result.eventId}.`)
+    parts.push(`ID sự kiện: ${result.eventId}.`)
   }
 
   if (result.message?.trim()) {
@@ -95,17 +95,17 @@ export function buildPendingNewsEventDerivationSummary(
   const selectedCount = result.selectedCount ?? 0
 
   if (selectedCount === 0) {
-    return "Khong co bai viet tin tuc nao dang cho suy dien trong lo hien tai."
+    return "Không có bài viết tin tức nào đang chờ suy diễn trong lô hiện tại."
   }
 
   const parts = [
-    `da xu ly ${result.processedCount ?? 0}/${selectedCount}`,
-    `tao moi ${result.createdCount ?? 0}`,
-    `cap nhat ${result.updatedCount ?? 0}`,
-    `khong co su kien ${result.noEventCount ?? 0}`,
-    `bo qua ${result.skippedCount ?? 0}`,
-    `loi ${result.failedCount ?? 0}`,
+    `đã xử lý ${result.processedCount ?? 0}/${selectedCount}`,
+    `tạo mới ${result.createdCount ?? 0}`,
+    `cập nhật ${result.updatedCount ?? 0}`,
+    `không có sự kiện ${result.noEventCount ?? 0}`,
+    `bỏ qua ${result.skippedCount ?? 0}`,
+    `lỗi ${result.failedCount ?? 0}`,
   ]
 
-  return `Da chay suy dien cho lo bai viet dang cho: ${parts.join(", ")}.`
+  return `Đã chạy suy diễn cho lô bài viết đang chờ: ${parts.join(", ")}.`
 }

@@ -35,7 +35,7 @@ export function NewsArticleDerivePendingEventsButton({
       const result = await derivePendingNewsArticleEvents(batchSize)
 
       if (!result.success) {
-        toast.error(result.error || "Khong the suy dien lo bai viet dang cho.")
+        toast.error(result.error || "Không thể suy diễn lô bài viết đang chờ.")
         return
       }
 
@@ -67,7 +67,7 @@ export function NewsArticleDerivePendingEventsButton({
       ) : (
         <GitBranch className="h-4 w-4" data-icon="inline-start" />
       )}
-      <span>{isPending ? "Dang suy dien..." : "Suy dien bai viet cho"}</span>
+      <span>{isPending ? "Đang suy diễn..." : "Suy diễn bài viết chờ"}</span>
     </Button>
   )
 }

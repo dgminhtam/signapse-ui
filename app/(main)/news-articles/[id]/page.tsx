@@ -2,14 +2,16 @@ import { format } from "date-fns"
 import {
   ArrowLeft,
   Calendar,
+  ChevronDown,
   Clock3,
   ExternalLink,
   FileText,
   GitBranch,
   Globe2,
   Hash,
-  Link2,
+  ImageIcon,
   Layers3,
+  Link2,
   RefreshCcw,
 } from "lucide-react"
 import Link from "next/link"
@@ -46,7 +48,6 @@ import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 
 import { getEventEnrichmentVariant, getEventStatusVariant } from "../../events/event-presentation"
-import { NewsArticleAnalyzeButton } from "../news-article-analyze-button"
 import { NewsArticleCrawlButton } from "../news-article-crawl-button"
 import { NewsArticleDeleteButton } from "../news-article-delete-button"
 import { NewsArticleDeriveEventButton } from "../news-article-derive-event-button"
@@ -59,7 +60,7 @@ type ApiLikeError = Error & { status?: number }
 
 function formatDateTime(value?: string) {
   if (!value) {
-    return "Chua co"
+    return "Chưa có"
   }
 
   return format(new Date(value), "dd/MM/yyyy HH:mm")
@@ -67,7 +68,7 @@ function formatDateTime(value?: string) {
 
 function formatConfidence(value?: number) {
   if (typeof value !== "number") {
-    return "Chua co"
+    return "Chưa có"
   }
 
   return `${Math.round(value * 100)}%`
@@ -113,6 +114,23 @@ function DetailCard({
   )
 }
 
+function SectionHeading({
+  title,
+  icon: Icon,
+}: {
+  title: string
+  icon: React.ElementType
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <Icon className="h-4 w-4 text-muted-foreground" />
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+        {title}
+      </h2>
+    </div>
+  )
+}
+
 function SectionEmpty({
   title,
   description,
@@ -140,15 +158,15 @@ export default async function NewsArticleDetailPage({ params }: PageProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Chi tiet bai viet tin tuc</CardTitle>
+          <CardTitle>Chi tiết bài viết tin tức</CardTitle>
           <CardDescription>
-            Xem noi dung da ingest, metadata bai viet, va cac lien ket su kien lien quan.
+            Xem nội dung đã nạp, trạng thái xử lý và các sự kiện liên kết.
           </CardDescription>
         </CardHeader>
         <Separator />
         <CardContent className="pt-6">
           <AccessDenied
-            description="Ban khong co quyen xem chi tiet bai viet tin tuc."
+            description="Bạn không có quyền xem chi tiết bài viết tin tức."
             permission={NEWS_ARTICLE_READ_PERMISSIONS[0]}
           />
         </CardContent>
@@ -163,10 +181,10 @@ export default async function NewsArticleDetailPage({ params }: PageProps) {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center">
-        <Button asChild variant="ghost" size="sm" className="-ml-2">
+        <Button asChild variant="ghost" size="sm" className="-ml-2 gap-2">
           <Link href="/news-articles">
-            <ArrowLeft className="mr-2 h-4 w-4" data-icon="inline-start" />
-            Quay lai danh sach
+            <ArrowLeft className="h-4 w-4" data-icon="inline-start" />
+            Quay lại danh sách
           </Link>
         </Button>
       </div>
@@ -218,7 +236,7 @@ async function FetchNewsArticleData({
               <CardDescription className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1">
                 <span className="inline-flex items-center gap-1.5">
                   <Globe2 className="h-4 w-4" />
-                  {article.newsOutletName?.trim() || "Chua co nguon tin"}
+                  {article.newsOutletName?.trim() || "Chưa có nguồn tin"}
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <Calendar className="h-4 w-4" />
@@ -229,13 +247,12 @@ async function FetchNewsArticleData({
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <NewsArticleAnalyzeButton id={article.id} variant="outline" size="sm" showText />
-            <NewsArticleCrawlButton id={article.id} />
             <NewsArticleDeriveEventButton id={article.id} />
-            <Button variant="outline" size="sm" asChild>
+            <NewsArticleCrawlButton id={article.id} />
+            <Button variant="outline" size="sm" className="gap-2" asChild>
               <a href={article.url} target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="h-4 w-4" data-icon="inline-start" />
-                Mo lien ket goc
+                Mở liên kết gốc
               </a>
             </Button>
             <NewsArticleDeleteButton
@@ -254,105 +271,63 @@ async function FetchNewsArticleData({
 
       <CardContent className="pt-6">
         <div className="flex flex-col gap-8">
-          {imageUrl ? (
-            <div className="overflow-hidden rounded-lg border bg-muted">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={imageUrl}
-                alt={article.featureImage?.altText || article.title}
-                className="aspect-video w-full object-cover"
-              />
-            </div>
-          ) : null}
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+            <div className="flex flex-col gap-6">
+              <div className="grid gap-4 md:grid-cols-3">
+                <DetailCard
+                  title="Trạng thái"
+                  value={NEWS_ARTICLE_STATUS_LABELS[article.status]}
+                  icon={Layers3}
+                />
+                <DetailCard
+                  title="Nguồn tin"
+                  value={article.newsOutletName?.trim() || "Chưa có"}
+                  icon={Globe2}
+                />
+                <DetailCard
+                  title="Xuất bản"
+                  value={formatDateTime(article.publishedAt)}
+                  icon={Calendar}
+                />
+              </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
-            <DetailCard title="Ma bai viet" value={String(article.id)} icon={Hash} />
-            <DetailCard
-              title="Nguon tin"
-              value={article.newsOutletName?.trim() || "Chua co"}
-              icon={Globe2}
-            />
-            <DetailCard
-              title="Xuat ban"
-              value={formatDateTime(article.publishedAt)}
-              icon={Calendar}
-            />
-            <DetailCard
-              title="Trang thai"
-              value={NEWS_ARTICLE_STATUS_LABELS[article.status]}
-              icon={Layers3}
-            />
-            <DetailCard title="Tao luc" value={formatDateTime(article.createdDate)} icon={Clock3} />
-            <DetailCard
-              title="Cap nhat"
-              value={formatDateTime(article.lastModifiedDate)}
-              icon={RefreshCcw}
-            />
+              {article.description?.trim() ? (
+                <section className="flex flex-col gap-3">
+                  <SectionHeading title="Mô tả" icon={FileText} />
+                  <div className="rounded-lg border border-border bg-muted/20 p-4">
+                    <p className="whitespace-pre-wrap text-sm leading-7 text-foreground/90">
+                      {article.description}
+                    </p>
+                  </div>
+                </section>
+              ) : null}
+            </div>
+
+            {imageUrl ? (
+              <aside className="flex flex-col gap-3">
+                <div className="overflow-hidden rounded-lg border bg-muted">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={imageUrl}
+                    alt={article.featureImage?.altText?.trim() || article.title}
+                    className="aspect-video max-h-[220px] w-full object-cover"
+                  />
+                </div>
+              </aside>
+            ) : null}
           </div>
 
           <section className="flex flex-col gap-3">
-            <div className="flex items-center gap-2">
-              <Hash className="h-4 w-4 text-muted-foreground" />
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                Metadata he thong
-              </h2>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              <DetailCard
-                title="External Key"
-                value={article.externalKey || "Chua co"}
-                icon={Link2}
-              />
-              <DetailCard
-                title="News Outlet ID"
-                value={typeof article.newsOutletId === "number" ? String(article.newsOutletId) : "Chua co"}
-                icon={Hash}
-              />
-              <DetailCard
-                title="Lien ket goc"
-                value={article.url || "Chua co"}
-                icon={ExternalLink}
-              />
-            </div>
-          </section>
-
-          {article.description?.trim() ? (
-            <section className="flex flex-col gap-3">
-              <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4 text-muted-foreground" />
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                  Mo ta
-                </h2>
-              </div>
-              <div className="rounded-lg border border-border bg-muted/20 p-4">
-                <p className="whitespace-pre-wrap text-sm leading-7 text-foreground/90">
-                  {article.description}
-                </p>
-              </div>
-            </section>
-          ) : null}
-
-          <section className="flex flex-col gap-3">
-            <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-muted-foreground" />
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                Noi dung
-              </h2>
-            </div>
+            <SectionHeading title="Nội dung" icon={FileText} />
             <div className="rounded-lg border border-border p-4">
               <div className="whitespace-pre-wrap text-sm leading-7 text-foreground/90">
-                {article.content?.trim() || "Chua co noi dung chi tiet."}
+                {article.content?.trim() || "Chưa có nội dung chi tiết."}
               </div>
             </div>
           </section>
 
           <section className="flex flex-col gap-4">
-            <div className="flex items-center gap-2">
-              <GitBranch className="h-4 w-4 text-muted-foreground" />
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                Su kien lien ket
-              </h2>
-            </div>
+            <SectionHeading title="Sự kiện liên kết" icon={GitBranch} />
 
             {linkedEvents.length > 0 ? (
               <div className="flex flex-col gap-3">
@@ -378,7 +353,7 @@ async function FetchNewsArticleData({
                               >
                                 {
                                   EVENT_ENRICHMENT_STATUS_LABELS[
-                                    linkedEvent.eventEnrichmentStatus
+                                  linkedEvent.eventEnrichmentStatus
                                   ]
                                 }
                               </Badge>
@@ -395,23 +370,23 @@ async function FetchNewsArticleData({
                               href={`/events/${linkedEvent.eventId}`}
                               className="font-medium text-foreground hover:underline"
                             >
-                              {linkedEvent.eventTitle || `Su kien #${linkedEvent.eventId}`}
+                              {linkedEvent.eventTitle || `Sự kiện #${linkedEvent.eventId}`}
                             </Link>
                           ) : (
                             <p className="font-medium text-foreground">
                               {linkedEvent.eventTitle ||
                                 (typeof linkedEvent.eventId === "number"
-                                  ? `Su kien #${linkedEvent.eventId}`
-                                  : "Su kien chua co tieu de")}
+                                  ? `Sự kiện #${linkedEvent.eventId}`
+                                  : "Sự kiện chưa có tiêu đề")}
                             </p>
                           )}
 
                           <div className="flex flex-col gap-1 text-sm text-muted-foreground">
                             <span>
-                              Khoa chuan: {linkedEvent.eventCanonicalKey || "Chua co"}
+                              Khóa chuẩn: {linkedEvent.eventCanonicalKey || "Chưa có"}
                             </span>
                             <span>
-                              Do tin cay bang chung:{" "}
+                              Độ tin cậy bằng chứng:{" "}
                               {formatConfidence(linkedEvent.evidenceConfidence)}
                             </span>
                           </div>
@@ -424,10 +399,10 @@ async function FetchNewsArticleData({
                         </div>
 
                         {canOpenEvent ? (
-                          <Button variant="outline" size="sm" asChild>
+                          <Button variant="outline" size="sm" className="gap-2" asChild>
                             <Link href={`/events/${linkedEvent.eventId}`}>
                               <ExternalLink className="h-4 w-4" data-icon="inline-start" />
-                              Xem su kien
+                              Xem sự kiện
                             </Link>
                           </Button>
                         ) : null}
@@ -438,10 +413,50 @@ async function FetchNewsArticleData({
               </div>
             ) : (
               <SectionEmpty
-                title="Chua co su kien lien ket"
-                description="Bai viet nay chua co su kien lien ket trong du lieu hien tai."
+                title="Chưa có sự kiện liên kết"
+                description="Bài viết này chưa có sự kiện liên kết trong dữ liệu hiện tại."
               />
             )}
+          </section>
+
+          <section className="rounded-lg border border-dashed bg-muted/10">
+            <details>
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4 text-sm font-semibold text-muted-foreground">
+                <span className="inline-flex items-center gap-2 uppercase tracking-wide">
+                  <Hash className="h-4 w-4" />
+                  Thông tin kỹ thuật
+                </span>
+                <ChevronDown className="h-4 w-4" />
+              </summary>
+              <div className="grid gap-4 border-t border-border p-4 sm:grid-cols-2 xl:grid-cols-3">
+                <DetailCard title="Mã bài viết" value={String(article.id)} icon={Hash} />
+                <DetailCard
+                  title="External Key"
+                  value={article.externalKey || "Chưa có"}
+                  icon={Link2}
+                />
+                <DetailCard
+                  title="News Outlet ID"
+                  value={
+                    typeof article.newsOutletId === "number"
+                      ? String(article.newsOutletId)
+                      : "Chưa có"
+                  }
+                  icon={Hash}
+                />
+                <DetailCard title="URL gốc" value={article.url || "Chưa có"} icon={ExternalLink} />
+                <DetailCard
+                  title="Tạo lúc"
+                  value={formatDateTime(article.createdDate)}
+                  icon={Clock3}
+                />
+                <DetailCard
+                  title="Cập nhật"
+                  value={formatDateTime(article.lastModifiedDate)}
+                  icon={RefreshCcw}
+                />
+              </div>
+            </details>
           </section>
         </div>
       </CardContent>
@@ -455,7 +470,6 @@ function NewsArticleDetailSkeleton() {
       <CardHeader className="flex flex-col gap-4">
         <div className="flex gap-2">
           <Skeleton className="h-5 w-24 rounded-full" />
-          <Skeleton className="h-5 w-28 rounded-full" />
         </div>
         <div className="flex flex-col gap-2">
           <Skeleton className="h-8 w-2/3" />
@@ -464,21 +478,35 @@ function NewsArticleDetailSkeleton() {
       </CardHeader>
       <Separator />
       <CardContent className="flex flex-col gap-8 pt-6">
-        <Skeleton className="aspect-video w-full rounded-lg" />
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="rounded-lg border p-4">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="mt-3 h-5 w-full" />
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="flex flex-col gap-6">
+            <div className="grid gap-4 md:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <div key={index} className="rounded-lg border p-4">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="mt-3 h-5 w-full" />
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        {Array.from({ length: 3 }).map((_, index) => (
-          <div key={index} className="flex flex-col gap-3">
-            <Skeleton className="h-4 w-32" />
-            <Skeleton className="h-32 w-full rounded-lg" />
+            <div className="flex flex-col gap-3">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-28 w-full rounded-lg" />
+            </div>
           </div>
-        ))}
+          <div className="flex flex-col gap-3">
+            <Skeleton className="h-4 w-28" />
+            <Skeleton className="aspect-video max-h-[220px] w-full rounded-lg" />
+          </div>
+        </div>
+        <div className="flex flex-col gap-3">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-40 w-full rounded-lg" />
+        </div>
+        <div className="flex flex-col gap-3">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-32 w-full rounded-lg" />
+        </div>
+        <Skeleton className="h-14 w-full rounded-lg" />
       </CardContent>
     </>
   )

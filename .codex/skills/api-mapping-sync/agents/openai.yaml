@@ -1,4 +1,4 @@
-﻿interface:
+interface:
   display_name: "API Mapping Sync"
-  short_description: "Sync api_mapping.json into APIMAPPING.md"
-  default_prompt: "Use $api-mapping-sync to compare docs/api_mapping.json with docs/APIMAPPING.md, update the frontend integration notes, and summarize FE impact."
+  short_description: "Update APIMAPPING.md and report API diffs"
+  default_prompt: "Use $api-mapping-sync to update docs/APIMAPPING.md from docs/api_mapping.json, report the confirmed API diffs, and summarize frontend impact."

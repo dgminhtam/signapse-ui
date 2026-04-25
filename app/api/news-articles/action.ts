@@ -48,26 +48,7 @@ export async function deleteNewsArticle(id: number): Promise<ActionResult> {
   } catch (error: unknown) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Khong the xoa bai viet tin tuc.",
-    }
-  }
-}
-
-export async function analyzeNewsArticle(
-  id: number
-): Promise<ActionResult<NewsArticleResponse>> {
-  try {
-    const data = await fetchAuthenticated<NewsArticleResponse>(`/news-articles/${id}/analyze`, {
-      method: "POST",
-    })
-
-    revalidateNewsArticleRoutes(id)
-
-    return { success: true, data }
-  } catch (error: unknown) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Khong the phan tich bai viet tin tuc.",
+      error: error instanceof Error ? error.message : "Không thể xóa bài viết tin tức.",
     }
   }
 }
@@ -90,7 +71,7 @@ export async function crawlNewsArticleFullContent(
     return {
       success: false,
       error:
-        error instanceof Error ? error.message : "Khong the tai lai noi dung day du.",
+        error instanceof Error ? error.message : "Không thể tải lại nội dung đầy đủ.",
     }
   }
 }
@@ -113,7 +94,7 @@ export async function derivePrimaryEventFromNewsArticle(
     return {
       success: false,
       error:
-        error instanceof Error ? error.message : "Khong the suy dien su kien chinh.",
+        error instanceof Error ? error.message : "Không thể suy diễn sự kiện chính.",
     }
   }
 }
@@ -137,7 +118,7 @@ export async function derivePendingNewsArticleEvents(
     return {
       success: false,
       error:
-        error instanceof Error ? error.message : "Khong the suy dien lo bai viet dang cho.",
+        error instanceof Error ? error.message : "Không thể suy diễn lô bài viết đang chờ.",
     }
   }
 }
@@ -162,7 +143,7 @@ export async function updateNewsArticleFeatureImage(
     return {
       success: false,
       error:
-        error instanceof Error ? error.message : "Khong the cap nhat anh dai dien bai viet.",
+        error instanceof Error ? error.message : "Không thể cập nhật ảnh đại diện bài viết.",
     }
   }
 }

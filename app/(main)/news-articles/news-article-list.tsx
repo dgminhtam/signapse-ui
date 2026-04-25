@@ -36,12 +36,10 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
 
-import { NewsArticleAnalyzeButton } from "./news-article-analyze-button"
 import { NewsArticleDeleteButton } from "./news-article-delete-button"
 import { NewsArticleDerivePendingEventsButton } from "./news-article-derive-pending-events-button"
 import { NewsArticleSearch } from "./news-article-search"
@@ -151,7 +149,6 @@ export function NewsArticleList({ newsArticlePage }: NewsArticleListProps) {
                           <span className="sr-only">Xem chi tiết</span>
                         </Link>
                       </Button>
-                      <NewsArticleAnalyzeButton id={article.id} />
                       <Button
                         variant="ghost"
                         size="icon-sm"

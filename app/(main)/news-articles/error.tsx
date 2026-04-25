@@ -25,14 +25,14 @@ export default function Error({
           <EmptyMedia variant="icon" className="bg-destructive/10 text-destructive">
             <AlertCircle />
           </EmptyMedia>
-          <EmptyTitle>Da co loi xay ra</EmptyTitle>
+          <EmptyTitle>Đã có lỗi xảy ra</EmptyTitle>
           <EmptyDescription>
-            {error.message || "Khong the tai du lieu bai viet tin tuc luc nay."}
+            {error.message || "Không thể tải dữ liệu bài viết tin tức lúc này."}
           </EmptyDescription>
         </EmptyHeader>
         <div className="mt-4 flex justify-center">
           <Button onClick={() => reset()} variant="outline">
-            <RefreshCcw data-icon="inline-start" /> Thu lai
+            <RefreshCcw data-icon="inline-start" /> Thử lại
           </Button>
         </div>
       </Empty>
