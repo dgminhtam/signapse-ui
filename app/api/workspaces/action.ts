@@ -30,7 +30,8 @@ export async function createWorkspace(
     revalidatePath("/", "layout")
     return { success: true, data: workspace }
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "Failed to create workspace"
+    const errorMessage =
+      error instanceof Error ? error.message : "Không thể tạo không gian làm việc."
     return { success: false, error: errorMessage }
   }
 }
@@ -47,7 +48,8 @@ export async function updateWorkspace(
     revalidatePath("/", "layout")
     return { success: true, data: workspace }
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "Failed to update workspace"
+    const errorMessage =
+      error instanceof Error ? error.message : "Không thể cập nhật không gian làm việc."
     return { success: false, error: errorMessage }
   }
 }
@@ -63,7 +65,8 @@ export async function setDefaultWorkspace(id: number): Promise<ActionResult<Work
     revalidatePath("/", "layout")
     return { success: true, data: workspace }
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "Failed to set default workspace"
+    const errorMessage =
+      error instanceof Error ? error.message : "Không thể chuyển không gian làm việc."
     return { success: false, error: errorMessage }
   }
 }

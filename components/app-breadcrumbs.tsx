@@ -1,31 +1,52 @@
 "use client"
 
+import React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import React from "react"
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "./ui/breadcrumb"
 
-function capitalize(s: string) {
-  if (!s) return ""
-  return s.charAt(0).toUpperCase() + s.slice(1)
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "./ui/breadcrumb"
+
+const FRIENDLY_SEGMENT_NAMES: Record<string, string> = {
+  categories: "Danh mục",
+  create: "Tạo mới",
+  "ai-provider-configs": "Nhà cung cấp AI",
+  blogs: "Blog",
+  cronjobs: "Tác vụ định kỳ",
+  "developer-token": "Token nhà phát triển",
+  "economic-calendar": "Lịch kinh tế",
+  events: "Sự kiện",
+  "graph-view": "Biểu đồ tri thức",
+  "market-query": "Truy vấn thị trường",
+  "news-articles": "Tài liệu nguồn",
+  "news-outlets": "Nguồn tin",
+  roles: "Vai trò",
+  "source-documents": "Tài liệu nguồn",
+  "system-prompts": "Prompt hệ thống",
 }
 
-function formatSegment(segment: string, index: number, allSegments: string[]) {
+function formatSegment(segment: string, index: number) {
   const decodedSegment = decodeURIComponent(segment)
-  const friendlyNames: { [key: string]: string } = {
-    categories: "Danh mục",
-    create: "Tạo mới",
-    "developer-token": "Developer Token",
-  }
 
-  if (friendlyNames[decodedSegment]) {
-    return friendlyNames[decodedSegment]
+  if (FRIENDLY_SEGMENT_NAMES[decodedSegment]) {
+    return FRIENDLY_SEGMENT_NAMES[decodedSegment]
   }
 
   if (index > 0) {
-    return "Cập nhật"
+    return "Chi tiết"
   }
-  return capitalize(decodedSegment)
+
+  return decodedSegment
+    .split("-")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ")
 }
 
 export function AppBreadcrumb() {
@@ -33,25 +54,27 @@ export function AppBreadcrumb() {
   const segments = pathname.split("/").filter(Boolean)
 
   return (
-    <Breadcrumb>
-      <BreadcrumbList>
+    <Breadcrumb className="min-w-0">
+      <BreadcrumbList className="flex-nowrap">
         <BreadcrumbItem className="hidden md:block">
           <BreadcrumbLink asChild>
-            <Link href="/">Home</Link>
+            <Link href="/">Trang chủ</Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
 
         {segments.map((segment, index) => {
           const href = `/${segments.slice(0, index + 1).join("/")}`
           const isLast = index === segments.length - 1
-          const title = formatSegment(segment, index, segments)
+          const title = formatSegment(segment, index)
 
           return (
             <React.Fragment key={href}>
               <BreadcrumbSeparator className="hidden md:block" />
-              <BreadcrumbItem className={!isLast ? "hidden md:block" : ""}>
+              <BreadcrumbItem className={!isLast ? "hidden md:block" : "min-w-0"}>
                 {isLast ? (
-                  <BreadcrumbPage>{title}</BreadcrumbPage>
+                  <BreadcrumbPage className="max-w-[45vw] truncate md:max-w-[36rem]">
+                    {title}
+                  </BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink asChild>
                     <Link href={href}>{title}</Link>

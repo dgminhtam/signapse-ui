@@ -47,7 +47,7 @@ export interface MarketQueryResponse {
 }
 
 export const marketQueryRequestSchema = z.object({
-  question: z.string().trim().min(1, "Vui long nhap cau hoi."),
+  question: z.string().trim().min(1, "Vui lòng nhập câu hỏi."),
   asOfTime: z.string().datetime().nullish(),
 }) satisfies z.ZodType<MarketQueryRequest>
 
@@ -85,16 +85,16 @@ export const marketQueryResponseSchema = z.object({
 }) satisfies z.ZodType<MarketQueryResponse>
 
 export const MARKET_QUERY_ARTIFACT_TYPE_LABELS: Record<ArtifactType, string> = {
-  NEWS_ARTICLE: "Bai viet tin tuc",
-  ECONOMIC_CALENDAR_ENTRY: "Muc lich kinh te",
-  RESEARCH_DOCUMENT: "Tai lieu nghien cuu",
-  STRATEGY_PLAYBOOK: "Playbook chien luoc",
-  OTHER: "Khac",
+  NEWS_ARTICLE: "Tài liệu nguồn tin tức",
+  ECONOMIC_CALENDAR_ENTRY: "Mục lịch kinh tế",
+  RESEARCH_DOCUMENT: "Tài liệu nghiên cứu",
+  STRATEGY_PLAYBOOK: "Playbook chiến lược",
+  OTHER: "Khác",
 }
 
 export const MARKET_QUERY_EVIDENCE_ROLE_LABELS: Record<MarketQueryEvidenceRole, string> = {
-  PRIMARY: "Chinh",
-  SUPPORTING: "Ho tro",
-  UPDATE: "Cap nhat",
-  CONTRADICTING: "Mau thuan",
+  PRIMARY: "Chính",
+  SUPPORTING: "Hỗ trợ",
+  UPDATE: "Cập nhật",
+  CONTRADICTING: "Mâu thuẫn",
 }

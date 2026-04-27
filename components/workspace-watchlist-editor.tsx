@@ -67,17 +67,9 @@ export function WorkspaceWatchlistEditor({
   const [initialAssets, setInitialAssets] = React.useState<AssetListResponse[]>([])
   const [selectedAssets, setSelectedAssets] = React.useState<AssetListResponse[]>([])
 
-  const canReadWorkspaceWatchlist =
-    !!workspace &&
-    canReadAsset &&
-    canReadWatchlist
-
+  const canReadWorkspaceWatchlist = !!workspace && canReadAsset && canReadWatchlist
   const canManageWorkspaceWatchlist =
-    !!workspace &&
-    canReadAsset &&
-    canReadWatchlist &&
-    canCreateWatchlist &&
-    canDeleteWatchlist
+    canReadWorkspaceWatchlist && canCreateWatchlist && canDeleteWatchlist
 
   const loadWorkspaceWatchlistState = React.useCallback(async () => {
     if (!workspace || !canReadWorkspaceWatchlist) {
@@ -100,7 +92,7 @@ export function WorkspaceWatchlistEditor({
       setSelectedAssets(assets)
     } catch (error: unknown) {
       const errorMessage =
-        error instanceof Error ? error.message : "Không thể tải danh sách theo dõi"
+        error instanceof Error ? error.message : "Không thể tải tài sản theo dõi."
       setLoadError(errorMessage)
       setInitialAssets([])
       setSelectedAssets([])
@@ -110,15 +102,7 @@ export function WorkspaceWatchlistEditor({
   }, [canReadWorkspaceWatchlist, workspace])
 
   React.useEffect(() => {
-    if (!open) {
-      return
-    }
-
-    if (!canReadWorkspaceWatchlist) {
-      setIsLoading(false)
-      setLoadError(null)
-      setInitialAssets([])
-      setSelectedAssets([])
+    if (!open || !canReadWorkspaceWatchlist) {
       return
     }
 
@@ -144,7 +128,7 @@ export function WorkspaceWatchlistEditor({
     const assetsToAdd = selectedAssets.filter((asset) => !initialIds.has(asset.id))
 
     if (assetsToRemove.length === 0 && assetsToAdd.length === 0) {
-      toast.success("Không có thay đổi để lưu")
+      toast.success("Không có thay đổi để lưu.")
       onOpenChange(false)
       return
     }
@@ -163,7 +147,7 @@ export function WorkspaceWatchlistEditor({
 
       if (failedOperations.length > 0) {
         toast.error(
-          "Không thể đồng bộ đầy đủ danh sách theo dõi. Dữ liệu mới nhất đã được tải lại."
+          "Không thể đồng bộ đầy đủ tài sản theo dõi. Dữ liệu mới nhất đã được tải lại."
         )
         await loadWorkspaceWatchlistState()
         router.refresh()
@@ -171,7 +155,7 @@ export function WorkspaceWatchlistEditor({
       }
 
       setInitialAssets([...selectedAssets])
-      toast.success(`Đã cập nhật danh sách theo dõi cho workspace "${workspace.name}"`)
+      toast.success(`Đã cập nhật tài sản theo dõi cho "${workspace.name}".`)
       onOpenChange(false)
       router.refresh()
     })
@@ -189,12 +173,11 @@ export function WorkspaceWatchlistEditor({
           <div className="flex items-start justify-between gap-4 border-b px-6 py-5">
             <div className="flex flex-col gap-1">
               <DialogPrimitive.Title className="text-lg font-medium text-foreground">
-                Chỉnh danh sách theo dõi
+                Quản lý tài sản theo dõi
               </DialogPrimitive.Title>
               <DialogPrimitive.Description className="text-sm text-muted-foreground">
-                Danh sách này được lưu theo workspace đang hoạt động:{" "}
-                {workspace?.name ?? "chưa có workspace"}.
-                Nếu muốn quản lý workspace khác, hãy chuyển workspace trước.
+                Danh sách này được lưu theo không gian làm việc đang hoạt động:{" "}
+                {workspace?.name ?? "chưa có không gian làm việc"}.
               </DialogPrimitive.Description>
             </div>
             <DialogPrimitive.Close asChild>
@@ -212,9 +195,9 @@ export function WorkspaceWatchlistEditor({
                   <EmptyMedia variant="icon">
                     <FolderOpenIcon />
                   </EmptyMedia>
-                  <EmptyTitle>Chưa có workspace đang hoạt động</EmptyTitle>
+                  <EmptyTitle>Chưa có không gian làm việc đang hoạt động</EmptyTitle>
                   <EmptyDescription>
-                    Hãy chọn một workspace trong sidebar trước khi quản lý danh sách theo dõi.
+                    Hãy chọn một không gian làm việc trước khi quản lý tài sản theo dõi.
                   </EmptyDescription>
                 </EmptyHeader>
               </Empty>
@@ -226,10 +209,10 @@ export function WorkspaceWatchlistEditor({
                   <EmptyMedia variant="icon">
                     <ShieldAlertIcon />
                   </EmptyMedia>
-                  <EmptyTitle>Bạn chưa có quyền quản lý danh sách theo dõi</EmptyTitle>
+                  <EmptyTitle>Bạn chưa có quyền quản lý tài sản theo dõi</EmptyTitle>
                   <EmptyDescription>
-                    Tài khoản hiện tại cần quyền đọc, thêm và gỡ tài sản trong danh sách theo dõi
-                    của workspace này.
+                    Tài khoản hiện tại cần quyền đọc, thêm và gỡ tài sản trong danh sách
+                    theo dõi của không gian làm việc này.
                   </EmptyDescription>
                 </EmptyHeader>
               </Empty>
@@ -238,14 +221,14 @@ export function WorkspaceWatchlistEditor({
             {canShowEditorBody ? (
               <>
                 <div className="rounded-lg border bg-muted/20 p-4 text-sm text-muted-foreground">
-                  Bạn có thể tìm tài sản theo tên hoặc mã. Mọi thay đổi sẽ được đồng bộ với danh
-                  sách theo dõi của workspace hiện tại thông qua API hiện có của backend.
+                  Tìm tài sản theo tên hoặc mã. Mọi thay đổi sẽ được đồng bộ với danh sách
+                  tài sản theo dõi của không gian làm việc hiện tại.
                 </div>
 
                 {loadError ? (
                   <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4">
                     <div className="text-sm font-medium text-destructive">
-                      Không thể tải danh sách theo dõi hiện tại
+                      Không thể tải tài sản theo dõi hiện tại
                     </div>
                     <div className="mt-1 text-sm text-muted-foreground">{loadError}</div>
                     <div className="mt-3">
@@ -270,7 +253,7 @@ export function WorkspaceWatchlistEditor({
                   <div className="flex min-h-40 items-center justify-center rounded-lg border border-dashed">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Spinner />
-                      Đang tải danh sách theo dõi...
+                      Đang tải tài sản theo dõi...
                     </div>
                   </div>
                 ) : (
@@ -287,8 +270,8 @@ export function WorkspaceWatchlistEditor({
           <div className="flex items-center justify-between gap-3 border-t px-6 py-4">
             <p className="text-sm text-muted-foreground">
               {canShowEditorBody
-                ? `Đã chọn ${selectedAssets.length} tài sản cho workspace này.`
-                : "Chỉ có thể quản lý danh sách theo dõi khi đã chọn workspace phù hợp."}
+                ? `Đã chọn ${selectedAssets.length} tài sản cho không gian làm việc này.`
+                : "Chỉ có thể quản lý tài sản theo dõi khi đã chọn không gian làm việc phù hợp."}
             </p>
             <div className="flex items-center gap-3">
               <Button

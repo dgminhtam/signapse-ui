@@ -32,7 +32,7 @@ export function SourceSearch() {
   }, 300)
 
   return (
-    <div className="relative max-w-sm flex-1">
+    <div className="relative w-full sm:w-80 lg:w-96">
       <label htmlFor="source-search" className="sr-only">
         Tìm nguồn dữ liệu
       </label>

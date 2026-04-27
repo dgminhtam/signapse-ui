@@ -56,6 +56,8 @@ app/(main)/[feature]/
 - Search input phải có `type="search"`, `id` và `label` dạng `sr-only`
 - Search phải hiển thị `<Spinner>` inline trong lúc pending route transition
 - Nếu search theo nhiều field, khai báo query key thành hằng số cục bộ rõ nghĩa trong file search
+- Search trên trang danh sách phải dùng wrapper responsive thống nhất `w-full sm:w-80 lg:w-96`: mobile chiếm đủ chiều ngang toolbar, desktop giữ độ rộng đồng đều; không dùng tự phát `max-w-sm` hoặc `flex-1 shrink-0` làm search dài/ngắn lệch giữa các màn
+- Search trong toolbar danh sách phải nằm ở vùng leading cùng action chính; các view controls như filter tĩnh, sort và page size nằm ở vùng trailing, ưu tiên dùng `AppListToolbar`, `AppListToolbarLeading` và `AppListToolbarTrailing`
 - Không tạo shared component search list mặc định; ưu tiên component cục bộ nhưng hành vi phải thống nhất theo các quy ước này
 
 ## Quy tắc phát triển
@@ -64,6 +66,13 @@ app/(main)/[feature]/
 
 - Chỉ giữ skill thật sự sát stack và workflow của Signapse trong `.codex/skills`
 - Không duy trì bộ skill vendor/community quá rộng nếu chúng không giúp Codex làm việc tốt hơn trong repo này
+
+### Guardrail triển khai
+
+- Trước thay đổi không tầm thường, khóa scope bằng mục tiêu, giả định, non-goals và tiêu chí hoàn thành rõ ràng.
+- Ưu tiên giải pháp đơn giản nhất đủ yêu cầu; không tạo abstraction, cấu hình hoặc luồng dự phòng khi chưa có nhu cầu rõ.
+- Chỉnh sửa phẫu thuật: chỉ sửa file liên quan trực tiếp, bám style hiện có và không dọn code ngoài scope.
+- Kết thúc bằng kiểm chứng phù hợp như lint, typecheck, test hoặc smoke test; nếu chưa chạy được thì nói rõ lý do.
 
 ### Core components
 

@@ -24,7 +24,9 @@ export default function Error({
           <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-destructive/10">
             <AlertCircle className="size-6 text-destructive" />
           </div>
-          <CardTitle className="text-xl font-bold">Không thể tải truy vấn thị trường</CardTitle>
+          <CardTitle className="text-xl font-bold">
+            Không thể tải truy vấn thị trường
+          </CardTitle>
           <CardDescription className="mt-2 text-muted-foreground">
             {error.message || "Đã có lỗi xảy ra trong khi tải không gian truy vấn."}
           </CardDescription>

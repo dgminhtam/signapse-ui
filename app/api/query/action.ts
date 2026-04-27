@@ -41,7 +41,7 @@ export async function queryMarket(
       console.error("Market query response validation failed", parsedResponse.error.issues)
       return {
         success: false,
-        error: "Backend tra ve du lieu truy van khong dung dinh dang mong doi.",
+        error: "Hệ thống trả về dữ liệu truy vấn không đúng định dạng mong đợi.",
       }
     }
 
@@ -55,7 +55,7 @@ export async function queryMarket(
       error:
         error instanceof Error
           ? error.message
-          : "Khong the thuc hien truy van thi truong trong luc nay.",
+          : "Không thể thực hiện truy vấn thị trường trong lúc này.",
     }
   }
 }

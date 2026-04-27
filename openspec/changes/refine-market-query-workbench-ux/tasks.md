@@ -21,14 +21,29 @@
 
 ## 4. Verify accessibility and responsive readability
 
-- [ ] 4.1 Verify keyboard and viewport behavior for result completion and failure states, including whichever focus or scroll visibility aid is implemented.
-- [ ] 4.2 Verify the narrow-layout reading order keeps composer, current query context, answer, trust signals, and evidence ahead of lower-priority modules.
-- [ ] 4.3 Verify confidence, limitation, and permission cues remain understandable without color alone.
+- [x] 4.1 Verify keyboard and viewport behavior for result completion and failure states, including whichever focus or scroll visibility aid is implemented.
+- [x] 4.2 Verify the narrow-layout reading order keeps composer, current query context, answer, trust signals, and evidence ahead of lower-priority modules.
+- [x] 4.3 Verify confidence, limitation, and permission cues remain understandable without color alone.
 
 ## 5. Verify operator-facing behavior
 
-- [ ] 5.1 Verify idle, running, completed, failed-resubmission, and recovery flows of `/market-query` against the new usability requirements.
-- [ ] 5.2 Verify evidence rendering for users with and without `event:read` and `source-document:read` so traceability stays informative without noisy disabled actions.
+- [x] 5.1 Verify idle, running, completed, failed-resubmission, and recovery flows of `/market-query` against the new usability requirements.
+- [x] 5.2 Verify evidence rendering for users with and without `event:read` and `source-document:read` so traceability stays informative without noisy disabled actions.
 - [x] 5.3 Run lint and typecheck for the refined market-query scope and note any unrelated issues that block a fully green verification pass.
 
-Verification note: `pnpm typecheck` passed on April 20, 2026. `pnpm lint` still fails because of unrelated pre-existing issues in `ai-provider-configs`, `blogs`, `cronjobs`, `developer-token`, `roles`, `topics`, shared API utilities, and `scratch/list_endpoints.cjs`.
+Verification note: `pnpm typecheck` passed on April 25, 2026. Scoped `pnpm lint -- "app/(main)/market-query" "app/api/query" "app/lib/market-query" "config/site.ts"` passed on April 25, 2026. `git diff --check` passed for the same scope. `pnpm exec prettier --write ...` could not run in this shell because the `prettier` binary was not recognized.
+
+## 6. Address follow-up UI/UX review findings
+
+- [x] 6.1 Fix mojibake and unaccented Vietnamese copy in `app/(main)/market-query/*`, `app/lib/market-query/*`, `app/api/query/action.ts`, and market-query navigation labels.
+- [x] 6.2 Remove the competing inner hero from the client workbench so the route `CardHeader` owns page orientation and the query composer becomes the first meaningful region.
+- [x] 6.3 Flatten the completed-result layout so answer and evidence have stronger hierarchy than trust metadata, key events, and reasoning without stacking many equal card-like panels.
+- [x] 6.4 Align evidence document labels, permission hints, and internal drill-down routes with the SourceDocument model instead of legacy news-article-only wording.
+- [x] 6.5 Split `market-query-workbench.tsx` into focused local components for composer, query state, briefing content, evidence list, key events, and reasoning while keeping state orchestration clear.
+
+## 7. Re-verify review findings
+
+- [x] 7.1 Verify no visible market-query copy contains mojibake or non-professional Vietnamese.
+- [x] 7.2 Verify the first-run, running, success, and failed-resubmission layouts avoid nested equal-weight card clutter.
+- [x] 7.3 Verify evidence traceability remains useful for authorized and restricted users, including non-NEWS evidence where backend data allows it.
+- [x] 7.4 Re-run targeted typecheck/lint checks or document remaining unrelated blockers.

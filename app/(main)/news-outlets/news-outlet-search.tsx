@@ -34,15 +34,15 @@ export function NewsOutletSearch() {
   }, 300)
 
   return (
-    <div className="relative max-w-sm flex-1">
+    <div className="relative w-full sm:w-80 lg:w-96">
       <label htmlFor="news-outlet-search" className="sr-only">
-        Tim nguon tin
+        Tìm nguồn tin
       </label>
       <Search className="absolute top-2.5 left-2.5 h-4 w-4 text-muted-foreground" />
       <Input
         id="news-outlet-search"
         type="search"
-        placeholder="Tim theo ten nguon tin..."
+        placeholder="Tìm theo tên nguồn tin..."
         className="pl-8"
         value={value}
         onChange={(event) => {

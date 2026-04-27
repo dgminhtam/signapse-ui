@@ -39,7 +39,7 @@ export function AiProviderConfigSearch() {
   }, 300)
 
   return (
-    <div className="relative max-w-sm flex-1">
+    <div className="relative w-full sm:w-80 lg:w-96">
       <label htmlFor={SEARCH_INPUT_ID} className="sr-only">
         Tìm cấu hình AI
       </label>

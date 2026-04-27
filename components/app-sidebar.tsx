@@ -1,7 +1,32 @@
 "use client"
 
 import * as React from "react"
+import { SignOutButton } from "@clerk/nextjs"
+import {
+  BadgeCheckIcon,
+  BellIcon,
+  ChevronRightIcon,
+  ChevronsUpDownIcon,
+  CreditCardIcon,
+  LogOutIcon,
+  SparklesIcon,
+} from "lucide-react"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 
+import { NavItem, filterNavItemsByPermissions, siteConfig } from "@/config/site"
+
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./ui/collapsible"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu"
 import {
   Sidebar,
   SidebarContent,
@@ -18,18 +43,7 @@ import {
   SidebarMenuSubItem,
   SidebarRail,
   useSidebar,
-} from "@/components/ui/sidebar"
-import { ChevronsUpDownIcon, SparklesIcon, BadgeCheckIcon, CreditCardIcon, BellIcon, LogOutIcon, PlusIcon, ChevronRightIcon } from "lucide-react"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./ui/collapsible"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuTrigger } from "./ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
-import { NavItem, filterNavItemsByPermissions, siteConfig } from "@/config/site"
-import { SignOutButton } from "@clerk/nextjs"
-import { usePathname } from "next/navigation"
-import Link from "next/link"
-import { WorkspaceResponse } from "@/app/lib/workspaces/definitions"
-import { resolveActiveWorkspace } from "@/app/lib/workspaces/active"
-import { WorkspaceSwitcherV2 } from "./workspace-switcher-v2"
+} from "./ui/sidebar"
 
 type SimpleUser = {
   imageUrl: string
@@ -38,51 +52,58 @@ type SimpleUser = {
 } | null
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
-  user: SimpleUser,
+  user: SimpleUser
   isAuthenticated: boolean
   permissions: string[]
-  workspaces: WorkspaceResponse[]
 }
 
-export function AppSidebar({ user, isAuthenticated, permissions, workspaces, ...props }: AppSidebarProps) {
-  const activeWorkspace = resolveActiveWorkspace(workspaces)
+export function AppSidebar({
+  user,
+  isAuthenticated,
+  permissions,
+  ...props
+}: AppSidebarProps) {
   const visibleNavItems = filterNavItemsByPermissions(siteConfig.navMain, permissions)
-  const canReadWorkspace = permissions.includes("workspace:read")
 
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        {canReadWorkspace ? (
-          <WorkspaceSwitcherV2
-            workspaces={workspaces}
-            activeWorkspace={activeWorkspace}
-            logo={siteConfig.brand.logo}
-            canCreateWorkspace={permissions.includes("workspace:create")}
-            canRenameWorkspace={permissions.includes("workspace:update")}
-            canSetDefaultWorkspace={permissions.includes("workspace:set-default")}
-            canReadAsset={permissions.includes("asset:read")}
-            canReadWatchlist={permissions.includes("watchlist:read")}
-            canCreateWatchlist={permissions.includes("watchlist:create")}
-            canDeleteWatchlist={permissions.includes("watchlist:delete")}
-          />
-        ) : null}
+        <SidebarBrand />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={visibleNavItems} />
       </SidebarContent>
-      <SidebarFooter>
-        {isAuthenticated && <NavUser user={user} />}
-      </SidebarFooter>
+      <SidebarFooter>{isAuthenticated && <NavUser user={user} />}</SidebarFooter>
       <SidebarRail />
     </Sidebar>
   )
 }
 
-export function NavMain({
-  items,
-}: {
-  items: NavItem[]
-}) {
+function SidebarBrand() {
+  const Logo = siteConfig.brand.logo
+
+  return (
+    <SidebarMenu>
+      <SidebarMenuItem>
+        <SidebarMenuButton asChild size="lg" tooltip={siteConfig.brand.name}>
+          <Link href="/">
+            <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+              <Logo className="size-4" />
+            </div>
+            <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
+              <span className="truncate font-medium">{siteConfig.brand.name}</span>
+              <span className="truncate text-xs text-muted-foreground">
+                {siteConfig.brand.subtitle}
+              </span>
+            </div>
+          </Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    </SidebarMenu>
+  )
+}
+
+export function NavMain({ items }: { items: NavItem[] }) {
   const pathname = usePathname()
   const matchesPath = (url: string) => {
     if (url === "/") {
@@ -95,9 +116,10 @@ export function NavMain({
   const hasActiveSubItem = (subItems?: { title: string; url: string }[]) => {
     return subItems?.some((subItem) => matchesPath(subItem.url)) ?? false
   }
+
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      <SidebarGroupLabel>Nền tảng</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           {items.map((item) => {
@@ -118,7 +140,12 @@ export function NavMain({
             }
 
             return (
-              <Collapsible key={item.title} asChild defaultOpen={item.isActive ?? isActive} className="group/collapsible">
+              <Collapsible
+                key={item.title}
+                asChild
+                defaultOpen={item.isActive ?? isActive}
+                className="group/collapsible"
+              >
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton tooltip={item.title} isActive={isActive}>
@@ -131,6 +158,7 @@ export function NavMain({
                     <SidebarMenuSub>
                       {item.items?.map((subItem) => {
                         const isSubItemActive = matchesPath(subItem.url)
+
                         return (
                           <SidebarMenuSubItem key={subItem.title}>
                             <SidebarMenuSubButton isActive={isSubItemActive} asChild>
@@ -149,7 +177,7 @@ export function NavMain({
           })}
         </SidebarMenu>
       </SidebarGroupContent>
-    </SidebarGroup >
+    </SidebarGroup>
   )
 }
 
@@ -202,105 +230,35 @@ function NavUser({ user }: NavUserProps) {
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <SparklesIcon />
-                Upgrade to Pro
+                Nâng cấp gói
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <BadgeCheckIcon />
-                Account
+                Tài khoản
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <CreditCardIcon />
-                Billing
+                Thanh toán
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <BellIcon />
-                Notifications
+                Thông báo
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <SignOutButton>
-                <div className="flex w-full items-center gap-2 px-1 py-1.5">
-                  <LogOutIcon />
-                  <span>Log out</span>
-                </div>
-              </SignOutButton>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </SidebarMenuItem>
-    </SidebarMenu>
-  )
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function TeamSwitcher({
-  teams,
-}: {
-  teams: {
-    name: string
-    logo: React.ElementType
-    plan: string
-  }[]
-}) {
-  const { isMobile } = useSidebar()
-  const [activeTeam, setActiveTeam] = React.useState(teams[0])
-
-  if (!activeTeam) {
-    return null
-  }
-
-  return (
-    <SidebarMenu>
-      <SidebarMenuItem>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-            >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                <activeTeam.logo />
-              </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{activeTeam.name}</span>
-                <span className="truncate text-xs">{activeTeam.plan}</span>
-              </div>
-              <ChevronsUpDownIcon className="ml-auto" />
-            </SidebarMenuButton>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-            align="start"
-            side={isMobile ? "bottom" : "right"}
-            sideOffset={4}
-          >
-            <DropdownMenuLabel className="text-xs text-muted-foreground">
-              Teams
-            </DropdownMenuLabel>
-            {teams.map((team, index) => (
-              <DropdownMenuItem
-                key={team.name}
-                onClick={() => setActiveTeam(team)}
-                className="gap-2 p-2"
-              >
-                <div className="flex size-6 items-center justify-center rounded-md border">
-                  <team.logo />
-                </div>
-                {team.name}
-                <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
+            <DropdownMenuGroup>
+              <DropdownMenuItem>
+                <SignOutButton>
+                  <div className="flex w-full items-center gap-2 px-1 py-1.5">
+                    <LogOutIcon />
+                    <span>Đăng xuất</span>
+                  </div>
+                </SignOutButton>
               </DropdownMenuItem>
-            ))}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="gap-2 p-2">
-              <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
-                <PlusIcon className="size-4" />
-              </div>
-              <div className="font-medium text-muted-foreground">Add team</div>
-            </DropdownMenuItem>
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

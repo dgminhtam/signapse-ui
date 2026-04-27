@@ -10,6 +10,11 @@ import { toast } from "sonner"
 import { deleteTopic, toggleTopicActive } from "@/app/api/topics/action"
 import { Page } from "@/app/lib/definitions"
 import { TopicListResponse } from "@/app/lib/topics/definitions"
+import {
+  AppListToolbar,
+  AppListToolbarLeading,
+  AppListToolbarTrailing,
+} from "@/components/app-list-toolbar"
 import { AppPaginationControls } from "@/components/app-pagination-controls"
 import { SortSelect } from "@/components/sort-select"
 import { Button } from "@/components/ui/button"
@@ -53,26 +58,28 @@ export function TopicListPage({ topicPage }: TopicListPageProps) {
 
   return (
     <div className="w-full">
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex w-full flex-1 items-center gap-4 sm:w-auto">
+      <AppListToolbar>
+        <AppListToolbarLeading>
           <Button asChild>
             <Link href="/topics/create">
-              <Plus data-icon="inline-start" /> Add topic
+              <Plus data-icon="inline-start" /> Thêm chủ đề
             </Link>
           </Button>
           <TopicSearch />
-        </div>
-        <div className="flex items-center gap-2">
+        </AppListToolbarLeading>
+        <AppListToolbarTrailing>
           <SortSelect
+            className="w-full sm:w-auto"
             options={[
-              { label: "Latest", value: "id_desc" },
-              { label: "Oldest", value: "id_asc" },
-              { label: "Name (A-Z)", value: "name_asc" },
+              { label: "Mới tạo", value: "id_desc" },
+              { label: "Cũ hơn", value: "id_asc" },
+              { label: "Tên A-Z", value: "name_asc" },
               { label: "Slug (A-Z)", value: "slug_asc" },
             ]}
+            triggerClassName="w-full sm:w-[200px]"
           />
-        </div>
-      </div>
+        </AppListToolbarTrailing>
+      </AppListToolbar>
 
       <div className="space-y-4">
         <div className="rounded-md border border-border bg-card">

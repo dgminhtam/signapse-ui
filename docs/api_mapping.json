@@ -822,37 +822,6 @@
                 }
             }
         },
-        "/news-articles/{id}/analyze": {
-            "post": {
-                "tags": [
-                    "news-article-controller"
-                ],
-                "operationId": "analyzeContent",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int64"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "*/*": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/NewsArticleResponse"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/news-articles/derive-pending-news-events": {
             "post": {
                 "tags": [
@@ -3362,13 +3331,13 @@
             "PageWatchlistListResponse": {
                 "type": "object",
                 "properties": {
-                    "totalPages": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
                     "totalElements": {
                         "type": "integer",
                         "format": "int64"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32"
                     },
                     "size": {
                         "type": "integer",
@@ -3415,9 +3384,6 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
-                    "paged": {
-                        "type": "boolean"
-                    },
                     "pageSize": {
                         "type": "integer",
                         "format": "int32"
@@ -3425,6 +3391,9 @@
                     "pageNumber": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "paged": {
+                        "type": "boolean"
                     },
                     "unpaged": {
                         "type": "boolean"
@@ -3481,13 +3450,13 @@
             "PageSystemPromptResponse": {
                 "type": "object",
                 "properties": {
-                    "totalPages": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
                     "totalElements": {
                         "type": "integer",
                         "format": "int64"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32"
                     },
                     "size": {
                         "type": "integer",
@@ -3559,13 +3528,13 @@
             "PageNewsOutletListResponse": {
                 "type": "object",
                 "properties": {
-                    "totalPages": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
                     "totalElements": {
                         "type": "integer",
                         "format": "int64"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32"
                     },
                     "size": {
                         "type": "integer",
@@ -3653,13 +3622,13 @@
             "PageNewsArticleListResponse": {
                 "type": "object",
                 "properties": {
-                    "totalPages": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
                     "totalElements": {
                         "type": "integer",
                         "format": "int64"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32"
                     },
                     "size": {
                         "type": "integer",
@@ -3700,13 +3669,13 @@
             "PageMediaResponse": {
                 "type": "object",
                 "properties": {
-                    "totalPages": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
                     "totalElements": {
                         "type": "integer",
                         "format": "int64"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32"
                     },
                     "size": {
                         "type": "integer",
@@ -3793,13 +3762,13 @@
             "PageWorkspaceResponse": {
                 "type": "object",
                 "properties": {
-                    "totalPages": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
                     "totalElements": {
                         "type": "integer",
                         "format": "int64"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32"
                     },
                     "size": {
                         "type": "integer",
@@ -4029,13 +3998,13 @@
             "PageEventListResponse": {
                 "type": "object",
                 "properties": {
-                    "totalPages": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
                     "totalElements": {
                         "type": "integer",
                         "format": "int64"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32"
                     },
                     "size": {
                         "type": "integer",
@@ -4283,22 +4252,10 @@
                     "title": {
                         "type": "string"
                     },
-                    "description": {
+                    "currencyCode": {
                         "type": "string"
                     },
-                    "url": {
-                        "type": "string"
-                    },
-                    "externalKey": {
-                        "type": "string"
-                    },
-                    "provider": {
-                        "type": "string"
-                    },
-                    "countryCode": {
-                        "type": "string"
-                    },
-                    "importance": {
+                    "impact": {
                         "type": "string"
                     },
                     "forecastValue": {
@@ -4310,15 +4267,29 @@
                     "actualValue": {
                         "type": "string"
                     },
+                    "contentAvailable": {
+                        "type": "boolean"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "PENDING",
+                            "AVAILABLE"
+                        ]
+                    },
                     "scheduledAt": {
                         "type": "string",
                         "format": "date-time"
                     },
-                    "ingestedAt": {
+                    "syncedAt": {
                         "type": "string",
                         "format": "date-time"
                     },
                     "createdDate": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "lastModifiedDate": {
                         "type": "string",
                         "format": "date-time"
                     }
@@ -4327,13 +4298,13 @@
             "PageEconomicCalendarListResponse": {
                 "type": "object",
                 "properties": {
-                    "totalPages": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
                     "totalElements": {
                         "type": "integer",
                         "format": "int64"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32"
                     },
                     "size": {
                         "type": "integer",
@@ -4380,25 +4351,10 @@
                     "title": {
                         "type": "string"
                     },
-                    "description": {
+                    "currencyCode": {
                         "type": "string"
                     },
-                    "rawContent": {
-                        "type": "string"
-                    },
-                    "url": {
-                        "type": "string"
-                    },
-                    "externalKey": {
-                        "type": "string"
-                    },
-                    "provider": {
-                        "type": "string"
-                    },
-                    "countryCode": {
-                        "type": "string"
-                    },
-                    "importance": {
+                    "impact": {
                         "type": "string"
                     },
                     "forecastValue": {
@@ -4410,16 +4366,26 @@
                     "actualValue": {
                         "type": "string"
                     },
+                    "content": {
+                        "type": "string"
+                    },
+                    "contentAvailable": {
+                        "type": "boolean"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "PENDING",
+                            "AVAILABLE"
+                        ]
+                    },
                     "scheduledAt": {
                         "type": "string",
                         "format": "date-time"
                     },
-                    "ingestedAt": {
+                    "syncedAt": {
                         "type": "string",
                         "format": "date-time"
-                    },
-                    "rawMetadata": {
-                        "type": "string"
                     },
                     "createdDate": {
                         "type": "string",
@@ -4435,13 +4401,13 @@
             "PageCronjobResponse": {
                 "type": "object",
                 "properties": {
-                    "totalPages": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
                     "totalElements": {
                         "type": "integer",
                         "format": "int64"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32"
                     },
                     "size": {
                         "type": "integer",
@@ -4511,13 +4477,13 @@
             "PageBlogPostListResponse": {
                 "type": "object",
                 "properties": {
-                    "totalPages": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
                     "totalElements": {
                         "type": "integer",
                         "format": "int64"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32"
                     },
                     "size": {
                         "type": "integer",
@@ -4582,13 +4548,13 @@
             "PageAssetListResponse": {
                 "type": "object",
                 "properties": {
-                    "totalPages": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
                     "totalElements": {
                         "type": "integer",
                         "format": "int64"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32"
                     },
                     "size": {
                         "type": "integer",
@@ -4661,13 +4627,13 @@
             "PageAiProviderConfigResponse": {
                 "type": "object",
                 "properties": {
-                    "totalPages": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
                     "totalElements": {
                         "type": "integer",
                         "format": "int64"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32"
                     },
                     "size": {
                         "type": "integer",

@@ -5,11 +5,13 @@ import {
   Settings2,
 } from "lucide-react"
 
+import { ECONOMIC_CALENDAR_NAV_PERMISSIONS } from "@/app/lib/economic-calendar/permissions"
 import { EVENT_NAV_PERMISSIONS } from "@/app/lib/events/permissions"
 import { GRAPH_VIEW_NAV_PERMISSIONS } from "@/app/lib/graph-view/permissions"
 import { MARKET_QUERY_NAV_PERMISSIONS } from "@/app/lib/market-query/permissions"
 import { NEWS_ARTICLE_NAV_PERMISSIONS } from "@/app/lib/news-articles/permissions"
 import { NEWS_OUTLET_NAV_PERMISSIONS } from "@/app/lib/news-outlets/permissions"
+import { SYSTEM_PROMPT_NAV_PERMISSIONS } from "@/app/lib/system-prompts/permissions"
 
 export interface NavSubItem {
   title: string
@@ -46,43 +48,48 @@ export const siteConfig = {
     {
       name: "Signapse",
       logo: GalleryVerticalEnd,
-      plan: "Trang quan tri",
+      plan: "Trang quản trị",
     },
   ],
   brand: {
     name: "Signapse",
     logo: GalleryVerticalEnd,
-    subtitle: "Trang quan tri",
+    subtitle: "Trang quản trị",
   },
   navMain: [
     {
-      title: "Bieu do tri thuc",
+      title: "Biểu đồ tri thức",
       url: "/graph-view",
       icon: LayoutDashboard,
       permission: GRAPH_VIEW_NAV_PERMISSIONS,
     },
     {
-      title: "Noi dung",
+      title: "Nội dung",
       url: "#",
       icon: Newspaper,
       items: [
         {
-          title: "Nguon tin",
+          title: "Nguồn tin",
           url: "/news-outlets",
           permission: NEWS_OUTLET_NAV_PERMISSIONS,
         },
         {
-          title: "Bai viet tin tuc",
+          title: "Tài liệu nguồn",
           url: "/news-articles",
           permission: NEWS_ARTICLE_NAV_PERMISSIONS,
         },
         {
-          title: "Su kien",
+          title: "Sự kiện",
           url: "/events",
           permission: EVENT_NAV_PERMISSIONS,
         },
         {
-          title: "Truy van thi truong",
+          title: "Lịch kinh tế",
+          url: "/economic-calendar",
+          permission: ECONOMIC_CALENDAR_NAV_PERMISSIONS,
+        },
+        {
+          title: "Truy vấn thị trường",
           url: "/market-query",
           permission: MARKET_QUERY_NAV_PERMISSIONS,
         },
@@ -94,27 +101,32 @@ export const siteConfig = {
       ],
     },
     {
-      title: "Cai dat",
+      title: "Cài đặt",
       url: "#",
       icon: Settings2,
       items: [
         {
-          title: "Nha cung cap AI",
+          title: "Nhà cung cấp AI",
           url: "/ai-provider-configs",
           permission: "ai-provider-config:read",
         },
         {
-          title: "Tac vu dinh ky",
+          title: "Prompt hệ thống",
+          url: "/system-prompts",
+          permission: SYSTEM_PROMPT_NAV_PERMISSIONS,
+        },
+        {
+          title: "Tác vụ định kỳ",
           url: "/cronjobs",
           permission: "cronjob:read",
         },
         {
-          title: "Vai tro",
+          title: "Vai trò",
           url: "/roles",
           permission: "role:update",
         },
         {
-          title: "Token nha phat trien",
+          title: "Token nhà phát triển",
           url: "/developer-token",
         },
       ],

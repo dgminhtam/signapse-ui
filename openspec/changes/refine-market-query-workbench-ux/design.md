@@ -1,172 +1,214 @@
 ## Context
 
-`/market-query` already exists as a protected, stateless workbench for one-shot grounded analysis. The first release solved the core contract and rendering path, but the current UI still carries onboarding copy, helper panels, and permission feedback that were useful while shaping the feature and are now competing with the actual analysis result.
+`/market-query` already exists as a protected, stateless workbench for one-shot grounded analysis. The first release solved the core API contract and rendering path, but the current screen still feels like a feature demo rather than an operator-focused analysis surface.
 
-The review surfaced three concrete operator-experience problems:
+The latest UI/UX review surfaced five important issues that should be captured in this change:
 
-- the page repeats the same guidance in the route description, hero copy, side panel, and empty state
-- running a second query leaves the previous briefing visible until the new response arrives, which can misrepresent which question the user is currently executing
-- some secondary metadata and disabled permission controls occupy more visual weight than the answer and evidence that operators most need to verify
+- Vietnamese UI copy in the market-query route and related labels is corrupted by mojibake or inconsistent unaccented text.
+- The route-level `CardHeader` and the inner workbench hero compete for the same orientation job.
+- Completed results use too many equally weighted card-like surfaces, causing the answer, trust signals, evidence, events, and reasoning to visually compete.
+- Evidence drill-down still uses legacy `news-articles` wording/routes in places where the product model has moved toward SourceDocument.
+- The main workbench component has grown large enough that UI iteration is risky without local decomposition.
 
-Follow-up review with a UI/UX audit lens highlighted several adjacent gaps that should be resolved in the same pass:
-
-- the UI does not yet define how the active question stays visible across running, success, and failure states
-- a failed resubmission after a successful query needs an explicit rule so operators do not confuse "current run failed" with "current result is still valid"
-- toast-only completion and error feedback is weak for a tall, dense workbench where the user's reading position may be far from the newly changed content
-- responsive behavior should intentionally preserve composer, active query context, answer, and trust signals before lower-priority supporting detail
-
-This change builds on the existing `add-market-query-workbench` work without changing the backend API, route, or permission model. The work is frontend-only and must stay aligned with repo conventions around Card shells, shadcn composition, Vietnamese copy, and explicit loading feedback.
+This change remains frontend-only. It must preserve the existing `POST /query` contract, the protected route, and Signapse conventions around Card shells, shadcn composition, professional Vietnamese UI copy, and explicit loading feedback.
 
 ## Goals / Non-Goals
 
 **Goals:**
-- Make the workbench faster to understand on first open by removing duplicated guidance and prompt modules.
-- Ensure the running state for a new query is unambiguous and never reuses stale briefing content as if it belonged to the new question.
-- Keep the active query visible and legible through running, success, and failure transitions.
-- Rebalance the information hierarchy so operators can scan answer quality and supporting evidence before static explanations or debug-like metadata.
-- Keep permission-aware traceability useful without repeating disabled actions across every evidence item.
-- Improve in-page completion and error visibility for keyboard, screen-reader, and long-page usage.
-- Preserve the primary decision path on narrower layouts by keeping the composer, current query context, answer, and trust signals above lower-priority material.
-- Preserve the route's stateless, one-shot nature and existing backend contract.
+
+- Restore all market-query user-facing copy to readable, professional Vietnamese.
+- Make the first-run experience faster by removing duplicated guidance and the competing inner hero.
+- Ensure running, success, and failure states clearly identify the active submitted question.
+- Prevent stale previous results from reading as the active answer during a new query.
+- Flatten the completed-result layout so the answer, confidence, limitations, and evidence form the primary decision path.
+- Keep key events and reasoning available but visually secondary to answer quality and evidence.
+- Align evidence labels and internal drill-downs with the SourceDocument mental model.
+- Keep permission-aware traceability informative without repeating noisy disabled controls.
+- Split the large workbench into focused local feature components after the target layout is clear.
+- Preserve narrow-layout reading order: composer, active query context, answer, trust signals, evidence, then lower-priority supporting detail.
 
 **Non-Goals:**
-- Adding query history, conversation threads, exports, or streaming results.
-- Changing `POST /query`, the result schema, or backend permission semantics.
-- Introducing a new route or navigation pattern for market analysis.
-- Hiding all low-level metadata from power users; the goal is to demote it from the primary scan path, not erase it entirely.
+
+- Changing `POST /query`, response schemas, or backend permissions.
+- Adding query history, conversation threads, streaming, exports, or saved queries.
+- Reworking the global visual system or editing shadcn primitives.
+- Creating shared dashboard abstractions for market-query-only UI.
+- Removing all metadata from power users; the goal is to demote internal-looking fallback metadata, not erase useful context.
 
 ## Decisions
 
-### 1. Model the client surface around explicit run phases
-The workbench will distinguish between at least three user-visible phases: first-run idle, query in progress, and latest completed result. On submission, the UI will immediately transition away from treating the previous result as the active answer for the newly entered question.
+### 1. Treat copy encoding as a first-class UX requirement
+
+Market-query copy must be corrected before layout polish is evaluated. This includes the route shell, workbench copy, prompt examples, validation errors, toast messages, artifact/evidence labels, and sidebar/navigation strings that affect entry into this screen.
 
 Why:
-- The current "leave old result in place until new data returns" behavior creates a trust problem.
-- A workbench can tolerate temporary emptiness during a run more easily than it can tolerate ambiguity about which result belongs to which query.
+- Broken Vietnamese copy undermines trust more than spacing or card hierarchy.
+- The repo requires professional Vietnamese UI text.
 
 Alternatives considered:
-- Keep the current result visible and rely on button spinners alone.
-- Rejected because it preserves the ambiguity that triggered the review finding.
-- Keep the old result visible behind a small loading badge.
-- Rejected because the old briefing still dominates the viewport and reads as current output.
+- Leave copy cleanup for a separate pass.
+- Rejected because the screen cannot be judged as production-grade while major labels are corrupted.
 
-### 2. Preserve the latest successful result only as historical context after a failed resubmission
-If a new query fails after a previous query succeeded, the UI will surface the failed attempt as the current state and may retain the last successful result only as clearly labeled prior context. The earlier briefing must not appear as though it answers the failed question.
+### 2. Keep the route CardHeader as the page orientation
+
+The page-level `CardHeader` owns the title and description. The client workbench should begin with a query composer and concise examples, not a second H1-style hero with product-level badges and repeated description.
 
 Why:
-- Operators often retry adjacent questions and still need the last successful output for reference.
-- Throwing away the last successful briefing entirely would reduce usefulness, but leaving it visually primary would blur state ownership.
+- The current nested hero forces users to parse two introductions before they can act.
+- `/market-query` is an operator tool, so the primary action should appear quickly.
+
+Alternatives considered:
+- Keep both headers and shorten the copy.
+- Rejected because the visual competition remains.
+- Move all page orientation into the client workbench.
+- Rejected because repo page conventions expect the route Card shell to own title and description.
+
+### 3. Model the client surface around explicit run phases
+
+The workbench distinguishes first-run idle, running, successful result, and error states. On submission, the UI immediately stops treating the previous briefing as the active result for the newly submitted question.
+
+Why:
+- Leaving the old result in place during a new request creates a trust problem.
+- It is better to show a deliberate running state than to make users infer whether a result is stale.
+
+Alternatives considered:
+- Keep the old result visible and rely on button spinners.
+- Rejected because it preserves ambiguity.
+- Keep the old result visible behind a small loading badge.
+- Rejected because the old briefing still dominates the viewport.
+
+### 4. Preserve the latest successful result only as historical context after a failed resubmission
+
+If a new query fails after a previous query succeeded, the failed attempt becomes the current state. The earlier briefing may remain available only as clearly labeled prior context.
+
+Why:
+- Operators may still need the last successful output while iterating.
+- The UI must not imply that an old answer belongs to the failed question.
 
 Alternatives considered:
 - Discard the previous successful result immediately on failure.
-- Rejected because it removes still-useful analytical context during iterative work.
-- Keep the previous successful result unchanged and rely on a toast or inline error message.
-- Rejected because it preserves the ambiguity between current run status and last successful output.
+- Rejected because it removes useful context.
+- Keep the previous successful result unchanged with only a toast error.
+- Rejected because it blurs current failure and prior success.
 
-### 3. Consolidate guidance into one primary entry path
-The route will keep a concise page description and one primary first-run guidance surface. Example prompts should appear once in the initial experience, not in multiple stacked modules. After a result exists, helper space should shift to contextual query metadata or disappear entirely.
+### 5. Flatten result surfaces instead of stacking many equal cards
 
-Why:
-- Operators need to act quickly; repeated explanatory copy slows the first action without improving comprehension proportionally.
-- Prompt suggestions are valuable, but duplication makes the page feel longer and noisier than necessary.
-
-Alternatives considered:
-- Preserve the current hero, side panel, and lower empty state together.
-- Rejected because they restate the same product story with little incremental value.
-- Remove all guidance and show only a textarea.
-- Rejected because the feature still benefits from one concise orientation block and example prompts.
-
-### 4. Keep active query context visible throughout the workbench state transitions
-The running state, completed-result view, and error view will all keep a clear textual reference to the query they apply to. The page should never make the operator infer which question the visible status belongs to.
+The completed result should use one dominant answer surface, a lighter trust-signal rail or metadata cluster, an evidence list/table-like surface, and lower-emphasis supporting sections for key events and reasoning. Avoid wrapping every subsection in the same rounded border, padding, and shadow treatment.
 
 Why:
-- In a one-shot workbench, the question is the anchor for interpreting every subsequent state.
-- This becomes even more important once duplicated onboarding copy is removed.
+- Equal-weight cards make everything look equally important.
+- The current nested-card feeling increases visual work without adding information value.
 
 Alternatives considered:
-- Show the query only inside the textarea value.
-- Rejected because the user may edit the textarea while inspecting a prior or in-flight result, which breaks the state association.
+- Keep the current card stack but reduce copy.
+- Rejected because visual competition remains.
+- Remove all section boundaries.
+- Rejected because evidence, trust signals, and reasoning still need clear grouping.
 
-### 5. Reorder the briefing toward evidence-backed decision support
-The completed result should foreground the final answer, confidence, limitations, and evidence before lower-priority supporting material. `Sự kiện trọng yếu` and `Quá trình tổng hợp` remain available, but they should not outrank evidence in either spatial prominence or reading order.
+### 6. Reorder the briefing toward evidence-backed decision support
+
+The completed result foregrounds the final answer, confidence, limitations, and evidence before lower-priority supporting material. Key events and reasoning remain available but should not outrank evidence in spatial prominence or reading order.
 
 Why:
 - The answer tells the operator the conclusion.
 - Confidence and limitations tell them how much to trust it.
 - Evidence tells them why they should trust it.
-- Events and reasoning remain useful, but they are secondary to validation.
+- Events and reasoning are useful but secondary to validation.
 
 Alternatives considered:
-- Keep the current section ordering.
-- Rejected because it gives equivalent or greater emphasis to panels that are less central to operator verification.
+- Keep the current section order and visual weight.
+- Rejected because it gives equivalent emphasis to less central modules.
 
-### 6. Replace repetitive disabled controls with compact permission cues
-When users lack `event:read` or `source-document:read`, the UI should preserve analytical metadata but avoid rendering repeated disabled buttons inside each evidence row. Instead, it should use compact non-interactive cues or short supporting text that explains why the drill-down is unavailable.
+### 7. Align evidence navigation with SourceDocument
+
+Evidence rows should use SourceDocument-oriented labels and internal routes when they refer to backend source-document artifacts. Legacy `news-articles` routes can remain only as compatibility plumbing if the current app still redirects there; the market-query UI should not make NEWS-only assumptions for all evidence.
+
+Why:
+- The product model has moved from article-centric wording toward SourceDocument.
+- Market-query evidence can represent more than one artifact type.
+
+Alternatives considered:
+- Keep `/news-articles/{id}` as the only internal evidence route.
+- Rejected because it keeps traceability coupled to legacy naming.
+- Link every evidence item only to the original external URL.
+- Rejected because internal drill-down remains valuable for authorized operators.
+
+### 8. Replace repetitive disabled controls with compact permission cues
+
+When users lack `event:read` or `source-document:read`, the UI preserves analytical metadata but avoids repeated disabled action buttons inside every evidence row. Use compact non-interactive cues or short supporting text instead.
 
 Why:
 - Repeated disabled buttons add noise without creating an actionable next step.
-- Preserving the metadata still respects the decision that query output itself is readable to authorized market-query users.
+- Preserving metadata still respects the query output as readable analytical context.
 
 Alternatives considered:
 - Keep disabled buttons for every inaccessible action.
 - Rejected because the list becomes visually heavy and repetitive.
-- Hide the related metadata entirely.
-- Rejected because it removes analytical context that belongs to the query output.
+- Hide related metadata entirely.
+- Rejected because it removes analytical context.
 
-### 7. Demote raw internal-looking metadata from primary labels
-Raw IDs, slugs, or other fallback values may still appear when the backend lacks richer labels, but they should not occupy primary headline space unless they are the only usable identifier. When used, they should be rendered as subdued fallback metadata rather than the main takeaway of a card.
+### 9. Add explicit in-page announcement and focus strategy for result-state changes
 
-Why:
-- Operators scan for semantic meaning first, not internal identifiers.
-- Internal-looking fallback text is sometimes necessary, but it should feel like a fallback.
-
-Alternatives considered:
-- Continue showing raw fallback values as primary titles or primary chip sets.
-- Rejected because it makes the page feel more diagnostic than operational.
-
-### 8. Add explicit in-page announcement and focus strategy for result-state changes
-The workbench will not rely on toast notifications alone to communicate completion or failure. It should provide in-page state messaging and move the user's attention predictably toward the updated result or error region through focus management, viewport positioning, or another deliberate announcement pattern.
+The workbench should not rely on toast notifications alone. It should provide in-page state messaging and move attention predictably toward the updated result or error region through focus management, viewport positioning, or an equivalent announcement pattern.
 
 Why:
 - Toasts are transient and easy to miss on long pages.
-- Keyboard and assistive-technology users need a stronger signal that the state changed.
+- Keyboard and assistive-technology users need a stronger signal that state changed.
 
 Alternatives considered:
-- Keep current toast-only signaling.
-- Rejected because it does not reliably communicate where new content appeared or which state changed.
+- Keep toast-only signaling.
+- Rejected because it does not reliably communicate where new content appeared.
 
-### 9. Preserve a mobile and narrow-layout reading order that keeps the decision path first
-On narrower viewports, the page should keep the composer, active query context, answer, confidence, limitations, and evidence ahead of lower-priority explanatory or supporting modules. The layout may stack, but the reading order must remain intentional.
+### 10. Split the workbench after the target layout is defined
+
+Keep state orchestration in the main workbench component, then extract presentational regions into local feature components such as composer, query state, answer/trust panel, evidence list, key event cards, and reasoning panel.
 
 Why:
-- Responsive collapse alone does not guarantee useful scan order.
-- Operational tools still need an explicit above-the-fold priority on smaller screens.
+- The current file size makes visual refactors likely to touch unrelated behavior.
+- Local extraction improves reviewability without prematurely creating shared abstractions.
 
 Alternatives considered:
-- Let the existing desktop section order stack naturally on smaller screens.
-- Rejected because the resulting order may preserve decorative or explanatory content ahead of the most decision-relevant output.
+- Leave the file monolithic until more features are added.
+- Rejected because the current UX work already needs multiple layout passes.
+- Create shared dashboard components immediately.
+- Rejected because these pieces are still market-query-specific.
+
+### 11. Preserve mobile and narrow-layout decision order
+
+On narrower viewports, the page should keep the composer, active query context, answer, confidence, limitations, and evidence ahead of lower-priority explanatory or supporting modules.
+
+Why:
+- Responsive stacking alone does not guarantee useful scan order.
+- Operational tools need explicit above-the-fold priority on smaller screens.
+
+Alternatives considered:
+- Let the desktop order stack naturally.
+- Rejected because decorative or secondary content may appear before decision-critical output.
 
 ## Risks / Trade-offs
 
-- [Reducing guidance may hurt discoverability for first-time users] -> Keep one concise orientation block and a single prompt-suggestion module.
-- [Clearing stale results may make the page feel briefly emptier during long requests] -> Replace old content with a deliberate running state tied to the submitted question so the empty interval still feels informative.
-- [Showing the last successful result after a failed retry may still confuse some users] -> Label it explicitly as previous successful output and separate it visually from the current failure state.
-- [Demoting metadata may frustrate power users who want every field visible] -> Keep secondary metadata available, but move it out of the primary scan path.
-- [Changing section order may surprise users familiar with the current page] -> Preserve section labels and overall workbench structure while improving emphasis rather than redesigning the route from scratch.
-- [Extra focus movement may feel jarring] -> Move attention only to major state changes and keep the motion or jump bounded to the relevant result or error region.
+- [Reducing guidance may hurt first-time discoverability] -> Keep one concise orientation path and one prompt-suggestion module.
+- [Clearing stale results may make long requests feel emptier] -> Replace old content with a deliberate running state tied to the submitted question.
+- [Showing the last successful result after a failed retry may still confuse some users] -> Label it explicitly as previous successful output and separate it visually from the current failure.
+- [Flattening surfaces too aggressively may reduce grouping] -> Keep semantic sections and separators, but vary visual weight.
+- [Demoting metadata may frustrate power users] -> Keep secondary metadata available outside the primary scan path.
+- [SourceDocument routes may currently redirect through compatibility routes] -> Use SourceDocument wording in UI and isolate route compatibility behind small helpers.
+- [Component extraction can create churn] -> Extract only local feature components with clear ownership.
+- [Focus movement may feel jarring] -> Move attention only on major state changes and respect reduced-motion behavior.
 
 ## Migration Plan
 
-1. Update the client state model in `market-query-workbench.tsx` so resubmission has an explicit running state.
-2. Define how failed resubmissions preserve prior successful context without mislabeling it as the current answer.
-3. Simplify duplicated guidance and empty-state content while preserving one first-run prompt module.
-4. Rebalance completed-result layout and permission-aware evidence affordances.
-5. Add explicit result and error announcement behavior and verify narrow-layout reading order.
-6. Verify idle, running, completed, failed-resubmission, and permission-restricted flows locally.
+1. Correct corrupted Vietnamese copy in market-query UI, labels, validation, toast, and related navigation strings.
+2. Remove the competing inner hero and make the composer the first meaningful workbench region.
+3. Preserve and clarify explicit run phases for idle, running, success, and failed resubmission.
+4. Flatten completed-result surfaces and rebalance answer, trust signals, evidence, events, and reasoning.
+5. Align evidence drill-down labels/routes with SourceDocument-oriented traceability.
+6. Extract local presentational components after the target layout is stable.
+7. Verify idle, running, completed, failed-resubmission, permission-restricted, and narrow-layout flows locally.
 
 Rollback strategy:
-- Revert the route-level UI changes in `app/(main)/market-query/*`; no backend rollback or data migration is required.
+- Revert the frontend files under `app/(main)/market-query/*`, related market-query labels, and navigation copy; no backend rollback or data migration is required.
 
 ## Open Questions
 
-- None at the moment; the review findings are specific enough to translate directly into implementation tasks.
+- Whether SourceDocument detail should use `/source-documents/{id}` directly or keep the current compatibility redirect during this change. The UI copy should still use SourceDocument wording either way.

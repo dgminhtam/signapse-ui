@@ -21,6 +21,11 @@ import {
   SOURCE_TYPE_LABELS,
   SourceListResponse,
 } from "@/app/lib/sources/definitions"
+import {
+  AppListToolbar,
+  AppListToolbarLeading,
+  AppListToolbarTrailing,
+} from "@/components/app-list-toolbar"
 import { AppPaginationControls } from "@/components/app-pagination-controls"
 import { useHasPermission } from "@/components/permission-provider"
 import { SortSelect } from "@/components/sort-select"
@@ -108,8 +113,8 @@ export function SourceListPage({ sourcePage }: SourceListProps) {
 
   return (
     <div className="w-full">
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex w-full flex-1 items-center gap-4 sm:w-auto">
+      <AppListToolbar>
+        <AppListToolbarLeading>
           {canCreateSource ? (
             <Button asChild>
               <Link href="/sources/create">
@@ -118,18 +123,20 @@ export function SourceListPage({ sourcePage }: SourceListProps) {
             </Button>
           ) : null}
           <SourceSearch />
-        </div>
-        <div className="flex items-center gap-2">
+        </AppListToolbarLeading>
+        <AppListToolbarTrailing>
           <SortSelect
+            className="w-full sm:w-auto"
             options={[
               { label: "Mới tạo", value: "id_desc" },
               { label: "Cũ hơn", value: "id_asc" },
               { label: "Tên A-Z", value: "name_asc" },
               { label: "Ingest mới nhất", value: "lastIngestedAt_desc" },
             ]}
+            triggerClassName="w-full sm:w-[200px]"
           />
-        </div>
-      </div>
+        </AppListToolbarTrailing>
+      </AppListToolbar>
 
       <div className="space-y-4">
         <div className="rounded-md border border-border bg-card">

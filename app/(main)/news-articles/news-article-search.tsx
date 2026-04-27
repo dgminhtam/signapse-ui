@@ -2,44 +2,56 @@
 
 import { Search } from "lucide-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useState, useTransition } from "react"
+import { useEffect, useState, useTransition } from "react"
 import { useDebouncedCallback } from "use-debounce"
 
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
+
+const SEARCH_PARAM_KEY = "title[containsIgnoreCase]"
+const SEARCH_INPUT_ID = "news-article-search"
 
 export function NewsArticleSearch() {
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const { replace } = useRouter()
   const [isPending, startTransition] = useTransition()
-  const [value, setValue] = useState(searchParams.get("title[containsIgnoreCase]") || "")
+  const currentSearch = searchParams.get(SEARCH_PARAM_KEY)?.toString() || ""
+  const [value, setValue] = useState(currentSearch)
+
+  useEffect(() => {
+    setValue(currentSearch)
+  }, [currentSearch])
 
   const handleSearch = useDebouncedCallback((term: string) => {
+    const trimmedTerm = term.trim()
     const params = new URLSearchParams(searchParams)
     params.set("page", "1")
 
-    if (term.trim()) {
-      params.set("title[containsIgnoreCase]", term.trim())
+    if (trimmedTerm) {
+      params.set(SEARCH_PARAM_KEY, trimmedTerm)
     } else {
-      params.delete("title[containsIgnoreCase]")
+      params.delete(SEARCH_PARAM_KEY)
     }
 
+    const query = params.toString()
+
     startTransition(() => {
-      replace(`${pathname}?${params.toString()}`)
+      replace(query ? `${pathname}?${query}` : pathname)
     })
   }, 300)
 
   return (
-    <div className="relative flex flex-1 shrink-0">
-      <label htmlFor="news-article-search" className="sr-only">
-        Tim bai viet tin tuc
+    <div className="relative flex w-full sm:w-80 lg:w-96">
+      <label htmlFor={SEARCH_INPUT_ID} className="sr-only">
+        Tìm bài viết tin tức
       </label>
       <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
       <Input
-        id="news-article-search"
+        id={SEARCH_INPUT_ID}
+        type="search"
         className="pl-9 pr-10"
-        placeholder="Tim theo tieu de bai viet..."
+        placeholder="Tìm theo tiêu đề bài viết..."
         value={value}
         onChange={(event) => {
           setValue(event.target.value)

@@ -2,7 +2,15 @@
 
 import * as React from "react"
 import { Dialog as DialogPrimitive } from "radix-ui"
-import { CheckIcon, ChevronsUpDownIcon, PencilIcon, PlusIcon, XIcon } from "lucide-react"
+import {
+  BriefcaseBusinessIcon,
+  CheckIcon,
+  ChevronsUpDownIcon,
+  ListPlusIcon,
+  PencilIcon,
+  PlusIcon,
+  XIcon,
+} from "lucide-react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 
@@ -23,57 +31,79 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar"
+import { Spinner } from "@/components/ui/spinner"
+import { cn } from "@/lib/utils"
+
+import { WorkspaceWatchlistEditor } from "./workspace-watchlist-editor"
 
 interface WorkspaceSwitcherProps {
   workspaces: WorkspaceResponse[]
   activeWorkspace: WorkspaceResponse | null
-  logo: React.ElementType
   canCreateWorkspace: boolean
   canRenameWorkspace: boolean
   canSetDefaultWorkspace: boolean
+  canReadAsset: boolean
+  canReadWatchlist: boolean
+  canCreateWatchlist: boolean
+  canDeleteWatchlist: boolean
+  className?: string
 }
 
 export function WorkspaceSwitcher({
   workspaces,
   activeWorkspace,
-  logo: Logo,
   canCreateWorkspace,
   canRenameWorkspace,
   canSetDefaultWorkspace,
+  canReadAsset,
+  canReadWatchlist,
+  canCreateWatchlist,
+  canDeleteWatchlist,
+  className,
 }: WorkspaceSwitcherProps) {
   const router = useRouter()
-  const { isMobile } = useSidebar()
   const [isPending, startTransition] = React.useTransition()
-
   const [isCreateOpen, setIsCreateOpen] = React.useState(false)
+  const [isRenameOpen, setIsRenameOpen] = React.useState(false)
+  const [isWatchlistOpen, setIsWatchlistOpen] = React.useState(false)
   const [createName, setCreateName] = React.useState("")
   const [createSlug, setCreateSlug] = React.useState("")
-
-  const [isRenameOpen, setIsRenameOpen] = React.useState(false)
   const [renameName, setRenameName] = React.useState("")
   const [renameSlug, setRenameSlug] = React.useState("")
 
-  React.useEffect(() => {
-    if (!isRenameOpen || !activeWorkspace) return
-    setRenameName(activeWorkspace.name ?? "")
-    setRenameSlug(activeWorkspace.slug ?? "")
-  }, [activeWorkspace, isRenameOpen])
+  const canManageWatchlist =
+    !!activeWorkspace &&
+    canReadAsset &&
+    canReadWatchlist &&
+    canCreateWatchlist &&
+    canDeleteWatchlist
 
   async function handleSwitchWorkspace(workspace: WorkspaceResponse) {
-    if (!canSetDefaultWorkspace || !activeWorkspace || workspace.id === activeWorkspace.id) {
+    if (!canSetDefaultWorkspace || workspace.id === activeWorkspace?.id) {
       return
     }
 
     startTransition(async () => {
       const result = await setDefaultWorkspace(workspace.id)
+
       if (!result.success) {
         toast.error(result.error)
         return
       }
-      toast.success(`Đã chuyển sang workspace "${workspace.name}"`)
+
+      toast.success(`Đã chuyển sang không gian làm việc "${workspace.name}".`)
       router.refresh()
     })
+  }
+
+  function openRenameDialog() {
+    if (!activeWorkspace) {
+      return
+    }
+
+    setRenameName(activeWorkspace.name ?? "")
+    setRenameSlug(activeWorkspace.slug ?? "")
+    setIsRenameOpen(true)
   }
 
   async function handleCreateWorkspace() {
@@ -85,7 +115,7 @@ export function WorkspaceSwitcher({
     const slug = createSlug.trim()
 
     if (!name) {
-      toast.error("Vui lòng nhập tên workspace")
+      toast.error("Vui lòng nhập tên không gian làm việc.")
       return
     }
 
@@ -100,7 +130,7 @@ export function WorkspaceSwitcher({
         return
       }
 
-      toast.success("Tạo workspace thành công")
+      toast.success("Đã tạo không gian làm việc.")
       setCreateName("")
       setCreateSlug("")
       setIsCreateOpen(false)
@@ -114,7 +144,7 @@ export function WorkspaceSwitcher({
     }
 
     if (activeWorkspace.personal) {
-      toast.error("Workspace cá nhân không hỗ trợ đổi tên")
+      toast.error("Không gian làm việc cá nhân không hỗ trợ đổi tên.")
       return
     }
 
@@ -122,7 +152,7 @@ export function WorkspaceSwitcher({
     const slug = renameSlug.trim()
 
     if (!name) {
-      toast.error("Vui lòng nhập tên workspace")
+      toast.error("Vui lòng nhập tên không gian làm việc.")
       return
     }
 
@@ -137,210 +167,244 @@ export function WorkspaceSwitcher({
         return
       }
 
-      toast.success("Cập nhật workspace thành công")
+      toast.success("Đã cập nhật không gian làm việc.")
       setIsRenameOpen(false)
       router.refresh()
     })
   }
 
-
   return (
     <>
-      <SidebarMenu>
-        <SidebarMenuItem>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <SidebarMenuButton
-                size="lg"
-                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-              >
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <Logo />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">
-                    {activeWorkspace?.name ?? "No Workspace selected"}
-                  </span>
-                  <span className="truncate text-xs">
-                    {activeWorkspace
-                      ? (activeWorkspace.personal ? "Personal workspace" : activeWorkspace.slug)
-                      : "Please select or create one"}
-                  </span>
-                </div>
-                <ChevronsUpDownIcon className="ml-auto" />
-              </SidebarMenuButton>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-              align="start"
-              side={isMobile ? "bottom" : "right"}
-              sideOffset={4}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            type="button"
+            variant="outline"
+            className={cn(
+              "h-10 max-w-full justify-between gap-3 px-3 md:min-w-64",
+              className
+            )}
+          >
+            <span className="flex min-w-0 items-center gap-2">
+              <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                <BriefcaseBusinessIcon className="size-4" />
+              </span>
+              <span className="flex min-w-0 flex-col items-start leading-tight">
+                <span className="text-xs text-muted-foreground">Không gian làm việc</span>
+                <span className="max-w-44 truncate text-sm font-medium md:max-w-52">
+                  {activeWorkspace?.name ?? "Chưa chọn"}
+                </span>
+              </span>
+            </span>
+            {isPending ? (
+              <Spinner className="size-4" />
+            ) : (
+              <ChevronsUpDownIcon className="size-4 text-muted-foreground" />
+            )}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-72" align="end">
+          <DropdownMenuLabel>Không gian làm việc</DropdownMenuLabel>
+          <DropdownMenuGroup>
+            {workspaces.length > 0 ? (
+              workspaces.map((workspace) => {
+                const isSelected = activeWorkspace?.id === workspace.id
+
+                return (
+                  <DropdownMenuItem
+                    key={workspace.id}
+                    disabled={isPending || !canSetDefaultWorkspace}
+                    onClick={() => void handleSwitchWorkspace(workspace)}
+                    className="gap-2 p-2"
+                  >
+                    <div className="flex size-8 items-center justify-center rounded-md border bg-muted/40">
+                      <BriefcaseBusinessIcon className="size-4 text-muted-foreground" />
+                    </div>
+                    <div className="flex min-w-0 flex-1 flex-col">
+                      <span className="truncate font-medium">{workspace.name}</span>
+                      <span className="truncate text-xs text-muted-foreground">
+                        {workspace.personal ? "Cá nhân" : workspace.slug}
+                      </span>
+                    </div>
+                    {isSelected ? <CheckIcon className="size-4 text-primary" /> : null}
+                  </DropdownMenuItem>
+                )
+              })
+            ) : (
+              <DropdownMenuItem disabled className="p-2 text-muted-foreground">
+                Chưa có không gian làm việc
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuGroup>
+
+          <DropdownMenuSeparator
+            className={
+              !canCreateWorkspace && !canRenameWorkspace && !canManageWatchlist
+                ? "hidden"
+                : ""
+            }
+          />
+
+          <DropdownMenuGroup>
+            <DropdownMenuItem
+              className={canCreateWorkspace ? "gap-2 p-2" : "hidden"}
+              onSelect={(event) => {
+                event.preventDefault()
+                setIsCreateOpen(true)
+              }}
             >
-              <DropdownMenuLabel className="text-xs text-muted-foreground">
-                Workspaces
-              </DropdownMenuLabel>
-              <DropdownMenuGroup>
-                {workspaces.map((workspace) => {
-                  const isSelected = activeWorkspace?.id === workspace.id
-                  return (
-                    <DropdownMenuItem
-                      key={workspace.id}
-                      disabled={isPending || !canSetDefaultWorkspace}
-                      onClick={() => handleSwitchWorkspace(workspace)}
-                      className="gap-2 p-2"
-                    >
-                      <div className="flex size-6 items-center justify-center rounded-md border">
-                        <Logo />
-                      </div>
-                      <div className="flex min-w-0 flex-1 flex-col">
-                        <span className="truncate">{workspace.name}</span>
-                        <span className="truncate text-xs text-muted-foreground">
-                          {workspace.personal ? "personal" : workspace.slug}
-                        </span>
-                      </div>
-                      {isSelected ? <CheckIcon className="size-4 text-primary" /> : null}
-                    </DropdownMenuItem>
-                  )
-                })}
-              </DropdownMenuGroup>
-              <DropdownMenuSeparator className={!canCreateWorkspace && !canRenameWorkspace ? "hidden" : ""} />
-              <DropdownMenuItem
-                className={canCreateWorkspace ? "gap-2 p-2" : "hidden"}
-                onSelect={(event) => {
-                  event.preventDefault()
-                  setIsCreateOpen(true)
-                }}
-              >
-                <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
-                  <PlusIcon className="size-4" />
-                </div>
-                <div className="font-medium">Tạo workspace</div>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className={canRenameWorkspace ? "gap-2 p-2" : "hidden"}
-                disabled={!canRenameWorkspace || !activeWorkspace || activeWorkspace.personal}
-                onSelect={(event) => {
-                  event.preventDefault()
-                  setIsRenameOpen(true)
-                }}
-              >
-                <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
-                  <PencilIcon className="size-4" />
-                </div>
-                <div className="font-medium">Đổi tên workspace</div>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </SidebarMenuItem>
-      </SidebarMenu>
+              <PlusIcon className="size-4" />
+              Tạo không gian làm việc
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className={canRenameWorkspace ? "gap-2 p-2" : "hidden"}
+              disabled={!canRenameWorkspace || !activeWorkspace || activeWorkspace.personal}
+              onSelect={(event) => {
+                event.preventDefault()
+                openRenameDialog()
+              }}
+            >
+              <PencilIcon className="size-4" />
+              Đổi tên không gian làm việc
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className={canManageWatchlist ? "gap-2 p-2" : "hidden"}
+              disabled={!canManageWatchlist}
+              onSelect={(event) => {
+                event.preventDefault()
+                setIsWatchlistOpen(true)
+              }}
+            >
+              <ListPlusIcon className="size-4" />
+              Quản lý tài sản theo dõi
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
-      <DialogPrimitive.Root open={canCreateWorkspace && isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogPrimitive.Portal>
-          <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/10 backdrop-blur-xs data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0" />
-          <DialogPrimitive.Content className="fixed top-1/2 left-1/2 z-50 w-[min(520px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-xl border bg-popover text-popover-foreground shadow-lg data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0">
-            <div className="flex items-start justify-between gap-4 border-b px-6 py-5">
-              <div className="flex flex-col gap-1">
-                <DialogPrimitive.Title className="text-lg font-medium text-foreground">
-                  Tạo workspace mới
-                </DialogPrimitive.Title>
-                <DialogPrimitive.Description className="text-sm text-muted-foreground">
-                  Nhập tên và slug (tuỳ chọn) để tạo workspace mới.
-                </DialogPrimitive.Description>
-              </div>
-              <DialogPrimitive.Close asChild>
-                <Button type="button" variant="ghost" size="icon-sm">
-                  <XIcon />
-                  <span className="sr-only">Đóng</span>
-                </Button>
-              </DialogPrimitive.Close>
-            </div>
+      <WorkspaceFormDialog
+        open={canCreateWorkspace && isCreateOpen}
+        title="Tạo không gian làm việc mới"
+        description="Nhập tên và slug tùy chọn để tạo không gian làm việc mới."
+        name={createName}
+        slug={createSlug}
+        submitLabel="Tạo không gian làm việc"
+        isPending={isPending}
+        onNameChange={setCreateName}
+        onSlugChange={setCreateSlug}
+        onOpenChange={setIsCreateOpen}
+        onSubmit={handleCreateWorkspace}
+      />
 
-            <div className="flex flex-col gap-4 px-6 py-5">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Tên workspace *</label>
-                <Input
-                  value={createName}
-                  onChange={(event) => setCreateName(event.target.value)}
-                  placeholder="Ví dụ: Team Research"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Slug (tuỳ chọn)</label>
-                <Input
-                  value={createSlug}
-                  onChange={(event) => setCreateSlug(event.target.value)}
-                  placeholder="team-research"
-                />
-              </div>
-            </div>
+      <WorkspaceFormDialog
+        open={canRenameWorkspace && isRenameOpen}
+        title="Đổi tên không gian làm việc"
+        description="Cập nhật tên hoặc slug cho không gian làm việc đang chọn."
+        name={renameName}
+        slug={renameSlug}
+        submitLabel="Lưu thay đổi"
+        isPending={isPending}
+        onNameChange={setRenameName}
+        onSlugChange={setRenameSlug}
+        onOpenChange={setIsRenameOpen}
+        onSubmit={handleRenameWorkspace}
+      />
 
-            <div className="flex items-center justify-end gap-3 border-t px-6 py-4">
-              <Button type="button" variant="ghost" onClick={() => setIsCreateOpen(false)}>
-                Hủy
-              </Button>
-              <Button type="button" disabled={isPending} onClick={handleCreateWorkspace}>
-                Tạo workspace
-              </Button>
-            </div>
-          </DialogPrimitive.Content>
-        </DialogPrimitive.Portal>
-      </DialogPrimitive.Root>
-
-      <DialogPrimitive.Root open={canRenameWorkspace && isRenameOpen} onOpenChange={setIsRenameOpen}>
-        <DialogPrimitive.Portal>
-          <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/10 backdrop-blur-xs data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0" />
-          <DialogPrimitive.Content className="fixed top-1/2 left-1/2 z-50 w-[min(520px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-xl border bg-popover text-popover-foreground shadow-lg data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0">
-            <div className="flex items-start justify-between gap-4 border-b px-6 py-5">
-              <div className="flex flex-col gap-1">
-                <DialogPrimitive.Title className="text-lg font-medium text-foreground">
-                  Đổi tên workspace
-                </DialogPrimitive.Title>
-                <DialogPrimitive.Description className="text-sm text-muted-foreground">
-                  Cập nhật tên hoặc slug cho workspace đang chọn.
-                </DialogPrimitive.Description>
-              </div>
-              <DialogPrimitive.Close asChild>
-                <Button type="button" variant="ghost" size="icon-sm">
-                  <XIcon />
-                  <span className="sr-only">Đóng</span>
-                </Button>
-              </DialogPrimitive.Close>
-            </div>
-
-            <div className="flex flex-col gap-4 px-6 py-5">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Tên workspace *</label>
-                <Input
-                  value={renameName}
-                  onChange={(event) => setRenameName(event.target.value)}
-                  placeholder="Ví dụ: Team Research"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Slug (tuỳ chọn)</label>
-                <Input
-                  value={renameSlug}
-                  onChange={(event) => setRenameSlug(event.target.value)}
-                  placeholder="team-research"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end gap-3 border-t px-6 py-4">
-              <Button type="button" variant="ghost" onClick={() => setIsRenameOpen(false)}>
-                Hủy
-              </Button>
-              <Button
-                type="button"
-                disabled={isPending || !canRenameWorkspace || !activeWorkspace || activeWorkspace.personal}
-                onClick={handleRenameWorkspace}
-              >
-                Lưu thay đổi
-              </Button>
-            </div>
-          </DialogPrimitive.Content>
-        </DialogPrimitive.Portal>
-      </DialogPrimitive.Root>
+      <WorkspaceWatchlistEditor
+        open={isWatchlistOpen}
+        onOpenChange={setIsWatchlistOpen}
+        workspace={activeWorkspace}
+        canReadAsset={canReadAsset}
+        canReadWatchlist={canReadWatchlist}
+        canCreateWatchlist={canCreateWatchlist}
+        canDeleteWatchlist={canDeleteWatchlist}
+      />
     </>
+  )
+}
+
+function WorkspaceFormDialog({
+  open,
+  title,
+  description,
+  name,
+  slug,
+  submitLabel,
+  isPending,
+  onNameChange,
+  onSlugChange,
+  onOpenChange,
+  onSubmit,
+}: {
+  open: boolean
+  title: string
+  description: string
+  name: string
+  slug: string
+  submitLabel: string
+  isPending: boolean
+  onNameChange: (value: string) => void
+  onSlugChange: (value: string) => void
+  onOpenChange: (open: boolean) => void
+  onSubmit: () => void
+}) {
+  return (
+    <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/10 backdrop-blur-xs data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0" />
+        <DialogPrimitive.Content className="fixed top-1/2 left-1/2 z-50 w-[min(520px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-xl border bg-popover text-popover-foreground shadow-lg data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0">
+          <div className="flex items-start justify-between gap-4 border-b px-6 py-5">
+            <div className="flex flex-col gap-1">
+              <DialogPrimitive.Title className="text-lg font-medium text-foreground">
+                {title}
+              </DialogPrimitive.Title>
+              <DialogPrimitive.Description className="text-sm text-muted-foreground">
+                {description}
+              </DialogPrimitive.Description>
+            </div>
+            <DialogPrimitive.Close asChild>
+              <Button type="button" variant="ghost" size="icon-sm" disabled={isPending}>
+                <XIcon />
+                <span className="sr-only">Đóng</span>
+              </Button>
+            </DialogPrimitive.Close>
+          </div>
+
+          <div className="flex flex-col gap-4 px-6 py-5">
+            <label className="flex flex-col gap-2 text-sm font-medium">
+              Tên không gian làm việc *
+              <Input
+                value={name}
+                onChange={(event) => onNameChange(event.target.value)}
+                placeholder="Ví dụ: Nhóm nghiên cứu"
+              />
+            </label>
+            <label className="flex flex-col gap-2 text-sm font-medium">
+              Slug tùy chọn
+              <Input
+                value={slug}
+                onChange={(event) => onSlugChange(event.target.value)}
+                placeholder="nhom-nghien-cuu"
+              />
+            </label>
+          </div>
+
+          <div className="flex items-center justify-end gap-3 border-t px-6 py-4">
+            <Button
+              type="button"
+              variant="ghost"
+              disabled={isPending}
+              onClick={() => onOpenChange(false)}
+            >
+              Hủy
+            </Button>
+            <Button type="button" disabled={isPending} onClick={onSubmit}>
+              {isPending ? <Spinner data-icon="inline-start" /> : null}
+              {submitLabel}
+            </Button>
+          </div>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   )
 }

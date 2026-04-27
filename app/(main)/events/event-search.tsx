@@ -39,7 +39,7 @@ export function EventSearch() {
   }, 300)
 
   return (
-    <div className="relative flex flex-1 shrink-0">
+    <div className="relative flex w-full sm:w-80 lg:w-96">
       <label htmlFor={SEARCH_INPUT_ID} className="sr-only">
         Tìm sự kiện
       </label>

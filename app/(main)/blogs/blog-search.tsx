@@ -40,7 +40,7 @@ export function BlogSearch() {
   }, 300)
 
   return (
-    <div className="relative flex w-full max-w-sm flex-1 items-center">
+    <div className="relative flex w-full items-center sm:w-80 lg:w-96">
       <label htmlFor={SEARCH_INPUT_ID} className="sr-only">
         Tìm bài viết
       </label>

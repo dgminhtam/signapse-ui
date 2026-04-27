@@ -1,51 +1,59 @@
-# Tai lieu anh xa API
+# Tài liệu ánh xạ API
 
-Tai lieu nay anh xa snapshot OpenAPI backend trong `docs/api_mapping.json` toi cac diem tich hop frontend hien tai cua repo.
+Tài liệu này ánh xạ snapshot OpenAPI backend trong `docs/api_mapping.json` tới các điểm tích hợp frontend hiện tại của repo.
 
-Xac minh lan cuoi: ngay 22 thang 4 nam 2026
+Xác minh lần cuối: ngày 25 tháng 4 năm 2026
 
-## Cau hinh co so
+## Cấu hình cơ sở
 
-| Muc                  | Gia tri                                               |
+| Mục                  | Giá trị                                               |
 | -------------------- | ----------------------------------------------------- |
-| URL goc API          | `http://localhost:8484`                               |
-| Nguon chuan          | `docs/api_mapping.json`                               |
-| Ham auth chinh       | `fetchAuthenticated()` trong `app/api/auth/action.ts` |
-| Ham public           | `fetchPublic()` trong `app/api/auth/action.ts`        |
-| Kieu mutation result | `ActionResult<T>` trong `app/lib/definitions.ts`      |
+| URL gốc API          | `http://localhost:8484`                               |
+| Nguồn chuẩn          | `docs/api_mapping.json`                               |
+| Hàm auth chính       | `fetchAuthenticated()` trong `app/api/auth/action.ts` |
+| Hàm public           | `fetchPublic()` trong `app/api/auth/action.ts`        |
+| Kiểu mutation result | `ActionResult<T>` trong `app/lib/definitions.ts`      |
 
-## Quy uoc dung chung
+## Quy ước dùng chung
 
-- Cac request duoc bao ve di qua `fetchAuthenticated()`.
-- `apiFetch()` doc `response.text()` truoc khi parse JSON.
-- Frontend runtime list/search dang serialize query thanh `$filter`, `page`, `size`, `sort` thong qua `queryParamsToString()`.
-- OpenAPI van mo ta list query bang `specification` va `pageable`, nen can tach biet giua spec contract va effective runtime contract ma frontend dang goi.
+- Các request được bảo vệ đi qua `fetchAuthenticated()`.
+- `apiFetch()` đọc `response.text()` trước khi parse JSON.
+- Frontend runtime list/search đang serialize query thành `$filter`, `page`, `size`, `sort` thông qua `queryParamsToString()`.
+- OpenAPI vẫn mô tả list query bằng `specification` và `pageable`, nên cần tách biệt giữa spec contract và effective runtime contract mà frontend đang gọi.
 
-## Tong quan thay doi lon tu snapshot hien tai
+## Tổng quan thay đổi lớn từ snapshot hiện tại
 
-- Snapshot backend hien tai gom `66` operation.
-- Backend da chuyen domain noi dung canon tu `sources` / `source-documents` sang `news-outlets` / `news-articles`.
-- Backend van giu cac surface `events`, `query`, va `graph-view`, nhung nhieu payload da doi naming tu `sourceDocument*` sang `artifact*` hoac `news-article`.
-- Frontend hien da co route va workbench cho `market-query` va `graph-view`, nhung van con lech contract voi snapshot backend moi.
-- Frontend da co surface canon `news-outlets` va `news-articles`; cac route legacy `/sources*`, `/news-sources*`, va `/source-documents*` hien chi con redirect compatibility.
-- Surface workspace da doi tu `set-default` sang `set-current`, dong thoi `WorkspaceResponse` da doi field co nghia tu `defaultWorkspace` sang `currentWorkspace`.
-- `roles` va `permissions` hien da co action va UI frontend, khong con o trang thai "chua trien khai".
+- Snapshot backend hiện tại gồm `68` operation.
+- Backend đã chuyển domain nội dung canon từ `sources` / `source-documents` sang `news-outlets` / `news-articles`.
+- Backend vẫn giữ các surface `events`, `query`, và `graph-view`, nhưng nhiều payload đã đổi naming từ `sourceDocument*` sang `artifact*` hoặc `news-article`.
+- Frontend hiện đã có route và workbench cho `market-query` và `graph-view`, nhưng vẫn còn lệch contract với snapshot backend mới.
+- Frontend đã có surface canon `news-outlets` và `news-articles`; các route legacy `/sources*`, `/news-sources*`, và `/source-documents*` hiện chỉ còn redirect compatibility.
+- Surface workspace đã đổi từ `set-default` sang `set-current`, đồng thời `WorkspaceResponse` đã đổi field có nghĩa từ `defaultWorkspace` sang `currentWorkspace`.
+- `roles` và `permissions` hiện đã có action và UI frontend, không còn ở trạng thái "chưa triển khai".
 
-## Pham vi endpoint
+## Phạm vi endpoint
 
 ### 1. API system prompts
 
-| Phuong thuc | Endpoint backend               | operationId          | Tich hop frontend | Trang thai      | Ghi chu                                     |
-| ----------- | ------------------------------ | -------------------- | ----------------- | --------------- | ------------------------------------------- |
-| GET         | `/system-prompts`              | `getSystemPrompts`   | `-`               | Chua trien khai | Chua co `app/api/system-prompts/action.ts`. |
-| POST        | `/system-prompts`              | `createSystemPrompt` | `-`               | Chua trien khai | Backend da co create schema.                |
-| GET         | `/system-prompts/{promptType}` | `getSystemPrompt`    | `-`               | Chua trien khai | Frontend chua tich hop.                     |
-| PUT         | `/system-prompts/{promptType}` | `updateSystemPrompt` | `-`               | Chua trien khai | Frontend chua tich hop.                     |
-| DELETE      | `/system-prompts/{promptType}` | `deleteSystemPrompt` | `-`               | Chua trien khai | Frontend chua tich hop.                     |
+| Phương thức | Endpoint backend               | operationId          | Tích hợp frontend                | Trạng thái    | Ghi chú                                                                 |
+| ----------- | ------------------------------ | -------------------- | -------------------------------- | ------------- | ----------------------------------------------------------------------- |
+| GET         | `/system-prompts`              | `getSystemPrompts`   | `getSystemPrompts(searchParams)` | Đã triển khai | List route `/system-prompts` dùng `Page<SystemPromptResponse>`.         |
+| POST        | `/system-prompts`              | `createSystemPrompt` | `createSystemPrompt(request)`    | Đã triển khai | Form tạo mới gửi `promptType` và `content`, validate tối đa 10000 ký tự. |
+| GET         | `/system-prompts/{promptType}` | `getSystemPrompt`    | `getSystemPromptByType(type)`    | Đã triển khai | Trang chi tiết/chỉnh sửa dùng `promptType` đã URL-encode.               |
+| PUT         | `/system-prompts/{promptType}` | `updateSystemPrompt` | `updateSystemPrompt(type, data)` | Đã triển khai | Form cập nhật chỉ sửa `content`, giữ `promptType` readonly.             |
+| DELETE      | `/system-prompts/{promptType}` | `deleteSystemPrompt` | `deleteSystemPrompt(type)`       | Đã triển khai | Action xóa có `AlertDialog` và gate bằng `system-prompt:delete`.        |
 
-Ghi chu:
+Frontend liên quan:
 
-- Enum `promptType` trong snapshot hien tai van giu nhom legacy `NEWS_FILTER`, `NEWS_ANALYSIS`, `SIGNAL_GENERATION`, `DECISION_MAKING`, `CONTENT_EXTRACTION`, `SENTIMENT_ANALYSIS`, `TITLE_GENERATION`, `SUMMARY_GENERATION`, `CONTENT_CLEANING`, dong thoi mo rong them `FIRECRAWL_SOURCE_DOCUMENT_FILTER`, `NEWS_PRIMARY_EVENT_DERIVATION`, `EVENT_ASSET_THEME_ENRICHMENT`, va `EVENT_GROUNDED_MARKET_QUERY_SYNTHESIS`.
+- `app/api/system-prompts/action.ts`
+- `app/lib/system-prompts/definitions.ts`
+- `app/lib/system-prompts/permissions.ts`
+- `app/(main)/system-prompts/*`
+
+Ghi chú:
+
+- Enum `promptType` trong snapshot hiện tại vẫn giữ nhóm legacy `NEWS_FILTER`, `NEWS_ANALYSIS`, `SIGNAL_GENERATION`, `DECISION_MAKING`, `CONTENT_EXTRACTION`, `SENTIMENT_ANALYSIS`, `TITLE_GENERATION`, `SUMMARY_GENERATION`, `CONTENT_CLEANING`, đồng thời mở rộng thêm `FIRECRAWL_SOURCE_DOCUMENT_FILTER`, `NEWS_PRIMARY_EVENT_DERIVATION`, `EVENT_ASSET_THEME_ENRICHMENT`, và `EVENT_GROUNDED_MARKET_QUERY_SYNTHESIS`.
+- Frontend v1 validate `content` không được rỗng sau khi `trim()` và không vượt quá `10000` ký tự, khớp giới hạn tối đa trong schema backend.
 
 ### 2. API news outlets
 
@@ -85,7 +93,6 @@ Day la domain noi dung canon cua snapshot backend hien tai.
 | GET         | `/news-articles/{id}`                       | `getNewsArticle`          | `getNewsArticleById(id)`                                 | Da trien khai                      | Detail/operator workbench dung `newsOutletId`, `newsOutletName`, `status`, `externalKey`, `linkedEvents`.                                  |
 | DELETE      | `/news-articles/{id}`                       | `deleteNewsArticle`       | `deleteNewsArticle(id)`                                  | Da trien khai                      | Route canon va nut operator da doi naming sang `news-article`.                                                                              |
 | POST        | `/news-articles/{id}/crawl-full-content`    | `crawlFullContent`        | `crawlNewsArticleFullContent(id)`                        | Da trien khai                      | Contract moi tra ve `NewsArticleResponse`.                                                                                                   |
-| POST        | `/news-articles/{id}/analyze`               | `analyzeContent`          | Không dùng trong UI                                      | Không còn dùng trong UI            | Workflow phân tích bài viết đã chuyển sang cronjob; frontend không hiển thị nút hoặc action gọi endpoint này.                               |
 | POST        | `/news-articles/{id}/derive-primary-event`  | `derivePrimaryEvent`      | `derivePrimaryEventFromNewsArticle(id)`                  | Da trien khai                      | `NewsPrimaryEventDerivationResult` dung `newsArticleId`, `newsArticleTitle`, `status`, `changeType`, `eventId`, `eventCanonicalKey`.      |
 | POST        | `/news-articles/derive-pending-news-events` | `derivePendingNewsEvents` | `derivePendingNewsArticleEvents(batchSize?)`             | Da trien khai                      | Batch result dung `PendingNewsEventDerivationBatchResult` va summary helper moi theo naming `news-article`.                                |
 | PATCH       | `/news-articles/{id}/feature-image`         | `updateFeatureImage`      | `updateNewsArticleFeatureImage(id, request)`             | Da trien khai                      | Data layer canon nam trong `app/api/news-articles/action.ts`.                                                                               |
@@ -105,6 +112,7 @@ Ghi chu:
 - Enum `status` hien tai la `INGESTED`, `DERIVATION_PENDING`, `EVENT_RESOLVED`, `NO_PRIMARY_EVENT`, `CONTENT_FAILED`, `DERIVATION_FAILED`.
 - Navigation "Noi dung" da tro ve `/news-articles`; route `/source-documents*` chi con redirect sang surface canon moi.
 - Snapshot backend khong con `lifecycleStatus`, `readinessStatus`, `eventDerivationStatus`, `documentType`, hoac endpoint canon `/source-documents*`.
+- Endpoint `POST /news-articles/{id}/analyze` khong con nam trong snapshot OpenAPI hien tai; UI da go manual analyze va workflow phan tich bai viet chuyen sang cronjob.
 
 ### 4. API events
 
@@ -219,7 +227,22 @@ Ghi chu:
 | DELETE      | `/medias/{id}`   | `deleteMedia` | `-`               | Chua trien khai | Chua co tich hop.                   |
 | POST        | `/medias/upload` | `upload`      | `-`               | Chua trien khai | Chua co tich hop.                   |
 
-### 12. API workspace
+### 12. API economic calendar
+
+| Phương thức | Endpoint backend          | operationId                 | Tích hợp frontend | Trạng thái      | Ghi chú                                                                                                  |
+| ----------- | ------------------------- | --------------------------- | ----------------- | --------------- | -------------------------------------------------------------------------------------------------------- |
+| GET         | `/economic-calendar`      | `getEconomicCalendarEntries` | `getEconomicCalendarEntries(searchParams)` | Đã triển khai | Trả về `Page<EconomicCalendarListResponse>` với schema đã giản lược; frontend dùng `$filter/page/size/sort` qua `queryParamsToString()`. |
+| GET         | `/economic-calendar/{id}` | `getEconomicCalendarEntry`   | `getEconomicCalendarEntryById(id)`         | Đã triển khai | Trả về `EconomicCalendarResponse` cho trang chi tiết read-only, có `content` khi nội dung đã sẵn sàng. |
+| POST        | `/economic-calendar/sync` | `syncEconomicCalendarEntries` | `syncEconomicCalendarEntries()`            | Đã triển khai | Trả về `EconomicCalendarSyncResponse` với `fetchedCount`, `createdCount`, `updatedCount`, `skippedCount`.      |
+
+Ghi chú:
+
+- Frontend đã có `app/api/economic-calendar/action.ts`, definitions, permissions, navigation và route UI `/economic-calendar`.
+- List/detail response hiện dùng các trường chính: `title`, `currencyCode`, `impact`, `forecastValue`, `previousValue`, `actualValue`, `contentAvailable`, `status`, `scheduledAt`, `syncedAt`, `createdDate`, `lastModifiedDate`.
+- Detail response có thêm `content`; UI chỉ hiển thị nội dung khi `contentAvailable` là true và `content` có dữ liệu.
+- Frontend không còn phụ thuộc vào các field cũ đã bị backend loại bỏ như `description`, `url`, `externalKey`, `provider`, `countryCode`, `importance`, `ingestedAt`, `rawContent`, hoặc `rawMetadata`.
+
+### 13. API workspace
 
 | Phuong thuc | Endpoint backend                  | operationId           | Tich hop frontend               | Trang thai                         | Ghi chu                                                                 |
 | ----------- | --------------------------------- | --------------------- | ------------------------------- | ---------------------------------- | ----------------------------------------------------------------------- |
@@ -228,13 +251,13 @@ Ghi chu:
 | PUT         | `/me/workspaces/{id}`             | `updateWorkspace`     | `updateWorkspace(id, request)`  | Da trien khai                      | Rename workspace.                                                       |
 | PATCH       | `/me/workspaces/{id}/set-current` | `setCurrentWorkspace` | `setDefaultWorkspace(id)`       | Da trien khai nhung con lech contract | Frontend action hien van goi `/set-default`; can doi sang `/set-current`. |
 
-### 13. API user
+### 14. API user
 
 | Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai                         | Ghi chu                                                                                                                                  |
 | ----------- | ---------------- | ----------- | ----------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | GET         | `/me`            | `me`        | `getMe()`         | Da trien khai nhung con lech contract | Snapshot hien tai dung `currentWorkspace` thay vi `workspace`, va `mainImage` la `MediaResponse`; FE `BackendMeResponse` van map `workspace` va `mainImage` thanh `string`. |
 
-### 14. API wiki
+### 15. API wiki
 
 Khong con tich hop frontend.
 
@@ -243,20 +266,20 @@ Ghi chu:
 - Toan bo route, action, definition, va UI surface `wiki` da duoc go khoi frontend.
 - Neu backend tai xuat wiki trong tuong lai, nen de xuat mot change moi thay vi tai su dung module cu.
 
-### 15. API roles
+### 16. API roles
 
 | Phuong thuc | Endpoint backend               | operationId             | Tich hop frontend                         | Trang thai    | Ghi chu                                            |
 | ----------- | ------------------------------ | ----------------------- | ----------------------------------------- | ------------- | -------------------------------------------------- |
 | GET         | `/roles`                       | `getRoles`              | `getRoles()`                              | Da trien khai | Trang roles da load danh sach vai tro.             |
 | PUT         | `/roles/{roleKey}/permissions` | `updateRolePermissions` | `updateRolePermissions(roleKey, request)` | Da trien khai | Dialog frontend cho phep cap nhat permission keys. |
 
-### 16. API permissions
+### 17. API permissions
 
 | Phuong thuc | Endpoint backend | operationId      | Tich hop frontend  | Trang thai    | Ghi chu                                                 |
 | ----------- | ---------------- | ---------------- | ------------------ | ------------- | ------------------------------------------------------- |
 | GET         | `/permissions`   | `getPermissions` | `getPermissions()` | Da trien khai | Duoc dung cung role editor de build permission catalog. |
 
-### 17. API watchlists
+### 18. API watchlists
 
 | Phuong thuc | Endpoint backend               | operationId       | Tich hop frontend                            | Trang thai    | Ghi chu                                                 |
 | ----------- | ------------------------------ | ----------------- | -------------------------------------------- | ------------- | ------------------------------------------------------- |
@@ -264,13 +287,13 @@ Ghi chu:
 | POST        | `/watchlists`                  | `createWatchlist` | `addAssetToWorkspaceWatchlist({ assetId })`  | Da trien khai | Sync add theo diff trong workspace editor.              |
 | DELETE      | `/watchlists/assets/{assetId}` | `deleteByAssetId` | `removeAssetFromWorkspaceWatchlist(assetId)` | Da trien khai | Sync remove theo diff.                                  |
 
-### 18. Webhook
+### 19. Webhook
 
 | Phuong thuc | Endpoint backend  | operationId          | Tich hop frontend | Trang thai  | Ghi chu                           |
 | ----------- | ----------------- | -------------------- | ----------------- | ----------- | --------------------------------- |
 | POST        | `/webhooks/clerk` | `handleClerkWebhook` | `-`               | Chi backend | Khong ky vong co frontend caller. |
 
-### 19. Health check
+### 20. Health check
 
 | Phuong thuc | Endpoint backend | operationId   | Tich hop frontend | Trang thai      | Ghi chu               |
 | ----------- | ---------------- | ------------- | ----------------- | --------------- | --------------------- |
@@ -357,13 +380,14 @@ type ActionResult<T = void> =
 | Cronjobs                                  | `app/api/cronjobs/action.ts`, `app/lib/cronjobs/definitions.ts`                                                                                                     |
 | AI provider configs                       | `app/api/ai-provider-configs/action.ts`, `app/lib/ai-provider-configs/definitions.ts`                                                                               |
 | Assets                                    | `app/api/assets/action.ts`, `app/lib/assets/definitions.ts`                                                                                                         |
+| Economic calendar                         | `app/api/economic-calendar/action.ts`, `app/lib/economic-calendar/definitions.ts`, `app/lib/economic-calendar/permissions.ts`, `app/(main)/economic-calendar/*`     |
 | User profile                              | `app/api/user/action.ts`, `app/lib/users/definitions.ts`                                                                                                            |
 | Workspace                                 | `app/api/workspaces/action.ts`, `app/lib/workspaces/definitions.ts`                                                                                                 |
 | Watchlists                                | `app/api/watchlists/action.ts`, `app/lib/watchlists/definitions.ts`, `components/workspace-watchlist-editor.tsx`, `components/asset-multi-select-combobox.tsx`     |
 | Roles va permissions                      | `app/api/roles/action.ts`, `app/lib/roles/definitions.ts`, `app/(main)/roles/*`                                                                                     |
 | Route user cuc bo                         | `app/api/user/route.ts`                                                                                                                                             |
 | Media                                     | `-`                                                                                                                                                                 |
-| System prompts                            | `-`                                                                                                                                                                 |
+| System prompts                            | `app/api/system-prompts/action.ts`, `app/lib/system-prompts/definitions.ts`, `app/lib/system-prompts/permissions.ts`, `app/(main)/system-prompts/*`                 |
 | Topics (ngoai spec hien tai)              | `app/api/topics/action.ts`, `app/lib/topics/definitions.ts`, `app/(main)/topics/*`                                                                                  |
 
 ## Cac diem lech contract da biet
@@ -375,5 +399,6 @@ type ActionResult<T = void> =
 - `user profile`: `GET /me` da doi `workspace` thanh `currentWorkspace`, va `mainImage` la object media; FE `app/lib/users/definitions.ts` hien van map theo contract cu. Hien tac dong runtime thap vi permissions server chi doc `permissions[]`.
 - `blogs`: create va response dung `visible`, update dung `isVisible`; frontend van can tiep tuc xu ly ky de tranh drift.
 - `ai-provider-configs`: frontend sanitize `apiKey` khoi response truoc khi dua xuong client.
-- `media` va `system-prompts`: da co trong spec nhung frontend chua co module; `system-prompts` hien tai giu ca nhom legacy prompt types va nhom prompt moi cho news article, events, va market query.
+- `media`: da co trong spec nhung frontend chua co module.
+- `system-prompts`: frontend da co module quan ly rieng tai `/system-prompts`; enum van giu ca nhom legacy prompt types va nhom prompt moi cho news article, events, va market query.
 - `topics`: van ton tai tren frontend, nhung khong con nam trong snapshot API hien tai.

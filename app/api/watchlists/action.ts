@@ -29,7 +29,7 @@ export async function addAssetToWorkspaceWatchlist(
     return { success: true, data: watchlistAsset }
   } catch (error: unknown) {
     const errorMessage =
-      error instanceof Error ? error.message : "Không thể thêm tài sản vào danh sách theo dõi"
+      error instanceof Error ? error.message : "Không thể thêm tài sản vào danh sách theo dõi."
     return { success: false, error: errorMessage }
   }
 }
@@ -43,7 +43,7 @@ export async function removeAssetFromWorkspaceWatchlist(assetId: number): Promis
     return { success: true, data: undefined }
   } catch (error: unknown) {
     const errorMessage =
-      error instanceof Error ? error.message : "Không thể gỡ tài sản khỏi danh sách theo dõi"
+      error instanceof Error ? error.message : "Không thể gỡ tài sản khỏi danh sách theo dõi."
     return { success: false, error: errorMessage }
   }
 }

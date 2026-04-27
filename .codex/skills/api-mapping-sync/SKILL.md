@@ -1,4 +1,4 @@
-﻿---
+---
 name: api-mapping-sync
 description: Update Signapse docs/APIMAPPING.md from docs/api_mapping.json and report exact API/documentation diffs. Use when api_mapping.json changes, when backend APIs are updated, when APIMAPPING.md must be refreshed, or when the user asks what changed between the backend contract and frontend mapping docs.
 ---

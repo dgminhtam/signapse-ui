@@ -1,5 +1,17 @@
 ## ADDED Requirements
 
+### Requirement: Market-query UI copy MUST be readable Vietnamese
+The market-query workbench SHALL use readable, professional Vietnamese for route copy, workbench labels, prompt examples, validation errors, toast messages, evidence labels, and navigation labels that affect entry into the screen.
+
+#### Scenario: Market-query copy renders without mojibake
+- **WHEN** a user opens `/market-query`
+- **THEN** visible Vietnamese text MUST NOT contain mojibake fragments such as `Ã`, `Â`, `Æ`, `Ä`, or similarly corrupted accented text
+- **AND** labels, placeholders, errors, empty states, and button text MUST be professional Vietnamese
+
+#### Scenario: Market-query navigation label is readable
+- **WHEN** the market-query item appears in sidebar navigation
+- **THEN** the label MUST use readable Vietnamese copy for "Truy vấn thị trường"
+
 ### Requirement: Market-query workbench MUST minimize duplicated guidance
 The market-query workbench SHALL keep first-run orientation concise, and it MUST avoid repeating the same instructional content or prompt suggestions across multiple visible modules on the page.
 
@@ -7,6 +19,11 @@ The market-query workbench SHALL keep first-run orientation concise, and it MUST
 - **WHEN** a user opens `/market-query` before submitting any query
 - **THEN** the page MUST present at most one primary guidance module for how to use the workbench
 - **AND** it MUST present prompt suggestions in a single location rather than duplicating the same suggestions in separate page regions
+
+#### Scenario: Composer is the first meaningful workbench region
+- **WHEN** the route shell already shows the page title and description
+- **THEN** the client workbench MUST NOT render a competing H1-style hero that repeats the same orientation purpose
+- **AND** the query composer MUST appear before secondary explanation modules
 
 #### Scenario: Completed-result view removes no-longer-useful onboarding content
 - **WHEN** the workbench is rendering a completed query result
@@ -56,6 +73,11 @@ The market-query workbench SHALL prioritize the answer, trust signals, and suppo
 - **THEN** the answer, confidence, limitations, and evidence MUST appear in the primary content hierarchy before lower-priority explanatory chrome
 - **AND** the user MUST be able to scan those elements without first reading static product guidance
 
+#### Scenario: Result sections do not all use equal visual weight
+- **WHEN** a completed result contains answer, trust signals, evidence, key events, and reasoning content
+- **THEN** the answer and evidence MUST have stronger primary hierarchy than lower-priority supporting sections
+- **AND** the page MUST avoid rendering every result subsection as an equally prominent rounded bordered card
+
 #### Scenario: Raw fallback metadata is not treated as primary insight
 - **WHEN** the backend lacks rich labels for related events, themes, or documents
 - **THEN** the workbench MUST avoid presenting raw identifiers or slug-like values as the primary headline or primary call-to-action for a result card
@@ -73,6 +95,19 @@ The market-query workbench SHALL preserve analytical context for related entitie
 - **WHEN** a query result contains related event or source-document identifiers and the user has the corresponding read permission
 - **THEN** the workbench MUST provide interactive navigation to the related detail route from the relevant result item
 
+### Requirement: Market-query evidence navigation MUST align with SourceDocument
+The market-query workbench SHALL use SourceDocument-oriented labels and internal navigation for evidence documents, while still allowing compatible route plumbing if the application currently redirects legacy routes.
+
+#### Scenario: Evidence document has an internal identifier
+- **WHEN** an evidence item includes a document identifier that can be opened inside the application
+- **THEN** the workbench MUST label the action as opening a source document or source material rather than a legacy news article
+- **AND** it MUST avoid assuming that every evidence item is a `NEWS_ARTICLE`
+
+#### Scenario: Evidence document cannot be opened internally
+- **WHEN** an evidence item lacks an internal route or the user lacks the required read permission
+- **THEN** the workbench MUST still show the evidence title, source, publish time, and available external URL when present
+- **AND** it MUST explain restricted internal drill-down compactly when needed
+
 ### Requirement: Market-query workbench MUST preserve the decision path on narrower layouts
 The market-query workbench SHALL keep the primary operator task legible on smaller screens, and it MUST maintain a responsive reading order that prioritizes the composer, active query context, answer, trust signals, and evidence over lower-priority supporting material.
 
@@ -85,3 +120,11 @@ The market-query workbench SHALL keep the primary operator task legible on small
 - **WHEN** the workbench renders confidence, limitation, or permission-related status cues
 - **THEN** the page MUST not rely on color alone to communicate meaning
 - **AND** textual labels or equivalent non-color signals MUST remain visible in the responsive layout
+
+### Requirement: Market-query workbench implementation MUST be locally decomposed
+The market-query workbench implementation SHALL be decomposed into focused local feature components once the target layout is defined, so future UI iteration can be reviewed without touching unrelated state and rendering logic.
+
+#### Scenario: Workbench is refactored after layout decisions
+- **WHEN** the UI refinement is implemented
+- **THEN** state orchestration MUST remain clear in the main workbench component
+- **AND** large presentational regions such as composer, query state, briefing content, evidence list, key events, and reasoning MUST be extracted into local feature components or equivalent focused modules
