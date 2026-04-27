@@ -27,6 +27,7 @@ import {
   AppListToolbarTrailing,
 } from "@/components/app-list-toolbar"
 import { AppPaginationControls } from "@/components/app-pagination-controls"
+import { AppSelectPageSize } from "@/components/app-select-page-size"
 import { useHasPermission } from "@/components/permission-provider"
 import { SortSelect } from "@/components/sort-select"
 import {
@@ -134,6 +135,11 @@ export function SourceListPage({ sourcePage }: SourceListProps) {
               { label: "Ingest mới nhất", value: "lastIngestedAt_desc" },
             ]}
             triggerClassName="w-full sm:w-[200px]"
+          />
+          <AppSelectPageSize
+            defaultSize={sourcePage.size}
+            showLabel={false}
+            triggerClassName="w-full sm:w-[120px]"
           />
         </AppListToolbarTrailing>
       </AppListToolbar>

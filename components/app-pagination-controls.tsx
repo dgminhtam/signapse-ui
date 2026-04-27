@@ -1,15 +1,15 @@
 "use client"
 
+import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
+
 import { Page } from "@/app/lib/definitions"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   Pagination,
   PaginationContent,
   PaginationEllipsis,
   PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
 } from "@/components/ui/pagination"
 import {
   Select,
@@ -128,64 +128,61 @@ export function PaginationNavigation({
     >
       <PaginationContent className="flex-wrap justify-start sm:justify-end">
         <PaginationItem>
-          <PaginationPrevious
-            href="#"
-            text="Trước"
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
             aria-label="Đi tới trang trước"
-            aria-disabled={isPreviousDisabled}
-            tabIndex={isPreviousDisabled ? -1 : undefined}
-            className={cn(isPreviousDisabled && "pointer-events-none opacity-50")}
-            onClick={(event) => {
-              event.preventDefault()
-
-              if (!isPreviousDisabled) {
-                onPageChange(currentPage - 1)
-              }
-            }}
-          />
+            disabled={isPreviousDisabled}
+            onClick={() => onPageChange(currentPage - 1)}
+          >
+            <ChevronLeftIcon data-icon="inline-start" />
+          </Button>
         </PaginationItem>
 
-        {paginationRange.map((entry, index) => (
-          <PaginationItem key={`${entry}-${index}`}>
-            {entry === DOTS ? (
-              <PaginationEllipsis />
-            ) : (
-              <PaginationLink
-                href="#"
-                isActive={currentPage === entry}
-                aria-label={`Đi tới trang ${entry}`}
-                tabIndex={isPending ? -1 : undefined}
-                className={cn(isPending && "pointer-events-none opacity-50")}
-                onClick={(event) => {
-                  event.preventDefault()
+        {paginationRange.map((entry, index) => {
+          if (entry === DOTS) {
+            return (
+              <PaginationItem key={`${entry}-${index}`}>
+                <PaginationEllipsis />
+              </PaginationItem>
+            )
+          }
 
-                  if (!isPending) {
+          const isCurrentPage = currentPage === entry
+
+          return (
+            <PaginationItem key={entry}>
+              <Button
+                type="button"
+                variant={isCurrentPage ? "default" : "outline"}
+                size="icon"
+                aria-label={`Đi tới trang ${entry}`}
+                aria-current={isCurrentPage ? "page" : undefined}
+                disabled={isPending}
+                onClick={() => {
+                  if (!isCurrentPage) {
                     onPageChange(entry)
                   }
                 }}
               >
                 {entry}
-              </PaginationLink>
-            )}
-          </PaginationItem>
-        ))}
+              </Button>
+            </PaginationItem>
+          )
+        })}
 
         <PaginationItem>
-          <PaginationNext
-            href="#"
-            text="Tiếp"
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
             aria-label="Đi tới trang sau"
-            aria-disabled={isNextDisabled}
-            tabIndex={isNextDisabled ? -1 : undefined}
-            className={cn(isNextDisabled && "pointer-events-none opacity-50")}
-            onClick={(event) => {
-              event.preventDefault()
-
-              if (!isNextDisabled) {
-                onPageChange(currentPage + 1)
-              }
-            }}
-          />
+            disabled={isNextDisabled}
+            onClick={() => onPageChange(currentPage + 1)}
+          >
+            <ChevronRightIcon data-icon="inline-start" />
+          </Button>
         </PaginationItem>
       </PaginationContent>
     </Pagination>
@@ -223,23 +220,15 @@ export function AppPaginationControls<T>({
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 flex-col gap-1.5">
-          <div className="flex flex-wrap items-center gap-2">
-            {page.totalPages > 1 ? (
-              <Badge variant="secondary">Trang {currentPage}/{page.totalPages}</Badge>
-            ) : page.totalElements > 0 ? (
-              <Badge variant="secondary">{page.totalElements} kết quả</Badge>
-            ) : (
-              <Badge variant="secondary">0 kết quả</Badge>
-            )}
-
-            {isPending ? (
+          <p className="text-sm text-muted-foreground">{summaryText}</p>
+          {isPending ? (
+            <div className="flex flex-wrap items-center gap-2">
               <Badge variant="outline" className="gap-1">
                 <Spinner className="size-3.5" />
                 Đang cập nhật
               </Badge>
-            ) : null}
-          </div>
-          <p className="text-sm text-muted-foreground">{summaryText}</p>
+            </div>
+          ) : null}
         </div>
 
         {page.totalPages > 1 ? (

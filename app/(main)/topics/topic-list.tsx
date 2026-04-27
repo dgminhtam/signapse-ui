@@ -16,6 +16,7 @@ import {
   AppListToolbarTrailing,
 } from "@/components/app-list-toolbar"
 import { AppPaginationControls } from "@/components/app-pagination-controls"
+import { AppSelectPageSize } from "@/components/app-select-page-size"
 import { SortSelect } from "@/components/sort-select"
 import { Button } from "@/components/ui/button"
 import {
@@ -77,6 +78,11 @@ export function TopicListPage({ topicPage }: TopicListPageProps) {
               { label: "Slug (A-Z)", value: "slug_asc" },
             ]}
             triggerClassName="w-full sm:w-[200px]"
+          />
+          <AppSelectPageSize
+            defaultSize={topicPage.size}
+            showLabel={false}
+            triggerClassName="w-full sm:w-[120px]"
           />
         </AppListToolbarTrailing>
       </AppListToolbar>
