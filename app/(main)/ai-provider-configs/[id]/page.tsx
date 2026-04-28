@@ -7,8 +7,6 @@ import { hasPermission } from "@/app/lib/permissions"
 import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { AccessDenied } from "@/components/access-denied"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
 
 import { AiProviderConfigForm } from "../ai-provider-config-form"
 
@@ -23,21 +21,10 @@ export default async function EditAiProviderConfigPage({
 
   if (!hasPermission(permissions, "ai-provider-config:update")) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Chá»‰nh sá»­a cáº¥u hÃ¬nh nhÃ  cung cáº¥p AI</CardTitle>
-          <CardDescription>
-            Cáº­p nháº­t cáº¥u hÃ¬nh cho nhÃ  cung cáº¥p AI Ä‘Ã£ cÃ³.
-          </CardDescription>
-        </CardHeader>
-        <Separator />
-        <CardContent className="pt-6">
-          <AccessDenied
-            description="Báº¡n khÃ´ng cÃ³ quyá»n cáº­p nháº­t cáº¥u hÃ¬nh nhÃ  cung cáº¥p AI."
-            permission="ai-provider-config:update"
-          />
-        </CardContent>
-      </Card>
+      <AccessDenied
+        description="Bạn không có quyền cập nhật cấu hình nhà cung cấp AI."
+        permission="ai-provider-config:update"
+      />
     )
   }
 
@@ -59,19 +46,7 @@ export default async function EditAiProviderConfigPage({
         </Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Chỉnh sửa cấu hình nhà cung cấp AI</CardTitle>
-          <CardDescription>
-            Cập nhật cấu hình cho{" "}
-            <span className="font-semibold text-foreground">{providerConfig.name}</span>.
-          </CardDescription>
-        </CardHeader>
-        <Separator />
-        <CardContent className="pt-6">
-          <AiProviderConfigForm initialData={providerConfig} />
-        </CardContent>
-      </Card>
+      <AiProviderConfigForm initialData={providerConfig} />
     </div>
   )
 }

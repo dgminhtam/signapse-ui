@@ -11,14 +11,6 @@ import {
   AppListTableHead,
   AppListTableHeaderRow,
 } from "@/components/app-list-table"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
@@ -41,24 +33,10 @@ export default async function EconomicCalendarPage({
 
   if (!hasAnyPermission(permissions, ECONOMIC_CALENDAR_READ_PERMISSIONS)) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Lịch kinh tế</CardTitle>
-          <CardDescription>
-            Theo dõi các mốc công bố kinh tế và trạng thái dữ liệu đã đồng bộ từ
-            backend.
-          </CardDescription>
-        </CardHeader>
-
-        <Separator />
-
-        <CardContent className="pt-6">
-          <AccessDenied
-            description="Bạn không có quyền truy cập lịch kinh tế."
-            permission={ECONOMIC_CALENDAR_READ_PERMISSIONS[0]}
-          />
-        </CardContent>
-      </Card>
+      <AccessDenied
+        description="Bạn không có quyền truy cập lịch kinh tế."
+        permission={ECONOMIC_CALENDAR_READ_PERMISSIONS[0]}
+      />
     )
   }
 
@@ -68,28 +46,14 @@ export default async function EconomicCalendarPage({
   const sort = typeof params.sort === "string" ? params.sort : "scheduledAt_desc"
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Lịch kinh tế</CardTitle>
-        <CardDescription>
-          Duyệt dữ liệu lịch kinh tế theo tiền tệ, tác động, trạng thái nội dung
-          và các giá trị actual, forecast, previous.
-        </CardDescription>
-      </CardHeader>
-
-      <Separator />
-
-      <CardContent className="pt-6">
-        <Suspense fallback={<EconomicCalendarListSkeleton />}>
-          <EconomicCalendarListContent
-            page={page}
-            size={size}
-            sort={sort}
-            searchParams={params}
-          />
-        </Suspense>
-      </CardContent>
-    </Card>
+    <Suspense fallback={<EconomicCalendarListSkeleton />}>
+      <EconomicCalendarListContent
+        page={page}
+        size={size}
+        sort={sort}
+        searchParams={params}
+      />
+    </Suspense>
   )
 }
 

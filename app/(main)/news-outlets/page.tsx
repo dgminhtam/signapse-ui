@@ -13,14 +13,6 @@ import {
   AppListTableHead,
   AppListTableHeaderRow,
 } from "@/components/app-list-table"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   TableCell,
@@ -39,43 +31,17 @@ export default async function NewsOutletsPage({ searchParams }: PageProps) {
 
   if (!hasPermission(permissions, NEWS_OUTLET_READ_PERMISSION)) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Nguồn tin</CardTitle>
-          <CardDescription>
-            Quản lý danh sách nguồn tin và trạng thái kích hoạt theo contract mới
-            của backend.
-          </CardDescription>
-        </CardHeader>
-
-        <Separator />
-
-        <CardContent className="pt-6">
-          <AccessDenied
-            description="Bạn không có quyền xem khu vực quản lý nguồn tin."
-            permission={NEWS_OUTLET_READ_PERMISSION}
-          />
-        </CardContent>
-      </Card>
+      <AccessDenied
+        description="Bạn không có quyền xem khu vực quản lý nguồn tin."
+        permission={NEWS_OUTLET_READ_PERMISSION}
+      />
     )
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Nguồn tin</CardTitle>
-        <CardDescription>
-          Quản lý danh sách news outlet theo contract backend hiện tại, bao gồm
-          thông tin trang chủ, RSS, slug và trạng thái kích hoạt.
-        </CardDescription>
-      </CardHeader>
-
-      <Separator />
-
-      <Suspense fallback={<ListSkeleton />}>
-        <NewsOutletContent searchParamsPromise={searchParams} />
-      </Suspense>
-    </Card>
+    <Suspense fallback={<ListSkeleton />}>
+      <NewsOutletContent searchParamsPromise={searchParams} />
+    </Suspense>
   )
 }
 
@@ -99,16 +65,12 @@ async function NewsOutletContent({
     filter,
   })
 
-  return (
-    <CardContent className="pt-6">
-      <NewsOutletListPage newsOutletPage={newsOutletPage} />
-    </CardContent>
-  )
+  return <NewsOutletListPage newsOutletPage={newsOutletPage} />
 }
 
 function ListSkeleton() {
   return (
-    <CardContent className="flex flex-col gap-6 pt-6">
+    <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex w-full flex-1 flex-col gap-4 sm:w-auto sm:flex-row sm:items-center">
           <Skeleton className="h-10 w-[160px]" />
@@ -179,6 +141,6 @@ function ListSkeleton() {
           <Skeleton className="h-8 w-20" />
         </div>
       </div>
-    </CardContent>
+    </div>
   )
 }

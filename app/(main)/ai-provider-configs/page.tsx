@@ -5,14 +5,6 @@ import { hasPermission } from "@/app/lib/permissions"
 import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { buildFilterQuery, buildSortQuery } from "@/app/lib/utils"
 import { AccessDenied } from "@/components/access-denied"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 
 import { AiProviderConfigListPage } from "./ai-provider-config-list"
@@ -26,41 +18,17 @@ export default async function AiProviderConfigsPage({ searchParams }: PageProps)
 
   if (!hasPermission(permissions, "ai-provider-config:read")) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Cấu hình nhà cung cấp AI</CardTitle>
-          <CardDescription>
-            Quản lý thông tin xác thực, model đã chọn và nhà cung cấp AI mặc định.
-          </CardDescription>
-        </CardHeader>
-
-        <Separator />
-
-        <CardContent className="pt-6">
-          <AccessDenied
-            description="Bạn không có quyền xem cấu hình nhà cung cấp AI."
-            permission="ai-provider-config:read"
-          />
-        </CardContent>
-      </Card>
+      <AccessDenied
+        description="Bạn không có quyền xem cấu hình nhà cung cấp AI."
+        permission="ai-provider-config:read"
+      />
     )
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Cấu hình nhà cung cấp AI</CardTitle>
-        <CardDescription>
-          Quản lý thông tin xác thực, model đã chọn và nhà cung cấp AI mặc định.
-        </CardDescription>
-      </CardHeader>
-
-      <Separator />
-
-      <Suspense fallback={<ListSkeleton />}>
-        <AiProviderConfigsContent searchParamsPromise={searchParams} />
-      </Suspense>
-    </Card>
+    <Suspense fallback={<ListSkeleton />}>
+      <AiProviderConfigsContent searchParamsPromise={searchParams} />
+    </Suspense>
   )
 }
 
@@ -80,17 +48,12 @@ async function AiProviderConfigsContent({
     filter: buildFilterQuery(filterParams),
   })
 
-  return (
-    <CardContent className="pt-6">
-      <AiProviderConfigListPage providerPage={providerPage} />
-    </CardContent>
-  )
+  return <AiProviderConfigListPage providerPage={providerPage} />
 }
 
 function ListSkeleton() {
   return (
-    <CardContent className="pt-6">
-      <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex w-full flex-1 flex-col gap-4 sm:w-auto sm:flex-row sm:items-center">
             <Skeleton className="h-10 w-[180px]" />
@@ -148,7 +111,6 @@ function ListSkeleton() {
             <Skeleton className="h-8 w-20" />
           </div>
         </div>
-      </div>
-    </CardContent>
+    </div>
   )
 }

@@ -32,7 +32,6 @@ import { NEWS_ARTICLE_READ_PERMISSIONS } from "@/app/lib/news-articles/permissio
 import { AccessDenied } from "@/components/access-denied"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Empty,
   EmptyDescription,
@@ -40,7 +39,6 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
-import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 
 import { EventEnrichButton } from "../event-enrich-button"
@@ -153,21 +151,10 @@ export default async function EventDetailPage({ params }: PageProps) {
 
   if (!hasAnyPermission(permissions, EVENT_READ_PERMISSIONS)) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Chi tiết sự kiện</CardTitle>
-          <CardDescription>
-            Xem thông tin tổng hợp, tài sản, chủ đề và bằng chứng của sự kiện.
-          </CardDescription>
-        </CardHeader>
-        <Separator />
-        <CardContent className="pt-6">
-          <AccessDenied
-            description="Bạn không có quyền xem chi tiết sự kiện."
-            permission={EVENT_READ_PERMISSIONS[0]}
-          />
-        </CardContent>
-      </Card>
+      <AccessDenied
+        description="Bạn không có quyền xem chi tiết sự kiện."
+        permission={EVENT_READ_PERMISSIONS[0]}
+      />
     )
   }
 
@@ -186,11 +173,9 @@ export default async function EventDetailPage({ params }: PageProps) {
         </Button>
       </div>
 
-      <Card>
-        <Suspense fallback={<EventDetailSkeleton />}>
-          <FetchEventData id={eventId} canReadNewsArticles={canReadNewsArticles} />
-        </Suspense>
-      </Card>
+      <Suspense fallback={<EventDetailSkeleton />}>
+        <FetchEventData id={eventId} canReadNewsArticles={canReadNewsArticles} />
+      </Suspense>
     </div>
   )
 }
@@ -219,8 +204,8 @@ async function FetchEventData({
   const evidenceItems = event.evidence ?? []
 
   return (
-    <>
-      <CardHeader>
+    <div className="flex flex-col gap-6">
+      <div>
         <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div className="flex flex-col gap-3">
             <div className="flex flex-wrap items-center gap-2">
@@ -230,10 +215,12 @@ async function FetchEventData({
             </div>
 
             <div className="flex flex-col gap-1">
-              <CardTitle className="text-2xl">{event.title}</CardTitle>
-              <CardDescription className="max-w-4xl pt-1 leading-6">
+              <h1 className="text-2xl font-semibold leading-tight text-foreground">
+                {event.title}
+              </h1>
+              <p className="max-w-4xl pt-1 text-sm leading-6 text-muted-foreground">
                 {event.description?.trim() || "Chưa có mô tả cho sự kiện này."}
-              </CardDescription>
+              </p>
             </div>
           </div>
 
@@ -241,12 +228,9 @@ async function FetchEventData({
             <EventEnrichButton id={event.id} />
           </div>
         </div>
-      </CardHeader>
+      </div>
 
-      <Separator />
-
-      <CardContent className="pt-6">
-        <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-8">
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             <DetailCard
               title="Độ tin cậy"
@@ -451,16 +435,15 @@ async function FetchEventData({
               </div>
             </details>
           </section>
-        </div>
-      </CardContent>
-    </>
+      </div>
+    </div>
   )
 }
 
 function EventDetailSkeleton() {
   return (
-    <>
-      <CardHeader className="flex flex-col gap-4">
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-4">
         <div className="flex gap-2">
           <Skeleton className="h-5 w-32 rounded-full" />
         </div>
@@ -468,9 +451,8 @@ function EventDetailSkeleton() {
           <Skeleton className="h-8 w-2/3" />
           <Skeleton className="h-4 w-3/4" />
         </div>
-      </CardHeader>
-      <Separator />
-      <CardContent className="flex flex-col gap-8 pt-6">
+      </div>
+      <div className="flex flex-col gap-8">
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 3 }).map((_, index) => (
             <div key={index} className="rounded-lg border p-4">
@@ -494,7 +476,7 @@ function EventDetailSkeleton() {
           ))}
         </div>
         <Skeleton className="h-14 w-full rounded-lg" />
-      </CardContent>
-    </>
+      </div>
+    </div>
   )
 }

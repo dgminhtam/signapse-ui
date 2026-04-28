@@ -10,14 +10,6 @@ import {
   AppListTableHead,
   AppListTableHeaderRow,
 } from "@/components/app-list-table"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
@@ -40,23 +32,10 @@ export default async function SystemPromptsPage({
 
   if (!canReadSystemPrompts(permissions)) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Prompt hệ thống</CardTitle>
-          <CardDescription>
-            Quản lý prompt điều khiển các workflow AI của hệ thống.
-          </CardDescription>
-        </CardHeader>
-
-        <Separator />
-
-        <CardContent className="pt-6">
-          <AccessDenied
-            description="Bạn không có quyền xem prompt hệ thống."
-            permission="system-prompt:read"
-          />
-        </CardContent>
-      </Card>
+      <AccessDenied
+        description="Bạn không có quyền xem prompt hệ thống."
+        permission="system-prompt:read"
+      />
     )
   }
 
@@ -67,28 +46,14 @@ export default async function SystemPromptsPage({
     typeof params.sort === "string" ? params.sort : "lastModifiedDate_desc"
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Prompt hệ thống</CardTitle>
-        <CardDescription>
-          Quản lý nội dung prompt đang điều khiển các workflow AI như lọc tin,
-          suy luận sự kiện và tổng hợp truy vấn thị trường.
-        </CardDescription>
-      </CardHeader>
-
-      <Separator />
-
-      <CardContent className="pt-6">
-        <Suspense fallback={<SystemPromptListSkeleton />}>
-          <SystemPromptListContent
-            page={page}
-            size={size}
-            sort={sort}
-            searchParams={params}
-          />
-        </Suspense>
-      </CardContent>
-    </Card>
+    <Suspense fallback={<SystemPromptListSkeleton />}>
+      <SystemPromptListContent
+        page={page}
+        size={size}
+        sort={sort}
+        searchParams={params}
+      />
+    </Suspense>
   )
 }
 

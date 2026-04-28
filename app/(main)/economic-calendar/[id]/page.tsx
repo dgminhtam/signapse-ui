@@ -30,14 +30,6 @@ import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { AccessDenied } from "@/components/access-denied"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 
 interface PageProps {
@@ -118,22 +110,10 @@ export default async function EconomicCalendarDetailPage({ params }: PageProps) 
 
   if (!hasAnyPermission(permissions, ECONOMIC_CALENDAR_READ_PERMISSIONS)) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Chi tiết lịch kinh tế</CardTitle>
-          <CardDescription>
-            Xem dữ liệu công bố kinh tế, trạng thái nội dung và các giá trị actual,
-            forecast, previous.
-          </CardDescription>
-        </CardHeader>
-        <Separator />
-        <CardContent className="pt-6">
-          <AccessDenied
-            description="Bạn không có quyền xem chi tiết lịch kinh tế."
-            permission={ECONOMIC_CALENDAR_READ_PERMISSIONS[0]}
-          />
-        </CardContent>
-      </Card>
+      <AccessDenied
+        description="Bạn không có quyền xem chi tiết lịch kinh tế."
+        permission={ECONOMIC_CALENDAR_READ_PERMISSIONS[0]}
+      />
     )
   }
 
@@ -155,11 +135,9 @@ export default async function EconomicCalendarDetailPage({ params }: PageProps) 
         </Button>
       </div>
 
-      <Card>
-        <Suspense fallback={<EconomicCalendarDetailSkeleton />}>
-          <FetchEconomicCalendarEntryData id={entryId} />
-        </Suspense>
-      </Card>
+      <Suspense fallback={<EconomicCalendarDetailSkeleton />}>
+        <FetchEconomicCalendarEntryData id={entryId} />
+      </Suspense>
     </div>
   )
 }
@@ -180,8 +158,8 @@ async function FetchEconomicCalendarEntryData({ id }: { id: number }) {
   const hasContent = Boolean(entry.contentAvailable && entry.content?.trim())
 
   return (
-    <>
-      <CardHeader>
+    <div className="flex flex-col gap-6">
+      <div>
         <div className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant={getEconomicCalendarImpactVariant(entry.impact)}>
@@ -198,10 +176,10 @@ async function FetchEconomicCalendarEntryData({ id }: { id: number }) {
           </div>
 
           <div className="flex flex-col gap-1">
-            <CardTitle className="text-2xl">
+            <h1 className="text-2xl font-semibold leading-tight text-foreground">
               {formatEconomicCalendarValue(entry.title, "Sự kiện chưa có tiêu đề")}
-            </CardTitle>
-            <CardDescription className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1">
+            </h1>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1 text-sm text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">
                 <Landmark className="h-4 w-4" />
                 Tiền tệ {formatCurrency(entry.currencyCode)}
@@ -210,15 +188,12 @@ async function FetchEconomicCalendarEntryData({ id }: { id: number }) {
                 <CalendarClock className="h-4 w-4" />
                 Công bố {formatDateTime(entry.scheduledAt)}
               </span>
-            </CardDescription>
+            </div>
           </div>
         </div>
-      </CardHeader>
+      </div>
 
-      <Separator />
-
-      <CardContent className="pt-6">
-        <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-8">
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <DetailCard
               title="Actual"
@@ -296,16 +271,15 @@ async function FetchEconomicCalendarEntryData({ id }: { id: number }) {
               </div>
             </details>
           </section>
-        </div>
-      </CardContent>
-    </>
+      </div>
+    </div>
   )
 }
 
 function EconomicCalendarDetailSkeleton() {
   return (
-    <>
-      <CardHeader className="flex flex-col gap-4">
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-4">
         <div className="flex gap-2">
           <Skeleton className="h-5 w-28 rounded-full" />
           <Skeleton className="h-5 w-24 rounded-full" />
@@ -314,9 +288,8 @@ function EconomicCalendarDetailSkeleton() {
           <Skeleton className="h-8 w-2/3" />
           <Skeleton className="h-4 w-1/2" />
         </div>
-      </CardHeader>
-      <Separator />
-      <CardContent className="flex flex-col gap-8 pt-6">
+      </div>
+      <div className="flex flex-col gap-8">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {Array.from({ length: 4 }).map((_, index) => (
             <div key={index} className="rounded-lg border p-4">
@@ -330,7 +303,7 @@ function EconomicCalendarDetailSkeleton() {
           <Skeleton className="h-40 w-full rounded-lg" />
         </div>
         <Skeleton className="h-14 w-full rounded-lg" />
-      </CardContent>
-    </>
+      </div>
+    </div>
   )
 }

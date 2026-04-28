@@ -17,20 +17,12 @@ import { WorkspaceResponse } from "@/app/lib/workspaces/definitions"
 import { WorkspaceWatchlistAssetListItemResponse } from "@/app/lib/watchlists/definitions"
 import { Badge } from "@/components/ui/badge"
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
-import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 
 import { WorkspaceOverviewActions } from "./workspace-overview-actions"
@@ -190,19 +182,7 @@ async function loadWatchlistPreview(canReadTrackedAssets: boolean): Promise<Watc
 }
 
 function WorkspaceOverviewShell({ children }: { children: ReactNode }) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Tổng quan không gian làm việc</CardTitle>
-        <CardDescription>
-          Theo dõi phạm vi dữ liệu đang hoạt động, tài sản theo dõi và các thông
-          tin chính của workspace hiện tại.
-        </CardDescription>
-      </CardHeader>
-      <Separator />
-      <CardContent>{children}</CardContent>
-    </Card>
-  )
+  return <>{children}</>
 }
 
 function WorkspaceHero({
@@ -451,40 +431,31 @@ function TechnicalDetail({ label, value }: { label: string; value: string }) {
 
 function WorkspaceOverviewSkeleton() {
   return (
-    <Card>
-      <CardHeader>
-        <Skeleton className="h-6 w-64" />
-        <Skeleton className="h-4 w-full max-w-xl" />
-      </CardHeader>
-      <Separator />
-      <CardContent>
-        <div className="flex flex-col gap-6">
-          <div className="rounded-xl border bg-muted/20 p-5">
-            <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-              <div className="flex flex-1 flex-col gap-3">
-                <Skeleton className="h-5 w-32" />
-                <Skeleton className="h-8 w-full max-w-md" />
-                <Skeleton className="h-4 w-full max-w-2xl" />
-              </div>
-              <Skeleton className="h-9 w-44" />
-            </div>
-            <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              {Array.from({ length: 4 }).map((_, index) => (
-                <div key={index} className="rounded-lg border bg-background p-4">
-                  <Skeleton className="h-4 w-28" />
-                  <Skeleton className="mt-3 h-6 w-full" />
-                  <Skeleton className="mt-3 h-3 w-32" />
-                </div>
-              ))}
-            </div>
+    <div className="flex flex-col gap-6">
+      <div className="rounded-xl border bg-muted/20 p-5">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex flex-1 flex-col gap-3">
+            <Skeleton className="h-5 w-32" />
+            <Skeleton className="h-8 w-full max-w-md" />
+            <Skeleton className="h-4 w-full max-w-2xl" />
           </div>
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
-            <Skeleton className="h-80 rounded-xl" />
-            <Skeleton className="h-80 rounded-xl" />
-          </div>
+          <Skeleton className="h-9 w-44" />
         </div>
-      </CardContent>
-    </Card>
+        <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div key={index} className="rounded-lg border bg-background p-4">
+              <Skeleton className="h-4 w-28" />
+              <Skeleton className="mt-3 h-6 w-full" />
+              <Skeleton className="mt-3 h-3 w-32" />
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
+        <Skeleton className="h-80 rounded-xl" />
+        <Skeleton className="h-80 rounded-xl" />
+      </div>
+    </div>
   )
 }
 

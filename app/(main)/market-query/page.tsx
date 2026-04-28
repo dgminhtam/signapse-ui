@@ -6,14 +6,6 @@ import {
   MARKET_QUERY_EXECUTE_PERMISSIONS,
 } from "@/app/lib/market-query/permissions"
 import { AccessDenied } from "@/components/access-denied"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 
 import { MarketQueryWorkbench } from "./market-query-workbench"
@@ -23,45 +15,17 @@ export default async function MarketQueryPage() {
 
   if (!canExecuteMarketQueries(permissions)) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Truy vấn thị trường</CardTitle>
-          <CardDescription>
-            Đặt câu hỏi dựa trên sự kiện và tài liệu nguồn để nhận bản tổng hợp phân tích
-            thị trường ngay trong hệ thống.
-          </CardDescription>
-        </CardHeader>
-
-        <Separator />
-
-        <CardContent className="pt-6">
-          <AccessDenied
-            description="Bạn không có quyền sử dụng công cụ truy vấn thị trường."
-            permission={MARKET_QUERY_EXECUTE_PERMISSIONS[0]}
-          />
-        </CardContent>
-      </Card>
+      <AccessDenied
+        description="Bạn không có quyền sử dụng công cụ truy vấn thị trường."
+        permission={MARKET_QUERY_EXECUTE_PERMISSIONS[0]}
+      />
     )
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Truy vấn thị trường</CardTitle>
-        <CardDescription>
-          Đặt một câu hỏi để nhận bản tổng hợp thị trường gồm kết luận, độ tin cậy và bằng
-          chứng liên quan.
-        </CardDescription>
-      </CardHeader>
-
-      <Separator />
-
-      <CardContent className="pt-6">
-        <Suspense fallback={<MarketQueryWorkbenchSkeleton />}>
-          <MarketQueryWorkbench />
-        </Suspense>
-      </CardContent>
-    </Card>
+    <Suspense fallback={<MarketQueryWorkbenchSkeleton />}>
+      <MarketQueryWorkbench />
+    </Suspense>
   )
 }
 

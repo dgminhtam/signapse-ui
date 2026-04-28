@@ -24,7 +24,7 @@ const FRIENDLY_SEGMENT_NAMES: Record<string, string> = {
   events: "Sự kiện",
   "graph-view": "Biểu đồ tri thức",
   "market-query": "Truy vấn thị trường",
-  "news-articles": "Tài liệu nguồn",
+  "news-articles": "Bài viết tin tức",
   "news-outlets": "Nguồn tin",
   roles: "Vai trò",
   "source-documents": "Tài liệu nguồn",

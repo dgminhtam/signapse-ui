@@ -5,14 +5,6 @@ import { hasPermission } from "@/app/lib/permissions";
 import { getCurrentPermissions } from "@/app/lib/permissions-server";
 import { buildSortQuery, buildFilterQuery } from "@/app/lib/utils";
 import { AccessDenied } from "@/components/access-denied";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface BlogPageProps {
@@ -24,41 +16,17 @@ export default async function Page({ searchParams }: BlogPageProps) {
 
     if (!hasPermission(permissions, "blog:read")) {
         return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Quáº£n lÃ½ bÃ i viáº¿t</CardTitle>
-                    <CardDescription>
-                        Danh sÃ¡ch, tÃ¬m kiáº¿m vÃ  quáº£n lÃ½ toÃ n bá»™ bÃ i viáº¿t trong há»‡ thá»‘ng.
-                    </CardDescription>
-                </CardHeader>
-
-                <Separator />
-
-                <CardContent className="pt-6">
-                    <AccessDenied
-                        description="Báº¡n khÃ´ng cÃ³ quyá»n xem danh sÃ¡ch bÃ i viáº¿t."
-                        permission="blog:read"
-                    />
-                </CardContent>
-            </Card>
+            <AccessDenied
+                description="Bạn không có quyền xem danh sách bài viết."
+                permission="blog:read"
+            />
         );
     }
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Quản lý bài viết</CardTitle>
-                <CardDescription>
-                    Danh sách, tìm kiếm và quản lý toàn bộ bài viết trong hệ thống.
-                </CardDescription>
-            </CardHeader>
-
-            <Separator />
-
-            <Suspense fallback={<BlogListSkeleton />}>
-                <BlogListContent searchParamsPromise={searchParams} />
-            </Suspense>
-        </Card>
+        <Suspense fallback={<BlogListSkeleton />}>
+            <BlogListContent searchParamsPromise={searchParams} />
+        </Suspense>
     );
 }
 
@@ -80,16 +48,12 @@ async function BlogListContent({
         sort: buildSortQuery(sort as string),
     });
 
-    return (
-        <CardContent>
-            <BlogListPage blogPage={blogPage} />
-        </CardContent>
-    );
+    return <BlogListPage blogPage={blogPage} />;
 }
 
 function BlogListSkeleton() {
     return (
-        <CardContent className="pt-6 space-y-6">
+        <div className="flex flex-col gap-6">
             <div className="flex flex-col sm:flex-row gap-4 justify-between">
                 <div className="flex gap-4 w-full sm:w-auto flex-1 items-center">
                     <Skeleton className="h-10 w-[160px]" />
@@ -108,7 +72,7 @@ function BlogListSkeleton() {
 
                 {Array.from({ length: 5 }).map((_, i) => (
                     <div key={i} className="h-16 px-4 flex items-center gap-4 border-b last:border-0">
-                        <div className="space-y-2 flex-3 min-w-[200px]">
+                        <div className="flex min-w-[200px] flex-3 flex-col gap-2">
                             <Skeleton className="h-4 w-3/4" />
                             <Skeleton className="h-3 w-1/2" />
                         </div>
@@ -130,6 +94,6 @@ function BlogListSkeleton() {
                     <Skeleton className="h-8 w-8" />
                 </div>
             </div>
-        </CardContent>
+        </div>
     )
 }

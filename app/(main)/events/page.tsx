@@ -11,14 +11,6 @@ import {
   AppListTableHead,
   AppListTableHeaderRow,
 } from "@/components/app-list-table"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
@@ -39,23 +31,10 @@ export default async function EventsPage({ searchParams }: PageProps) {
 
   if (!hasAnyPermission(permissions, EVENT_READ_PERMISSIONS)) {
     return (
-      <Card>
-        <CardHeader>
-        <CardTitle>Sự kiện</CardTitle>
-        <CardDescription>
-          Theo dõi các sự kiện đã được tổng hợp, trạng thái làm giàu và bằng chứng liên quan.
-          </CardDescription>
-        </CardHeader>
-
-        <Separator />
-
-        <CardContent className="pt-6">
-          <AccessDenied
-            description="Bạn không có quyền truy cập khu vực quản lý sự kiện."
-            permission={EVENT_READ_PERMISSIONS[0]}
-          />
-        </CardContent>
-      </Card>
+      <AccessDenied
+        description="Bạn không có quyền truy cập khu vực quản lý sự kiện."
+        permission={EVENT_READ_PERMISSIONS[0]}
+      />
     )
   }
 
@@ -65,22 +44,9 @@ export default async function EventsPage({ searchParams }: PageProps) {
   const sort = typeof params.sort === "string" ? params.sort : "occurredAt_desc"
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Sự kiện</CardTitle>
-        <CardDescription>
-          Duyệt sự kiện đã được tổng hợp, kiểm tra trạng thái làm giàu và chuỗi bằng chứng liên quan.
-        </CardDescription>
-      </CardHeader>
-
-      <Separator />
-
-      <CardContent className="pt-6">
-        <Suspense fallback={<EventListSkeleton />}>
-          <EventListContent page={page} size={size} sort={sort} searchParams={params} />
-        </Suspense>
-      </CardContent>
-    </Card>
+    <Suspense fallback={<EventListSkeleton />}>
+      <EventListContent page={page} size={size} sort={sort} searchParams={params} />
+    </Suspense>
   )
 }
 

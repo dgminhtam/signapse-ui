@@ -29,8 +29,8 @@ Mỗi feature nên nằm trọn trong thư mục riêng:
 
 ```text
 app/(main)/[feature]/
-├── page.tsx              # Server Component: Card shell + Suspense boundary
-├── [id]/page.tsx         # Trang chi tiết: Card shell + nút quay lại chuẩn
+├── page.tsx              # Server Component: cardless workspace + Suspense boundary
+├── [id]/page.tsx         # Trang chi tiết: cardless workspace + nút quay lại chuẩn
 ├── error.tsx             # Local error boundary
 ├── [feature]-list.tsx    # Client Component: bảng/danh sách + toolbar
 ├── [feature]-form.tsx    # Client Component: form tạo mới/chỉnh sửa
@@ -97,10 +97,11 @@ app/(main)/[feature]/
 
 ### Bố cục trang chuẩn
 
-- Trang danh sách phải được bọc trong `<Card>`
-- Header của mỗi trang phải có `<CardHeader>`, `<CardTitle>` và `<CardDescription>`
-- Thêm `<Separator />` giữa phần header và nội dung chính
-- Trang chi tiết phải có nút quay lại phía trên phần nội dung Card
+- Trang trong `app/(main)` dùng cardless workspace theo padding của layout cha; không bọc toàn bộ page bằng main `<Card>` chỉ để lặp lại breadcrumb title
+- Breadcrumb trong app header là page identity chính cho các trang đơn giản; nếu breadcrumb label lệch với tên màn hình thì sửa breadcrumb mapping thay vì thêm heading trùng lặp
+- Chỉ dùng `<Card>` cho inner surface có ranh giới thật như form section, detail panel, dashboard tile, access-denied/error panel hoặc repeated item
+- Trang danh sách render trực tiếp shared toolbar, table và pagination surfaces; không thêm main `<Card>`, `<CardHeader>`, `<CardTitle>`, `<CardDescription>` và `<Separator />` bao ngoài
+- Trang chi tiết phải có nút quay lại phía trên nội dung chính; các panel bên trong có thể dùng `<Card>` khi giúp nhóm dữ liệu rõ hơn
 
 ### Bố cục toolbar
 
@@ -150,12 +151,13 @@ app/(main)/[feature]/
 ### Kỳ vọng khi review
 
 - Review theo các rule trong file này, không dựa trên metadata Claude cũ
-- Kiểm tra trang danh sách có Card shell, toolbar đúng bố cục và loading feedback phù hợp
+- Kiểm tra trang danh sách dùng cardless workspace, toolbar đúng bố cục và loading feedback phù hợp
+- Đánh dấu top-level main `<Card>` chỉ để lặp lại breadcrumb title và bọc toàn page là review finding
 - Kiểm tra bảng list dùng shared table surface nhất quán cho shell, header và empty state
-- Kiểm tra trang chi tiết có flow quay lại chuẩn và cấu trúc Card nhất quán
+- Kiểm tra trang chi tiết có flow quay lại chuẩn và chỉ dùng `<Card>` cho inner surface có ý nghĩa
 - Kiểm tra mutation có xử lý kiểu `ActionResult`, có pending state, spinner và disable control đúng lúc
 - Kiểm tra action xóa có dùng `AlertDialog`
-- Đánh dấu `any`, skeleton lệch bố cục, table surface drift và UI copy không phải tiếng Việt là review finding
+- Đánh dấu `any`, skeleton lệch bố cục, main-card shell drift, table surface drift và UI copy không phải tiếng Việt là review finding
 
 ## Biến môi trường
 
@@ -181,7 +183,7 @@ API_BASE_URL=http://localhost:8484
 
 Trước khi đánh dấu một feature là xong:
 
-- [ ] `page.tsx` dùng `Card` shell với `CardHeader` và `Separator`
+- [ ] `page.tsx` dùng cardless workspace, không có main `Card` shell chỉ để lặp lại breadcrumb title
 - [ ] `page.tsx` có `Suspense` với `Skeleton` bám sát bố cục thật
 - [ ] Có `error.tsx` để xử lý local server error
 - [ ] Search tuân thủ quy ước search list trong file này

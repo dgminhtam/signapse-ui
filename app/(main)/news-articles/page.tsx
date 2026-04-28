@@ -11,14 +11,6 @@ import {
   AppListTableHead,
   AppListTableHeaderRow,
 } from "@/components/app-list-table"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
@@ -40,23 +32,10 @@ export default async function NewsArticlesPage({ searchParams }: PageProps) {
 
   if (!hasAnyPermission(permissions, NEWS_ARTICLE_READ_PERMISSIONS)) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Bài viết tin tức</CardTitle>
-          <CardDescription>
-            Xem và quản lý danh sách bài viết tin tức theo contract backend hiện tại.
-          </CardDescription>
-        </CardHeader>
-
-        <Separator />
-
-        <CardContent className="pt-6">
-          <AccessDenied
-            description="Bạn không có quyền truy cập khu vực quản lý bài viết tin tức."
-            permission={NEWS_ARTICLE_READ_PERMISSIONS[0]}
-          />
-        </CardContent>
-      </Card>
+      <AccessDenied
+        description="Bạn không có quyền truy cập khu vực quản lý bài viết tin tức."
+        permission={NEWS_ARTICLE_READ_PERMISSIONS[0]}
+      />
     )
   }
 
@@ -66,23 +45,9 @@ export default async function NewsArticlesPage({ searchParams }: PageProps) {
   const sort = typeof params.sort === "string" ? params.sort : "publishedAt_desc"
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Bài viết tin tức</CardTitle>
-        <CardDescription>
-          Theo dõi nội dung đã ingest, trạng thái bài viết và các thao tác operator
-          theo surface canon `news-articles`.
-        </CardDescription>
-      </CardHeader>
-
-      <Separator />
-
-      <CardContent className="pt-6">
-        <Suspense fallback={<NewsArticleListSkeleton />}>
-          <NewsArticleListContent page={page} size={size} sort={sort} searchParams={params} />
-        </Suspense>
-      </CardContent>
-    </Card>
+    <Suspense fallback={<NewsArticleListSkeleton />}>
+      <NewsArticleListContent page={page} size={size} sort={sort} searchParams={params} />
+    </Suspense>
   )
 }
 

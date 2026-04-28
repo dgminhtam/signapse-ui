@@ -36,7 +36,6 @@ import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { AccessDenied } from "@/components/access-denied"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Empty,
   EmptyDescription,
@@ -44,7 +43,6 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
-import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 
 import { getEventEnrichmentVariant, getEventStatusVariant } from "../../events/event-presentation"
@@ -156,21 +154,10 @@ export default async function NewsArticleDetailPage({ params }: PageProps) {
 
   if (!hasAnyPermission(permissions, NEWS_ARTICLE_READ_PERMISSIONS)) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Chi tiết bài viết tin tức</CardTitle>
-          <CardDescription>
-            Xem nội dung đã nạp, trạng thái xử lý và các sự kiện liên kết.
-          </CardDescription>
-        </CardHeader>
-        <Separator />
-        <CardContent className="pt-6">
-          <AccessDenied
-            description="Bạn không có quyền xem chi tiết bài viết tin tức."
-            permission={NEWS_ARTICLE_READ_PERMISSIONS[0]}
-          />
-        </CardContent>
-      </Card>
+      <AccessDenied
+        description="Bạn không có quyền xem chi tiết bài viết tin tức."
+        permission={NEWS_ARTICLE_READ_PERMISSIONS[0]}
+      />
     )
   }
 
@@ -189,11 +176,9 @@ export default async function NewsArticleDetailPage({ params }: PageProps) {
         </Button>
       </div>
 
-      <Card>
-        <Suspense fallback={<NewsArticleDetailSkeleton />}>
-          <FetchNewsArticleData id={newsArticleId} canReadEvents={canReadEvents} />
-        </Suspense>
-      </Card>
+      <Suspense fallback={<NewsArticleDetailSkeleton />}>
+        <FetchNewsArticleData id={newsArticleId} canReadEvents={canReadEvents} />
+      </Suspense>
     </div>
   )
 }
@@ -221,8 +206,8 @@ async function FetchNewsArticleData({
   const linkedEvents = article.linkedEvents ?? []
 
   return (
-    <>
-      <CardHeader>
+    <div className="flex flex-col gap-6">
+      <div>
         <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div className="flex flex-col gap-3">
             <div className="flex flex-wrap items-center gap-2">
@@ -232,8 +217,10 @@ async function FetchNewsArticleData({
             </div>
 
             <div className="flex flex-col gap-1">
-              <CardTitle className="text-2xl">{article.title}</CardTitle>
-              <CardDescription className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1">
+              <h1 className="text-2xl font-semibold leading-tight text-foreground">
+                {article.title}
+              </h1>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1 text-sm text-muted-foreground">
                 <span className="inline-flex items-center gap-1.5">
                   <Globe2 className="h-4 w-4" />
                   {article.newsOutletName?.trim() || "Chưa có nguồn tin"}
@@ -242,7 +229,7 @@ async function FetchNewsArticleData({
                   <Calendar className="h-4 w-4" />
                   {formatDateTime(article.publishedAt)}
                 </span>
-              </CardDescription>
+              </div>
             </div>
           </div>
 
@@ -265,12 +252,9 @@ async function FetchNewsArticleData({
             />
           </div>
         </div>
-      </CardHeader>
+      </div>
 
-      <Separator />
-
-      <CardContent className="pt-6">
-        <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-8">
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
             <div className="flex flex-col gap-6">
               <div className="grid gap-4 md:grid-cols-3">
@@ -458,16 +442,15 @@ async function FetchNewsArticleData({
               </div>
             </details>
           </section>
-        </div>
-      </CardContent>
-    </>
+      </div>
+    </div>
   )
 }
 
 function NewsArticleDetailSkeleton() {
   return (
-    <>
-      <CardHeader className="flex flex-col gap-4">
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-4">
         <div className="flex gap-2">
           <Skeleton className="h-5 w-24 rounded-full" />
         </div>
@@ -475,9 +458,8 @@ function NewsArticleDetailSkeleton() {
           <Skeleton className="h-8 w-2/3" />
           <Skeleton className="h-4 w-1/2" />
         </div>
-      </CardHeader>
-      <Separator />
-      <CardContent className="flex flex-col gap-8 pt-6">
+      </div>
+      <div className="flex flex-col gap-8">
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
           <div className="flex flex-col gap-6">
             <div className="grid gap-4 md:grid-cols-3">
@@ -507,7 +489,7 @@ function NewsArticleDetailSkeleton() {
           <Skeleton className="h-32 w-full rounded-lg" />
         </div>
         <Skeleton className="h-14 w-full rounded-lg" />
-      </CardContent>
-    </>
+      </div>
+    </div>
   )
 }

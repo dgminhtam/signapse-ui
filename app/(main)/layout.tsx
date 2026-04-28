@@ -12,6 +12,7 @@ import { ModeToggle } from "@/components/mode-toggle"
 import { PermissionProvider } from "@/components/permission-provider"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { WorkspaceSwitcher } from "@/components/workspace-switcher"
+import { Separator } from "@/components/ui/separator"
 
 export default async function Layout({
   children,
@@ -27,10 +28,10 @@ export default async function Layout({
   const user = await currentUser()
   const simpleUser = user
     ? {
-        imageUrl: user.imageUrl,
-        fullName: user.fullName,
-        username: user.username,
-      }
+      imageUrl: user.imageUrl,
+      fullName: user.fullName,
+      username: user.username,
+    }
     : null
 
   const cookieStore = await cookies()
@@ -68,6 +69,10 @@ export default async function Layout({
             <div className="flex w-full flex-col gap-2 md:flex-row md:items-center md:justify-between">
               <div className="flex min-w-0 items-center gap-2">
                 <SidebarTrigger />
+                <Separator
+                  orientation="vertical"
+                  className="mr-2 data-[orientation=vertical]:h-8"
+                />
                 <AppBreadcrumb />
               </div>
 

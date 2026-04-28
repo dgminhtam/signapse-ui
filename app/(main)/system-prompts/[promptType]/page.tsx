@@ -12,14 +12,6 @@ import { canUpdateSystemPrompts } from "@/app/lib/system-prompts/permissions"
 import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { AccessDenied } from "@/components/access-denied"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
 
 import { SystemPromptForm } from "../system-prompt-form"
 
@@ -34,21 +26,10 @@ export default async function EditSystemPromptPage({
 
   if (!canUpdateSystemPrompts(permissions)) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Chỉnh sửa prompt hệ thống</CardTitle>
-          <CardDescription>
-            Cập nhật nội dung prompt đang điều khiển workflow AI.
-          </CardDescription>
-        </CardHeader>
-        <Separator />
-        <CardContent className="pt-6">
-          <AccessDenied
-            description="Bạn không có quyền cập nhật prompt hệ thống."
-            permission="system-prompt:update"
-          />
-        </CardContent>
-      </Card>
+      <AccessDenied
+        description="Bạn không có quyền cập nhật prompt hệ thống."
+        permission="system-prompt:update"
+      />
     )
   }
 
@@ -78,22 +59,7 @@ export default async function EditSystemPromptPage({
         </Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Chỉnh sửa prompt hệ thống</CardTitle>
-          <CardDescription>
-            Cập nhật nội dung cho{" "}
-            <span className="font-semibold text-foreground">
-              {getSystemPromptTypeLabel(prompt.promptType)}
-            </span>
-            .
-          </CardDescription>
-        </CardHeader>
-        <Separator />
-        <CardContent className="pt-6">
-          <SystemPromptForm initialData={prompt} />
-        </CardContent>
-      </Card>
+      <SystemPromptForm initialData={prompt} />
     </div>
   )
 }

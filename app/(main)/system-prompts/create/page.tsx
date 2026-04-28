@@ -5,14 +5,6 @@ import { canCreateSystemPrompts } from "@/app/lib/system-prompts/permissions"
 import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { AccessDenied } from "@/components/access-denied"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
 
 import { SystemPromptForm } from "../system-prompt-form"
 
@@ -21,21 +13,10 @@ export default async function CreateSystemPromptPage() {
 
   if (!canCreateSystemPrompts(permissions)) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Tạo prompt hệ thống</CardTitle>
-          <CardDescription>
-            Thêm prompt điều khiển một workflow AI trong hệ thống.
-          </CardDescription>
-        </CardHeader>
-        <Separator />
-        <CardContent className="pt-6">
-          <AccessDenied
-            description="Bạn không có quyền tạo prompt hệ thống."
-            permission="system-prompt:create"
-          />
-        </CardContent>
-      </Card>
+      <AccessDenied
+        description="Bạn không có quyền tạo prompt hệ thống."
+        permission="system-prompt:create"
+      />
     )
   }
 
@@ -50,19 +31,7 @@ export default async function CreateSystemPromptPage() {
         </Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Tạo prompt hệ thống</CardTitle>
-          <CardDescription>
-            Chọn loại prompt và khai báo nội dung hướng dẫn cho workflow AI tương
-            ứng.
-          </CardDescription>
-        </CardHeader>
-        <Separator />
-        <CardContent className="pt-6">
-          <SystemPromptForm />
-        </CardContent>
-      </Card>
+      <SystemPromptForm />
     </div>
   )
 }

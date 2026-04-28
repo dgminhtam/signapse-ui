@@ -2,13 +2,6 @@ import { getCronjobById } from "@/app/api/cronjobs/action"
 import { hasPermission } from "@/app/lib/permissions"
 import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { AccessDenied } from "@/components/access-denied"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { notFound } from "next/navigation"
@@ -26,23 +19,10 @@ export default async function EditCronjobPage({ params }: PageProps) {
 
   if (!hasPermission(permissions, "cronjob:update")) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Edit Cronjob</CardTitle>
-          <CardDescription>
-            Update detailed information and cronjob configuration.
-          </CardDescription>
-        </CardHeader>
-
-        <Separator />
-
-        <CardContent className="pt-6">
-          <AccessDenied
-            description="You do not have permission to update cronjobs."
-            permission="cronjob:update"
-          />
-        </CardContent>
-      </Card>
+      <AccessDenied
+        description="Bạn không có quyền cập nhật tác vụ định kỳ."
+        permission="cronjob:update"
+      />
     )
   }
 
@@ -50,20 +30,9 @@ export default async function EditCronjobPage({ params }: PageProps) {
   const cronjobId = Number(id)
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Edit Cronjob</CardTitle>
-        <CardDescription>
-          Update detailed information and cronjob configuration.
-        </CardDescription>
-      </CardHeader>
-
-      <Separator />
-
-      <Suspense fallback={<UpdateCronjobSkeleton />}>
-        <FetchCronjobData id={cronjobId} />
-      </Suspense>
-    </Card>
+    <Suspense fallback={<UpdateCronjobSkeleton />}>
+      <FetchCronjobData id={cronjobId} />
+    </Suspense>
   )
 }
 
@@ -74,37 +43,33 @@ async function FetchCronjobData({ id }: { id: number }) {
     notFound()
   }
 
-  return (
-    <CardContent className="pt-6">
-      <UpdateCronjobForm cronjob={cronjob} />
-    </CardContent>
-  )
+  return <UpdateCronjobForm cronjob={cronjob} />
 }
 
 function UpdateCronjobSkeleton() {
   return (
-    <CardContent className="space-y-8 pt-6">
-      <div className="space-y-2">
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-2">
         <Skeleton className="h-4 w-24" />
         <Skeleton className="h-10 w-full" />
       </div>
 
-      <div className="space-y-2">
+      <div className="flex flex-col gap-2">
         <Skeleton className="h-4 w-20" />
         <Skeleton className="h-10 w-full" />
       </div>
 
-      <div className="space-y-2">
+      <div className="flex flex-col gap-2">
         <Skeleton className="h-4 w-24" />
         <Skeleton className="h-10 w-full" />
       </div>
 
-      <div className="space-y-2">
+      <div className="flex flex-col gap-2">
         <Skeleton className="h-4 w-32" />
         <Skeleton className="h-10 w-full" />
       </div>
 
-      <div className="space-y-2">
+      <div className="flex flex-col gap-2">
         <Skeleton className="h-4 w-20" />
         <Skeleton className="h-10 w-full" />
       </div>
@@ -115,6 +80,6 @@ function UpdateCronjobSkeleton() {
         <Skeleton className="h-10 w-32" />
         <Skeleton className="h-10 w-24" />
       </div>
-    </CardContent>
+    </div>
   )
 }
