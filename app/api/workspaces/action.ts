@@ -54,10 +54,10 @@ export async function updateWorkspace(
   }
 }
 
-export async function setDefaultWorkspace(id: number): Promise<ActionResult<WorkspaceResponse>> {
+export async function setCurrentWorkspace(id: number): Promise<ActionResult<WorkspaceResponse>> {
   try {
     const workspace = await fetchAuthenticated<WorkspaceResponse>(
-      `/me/workspaces/${id}/set-default`,
+      `/me/workspaces/${id}/set-current`,
       {
         method: "PATCH",
       }

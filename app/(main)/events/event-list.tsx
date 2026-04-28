@@ -5,10 +5,7 @@ import { Calendar, Eye, GitBranch } from "lucide-react"
 import Link from "next/link"
 
 import { Page } from "@/app/lib/definitions"
-import {
-  EVENT_ENRICHMENT_STATUS_LABELS,
-  EventListResponse,
-} from "@/app/lib/events/definitions"
+import { EventListResponse } from "@/app/lib/events/definitions"
 import { AppPaginationControls } from "@/components/app-pagination-controls"
 import {
   AppListToolbar,
@@ -35,7 +32,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
@@ -43,7 +39,6 @@ import {
 import { EventEnrichPendingButton } from "./event-enrich-pending-button"
 import { EventSearch } from "./event-search"
 import {
-  getEventEnrichmentVariant,
   getEventStatusLabel,
   getEventStatusVariant,
 } from "./event-presentation"
@@ -129,7 +124,7 @@ export function EventList({ eventPage }: EventListProps) {
                         {event.title}
                       </Link>
                       <span className="line-clamp-2 text-xs text-muted-foreground">
-                        {event.summary?.trim() || "Chưa có tóm tắt ngắn."}
+                        {event.description?.trim() || "Chưa có mô tả ngắn."}
                       </span>
                       {event.canonicalKey ? (
                         <span className="text-xs text-muted-foreground">
@@ -139,19 +134,9 @@ export function EventList({ eventPage }: EventListProps) {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-col gap-2">
-                      <Badge variant={getEventStatusVariant(event.status)}>
-                        {getEventStatusLabel(event.status)}
-                      </Badge>
-                      <Badge variant={getEventEnrichmentVariant(event.enrichmentStatus)}>
-                        {event.enrichmentStatus
-                          ? EVENT_ENRICHMENT_STATUS_LABELS[event.enrichmentStatus]
-                          : "Chưa làm giàu"}
-                      </Badge>
-                      <Badge variant={event.active ? "secondary" : "outline"}>
-                        {event.active ? "Đang hoạt động" : "Không hoạt động"}
-                      </Badge>
-                    </div>
+                    <Badge variant={getEventStatusVariant(event.status)}>
+                      {getEventStatusLabel(event.status)}
+                    </Badge>
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     <div className="flex flex-col gap-1">
@@ -159,9 +144,6 @@ export function EventList({ eventPage }: EventListProps) {
                         <Calendar className="h-3.5 w-3.5" />
                         <span>{formatDateTime(event.occurredAt)}</span>
                       </div>
-                      <span className="text-xs text-muted-foreground">
-                        Cập nhật {formatDateTime(event.lastModifiedDate)}
-                      </span>
                     </div>
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">

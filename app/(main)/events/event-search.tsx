@@ -8,7 +8,8 @@ import { useOptimistic, useTransition } from "react"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 
-const SEARCH_PARAM_KEY = "title[containsIgnoreCase],canonicalKey[containsIgnoreCase]"
+const SEARCH_PARAM_KEY =
+  "title[containsIgnoreCase],description[containsIgnoreCase],canonicalKey[containsIgnoreCase]"
 const SEARCH_INPUT_ID = "event-search"
 
 export function EventSearch() {
@@ -48,7 +49,7 @@ export function EventSearch() {
         id={SEARCH_INPUT_ID}
         type="search"
         className="pl-9 pr-10"
-        placeholder="Tìm theo tiêu đề hoặc khóa chuẩn..."
+        placeholder="Tìm theo tiêu đề, mô tả hoặc khóa chuẩn..."
         value={value}
         onChange={(event) => {
           setValue(event.target.value)

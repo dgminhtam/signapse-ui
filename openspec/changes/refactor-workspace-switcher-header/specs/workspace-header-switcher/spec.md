@@ -48,8 +48,8 @@ The system SHALL preserve existing workspace actions from the canonical menu acc
 
 #### Scenario: User can switch workspace
 
-- **WHEN** a user can set the default workspace and selects a different workspace
-- **THEN** the system calls the existing set-default workspace action, shows pending feedback, refreshes the UI, and keeps the selected workspace visible after completion
+- **WHEN** a user can set the current workspace and selects a different workspace
+- **THEN** the system calls the existing set-current workspace action, shows pending feedback, refreshes the UI, and keeps the selected workspace visible after completion
 
 #### Scenario: User can create workspace
 

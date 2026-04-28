@@ -3,7 +3,6 @@
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 
 import { Page } from "@/app/lib/definitions"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Pagination,
@@ -221,14 +220,6 @@ export function AppPaginationControls<T>({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 flex-col gap-1.5">
           <p className="text-sm text-muted-foreground">{summaryText}</p>
-          {isPending ? (
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline" className="gap-1">
-                <Spinner className="size-3.5" />
-                Đang cập nhật
-              </Badge>
-            </div>
-          ) : null}
         </div>
 
         {page.totalPages > 1 ? (

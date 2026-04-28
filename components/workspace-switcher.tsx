@@ -16,7 +16,7 @@ import { toast } from "sonner"
 
 import {
   createWorkspace,
-  setDefaultWorkspace,
+  setCurrentWorkspace,
   updateWorkspace,
 } from "@/app/api/workspaces/action"
 import { WorkspaceResponse } from "@/app/lib/workspaces/definitions"
@@ -38,10 +38,10 @@ import { WorkspaceWatchlistEditor } from "./workspace-watchlist-editor"
 
 interface WorkspaceSwitcherProps {
   workspaces: WorkspaceResponse[]
-  activeWorkspace: WorkspaceResponse | null
+  currentWorkspace: WorkspaceResponse | null
   canCreateWorkspace: boolean
   canRenameWorkspace: boolean
-  canSetDefaultWorkspace: boolean
+  canSetCurrentWorkspace: boolean
   canReadAsset: boolean
   canReadWatchlist: boolean
   canCreateWatchlist: boolean
@@ -51,10 +51,10 @@ interface WorkspaceSwitcherProps {
 
 export function WorkspaceSwitcher({
   workspaces,
-  activeWorkspace,
+  currentWorkspace,
   canCreateWorkspace,
   canRenameWorkspace,
-  canSetDefaultWorkspace,
+  canSetCurrentWorkspace,
   canReadAsset,
   canReadWatchlist,
   canCreateWatchlist,
@@ -72,19 +72,19 @@ export function WorkspaceSwitcher({
   const [renameSlug, setRenameSlug] = React.useState("")
 
   const canManageWatchlist =
-    !!activeWorkspace &&
+    !!currentWorkspace &&
     canReadAsset &&
     canReadWatchlist &&
     canCreateWatchlist &&
     canDeleteWatchlist
 
   async function handleSwitchWorkspace(workspace: WorkspaceResponse) {
-    if (!canSetDefaultWorkspace || workspace.id === activeWorkspace?.id) {
+    if (!canSetCurrentWorkspace || workspace.id === currentWorkspace?.id) {
       return
     }
 
     startTransition(async () => {
-      const result = await setDefaultWorkspace(workspace.id)
+      const result = await setCurrentWorkspace(workspace.id)
 
       if (!result.success) {
         toast.error(result.error)
@@ -97,12 +97,12 @@ export function WorkspaceSwitcher({
   }
 
   function openRenameDialog() {
-    if (!activeWorkspace) {
+    if (!currentWorkspace) {
       return
     }
 
-    setRenameName(activeWorkspace.name ?? "")
-    setRenameSlug(activeWorkspace.slug ?? "")
+    setRenameName(currentWorkspace.name ?? "")
+    setRenameSlug(currentWorkspace.slug ?? "")
     setIsRenameOpen(true)
   }
 
@@ -139,12 +139,7 @@ export function WorkspaceSwitcher({
   }
 
   async function handleRenameWorkspace() {
-    if (!canRenameWorkspace || !activeWorkspace) {
-      return
-    }
-
-    if (activeWorkspace.personal) {
-      toast.error("Không gian làm việc cá nhân không hỗ trợ đổi tên.")
+    if (!canRenameWorkspace || !currentWorkspace) {
       return
     }
 
@@ -157,7 +152,7 @@ export function WorkspaceSwitcher({
     }
 
     startTransition(async () => {
-      const result = await updateWorkspace(activeWorkspace.id, {
+      const result = await updateWorkspace(currentWorkspace.id, {
         name,
         ...(slug ? { slug } : {}),
       })
@@ -190,9 +185,9 @@ export function WorkspaceSwitcher({
                 <BriefcaseBusinessIcon className="size-4" />
               </span>
               <span className="flex min-w-0 flex-col items-start leading-tight">
-                <span className="text-xs text-muted-foreground">Không gian làm việc</span>
+                <span className="text-xs text-muted-foreground">Đang hoạt động</span>
                 <span className="max-w-44 truncate text-sm font-medium md:max-w-52">
-                  {activeWorkspace?.name ?? "Chưa chọn"}
+                  {currentWorkspace?.name ?? "Chưa chọn"}
                 </span>
               </span>
             </span>
@@ -208,13 +203,13 @@ export function WorkspaceSwitcher({
           <DropdownMenuGroup>
             {workspaces.length > 0 ? (
               workspaces.map((workspace) => {
-                const isSelected = activeWorkspace?.id === workspace.id
+                const isSelected = currentWorkspace?.id === workspace.id
 
                 return (
                   <DropdownMenuItem
                     key={workspace.id}
-                    disabled={isPending || !canSetDefaultWorkspace}
-                    onClick={() => void handleSwitchWorkspace(workspace)}
+                    disabled={isPending || !canSetCurrentWorkspace || isSelected}
+                    onSelect={() => void handleSwitchWorkspace(workspace)}
                     className="gap-2 p-2"
                   >
                     <div className="flex size-8 items-center justify-center rounded-md border bg-muted/40">
@@ -223,7 +218,7 @@ export function WorkspaceSwitcher({
                     <div className="flex min-w-0 flex-1 flex-col">
                       <span className="truncate font-medium">{workspace.name}</span>
                       <span className="truncate text-xs text-muted-foreground">
-                        {workspace.personal ? "Cá nhân" : workspace.slug}
+                        {isSelected ? "Đang hoạt động" : workspace.slug}
                       </span>
                     </div>
                     {isSelected ? <CheckIcon className="size-4 text-primary" /> : null}
@@ -258,7 +253,7 @@ export function WorkspaceSwitcher({
             </DropdownMenuItem>
             <DropdownMenuItem
               className={canRenameWorkspace ? "gap-2 p-2" : "hidden"}
-              disabled={!canRenameWorkspace || !activeWorkspace || activeWorkspace.personal}
+              disabled={!canRenameWorkspace || !currentWorkspace}
               onSelect={(event) => {
                 event.preventDefault()
                 openRenameDialog()
@@ -299,7 +294,7 @@ export function WorkspaceSwitcher({
       <WorkspaceFormDialog
         open={canRenameWorkspace && isRenameOpen}
         title="Đổi tên không gian làm việc"
-        description="Cập nhật tên hoặc slug cho không gian làm việc đang chọn."
+        description="Cập nhật tên hoặc slug cho không gian làm việc đang hoạt động."
         name={renameName}
         slug={renameSlug}
         submitLabel="Lưu thay đổi"
@@ -313,7 +308,7 @@ export function WorkspaceSwitcher({
       <WorkspaceWatchlistEditor
         open={isWatchlistOpen}
         onOpenChange={setIsWatchlistOpen}
-        workspace={activeWorkspace}
+        workspace={currentWorkspace}
         canReadAsset={canReadAsset}
         canReadWatchlist={canReadWatchlist}
         canCreateWatchlist={canCreateWatchlist}

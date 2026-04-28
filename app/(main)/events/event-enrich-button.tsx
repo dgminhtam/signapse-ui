@@ -38,7 +38,7 @@ export function EventEnrichButton({
       const result = await enrichEventAssetsAndThemes(id)
 
       if (!result.success) {
-        toast.error(result.error || "Không thể làm giàu liên kết tài sản và chủ đề.")
+        toast.error(result.error || "Không thể làm giàu tài sản và chủ đề cho sự kiện.")
         return
       }
 
@@ -67,12 +67,12 @@ export function EventEnrichButton({
       className={cn(showText ? "gap-2" : undefined, className)}
     >
       {isPending ? (
-        <Spinner className="h-4 w-4" data-icon="inline-start" />
+        <Spinner data-icon="inline-start" />
       ) : (
-        <Sparkles className="h-4 w-4" data-icon="inline-start" />
+        <Sparkles data-icon="inline-start" />
       )}
       {showText ? (
-        <span>{isPending ? "Đang làm giàu..." : "Làm giàu tài sản/chủ đề"}</span>
+        <span>{isPending ? "Đang làm giàu..." : "Làm giàu tài sản và chủ đề"}</span>
       ) : (
         <span className="sr-only">Làm giàu tài sản và chủ đề</span>
       )}

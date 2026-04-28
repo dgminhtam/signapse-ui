@@ -2675,7 +2675,7 @@
                     "title": {
                         "type": "string"
                     },
-                    "summary": {
+                    "description": {
                         "type": "string"
                     },
                     "occurredAt": {
@@ -2829,19 +2829,11 @@
                     "eventStatus": {
                         "type": "string",
                         "enum": [
-                            "EMERGING",
-                            "CONFIRMED",
-                            "RESOLVED",
+                            "ENRICHMENT_PENDING",
+                            "ENRICHED",
+                            "ENRICHMENT_NO_MATCH",
+                            "ENRICHMENT_FAILED",
                             "ARCHIVED"
-                        ]
-                    },
-                    "eventEnrichmentStatus": {
-                        "type": "string",
-                        "enum": [
-                            "PENDING",
-                            "SUCCESS",
-                            "NO_MATCH",
-                            "FAILED"
                         ]
                     },
                     "evidenceRole": {
@@ -3029,10 +3021,11 @@
                     "outcome": {
                         "type": "string",
                         "enum": [
-                            "PENDING",
-                            "SUCCESS",
-                            "NO_MATCH",
-                            "FAILED"
+                            "ENRICHMENT_PENDING",
+                            "ENRICHED",
+                            "ENRICHMENT_NO_MATCH",
+                            "ENRICHMENT_FAILED",
+                            "ARCHIVED"
                         ]
                     },
                     "assetLinkCount": {
@@ -3356,6 +3349,9 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
+                    },
                     "first": {
                         "type": "boolean"
                     },
@@ -3365,9 +3361,6 @@
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
-                    },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"
@@ -3475,6 +3468,9 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
+                    },
                     "first": {
                         "type": "boolean"
                     },
@@ -3484,9 +3480,6 @@
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
-                    },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"
@@ -3553,6 +3546,9 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
+                    },
                     "first": {
                         "type": "boolean"
                     },
@@ -3562,9 +3558,6 @@
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
-                    },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"
@@ -3647,6 +3640,9 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
+                    },
                     "first": {
                         "type": "boolean"
                     },
@@ -3656,9 +3652,6 @@
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
-                    },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"
@@ -3694,6 +3687,9 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
+                    },
                     "first": {
                         "type": "boolean"
                     },
@@ -3703,9 +3699,6 @@
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
-                    },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"
@@ -3787,6 +3780,9 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
+                    },
                     "first": {
                         "type": "boolean"
                     },
@@ -3796,9 +3792,6 @@
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
-                    },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"
@@ -3900,8 +3893,15 @@
                         "type": "string",
                         "format": "date-time"
                     },
-                    "active": {
-                        "type": "boolean"
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "ENRICHMENT_PENDING",
+                            "ENRICHED",
+                            "ENRICHMENT_NO_MATCH",
+                            "ENRICHMENT_FAILED",
+                            "ARCHIVED"
+                        ]
                     },
                     "confidence": {
                         "type": "number"
@@ -3942,46 +3942,27 @@
                     "canonicalKey": {
                         "type": "string"
                     },
-                    "summary": {
+                    "description": {
                         "type": "string"
                     },
                     "status": {
                         "type": "string",
                         "enum": [
-                            "EMERGING",
-                            "CONFIRMED",
-                            "RESOLVED",
+                            "ENRICHMENT_PENDING",
+                            "ENRICHED",
+                            "ENRICHMENT_NO_MATCH",
+                            "ENRICHMENT_FAILED",
                             "ARCHIVED"
                         ]
                     },
                     "confidence": {
                         "type": "number"
                     },
-                    "active": {
-                        "type": "boolean"
-                    },
                     "occurredAt": {
                         "type": "string",
                         "format": "date-time"
                     },
                     "confirmedAt": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "enrichmentStatus": {
-                        "type": "string",
-                        "enum": [
-                            "PENDING",
-                            "SUCCESS",
-                            "NO_MATCH",
-                            "FAILED"
-                        ]
-                    },
-                    "enrichmentAttemptedAt": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "enrichmentCompletedAt": {
                         "type": "string",
                         "format": "date-time"
                     },
@@ -4023,6 +4004,9 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
+                    },
                     "first": {
                         "type": "boolean"
                     },
@@ -4032,9 +4016,6 @@
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
-                    },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"
@@ -4136,9 +4117,6 @@
                     "slug": {
                         "type": "string"
                     },
-                    "summary": {
-                        "type": "string"
-                    },
                     "description": {
                         "type": "string"
                     },
@@ -4156,37 +4134,15 @@
                     "status": {
                         "type": "string",
                         "enum": [
-                            "EMERGING",
-                            "CONFIRMED",
-                            "RESOLVED",
+                            "ENRICHMENT_PENDING",
+                            "ENRICHED",
+                            "ENRICHMENT_NO_MATCH",
+                            "ENRICHMENT_FAILED",
                             "ARCHIVED"
                         ]
                     },
                     "confidence": {
                         "type": "number"
-                    },
-                    "active": {
-                        "type": "boolean"
-                    },
-                    "enrichmentStatus": {
-                        "type": "string",
-                        "enum": [
-                            "PENDING",
-                            "SUCCESS",
-                            "NO_MATCH",
-                            "FAILED"
-                        ]
-                    },
-                    "enrichmentAttemptedAt": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "enrichmentCompletedAt": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "enrichmentError": {
-                        "type": "string"
                     },
                     "createdDate": {
                         "type": "string",
@@ -4323,6 +4279,9 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
+                    },
                     "first": {
                         "type": "boolean"
                     },
@@ -4332,9 +4291,6 @@
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
-                    },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"
@@ -4426,6 +4382,9 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
+                    },
                     "first": {
                         "type": "boolean"
                     },
@@ -4435,9 +4394,6 @@
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
-                    },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"
@@ -4502,6 +4458,9 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
+                    },
                     "first": {
                         "type": "boolean"
                     },
@@ -4511,9 +4470,6 @@
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
-                    },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"
@@ -4573,6 +4529,9 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
+                    },
                     "first": {
                         "type": "boolean"
                     },
@@ -4582,9 +4541,6 @@
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
-                    },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"
@@ -4652,6 +4608,9 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
+                    },
                     "first": {
                         "type": "boolean"
                     },
@@ -4661,9 +4620,6 @@
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
-                    },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"

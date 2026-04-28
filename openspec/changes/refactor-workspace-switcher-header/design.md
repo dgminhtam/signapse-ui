@@ -11,7 +11,7 @@ Workspace watchlist management is still a required capability. This change shoul
 - Put workspace context near the breadcrumb in the top header.
 - Restore a stable Signapse brand/logo row in the sidebar header.
 - Collapse the two switcher implementations into one canonical workspace selector component.
-- Preserve workspace switch, create, rename, set-default, and tracked-asset list entry points.
+- Preserve workspace switch, create, rename, set-current, and tracked-asset list entry points.
 - Keep `WorkspaceWatchlistEditor` as a separate focused editor launched from the workspace menu.
 - Remove unused workspace/sidebar demo code and clean mojibake or mixed-language copy in the touched shell/workspace files.
 - Keep responsive behavior usable when the sidebar is collapsed or the viewport is narrow.
@@ -92,7 +92,7 @@ Alternative considered:
 
 - [Header overcrowding] -> Keep the switcher compact, right-align it with mode toggle on desktop, and allow wrapping or a second header row on narrow screens if needed.
 - [Losing workspace visibility on mobile] -> Ensure the trigger remains visible or collapses into a compact label/chip rather than disappearing behind the sidebar.
-- [Breaking workspace actions during component consolidation] -> Preserve the existing server actions and permission checks, then verify create, rename, set-default, and watchlist launch paths.
+- [Breaking workspace actions during component consolidation] -> Preserve the existing server actions and permission checks, then verify create, rename, set-current, and watchlist launch paths.
 - [Watchlist editor copy remains corrupted] -> Include touched editor copy cleanup in the task list because the editor is launched from the new canonical switcher.
 - [Scope creep into full shell redesign] -> Limit layout changes to sidebar header, top header, workspace switcher, breadcrumb copy, and dead code removal.
 

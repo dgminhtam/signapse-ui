@@ -24,7 +24,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
@@ -42,10 +41,9 @@ export default async function EventsPage({ searchParams }: PageProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Sự kiện</CardTitle>
-          <CardDescription>
-            Theo dõi các sự kiện đã được suy diễn từ tài liệu nguồn và trạng thái
-            làm giàu liên quan.
+        <CardTitle>Sự kiện</CardTitle>
+        <CardDescription>
+          Theo dõi các sự kiện đã được tổng hợp, trạng thái làm giàu và bằng chứng liên quan.
           </CardDescription>
         </CardHeader>
 
@@ -71,8 +69,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
       <CardHeader>
         <CardTitle>Sự kiện</CardTitle>
         <CardDescription>
-          Duyệt các sự kiện đã được tổng hợp, theo dõi trạng thái làm giàu và kiểm
-          tra chuỗi bằng chứng liên quan.
+          Duyệt sự kiện đã được tổng hợp, kiểm tra trạng thái làm giàu và chuỗi bằng chứng liên quan.
         </CardDescription>
       </CardHeader>
 
@@ -130,7 +127,7 @@ function EventListSkeleton() {
             <AppListTableHeaderRow>
               <AppListTableHead className="w-[360px]">Sự kiện</AppListTableHead>
               <AppListTableHead>Trạng thái</AppListTableHead>
-              <AppListTableHead>Thời gian</AppListTableHead>
+              <AppListTableHead>Xảy ra lúc</AppListTableHead>
               <AppListTableHead>Độ tin cậy</AppListTableHead>
               <AppListTableHead className="text-right">Thao tác</AppListTableHead>
             </AppListTableHeaderRow>
@@ -142,21 +139,13 @@ function EventListSkeleton() {
                   <div className="flex flex-col gap-2">
                     <Skeleton className="h-4 w-[260px]" />
                     <Skeleton className="h-3 w-[220px]" />
-                    <Skeleton className="h-3 w-[180px]" />
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className="flex flex-col gap-2">
-                    <Skeleton className="h-6 w-24" />
-                    <Skeleton className="h-6 w-28" />
-                    <Skeleton className="h-6 w-24" />
-                  </div>
+                  <Skeleton className="h-6 w-32" />
                 </TableCell>
                 <TableCell>
-                  <div className="flex flex-col gap-2">
-                    <Skeleton className="h-4 w-32" />
-                    <Skeleton className="h-3 w-28" />
-                  </div>
+                  <Skeleton className="h-4 w-32" />
                 </TableCell>
                 <TableCell>
                   <Skeleton className="h-4 w-16" />

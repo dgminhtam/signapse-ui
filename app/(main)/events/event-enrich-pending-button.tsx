@@ -63,9 +63,9 @@ export function EventEnrichPendingButton({
       className={cn("gap-2", className)}
     >
       {isPending ? (
-        <Spinner className="h-4 w-4" data-icon="inline-start" />
+        <Spinner data-icon="inline-start" />
       ) : (
-        <Sparkles className="h-4 w-4" data-icon="inline-start" />
+        <Sparkles data-icon="inline-start" />
       )}
       <span>{isPending ? "Đang làm giàu..." : "Làm giàu sự kiện chờ"}</span>
     </Button>

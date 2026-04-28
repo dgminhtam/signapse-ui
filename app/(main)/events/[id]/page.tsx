@@ -1,8 +1,9 @@
-import { Suspense } from "react"
+import { Suspense, type ElementType } from "react"
 import { format } from "date-fns"
 import {
   ArrowLeft,
   Calendar,
+  ChevronDown,
   Clock3,
   ExternalLink,
   FileText,
@@ -11,7 +12,6 @@ import {
   Layers3,
   Link2,
   RefreshCcw,
-  Sparkles,
 } from "lucide-react"
 import Link from "next/link"
 import { notFound } from "next/navigation"
@@ -45,8 +45,6 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 import { EventEnrichButton } from "../event-enrich-button"
 import {
-  getEventEnrichmentLabel,
-  getEventEnrichmentVariant,
   getEventStatusLabel,
   getEventStatusVariant,
 } from "../event-presentation"
@@ -61,13 +59,13 @@ type ApiLikeError = Error & { status?: number }
 
 function formatDateTime(value?: string | null) {
   if (!value) {
-    return "Chua co"
+    return "Chưa có"
   }
 
   const date = new Date(value)
 
   if (Number.isNaN(date.getTime())) {
-    return "Chua co"
+    return "Chưa có"
   }
 
   return format(date, "dd/MM/yyyy HH:mm")
@@ -75,7 +73,7 @@ function formatDateTime(value?: string | null) {
 
 function formatConfidence(value?: number) {
   if (typeof value !== "number") {
-    return "Chua co"
+    return "Chưa có"
   }
 
   return `${Math.round(value * 100)}%`
@@ -100,7 +98,7 @@ function DetailCard({
 }: {
   title: string
   value: string
-  icon: React.ElementType
+  icon: ElementType
 }) {
   return (
     <div className="rounded-lg border border-border bg-muted/20 p-4">
@@ -109,6 +107,23 @@ function DetailCard({
         {title}
       </div>
       <p className="mt-2 break-words font-medium text-foreground">{value}</p>
+    </div>
+  )
+}
+
+function SectionHeading({
+  title,
+  icon: Icon,
+}: {
+  title: string
+  icon: ElementType
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <Icon className="h-4 w-4 text-muted-foreground" />
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+        {title}
+      </h2>
     </div>
   )
 }
@@ -140,15 +155,15 @@ export default async function EventDetailPage({ params }: PageProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Chi tiet su kien</CardTitle>
+          <CardTitle>Chi tiết sự kiện</CardTitle>
           <CardDescription>
-            Xem thong tin tong hop, lien ket tai san, chu de va bang chung cua su kien.
+            Xem thông tin tổng hợp, tài sản, chủ đề và bằng chứng của sự kiện.
           </CardDescription>
         </CardHeader>
         <Separator />
         <CardContent className="pt-6">
           <AccessDenied
-            description="Ban khong co quyen xem chi tiet su kien."
+            description="Bạn không có quyền xem chi tiết sự kiện."
             permission={EVENT_READ_PERMISSIONS[0]}
           />
         </CardContent>
@@ -163,10 +178,10 @@ export default async function EventDetailPage({ params }: PageProps) {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center">
-        <Button asChild variant="ghost" size="sm" className="-ml-2">
+        <Button asChild variant="ghost" size="sm" className="-ml-2 gap-2">
           <Link href="/events">
-            <ArrowLeft className="mr-2 h-4 w-4" data-icon="inline-start" />
-            Quay lai danh sach
+            <ArrowLeft data-icon="inline-start" />
+            Quay lại danh sách
           </Link>
         </Button>
       </div>
@@ -212,18 +227,12 @@ async function FetchEventData({
               <Badge variant={getEventStatusVariant(event.status)}>
                 {getEventStatusLabel(event.status)}
               </Badge>
-              <Badge variant={getEventEnrichmentVariant(event.enrichmentStatus)}>
-                {getEventEnrichmentLabel(event.enrichmentStatus)}
-              </Badge>
-              <Badge variant={event.active ? "secondary" : "outline"}>
-                {event.active ? "Dang hoat dong" : "Khong hoat dong"}
-              </Badge>
             </div>
 
             <div className="flex flex-col gap-1">
               <CardTitle className="text-2xl">{event.title}</CardTitle>
-              <CardDescription className="pt-1">
-                {event.summary?.trim() || "Chua co tom tat cho su kien nay."}
+              <CardDescription className="max-w-4xl pt-1 leading-6">
+                {event.description?.trim() || "Chưa có mô tả cho sự kiện này."}
               </CardDescription>
             </div>
           </div>
@@ -238,188 +247,26 @@ async function FetchEventData({
 
       <CardContent className="pt-6">
         <div className="flex flex-col gap-8">
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <DetailCard title="Ma su kien" value={String(event.id)} icon={Hash} />
-            <DetailCard title="Slug" value={event.slug || "Chua co"} icon={Link2} />
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             <DetailCard
-              title="Khoa chuan"
-              value={event.canonicalKey || "Chua co"}
-              icon={GitBranch}
-            />
-            <DetailCard
-              title="Do tin cay"
+              title="Độ tin cậy"
               value={formatConfidence(event.confidence)}
               icon={Layers3}
             />
-            <DetailCard title="Xay ra luc" value={formatDateTime(event.occurredAt)} icon={Calendar} />
             <DetailCard
-              title="Xac nhan luc"
+              title="Xảy ra lúc"
+              value={formatDateTime(event.occurredAt)}
+              icon={Calendar}
+            />
+            <DetailCard
+              title="Xác nhận lúc"
               value={formatDateTime(event.confirmedAt)}
               icon={Calendar}
             />
-            <DetailCard title="Tao luc" value={formatDateTime(event.createdDate)} icon={Clock3} />
-            <DetailCard
-              title="Cap nhat"
-              value={formatDateTime(event.lastModifiedDate)}
-              icon={RefreshCcw}
-            />
           </div>
 
-          <section className="flex flex-col gap-3">
-            <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-muted-foreground" />
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                Mo ta
-              </h2>
-            </div>
-            <div className="rounded-lg border border-border bg-muted/20 p-4">
-              <p className="whitespace-pre-wrap text-sm leading-7 text-foreground/90">
-                {event.description?.trim() || "Chua co mo ta chi tiet."}
-              </p>
-            </div>
-          </section>
-
           <section className="flex flex-col gap-4">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-muted-foreground" />
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                Trang thai lam giau
-              </h2>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              <DetailCard
-                title="Trang thai"
-                value={getEventEnrichmentLabel(event.enrichmentStatus)}
-                icon={Sparkles}
-              />
-              <DetailCard
-                title="Lan lam giau gan nhat"
-                value={formatDateTime(event.enrichmentAttemptedAt)}
-                icon={Clock3}
-              />
-              <DetailCard
-                title="Hoan tat luc"
-                value={formatDateTime(event.enrichmentCompletedAt)}
-                icon={RefreshCcw}
-              />
-              <DetailCard
-                title="Hoat dong"
-                value={event.active ? "Dang hoat dong" : "Khong hoat dong"}
-                icon={Layers3}
-              />
-            </div>
-
-            {event.enrichmentError ? (
-              <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
-                <div className="mb-1 font-semibold">Loi lam giau gan nhat</div>
-                <div className="whitespace-pre-wrap">{event.enrichmentError}</div>
-              </div>
-            ) : null}
-          </section>
-
-          <section className="flex flex-col gap-4">
-            <div className="flex items-center gap-2">
-              <Layers3 className="h-4 w-4 text-muted-foreground" />
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                Tai san lien quan
-              </h2>
-            </div>
-
-            {assets.length > 0 ? (
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {assets.map((asset, index) => (
-                  <div
-                    key={`${asset.assetId ?? "asset"}-${index}`}
-                    className="rounded-lg border border-border bg-muted/20 p-4"
-                  >
-                    <div className="flex flex-wrap items-center gap-2">
-                      {asset.assetType ? (
-                        <Badge variant="outline">
-                          {EVENT_ASSET_TYPE_LABELS[asset.assetType]}
-                        </Badge>
-                      ) : null}
-                      {asset.relationType ? (
-                        <Badge variant="secondary">
-                          {EVENT_ASSET_RELATION_LABELS[asset.relationType]}
-                        </Badge>
-                      ) : null}
-                    </div>
-                    <div className="mt-3 flex flex-col gap-1">
-                      <p className="font-medium text-foreground">
-                        {asset.assetName || "Chua co ten tai san"}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {asset.assetSymbol || "Chua co ma"}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Trong so:{" "}
-                        {typeof asset.weight === "number" ? asset.weight.toFixed(2) : "Chua co"}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <SectionEmpty
-                title="Chua co tai san lien quan"
-                description="Su kien nay chua co lien ket tai san trong du lieu hien tai."
-              />
-            )}
-          </section>
-
-          <section className="flex flex-col gap-4">
-            <div className="flex items-center gap-2">
-              <Layers3 className="h-4 w-4 text-muted-foreground" />
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                Chu de lien quan
-              </h2>
-            </div>
-
-            {themes.length > 0 ? (
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {themes.map((theme, index) => (
-                  <div
-                    key={`${theme.themeId ?? "theme"}-${index}`}
-                    className="rounded-lg border border-border bg-muted/20 p-4"
-                  >
-                    <div className="flex flex-wrap items-center gap-2">
-                      {theme.relationType ? (
-                        <Badge variant="secondary">
-                          {EVENT_THEME_RELATION_LABELS[theme.relationType]}
-                        </Badge>
-                      ) : null}
-                    </div>
-                    <div className="mt-3 flex flex-col gap-1">
-                      <p className="font-medium text-foreground">
-                        {theme.themeTitle || "Chua co ten chu de"}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {theme.themeSlug || "Chua co slug"}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Trong so:{" "}
-                        {typeof theme.weight === "number" ? theme.weight.toFixed(2) : "Chua co"}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <SectionEmpty
-                title="Chua co chu de lien quan"
-                description="Su kien nay chua co lien ket chu de trong du lieu hien tai."
-              />
-            )}
-          </section>
-
-          <section className="flex flex-col gap-4">
-            <div className="flex items-center gap-2">
-              <GitBranch className="h-4 w-4 text-muted-foreground" />
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                Bang chung
-              </h2>
-            </div>
+            <SectionHeading title="Bằng chứng" icon={GitBranch} />
 
             {evidenceItems.length > 0 ? (
               <div className="flex flex-col gap-3">
@@ -443,15 +290,15 @@ async function FetchEventData({
                           ) : null}
                         </div>
                         <p className="font-medium text-foreground">
-                          {evidence.artifactTitle || "Chua co tieu de tu lieu"}
+                          {evidence.artifactTitle || "Chưa có tiêu đề tư liệu"}
                         </p>
                         <div className="flex flex-col gap-1 text-sm text-muted-foreground">
-                          <span>Nguon tin: {evidence.newsOutletName || "Chua co"}</span>
-                          <span>Xuat ban: {formatDateTime(evidence.publishedAt)}</span>
-                          <span>Do tin cay: {formatConfidence(evidence.confidence)}</span>
+                          <span>Nguồn tin: {evidence.newsOutletName || "Chưa có"}</span>
+                          <span>Xuất bản: {formatDateTime(evidence.publishedAt)}</span>
+                          <span>Độ tin cậy: {formatConfidence(evidence.confidence)}</span>
                         </div>
                         {evidence.evidenceNote?.trim() ? (
-                          <p className="whitespace-pre-wrap text-sm text-foreground/90">
+                          <p className="whitespace-pre-wrap text-sm leading-6 text-foreground/90">
                             {evidence.evidenceNote}
                           </p>
                         ) : null}
@@ -461,18 +308,18 @@ async function FetchEventData({
                         {typeof evidence.artifactId === "number" &&
                         isNewsArticleArtifact(evidence.artifactType) &&
                         canReadNewsArticles ? (
-                          <Button variant="outline" size="sm" asChild>
+                          <Button variant="outline" size="sm" className="gap-2" asChild>
                             <Link href={`/news-articles/${evidence.artifactId}`}>
-                              <FileText className="h-4 w-4" data-icon="inline-start" />
-                              Xem bai viet
+                              <FileText data-icon="inline-start" />
+                              Xem bài viết
                             </Link>
                           </Button>
                         ) : null}
                         {evidence.artifactUrl ? (
-                          <Button variant="outline" size="sm" asChild>
+                          <Button variant="outline" size="sm" className="gap-2" asChild>
                             <a href={evidence.artifactUrl} target="_blank" rel="noopener noreferrer">
-                              <ExternalLink className="h-4 w-4" data-icon="inline-start" />
-                              Mo lien ket goc
+                              <ExternalLink data-icon="inline-start" />
+                              Mở liên kết gốc
                             </a>
                           </Button>
                         ) : null}
@@ -483,10 +330,126 @@ async function FetchEventData({
               </div>
             ) : (
               <SectionEmpty
-                title="Chua co bang chung"
-                description="Su kien nay chua co bang chung chi tiet trong du lieu hien tai."
+                title="Chưa có bằng chứng"
+                description="Sự kiện này chưa có bằng chứng chi tiết trong dữ liệu hiện tại."
               />
             )}
+          </section>
+
+          <section className="flex flex-col gap-4">
+            <SectionHeading title="Tài sản liên quan" icon={Layers3} />
+
+            {assets.length > 0 ? (
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {assets.map((asset, index) => (
+                  <div
+                    key={`${asset.assetId ?? "asset"}-${index}`}
+                    className="rounded-lg border border-border bg-muted/20 p-4"
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      {asset.assetType ? (
+                        <Badge variant="outline">
+                          {EVENT_ASSET_TYPE_LABELS[asset.assetType]}
+                        </Badge>
+                      ) : null}
+                      {asset.relationType ? (
+                        <Badge variant="secondary">
+                          {EVENT_ASSET_RELATION_LABELS[asset.relationType]}
+                        </Badge>
+                      ) : null}
+                    </div>
+                    <div className="mt-3 flex flex-col gap-1">
+                      <p className="font-medium text-foreground">
+                        {asset.assetName || "Chưa có tên tài sản"}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {asset.assetSymbol || "Chưa có mã"}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Trọng số:{" "}
+                        {typeof asset.weight === "number" ? asset.weight.toFixed(2) : "Chưa có"}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <SectionEmpty
+                title="Chưa có tài sản liên quan"
+                description="Sự kiện này chưa có liên kết tài sản trong dữ liệu hiện tại."
+              />
+            )}
+          </section>
+
+          <section className="flex flex-col gap-4">
+            <SectionHeading title="Chủ đề liên quan" icon={Layers3} />
+
+            {themes.length > 0 ? (
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {themes.map((theme, index) => (
+                  <div
+                    key={`${theme.themeId ?? "theme"}-${index}`}
+                    className="rounded-lg border border-border bg-muted/20 p-4"
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      {theme.relationType ? (
+                        <Badge variant="secondary">
+                          {EVENT_THEME_RELATION_LABELS[theme.relationType]}
+                        </Badge>
+                      ) : null}
+                    </div>
+                    <div className="mt-3 flex flex-col gap-1">
+                      <p className="font-medium text-foreground">
+                        {theme.themeTitle || "Chưa có tên chủ đề"}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {theme.themeSlug || "Chưa có slug"}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Trọng số:{" "}
+                        {typeof theme.weight === "number" ? theme.weight.toFixed(2) : "Chưa có"}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <SectionEmpty
+                title="Chưa có chủ đề liên quan"
+                description="Sự kiện này chưa có liên kết chủ đề trong dữ liệu hiện tại."
+              />
+            )}
+          </section>
+
+          <section className="rounded-lg border border-dashed bg-muted/10">
+            <details>
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4 text-sm font-semibold text-muted-foreground">
+                <span className="inline-flex items-center gap-2 uppercase tracking-wide">
+                  <Hash className="h-4 w-4" />
+                  Thông tin kỹ thuật
+                </span>
+                <ChevronDown className="h-4 w-4" />
+              </summary>
+              <div className="grid gap-4 border-t border-border p-4 sm:grid-cols-2 xl:grid-cols-3">
+                <DetailCard title="Mã sự kiện" value={String(event.id)} icon={Hash} />
+                <DetailCard title="Slug" value={event.slug || "Chưa có"} icon={Link2} />
+                <DetailCard
+                  title="Khóa chuẩn"
+                  value={event.canonicalKey || "Chưa có"}
+                  icon={GitBranch}
+                />
+                <DetailCard
+                  title="Tạo lúc"
+                  value={formatDateTime(event.createdDate)}
+                  icon={Clock3}
+                />
+                <DetailCard
+                  title="Cập nhật"
+                  value={formatDateTime(event.lastModifiedDate)}
+                  icon={RefreshCcw}
+                />
+              </div>
+            </details>
           </section>
         </div>
       </CardContent>
@@ -499,31 +462,38 @@ function EventDetailSkeleton() {
     <>
       <CardHeader className="flex flex-col gap-4">
         <div className="flex gap-2">
-          <Skeleton className="h-5 w-24 rounded-full" />
-          <Skeleton className="h-5 w-24 rounded-full" />
-          <Skeleton className="h-5 w-28 rounded-full" />
+          <Skeleton className="h-5 w-32 rounded-full" />
         </div>
         <div className="flex flex-col gap-2">
           <Skeleton className="h-8 w-2/3" />
-          <Skeleton className="h-4 w-1/2" />
+          <Skeleton className="h-4 w-3/4" />
         </div>
       </CardHeader>
       <Separator />
       <CardContent className="flex flex-col gap-8 pt-6">
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {Array.from({ length: 8 }).map((_, index) => (
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, index) => (
             <div key={index} className="rounded-lg border p-4">
               <Skeleton className="h-4 w-24" />
               <Skeleton className="mt-3 h-5 w-full" />
             </div>
           ))}
         </div>
-        {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="flex flex-col gap-3">
-            <Skeleton className="h-4 w-32" />
-            <Skeleton className="h-32 w-full rounded-lg" />
-          </div>
-        ))}
+        <div className="flex flex-col gap-3">
+          <Skeleton className="h-4 w-28" />
+          <Skeleton className="h-32 w-full rounded-lg" />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <Skeleton key={index} className="h-28 rounded-lg" />
+          ))}
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <Skeleton key={index} className="h-28 rounded-lg" />
+          ))}
+        </div>
+        <Skeleton className="h-14 w-full rounded-lg" />
       </CardContent>
     </>
   )

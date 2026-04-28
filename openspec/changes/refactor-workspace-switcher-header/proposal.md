@@ -7,7 +7,7 @@ The workspace selector currently sits in the sidebar header and consumes the sam
 - Move workspace selection from the sidebar header into the top application header, positioned near the breadcrumb as global context for the current page.
 - Restore a dedicated Signapse brand row in the sidebar header so the app logo and workspace context are visually distinct.
 - Consolidate workspace selection into one canonical component and remove the legacy duplicate switcher after migration.
-- Keep workspace create, rename, set-default, and tracked-asset watchlist entry points available from the canonical workspace menu according to existing permissions.
+- Keep workspace create, rename, set-current, and tracked-asset watchlist entry points available from the canonical workspace menu according to existing permissions.
 - Keep `WorkspaceWatchlistEditor` as a separate workspace-scoped editor instead of folding watchlist editing into sidebar branding.
 - Clean workspace/header/sidebar user-facing copy so it is professional Vietnamese and contains no mojibake.
 - Remove obvious workspace/sidebar demo or dead code such as the unused `TeamSwitcher` path when it is no longer needed.

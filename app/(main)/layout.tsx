@@ -53,7 +53,7 @@ export default async function Layout({
     }
   }
 
-  const activeWorkspace = resolveActiveWorkspace(workspaces)
+  const currentWorkspace = resolveActiveWorkspace(workspaces)
 
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
@@ -75,10 +75,10 @@ export default async function Layout({
                 {canReadWorkspace ? (
                   <WorkspaceSwitcher
                     workspaces={workspaces}
-                    activeWorkspace={activeWorkspace}
+                    currentWorkspace={currentWorkspace}
                     canCreateWorkspace={permissions.includes("workspace:create")}
                     canRenameWorkspace={permissions.includes("workspace:update")}
-                    canSetDefaultWorkspace={permissions.includes("workspace:set-default")}
+                    canSetCurrentWorkspace={permissions.includes("workspace:set-default")}
                     canReadAsset={permissions.includes("asset:read")}
                     canReadWatchlist={permissions.includes("watchlist:read")}
                     canCreateWatchlist={permissions.includes("watchlist:create")}

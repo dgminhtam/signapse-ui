@@ -12,9 +12,7 @@ export interface WorkspaceResponse {
   id: number
   name: string
   slug: string
-  personal: boolean
-  active: boolean
-  defaultWorkspace: boolean
+  currentWorkspace: boolean
   createdDate: string
   lastModifiedDate: string
 }

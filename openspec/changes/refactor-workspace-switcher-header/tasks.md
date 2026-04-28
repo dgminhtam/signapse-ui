@@ -21,7 +21,7 @@
 - [x] 4.1 Refactor the active workspace selector into one canonical component named `WorkspaceSwitcher` or an equally clear single export.
 - [x] 4.2 Remove `WorkspaceSwitcherV2` usage and delete or replace the duplicate legacy switcher implementation so only one active selector remains.
 - [x] 4.3 Make the canonical switcher layout-neutral by avoiding sidebar-only primitives such as `SidebarMenuButton` and `useSidebar`.
-- [x] 4.4 Preserve workspace switch, create, rename, set-default, pending feedback, disabled duplicate submission, refresh behavior, and permission-gated menu actions.
+- [x] 4.4 Preserve workspace switch, create, rename, set-current, pending feedback, disabled duplicate submission, refresh behavior, and permission-gated menu actions.
 
 ## 5. Preserve tracked-asset watchlist entry point
 

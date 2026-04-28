@@ -127,6 +127,15 @@ app/(main)/[feature]/
 - Skeleton loader phải bám sát bố cục cuối cùng để tránh layout shift
 - Thanh loading phía trên phải luôn được bật cho page transition
 
+### Màn hình theo API đã giản lược
+
+- Khi backend giản lược contract của một feature, frontend phải giản lược lại hierarchy thay vì giữ nguyên bố cục cũ
+- Bỏ các field, badge, filter, section hoặc metadata card không còn trong response hiện tại; không giữ placeholder rỗng cho concept backend đã loại bỏ
+- Nếu nhiều lifecycle cũ đã được backend gom thành một field `status`, UI chỉ hiển thị một tín hiệu trạng thái rõ nghĩa thay vì nhiều badge lifecycle cũ
+- Trang danh sách phải ưu tiên tên entity, mô tả ngắn, trạng thái hiện tại, timestamp chính, tín hiệu confidence/impact nếu có và action chính trước các field kỹ thuật
+- Trang chi tiết phải đưa core facts và bằng chứng/hệ quả quan trọng lên trước; các field như `id`, `slug`, `canonicalKey`, `createdDate`, `lastModifiedDate` nên nằm trong vùng thông tin kỹ thuật cấp thấp hơn
+- Khi cập nhật theo contract giản lược, skeleton, empty state, toast, APIMAPPING và review checklist liên quan phải phản ánh hierarchy mới
+
 ### Ngôn ngữ
 
 - Toàn bộ UI text hướng đến người dùng phải là tiếng Việt chuyên nghiệp, rõ ràng và nhất quán

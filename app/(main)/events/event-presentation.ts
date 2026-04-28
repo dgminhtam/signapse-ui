@@ -3,23 +3,28 @@ import {
   EVENT_STATUS_LABELS,
   EventEnrichmentResult,
   EventEnrichmentStatus,
-  EventStatus,
   PendingEventEnrichmentBatchResult,
 } from "@/app/lib/events/definitions"
 
-export function getEventStatusLabel(status: EventStatus) {
-  return EVENT_STATUS_LABELS[status]
+export function getEventStatusLabel(status?: string) {
+  if (!status) {
+    return "Chưa có"
+  }
+
+  return EVENT_STATUS_LABELS[status] || status
 }
 
 export function getEventStatusVariant(
-  status: EventStatus
-): "default" | "secondary" | "outline" {
+  status?: string
+): "default" | "secondary" | "outline" | "destructive" {
   switch (status) {
-    case "CONFIRMED":
+    case "ENRICHED":
       return "default"
-    case "RESOLVED":
+    case "ENRICHMENT_PENDING":
       return "secondary"
-    case "EMERGING":
+    case "ENRICHMENT_FAILED":
+      return "destructive"
+    case "ENRICHMENT_NO_MATCH":
     case "ARCHIVED":
     default:
       return "outline"
@@ -49,24 +54,27 @@ export function getEventEnrichmentVariant(
 }
 
 export function isEventEnrichmentFailure(result: EventEnrichmentResult) {
-  return result.outcome === "FAILED"
+  return result.outcome === "ENRICHMENT_FAILED"
 }
 
 export function buildEventEnrichmentSummary(result: EventEnrichmentResult) {
   const parts: string[] = []
 
   switch (result.outcome) {
-    case "SUCCESS":
+    case "ENRICHED":
       parts.push("Đã làm giàu liên kết tài sản và chủ đề cho sự kiện.")
       break
-    case "NO_MATCH":
+    case "ENRICHMENT_NO_MATCH":
       parts.push("Đã chạy làm giàu nhưng chưa tìm thấy liên kết phù hợp.")
       break
-    case "PENDING":
+    case "ENRICHMENT_PENDING":
       parts.push("Yêu cầu làm giàu sự kiện đã được tiếp nhận.")
       break
-    case "FAILED":
+    case "ENRICHMENT_FAILED":
       parts.push("Làm giàu liên kết tài sản và chủ đề không thành công.")
+      break
+    case "ARCHIVED":
+      parts.push("Sự kiện đã được lưu trữ, không có thay đổi làm giàu mới.")
       break
   }
 
@@ -89,7 +97,12 @@ export function buildEventEnrichmentSummary(result: EventEnrichmentResult) {
 export function hasOnlyFailedPendingEventEnrichment(
   result: PendingEventEnrichmentBatchResult
 ) {
-  return (result.failedCount ?? 0) > 0 && (result.enrichedCount ?? 0) === 0 && (result.noMatchCount ?? 0) === 0
+  return (
+    (result.failedCount ?? 0) > 0 &&
+    (result.enrichedCount ?? 0) === 0 &&
+    (result.noMatchCount ?? 0) === 0 &&
+    (result.deferredCount ?? 0) === 0
+  )
 }
 
 export function buildPendingEventEnrichmentSummary(
@@ -106,6 +119,7 @@ export function buildPendingEventEnrichmentSummary(
     `thành công ${result.enrichedCount ?? 0}`,
     `không khớp ${result.noMatchCount ?? 0}`,
     `bỏ qua ${result.skippedCount ?? 0}`,
+    `hoãn ${result.deferredCount ?? 0}`,
     `lỗi ${result.failedCount ?? 0}`,
   ]
 

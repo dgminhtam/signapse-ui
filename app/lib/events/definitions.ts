@@ -1,6 +1,11 @@
 import type { ArtifactType } from "@/app/lib/artifacts/definitions"
 
-export type EventStatus = "EMERGING" | "CONFIRMED" | "RESOLVED" | "ARCHIVED"
+export type EventStatus =
+  | "ENRICHMENT_PENDING"
+  | "ENRICHED"
+  | "ENRICHMENT_NO_MATCH"
+  | "ENRICHMENT_FAILED"
+  | "ARCHIVED"
 
 export type EventEnrichmentStatus = "PENDING" | "SUCCESS" | "NO_MATCH" | "FAILED"
 
@@ -19,22 +24,18 @@ export type EventEvidenceRole =
   | "UPDATE"
   | "CONTRADICTING"
 
-export type EventEnrichmentOutcome = EventEnrichmentStatus
+export type EventEnrichmentOutcome = EventStatus
 
 export interface EventListResponse {
   id: number
   title: string
   slug?: string
   canonicalKey?: string
-  summary?: string
+  description?: string
   status: EventStatus
   confidence?: number
-  active: boolean
   occurredAt?: string
   confirmedAt?: string
-  enrichmentStatus?: EventEnrichmentStatus
-  enrichmentAttemptedAt?: string
-  enrichmentCompletedAt?: string
   createdDate: string
   lastModifiedDate?: string
 }
@@ -69,8 +70,6 @@ export interface EventEvidenceSummaryResponse {
 }
 
 export interface EventResponse extends EventListResponse {
-  description?: string
-  enrichmentError?: string
   assets: EventAssetSummaryResponse[]
   themes: EventThemeSummaryResponse[]
   evidence: EventEvidenceSummaryResponse[]
@@ -91,16 +90,18 @@ export interface PendingEventEnrichmentBatchResult {
   selectedCount?: number
   processedCount?: number
   skippedCount?: number
+  deferredCount?: number
   enrichedCount?: number
   noMatchCount?: number
   failedCount?: number
   results?: EventEnrichmentResult[]
 }
 
-export const EVENT_STATUS_LABELS: Record<EventStatus, string> = {
-  EMERGING: "Mới nổi",
-  CONFIRMED: "Đã xác nhận",
-  RESOLVED: "Đã kết thúc",
+export const EVENT_STATUS_LABELS: Record<string, string> = {
+  ENRICHMENT_PENDING: "Chờ làm giàu",
+  ENRICHED: "Đã làm giàu",
+  ENRICHMENT_NO_MATCH: "Không có liên kết phù hợp",
+  ENRICHMENT_FAILED: "Lỗi làm giàu",
   ARCHIVED: "Lưu trữ",
 }
 
