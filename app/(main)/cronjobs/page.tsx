@@ -5,7 +5,19 @@ import { hasPermission } from "@/app/lib/permissions"
 import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { buildSortQuery, buildFilterQuery } from "@/app/lib/utils"
 import { AccessDenied } from "@/components/access-denied"
+import {
+  AppListTable,
+  AppListTableHead,
+  AppListTableHeaderRow,
+} from "@/components/app-list-table"
 import { Skeleton } from "@/components/ui/skeleton"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 interface CronjobPageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
@@ -36,7 +48,7 @@ async function CronjobListContent({
   searchParamsPromise: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const resolvedParams = await searchParamsPromise
-  const { page = "1", size = "12", sort = "", ...filterParams } = resolvedParams
+  const { page = "1", size = "10", sort = "", ...filterParams } = resolvedParams
 
   const pageIndex = Math.max(0, Number(page) - 1)
   const filter = buildFilterQuery(filterParams)
@@ -53,47 +65,73 @@ async function CronjobListContent({
 
 function CronjobListSkeleton() {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col">
       <div className="flex flex-col gap-4 sm:flex-row sm:justify-between">
         <div className="flex w-full flex-1 items-center gap-4 sm:w-auto">
-          <Skeleton className="h-10 w-[160px]" />
-          <Skeleton className="h-10 w-full max-w-sm" />
+          <Skeleton className="h-9 w-[160px]" />
+          <Skeleton className="h-9 w-full max-w-sm" />
         </div>
-        <Skeleton className="h-10 w-[180px]" />
+        <Skeleton className="h-9 w-[180px]" />
       </div>
 
-      <div className="rounded-md border">
-        <div className="flex h-10 items-center gap-4 border-b bg-muted/50 px-4 text-center">
-          <Skeleton className="h-4 w-32 text-left" />
-          <Skeleton className="h-4 w-20" />
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-4 w-32" />
-          <Skeleton className="h-4 w-32" />
-          <Skeleton className="ml-auto h-4 w-20" />
-        </div>
+      <AppListTable>
+        <Table>
+          <TableHeader>
+            <AppListTableHeaderRow>
+              <AppListTableHead className="w-[30%]">
+                <Skeleton className="h-4 w-32" />
+              </AppListTableHead>
+              <AppListTableHead className="w-36 text-center">
+                <Skeleton className="mx-auto h-4 w-20" />
+              </AppListTableHead>
+              <AppListTableHead className="w-36 text-center">
+                <Skeleton className="mx-auto h-4 w-24" />
+              </AppListTableHead>
+              <AppListTableHead className="w-48 text-center">
+                <Skeleton className="mx-auto h-4 w-32" />
+              </AppListTableHead>
+              <AppListTableHead className="w-40 text-center">
+                <Skeleton className="mx-auto h-4 w-32" />
+              </AppListTableHead>
+              <AppListTableHead className="w-44 text-center">
+                <Skeleton className="ml-auto h-4 w-20" />
+              </AppListTableHead>
+            </AppListTableHeaderRow>
+          </TableHeader>
+          <TableBody>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <TableRow key={i}>
+                <TableCell className="align-top whitespace-normal">
+                  <div className="flex min-w-0 flex-col gap-2">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </div>
+                </TableCell>
+                <TableCell className="w-36 text-center">
+                  <Skeleton className="mx-auto h-6 w-20 rounded-full" />
+                </TableCell>
+                <TableCell className="w-36 text-center">
+                  <Skeleton className="mx-auto h-4 w-24" />
+                </TableCell>
+                <TableCell className="w-48 text-center">
+                  <Skeleton className="mx-auto h-4 w-32 font-mono" />
+                </TableCell>
+                <TableCell className="w-40 text-center">
+                  <Skeleton className="mx-auto h-4 w-32" />
+                </TableCell>
+                <TableCell className="w-44 text-center">
+                  <div className="flex justify-end gap-2">
+                    <Skeleton className="h-8 w-8" />
+                    <Skeleton className="h-8 w-8" />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </AppListTable>
 
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div
-            key={i}
-            className="flex h-16 items-center gap-4 border-b px-4 last:border-0 text-center"
-          >
-            <div className="flex min-w-[150px] flex-1 flex-col gap-2 text-left">
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-3 w-1/2" />
-            </div>
-            <Skeleton className="h-6 w-20 rounded-full" />
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-4 w-32 font-mono" />
-            <Skeleton className="h-4 w-32" />
-            <div className="ml-auto flex gap-2">
-              <Skeleton className="h-8 w-8" />
-              <Skeleton className="h-8 w-8" />
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="flex items-center justify-between gap-2">
+      <div className="mt-4 flex items-center justify-between gap-2">
         <Skeleton className="h-8 w-24" />
         <Skeleton className="h-4 w-32" />
         <div className="flex gap-2">

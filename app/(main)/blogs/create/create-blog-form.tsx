@@ -8,6 +8,11 @@ import { toast } from "sonner"
 import * as z from "zod"
 
 import { createBlog } from "@/app/api/blogs/action"
+import {
+  AppFormShell,
+  AppFormShellBody,
+  AppFormShellFooter,
+} from "@/components/app-form-shell"
 import { Button } from "@/components/ui/button"
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
@@ -17,7 +22,6 @@ import {
   InputGroupText,
   InputGroupTextarea,
 } from "@/components/ui/input-group"
-import { Separator } from "@/components/ui/separator"
 import { Spinner } from "@/components/ui/spinner"
 import { Switch } from "@/components/ui/switch"
 
@@ -92,8 +96,14 @@ export function CreateBlogForm() {
   }
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
-      <FieldGroup>
+    <AppFormShell
+      title="Tạo bài viết"
+      description="Soạn nội dung, slug và trạng thái hiển thị cho bài viết mới."
+      width="lg"
+    >
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <AppFormShellBody>
+          <FieldGroup>
       <Controller
         name="title"
         control={form.control}
@@ -206,9 +216,10 @@ export function CreateBlogForm() {
         )}
       />
 
-      </FieldGroup>
-      <Separator className="my-8" />
+          </FieldGroup>
+        </AppFormShellBody>
 
+        <AppFormShellFooter>
       <div className="flex gap-4">
         <Button disabled={form.formState.isSubmitting} type="submit">
           {form.formState.isSubmitting ? (
@@ -221,12 +232,14 @@ export function CreateBlogForm() {
         </Button>
         <Button
           type="button"
-          variant="outline"
-          onClick={() => window.history.back()}
+          variant="ghost"
+          onClick={() => router.push("/blogs")}
         >
           Hủy
         </Button>
       </div>
-    </form>
+        </AppFormShellFooter>
+      </form>
+    </AppFormShell>
   )
 }

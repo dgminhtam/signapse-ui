@@ -11,7 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
 
 interface SortOption {
@@ -66,9 +65,9 @@ export function SortSelect({
       ) : null}
       <Select value={currentSort} onValueChange={onSortChange} disabled={isPending}>
         <SelectTrigger
-          size="sm"
           className={cn("w-full sm:w-[200px]", triggerClassName)}
           aria-label={label}
+          aria-busy={isPending}
         >
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
@@ -82,7 +81,6 @@ export function SortSelect({
           </SelectGroup>
         </SelectContent>
       </Select>
-      {isPending ? <Spinner className="size-4 text-muted-foreground" /> : null}
     </div>
   )
 }

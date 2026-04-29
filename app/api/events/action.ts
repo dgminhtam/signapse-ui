@@ -7,7 +7,9 @@ import { ActionResult, Page, SearchParams } from "@/app/lib/definitions"
 import {
   EventEnrichmentResult,
   EventListResponse,
+  EventMarketReactionDerivationResult,
   EventResponse,
+  PendingEventMarketReactionDerivationBatchResult,
   PendingEventEnrichmentBatchResult,
 } from "@/app/lib/events/definitions"
 import { queryParamsToString } from "@/app/lib/utils"
@@ -23,7 +25,9 @@ function revalidateEventRoutes(id?: number) {
   revalidatePath("/events/[id]", "page")
 }
 
-export async function getEvents(searchParams: SearchParams): Promise<Page<EventListResponse>> {
+export async function getEvents(
+  searchParams: SearchParams
+): Promise<Page<EventListResponse>> {
   return fetchAuthenticated<Page<EventListResponse>>(
     `/events?${queryParamsToString(searchParams)}`
   )
@@ -76,7 +80,62 @@ export async function enrichPendingEventAssetsAndThemes(
   } catch (error: unknown) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Không thể làm giàu các sự kiện đang chờ",
+      error:
+        error instanceof Error
+          ? error.message
+          : "Không thể làm giàu các sự kiện đang chờ",
+    }
+  }
+}
+
+export async function deriveEventMarketReactions(
+  id: number
+): Promise<ActionResult<EventMarketReactionDerivationResult>> {
+  try {
+    const data = await fetchAuthenticated<EventMarketReactionDerivationResult>(
+      `/events/${id}/derive-market-reactions`,
+      {
+        method: "POST",
+      }
+    )
+
+    revalidateEventRoutes(id)
+
+    return { success: true, data }
+  } catch (error: unknown) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Không thể suy luận tác động thị trường cho sự kiện",
+    }
+  }
+}
+
+export async function derivePendingEventMarketReactions(
+  batchSize?: number
+): Promise<ActionResult<PendingEventMarketReactionDerivationBatchResult>> {
+  try {
+    const query = typeof batchSize === "number" ? `?batchSize=${batchSize}` : ""
+    const data =
+      await fetchAuthenticated<PendingEventMarketReactionDerivationBatchResult>(
+        `/events/derive-pending-market-reactions${query}`,
+        {
+          method: "POST",
+        }
+      )
+
+    revalidateEventRoutes()
+
+    return { success: true, data }
+  } catch (error: unknown) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Không thể suy luận tác động thị trường cho các sự kiện đang chờ",
     }
   }
 }

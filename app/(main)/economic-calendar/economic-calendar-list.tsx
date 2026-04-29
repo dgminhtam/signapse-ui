@@ -106,13 +106,15 @@ export function EconomicCalendarList({
         <Table>
           <TableHeader>
             <AppListTableHeaderRow>
-              <AppListTableHead>Sự kiện</AppListTableHead>
-              <AppListTableHead>Tiền tệ</AppListTableHead>
-              <AppListTableHead>Tác động</AppListTableHead>
-              <AppListTableHead>Trạng thái</AppListTableHead>
-              <AppListTableHead>Thời gian</AppListTableHead>
-              <AppListTableHead>Giá trị</AppListTableHead>
-              <AppListTableHead className="text-right">Thao tác</AppListTableHead>
+              <AppListTableHead className="w-[32%]">Sự kiện</AppListTableHead>
+              <AppListTableHead className="w-24">Tiền tệ</AppListTableHead>
+              <AppListTableHead className="w-28">Tác động</AppListTableHead>
+              <AppListTableHead className="w-32">Trạng thái</AppListTableHead>
+              <AppListTableHead className="w-44">Thời gian</AppListTableHead>
+              <AppListTableHead className="w-40">Giá trị</AppListTableHead>
+              <AppListTableHead className="w-20 text-right">
+                Thao tác
+              </AppListTableHead>
             </AppListTableHeaderRow>
           </TableHeader>
           <TableBody>
@@ -122,40 +124,48 @@ export function EconomicCalendarList({
                   key={entry.id}
                   className="border-border transition-colors hover:bg-muted/50"
                 >
-                  <TableCell>
-                    <div className="flex flex-col gap-1">
+                  <TableCell className="align-top whitespace-normal">
+                    <div className="flex min-w-0 flex-col gap-1">
                       <Link
                         href={`/economic-calendar/${entry.id}`}
-                        className="line-clamp-1 font-medium hover:underline"
+                        className="line-clamp-1 font-medium break-words hover:underline"
                       >
-                        {formatEconomicCalendarValue(entry.title, "Sự kiện chưa có tiêu đề")}
+                        {formatEconomicCalendarValue(
+                          entry.title,
+                          "Sự kiện chưa có tiêu đề"
+                        )}
                       </Link>
                       <span className="text-xs text-muted-foreground">
                         Mã mục #{entry.id}
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-sm">
+                  <TableCell className="w-24 text-sm">
                     <span className="font-medium text-foreground">
                       {formatCurrency(entry.currencyCode)}
                     </span>
                   </TableCell>
-                  <TableCell>
-                    <Badge variant={getEconomicCalendarImpactVariant(entry.impact)}>
+                  <TableCell className="w-28">
+                    <Badge
+                      variant={getEconomicCalendarImpactVariant(entry.impact)}
+                    >
                       {getEconomicCalendarImpactLabel(entry.impact)}
                     </Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="w-32">
                     <Badge
                       variant={getEconomicCalendarStatusVariant(
                         entry.status,
                         entry.contentAvailable
                       )}
                     >
-                      {getEconomicCalendarStatusLabel(entry.status, entry.contentAvailable)}
+                      {getEconomicCalendarStatusLabel(
+                        entry.status,
+                        entry.contentAvailable
+                      )}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
+                  <TableCell className="w-44 text-sm text-muted-foreground">
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2">
                         <CalendarClock className="h-3.5 w-3.5" />
@@ -166,14 +176,22 @@ export function EconomicCalendarList({
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    <div className="flex flex-col gap-1">
-                      <span>Actual: {formatEconomicCalendarValue(entry.actualValue)}</span>
-                      <span>Forecast: {formatEconomicCalendarValue(entry.forecastValue)}</span>
-                      <span>Previous: {formatEconomicCalendarValue(entry.previousValue)}</span>
+                  <TableCell className="w-40 max-w-[10rem] text-sm text-muted-foreground">
+                    <div className="flex min-w-0 flex-col gap-1">
+                      <span className="truncate">
+                        Actual: {formatEconomicCalendarValue(entry.actualValue)}
+                      </span>
+                      <span className="truncate">
+                        Forecast:{" "}
+                        {formatEconomicCalendarValue(entry.forecastValue)}
+                      </span>
+                      <span className="truncate">
+                        Previous:{" "}
+                        {formatEconomicCalendarValue(entry.previousValue)}
+                      </span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="w-20 text-right">
                     <div className="flex justify-end gap-1">
                       <Button
                         variant="ghost"
@@ -183,7 +201,9 @@ export function EconomicCalendarList({
                       >
                         <Link href={`/economic-calendar/${entry.id}`}>
                           <Eye data-icon="inline-start" />
-                          <span className="sr-only">Xem chi tiết lịch kinh tế</span>
+                          <span className="sr-only">
+                            Xem chi tiết lịch kinh tế
+                          </span>
                         </Link>
                       </Button>
                     </div>

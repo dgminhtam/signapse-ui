@@ -12,7 +12,7 @@ function AppListToolbar({
     <div
       data-slot="app-list-toolbar"
       className={cn(
-        "mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between",
+        "flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between",
         className
       )}
       {...props}
@@ -44,7 +44,7 @@ function AppListToolbarTrailing({
     <div
       data-slot="app-list-toolbar-trailing"
       className={cn(
-        "flex w-full flex-col gap-2 rounded-xl border border-border/60 bg-muted/20 p-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end",
+        "flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end",
         className
       )}
       {...props}

@@ -1,6 +1,6 @@
 ## Context
 
-The protected home page at `app/(main)/page.tsx` currently renders an empty fragment. Workspace context is resolved in the main layout for the header switcher, while the watchlist editor is reachable only from the workspace menu. API mapping already notes that the backend workspace contract has moved from `defaultWorkspace` and `/set-default` to `currentWorkspace` and `/set-current`, but the frontend code still uses the older names.
+The protected home page at `app/(main)/page.tsx` currently renders an empty fragment. Workspace context is resolved in the main layout for the header switcher, while the watchlist editor is reachable only from the workspace menu. API mapping notes that the backend workspace contract uses `currentWorkspace` and `/set-current`.
 
 This change should make `/` a useful landing surface without turning workspace into a heavy settings module. The page should communicate the active workspace, expose the most relevant workspace-scoped data, and provide a clean entry point to the existing tracked-asset editor.
 
@@ -46,7 +46,7 @@ Alternative considered:
 
 ### 3. Align workspace naming before building on top of it
 
-Implementation should rename frontend semantics from `defaultWorkspace` to `currentWorkspace`, and from `setDefaultWorkspace` to `setCurrentWorkspace`, while calling `/me/workspaces/{id}/set-current`.
+Implementation should use `currentWorkspace` semantics and `setCurrentWorkspace`, while calling `/me/workspaces/{id}/set-current`.
 
 Why:
 - The overview must not introduce more product copy or code around a legacy "default" concept.
@@ -79,10 +79,10 @@ Why:
 ## Risks / Trade-offs
 
 - [Duplicate workspace fetch with layout] -> Keep the page fetch simple for now; avoid introducing shared global state unless performance becomes a measured issue.
-- [Permission key for workspace switching may still be legacy] -> Verify the backend permission constant during implementation; preserve current permission behavior unless the contract confirms a new key.
+- [Permission key for workspace switching] -> Use the confirmed backend permission constant `workspace:set-current`.
 - [Overview becomes too dense] -> Limit first version to current workspace identity, tracked assets, quick actions, and technical details.
 - [Watchlist preview fails independently] -> Render the workspace overview even if watchlist preview fails, and show a localized blocked/error state only inside the watchlist module.
-- [Existing header switcher change still references set-default] -> Update the header switcher naming and OpenSpec notes during implementation so both changes converge on `currentWorkspace`.
+- [Existing header switcher change needs aligned wording] -> Update the header switcher naming and OpenSpec notes during implementation so both changes converge on `currentWorkspace`.
 
 ## Migration Plan
 

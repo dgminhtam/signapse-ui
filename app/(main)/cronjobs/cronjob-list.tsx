@@ -164,12 +164,24 @@ export function CronjobListPage({ cronjobPage }: CronjobListProps) {
         <Table>
           <TableHeader>
             <AppListTableHeaderRow>
-              <AppListTableHead>Tên tác vụ</AppListTableHead>
-              <AppListTableHead className="text-center">Nhóm</AppListTableHead>
-              <AppListTableHead className="text-center">Trạng thái</AppListTableHead>
-              <AppListTableHead className="text-center">Biểu thức cron</AppListTableHead>
-              <AppListTableHead className="text-center">Lần chạy kế tiếp</AppListTableHead>
-              <AppListTableHead className="text-center">Thao tác</AppListTableHead>
+              <AppListTableHead className="w-[30%]">
+                Tên tác vụ
+              </AppListTableHead>
+              <AppListTableHead className="w-36 text-center">
+                Nhóm
+              </AppListTableHead>
+              <AppListTableHead className="w-36 text-center">
+                Trạng thái
+              </AppListTableHead>
+              <AppListTableHead className="w-48 text-center">
+                Biểu thức cron
+              </AppListTableHead>
+              <AppListTableHead className="w-40 text-center">
+                Lần chạy kế tiếp
+              </AppListTableHead>
+              <AppListTableHead className="w-44 text-center">
+                Thao tác
+              </AppListTableHead>
             </AppListTableHeaderRow>
           </TableHeader>
           <TableBody>
@@ -179,29 +191,33 @@ export function CronjobListPage({ cronjobPage }: CronjobListProps) {
                   key={cronjob.id}
                   className="border-border transition-colors hover:bg-muted/50"
                 >
-                  <TableCell className="font-medium text-foreground">
-                    <Link href={`/cronjobs/${cronjob.id}`}>
-                      {cronjob.jobName}
-                    </Link>
-                    {cronjob.description && (
-                      <>
-                        <br />
-                        <span className="block max-w-[250px] truncate text-xs text-muted-foreground">
+                  <TableCell className="align-top font-medium whitespace-normal text-foreground">
+                    <div className="flex min-w-0 flex-col gap-1">
+                      <Link
+                        href={`/cronjobs/${cronjob.id}`}
+                        className="line-clamp-1 break-words"
+                      >
+                        {cronjob.jobName}
+                      </Link>
+                      {cronjob.description && (
+                        <span className="line-clamp-2 text-xs break-words text-muted-foreground">
                           {cronjob.description}
                         </span>
-                      </>
-                    )}
+                      )}
+                    </div>
                   </TableCell>
-                  <TableCell className="text-center text-muted-foreground">
-                    {cronjob.jobGroup}
+                  <TableCell className="w-36 max-w-[9rem] text-center text-muted-foreground">
+                    <span className="block truncate">{cronjob.jobGroup}</span>
                   </TableCell>
-                  <TableCell className="text-center">
+                  <TableCell className="w-36 text-center">
                     {getStatusBadge(cronjob.jobStatus)}
                   </TableCell>
-                  <TableCell className="text-center font-mono text-sm text-muted-foreground">
-                    {cronjob.cronExpression}
+                  <TableCell className="w-48 max-w-[12rem] text-center font-mono text-sm text-muted-foreground">
+                    <span className="block truncate">
+                      {cronjob.cronExpression}
+                    </span>
                   </TableCell>
-                  <TableCell className="text-center text-sm text-muted-foreground">
+                  <TableCell className="w-40 text-center text-sm text-muted-foreground">
                     {cronjob.nextTriggeredTime
                       ? format(
                           new Date(cronjob.nextTriggeredTime),
@@ -209,7 +225,7 @@ export function CronjobListPage({ cronjobPage }: CronjobListProps) {
                         )
                       : "-"}
                   </TableCell>
-                  <TableCell className="text-center">
+                  <TableCell className="w-44 text-center">
                     <div className="flex items-center justify-center gap-1">
                       <StatusActions
                         id={cronjob.id}
@@ -229,7 +245,9 @@ export function CronjobListPage({ cronjobPage }: CronjobListProps) {
                           </Link>
                         </Button>
                       ) : null}
-                      {canDeleteCronjob ? <DeleteCronjobButton id={cronjob.id} /> : null}
+                      {canDeleteCronjob ? (
+                        <DeleteCronjobButton id={cronjob.id} />
+                      ) : null}
                     </div>
                   </TableCell>
                 </TableRow>
@@ -314,7 +332,11 @@ function StatusActions({ id, status }: { id: number; status: string }) {
               disabled={isPending}
               onClick={handleStart}
             >
-              {isPending ? <Spinner className="size-4" /> : <Play className="h-4 w-4" />}
+              {isPending ? (
+                <Spinner className="size-4" />
+              ) : (
+                <Play className="h-4 w-4" />
+              )}
               <span className="sr-only">Khởi chạy</span>
             </Button>
           ) : null}
@@ -327,13 +349,17 @@ function StatusActions({ id, status }: { id: number; status: string }) {
               disabled={isPending}
               onClick={handlePause}
             >
-              {isPending ? <Spinner className="size-4" /> : <Pause className="h-4 w-4" />}
+              {isPending ? (
+                <Spinner className="size-4" />
+              ) : (
+                <Pause className="h-4 w-4" />
+              )}
               <span className="sr-only">Tạm dừng</span>
             </Button>
           ) : null}
         </div>
       )}
-      {(statusValue === "PAUSED" && canResumeCronjob) ? (
+      {statusValue === "PAUSED" && canResumeCronjob ? (
         <Button
           variant="ghost"
           size="icon"
@@ -389,8 +415,8 @@ function DeleteCronjobButton({ id }: { id: number }) {
         <AlertDialogHeader>
           <AlertDialogTitle>Bạn có chắc chắn muốn xóa?</AlertDialogTitle>
           <AlertDialogDescription>
-            Hành động này không thể hoàn tác. Cronjob đã chọn sẽ bị xóa vĩnh viễn
-            khỏi hệ thống.
+            Hành động này không thể hoàn tác. Cronjob đã chọn sẽ bị xóa vĩnh
+            viễn khỏi hệ thống.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

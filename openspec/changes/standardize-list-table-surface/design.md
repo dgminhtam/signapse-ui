@@ -7,8 +7,9 @@ The previous `refine-list-control-hierarchy` change standardized the controls ar
 - some pages render a muted header row while others render a transparent header row
 - empty states all use `<Empty>`, but with different padding, centering, and visual weight
 - several skeletons still suggest a different table shell than the screen actually renders
+- some dense list pages can expand horizontally on desktop when long backend text inherits the table primitive's default `whitespace-nowrap` behavior without a page-owned column width strategy
 
-This drift is visible in active pages such as `blogs`, `cronjobs`, `roles`, and `ai-provider-configs`, while `events`, `news-outlets`, and `source-documents` already use the newer toolbar and footer composition. The underlying `Table` primitive in `components/ui/table.tsx` deliberately does not own table-shell styling, so consistency has to come from app-level composition rather than from the primitive itself.
+This drift is visible in active pages such as `blogs`, `cronjobs`, `roles`, and `ai-provider-configs`, while `events`, `news-outlets`, and `source-documents` already use the newer toolbar and footer composition. The underlying `Table` primitive in `components/ui/table.tsx` deliberately does not own table-shell styling, and its default `whitespace-nowrap` cell behavior is better treated as a metadata-friendly baseline than as a complete layout contract. Consistency has to come from app-level composition and page-owned column decisions rather than from the primitive itself.
 
 Important constraints:
 
@@ -26,6 +27,7 @@ Important constraints:
 - Make header radius, border ownership, and clipping behavior consistent across adopted pages.
 - Standardize in-table empty states so empty-result screens feel like part of the table system rather than ad hoc page content.
 - Align list-page skeletons with the final table shell and header treatment.
+- Prevent long backend-provided content from expanding adopted desktop list tables beyond the intended viewport rhythm.
 - Capture the final table rules and review expectations in `AGENTS.md`.
 
 **Non-Goals:**
@@ -35,6 +37,7 @@ Important constraints:
 - Change backend sorting, filtering, paging, or DTO contracts.
 - Migrate hidden or redirected legacy list pages in the first wave.
 - Modify shadcn primitive source files under `components/ui`.
+- Replace every adopted table with a generic `table-fixed` default or remove `whitespace-nowrap` globally from `components/ui/table.tsx`.
 
 ## Decisions
 
@@ -101,13 +104,15 @@ Alternatives considered:
 
 ### 6. Roll out to active list pages first
 
-The first wave should target active list pages that users can currently reach and that represent the major variations in the repo: simple list pages, dense operational pages, and pages already migrated to the new toolbar/footer hierarchy.
+The first wave should target active list pages that users can currently reach and that represent the major variations in the repo: simple list pages, dense operational pages, and pages already migrated to the new toolbar/footer hierarchy. The column overflow contract applies to all adopted active list pages, even when the surface migration work for a given page was already completed earlier in this change.
 
 Recommended first-wave pages:
 
 - `app/(main)/events/event-list.tsx`
 - `app/(main)/news-articles/news-article-list.tsx`
 - `app/(main)/news-outlets/news-outlet-list.tsx`
+- `app/(main)/economic-calendar/economic-calendar-list.tsx`
+- `app/(main)/system-prompts/system-prompt-list.tsx`
 - `app/(main)/ai-provider-configs/ai-provider-config-list.tsx`
 - `app/(main)/blogs/blog-list.tsx`
 - `app/(main)/cronjobs/cronjob-list.tsx`
@@ -118,11 +123,27 @@ Deferred in first wave:
 - `topics`, because the route is currently hidden
 - legacy `sources` and `source-documents`, because those routes now redirect to canon surfaces
 
+### 7. Require a page-owned column overflow strategy
+
+Every adopted list table should explicitly classify its columns by job:
+
+- primary content columns are fluid, may wrap, and must contain long text safely
+- metadata columns such as source, provider, date, group, model, slug, and numeric summaries get stable width or min-width constraints
+- status and action columns stay compact, aligned, and predictable
+
+Because `TableCell` defaults to `whitespace-nowrap`, cells that display titles, descriptions, URLs, slugs, prompt names, model IDs, or other backend text that may exceed the available width should override locally with `whitespace-normal align-top` where multiline content is intended. Inner wrappers should use `min-w-0` when flex children need to shrink, and the text treatment should be chosen deliberately: `truncate` for single-line identifiers, `line-clamp-*` for summaries, and `break-words` for untrusted or hard-to-tokenize strings.
+
+Horizontal table scrolling remains available through the shared `Table` wrapper as a fallback for small viewports and genuinely dense datasets. It should not be the primary mechanism that keeps desktop list pages usable.
+
+Skeletons must mirror the same column width strategy as the final table. A fallback that declares a wide primary column while the runtime table has no corresponding width contract is considered layout drift.
+
 ## Risks / Trade-offs
 
 - [The shared table API becomes too heavy] -> Keep it surface-focused and slot-based, not data-schema-driven.
 - [Some pages need minor exceptions for dense content] -> Allow page-owned cell content and column widths while keeping shell, header, and empty-state structure shared.
+- [Column rules become too rigid for dense operational pages] -> Define the rule as a page-owned strategy instead of a single global width map; require explicit handling of long content while preserving feature-specific columns.
 - [Skeletons still drift after rollout] -> Add explicit `AGENTS.md` review rules so skeleton parity is enforced in future review passes.
+- [Changing the primitive fixes one page but regresses metadata scanability elsewhere] -> Keep `components/ui/table.tsx` unchanged and override wrapping only in cells that actually contain long content.
 - [Legacy pages remain inconsistent] -> Limit the first wave to active pages and treat hidden or redirected pages as separate cleanup work if they return.
 - [Header style choice becomes contentious] -> Centralize it in the shared component so changes happen once instead of through repeated per-page tweaks.
 
@@ -130,9 +151,10 @@ Deferred in first wave:
 
 1. Introduce shared app-level composition for list-table shell, header, and in-table empty-state structure.
 2. Migrate active list pages to the shared table surface without changing toolbar or pagination query semantics.
-3. Update the local skeletons for adopted pages so loading states match the final table surface.
-4. Update `AGENTS.md` with table rules and review expectations tied to the new shared pattern.
-5. Verify active pages for consistent shell, header, empty-state, and skeleton presentation across desktop and mobile.
+3. Apply a column overflow strategy to adopted active list pages so primary content columns can shrink, wrap, clamp, or truncate safely while metadata and action columns keep stable widths.
+4. Update the local skeletons for adopted pages so loading states match the final table surface and column strategy.
+5. Update `AGENTS.md` with table rules and review expectations tied to the new shared pattern and long-content overflow handling.
+6. Verify active pages for consistent shell, header, empty-state, skeleton presentation, and stable column behavior across desktop and mobile.
 
 Rollback:
 

@@ -20,7 +20,7 @@ The system SHALL use backend current-workspace semantics for workspace selection
 
 #### Scenario: Current workspace is resolved
 - **WHEN** workspace data is loaded from `/me/workspaces`
-- **THEN** the active workspace is resolved from the `currentWorkspace` field and not from legacy `defaultWorkspace`
+- **THEN** the active workspace is resolved from the `currentWorkspace` field
 
 #### Scenario: User switches workspace
 - **WHEN** a user selects another workspace through a workspace switch control

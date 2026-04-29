@@ -1,10 +1,10 @@
 ## 1. Align workspace contract and naming
 
 - [x] 1.1 Confirm the current workspace response fields and switch endpoint from `docs/api_mapping.json` and `docs/APIMAPPING.md`.
-- [x] 1.2 Update workspace definitions so `WorkspaceResponse` uses `currentWorkspace` and no longer depends on removed `defaultWorkspace`, `personal`, or `active` fields.
-- [x] 1.3 Rename frontend workspace action semantics from `setDefaultWorkspace` to `setCurrentWorkspace` and call `/me/workspaces/{id}/set-current`.
+- [x] 1.2 Update workspace definitions so `WorkspaceResponse` uses `currentWorkspace`.
+- [x] 1.3 Use `setCurrentWorkspace` frontend action semantics and call `/me/workspaces/{id}/set-current`.
 - [x] 1.4 Update active workspace resolution to select `currentWorkspace` before falling back to the first workspace.
-- [x] 1.5 Update layout and workspace switcher prop/action names to use current-workspace terminology while preserving the existing permission gate until the backend permission key is confirmed.
+- [x] 1.5 Update layout and workspace switcher prop/action names to use current-workspace terminology and gate switching with `workspace:set-current`.
 
 ## 2. Build workspace overview data flow
 
@@ -32,8 +32,8 @@
 
 - [x] 5.1 Add or update a loading skeleton for `/` that closely matches the final workspace overview layout.
 - [x] 5.2 Update `docs/APIMAPPING.md` so workspace API integration reflects `currentWorkspace` and `/set-current` after implementation.
-- [x] 5.3 Update relevant OpenSpec notes in `refactor-workspace-switcher-header` if implementation changes the old `set-default` wording still present there.
-- [x] 5.4 Search touched workspace/home files for mojibake markers and legacy terms such as `defaultWorkspace`, `set-default`, and user-facing "default" copy.
+- [x] 5.3 Update relevant OpenSpec notes in `refactor-workspace-switcher-header` so workspace switching uses current-workspace terminology.
+- [x] 5.4 Search touched workspace/home files for mojibake markers and legacy user-facing "default" copy.
 
 ## 6. Verification
 

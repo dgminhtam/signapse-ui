@@ -4,7 +4,7 @@ export const DOTS = "..." as const
 
 export type PaginationEntry = number | typeof DOTS
 
-export const DEFAULT_PAGE_SIZE_OPTIONS = [12, 20, 40, 80] as const
+export const DEFAULT_PAGE_SIZE_OPTIONS = [10, 20, 50, 100] as const
 
 const range = (start: number, end: number) => {
   const length = end - start + 1

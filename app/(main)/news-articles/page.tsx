@@ -16,7 +16,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
@@ -42,11 +41,17 @@ export default async function NewsArticlesPage({ searchParams }: PageProps) {
   const params = await searchParams
   const page = Number(params.page) || 1
   const size = Number(params.size) || 10
-  const sort = typeof params.sort === "string" ? params.sort : "publishedAt_desc"
+  const sort =
+    typeof params.sort === "string" ? params.sort : "publishedAt_desc"
 
   return (
     <Suspense fallback={<NewsArticleListSkeleton />}>
-      <NewsArticleListContent page={page} size={size} sort={sort} searchParams={params} />
+      <NewsArticleListContent
+        page={page}
+        size={size}
+        sort={sort}
+        searchParams={params}
+      />
     </Suspense>
   )
 }
@@ -77,50 +82,52 @@ async function NewsArticleListContent({
 
 function NewsArticleListSkeleton() {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex w-full flex-1 flex-col gap-4 sm:w-auto sm:flex-row sm:items-center">
-          <Skeleton className="h-10 w-[180px]" />
-          <Skeleton className="h-10 flex-1" />
+          <Skeleton className="h-9 w-[180px]" />
+          <Skeleton className="h-9 flex-1" />
         </div>
-        <div className="flex w-full flex-col gap-2 rounded-xl border border-border/60 bg-muted/20 p-2 sm:w-auto sm:flex-row sm:items-center">
-          <Skeleton className="h-8 w-full sm:w-[200px]" />
-          <Skeleton className="h-8 w-full sm:w-[120px]" />
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+          <Skeleton className="h-9 w-full sm:w-[200px]" />
+          <Skeleton className="h-9 w-full sm:w-[120px]" />
         </div>
       </div>
       <AppListTable>
         <Table>
           <TableHeader>
             <AppListTableHeaderRow>
-              <AppListTableHead className="w-[360px]">Bài viết</AppListTableHead>
-              <AppListTableHead>Nguồn tin</AppListTableHead>
-              <AppListTableHead>Thời gian</AppListTableHead>
-              <AppListTableHead>Trạng thái</AppListTableHead>
-              <AppListTableHead className="text-right">Thao tác</AppListTableHead>
+              <AppListTableHead className="w-[44%]">Bài viết</AppListTableHead>
+              <AppListTableHead className="w-44">Nguồn tin</AppListTableHead>
+              <AppListTableHead className="w-44">Thời gian</AppListTableHead>
+              <AppListTableHead className="w-32">Trạng thái</AppListTableHead>
+              <AppListTableHead className="w-28 text-right">
+                Thao tác
+              </AppListTableHead>
             </AppListTableHeaderRow>
           </TableHeader>
           <TableBody>
             {Array.from({ length: 5 }).map((_, index) => (
               <TableRow key={index} className="hover:bg-transparent">
-                <TableCell>
-                  <div className="flex flex-col gap-2">
+                <TableCell className="align-top whitespace-normal">
+                  <div className="flex min-w-0 flex-col gap-2">
                     <Skeleton className="h-4 w-[260px]" />
                     <Skeleton className="h-3 w-[220px]" />
                   </div>
                 </TableCell>
-                <TableCell>
+                <TableCell className="w-44 max-w-[11rem]">
                   <Skeleton className="h-4 w-28" />
                 </TableCell>
-                <TableCell>
+                <TableCell className="w-44">
                   <div className="flex flex-col gap-2">
                     <Skeleton className="h-4 w-32" />
                     <Skeleton className="h-3 w-28" />
                   </div>
                 </TableCell>
-                <TableCell>
+                <TableCell className="w-32">
                   <Skeleton className="h-6 w-32" />
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="w-28 text-right">
                   <div className="flex justify-end gap-2">
                     <Skeleton className="h-8 w-8 rounded" />
                     <Skeleton className="h-8 w-8 rounded" />
@@ -134,7 +141,7 @@ function NewsArticleListSkeleton() {
         </Table>
       </AppListTable>
 
-      <div className="flex flex-col gap-3 rounded-xl border border-border/60 bg-muted/20 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mt-4 flex flex-col gap-3 rounded-xl border border-border/60 bg-muted/20 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-2">
           <div className="flex flex-wrap items-center gap-2">
             <Skeleton className="h-6 w-24" />

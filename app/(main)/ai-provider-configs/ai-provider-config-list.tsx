@@ -52,7 +52,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
@@ -70,7 +69,9 @@ export function AiProviderConfigListPage({
   const canCreateProvider = useHasPermission("ai-provider-config:create")
   const canUpdateProvider = useHasPermission("ai-provider-config:update")
   const canDeleteProvider = useHasPermission("ai-provider-config:delete")
-  const canSetDefaultProvider = useHasPermission("ai-provider-config:set-default")
+  const canSetDefaultProvider = useHasPermission(
+    "ai-provider-config:set-default"
+  )
 
   return (
     <div className="w-full">
@@ -110,12 +111,18 @@ export function AiProviderConfigListPage({
         <Table>
           <TableHeader>
             <AppListTableHeaderRow>
-              <AppListTableHead>Tên cấu hình</AppListTableHead>
-              <AppListTableHead>Nhà cung cấp</AppListTableHead>
-              <AppListTableHead>Model</AppListTableHead>
-              <AppListTableHead className="text-center">Mặc định</AppListTableHead>
-              <AppListTableHead>Tạo lúc</AppListTableHead>
-              <AppListTableHead className="text-right">Thao tác</AppListTableHead>
+              <AppListTableHead className="w-[32%]">
+                Tên cấu hình
+              </AppListTableHead>
+              <AppListTableHead className="w-36">Nhà cung cấp</AppListTableHead>
+              <AppListTableHead className="w-[24%]">Model</AppListTableHead>
+              <AppListTableHead className="w-36 text-center">
+                Mặc định
+              </AppListTableHead>
+              <AppListTableHead className="w-40">Tạo lúc</AppListTableHead>
+              <AppListTableHead className="w-28 text-right">
+                Thao tác
+              </AppListTableHead>
             </AppListTableHeaderRow>
           </TableHeader>
           <TableBody>
@@ -125,34 +132,34 @@ export function AiProviderConfigListPage({
                   key={provider.id}
                   className="border-border transition-colors hover:bg-muted/50"
                 >
-                  <TableCell>
-                    <div className="flex flex-col gap-1">
+                  <TableCell className="align-top whitespace-normal">
+                    <div className="flex min-w-0 flex-col gap-1">
                       <Link
                         href={`/ai-provider-configs/${provider.id}`}
-                        className="font-medium text-foreground hover:underline"
+                        className="line-clamp-1 font-medium break-words text-foreground hover:underline"
                       >
                         {provider.name}
                       </Link>
-                      <span className="line-clamp-1 text-xs text-muted-foreground">
+                      <span className="line-clamp-1 text-xs break-words text-muted-foreground">
                         {provider.description || "Chưa có mô tả."}
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="w-36">
                     <Badge variant="secondary">{provider.providerType}</Badge>
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {provider.model}
+                  <TableCell className="w-[24%] max-w-[18rem] text-sm text-muted-foreground">
+                    <span className="block truncate">{provider.model}</span>
                   </TableCell>
-                  <TableCell className="text-center">
+                  <TableCell className="w-36 text-center">
                     {canSetDefaultProvider ? (
                       <SetDefaultButton provider={provider} />
                     ) : null}
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground tabular-nums">
+                  <TableCell className="w-40 text-sm text-muted-foreground tabular-nums">
                     {format(new Date(provider.createdDate), "dd/MM/yyyy HH:mm")}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="w-28">
                     <div className="flex justify-end gap-1">
                       {canUpdateProvider ? (
                         <Button
@@ -236,7 +243,11 @@ function SetDefaultButton({
       disabled={isPending}
       className="h-8"
     >
-      {isPending ? <Spinner className="size-4" /> : <Star data-icon="inline-start" />}
+      {isPending ? (
+        <Spinner className="size-4" />
+      ) : (
+        <Star data-icon="inline-start" />
+      )}
       Đặt mặc định
     </Button>
   )

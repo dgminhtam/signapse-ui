@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/table"
 
 import { EventEnrichPendingButton } from "./event-enrich-pending-button"
+import { EventMarketReactionPendingButton } from "./event-market-reaction-pending-button"
 import { EventSearch } from "./event-search"
 import {
   getEventStatusLabel,
@@ -71,6 +72,7 @@ export function EventList({ eventPage }: EventListProps) {
       <AppListToolbar>
         <AppListToolbarLeading>
           <EventEnrichPendingButton />
+          <EventMarketReactionPendingButton />
           <EventSearch />
         </AppListToolbarLeading>
         <AppListToolbarTrailing>
@@ -97,13 +99,11 @@ export function EventList({ eventPage }: EventListProps) {
         <Table>
           <TableHeader>
             <AppListTableHeaderRow>
-              <AppListTableHead>Sự kiện</AppListTableHead>
-              <AppListTableHead>Trạng thái</AppListTableHead>
-              <AppListTableHead>Thời gian</AppListTableHead>
-              <AppListTableHead>
-                Độ tin cậy
-              </AppListTableHead>
-              <AppListTableHead className="text-right">
+              <AppListTableHead className="w-[44%]">Sự kiện</AppListTableHead>
+              <AppListTableHead className="w-36">Trạng thái</AppListTableHead>
+              <AppListTableHead className="w-44">Thời gian</AppListTableHead>
+              <AppListTableHead className="w-28">Độ tin cậy</AppListTableHead>
+              <AppListTableHead className="w-20 text-right">
                 Thao tác
               </AppListTableHead>
             </AppListTableHeaderRow>
@@ -115,30 +115,30 @@ export function EventList({ eventPage }: EventListProps) {
                   key={event.id}
                   className="border-border transition-colors hover:bg-muted/50"
                 >
-                  <TableCell>
-                    <div className="flex flex-col gap-1">
+                  <TableCell className="align-top whitespace-normal">
+                    <div className="flex min-w-0 flex-col gap-1">
                       <Link
                         href={`/events/${event.id}`}
-                        className="line-clamp-1 font-medium hover:underline"
+                        className="line-clamp-1 font-medium break-words hover:underline"
                       >
                         {event.title}
                       </Link>
-                      <span className="line-clamp-2 text-xs text-muted-foreground">
+                      <span className="line-clamp-2 text-xs break-words text-muted-foreground">
                         {event.description?.trim() || "Chưa có mô tả ngắn."}
                       </span>
                       {event.canonicalKey ? (
-                        <span className="text-xs text-muted-foreground">
+                        <span className="line-clamp-1 text-xs break-all text-muted-foreground">
                           Khóa chuẩn: {event.canonicalKey}
                         </span>
                       ) : null}
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="w-36">
                     <Badge variant={getEventStatusVariant(event.status)}>
                       {getEventStatusLabel(event.status)}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
+                  <TableCell className="w-44 text-sm text-muted-foreground">
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-3.5 w-3.5" />
@@ -146,10 +146,10 @@ export function EventList({ eventPage }: EventListProps) {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
+                  <TableCell className="w-28 text-sm text-muted-foreground">
                     {formatConfidence(event.confidence)}
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="w-20 text-right">
                     <div className="flex justify-end gap-1">
                       <Button
                         variant="ghost"

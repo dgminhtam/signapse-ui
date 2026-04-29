@@ -90,11 +90,13 @@ export function NewsArticleList({ newsArticlePage }: NewsArticleListProps) {
         <Table>
           <TableHeader>
             <AppListTableHeaderRow>
-              <AppListTableHead>Bài viết</AppListTableHead>
-              <AppListTableHead>Nguồn tin</AppListTableHead>
-              <AppListTableHead>Thời gian</AppListTableHead>
-              <AppListTableHead>Trạng thái</AppListTableHead>
-              <AppListTableHead className="text-right">Thao tác</AppListTableHead>
+              <AppListTableHead className="w-[44%]">Bài viết</AppListTableHead>
+              <AppListTableHead className="w-44">Nguồn tin</AppListTableHead>
+              <AppListTableHead className="w-44">Thời gian</AppListTableHead>
+              <AppListTableHead className="w-32">Trạng thái</AppListTableHead>
+              <AppListTableHead className="w-28 text-right">
+                Thao tác
+              </AppListTableHead>
             </AppListTableHeaderRow>
           </TableHeader>
           <TableBody>
@@ -104,23 +106,25 @@ export function NewsArticleList({ newsArticlePage }: NewsArticleListProps) {
                   key={article.id}
                   className="border-border transition-colors hover:bg-muted/50"
                 >
-                  <TableCell>
-                    <div className="flex flex-col gap-1">
+                  <TableCell className="align-top whitespace-normal">
+                    <div className="flex min-w-0 flex-col gap-1">
                       <Link
                         href={`/news-articles/${article.id}`}
-                        className="line-clamp-1 font-medium hover:underline"
+                        className="line-clamp-1 font-medium break-words hover:underline"
                       >
                         {article.title}
                       </Link>
-                      <span className="line-clamp-2 text-xs text-muted-foreground">
+                      <span className="line-clamp-2 text-xs break-words text-muted-foreground">
                         {article.description?.trim() || "Chưa có mô tả ngắn."}
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {article.newsOutletName?.trim() || "Chưa có nguồn tin"}
+                  <TableCell className="w-44 max-w-[11rem] text-sm text-muted-foreground">
+                    <span className="block truncate">
+                      {article.newsOutletName?.trim() || "Chưa có nguồn tin"}
+                    </span>
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
+                  <TableCell className="w-44 text-sm text-muted-foreground">
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-3.5 w-3.5" />
@@ -131,12 +135,14 @@ export function NewsArticleList({ newsArticlePage }: NewsArticleListProps) {
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <Badge variant={getNewsArticleStatusVariant(article.status)}>
+                  <TableCell className="w-32">
+                    <Badge
+                      variant={getNewsArticleStatusVariant(article.status)}
+                    >
                       {NEWS_ARTICLE_STATUS_LABELS[article.status]}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="w-28 text-right">
                     <div className="flex justify-end gap-1">
                       <Button
                         variant="ghost"
@@ -155,12 +161,19 @@ export function NewsArticleList({ newsArticlePage }: NewsArticleListProps) {
                         asChild
                         className="text-muted-foreground hover:text-foreground"
                       >
-                        <a href={article.url} target="_blank" rel="noopener noreferrer">
+                        <a
+                          href={article.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
                           <ExternalLink data-icon="inline-start" />
                           <span className="sr-only">Mở liên kết gốc</span>
                         </a>
                       </Button>
-                      <NewsArticleDeleteButton id={article.id} title={article.title} />
+                      <NewsArticleDeleteButton
+                        id={article.id}
+                        title={article.title}
+                      />
                     </div>
                   </TableCell>
                 </TableRow>

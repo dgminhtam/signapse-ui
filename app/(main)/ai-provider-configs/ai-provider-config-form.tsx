@@ -21,6 +21,11 @@ import {
   AiProviderModelOptionResponse,
   AiProviderType,
 } from "@/app/lib/ai-provider-configs/definitions"
+import {
+  AppFormShell,
+  AppFormShellBody,
+  AppFormShellFooter,
+} from "@/components/app-form-shell"
 import { Button } from "@/components/ui/button"
 import { useHasPermission } from "@/components/permission-provider"
 import {
@@ -39,7 +44,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
 import { Spinner } from "@/components/ui/spinner"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
@@ -200,8 +204,20 @@ export function AiProviderConfigForm({ initialData }: AiProviderConfigFormProps)
 
   return (
     <>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        <FieldGroup>
+      <AppFormShell
+        title={
+          isEdit ? "Chỉnh sửa cấu hình nhà cung cấp AI" : "Tạo cấu hình nhà cung cấp AI"
+        }
+        description={
+          isEdit
+            ? "Cập nhật thông tin xác thực, model và trạng thái mặc định của cấu hình AI."
+            : "Khai báo nhà cung cấp AI, xác thực API key và chọn model sử dụng."
+        }
+        width="lg"
+      >
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <AppFormShellBody>
+            <FieldGroup>
           <Controller
             name="providerType"
             control={form.control}
@@ -425,10 +441,10 @@ export function AiProviderConfigForm({ initialData }: AiProviderConfigFormProps)
               </Field>
             )}
           />
-        </FieldGroup>
+            </FieldGroup>
+          </AppFormShellBody>
 
-        <Separator className="my-8" />
-
+          <AppFormShellFooter>
         <div className="flex gap-4">
           <Button disabled={form.formState.isSubmitting || !selectedModel} type="submit">
             {form.formState.isSubmitting ? (
@@ -473,7 +489,9 @@ export function AiProviderConfigForm({ initialData }: AiProviderConfigFormProps)
             Hủy
           </Button>
         </div>
-      </form>
+          </AppFormShellFooter>
+        </form>
+      </AppFormShell>
 
       <AiProviderModelPickerDialog
         currentModel={selectedModel}

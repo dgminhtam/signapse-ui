@@ -22,11 +22,11 @@
     },
     {
       "confidence": 0.95,
-      "id": "source-document:7->event:1:PRIMARY",
-      "kind": "source-document-event",
+      "id": "news-article:7->event:1:PRIMARY",
+      "kind": "source-artifact-event",
       "note": "The article explicitly states that BCA Research is advising its clients to buy HUF/USD.",
       "relationType": "PRIMARY",
-      "sourceNodeId": "source-document:7",
+      "sourceNodeId": "news-article:7",
       "targetNodeId": "event:1",
       "weight": null
     }
@@ -44,7 +44,7 @@
         "occurredAt": null,
         "publishedAt": null,
         "slug": "bca-research-recommends-buying-huf-usd",
-        "sourceName": null,
+        "newsOutletName": null,
         "symbol": null,
         "url": null
       },
@@ -62,7 +62,7 @@
         "occurredAt": null,
         "publishedAt": null,
         "slug": null,
-        "sourceName": null,
+        "newsOutletName": null,
         "symbol": "DXY",
         "url": null
       },
@@ -80,15 +80,15 @@
         "occurredAt": null,
         "publishedAt": null,
         "slug": "geopolitics",
-        "sourceName": null,
+        "newsOutletName": null,
         "symbol": null,
         "url": null
       },
       "secondaryLabel": "geopolitics"
     },
     {
-      "id": "source-document:7",
-      "kind": "source-document",
+      "id": "news-article:7",
+      "kind": "news-article",
       "label": "Nen mua HUF/USD, BCA khuyen nghi",
       "metadata": {
         "active": null,
@@ -98,7 +98,7 @@
         "occurredAt": null,
         "publishedAt": null,
         "slug": null,
-        "sourceName": "Investing VN News",
+        "newsOutletName": "Investing VN News",
         "symbol": null,
         "url": "https://vn.investing.com/news/forex-news/nen-mua-hufusd-bca-khuyen-nghi-93CH-2587742"
       },

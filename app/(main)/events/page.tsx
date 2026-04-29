@@ -45,7 +45,12 @@ export default async function EventsPage({ searchParams }: PageProps) {
 
   return (
     <Suspense fallback={<EventListSkeleton />}>
-      <EventListContent page={page} size={size} sort={sort} searchParams={params} />
+      <EventListContent
+        page={page}
+        size={size}
+        sort={sort}
+        searchParams={params}
+      />
     </Suspense>
   )
 }
@@ -75,15 +80,16 @@ async function EventListContent({
 
 function EventListSkeleton() {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex w-full flex-1 flex-col gap-4 sm:w-auto sm:flex-row sm:items-center">
-          <Skeleton className="h-10 w-[200px]" />
-          <Skeleton className="h-10 flex-1" />
+          <Skeleton className="h-9 w-[200px]" />
+          <Skeleton className="h-9 w-[220px]" />
+          <Skeleton className="h-9 flex-1" />
         </div>
-        <div className="flex w-full flex-col gap-2 rounded-xl border border-border/60 bg-muted/20 p-2 sm:w-auto sm:flex-row sm:items-center">
-          <Skeleton className="h-8 w-full sm:w-[200px]" />
-          <Skeleton className="h-8 w-full sm:w-[120px]" />
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+          <Skeleton className="h-9 w-full sm:w-[200px]" />
+          <Skeleton className="h-9 w-full sm:w-[120px]" />
         </div>
       </div>
 
@@ -91,32 +97,34 @@ function EventListSkeleton() {
         <Table>
           <TableHeader>
             <AppListTableHeaderRow>
-              <AppListTableHead className="w-[360px]">Sự kiện</AppListTableHead>
-              <AppListTableHead>Trạng thái</AppListTableHead>
-              <AppListTableHead>Xảy ra lúc</AppListTableHead>
-              <AppListTableHead>Độ tin cậy</AppListTableHead>
-              <AppListTableHead className="text-right">Thao tác</AppListTableHead>
+              <AppListTableHead className="w-[44%]">Sự kiện</AppListTableHead>
+              <AppListTableHead className="w-36">Trạng thái</AppListTableHead>
+              <AppListTableHead className="w-44">Xảy ra lúc</AppListTableHead>
+              <AppListTableHead className="w-28">Độ tin cậy</AppListTableHead>
+              <AppListTableHead className="w-20 text-right">
+                Thao tác
+              </AppListTableHead>
             </AppListTableHeaderRow>
           </TableHeader>
           <TableBody>
             {Array.from({ length: 5 }).map((_, index) => (
               <TableRow key={index} className="hover:bg-transparent">
-                <TableCell>
-                  <div className="flex flex-col gap-2">
+                <TableCell className="align-top whitespace-normal">
+                  <div className="flex min-w-0 flex-col gap-2">
                     <Skeleton className="h-4 w-[260px]" />
                     <Skeleton className="h-3 w-[220px]" />
                   </div>
                 </TableCell>
-                <TableCell>
+                <TableCell className="w-36">
                   <Skeleton className="h-6 w-32" />
                 </TableCell>
-                <TableCell>
+                <TableCell className="w-44">
                   <Skeleton className="h-4 w-32" />
                 </TableCell>
-                <TableCell>
+                <TableCell className="w-28">
                   <Skeleton className="h-4 w-16" />
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="w-20 text-right">
                   <div className="flex justify-end gap-2">
                     <Skeleton className="h-8 w-8 rounded" />
                   </div>
@@ -127,7 +135,7 @@ function EventListSkeleton() {
         </Table>
       </AppListTable>
 
-      <div className="flex flex-col gap-3 rounded-xl border border-border/60 bg-muted/20 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mt-4 flex flex-col gap-3 rounded-xl border border-border/60 bg-muted/20 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-2">
           <div className="flex flex-wrap items-center gap-2">
             <Skeleton className="h-6 w-24" />

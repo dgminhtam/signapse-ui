@@ -1,472 +1,489 @@
 "use client"
 
-import {
-  SigmaContainer,
-  useCamera,
-  useLoadGraph,
-  useRegisterEvents,
-  useSetSettings,
-  useSigma,
-} from "@react-sigma/core"
-import { LocateFixed, Minus, Plus } from "lucide-react"
-import { useEffect, useEffectEvent, useRef, useState } from "react"
-
-import { Button } from "@/components/ui/button"
+import { Graph } from "@antv/g6"
+import type {
+  D3ForceLayoutOptions,
+  EdgeData,
+  GraphData,
+  NodeData,
+} from "@antv/g6"
+import { useEffect, useMemo, useRef } from "react"
 
 import { getGraphViewRelationLabel } from "@/app/lib/graph-view/definitions"
 
-import type {
-  GraphEdgeAttributes,
-  GraphModel,
-  GraphNodeAttributes,
-  LocalFocusState,
-  SelectedGraphItem,
-} from "./graph-view-workbench"
+import {
+  GRAPH_VIEW_EDGE_VISUALS,
+  GRAPH_VIEW_NODE_VISUALS,
+} from "./graph-view-visuals"
+import type { GraphModel } from "./graph-view-workbench"
 
-const DIM_NODE_COLOR = "rgba(148, 163, 184, 0.42)"
-const DIM_EDGE_COLOR = "rgba(148, 163, 184, 0.26)"
+type ClusterState = {
+  clusterByNodeId: Map<string, string>
+  clusterLabelByKey: Map<string, string>
+}
 
-function getFocusState(
-  graphModel: GraphModel,
-  hoveredNodeId: string | null,
-  selectedItem: SelectedGraphItem
-) {
-  const focusNodes = new Set<string>()
-  const focusEdges = new Set<string>()
+const MIN_CANVAS_WIDTH = 360
+const MIN_CANVAS_HEIGHT = 640
 
-  const addNodeNeighborhood = (nodeId: string) => {
-    graphModel.relatedNodesByNodeId.get(nodeId)?.forEach((relatedNodeId) => {
-      focusNodes.add(relatedNodeId)
-    })
+function hashText(value: string) {
+  let hash = 0
 
-    graphModel.relatedEdgesByNodeId.get(nodeId)?.forEach((edgeId) => {
-      focusEdges.add(edgeId)
-    })
+  for (let index = 0; index < value.length; index += 1) {
+    hash = (hash << 5) - hash + value.charCodeAt(index)
+    hash |= 0
   }
 
-  if (hoveredNodeId && graphModel.nodeMap.has(hoveredNodeId)) {
-    addNodeNeighborhood(hoveredNodeId)
-  }
+  return Math.abs(hash)
+}
 
-  if (
-    selectedItem?.type === "node" &&
-    graphModel.nodeMap.has(selectedItem.id)
-  ) {
-    addNodeNeighborhood(selectedItem.id)
-  }
-
-  if (selectedItem?.type === "edge") {
-    const edge = graphModel.edgeMap.get(selectedItem.id)
-
-    if (edge) {
-      focusEdges.add(edge.id)
-      focusNodes.add(edge.sourceNodeId)
-      focusNodes.add(edge.targetNodeId)
-    }
-  }
+function createSeedPosition(nodeId: string, index: number, total: number) {
+  const hash = hashText(nodeId)
+  const angle = (index / Math.max(total, 1)) * Math.PI * 2 + (hash % 48) / 48
+  const radius = 180 + (index % 9) * 18 + (hash % 24)
 
   return {
-    focusNodes,
-    focusEdges,
-    hasFocus: focusNodes.size > 0 || focusEdges.size > 0,
+    x: Math.cos(angle) * radius,
+    y: Math.sin(angle) * radius,
   }
 }
 
-function GraphCanvasScene({
-  graphModel,
-  localFocusDepth,
-  localFocusState,
-  onSelectionChange,
-  selectedItem,
-  showContextualEdgeLabels,
-}: {
-  graphModel: GraphModel
-  localFocusDepth: number
-  localFocusState: LocalFocusState | null
-  onSelectionChange: (selectedItem: SelectedGraphItem) => void
-  selectedItem: SelectedGraphItem
-  showContextualEdgeLabels: boolean
-}) {
-  const loadGraph = useLoadGraph<GraphNodeAttributes, GraphEdgeAttributes>()
-  const registerEvents = useRegisterEvents<
-    GraphNodeAttributes,
-    GraphEdgeAttributes
+function createBoundedLabel(label: string, maxLength = 34) {
+  const normalizedLabel = label.trim()
+  const characters = Array.from(normalizedLabel)
+
+  if (characters.length <= maxLength) {
+    return normalizedLabel
+  }
+
+  return `${characters
+    .slice(0, Math.max(maxLength - 3, 1))
+    .join("")
+    .trimEnd()}...`
+}
+
+function getRelationScore(relationType: string, weight?: number | null) {
+  const baseScoreByRelation: Record<string, number> = {
+    PRIMARY_SUBJECT: 100,
+    PRIMARY_THEME: 94,
+    AFFECTED_ASSET: 76,
+    SECONDARY_THEME: 66,
+    REFERENCE_ASSET: 48,
+    PRIMARY: 82,
+    SUPPORTING: 58,
+  }
+
+  return (baseScoreByRelation[relationType] ?? 42) + (weight ?? 0) * 20
+}
+
+function inferClusterState(graphModel: GraphModel): ClusterState {
+  const clusterByNodeId = new Map<string, string>()
+  const clusterLabelByKey = new Map<string, string>()
+  const eventClusterCandidates = new Map<
+    string,
+    {
+      key: string
+      label: string
+      score: number
+    }
   >()
-  const setSettings = useSetSettings<GraphNodeAttributes, GraphEdgeAttributes>()
-  const sigma = useSigma<GraphNodeAttributes, GraphEdgeAttributes>()
-  const previousFocusNodeIdRef = useRef<string | null>(null)
-  const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null)
-  const [isSettling, setIsSettling] = useState(false)
-  const { gotoNode, reset, zoomIn, zoomOut } = useCamera({
-    duration: 320,
-    factor: 1.45,
-  })
 
-  const handleEnterNode = useEffectEvent((nodeId: string) => {
-    setHoveredNodeId(nodeId)
-  })
-
-  const handleLeaveNode = useEffectEvent(() => {
-    setHoveredNodeId(null)
-  })
-
-  const handleClickNode = useEffectEvent((nodeId: string) => {
-    onSelectionChange({
-      type: "node",
-      id: nodeId,
-    })
-  })
-
-  const handleClickEdge = useEffectEvent((edgeId: string) => {
-    onSelectionChange({
-      type: "edge",
-      id: edgeId,
-    })
-  })
-
-  const handleClickStage = useEffectEvent(() => {
-    onSelectionChange(null)
-  })
-
-  const handleResetViewport = () => {
-    if (localFocusState?.centerNodeId) {
-      void gotoNode(localFocusState.centerNodeId, {
-        duration: 520,
-      })
-
+  graphModel.nodes.forEach((node) => {
+    if (node.kind !== "asset" && node.kind !== "theme") {
       return
     }
 
-    reset({
-      duration: 520,
+    clusterByNodeId.set(node.id, node.id)
+    clusterLabelByKey.set(node.id, node.label)
+  })
+
+  graphModel.edges.forEach((edge) => {
+    const sourceNode = graphModel.nodeMap.get(edge.sourceNodeId)
+    const targetNode = graphModel.nodeMap.get(edge.targetNodeId)
+
+    if (!sourceNode || !targetNode) {
+      return
+    }
+
+    const eventNode =
+      sourceNode.kind === "event"
+        ? sourceNode
+        : targetNode.kind === "event"
+          ? targetNode
+          : null
+    const anchorNode =
+      sourceNode.kind === "asset" || sourceNode.kind === "theme"
+        ? sourceNode
+        : targetNode.kind === "asset" || targetNode.kind === "theme"
+          ? targetNode
+          : null
+
+    if (!eventNode || !anchorNode) {
+      return
+    }
+
+    const score = getRelationScore(edge.relationType, edge.weight)
+    const previousCandidate = eventClusterCandidates.get(eventNode.id)
+
+    if (!previousCandidate || score > previousCandidate.score) {
+      eventClusterCandidates.set(eventNode.id, {
+        key: anchorNode.id,
+        label: anchorNode.label,
+        score,
+      })
+    }
+  })
+
+  graphModel.nodes.forEach((node) => {
+    if (node.kind !== "event") {
+      return
+    }
+
+    const candidate = eventClusterCandidates.get(node.id)
+
+    if (candidate) {
+      clusterByNodeId.set(node.id, candidate.key)
+      clusterLabelByKey.set(candidate.key, candidate.label)
+      return
+    }
+
+    clusterByNodeId.set(node.id, node.id)
+    clusterLabelByKey.set(node.id, node.label)
+  })
+
+  graphModel.nodes.forEach((node) => {
+    if (node.kind !== "news-article") {
+      return
+    }
+
+    const eventEdge = graphModel.edges.find((edge) => {
+      if (edge.sourceNodeId !== node.id && edge.targetNodeId !== node.id) {
+        return false
+      }
+
+      const otherNodeId =
+        edge.sourceNodeId === node.id ? edge.targetNodeId : edge.sourceNodeId
+
+      return graphModel.nodeMap.get(otherNodeId)?.kind === "event"
     })
+
+    if (!eventEdge) {
+      return
+    }
+
+    const eventNodeId =
+      eventEdge.sourceNodeId === node.id
+        ? eventEdge.targetNodeId
+        : eventEdge.sourceNodeId
+    const inheritedClusterKey = clusterByNodeId.get(eventNodeId)
+
+    if (inheritedClusterKey) {
+      clusterByNodeId.set(node.id, inheritedClusterKey)
+    }
+  })
+
+  graphModel.nodes.forEach((node) => {
+    if (clusterByNodeId.has(node.id)) {
+      return
+    }
+
+    const fallbackKey = `${node.kind}:${node.id}`
+    clusterByNodeId.set(node.id, fallbackKey)
+    clusterLabelByKey.set(fallbackKey, GRAPH_VIEW_NODE_VISUALS[node.kind].label)
+  })
+
+  return {
+    clusterByNodeId,
+    clusterLabelByKey,
+  }
+}
+
+function shouldShowLabel(
+  graphModel: GraphModel,
+  nodeId: string,
+  nodeKind: NodeData["kind"]
+) {
+  const edgeCount = graphModel.relatedEdgesByNodeId.get(nodeId)?.size ?? 0
+
+  if (graphModel.nodes.length <= 42) {
+    return true
   }
 
+  return nodeKind === "asset" || nodeKind === "theme" || edgeCount >= 4
+}
+
+function createG6GraphData(graphModel: GraphModel): GraphData {
+  const clusterState = inferClusterState(graphModel)
+  const nodes: NodeData[] = graphModel.nodes.map((node, index) => {
+    const visual = GRAPH_VIEW_NODE_VISUALS[node.kind]
+    const clusterKey = clusterState.clusterByNodeId.get(node.id) ?? node.id
+    const linkCount = graphModel.relatedEdgesByNodeId.get(node.id)?.size ?? 0
+    const size = visual.size + Math.min(linkCount, 8) * 1.4
+    const seedPosition = createSeedPosition(
+      node.id,
+      index,
+      graphModel.nodes.length
+    )
+    const showLabel = shouldShowLabel(graphModel, node.id, node.kind)
+
+    return {
+      id: node.id,
+      cluster: clusterKey,
+      clusterLabel: clusterState.clusterLabelByKey.get(clusterKey) ?? clusterKey,
+      kind: node.kind,
+      label: node.label,
+      linkCount,
+      nodeRadius: size / 2 + 14,
+      type: "circle",
+      data: {
+        clusterKey,
+        kind: node.kind,
+        label: node.label,
+        metadata: node.metadata ?? null,
+        secondaryLabel: node.secondaryLabel ?? null,
+      },
+      style: {
+        fill: visual.color,
+        labelFill: "#172033",
+        labelFontSize: 11,
+        labelFontWeight: 600,
+        labelMaxWidth: 220,
+        labelOffsetX: 9,
+        labelPlacement: "right",
+        labelText: showLabel ? createBoundedLabel(node.label) : "",
+        lineWidth: 2,
+        opacity: 0.96,
+        shadowBlur: node.kind === "asset" || node.kind === "theme" ? 8 : 4,
+        shadowColor: `${visual.color}40`,
+        size,
+        stroke: "rgba(255,255,255,0.88)",
+        x: seedPosition.x,
+        y: seedPosition.y,
+      },
+    }
+  })
+
+  const edges: EdgeData[] = graphModel.edges.map((edge) => {
+    const visual = GRAPH_VIEW_EDGE_VISUALS[edge.kind]
+    const sourceClusterKey =
+      clusterState.clusterByNodeId.get(edge.sourceNodeId) ?? edge.sourceNodeId
+    const targetClusterKey =
+      clusterState.clusterByNodeId.get(edge.targetNodeId) ?? edge.targetNodeId
+    const sameCluster = sourceClusterKey === targetClusterKey
+
+    return {
+      id: edge.id,
+      confidence: edge.confidence ?? null,
+      kind: edge.kind,
+      relationType: edge.relationType,
+      sameCluster,
+      source: edge.sourceNodeId,
+      sourceClusterKey,
+      sourceNodeId: edge.sourceNodeId,
+      target: edge.targetNodeId,
+      targetClusterKey,
+      targetNodeId: edge.targetNodeId,
+      weight: edge.weight ?? null,
+      data: {
+        confidence: edge.confidence ?? null,
+        kind: edge.kind,
+        note: edge.note ?? null,
+        relationLabel: getGraphViewRelationLabel(edge.relationType),
+        relationType: edge.relationType,
+        sourceNodeId: edge.sourceNodeId,
+        targetNodeId: edge.targetNodeId,
+        weight: edge.weight ?? null,
+      },
+      style: {
+        lineWidth: visual.size,
+        opacity: sameCluster ? 0.46 : 0.32,
+        stroke: visual.color,
+      },
+      type: "line",
+    }
+  })
+
+  return {
+    edges,
+    nodes,
+  }
+}
+
+function getElementNumberValue(
+  datum: { [key: string]: unknown },
+  key: string,
+  fallback: number
+) {
+  const value = datum[key]
+
+  return typeof value === "number" && Number.isFinite(value) ? value : fallback
+}
+
+function getElementBooleanValue(
+  datum: { [key: string]: unknown },
+  key: string
+) {
+  return datum[key] === true
+}
+
+function createForceLayout(width: number, height: number) {
+  return {
+    alpha: 0.92,
+    alphaDecay: 0.038,
+    center: {
+      strength: 0.12,
+      x: width / 2,
+      y: height / 2,
+    },
+    clusterBy: (node) => String(node.cluster ?? node.id),
+    clusterEdgeDistance: 220,
+    clusterEdgeStrength: 0.16,
+    clusterFociStrength: 0.72,
+    clusterNodeSize: 36,
+    clusterNodeStrength: -12,
+    clustering: true,
+    collide: {
+      iterations: 3,
+      radius: (node) => getElementNumberValue(node, "nodeRadius", 24),
+      strength: 0.88,
+    },
+    link: {
+      distance: (edge) =>
+        getElementBooleanValue(edge, "sameCluster") ? 96 : 210,
+      iterations: 2,
+      strength: (edge) =>
+        getElementBooleanValue(edge, "sameCluster") ? 0.72 : 0.2,
+    },
+    manyBody: {
+      distanceMax: 780,
+      distanceMin: 18,
+      strength: (node) => {
+        const radius = getElementNumberValue(node, "nodeRadius", 24)
+
+        return -160 - radius * 7
+      },
+      theta: 0.82,
+    },
+    preventOverlap: true,
+    type: "d3-force",
+    velocityDecay: 0.42,
+    x: {
+      strength: 0.045,
+      x: width / 2,
+    },
+    y: {
+      strength: 0.045,
+      y: height / 2,
+    },
+  } satisfies D3ForceLayoutOptions & { type: "d3-force" }
+}
+
+function getContainerSize(container: HTMLDivElement) {
+  const rect = container.getBoundingClientRect()
+
+  return {
+    height: Math.max(rect.height, MIN_CANVAS_HEIGHT),
+    width: Math.max(rect.width, MIN_CANVAS_WIDTH),
+  }
+}
+
+export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const graphRef = useRef<Graph | null>(null)
+  const graphData = useMemo(() => createG6GraphData(graphModel), [graphModel])
+
   useEffect(() => {
-    loadGraph(graphModel.graph, true)
+    const container = containerRef.current
 
-    let settleTimeout: number | null = null
-    const animationTimeout = window.setTimeout(() => {
-      sigma.refresh()
+    if (!container) {
+      return
+    }
 
-      const camera = sigma.getCamera()
-      const settledState = camera.getState()
-      const prefersReducedMotion = window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
-      ).matches
+    const { height, width } = getContainerSize(container)
+    let isDisposed = false
+    const graph = new Graph({
+      animation: false,
+      autoFit: "view",
+      behaviors: [
+        "drag-canvas",
+        "zoom-canvas",
+        {
+          fixed: false,
+          type: "drag-element-force",
+        },
+      ],
+      container,
+      data: graphData,
+      edge: {
+        style: (edge) => edge.style ?? {},
+        type: "line",
+      },
+      height,
+      layout: createForceLayout(width, height),
+      node: {
+        style: (node) => node.style ?? {},
+        type: "circle",
+      },
+      padding: 48,
+      width,
+      zoomRange: [0.12, 4],
+    })
 
-      if (prefersReducedMotion) {
-        setIsSettling(false)
+    graphRef.current = graph
+    void graph.render().then(() => {
+      if (!isDisposed && !graph.destroyed) {
+        void graph.fitView({
+          direction: "both",
+          when: "always",
+        })
+      }
+    })
 
+    const resizeObserver = new ResizeObserver(() => {
+      if (isDisposed || graph.destroyed) {
         return
       }
 
-      setIsSettling(true)
-      camera.setState({
-        ...settledState,
-        angle: settledState.angle - 0.015,
-        ratio: Math.min(settledState.ratio * 1.16, settledState.ratio + 0.24),
-        x: settledState.x - 0.03,
-        y: settledState.y + 0.025,
-      })
-      void camera.animate(settledState, {
-        duration: 820,
-      })
+      const nextSize = getContainerSize(container)
+      graph.setSize(nextSize.width, nextSize.height)
+    })
 
-      settleTimeout = window.setTimeout(() => {
-        setIsSettling(false)
-      }, 840)
-    }, 60)
+    resizeObserver.observe(container)
 
     return () => {
-      window.clearTimeout(animationTimeout)
-
-      if (settleTimeout !== null) {
-        window.clearTimeout(settleTimeout)
-      }
+      isDisposed = true
+      resizeObserver.disconnect()
+      graph.destroy()
+      graphRef.current = null
     }
-  }, [graphModel, loadGraph, sigma])
-
-  useEffect(() => {
-    registerEvents({
-      clickEdge: ({ edge }) => handleClickEdge(edge),
-      clickNode: ({ node }) => handleClickNode(node),
-      clickStage: () => handleClickStage(),
-      enterNode: ({ node }) => handleEnterNode(node),
-      leaveNode: () => handleLeaveNode(),
-    })
-  }, [registerEvents])
-
-  useEffect(() => {
-    const focusCenterNodeId = localFocusState?.centerNodeId ?? null
-
-    if (focusCenterNodeId) {
-      previousFocusNodeIdRef.current = focusCenterNodeId
-      void gotoNode(focusCenterNodeId, {
-        duration: 540,
-      })
-
-      return
-    }
-
-    if (previousFocusNodeIdRef.current) {
-      previousFocusNodeIdRef.current = null
-      reset({
-        duration: 540,
-      })
-    }
-  }, [gotoNode, localFocusState, reset])
-
-  useEffect(() => {
-    const focusState = getFocusState(graphModel, hoveredNodeId, selectedItem)
-    const localFocusNodeIds = localFocusState?.nodeIds ?? null
-    const localFocusEdgeIds = localFocusState?.edgeIds ?? null
-    const shouldRevealAllLocalEdgeLabels =
-      showContextualEdgeLabels &&
-      !!localFocusState &&
-      localFocusState.edgeIds.size <= 12 &&
-      !hoveredNodeId &&
-      selectedItem?.type !== "edge"
-
-    setSettings({
-      edgeReducer: (edgeId, data) => {
-        const isVisible = !localFocusEdgeIds || localFocusEdgeIds.has(edgeId)
-        const isSelectedEdge =
-          selectedItem?.type === "edge" && selectedItem.id === edgeId
-        const isInteractionFocused =
-          !focusState.hasFocus || focusState.focusEdges.has(edgeId)
-        const shouldDim =
-          isVisible &&
-          focusState.hasFocus &&
-          !isInteractionFocused &&
-          !localFocusState
-        const shouldRevealLabel =
-          isSelectedEdge ||
-          (showContextualEdgeLabels &&
-            isVisible &&
-            (focusState.focusEdges.has(edgeId) || shouldRevealAllLocalEdgeLabels))
-
-        return {
-          ...data,
-          color: shouldDim ? DIM_EDGE_COLOR : data.baseColor,
-          forceLabel: shouldRevealLabel,
-          hidden: !isVisible,
-          label: shouldRevealLabel ? data.baseLabel : null,
-          size:
-            data.baseSize +
-            (isSelectedEdge
-              ? 1
-              : focusState.focusEdges.has(edgeId)
-                ? 0.28
-                : localFocusEdgeIds?.has(edgeId)
-                  ? 0.12
-                  : 0),
-          zIndex: isSelectedEdge ? 3 : focusState.focusEdges.has(edgeId) ? 1 : 0,
-        }
-      },
-      enableEdgeEvents: true,
-      labelDensity: showContextualEdgeLabels ? 0.1 : 0.06,
-      labelGridCellSize: showContextualEdgeLabels ? 132 : 164,
-      nodeReducer: (nodeId, data) => {
-        const isVisible = !localFocusNodeIds || localFocusNodeIds.has(nodeId)
-        const isHoveredNode = hoveredNodeId === nodeId
-        const isSelectedNode =
-          selectedItem?.type === "node" && selectedItem.id === nodeId
-        const isFocusedNode =
-          !focusState.hasFocus || focusState.focusNodes.has(nodeId)
-        const isSelectedEdgeEndpoint =
-          selectedItem?.type === "edge" && focusState.focusNodes.has(nodeId)
-        const isLocalFocusCenter = localFocusState?.centerNodeId === nodeId
-        const shouldDim =
-          isVisible &&
-          focusState.hasFocus &&
-          !isFocusedNode &&
-          !isSelectedEdgeEndpoint &&
-          !localFocusState
-        const shouldRevealLabel =
-          isHoveredNode ||
-          isSelectedNode ||
-          isSelectedEdgeEndpoint ||
-          isLocalFocusCenter
-
-        return {
-          ...data,
-          color: shouldDim ? DIM_NODE_COLOR : data.baseColor,
-          forceLabel: shouldRevealLabel,
-          hidden: !isVisible,
-          highlighted:
-            isHoveredNode ||
-            isSelectedNode ||
-            isSelectedEdgeEndpoint ||
-            isLocalFocusCenter,
-          label: shouldRevealLabel ? data.baseLabel : null,
-          size:
-            data.baseSize +
-            (isSelectedNode
-              ? 3.4
-              : isHoveredNode
-                ? 1.8
-                : isSelectedEdgeEndpoint || isLocalFocusCenter
-                  ? 0.9
-                  : 0),
-          zIndex: isSelectedNode
-            ? 4
-            : isHoveredNode || isSelectedEdgeEndpoint || isLocalFocusCenter
-              ? 2
-              : 0,
-        }
-      },
-      renderEdgeLabels: true,
-    })
-
-    sigma.refresh()
-  }, [
-    graphModel,
-    hoveredNodeId,
-    localFocusState,
-    selectedItem,
-    setSettings,
-    showContextualEdgeLabels,
-    sigma,
-  ])
-
-  const selectedLabel =
-    selectedItem?.type === "node"
-      ? graphModel.nodeMap.get(selectedItem.id)?.label
-      : selectedItem?.type === "edge"
-        ? getGraphViewRelationLabel(
-            graphModel.edgeMap.get(selectedItem.id)?.relationType ||
-              selectedItem.id
-          )
-        : null
-
-  const hoveredLabel = hoveredNodeId
-    ? graphModel.nodeMap.get(hoveredNodeId)?.label
-    : null
+  }, [graphData])
 
   return (
-    <>
-      <div className="pointer-events-none absolute inset-x-4 top-4 z-10 flex flex-wrap items-start justify-between gap-3">
-        <div className="pointer-events-auto flex max-w-[min(100%,30rem)] flex-col gap-1 rounded-2xl border border-border/80 bg-background/88 px-3.5 py-2.5 shadow-sm backdrop-blur">
-          <span className="text-[11px] font-medium tracking-[0.16em] text-muted-foreground uppercase">
-            {isSettling
-              ? "Đang ổn định bố cục"
-              : localFocusState
-                ? "Chế độ tập trung cụm"
-                : "Không gian toàn cảnh"}
-          </span>
-          <span className="text-xs leading-5 text-foreground/85">
-            {selectedLabel
-              ? `Đang neo chi tiết: ${selectedLabel}`
-              : hoveredLabel
-                ? `Đang rà qua: ${hoveredLabel}`
-                : "Rê chuột để đọc vùng lân cận, nhấp để mở hộp thoại chi tiết mà không rời khỏi góc nhìn hiện tại."}
-          </span>
-        </div>
+    <div className="relative h-full min-h-[640px] w-full animate-in duration-500 fade-in">
+      <div
+        ref={containerRef}
+        className="h-full min-h-[640px] w-full cursor-grab active:cursor-grabbing"
+      />
 
-        <div className="pointer-events-auto flex items-center gap-1 rounded-full border border-border/80 bg-background/90 p-1 shadow-sm backdrop-blur">
-          <Button
-            aria-label="Thu nhỏ biểu đồ"
-            onClick={() => zoomOut()}
-            size="icon-xs"
-            type="button"
-            variant="ghost"
-          >
-            <Minus />
-          </Button>
-          <Button
-            aria-label={
-              localFocusState
-                ? "Căn lại khung nhìn của cụm đang tập trung"
-                : "Đưa về toàn cảnh"
-            }
-            onClick={handleResetViewport}
-            size="icon-xs"
-            type="button"
-            variant="ghost"
-          >
-            <LocateFixed />
-          </Button>
-          <Button
-            aria-label="Phóng to biểu đồ"
-            onClick={() => zoomIn()}
-            size="icon-xs"
-            type="button"
-            variant="ghost"
-          >
-            <Plus />
-          </Button>
+      <div className="pointer-events-none absolute inset-x-4 top-4 z-10 flex flex-wrap items-start justify-between gap-3">
+        <div className="max-w-[min(100%,32rem)] rounded-2xl border border-border/80 bg-background/88 px-3.5 py-2.5 shadow-sm backdrop-blur">
+          <p className="text-[11px] font-medium tracking-[0.16em] text-muted-foreground uppercase">
+            D3 force layout
+          </p>
+          <p className="mt-1 text-xs leading-5 text-foreground/85">
+            Kéo một nút để các quan hệ gần nó phản hồi theo lực; cuộn để zoom
+            và kéo nền để di chuyển canvas.
+          </p>
         </div>
       </div>
 
       <div className="pointer-events-none absolute inset-x-4 bottom-4 z-10 flex flex-wrap items-end justify-between gap-3">
-        <div className="pointer-events-auto rounded-full border border-border/80 bg-background/88 px-3 py-1.5 text-xs text-muted-foreground shadow-sm backdrop-blur">
-          {localFocusState
-            ? `${localFocusState.nodeIds.size} nút · ${localFocusState.edgeIds.size} cạnh trong ${localFocusDepth} bậc`
-            : `${graphModel.nodes.length} nút · ${graphModel.edges.length} cạnh trong toàn cảnh`}
+        <div className="rounded-full border border-border/80 bg-background/88 px-3 py-1.5 text-xs text-muted-foreground shadow-sm backdrop-blur">
+          {graphModel.nodes.length} nút · {graphModel.edges.length} cạnh
         </div>
-
-        <div className="pointer-events-auto rounded-full border border-border/80 bg-background/88 px-3 py-1.5 text-xs text-muted-foreground shadow-sm backdrop-blur">
-          {showContextualEdgeLabels
-            ? "Nhãn cạnh theo ngữ cảnh đang bật"
-            : "Nhãn cạnh chỉ hiện khi cần"}
+        <div className="rounded-full border border-border/80 bg-background/88 px-3 py-1.5 text-xs text-muted-foreground shadow-sm backdrop-blur">
+          Force drag không ghi vị trí về backend
         </div>
       </div>
-    </>
-  )
-}
-
-export function GraphViewCanvas({
-  graphModel,
-  localFocusDepth,
-  localFocusState,
-  onSelectionChange,
-  selectedItem,
-  showContextualEdgeLabels,
-}: {
-  graphModel: GraphModel
-  localFocusDepth: number
-  localFocusState: LocalFocusState | null
-  onSelectionChange: (selectedItem: SelectedGraphItem) => void
-  selectedItem: SelectedGraphItem
-  showContextualEdgeLabels: boolean
-}) {
-  return (
-    <SigmaContainer
-      className="relative h-full min-h-[640px] w-full animate-in fade-in duration-500"
-      settings={{
-        autoCenter: true,
-        autoRescale: true,
-        defaultEdgeColor: "#94a3b8",
-        defaultNodeColor: "#94a3b8",
-        enableEdgeEvents: true,
-        enableCameraPanning: true,
-        enableCameraZooming: true,
-        hideEdgesOnMove: false,
-        hideLabelsOnMove: true,
-        labelDensity: 0.06,
-        labelGridCellSize: 164,
-        labelRenderedSizeThreshold: 12,
-        maxCameraRatio: 6,
-        minCameraRatio: 0.06,
-        renderEdgeLabels: true,
-        renderLabels: true,
-        stagePadding: 42,
-        zIndex: true,
-      }}
-      style={{
-        height: "100%",
-        width: "100%",
-      }}
-    >
-      <GraphCanvasScene
-        graphModel={graphModel}
-        localFocusDepth={localFocusDepth}
-        localFocusState={localFocusState}
-        onSelectionChange={onSelectionChange}
-        selectedItem={selectedItem}
-        showContextualEdgeLabels={showContextualEdgeLabels}
-      />
-    </SigmaContainer>
+    </div>
   )
 }

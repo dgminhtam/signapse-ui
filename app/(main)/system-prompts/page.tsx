@@ -85,15 +85,15 @@ async function SystemPromptListContent({
 
 function SystemPromptListSkeleton() {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex w-full flex-1 flex-col gap-4 sm:w-auto sm:flex-row sm:items-center">
-          <Skeleton className="h-10 w-full sm:w-[150px]" />
-          <Skeleton className="h-10 w-full sm:max-w-sm" />
+          <Skeleton className="h-9 w-full sm:w-[150px]" />
+          <Skeleton className="h-9 w-full sm:max-w-sm" />
         </div>
-        <div className="flex w-full flex-col gap-2 rounded-xl border border-border/60 bg-muted/20 p-2 sm:w-auto sm:flex-row sm:items-center">
-          <Skeleton className="h-8 w-full sm:w-[200px]" />
-          <Skeleton className="h-8 w-full sm:w-[120px]" />
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+          <Skeleton className="h-9 w-full sm:w-[200px]" />
+          <Skeleton className="h-9 w-full sm:w-[120px]" />
         </div>
       </div>
 
@@ -101,36 +101,42 @@ function SystemPromptListSkeleton() {
         <Table>
           <TableHeader>
             <AppListTableHeaderRow>
-              <AppListTableHead>Loại prompt</AppListTableHead>
-              <AppListTableHead>Nhóm workflow</AppListTableHead>
-              <AppListTableHead>Độ dài</AppListTableHead>
-              <AppListTableHead>Cập nhật</AppListTableHead>
-              <AppListTableHead>Tạo lúc</AppListTableHead>
-              <AppListTableHead className="text-right">Thao tác</AppListTableHead>
+              <AppListTableHead className="w-[34%]">
+                Loại prompt
+              </AppListTableHead>
+              <AppListTableHead className="w-44">
+                Nhóm workflow
+              </AppListTableHead>
+              <AppListTableHead className="w-28">Độ dài</AppListTableHead>
+              <AppListTableHead className="w-40">Cập nhật</AppListTableHead>
+              <AppListTableHead className="w-40">Tạo lúc</AppListTableHead>
+              <AppListTableHead className="w-28 text-right">
+                Thao tác
+              </AppListTableHead>
             </AppListTableHeaderRow>
           </TableHeader>
           <TableBody>
             {Array.from({ length: 5 }).map((_, index) => (
               <TableRow key={index} className="hover:bg-transparent">
-                <TableCell>
-                  <div className="flex flex-col gap-2">
+                <TableCell className="align-top whitespace-normal">
+                  <div className="flex min-w-0 flex-col gap-2">
                     <Skeleton className="h-4 w-52" />
                     <Skeleton className="h-3 w-64" />
                   </div>
                 </TableCell>
-                <TableCell>
+                <TableCell className="w-44 max-w-[11rem]">
                   <Skeleton className="h-6 w-24 rounded-full" />
                 </TableCell>
-                <TableCell>
+                <TableCell className="w-28">
                   <Skeleton className="h-4 w-20" />
                 </TableCell>
-                <TableCell>
+                <TableCell className="w-40">
                   <Skeleton className="h-4 w-32" />
                 </TableCell>
-                <TableCell>
+                <TableCell className="w-40">
                   <Skeleton className="h-4 w-32" />
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="w-28 text-right">
                   <div className="flex justify-end gap-2">
                     <Skeleton className="h-8 w-8 rounded" />
                     <Skeleton className="h-8 w-8 rounded" />
@@ -142,7 +148,7 @@ function SystemPromptListSkeleton() {
         </Table>
       </AppListTable>
 
-      <Skeleton className="h-16 w-full rounded-xl" />
+      <Skeleton className="mt-4 h-16 w-full rounded-xl" />
     </div>
   )
 }

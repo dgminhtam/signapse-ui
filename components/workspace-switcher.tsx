@@ -176,19 +176,16 @@ export function WorkspaceSwitcher({
             type="button"
             variant="outline"
             className={cn(
-              "h-10 max-w-full justify-between gap-3 px-3 md:min-w-64",
+              "max-w-full justify-between gap-2 px-3 md:min-w-56",
               className
             )}
           >
             <span className="flex min-w-0 items-center gap-2">
-              <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+              <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
                 <BriefcaseBusinessIcon className="size-4" />
               </span>
-              <span className="flex min-w-0 flex-col items-start leading-tight">
-                <span className="text-xs text-muted-foreground">Đang hoạt động</span>
-                <span className="max-w-44 truncate text-sm font-medium md:max-w-52">
-                  {currentWorkspace?.name ?? "Chưa chọn"}
-                </span>
+              <span className="max-w-44 truncate text-sm font-medium md:max-w-52">
+                {currentWorkspace?.name ?? "Chưa chọn"}
               </span>
             </span>
             {isPending ? (

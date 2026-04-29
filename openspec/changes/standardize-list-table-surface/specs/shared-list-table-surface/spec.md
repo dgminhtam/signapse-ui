@@ -34,3 +34,18 @@ The system SHALL ensure loading skeletons for adopted admin list pages mirror th
 - **WHEN** an adopted admin list page is rendering its skeleton or suspense fallback
 - **THEN** the loading state uses the same shell shape, header treatment, and footer placement as the final table screen
 - **AND** the loading state does not introduce a conflicting header bar or alternate table shell that is absent from the final UI
+
+### Requirement: Long table content does not break desktop list layout
+The system SHALL require adopted admin list pages to handle long backend-provided content through an explicit column overflow strategy.
+
+#### Scenario: Adopted list page renders long primary content
+- **WHEN** an adopted admin list page renders rows containing long titles, descriptions, URLs, slugs, model IDs, prompt names, cron expressions, source names, or similar backend-provided text
+- **THEN** the table preserves stable desktop layout instead of expanding the page horizontally beyond the intended list surface
+- **AND** primary content columns can shrink and use deliberate wrapping, truncation, clamping, or word breaking
+- **AND** metadata, status, timestamp, and action columns keep stable width behavior appropriate to their scan task
+- **AND** horizontal table scrolling remains a fallback for narrow viewports or genuinely dense data, not the primary desktop layout strategy
+
+#### Scenario: Loading state mirrors column overflow strategy
+- **WHEN** an adopted admin list page renders its skeleton or suspense fallback
+- **THEN** the skeleton uses the same primary-content and metadata column width strategy as the final table
+- **AND** the skeleton does not declare widths that hide or contradict the runtime table layout behavior

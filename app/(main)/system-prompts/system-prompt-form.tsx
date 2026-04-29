@@ -21,6 +21,11 @@ import {
   SystemPromptType,
   UpdateSystemPromptRequest,
 } from "@/app/lib/system-prompts/definitions"
+import {
+  AppFormShell,
+  AppFormShellBody,
+  AppFormShellFooter,
+} from "@/components/app-form-shell"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -44,7 +49,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
 import { Spinner } from "@/components/ui/spinner"
 
 const MAX_PROMPT_CONTENT_LENGTH = 10000
@@ -127,8 +131,18 @@ export function SystemPromptForm({ initialData }: SystemPromptFormProps) {
   }
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
-      <FieldGroup>
+    <AppFormShell
+      title={isEdit ? "Chỉnh sửa prompt hệ thống" : "Tạo prompt hệ thống"}
+      description={
+        isEdit
+          ? "Cập nhật nội dung prompt đang điều khiển workflow AI."
+          : "Tạo prompt mới cho một workflow AI trong hệ thống."
+      }
+      width="lg"
+    >
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <AppFormShellBody>
+          <FieldGroup>
         {isEdit && initialData ? (
           <Field>
             <FieldLabel>Loại prompt</FieldLabel>
@@ -234,11 +248,12 @@ export function SystemPromptForm({ initialData }: SystemPromptFormProps) {
             </p>
           </div>
         ) : null}
-      </FieldGroup>
+          </FieldGroup>
+        </AppFormShellBody>
 
-      <Separator className="my-8" />
+        <AppFormShellFooter>
 
-      <div className="flex flex-col gap-3 sm:flex-row">
+      <div className="flex flex-col-reverse gap-3 sm:flex-row">
         <Button disabled={form.formState.isSubmitting} type="submit">
           {form.formState.isSubmitting ? (
             <>
@@ -255,6 +270,8 @@ export function SystemPromptForm({ initialData }: SystemPromptFormProps) {
           Hủy
         </Button>
       </div>
-    </form>
+        </AppFormShellFooter>
+      </form>
+    </AppFormShell>
   )
 }

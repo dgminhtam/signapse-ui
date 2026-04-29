@@ -2,7 +2,7 @@
 
 Tài liệu này ánh xạ snapshot OpenAPI backend trong `docs/api_mapping.json` tới các điểm tích hợp frontend hiện tại của repo.
 
-Xác minh lần cuối: ngày 25 tháng 4 năm 2026
+Xác minh lần cuối: ngày 29 tháng 4 năm 2026
 
 ## Cấu hình cơ sở
 
@@ -23,12 +23,13 @@ Xác minh lần cuối: ngày 25 tháng 4 năm 2026
 
 ## Tổng quan thay đổi lớn từ snapshot hiện tại
 
-- Snapshot backend hiện tại gồm `68` operation.
+- Snapshot backend hiện tại gồm `70` operation.
 - Backend đã chuyển domain nội dung canon từ `sources` / `source-documents` sang `news-outlets` / `news-articles`.
 - Backend vẫn giữ các surface `events`, `query`, và `graph-view`, nhưng nhiều payload đã đổi naming từ `sourceDocument*` sang `artifact*` hoặc `news-article`.
+- Surface `events` có thêm workflow derive market reactions cho từng event và batch pending events.
 - Frontend hiện đã có route và workbench cho `market-query` và `graph-view`, nhưng vẫn còn lệch contract với snapshot backend mới.
 - Frontend đã có surface canon `news-outlets` và `news-articles`; các route legacy `/sources*`, `/news-sources*`, và `/source-documents*` hiện chỉ còn redirect compatibility.
-- Surface workspace đã đổi từ `set-default` sang `set-current`, đồng thời `WorkspaceResponse` đã đổi field có nghĩa từ `defaultWorkspace` sang `currentWorkspace`.
+- Surface workspace dùng chuẩn `set-current`, đồng thời `WorkspaceResponse` dùng field có nghĩa `currentWorkspace`.
 - `roles` và `permissions` hiện đã có action và UI frontend, không còn ở trạng thái "chưa triển khai".
 
 ## Phạm vi endpoint
@@ -52,7 +53,7 @@ Frontend liên quan:
 
 Ghi chú:
 
-- Enum `promptType` trong snapshot hiện tại vẫn giữ nhóm legacy `NEWS_FILTER`, `NEWS_ANALYSIS`, `SIGNAL_GENERATION`, `DECISION_MAKING`, `CONTENT_EXTRACTION`, `SENTIMENT_ANALYSIS`, `TITLE_GENERATION`, `SUMMARY_GENERATION`, `CONTENT_CLEANING`, đồng thời mở rộng thêm `FIRECRAWL_SOURCE_DOCUMENT_FILTER`, `NEWS_PRIMARY_EVENT_DERIVATION`, `EVENT_ASSET_THEME_ENRICHMENT`, và `EVENT_GROUNDED_MARKET_QUERY_SYNTHESIS`.
+- Enum `promptType` trong snapshot hiện tại vẫn giữ nhóm legacy `NEWS_FILTER`, `NEWS_ANALYSIS`, `SIGNAL_GENERATION`, `DECISION_MAKING`, `CONTENT_EXTRACTION`, `SENTIMENT_ANALYSIS`, `TITLE_GENERATION`, `SUMMARY_GENERATION`, `CONTENT_CLEANING`, đồng thời mở rộng thêm `FIRECRAWL_SOURCE_DOCUMENT_FILTER`, `NEWS_PRIMARY_EVENT_DERIVATION`, `EVENT_ASSET_THEME_ENRICHMENT`, `EVENT_MARKET_REACTION_DERIVATION`, và `EVENT_GROUNDED_MARKET_QUERY_SYNTHESIS`.
 - Frontend v1 validate `content` không được rỗng sau khi `trim()` và không vượt quá `10000` ký tự, khớp giới hạn tối đa trong schema backend.
 
 ### 2. API news outlets
@@ -120,10 +121,12 @@ Ghi chu:
 
 | Phuong thuc | Endpoint backend                           | operationId                    | Tich hop frontend                               | Trang thai                         | Ghi chu                                                                                                                                                                    |
 | ----------- | ------------------------------------------ | ------------------------------ | ----------------------------------------------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET         | `/events`                                  | `getEvents`                    | `getEvents(searchParams)`                       | Da trien khai                      | Frontend co route `/events`, toolbar batch-enrich + search, sort, phan trang, va render schema moi voi `description`, mot badge `status`, `occurredAt`, `confidence`. |
-| GET         | `/events/{id}`                             | `getEvent`                     | `getEventById(id)`                              | Da trien khai                      | Detail da uu tien status, confidence, thoi diem, description va evidence-first; field ky thuat duoc dua xuong vung thong tin ky thuat. |
+| GET         | `/events`                                  | `getEvents`                    | `getEvents(searchParams)`                       | Da trien khai                      | Frontend co route `/events`, toolbar batch-enrich + batch derive market reactions + search, sort, phan trang, va render schema moi voi `description`, mot badge `status`, `occurredAt`, `confidence`. |
+| GET         | `/events/{id}`                             | `getEvent`                     | `getEventById(id)`                              | Da trien khai                      | Detail da uu tien status, confidence, thoi diem, description, evidence-first, va render section `marketReactions[]` sau bang chung. |
 | POST        | `/events/{id}/enrich-assets-and-themes`    | `enrichAssetsAndThemes`        | `enrichEventAssetsAndThemes(id)`                | Da trien khai                      | Co nut operator tren event detail; toast summary da dung `EventEnrichmentResult.outcome` enum `ENRICHMENT_*` + `ARCHIVED`. |
+| POST        | `/events/{id}/derive-market-reactions`     | `deriveMarketReactions`        | `deriveEventMarketReactions(id)`                | Da trien khai                      | Co nut operator tren event detail; toast summary dung `reactionCount`, `neutralCount`, va `message`. |
 | POST        | `/events/enrich-pending-assets-and-themes` | `enrichPendingAssetsAndThemes` | `enrichPendingEventAssetsAndThemes(batchSize?)` | Da trien khai                      | Co nut batch tren event list; batch summary da tinh ca `deferredCount`. |
+| POST        | `/events/derive-pending-market-reactions`  | `derivePendingMarketReactions` | `derivePendingEventMarketReactions(batchSize?)` | Da trien khai                      | Co nut batch tren event list; toast summary dung `selectedCount`, `processedCount`, `skippedCount`, `derivedCount`, `neutralCount`, `failedCount`. |
 
 Frontend lien quan:
 
@@ -135,10 +138,13 @@ Frontend lien quan:
 Ghi chu:
 
 - `event:read` dung de gate navigation, `/events`, `/events/{id}`, va cac link sang event detail.
-- Event enrich operators hien duoc gate bang `source-document:analyze` theo quyet dinh frontend hien tai; neu backend doi permission key trong tuong lai, can kiem tra lai.
+- Event enrich operators va market reaction derivation hien duoc gate bang `source-document:analyze` theo quyet dinh frontend hien tai; neu backend doi permission key trong tuong lai, can kiem tra lai.
 - `EventListResponse` va `EventResponse` hien dung `description` thay `summary`, `status` enum `ENRICHMENT_PENDING`, `ENRICHED`, `ENRICHMENT_NO_MATCH`, `ENRICHMENT_FAILED`, `ARCHIVED`, va khong con `active`, `enrichmentStatus`, `enrichmentAttemptedAt`, `enrichmentCompletedAt`, `enrichmentError`.
 - `EventEnrichmentResult.outcome` cung dung enum `ENRICHMENT_PENDING`, `ENRICHED`, `ENRICHMENT_NO_MATCH`, `ENRICHMENT_FAILED`, `ARCHIVED`.
 - Batch enrichment result cua `/events/enrich-pending-assets-and-themes` da co them field `deferredCount`; frontend da surface trong toast summary.
+- `EventResponse` co them `marketReactions[]` gom `id`, `assetId`, `assetName`, `assetSymbol`, `assetType`, `direction`, `timeHorizon`, `confidence`, `reasoning`, `observedAt`; FE da map DTO va render trong section `Tac dong thi truong` tren detail event.
+- Market reaction enums moi: `direction` gom `BULLISH`, `BEARISH`, `MIXED`, `NEUTRAL`; `timeHorizon` gom `INTRADAY`, `SHORT_TERM`, `MEDIUM_TERM`, `LONG_TERM`.
+- `EventMarketReactionDerivationResult` gom `eventId`, `eventTitle`, `eventCanonicalKey`, `reactionCount`, `neutralCount`, `message`; batch result gom `requestedBatchSize`, `selectedCount`, `processedCount`, `skippedCount`, `derivedCount`, `neutralCount`, `failedCount`, `results[]`.
 - Detail event hien sap xep `evidence` truoc `assets` va `themes`, con `id`, `slug`, `canonicalKey`, `createdDate`, `lastModifiedDate` nam trong vung thong tin ky thuat cap thap.
 
 ### 5. API market query
@@ -252,10 +258,10 @@ Ghi chú:
 
 | Phuong thuc | Endpoint backend                  | operationId           | Tich hop frontend               | Trang thai                         | Ghi chu                                                                 |
 | ----------- | --------------------------------- | --------------------- | ------------------------------- | ---------------------------------- | ----------------------------------------------------------------------- |
-| GET         | `/me/workspaces`                  | `getMyWorkspaces`     | `getMyWorkspaces(searchParams)` | Da tich hop | `WorkspaceResponse` frontend da dung `currentWorkspace` va khong con phu thuoc `defaultWorkspace`, `personal`, hoac `active`. |
+| GET         | `/me/workspaces`                  | `getMyWorkspaces`     | `getMyWorkspaces(searchParams)` | Da tich hop | `WorkspaceResponse` frontend dung `currentWorkspace` de xac dinh workspace hien tai. |
 | POST        | `/me/workspaces`                  | `createWorkspace`     | `createWorkspace(request)`      | Da trien khai                      | Chi xu ly metadata workspace.                                           |
 | PUT         | `/me/workspaces/{id}`             | `updateWorkspace`     | `updateWorkspace(id, request)`  | Da trien khai                      | Rename workspace.                                                       |
-| PATCH       | `/me/workspaces/{id}/set-current` | `setCurrentWorkspace` | `setCurrentWorkspace(id)`       | Da tich hop | Frontend da goi dung `/set-current`; permission gate tam thoi van giu theo key hien co cua FE cho den khi backend xac nhan key moi. |
+| PATCH       | `/me/workspaces/{id}/set-current` | `setCurrentWorkspace` | `setCurrentWorkspace(id)`       | Da tich hop | Frontend goi dung `/set-current` va gate bang permission chinh thuc `workspace:set-current`. |
 
 ### 14. API user
 
@@ -407,5 +413,4 @@ type ActionResult<T = void> =
 - `blogs`: create va response dung `visible`, update dung `isVisible`; frontend van can tiep tuc xu ly ky de tranh drift.
 - `ai-provider-configs`: frontend sanitize `apiKey` khoi response truoc khi dua xuong client.
 - `media`: da co trong spec nhung frontend chua co module.
-- `system-prompts`: frontend da co module quan ly rieng tai `/system-prompts`; enum van giu ca nhom legacy prompt types va nhom prompt moi cho news article, events, va market query.
 - `topics`: van ton tai tren frontend, nhung khong con nam trong snapshot API hien tai.

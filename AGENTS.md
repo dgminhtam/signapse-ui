@@ -95,6 +95,18 @@ app/(main)/[feature]/
 - `SelectItem` phải nằm trong `SelectGroup`
 - `DropdownMenuItem` phải nằm trong `DropdownMenuGroup`
 
+### Quy ước theme
+
+- Theme token trong `app/globals.css` và `tailwind.baseColor` trong `components.json` phải lấy shadcn neutral default làm baseline; không tự pha token global/sidebar để sửa một vấn đề cục bộ nếu chưa có proposal riêng
+- Khi cần tăng hierarchy, density hoặc spacing cho component cụ thể, ưu tiên composition/class ở nơi sử dụng hoặc shared app-level surface; không silently đổi `--primary`, `--accent`, `--sidebar-*` hoặc chart tokens làm lệch baseline shadcn
+
+### Quy ước sidebar
+
+- Sidebar hover, open/context và selected/current row color treatment phải theo shadcn neutral sidebar token model, ưu tiên `sidebar-accent` và `sidebar-accent-foreground`; không thêm custom active color token, không dùng global `accent`, và không ép selected row sang `sidebar-primary` nếu chưa có proposal riêng
+- Sidebar item density được xử lý ở `AppSidebar`: parent/top-level row và child row dùng height đồng bộ với input chuẩn khi cần tăng readability
+- Parent group đang mở/active phải thể hiện context nhưng không dùng màu mạnh hơn child item đang là màn hình hiện tại
+- Child list trong sidebar giữ left indent rõ ràng, mở rộng hợp lý về bên phải, và dùng `py-1` để có khoảng thở mà không tạo gap quá lớn giữa parent và children
+
 ### Bố cục trang chuẩn
 
 - Trang trong `app/(main)` dùng cardless workspace theo padding của layout cha; không bọc toàn bộ page bằng main `<Card>` chỉ để lặp lại breadcrumb title
@@ -103,19 +115,43 @@ app/(main)/[feature]/
 - Trang danh sách render trực tiếp shared toolbar, table và pagination surfaces; không thêm main `<Card>`, `<CardHeader>`, `<CardTitle>`, `<CardDescription>` và `<Separator />` bao ngoài
 - Trang chi tiết phải có nút quay lại phía trên nội dung chính; các panel bên trong có thể dùng `<Card>` khi giúp nhóm dữ liệu rõ hơn
 
+### Bố cục màn hình tạo mới và chỉnh sửa
+
+- Màn hình create/update đang active phải dùng focused form shell qua shared component ngoài `components/ui`, không render form trần trực tiếp trên workspace
+- Focused form shell là inner task surface có `rounded-xl`, border, `bg-card`, header gọn, body field và footer action zone; không phải main Card shell lặp lại breadcrumb title
+- Header trong form shell mô tả tác vụ cụ thể như tạo mới hoặc chỉnh sửa; breadcrumb vẫn là page identity chính
+- Body form dùng `FieldGroup`, `FieldSet` và `gap-*` nhất quán; không lồng thêm `Card` chỉ để lấy border, radius hoặc clipping cho từng section
+- Footer form phải chứa action chính và action phụ, tách khỏi body bằng border/subtle background; không để submit/cancel trong ad hoc action row sau `Separator`
+- Chọn width có chủ đích: form đơn giản dùng `max-w-xl`, form CRUD phổ biến dùng `max-w-2xl`, form dày hoặc có editor/prompt/API key/model picker dùng `max-w-3xl`
+- Form create có action hủy an toàn như quay về danh sách hoặc reset theo flow hiện có; form update phải có nút Hủy `variant="ghost"` reset về dữ liệu ban đầu hoặc luồng an toàn tương đương
+- Skeleton hoặc Suspense fallback của create/update phải mirror form shell gồm header, body và footer để tránh layout shift
+
 ### Bố cục toolbar
 
 - Bên trái: action chính như Tạo mới/Crawl và ô tìm kiếm
 - Bên phải: cụm view controls như filter tĩnh, sort và số mục mỗi trang
 - Page size selector thuộc cụm controls bên phải, không đặt lại trong footer phân trang
 - Dùng `flex-col sm:flex-row sm:justify-between` để responsive
+- Primary controls trong toolbar danh sách như search input, action chính, sort select và page size select phải dùng height mặc định của shadcn primitives (`Input`, `Button`, `SelectTrigger`); không tự thêm `h-*`, `min-h-*` hoặc `size="sm"` chỉ để chỉnh chiều cao
+- Sort select và page size select trong toolbar dùng disable-only pending feedback khi URL transition đang chạy; không render `<Spinner>` bên trong trigger hoặc bên cạnh select vì đây là view control phụ và có thể làm rối/shift layout
+- Page size selector của list dùng options chuẩn `10`, `20`, `50`, `100` và default `10`; chỉ override khi có lý do sản phẩm rõ ràng
+- Wrapper toolbar chỉ quản layout nội bộ, gap, alignment và responsive width; không bọc thêm card/chrome hoặc padding riêng làm lệch chiều cao so với search input
+- `AppListToolbar` không sở hữu margin ngoài phía dưới; khoảng cách từ toolbar/search controls đến bảng thuộc về `AppListTable` qua `mt-4`
+- Compact size vẫn được phép cho row actions, icon-only buttons, dialog controls và pagination navigation vì đây là các ngữ cảnh density riêng, không cần bằng chiều cao search toolbar
 
 ### Bề mặt bảng danh sách
 
 - Trang list dùng bảng phải bọc phần table trong shared surface ngoài `components/ui`, không lồng thêm `Card` chỉ để lấy border, radius hoặc clipping
+- Shared table surface `AppListTable` sở hữu khoảng cách mặc định phía trên bằng `mt-4`, để nhịp toolbar -> table và table -> pagination đều là 16px
+- Nếu `AppListTable` xuất hiện trong ngữ cảnh không có toolbar/list controls phía trước và top spacing là sai, chỉ override cục bộ bằng `className="mt-0"` sau khi có lý do layout rõ ràng
 - Header của bảng list phải dùng cùng một treatment nền, border và bo góc thông qua shared table surface; không tự pha trộn kiểu `plain`, `bg-muted` và shell riêng theo từng page
 - Empty state trong bảng phải dùng `<Empty>` bên trong một shared empty row của table, không tự đặt `py-12`, `py-24` hoặc wrapper rời theo từng trang
-- Skeleton của bảng list phải bám đúng shell, header treatment và footer của bảng thật; không dựng loading header bar khác với UI cuối
+- Skeleton của bảng list phải bám đúng shell, header treatment, spacing và footer của bảng thật; không dựng loading header bar khác với UI cuối hoặc dùng parent `gap-*` tạo double spacing giữa toolbar và table
+- Mỗi bảng list phải có chiến lược chiều rộng cột rõ ràng: cột nội dung chính được phép co giãn, còn metadata, trạng thái, timestamp và action phải có width hoặc min-width ổn định theo nhiệm vụ scan của từng cột
+- Không để nội dung dài từ backend làm nở bảng ngang trên desktop; cột chứa title, description, URL, slug, model id, prompt name, cron expression hoặc text dài phải dùng `min-w-0` ở wrapper phù hợp và chọn rõ `truncate`, `line-clamp-*`, `break-words` hoặc `whitespace-normal`
+- Vì `TableCell` mặc định `whitespace-nowrap`, cell chứa nội dung nhiều dòng hoặc long-form text phải override cục bộ bằng `whitespace-normal align-top`; không sửa mặc định trong `components/ui/table.tsx` nếu chưa có proposal riêng
+- Horizontal scroll của `Table` chỉ là fallback cho viewport hẹp hoặc bảng dữ liệu rất dày, không phải cơ chế chính để desktop list không vỡ layout
+- Skeleton của bảng list phải mirror cùng column width strategy với bảng thật; không để skeleton khai báo width khác với table runtime
 
 ### Yêu cầu UX
 
@@ -152,12 +188,18 @@ app/(main)/[feature]/
 
 - Review theo các rule trong file này, không dựa trên metadata Claude cũ
 - Kiểm tra trang danh sách dùng cardless workspace, toolbar đúng bố cục và loading feedback phù hợp
+- Kiểm tra primary toolbar controls dùng default shadcn height; đánh dấu `h-*`, `min-h-*` hoặc `size="sm"` trong toolbar chính là review finding nếu không có lý do sản phẩm rõ ràng
+- Kiểm tra list toolbar không tự có `mb-*`; table surface phải là nơi sở hữu `mt-4` giữa toolbar/search controls và bảng
 - Đánh dấu top-level main `<Card>` chỉ để lặp lại breadcrumb title và bọc toàn page là review finding
 - Kiểm tra bảng list dùng shared table surface nhất quán cho shell, header và empty state
+- Đánh dấu list table để nội dung dài làm nở ngang layout, thiếu chiến lược width cho cột chính/metadata, hoặc skeleton lệch width với bảng thật là review finding
+- Đánh dấu wrapper skeleton/list dùng `gap-*` gây double spacing giữa toolbar và `AppListTable` là review finding
 - Kiểm tra trang chi tiết có flow quay lại chuẩn và chỉ dùng `<Card>` cho inner surface có ý nghĩa
+- Kiểm tra create/update form dùng focused form shell với header, body, footer action zone và width phù hợp mật độ field
+- Đánh dấu form trần trên workspace, submit/cancel row tự dựng sau `Separator`, skeleton create/update lệch shell hoặc nested card chỉ để lấy border/radius là review finding
 - Kiểm tra mutation có xử lý kiểu `ActionResult`, có pending state, spinner và disable control đúng lúc
 - Kiểm tra action xóa có dùng `AlertDialog`
-- Đánh dấu `any`, skeleton lệch bố cục, main-card shell drift, table surface drift và UI copy không phải tiếng Việt là review finding
+- Đánh dấu `any`, skeleton lệch bố cục, toolbar control height drift, toolbar/table spacing drift, main-card shell drift, form-shell drift, table surface drift và UI copy không phải tiếng Việt là review finding
 
 ## Biến môi trường
 
@@ -188,6 +230,7 @@ Trước khi đánh dấu một feature là xong:
 - [ ] Có `error.tsx` để xử lý local server error
 - [ ] Search tuân thủ quy ước search list trong file này
 - [ ] Bảng list dùng shared table surface cho shell, header và empty state
+- [ ] Màn hình create/update dùng focused form shell với header, body và footer action zone
 - [ ] Toàn bộ UI text là tiếng Việt chuyên nghiệp
 - [ ] Nút Submit và Lưu có `Spinner` và trạng thái disabled
 - [ ] Action xóa dùng `AlertDialog`

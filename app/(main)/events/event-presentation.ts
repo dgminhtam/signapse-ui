@@ -1,10 +1,18 @@
 import {
   EVENT_ENRICHMENT_STATUS_LABELS,
+  EVENT_MARKET_REACTION_DIRECTION_LABELS,
+  EVENT_MARKET_REACTION_TIME_HORIZON_LABELS,
   EVENT_STATUS_LABELS,
   EventEnrichmentResult,
   EventEnrichmentStatus,
+  EventMarketReactionDerivationResult,
+  EventMarketReactionDirection,
+  EventMarketReactionTimeHorizon,
+  PendingEventMarketReactionDerivationBatchResult,
   PendingEventEnrichmentBatchResult,
 } from "@/app/lib/events/definitions"
+
+type BadgeVariant = "default" | "secondary" | "outline" | "destructive"
 
 export function getEventStatusLabel(status?: string) {
   if (!status) {
@@ -14,9 +22,7 @@ export function getEventStatusLabel(status?: string) {
   return EVENT_STATUS_LABELS[status] || status
 }
 
-export function getEventStatusVariant(
-  status?: string
-): "default" | "secondary" | "outline" | "destructive" {
+export function getEventStatusVariant(status?: string): BadgeVariant {
   switch (status) {
     case "ENRICHED":
       return "default"
@@ -41,7 +47,7 @@ export function getEventEnrichmentLabel(status?: EventEnrichmentStatus) {
 
 export function getEventEnrichmentVariant(
   status?: EventEnrichmentStatus
-): "secondary" | "outline" | "destructive" {
+): Exclude<BadgeVariant, "default"> {
   if (status === "FAILED") {
     return "destructive"
   }
@@ -124,4 +130,98 @@ export function buildPendingEventEnrichmentSummary(
   ]
 
   return `Đã chạy làm giàu cho sự kiện chờ: ${parts.join(", ")}.`
+}
+
+export function getEventMarketReactionDirectionLabel(
+  direction?: EventMarketReactionDirection
+) {
+  if (!direction) {
+    return "Chưa có"
+  }
+
+  return EVENT_MARKET_REACTION_DIRECTION_LABELS[direction]
+}
+
+export function getEventMarketReactionDirectionVariant(
+  direction?: EventMarketReactionDirection
+): BadgeVariant {
+  switch (direction) {
+    case "BULLISH":
+      return "default"
+    case "BEARISH":
+      return "destructive"
+    case "MIXED":
+      return "secondary"
+    case "NEUTRAL":
+    default:
+      return "outline"
+  }
+}
+
+export function getEventMarketReactionTimeHorizonLabel(
+  timeHorizon?: EventMarketReactionTimeHorizon
+) {
+  if (!timeHorizon) {
+    return "Chưa có"
+  }
+
+  return EVENT_MARKET_REACTION_TIME_HORIZON_LABELS[timeHorizon]
+}
+
+export function getEventMarketReactionTimeHorizonVariant(
+  timeHorizon?: EventMarketReactionTimeHorizon
+): Exclude<BadgeVariant, "destructive"> {
+  if (timeHorizon === "INTRADAY" || timeHorizon === "SHORT_TERM") {
+    return "secondary"
+  }
+
+  return "outline"
+}
+
+export function buildEventMarketReactionDerivationSummary(
+  result: EventMarketReactionDerivationResult
+) {
+  const parts = [
+    `tác động ${result.reactionCount ?? 0}`,
+    `trung lập ${result.neutralCount ?? 0}`,
+  ]
+
+  const message = result.message?.trim()
+
+  return [
+    `Đã suy luận tác động thị trường cho sự kiện: ${parts.join(", ")}.`,
+    message,
+  ]
+    .filter(Boolean)
+    .join(" ")
+}
+
+export function hasOnlyFailedPendingEventMarketReactionDerivation(
+  result: PendingEventMarketReactionDerivationBatchResult
+) {
+  return (
+    (result.failedCount ?? 0) > 0 &&
+    (result.derivedCount ?? 0) === 0 &&
+    (result.neutralCount ?? 0) === 0
+  )
+}
+
+export function buildPendingEventMarketReactionDerivationSummary(
+  result: PendingEventMarketReactionDerivationBatchResult
+) {
+  const selectedCount = result.selectedCount ?? 0
+
+  if (selectedCount === 0) {
+    return "Không có sự kiện nào đang chờ suy luận tác động thị trường trong lô hiện tại."
+  }
+
+  const parts = [
+    `đã xử lý ${result.processedCount ?? 0}/${selectedCount}`,
+    `có tác động ${result.derivedCount ?? 0}`,
+    `trung lập ${result.neutralCount ?? 0}`,
+    `bỏ qua ${result.skippedCount ?? 0}`,
+    `lỗi ${result.failedCount ?? 0}`,
+  ]
+
+  return `Đã chạy suy luận tác động thị trường cho sự kiện chờ: ${parts.join(", ")}.`
 }

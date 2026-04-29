@@ -5,7 +5,7 @@ The authenticated home page is currently empty, so users land in the application
 ## What Changes
 
 - Replace the empty protected home page at `/` with a Vietnamese "Tổng quan không gian làm việc" page.
-- Show the current workspace as the primary context using backend `currentWorkspace` semantics instead of legacy `defaultWorkspace` wording.
+- Show the current workspace as the primary context using backend `currentWorkspace` semantics.
 - Add concise overview cards for the active workspace identity, tracked assets/watchlist status, and key technical timestamps without overloading the first screen.
 - Provide clear primary actions from the overview, including editing tracked assets through the existing workspace watchlist editor when permissions allow.
 - Add professional empty/blocked states for users with no workspace, no workspace read permission, or no tracked assets.

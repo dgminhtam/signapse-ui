@@ -7,6 +7,11 @@ import { toast } from "sonner"
 import * as z from "zod"
 
 import { createCronjob } from "@/app/api/cronjobs/action"
+import {
+  AppFormShell,
+  AppFormShellBody,
+  AppFormShellFooter,
+} from "@/components/app-form-shell"
 import { Button } from "@/components/ui/button"
 import {
   Field,
@@ -20,27 +25,26 @@ import {
   InputGroupAddon,
   InputGroupText,
 } from "@/components/ui/input-group"
-import { Separator } from "@/components/ui/separator"
 import { Spinner } from "@/components/ui/spinner"
 
 export const createCronjobSchema = z.object({
   jobName: z
     .string()
-    .min(1, "Job name cannot be empty")
-    .max(255, "Job name is too long"),
+    .min(1, "Tên tác vụ là bắt buộc")
+    .max(255, "Tên tác vụ quá dài"),
   jobGroup: z
     .string()
-    .min(1, "Job group cannot be empty")
-    .max(255, "Job group is too long"),
+    .min(1, "Nhóm tác vụ là bắt buộc")
+    .max(255, "Nhóm tác vụ quá dài"),
   jobClass: z
     .string()
-    .min(1, "Job class cannot be empty")
-    .max(255, "Job class is too long"),
+    .min(1, "Lớp xử lý là bắt buộc")
+    .max(255, "Lớp xử lý quá dài"),
   expression: z
     .string()
-    .min(1, "Cron expression cannot be empty")
-    .max(100, "Cron expression is too long"),
-  description: z.string().max(500, "Description is too long").optional(),
+    .min(1, "Biểu thức cron là bắt buộc")
+    .max(100, "Biểu thức cron quá dài"),
+  description: z.string().max(500, "Mô tả quá dài").optional(),
 })
 
 export type CreateCronjobRequest = z.infer<typeof createCronjobSchema>
@@ -61,7 +65,7 @@ export function CreateCronjobForm() {
   async function onSubmit(data: CreateCronjobRequest) {
     const result = await createCronjob(data)
     if (result.success) {
-      toast.success("Cronjob created successfully")
+      toast.success("Đã tạo tác vụ định kỳ thành công.")
 
       form.reset({
         jobName: "",
@@ -74,25 +78,31 @@ export function CreateCronjobForm() {
       router.push("/cronjobs")
       router.refresh()
     } else {
-      toast.error(result.error || "An unexpected error occurred. Please try again.")
+      toast.error(result.error || "Đã có lỗi không mong muốn xảy ra. Vui lòng thử lại.")
     }
   }
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
-      <FieldGroup>
+    <AppFormShell
+      title="Tạo tác vụ định kỳ"
+      description="Khai báo lớp xử lý, nhóm tác vụ và lịch chạy cron."
+      width="md"
+    >
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <AppFormShellBody>
+          <FieldGroup>
         <Controller
           name="jobName"
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
             <FieldLabel htmlFor="jobName">
-                Job Name <span className="text-destructive">*</span>
+                Tên tác vụ <span className="text-destructive">*</span>
               </FieldLabel>
               <Input
                 {...field}
                 id="jobName"
-                placeholder="Enter job name"
+                placeholder="Ví dụ: ingest-market-news"
                 autoComplete="off"
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -106,12 +116,12 @@ export function CreateCronjobForm() {
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
             <FieldLabel htmlFor="jobGroup">
-                Job Group <span className="text-destructive">*</span>
+                Nhóm tác vụ <span className="text-destructive">*</span>
               </FieldLabel>
               <Input
                 {...field}
                 id="jobGroup"
-                placeholder="Enter job group"
+                placeholder="Ví dụ: ingestion"
                 autoComplete="off"
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -125,12 +135,12 @@ export function CreateCronjobForm() {
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
             <FieldLabel htmlFor="jobClass">
-                Job Class <span className="text-destructive">*</span>
+                Lớp xử lý <span className="text-destructive">*</span>
               </FieldLabel>
               <Input
                 {...field}
                 id="jobClass"
-                placeholder="Enter job class"
+                placeholder="Ví dụ: com.signapse.jobs.NewsIngestJob"
                 autoComplete="off"
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -144,7 +154,7 @@ export function CreateCronjobForm() {
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
             <FieldLabel htmlFor="expression">
-                Cron Expression <span className="text-destructive">*</span>
+                Biểu thức cron <span className="text-destructive">*</span>
               </FieldLabel>
               <InputGroup>
                 <Input
@@ -156,7 +166,7 @@ export function CreateCronjobForm() {
                 />
                 <InputGroupAddon>
                   <InputGroupText className="text-xs text-muted-foreground">
-                    example: 0 0 * * * (daily at 00:00)
+                    Ví dụ: 0 0 * * * (chạy hằng ngày lúc 00:00)
                   </InputGroupText>
                 </InputGroupAddon>
               </InputGroup>
@@ -170,39 +180,41 @@ export function CreateCronjobForm() {
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor="description">Description</FieldLabel>
+            <FieldLabel htmlFor="description">Mô tả</FieldLabel>
               <Input
                 {...field}
                 id="description"
-                placeholder="Enter job description (optional)"
+                placeholder="Mô tả ngắn về mục đích của tác vụ"
                 autoComplete="off"
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
         />
-      </FieldGroup>
+          </FieldGroup>
+        </AppFormShellBody>
 
-      <Separator className="my-8" />
-
+        <AppFormShellFooter>
       <div className="flex gap-4">
         <Button disabled={form.formState.isSubmitting} type="submit">
           {form.formState.isSubmitting ? (
             <>
-              <Spinner className="size-4 mr-2" /> Creating...
+              <Spinner className="mr-2 size-4" data-icon="inline-start" /> Đang tạo...
             </>
           ) : (
-            "Create Cronjob"
+            "Tạo tác vụ"
           )}
         </Button>
         <Button
           type="button"
           variant="ghost"
-          onClick={() => window.history.back()}
+          onClick={() => router.push("/cronjobs")}
         >
-          Cancel
+          Hủy
         </Button>
       </div>
-    </form>
+        </AppFormShellFooter>
+      </form>
+    </AppFormShell>
   )
 }

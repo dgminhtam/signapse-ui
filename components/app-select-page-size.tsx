@@ -16,7 +16,7 @@ interface AppSelectPageSizeProps {
 
 export function AppSelectPageSize({
   className,
-  defaultSize = 12,
+  defaultSize = 10,
   label,
   options = DEFAULT_PAGE_SIZE_OPTIONS,
   showLabel = true,

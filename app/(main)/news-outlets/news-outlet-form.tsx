@@ -15,6 +15,11 @@ import {
   NewsOutletRequest,
   NewsOutletResponse,
 } from "@/app/lib/news-outlets/definitions"
+import {
+  AppFormShell,
+  AppFormShellBody,
+  AppFormShellFooter,
+} from "@/components/app-form-shell"
 import { Button } from "@/components/ui/button"
 import {
   Field,
@@ -26,7 +31,6 @@ import {
   FieldSet,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
 import { Spinner } from "@/components/ui/spinner"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
@@ -123,7 +127,17 @@ export function NewsOutletForm({ initialData }: NewsOutletFormProps) {
   }
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-8">
+    <AppFormShell
+      title={isEdit ? "Chỉnh sửa nguồn tin" : "Tạo nguồn tin"}
+      description={
+        isEdit
+          ? "Cập nhật thông tin nhận diện và trạng thái sử dụng của nguồn tin."
+          : "Khai báo nguồn tin để hệ thống có thể ingest và xử lý nội dung."
+      }
+      width="md"
+    >
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <AppFormShellBody className="flex flex-col gap-8">
       {isEdit ? (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <div className="rounded-lg border border-border bg-muted/20 p-4">
@@ -260,7 +274,7 @@ export function NewsOutletForm({ initialData }: NewsOutletFormProps) {
         </FieldGroup>
       </FieldSet>
 
-      <Separator />
+      <div className="border-t" />
 
       <FieldSet>
         <FieldLegend>Trang thai</FieldLegend>
@@ -288,8 +302,11 @@ export function NewsOutletForm({ initialData }: NewsOutletFormProps) {
         </FieldGroup>
       </FieldSet>
 
-      <Separator />
+      <div className="border-t" />
 
+        </AppFormShellBody>
+
+        <AppFormShellFooter>
       <div className="flex gap-4">
         <Button disabled={isSubmitting} type="submit">
           {isSubmitting ? (
@@ -312,6 +329,8 @@ export function NewsOutletForm({ initialData }: NewsOutletFormProps) {
           Huy
         </Button>
       </div>
-    </form>
+        </AppFormShellFooter>
+      </form>
+    </AppFormShell>
   )
 }

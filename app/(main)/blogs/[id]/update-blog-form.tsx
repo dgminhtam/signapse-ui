@@ -8,6 +8,11 @@ import * as z from "zod"
 
 import { updateBlog } from "@/app/api/blogs/action"
 import { BlogPost } from "@/app/lib/blogs/definitions"
+import {
+  AppFormShell,
+  AppFormShellBody,
+  AppFormShellFooter,
+} from "@/components/app-form-shell"
 import { Button } from "@/components/ui/button"
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
@@ -17,7 +22,6 @@ import {
   InputGroupText,
   InputGroupTextarea,
 } from "@/components/ui/input-group"
-import { Separator } from "@/components/ui/separator"
 import { Spinner } from "@/components/ui/spinner"
 import { Switch } from "@/components/ui/switch"
 import { useRouter } from "next/navigation"
@@ -51,15 +55,16 @@ interface UpdateBlogFormProps {
 
 export function UpdateBlogForm({ blog }: UpdateBlogFormProps) {
   const router = useRouter()
+  const initialFormValues: UpdateBlogRequest = {
+    title: blog.title,
+    slug: blog.slug,
+    content: blog.content,
+    shortDescription: blog.shortDescription || "",
+    isVisible: blog.isVisible,
+  }
   const form = useForm<UpdateBlogRequest>({
     resolver: zodResolver(updateBlogSchema as any),
-    defaultValues: {
-      title: blog.title,
-      slug: blog.slug,
-      content: blog.content,
-      shortDescription: blog.shortDescription || "",
-      isVisible: blog.isVisible,
-    },
+    defaultValues: initialFormValues,
   })
 
   // --- AUTO GENERATE SLUG ---
@@ -93,8 +98,14 @@ export function UpdateBlogForm({ blog }: UpdateBlogFormProps) {
   }
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
-      <FieldGroup>
+    <AppFormShell
+      title="Chỉnh sửa bài viết"
+      description="Cập nhật nội dung, slug và trạng thái hiển thị của bài viết."
+      width="lg"
+    >
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <AppFormShellBody>
+          <FieldGroup>
       {/* Tiêu đề */}
       <Controller
         name="title"
@@ -210,9 +221,10 @@ export function UpdateBlogForm({ blog }: UpdateBlogFormProps) {
         )}
       />
 
-      </FieldGroup>
-      <Separator className="my-8" />
+          </FieldGroup>
+        </AppFormShellBody>
 
+        <AppFormShellFooter>
       <div className="flex gap-4">
         <Button disabled={form.formState.isSubmitting} type="submit">
           {form.formState.isSubmitting ? (
@@ -225,12 +237,14 @@ export function UpdateBlogForm({ blog }: UpdateBlogFormProps) {
         </Button>
         <Button
           type="button"
-          variant="outline"
-          onClick={() => window.history.back()}
+          variant="ghost"
+          onClick={() => form.reset(initialFormValues)}
         >
           Hủy
         </Button>
       </div>
-    </form>
+        </AppFormShellFooter>
+      </form>
+    </AppFormShell>
   )
 }

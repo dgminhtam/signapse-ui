@@ -1,11 +1,13 @@
+import { Suspense } from "react"
+import { notFound } from "next/navigation"
+
 import { getCronjobById } from "@/app/api/cronjobs/action"
 import { hasPermission } from "@/app/lib/permissions"
 import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { AccessDenied } from "@/components/access-denied"
-import { Separator } from "@/components/ui/separator"
+import { AppFormShellSkeleton } from "@/components/app-form-shell"
 import { Skeleton } from "@/components/ui/skeleton"
-import { notFound } from "next/navigation"
-import { Suspense } from "react"
+
 import { UpdateCronjobForm } from "./update-cronjob-form"
 
 interface PageProps {
@@ -48,38 +50,25 @@ async function FetchCronjobData({ id }: { id: number }) {
 
 function UpdateCronjobSkeleton() {
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-2">
-        <Skeleton className="h-4 w-24" />
-        <Skeleton className="h-10 w-full" />
+    <AppFormShellSkeleton width="md">
+      <div className="flex flex-col gap-2 px-6 pt-6">
+        <Skeleton className="h-6 w-56" />
+        <Skeleton className="h-4 w-full max-w-md" />
       </div>
 
-      <div className="flex flex-col gap-2">
-        <Skeleton className="h-4 w-20" />
-        <Skeleton className="h-10 w-full" />
+      <div className="flex flex-col gap-7 px-6 py-6">
+        {Array.from({ length: 5 }).map((_, index) => (
+          <div key={index} className="flex flex-col gap-2">
+            <Skeleton className="h-4 w-28" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        ))}
       </div>
 
-      <div className="flex flex-col gap-2">
-        <Skeleton className="h-4 w-24" />
-        <Skeleton className="h-10 w-full" />
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Skeleton className="h-4 w-32" />
-        <Skeleton className="h-10 w-full" />
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Skeleton className="h-4 w-20" />
-        <Skeleton className="h-10 w-full" />
-      </div>
-
-      <Separator />
-
-      <div className="flex gap-4">
-        <Skeleton className="h-10 w-32" />
+      <div className="flex justify-end gap-3 border-t bg-muted/20 px-6 py-4">
         <Skeleton className="h-10 w-24" />
+        <Skeleton className="h-10 w-32" />
       </div>
-    </div>
+    </AppFormShellSkeleton>
   )
 }

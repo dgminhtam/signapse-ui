@@ -83,7 +83,7 @@ export default async function Layout({
                     currentWorkspace={currentWorkspace}
                     canCreateWorkspace={permissions.includes("workspace:create")}
                     canRenameWorkspace={permissions.includes("workspace:update")}
-                    canSetCurrentWorkspace={permissions.includes("workspace:set-default")}
+                    canSetCurrentWorkspace={permissions.includes("workspace:set-current")}
                     canReadAsset={permissions.includes("asset:read")}
                     canReadWatchlist={permissions.includes("watchlist:read")}
                     canCreateWatchlist={permissions.includes("watchlist:create")}

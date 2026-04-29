@@ -20,7 +20,7 @@ function AppListTable({
     <div
       data-slot="app-list-table"
       className={cn(
-        "overflow-hidden rounded-md border border-border bg-card",
+        "mt-4 overflow-hidden rounded-xl border border-border bg-card",
         className
       )}
       {...props}

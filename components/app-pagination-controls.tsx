@@ -18,7 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
 
 import {
@@ -78,9 +77,9 @@ export function PaginationPageSizeSelect({
         disabled={isPending}
       >
         <SelectTrigger
-          size="sm"
           className={cn("w-full sm:w-[120px]", triggerClassName)}
           aria-label={label}
+          aria-busy={isPending}
         >
           <SelectValue />
         </SelectTrigger>
@@ -94,7 +93,6 @@ export function PaginationPageSizeSelect({
           </SelectGroup>
         </SelectContent>
       </Select>
-      {isPending ? <Spinner className="size-4 text-muted-foreground" /> : null}
     </div>
   )
 }
@@ -213,7 +211,7 @@ export function AppPaginationControls<T>({
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 rounded-xl border border-border/60 bg-muted/20 px-4 py-3",
+        "flex flex-col gap-3 rounded-xl border bg-muted/20 px-4 py-3",
         className
       )}
     >

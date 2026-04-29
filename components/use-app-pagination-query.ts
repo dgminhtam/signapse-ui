@@ -9,7 +9,7 @@ const isPositiveInteger = (value: number) =>
   Number.isFinite(value) && Number.isInteger(value) && value > 0
 
 export function useAppPaginationQuery({
-  defaultSize = 12,
+  defaultSize = 10,
   totalPages,
 }: {
   defaultSize?: number

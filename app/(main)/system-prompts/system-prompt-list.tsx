@@ -132,12 +132,18 @@ export function SystemPromptList({ promptPage }: SystemPromptListProps) {
         <Table>
           <TableHeader>
             <AppListTableHeaderRow>
-              <AppListTableHead>Loại prompt</AppListTableHead>
-              <AppListTableHead>Nhóm workflow</AppListTableHead>
-              <AppListTableHead>Độ dài</AppListTableHead>
-              <AppListTableHead>Cập nhật</AppListTableHead>
-              <AppListTableHead>Tạo lúc</AppListTableHead>
-              <AppListTableHead className="text-right">Thao tác</AppListTableHead>
+              <AppListTableHead className="w-[34%]">
+                Loại prompt
+              </AppListTableHead>
+              <AppListTableHead className="w-44">
+                Nhóm workflow
+              </AppListTableHead>
+              <AppListTableHead className="w-28">Độ dài</AppListTableHead>
+              <AppListTableHead className="w-40">Cập nhật</AppListTableHead>
+              <AppListTableHead className="w-40">Tạo lúc</AppListTableHead>
+              <AppListTableHead className="w-28 text-right">
+                Thao tác
+              </AppListTableHead>
             </AppListTableHeaderRow>
           </TableHeader>
           <TableBody>
@@ -147,40 +153,42 @@ export function SystemPromptList({ promptPage }: SystemPromptListProps) {
                   key={prompt.promptType}
                   className="border-border transition-colors hover:bg-muted/50"
                 >
-                  <TableCell>
-                    <div className="flex flex-col gap-1">
+                  <TableCell className="align-top whitespace-normal">
+                    <div className="flex min-w-0 flex-col gap-1">
                       {canUpdate ? (
                         <Link
                           href={getPromptHref(prompt.promptType)}
-                          className="font-medium text-foreground hover:underline"
+                          className="line-clamp-1 font-medium break-words text-foreground hover:underline"
                         >
                           {getSystemPromptTypeLabel(prompt.promptType)}
                         </Link>
                       ) : (
-                        <span className="font-medium text-foreground">
+                        <span className="line-clamp-1 font-medium break-words text-foreground">
                           {getSystemPromptTypeLabel(prompt.promptType)}
                         </span>
                       )}
-                      <span className="font-mono text-xs text-muted-foreground">
+                      <span className="truncate font-mono text-xs text-muted-foreground">
                         {prompt.promptType}
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">
-                      {getSystemPromptWorkflowGroup(prompt.promptType)}
+                  <TableCell className="w-44 max-w-[11rem]">
+                    <Badge variant="secondary" className="max-w-full">
+                      <span className="truncate">
+                        {getSystemPromptWorkflowGroup(prompt.promptType)}
+                      </span>
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
+                  <TableCell className="w-28 text-sm text-muted-foreground">
                     {formatSystemPromptContentLength(prompt.content)}
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground tabular-nums">
+                  <TableCell className="w-40 text-sm text-muted-foreground tabular-nums">
                     {formatDateTime(prompt.lastModifiedDate)}
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground tabular-nums">
+                  <TableCell className="w-40 text-sm text-muted-foreground tabular-nums">
                     {formatDateTime(prompt.createdDate)}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="w-28">
                     <div className="flex justify-end gap-1">
                       {canUpdate ? (
                         <Button
@@ -191,11 +199,15 @@ export function SystemPromptList({ promptPage }: SystemPromptListProps) {
                         >
                           <Link href={getPromptHref(prompt.promptType)}>
                             <Edit2 data-icon="inline-start" />
-                            <span className="sr-only">Chỉnh sửa prompt hệ thống</span>
+                            <span className="sr-only">
+                              Chỉnh sửa prompt hệ thống
+                            </span>
                           </Link>
                         </Button>
                       ) : null}
-                      {canDelete ? <DeletePromptButton prompt={prompt} /> : null}
+                      {canDelete ? (
+                        <DeletePromptButton prompt={prompt} />
+                      ) : null}
                     </div>
                   </TableCell>
                 </TableRow>
@@ -208,7 +220,8 @@ export function SystemPromptList({ promptPage }: SystemPromptListProps) {
                   </EmptyMedia>
                   <EmptyTitle>Chưa có prompt hệ thống</EmptyTitle>
                   <EmptyDescription>
-                    Thêm prompt đầu tiên để cấu hình các workflow AI của hệ thống.
+                    Thêm prompt đầu tiên để cấu hình các workflow AI của hệ
+                    thống.
                   </EmptyDescription>
                 </EmptyHeader>
               </AppListTableEmptyState>
@@ -260,8 +273,8 @@ function DeletePromptButton({ prompt }: { prompt: SystemPromptResponse }) {
           <AlertDialogTitle>Xóa prompt hệ thống?</AlertDialogTitle>
           <AlertDialogDescription>
             Hành động này không thể hoàn tác từ giao diện. Prompt{" "}
-            <strong>{promptLabel}</strong> có thể đang ảnh hưởng trực tiếp tới các
-            workflow AI, vì vậy hãy chắc chắn bạn đã có phương án thay thế.
+            <strong>{promptLabel}</strong> có thể đang ảnh hưởng trực tiếp tới
+            các workflow AI, vì vậy hãy chắc chắn bạn đã có phương án thay thế.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

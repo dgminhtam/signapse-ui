@@ -48,7 +48,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
@@ -103,10 +102,16 @@ export function BlogListPage({ blogPage }: BlogListProps) {
         <Table>
           <TableHeader>
             <AppListTableHeaderRow>
-              <AppListTableHead>Tiêu đề</AppListTableHead>
-              <AppListTableHead className="text-center">Hiển thị</AppListTableHead>
-              <AppListTableHead className="text-center">Tạo lúc</AppListTableHead>
-              <AppListTableHead className="text-center">Thao tác</AppListTableHead>
+              <AppListTableHead className="w-[58%]">Tiêu đề</AppListTableHead>
+              <AppListTableHead className="w-32 text-center">
+                Hiển thị
+              </AppListTableHead>
+              <AppListTableHead className="w-40 text-center">
+                Tạo lúc
+              </AppListTableHead>
+              <AppListTableHead className="w-28 text-center">
+                Thao tác
+              </AppListTableHead>
             </AppListTableHeaderRow>
           </TableHeader>
           <TableBody>
@@ -116,14 +121,20 @@ export function BlogListPage({ blogPage }: BlogListProps) {
                   key={blog.id}
                   className="border-border transition-colors hover:bg-muted/50"
                 >
-                  <TableCell className="font-medium text-foreground">
-                    <Link href={`/blogs/${blog.id}`}>{blog.title}</Link>
-                    <br />
-                    <span className="block max-w-[300px] truncate text-xs text-muted-foreground">
-                      {blog.shortDescription}
-                    </span>
+                  <TableCell className="align-top font-medium whitespace-normal text-foreground">
+                    <div className="flex min-w-0 flex-col gap-1">
+                      <Link
+                        href={`/blogs/${blog.id}`}
+                        className="line-clamp-1 break-words"
+                      >
+                        {blog.title}
+                      </Link>
+                      <span className="line-clamp-2 text-xs break-words text-muted-foreground">
+                        {blog.shortDescription}
+                      </span>
+                    </div>
                   </TableCell>
-                  <TableCell className="text-center">
+                  <TableCell className="w-32 text-center">
                     {blog.isVisible ? (
                       <Badge variant="default" className="gap-1">
                         <Eye />
@@ -136,12 +147,12 @@ export function BlogListPage({ blogPage }: BlogListProps) {
                       </Badge>
                     )}
                   </TableCell>
-                  <TableCell className="text-center text-muted-foreground">
+                  <TableCell className="w-40 text-center text-muted-foreground">
                     {blog.createdDate
                       ? format(new Date(blog.createdDate), "dd/MM/yyyy HH:mm")
                       : "-"}
                   </TableCell>
-                  <TableCell className="text-center">
+                  <TableCell className="w-28 text-center">
                     <div className="flex items-center justify-center gap-2">
                       {canUpdateBlog ? (
                         <Button
@@ -219,7 +230,8 @@ function DeleteBlogButton({ id }: { id: number }) {
         <AlertDialogHeader>
           <AlertDialogTitle>Bạn có chắc chắn muốn xóa?</AlertDialogTitle>
           <AlertDialogDescription>
-            Hành động này không thể hoàn tác. Bài viết đã chọn sẽ bị xóa vĩnh viễn.
+            Hành động này không thể hoàn tác. Bài viết đã chọn sẽ bị xóa vĩnh
+            viễn.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

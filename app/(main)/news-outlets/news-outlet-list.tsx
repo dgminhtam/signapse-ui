@@ -65,7 +65,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
@@ -128,17 +127,13 @@ export function NewsOutletListPage({ newsOutletPage }: NewsOutletListProps) {
         <Table>
           <TableHeader>
             <AppListTableHeaderRow>
-              <AppListTableHead>
-                Nguồn tin
-              </AppListTableHead>
-              <AppListTableHead>Slug</AppListTableHead>
-              <AppListTableHead>
-                Tạo lúc
-              </AppListTableHead>
-              <AppListTableHead className="text-center">
+              <AppListTableHead className="w-[46%]">Nguồn tin</AppListTableHead>
+              <AppListTableHead className="w-44">Slug</AppListTableHead>
+              <AppListTableHead className="w-40">Tạo lúc</AppListTableHead>
+              <AppListTableHead className="w-28 text-center">
                 Kích hoạt
               </AppListTableHead>
-              <AppListTableHead className="text-center">
+              <AppListTableHead className="w-28 text-center">
                 Thao tác
               </AppListTableHead>
             </AppListTableHeaderRow>
@@ -150,17 +145,17 @@ export function NewsOutletListPage({ newsOutletPage }: NewsOutletListProps) {
                   key={newsOutlet.id}
                   className="border-border transition-colors hover:bg-muted/50"
                 >
-                  <TableCell className="font-medium text-foreground">
-                    <div className="flex flex-col gap-2">
+                  <TableCell className="align-top font-medium whitespace-normal text-foreground">
+                    <div className="flex min-w-0 flex-col gap-2">
                       <Link
                         href={`/news-outlets/${newsOutlet.id}`}
-                        className="hover:underline"
+                        className="line-clamp-1 break-words hover:underline"
                       >
                         {newsOutlet.name}
                       </Link>
 
                       {newsOutlet.description ? (
-                        <p className="max-w-xl text-sm text-muted-foreground">
+                        <p className="line-clamp-2 text-sm break-words text-muted-foreground">
                           {newsOutlet.description}
                         </p>
                       ) : null}
@@ -169,11 +164,13 @@ export function NewsOutletListPage({ newsOutletPage }: NewsOutletListProps) {
                         href={newsOutlet.homepageUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary"
+                        className="flex min-w-0 items-center gap-1 text-xs text-muted-foreground hover:text-primary"
                       >
-                        <Globe className="h-3 w-3" />
-                        Trang chủ: {newsOutlet.homepageUrl}
-                        <ExternalLink className="h-2 w-2" />
+                        <Globe className="h-3 w-3 shrink-0" />
+                        <span className="truncate">
+                          Trang chủ: {newsOutlet.homepageUrl}
+                        </span>
+                        <ExternalLink className="h-2 w-2 shrink-0" />
                       </a>
 
                       {newsOutlet.rssUrl ? (
@@ -181,27 +178,29 @@ export function NewsOutletListPage({ newsOutletPage }: NewsOutletListProps) {
                           href={newsOutlet.rssUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary"
+                          className="flex min-w-0 items-center gap-1 text-xs text-muted-foreground hover:text-primary"
                         >
-                          <Rss className="h-3 w-3" />
-                          RSS: {newsOutlet.rssUrl}
-                          <ExternalLink className="h-2 w-2" />
+                          <Rss className="h-3 w-3 shrink-0" />
+                          <span className="truncate">
+                            RSS: {newsOutlet.rssUrl}
+                          </span>
+                          <ExternalLink className="h-2 w-2 shrink-0" />
                         </a>
                       ) : null}
                     </div>
                   </TableCell>
 
-                  <TableCell>
-                    <code className="rounded bg-muted px-2 py-1 text-xs">
+                  <TableCell className="w-44 max-w-[11rem]">
+                    <code className="block truncate rounded bg-muted px-2 py-1 text-xs">
                       {newsOutlet.slug || "Tự sinh từ tên"}
                     </code>
                   </TableCell>
 
-                  <TableCell className="text-sm text-muted-foreground">
+                  <TableCell className="w-40 text-sm text-muted-foreground">
                     {formatDateTime(newsOutlet.createdDate)}
                   </TableCell>
 
-                  <TableCell className="text-center">
+                  <TableCell className="w-28 text-center">
                     <div className="flex justify-center">
                       <ToggleNewsOutletActiveSwitch
                         id={newsOutlet.id}
@@ -211,7 +210,7 @@ export function NewsOutletListPage({ newsOutletPage }: NewsOutletListProps) {
                     </div>
                   </TableCell>
 
-                  <TableCell className="text-center">
+                  <TableCell className="w-28 text-center">
                     <div className="flex items-center justify-center gap-1">
                       {canUpdateNewsOutlet ? (
                         <Button
@@ -245,8 +244,8 @@ export function NewsOutletListPage({ newsOutletPage }: NewsOutletListProps) {
                   </EmptyMedia>
                   <EmptyTitle>Chưa có nguồn tin</EmptyTitle>
                   <EmptyDescription>
-                    Thêm nguồn tin đầu tiên để bắt đầu quản lý danh sách nội dung theo
-                    contract mới của backend.
+                    Thêm nguồn tin đầu tiên để bắt đầu quản lý danh sách nội
+                    dung theo contract mới của backend.
                   </EmptyDescription>
                 </EmptyHeader>
               </AppListTableEmptyState>
@@ -282,7 +281,9 @@ function ToggleNewsOutletActiveSwitch({
       const result = await toggleNewsOutletActive(id)
 
       if (result.success) {
-        toast.success(active ? "Đã tạm dừng nguồn tin." : "Đã kích hoạt nguồn tin.")
+        toast.success(
+          active ? "Đã tạm dừng nguồn tin." : "Đã kích hoạt nguồn tin."
+        )
         router.refresh()
       } else {
         toast.error(result.error)
@@ -292,19 +293,17 @@ function ToggleNewsOutletActiveSwitch({
 
   return (
     <div className="flex items-center gap-2">
-      <Switch checked={active} onCheckedChange={handleToggle} disabled={isDisabled} />
+      <Switch
+        checked={active}
+        onCheckedChange={handleToggle}
+        disabled={isDisabled}
+      />
       {isPending ? <Spinner className="size-3" /> : null}
     </div>
   )
 }
 
-function DeleteNewsOutletButton({
-  id,
-  name,
-}: {
-  id: number
-  name: string
-}) {
+function DeleteNewsOutletButton({ id, name }: { id: number; name: string }) {
   const [isPending, startTransition] = useTransition()
   const [open, setOpen] = useState(false)
   const router = useRouter()
@@ -339,8 +338,8 @@ function DeleteNewsOutletButton({
         <AlertDialogHeader>
           <AlertDialogTitle>Bạn có chắc chắn muốn xóa?</AlertDialogTitle>
           <AlertDialogDescription>
-            Hành động này không thể hoàn tác. Nguồn tin <strong>{name}</strong> sẽ
-            bị xóa vĩnh viễn khỏi hệ thống.
+            Hành động này không thể hoàn tác. Nguồn tin <strong>{name}</strong>{" "}
+            sẽ bị xóa vĩnh viễn khỏi hệ thống.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

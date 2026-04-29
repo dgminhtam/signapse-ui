@@ -3,10 +3,7 @@
 import { Shield, SquarePen } from "lucide-react"
 import { useState } from "react"
 
-import {
-  PermissionResponse,
-  RoleResponse,
-} from "@/app/lib/roles/definitions"
+import { PermissionResponse, RoleResponse } from "@/app/lib/roles/definitions"
 import {
   AppListTable,
   AppListTableEmptyState,
@@ -25,7 +22,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
@@ -39,48 +35,67 @@ interface RoleListPageProps {
 
 export function RoleListPage({ roles, permissions }: RoleListPageProps) {
   const [selectedRole, setSelectedRole] = useState<RoleResponse | null>(null)
-  const [selectedPermissionKeys, setSelectedPermissionKeys] = useState<string[]>([])
+  const [selectedPermissionKeys, setSelectedPermissionKeys] = useState<
+    string[]
+  >([])
 
   const handleEditRole = (role: RoleResponse) => {
     setSelectedRole(role)
-    setSelectedPermissionKeys((role.permissions ?? []).map((permission) => permission.key))
+    setSelectedPermissionKeys(
+      (role.permissions ?? []).map((permission) => permission.key)
+    )
   }
 
   return (
     <>
-      <AppListTable>
+      <AppListTable className="mt-0">
         <Table>
           <TableHeader>
             <AppListTableHeaderRow>
-              <AppListTableHead>Vai trò</AppListTableHead>
-              <AppListTableHead>Key</AppListTableHead>
-              <AppListTableHead>Mô tả</AppListTableHead>
-              <AppListTableHead className="text-center">Quyền</AppListTableHead>
-              <AppListTableHead className="text-right">Thao tác</AppListTableHead>
+              <AppListTableHead className="w-56">Vai trò</AppListTableHead>
+              <AppListTableHead className="w-48">Key</AppListTableHead>
+              <AppListTableHead className="w-[40%]">Mô tả</AppListTableHead>
+              <AppListTableHead className="w-28 text-center">
+                Quyền
+              </AppListTableHead>
+              <AppListTableHead className="w-44 text-right">
+                Thao tác
+              </AppListTableHead>
             </AppListTableHeaderRow>
           </TableHeader>
           <TableBody>
             {roles.length > 0 ? (
               roles.map((role) => (
-                <TableRow key={role.id} className="border-border transition-colors hover:bg-muted/40">
-                  <TableCell>
-                    <div className="flex flex-col gap-1">
-                      <span className="font-medium text-foreground">{role.name}</span>
-                      <span className="text-xs text-muted-foreground">ID: {role.id}</span>
+                <TableRow
+                  key={role.id}
+                  className="border-border transition-colors hover:bg-muted/40"
+                >
+                  <TableCell className="w-56 max-w-[14rem] align-top whitespace-normal">
+                    <div className="flex min-w-0 flex-col gap-1">
+                      <span className="line-clamp-1 font-medium break-words text-foreground">
+                        {role.name}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        ID: {role.id}
+                      </span>
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <Badge variant="secondary" className="font-mono">
-                      {role.key}
+                  <TableCell className="w-48 max-w-[12rem]">
+                    <Badge variant="secondary" className="max-w-full font-mono">
+                      <span className="truncate">{role.key}</span>
                     </Badge>
                   </TableCell>
-                  <TableCell className="max-w-xl text-sm text-muted-foreground">
-                    {role.description || "Chưa có mô tả"}
+                  <TableCell className="w-[40%] align-top text-sm whitespace-normal text-muted-foreground">
+                    <span className="line-clamp-2 break-words">
+                      {role.description || "Chưa có mô tả"}
+                    </span>
                   </TableCell>
-                  <TableCell className="text-center">
-                    <Badge variant="outline">{role.permissions.length} quyền</Badge>
+                  <TableCell className="w-28 text-center">
+                    <Badge variant="outline">
+                      {role.permissions.length} quyền
+                    </Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="w-44">
                     <div className="flex justify-end">
                       <Button
                         type="button"
@@ -103,7 +118,8 @@ export function RoleListPage({ roles, permissions }: RoleListPageProps) {
                   </EmptyMedia>
                   <EmptyTitle>Chưa có vai trò nào</EmptyTitle>
                   <EmptyDescription>
-                    Hệ thống chưa trả về vai trò nào để bạn quản trị quyền truy cập.
+                    Hệ thống chưa trả về vai trò nào để bạn quản trị quyền truy
+                    cập.
                   </EmptyDescription>
                 </EmptyHeader>
               </AppListTableEmptyState>

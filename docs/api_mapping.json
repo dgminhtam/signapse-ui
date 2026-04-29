@@ -37,6 +37,7 @@
                                 "FIRECRAWL_SOURCE_DOCUMENT_FILTER",
                                 "NEWS_PRIMARY_EVENT_DERIVATION",
                                 "EVENT_ASSET_THEME_ENRICHMENT",
+                                "EVENT_MARKET_REACTION_DERIVATION",
                                 "EVENT_GROUNDED_MARKET_QUERY_SYNTHESIS"
                             ]
                         }
@@ -80,6 +81,7 @@
                                 "FIRECRAWL_SOURCE_DOCUMENT_FILTER",
                                 "NEWS_PRIMARY_EVENT_DERIVATION",
                                 "EVENT_ASSET_THEME_ENRICHMENT",
+                                "EVENT_MARKET_REACTION_DERIVATION",
                                 "EVENT_GROUNDED_MARKET_QUERY_SYNTHESIS"
                             ]
                         }
@@ -133,6 +135,7 @@
                                 "FIRECRAWL_SOURCE_DOCUMENT_FILTER",
                                 "NEWS_PRIMARY_EVENT_DERIVATION",
                                 "EVENT_ASSET_THEME_ENRICHMENT",
+                                "EVENT_MARKET_REACTION_DERIVATION",
                                 "EVENT_GROUNDED_MARKET_QUERY_SYNTHESIS"
                             ]
                         }
@@ -989,6 +992,37 @@
                 }
             }
         },
+        "/events/{id}/derive-market-reactions": {
+            "post": {
+                "tags": [
+                    "event-controller"
+                ],
+                "operationId": "deriveMarketReactions",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EventMarketReactionDerivationResult"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/events/enrich-pending-assets-and-themes": {
             "post": {
                 "tags": [
@@ -1014,6 +1048,38 @@
                             "*/*": {
                                 "schema": {
                                     "$ref": "#/components/schemas/PendingEventEnrichmentBatchResult"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/events/derive-pending-market-reactions": {
+            "post": {
+                "tags": [
+                    "event-controller"
+                ],
+                "operationId": "derivePendingMarketReactions",
+                "parameters": [
+                    {
+                        "name": "batchSize",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 50
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PendingMarketReactionDerivationBatchResult"
                                 }
                             }
                         }
@@ -2219,6 +2285,7 @@
                             "FIRECRAWL_SOURCE_DOCUMENT_FILTER",
                             "NEWS_PRIMARY_EVENT_DERIVATION",
                             "EVENT_ASSET_THEME_ENRICHMENT",
+                            "EVENT_MARKET_REACTION_DERIVATION",
                             "EVENT_GROUNDED_MARKET_QUERY_SYNTHESIS"
                         ]
                     },
@@ -2584,6 +2651,7 @@
                             "FIRECRAWL_SOURCE_DOCUMENT_FILTER",
                             "NEWS_PRIMARY_EVENT_DERIVATION",
                             "EVENT_ASSET_THEME_ENRICHMENT",
+                            "EVENT_MARKET_REACTION_DERIVATION",
                             "EVENT_GROUNDED_MARKET_QUERY_SYNTHESIS"
                         ]
                     },
@@ -3041,6 +3109,32 @@
                     }
                 }
             },
+            "EventMarketReactionDerivationResult": {
+                "type": "object",
+                "properties": {
+                    "eventId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "eventTitle": {
+                        "type": "string"
+                    },
+                    "eventCanonicalKey": {
+                        "type": "string"
+                    },
+                    "reactionCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "neutralCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string"
+                    }
+                }
+            },
             "PendingEventEnrichmentBatchResult": {
                 "type": "object",
                 "properties": {
@@ -3080,6 +3174,45 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/EventEnrichmentResult"
+                        }
+                    }
+                }
+            },
+            "PendingMarketReactionDerivationBatchResult": {
+                "type": "object",
+                "properties": {
+                    "requestedBatchSize": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "selectedCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "processedCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "skippedCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "derivedCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "neutralCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "failedCount": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/EventMarketReactionDerivationResult"
                         }
                     }
                 }
@@ -3349,9 +3482,6 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
                     "first": {
                         "type": "boolean"
                     },
@@ -3361,6 +3491,9 @@
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"
@@ -3377,6 +3510,9 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
+                    "paged": {
+                        "type": "boolean"
+                    },
                     "pageSize": {
                         "type": "integer",
                         "format": "int32"
@@ -3384,9 +3520,6 @@
                     "pageNumber": {
                         "type": "integer",
                         "format": "int32"
-                    },
-                    "paged": {
-                        "type": "boolean"
                     },
                     "unpaged": {
                         "type": "boolean"
@@ -3468,9 +3601,6 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
                     "first": {
                         "type": "boolean"
                     },
@@ -3480,6 +3610,9 @@
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"
@@ -3546,9 +3679,6 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
                     "first": {
                         "type": "boolean"
                     },
@@ -3558,6 +3688,9 @@
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"
@@ -3640,9 +3773,6 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
                     "first": {
                         "type": "boolean"
                     },
@@ -3652,6 +3782,9 @@
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"
@@ -3687,9 +3820,6 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
                     "first": {
                         "type": "boolean"
                     },
@@ -3699,6 +3829,9 @@
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"
@@ -3780,9 +3913,6 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
                     "first": {
                         "type": "boolean"
                     },
@@ -3792,6 +3922,9 @@
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"
@@ -4004,9 +4137,6 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
                     "first": {
                         "type": "boolean"
                     },
@@ -4016,6 +4146,9 @@
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"
@@ -4104,6 +4237,62 @@
                     }
                 }
             },
+            "EventMarketReactionSummaryResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "assetId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "assetName": {
+                        "type": "string"
+                    },
+                    "assetSymbol": {
+                        "type": "string"
+                    },
+                    "assetType": {
+                        "type": "string",
+                        "enum": [
+                            "COMMODITY",
+                            "CRYPTO",
+                            "FX",
+                            "INDEX"
+                        ]
+                    },
+                    "direction": {
+                        "type": "string",
+                        "enum": [
+                            "BULLISH",
+                            "BEARISH",
+                            "MIXED",
+                            "NEUTRAL"
+                        ]
+                    },
+                    "timeHorizon": {
+                        "type": "string",
+                        "enum": [
+                            "INTRADAY",
+                            "SHORT_TERM",
+                            "MEDIUM_TERM",
+                            "LONG_TERM"
+                        ]
+                    },
+                    "confidence": {
+                        "type": "number"
+                    },
+                    "reasoning": {
+                        "type": "string"
+                    },
+                    "observedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
             "EventResponse": {
                 "type": "object",
                 "properties": {
@@ -4168,6 +4357,12 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/EventEvidenceSummaryResponse"
+                        }
+                    },
+                    "marketReactions": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/EventMarketReactionSummaryResponse"
                         }
                     }
                 }
@@ -4279,9 +4474,6 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
                     "first": {
                         "type": "boolean"
                     },
@@ -4291,6 +4483,9 @@
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"
@@ -4382,9 +4577,6 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
                     "first": {
                         "type": "boolean"
                     },
@@ -4394,6 +4586,9 @@
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"
@@ -4458,9 +4653,6 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
                     "first": {
                         "type": "boolean"
                     },
@@ -4470,6 +4662,9 @@
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"
@@ -4529,9 +4724,6 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
                     "first": {
                         "type": "boolean"
                     },
@@ -4541,6 +4733,9 @@
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"
@@ -4608,9 +4803,6 @@
                     "sort": {
                         "$ref": "#/components/schemas/SortObject"
                     },
-                    "pageable": {
-                        "$ref": "#/components/schemas/PageableObject"
-                    },
                     "first": {
                         "type": "boolean"
                     },
@@ -4620,6 +4812,9 @@
                     "numberOfElements": {
                         "type": "integer",
                         "format": "int32"
+                    },
+                    "pageable": {
+                        "$ref": "#/components/schemas/PageableObject"
                     },
                     "empty": {
                         "type": "boolean"
