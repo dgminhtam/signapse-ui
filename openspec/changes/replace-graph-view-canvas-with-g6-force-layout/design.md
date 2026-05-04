@@ -85,6 +85,23 @@ Why:
 Alternatives considered:
 - Keep the deterministic post-layout no-overlap helper. Rejected for this MVP because G6 collision force should own spacing.
 
+Follow-up decision:
+- Dragging should use G6 `drag-element-force` with dropped nodes fixed for the current client session. In G6 v5, this maps to the behavior's `fixed: true` option; otherwise `onDragEnd` clears the fixed position and the force layout pulls the node back, which feels like drag-and-drop is not working.
+- Fixed drag positions remain frontend runtime state only. They should reset on graph remount/refetch and should not introduce backend position persistence.
+
+### Guard G6 render lifecycle against destroyed-instance races
+
+G6 `Graph.render()` is asynchronous and its internal `prepare()` step intentionally waits one microtask before initializing runtime. If React/Next development mode unmounts the component immediately after an effect setup, cleanup can call `graph.destroy()` before that microtask resumes. G6 then logs `[G6 v5.1.0] The graph instance has been destroyed` as a console error.
+
+The canvas lifecycle should avoid starting render work that is already known to be stale, and cleanup should be idempotent:
+
+- Schedule the initial render so immediate Strict Mode cleanup can cancel it before `graph.render()` starts.
+- Keep an `isDisposed` guard around render, fit, resize, and destroy paths.
+- Destroy only when the graph instance is not already destroyed.
+- Prefer one fit path; either rely on `autoFit: "view"` or perform a guarded explicit `fitView`, but avoid redundant fit work where possible.
+
+This is a frontend lifecycle race, not a backend graph payload issue.
+
 ### Keep multigraph semantics in data, even if visual edges are simplified
 
 The existing backend can return multiple edges between the same source and target with different relation types. The mapper should keep stable edge ids and relation metadata, but the first G6 MVP may visually simplify parallel edges if G6 defaults do not support them cleanly.

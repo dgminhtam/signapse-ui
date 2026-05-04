@@ -37,6 +37,12 @@ The graph view SHALL allow users to drag graph elements with force behavior so c
 - **AND** connected or clustered nodes SHALL react through the force layout rather than remaining completely static
 - **AND** the graph SHALL avoid sending backend mutations for drag positions
 
+#### Scenario: Drop a dragged node
+- **WHEN** the user releases a dragged graph node
+- **THEN** the node SHALL remain fixed at the dropped position for the current client-side graph session
+- **AND** the fixed position SHALL NOT be persisted to the backend
+- **AND** the rest of the force layout SHALL remain able to react around the fixed node
+
 #### Scenario: Navigate canvas
 - **WHEN** the user pans or zooms the graph canvas
 - **THEN** the graph view SHALL update the viewport without rebuilding the backend graph data

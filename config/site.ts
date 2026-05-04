@@ -1,4 +1,5 @@
 import {
+  ChartCandlestick,
   GalleryVerticalEnd,
   LayoutDashboard,
   Newspaper,
@@ -8,6 +9,7 @@ import {
 import { ECONOMIC_CALENDAR_NAV_PERMISSIONS } from "@/app/lib/economic-calendar/permissions"
 import { EVENT_NAV_PERMISSIONS } from "@/app/lib/events/permissions"
 import { GRAPH_VIEW_NAV_PERMISSIONS } from "@/app/lib/graph-view/permissions"
+import { MARKET_CHART_NAV_PERMISSIONS } from "@/app/lib/market-charts/permissions"
 import { MARKET_QUERY_NAV_PERMISSIONS } from "@/app/lib/market-query/permissions"
 import { NEWS_ARTICLE_NAV_PERMISSIONS } from "@/app/lib/news-articles/permissions"
 import { NEWS_OUTLET_NAV_PERMISSIONS } from "@/app/lib/news-outlets/permissions"
@@ -62,6 +64,12 @@ export const siteConfig = {
       url: "/graph-view",
       icon: LayoutDashboard,
       permission: GRAPH_VIEW_NAV_PERMISSIONS,
+    },
+    {
+      title: "Biểu đồ giá",
+      url: "/market-charts",
+      icon: ChartCandlestick,
+      permission: MARKET_CHART_NAV_PERMISSIONS,
     },
     {
       title: "Nội dung",

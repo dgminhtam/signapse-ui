@@ -5,11 +5,17 @@ import {
 
 export const EVENT_READ_PERMISSIONS = ["event:read"] as const
 
-// Event enrich operators are intentionally gated by source-document analyze permission.
-export const EVENT_ENRICH_PERMISSIONS = ["source-document:analyze"] as const
+// Backend gates event operators with the canon news-article permission, while
+// the legacy source-document alias remains accepted during role migration.
+export const EVENT_OPERATOR_PERMISSIONS = [
+  "news-article:analyze",
+  "source-document:analyze",
+] as const
+
+export const EVENT_ENRICH_PERMISSIONS = EVENT_OPERATOR_PERMISSIONS
 
 // Market reaction derivation currently uses the same backend operator permission.
-export const EVENT_MARKET_REACTION_DERIVE_PERMISSIONS = EVENT_ENRICH_PERMISSIONS
+export const EVENT_MARKET_REACTION_DERIVE_PERMISSIONS = EVENT_OPERATOR_PERMISSIONS
 
 export const EVENT_NAV_PERMISSIONS = EVENT_READ_PERMISSIONS
 

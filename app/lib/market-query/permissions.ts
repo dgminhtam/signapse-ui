@@ -4,9 +4,11 @@ export const MARKET_QUERY_EXECUTE_PERMISSIONS = ["query:execute"] as const
 
 export const MARKET_QUERY_NAV_PERMISSIONS = MARKET_QUERY_EXECUTE_PERMISSIONS
 
+// Prefer the canon news-article permission, but keep the legacy alias for
+// roles that have not finished migrating yet.
 export const MARKET_QUERY_SOURCE_DOCUMENT_READ_PERMISSIONS = [
-  "source-document:read",
   "news-article:read",
+  "source-document:read",
 ] as const
 
 export function canExecuteMarketQueries(permissions: PermissionCollection): boolean {

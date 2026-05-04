@@ -1,15 +1,35 @@
 "use client"
 
-import { Graph } from "@antv/g6"
+import {
+  DragElementForce,
+  ExtensionCategory,
+  Graph,
+  getExtension,
+  invokeLayoutMethod,
+  register,
+} from "@antv/g6"
 import type {
+  BaseLayout,
   D3ForceLayoutOptions,
+  DragElementForceOptions,
   EdgeData,
   GraphData,
+  ID,
   NodeData,
+  Point,
+  ViewportAnimationEffectTiming,
 } from "@antv/g6"
-import { useEffect, useMemo, useRef } from "react"
+import { Minus, Plus, RotateCcw } from "lucide-react"
+import { useTheme } from "next-themes"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 import { getGraphViewRelationLabel } from "@/app/lib/graph-view/definitions"
+import type {
+  GraphViewEdgeKind,
+  GraphViewNodeKind,
+} from "@/app/lib/graph-view/definitions"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 import {
   GRAPH_VIEW_EDGE_VISUALS,
@@ -22,8 +42,190 @@ type ClusterState = {
   clusterLabelByKey: Map<string, string>
 }
 
+type GraphAnalysisBounds = {
+  maxX: number
+  maxY: number
+  minX: number
+  minY: number
+}
+
+type BoundedDragElementForceOptions = DragElementForceOptions & {
+  getAnalysisBounds: () => GraphAnalysisBounds
+}
+
+type GraphThemeMode = "light" | "dark"
+
+type GraphCanvasPalette = {
+  activeNodeHaloColor: string
+  edgeHighlightLineWidthBoost: number
+  edgeHighlightOpacity: number
+  edgeInactiveOpacity: number
+  labelBackground: boolean
+  labelBackgroundFill: string
+  labelBackgroundOpacity: number
+  labelFill: string
+  labelStroke: string
+  labelStrokeOpacity: number
+  labelStrokeWidth: number
+  nodeHighlightOpacity: number
+  nodeInactiveOpacity: number
+  nodeStroke: string
+  tooltipSurfaceClassName: string
+}
+
+type HoverTooltipState = {
+  kind: GraphViewNodeKind
+  label: string
+  nodeId: string
+  x: number
+  y: number
+}
+
 const MIN_CANVAS_WIDTH = 360
 const MIN_CANVAS_HEIGHT = 640
+const GRAPH_CANVAS_PAN_RANGE = 0.45
+const GRAPH_ANALYSIS_BOUNDS_SCALE = 1.45
+const GRAPH_ANALYSIS_BOUNDS_MIN_PADDING = 144
+const GRAPH_HOVER_TOOLTIP_OFFSET = 14
+const GRAPH_HOVER_TOOLTIP_MIN_MARGIN = 12
+const GRAPH_HOVER_TOOLTIP_MAX_WIDTH = 320
+const GRAPH_HOVER_TOOLTIP_HEIGHT = 84
+const GRAPH_RECENTER_ANIMATION = {
+  duration: 520,
+  easing: "ease-in-out",
+} satisfies ViewportAnimationEffectTiming
+const GRAPH_ZOOM_ANIMATION = {
+  duration: 220,
+  easing: "ease-out",
+} satisfies ViewportAnimationEffectTiming
+const GRAPH_ZOOM_STEP_RATIO = 1.18
+const GRAPH_ZOOM_RANGE: [number, number] = [0.45, 2.2]
+const BOUNDED_DRAG_ELEMENT_FORCE_TYPE = "bounded-drag-element-force"
+const GRAPH_HUD_NODE_KIND_ORDER = [
+  "event",
+  "asset",
+  "theme",
+  "news-article",
+] satisfies GraphViewNodeKind[]
+const GRAPH_HUD_EDGE_KIND_ORDER = [
+  "event-asset",
+  "event-theme",
+  "source-artifact-event",
+] satisfies GraphViewEdgeKind[]
+
+function createGraphCanvasPalette(mode: GraphThemeMode): GraphCanvasPalette {
+  if (mode === "dark") {
+    return {
+      activeNodeHaloColor: "rgba(248, 250, 252, 0.65)",
+      edgeHighlightLineWidthBoost: 0.95,
+      edgeHighlightOpacity: 0.84,
+      edgeInactiveOpacity: 0.34,
+      labelBackground: true,
+      labelBackgroundFill: "rgba(2, 6, 23, 0.86)",
+      labelBackgroundOpacity: 0.82,
+      labelFill: "#f8fafc",
+      labelStroke: "rgba(2, 6, 23, 0.92)",
+      labelStrokeOpacity: 0.92,
+      labelStrokeWidth: 3.2,
+      nodeHighlightOpacity: 1,
+      nodeInactiveOpacity: 0.66,
+      nodeStroke: "rgba(241, 245, 249, 0.9)",
+      tooltipSurfaceClassName:
+        "border-border/80 bg-popover/95 text-popover-foreground shadow-xl",
+    }
+  }
+
+  return {
+    activeNodeHaloColor: "rgba(15, 23, 42, 0.36)",
+    edgeHighlightLineWidthBoost: 0.8,
+    edgeHighlightOpacity: 0.78,
+    edgeInactiveOpacity: 0.24,
+    labelBackground: true,
+    labelBackgroundFill: "rgba(248, 250, 252, 0.88)",
+    labelBackgroundOpacity: 0.76,
+    labelFill: "#172033",
+    labelStroke: "rgba(248, 250, 252, 0.96)",
+    labelStrokeOpacity: 0.96,
+    labelStrokeWidth: 2.6,
+    nodeHighlightOpacity: 1,
+    nodeInactiveOpacity: 0.61,
+    nodeStroke: "rgba(255, 255, 255, 0.88)",
+    tooltipSurfaceClassName:
+      "border-border/80 bg-popover/95 text-popover-foreground shadow-xl",
+  }
+}
+
+class BoundedDragElementForce extends DragElementForce {
+  private getBoundedForceLayoutInstance() {
+    return this.context.layout
+      ?.getLayoutInstance()
+      .find((layout) => layout.id === "d3-force" || layout.id === "d3-force-3d")
+  }
+
+  protected override async moveElement(ids: ID[], offset: Point) {
+    if (this.context.graph.destroyed) {
+      return
+    }
+
+    const layout = this.getBoundedForceLayoutInstance()
+    const options = this.options as unknown as Required<BoundedDragElementForceOptions>
+    const bounds = options.getAnalysisBounds()
+    const [dx, dy] = this.clampByRotation(offset)
+
+    this.context.graph.getNodeData(ids).forEach((element, index) => {
+      const style = (element.style ?? {}) as Record<string, unknown>
+      const currentX = getElementNumberValue(style, "x", 0)
+      const currentY = getElementNumberValue(style, "y", 0)
+      const [nextX, nextY] = clampPointToAnalysisBounds(
+        [currentX + dx, currentY + dy],
+        bounds
+      )
+
+      if (layout) {
+        invokeLayoutMethod(layout as BaseLayout, "setFixedPosition", ids[index], [
+          nextX,
+          nextY,
+        ])
+      }
+    })
+  }
+}
+
+function ensureBoundedDragElementForceRegistered() {
+  if (getExtension(ExtensionCategory.BEHAVIOR, BOUNDED_DRAG_ELEMENT_FORCE_TYPE)) {
+    return
+  }
+
+  register(
+    ExtensionCategory.BEHAVIOR,
+    BOUNDED_DRAG_ELEMENT_FORCE_TYPE,
+    BoundedDragElementForce
+  )
+}
+
+function GraphHudCountChip({
+  className,
+  count,
+  label,
+}: {
+  className: string
+  count: number
+  label: string
+}) {
+  return (
+    <span
+      className={cn(
+        "inline-flex h-7 items-center gap-1.5 rounded-full border px-2.5 text-[11px] font-medium shadow-sm backdrop-blur",
+        className
+      )}
+    >
+      <span>{label}</span>
+      <span className="rounded-full bg-background/70 px-1.5 py-0.5 text-[10px] font-semibold">
+        {count}
+      </span>
+    </span>
+  )
+}
 
 function hashText(value: string) {
   let hash = 0
@@ -211,7 +413,10 @@ function shouldShowLabel(
   return nodeKind === "asset" || nodeKind === "theme" || edgeCount >= 4
 }
 
-function createG6GraphData(graphModel: GraphModel): GraphData {
+function createG6GraphData(
+  graphModel: GraphModel,
+  graphPalette: GraphCanvasPalette
+): GraphData {
   const clusterState = inferClusterState(graphModel)
   const nodes: NodeData[] = graphModel.nodes.map((node, index) => {
     const visual = GRAPH_VIEW_NODE_VISUALS[node.kind]
@@ -243,19 +448,26 @@ function createG6GraphData(graphModel: GraphModel): GraphData {
       },
       style: {
         fill: visual.color,
-        labelFill: "#172033",
+        labelBackground: graphPalette.labelBackground,
+        labelBackgroundFill: graphPalette.labelBackgroundFill,
+        labelBackgroundOpacity: graphPalette.labelBackgroundOpacity,
+        labelBackgroundPadding: [2, 4, 2, 4],
+        labelFill: graphPalette.labelFill,
         labelFontSize: 11,
         labelFontWeight: 600,
         labelMaxWidth: 220,
         labelOffsetX: 9,
         labelPlacement: "right",
+        labelStroke: graphPalette.labelStroke,
+        labelStrokeOpacity: graphPalette.labelStrokeOpacity,
+        labelLineWidth: graphPalette.labelStrokeWidth,
         labelText: showLabel ? createBoundedLabel(node.label) : "",
         lineWidth: 2,
         opacity: 0.96,
         shadowBlur: node.kind === "asset" || node.kind === "theme" ? 8 : 4,
         shadowColor: `${visual.color}40`,
         size,
-        stroke: "rgba(255,255,255,0.88)",
+        stroke: graphPalette.nodeStroke,
         x: seedPosition.x,
         y: seedPosition.y,
       },
@@ -325,6 +537,41 @@ function getElementBooleanValue(
   return datum[key] === true
 }
 
+function createGraphAnalysisBounds(
+  width: number,
+  height: number
+): GraphAnalysisBounds {
+  const horizontalPadding = Math.max(
+    (width * (GRAPH_ANALYSIS_BOUNDS_SCALE - 1)) / 2,
+    GRAPH_ANALYSIS_BOUNDS_MIN_PADDING
+  )
+  const verticalPadding = Math.max(
+    (height * (GRAPH_ANALYSIS_BOUNDS_SCALE - 1)) / 2,
+    GRAPH_ANALYSIS_BOUNDS_MIN_PADDING
+  )
+
+  return {
+    maxX: width + horizontalPadding,
+    maxY: height + verticalPadding,
+    minX: -horizontalPadding,
+    minY: -verticalPadding,
+  }
+}
+
+function clampValue(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max)
+}
+
+function clampPointToAnalysisBounds(
+  [x, y]: Point,
+  bounds: GraphAnalysisBounds
+): [number, number] {
+  return [
+    clampValue(x, bounds.minX, bounds.maxX),
+    clampValue(y, bounds.minY, bounds.maxY),
+  ]
+}
+
 function createForceLayout(width: number, height: number) {
   return {
     alpha: 0.92,
@@ -386,10 +633,175 @@ function getContainerSize(container: HTMLDivElement) {
   }
 }
 
+function createNodeStateStyles(graphPalette: GraphCanvasPalette) {
+  const keepBaseStroke = (node: NodeData) => ({
+    lineWidth: getElementNumberValue(node.style ?? {}, "lineWidth", 2),
+    stroke:
+      typeof node.style?.stroke === "string"
+        ? node.style.stroke
+        : graphPalette.nodeStroke,
+  })
+
+  return {
+    active: (node: NodeData) => ({
+      ...keepBaseStroke(node),
+      opacity: 1,
+      shadowBlur: 22,
+      shadowColor: graphPalette.activeNodeHaloColor,
+    }),
+    highlight: (node: NodeData) => ({
+      ...keepBaseStroke(node),
+      opacity: graphPalette.nodeHighlightOpacity,
+      shadowBlur: 12,
+    }),
+    inactive: {
+      opacity: graphPalette.nodeInactiveOpacity,
+      shadowBlur: 0,
+    },
+  }
+}
+
+function createEdgeStateStyles(graphPalette: GraphCanvasPalette) {
+  return {
+    highlight: (edge: EdgeData) => ({
+      lineWidth:
+        getElementNumberValue(edge.style ?? {}, "lineWidth", 1.3) +
+        graphPalette.edgeHighlightLineWidthBoost,
+      opacity: graphPalette.edgeHighlightOpacity,
+    }),
+    inactive: {
+      opacity: graphPalette.edgeInactiveOpacity,
+    },
+  }
+}
+
+function resolveLocalPointerPosition(
+  graph: Graph,
+  container: HTMLDivElement,
+  event: {
+    clientX?: number
+    clientY?: number
+    target?: { id?: string }
+  }
+) {
+  const bounds = container.getBoundingClientRect()
+  const clientX = event.clientX
+  const clientY = event.clientY
+  const hasClientPoint =
+    typeof clientX === "number" &&
+    Number.isFinite(clientX) &&
+    typeof clientY === "number" &&
+    Number.isFinite(clientY)
+
+  if (hasClientPoint) {
+    return {
+      x: clientX - bounds.left,
+      y: clientY - bounds.top,
+    }
+  }
+
+  const nodeId = event.target?.id
+
+  if (nodeId) {
+    const [canvasX, canvasY] = graph.getCanvasByViewport(
+      graph.getElementPosition(nodeId)
+    )
+
+    return {
+      x: canvasX,
+      y: canvasY,
+    }
+  }
+
+  return {
+    x: bounds.width / 2,
+    y: bounds.height / 2,
+  }
+}
+
+function clampHoverTooltipPosition(container: HTMLDivElement, x: number, y: number) {
+  const rect = container.getBoundingClientRect()
+  const maxX = Math.max(
+    GRAPH_HOVER_TOOLTIP_MIN_MARGIN,
+    rect.width - GRAPH_HOVER_TOOLTIP_MAX_WIDTH - GRAPH_HOVER_TOOLTIP_MIN_MARGIN
+  )
+  const maxY = Math.max(
+    GRAPH_HOVER_TOOLTIP_MIN_MARGIN,
+    rect.height - GRAPH_HOVER_TOOLTIP_HEIGHT - GRAPH_HOVER_TOOLTIP_MIN_MARGIN
+  )
+
+  return {
+    x: clampValue(
+      x + GRAPH_HOVER_TOOLTIP_OFFSET,
+      GRAPH_HOVER_TOOLTIP_MIN_MARGIN,
+      maxX
+    ),
+    y: clampValue(
+      y + GRAPH_HOVER_TOOLTIP_OFFSET,
+      GRAPH_HOVER_TOOLTIP_MIN_MARGIN,
+      maxY
+    ),
+  }
+}
+
 export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
+  const { resolvedTheme } = useTheme()
   const containerRef = useRef<HTMLDivElement | null>(null)
   const graphRef = useRef<Graph | null>(null)
-  const graphData = useMemo(() => createG6GraphData(graphModel), [graphModel])
+  const [hoverTooltip, setHoverTooltip] = useState<HoverTooltipState | null>(null)
+  const graphThemeMode: GraphThemeMode =
+    resolvedTheme === "dark" ? "dark" : "light"
+  const graphPalette = useMemo(
+    () => createGraphCanvasPalette(graphThemeMode),
+    [graphThemeMode]
+  )
+  const graphData = useMemo(
+    () => createG6GraphData(graphModel, graphPalette),
+    [graphModel, graphPalette]
+  )
+
+  const handleRecenter = () => {
+    const graph = graphRef.current
+
+    if (!graph || graph.destroyed) {
+      return
+    }
+
+    void graph
+      .fitView(
+        {
+          direction: "both",
+          when: "always",
+        },
+        GRAPH_RECENTER_ANIMATION
+      )
+      .catch((error) => {
+        if (!graph.destroyed) {
+          console.error(error)
+        }
+      })
+  }
+
+  const handleZoom = (direction: "in" | "out") => {
+    const graph = graphRef.current
+
+    if (!graph || graph.destroyed) {
+      return
+    }
+
+    const currentZoom = graph.getZoom()
+    const nextRawZoom =
+      direction === "in"
+        ? currentZoom * GRAPH_ZOOM_STEP_RATIO
+        : currentZoom / GRAPH_ZOOM_STEP_RATIO
+    const nextZoom = clampValue(nextRawZoom, GRAPH_ZOOM_RANGE[0], GRAPH_ZOOM_RANGE[1])
+
+    void graph.zoomTo(nextZoom, GRAPH_ZOOM_ANIMATION).catch((error) => {
+      if (!graph.destroyed) {
+        console.error(error)
+      }
+    })
+  }
 
   useEffect(() => {
     const container = containerRef.current
@@ -398,44 +810,183 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
       return
     }
 
+    ensureBoundedDragElementForceRegistered()
+
     const { height, width } = getContainerSize(container)
+    let analysisBounds = createGraphAnalysisBounds(width, height)
     let isDisposed = false
+    let renderFrameId: number | null = null
+    let renderPromise: Promise<void> | null = null
     const graph = new Graph({
-      animation: false,
-      autoFit: "view",
+      autoFit: {
+        type: 'center',
+        animation: {
+          duration: 1000,
+          easing: 'ease-in-out',
+        },
+      },
+      animation: true,
       behaviors: [
-        "drag-canvas",
-        "zoom-canvas",
         {
-          fixed: false,
-          type: "drag-element-force",
+          range: GRAPH_CANVAS_PAN_RANGE,
+          type: "drag-canvas",
+        },
+        {
+          animation: false,
+          degree: 1,
+          direction: "both",
+          enable: (event: { targetType?: string }) => event.targetType === "node",
+          inactiveState: "inactive",
+          state: "highlight",
+          type: "hover-activate",
+        },
+        {
+          fixed: true,
+          getAnalysisBounds: () => analysisBounds,
+          type: BOUNDED_DRAG_ELEMENT_FORCE_TYPE,
         },
       ],
       container,
       data: graphData,
       edge: {
+        state: createEdgeStateStyles(graphPalette),
         style: (edge) => edge.style ?? {},
         type: "line",
       },
       height,
       layout: createForceLayout(width, height),
       node: {
+        state: createNodeStateStyles(graphPalette),
         style: (node) => node.style ?? {},
         type: "circle",
       },
       padding: 48,
       width,
-      zoomRange: [0.12, 4],
+      zoomRange: GRAPH_ZOOM_RANGE,
     })
 
     graphRef.current = graph
-    void graph.render().then(() => {
-      if (!isDisposed && !graph.destroyed) {
-        void graph.fitView({
+
+    const clearNodeActiveState = (nodeId?: string) => {
+      if (!nodeId || graph.destroyed) {
+        return
+      }
+
+      const nextState = graph.getElementState(nodeId).filter((state) => state !== "active")
+      void graph.setElementState(nodeId, nextState, false)
+    }
+
+    const updateHoverTooltip = (
+      nodeId: string,
+      event: {
+        clientX?: number
+        clientY?: number
+        target?: { id?: string }
+      }
+    ) => {
+      const node = graphModel.nodeMap.get(nodeId)
+
+      if (!node || graph.destroyed) {
+        return
+      }
+
+      const localPoint = resolveLocalPointerPosition(graph, container, event)
+      const position = clampHoverTooltipPosition(
+        container,
+        localPoint.x,
+        localPoint.y
+      )
+
+      setHoverTooltip({
+        kind: node.kind,
+        label: node.label,
+        nodeId,
+        x: position.x,
+        y: position.y,
+      })
+    }
+
+    const handleNodePointerEnter = (event: {
+      target?: { id?: string }
+      clientX?: number
+      clientY?: number
+    }) => {
+      const nodeId = event.target?.id
+
+      if (!nodeId || graph.destroyed) {
+        return
+      }
+
+      const nextState = Array.from(
+        new Set([...graph.getElementState(nodeId), "active"])
+      )
+      void graph.setElementState(nodeId, nextState, false)
+      updateHoverTooltip(nodeId, event)
+    }
+
+    const handleNodePointerMove = (event: {
+      target?: { id?: string }
+      clientX?: number
+      clientY?: number
+    }) => {
+      const nodeId = event.target?.id
+
+      if (!nodeId) {
+        return
+      }
+
+      updateHoverTooltip(nodeId, event)
+    }
+
+    const handleNodePointerLeave = (event: { target?: { id?: string } }) => {
+      clearNodeActiveState(event.target?.id)
+      setHoverTooltip(null)
+    }
+
+    const handleNodeDragStart = (event: { target?: { id?: string } }) => {
+      clearNodeActiveState(event.target?.id)
+      setHoverTooltip(null)
+    }
+
+    graph.on("node:pointerenter", handleNodePointerEnter as (event: unknown) => void)
+    graph.on("node:pointermove", handleNodePointerMove as (event: unknown) => void)
+    graph.on("node:pointerleave", handleNodePointerLeave as (event: unknown) => void)
+    graph.on("node:dragstart", handleNodeDragStart as (event: unknown) => void)
+
+    const renderGraph = async () => {
+      try {
+        await graph.render()
+
+        if (isDisposed || graph.destroyed) {
+          return
+        }
+
+        await graph.fitView({
           direction: "both",
           when: "always",
         })
+      } catch (error) {
+        if (isDisposed || graph.destroyed) {
+          return
+        }
+
+        console.error(error)
       }
+    }
+
+    const destroyGraph = () => {
+      if (!graph.destroyed) {
+        graph.destroy()
+      }
+
+      if (graphRef.current === graph) {
+        graphRef.current = null
+      }
+    }
+
+    renderFrameId = window.requestAnimationFrame(() => {
+      renderFrameId = null
+      renderPromise = renderGraph()
     })
 
     const resizeObserver = new ResizeObserver(() => {
@@ -444,6 +995,7 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
       }
 
       const nextSize = getContainerSize(container)
+      analysisBounds = createGraphAnalysisBounds(nextSize.width, nextSize.height)
       graph.setSize(nextSize.width, nextSize.height)
     })
 
@@ -452,36 +1004,132 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
     return () => {
       isDisposed = true
       resizeObserver.disconnect()
-      graph.destroy()
-      graphRef.current = null
+      graph.off("node:pointerenter", handleNodePointerEnter as (event: unknown) => void)
+      graph.off("node:pointermove", handleNodePointerMove as (event: unknown) => void)
+      graph.off("node:pointerleave", handleNodePointerLeave as (event: unknown) => void)
+      graph.off("node:dragstart", handleNodeDragStart as (event: unknown) => void)
+
+      if (renderFrameId !== null) {
+        window.cancelAnimationFrame(renderFrameId)
+        renderFrameId = null
+      }
+
+      if (renderPromise) {
+        void renderPromise.finally(destroyGraph)
+        return
+      }
+
+      destroyGraph()
     }
-  }, [graphData])
+  }, [graphData, graphModel.nodeMap, graphPalette])
 
   return (
-    <div className="relative h-full min-h-[640px] w-full animate-in duration-500 fade-in">
+    <div className="relative h-full min-h-[720px] w-full animate-in duration-500 fade-in lg:min-h-[calc(100svh-8rem)]">
       <div
         ref={containerRef}
-        className="h-full min-h-[640px] w-full cursor-grab active:cursor-grabbing"
+        className="h-full min-h-[720px] w-full cursor-grab active:cursor-grabbing lg:min-h-[calc(100svh-8rem)]"
       />
 
-      <div className="pointer-events-none absolute inset-x-4 top-4 z-10 flex flex-wrap items-start justify-between gap-3">
-        <div className="max-w-[min(100%,32rem)] rounded-2xl border border-border/80 bg-background/88 px-3.5 py-2.5 shadow-sm backdrop-blur">
-          <p className="text-[11px] font-medium tracking-[0.16em] text-muted-foreground uppercase">
-            D3 force layout
+      {hoverTooltip ? (
+        <div
+          className={cn(
+            "pointer-events-none absolute z-20 w-[min(20rem,calc(100%-1.5rem))] rounded-lg border px-3 py-2 backdrop-blur-sm",
+            graphPalette.tooltipSurfaceClassName
+          )}
+          style={{
+            left: `${hoverTooltip.x}px`,
+            top: `${hoverTooltip.y}px`,
+          }}
+        >
+          <p className="line-clamp-3 text-xs font-semibold leading-snug">
+            {hoverTooltip.label}
           </p>
-          <p className="mt-1 text-xs leading-5 text-foreground/85">
-            Kéo một nút để các quan hệ gần nó phản hồi theo lực; cuộn để zoom
-            và kéo nền để di chuyển canvas.
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            {GRAPH_VIEW_NODE_VISUALS[hoverTooltip.kind].label}
           </p>
+        </div>
+      ) : null}
+
+      <div className="pointer-events-none absolute inset-x-3 top-3 z-10 flex flex-wrap items-start justify-between gap-2 sm:inset-x-4 sm:top-4">
+        <div className="rounded-full border border-border/80 bg-background/88 px-3 py-1.5 text-xs font-semibold text-foreground shadow-sm backdrop-blur">
+          Biểu đồ tri thức
+        </div>
+
+        <div className="flex max-w-[min(100%,34rem)] flex-wrap items-center justify-end gap-1.5">
+          {GRAPH_HUD_NODE_KIND_ORDER.filter(
+            (kind) => graphModel.nodeCounts[kind] > 0
+          ).map((kind) => (
+            <GraphHudCountChip
+              className={GRAPH_VIEW_NODE_VISUALS[kind].chipClassName}
+              count={graphModel.nodeCounts[kind]}
+              key={kind}
+              label={GRAPH_VIEW_NODE_VISUALS[kind].label}
+            />
+          ))}
+          <Button
+            aria-label="Phóng to biểu đồ"
+            title="Phóng to biểu đồ"
+            type="button"
+            size="icon-sm"
+            variant="secondary"
+            className="pointer-events-auto rounded-full border border-border/80 bg-background/88 shadow-sm backdrop-blur hover:bg-background"
+            onClick={() => handleZoom("in")}
+          >
+            <Plus
+              aria-hidden="true"
+              className="size-4"
+              data-icon="inline-start"
+            />
+          </Button>
+          <Button
+            aria-label="Thu nhỏ biểu đồ"
+            title="Thu nhỏ biểu đồ"
+            type="button"
+            size="icon-sm"
+            variant="secondary"
+            className="pointer-events-auto rounded-full border border-border/80 bg-background/88 shadow-sm backdrop-blur hover:bg-background"
+            onClick={() => handleZoom("out")}
+          >
+            <Minus
+              aria-hidden="true"
+              className="size-4"
+              data-icon="inline-start"
+            />
+          </Button>
+          <Button
+            aria-label="Đưa biểu đồ về trung tâm"
+            title="Đưa biểu đồ về trung tâm"
+            type="button"
+            size="icon-sm"
+            variant="secondary"
+            className="pointer-events-auto rounded-full border border-border/80 bg-background/88 shadow-sm backdrop-blur hover:bg-background"
+            onClick={handleRecenter}
+          >
+            <RotateCcw
+              aria-hidden="true"
+              className="size-4"
+              data-icon="inline-start"
+            />
+          </Button>
         </div>
       </div>
 
-      <div className="pointer-events-none absolute inset-x-4 bottom-4 z-10 flex flex-wrap items-end justify-between gap-3">
-        <div className="rounded-full border border-border/80 bg-background/88 px-3 py-1.5 text-xs text-muted-foreground shadow-sm backdrop-blur">
+      <div className="pointer-events-none absolute inset-x-3 bottom-3 z-10 flex flex-wrap items-end justify-between gap-2 sm:inset-x-4 sm:bottom-4">
+        <div className="rounded-full border border-border/80 bg-background/82 px-3 py-1.5 text-[11px] text-muted-foreground shadow-sm backdrop-blur">
           {graphModel.nodes.length} nút · {graphModel.edges.length} cạnh
         </div>
-        <div className="rounded-full border border-border/80 bg-background/88 px-3 py-1.5 text-xs text-muted-foreground shadow-sm backdrop-blur">
-          Force drag không ghi vị trí về backend
+
+        <div className="flex max-w-[min(100%,36rem)] flex-wrap justify-end gap-1.5">
+          {GRAPH_HUD_EDGE_KIND_ORDER.filter(
+            (kind) => graphModel.edgeCounts[kind] > 0
+          ).map((kind) => (
+            <GraphHudCountChip
+              className={GRAPH_VIEW_EDGE_VISUALS[kind].chipClassName}
+              count={graphModel.edgeCounts[kind]}
+              key={kind}
+              label={GRAPH_VIEW_EDGE_VISUALS[kind].label}
+            />
+          ))}
         </div>
       </div>
     </div>

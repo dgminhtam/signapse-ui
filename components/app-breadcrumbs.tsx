@@ -23,6 +23,7 @@ const FRIENDLY_SEGMENT_NAMES: Record<string, string> = {
   "economic-calendar": "Lịch kinh tế",
   events: "Sự kiện",
   "graph-view": "Biểu đồ tri thức",
+  "market-charts": "Biểu đồ giá",
   "market-query": "Truy vấn thị trường",
   "news-articles": "Bài viết tin tức",
   "news-outlets": "Nguồn tin",

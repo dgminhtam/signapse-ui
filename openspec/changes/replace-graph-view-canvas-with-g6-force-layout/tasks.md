@@ -32,3 +32,9 @@
 - [x] 5.4 Run `pnpm lint` for graph-view files touched by this change.
 - [x] 5.5 Run `pnpm typecheck`.
 - [x] 5.6 Run `pnpm build`.
+
+## 6. Follow-up Interaction Hardening
+
+- [ ] 6.1 Configure G6 force dragging so a dropped node stays fixed for the current client-side graph session.
+- [ ] 6.2 Guard the initial G6 render/fit lifecycle against React dev unmount-remount races that can log `[G6 v5.1.0] The graph instance has been destroyed`.
+- [ ] 6.3 Smoke-check that node drag-drop pinning works and the destroyed-instance console error no longer appears during route mount/remount.

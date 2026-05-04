@@ -2,7 +2,7 @@
 
 Tài liệu này ánh xạ snapshot OpenAPI backend trong `docs/api_mapping.json` tới các điểm tích hợp frontend hiện tại của repo.
 
-Xác minh lần cuối: ngày 29 tháng 4 năm 2026
+Xác minh lần cuối: ngày 4 tháng 5 năm 2026
 
 ## Cấu hình cơ sở
 
@@ -20,15 +20,20 @@ Xác minh lần cuối: ngày 29 tháng 4 năm 2026
 - `apiFetch()` đọc `response.text()` trước khi parse JSON.
 - Frontend runtime list/search đang serialize query thành `$filter`, `page`, `size`, `sort` thông qua `queryParamsToString()`.
 - OpenAPI vẫn mô tả list query bằng `specification` và `pageable`, nên cần tách biệt giữa spec contract và effective runtime contract mà frontend đang gọi.
+- Snapshot backend hiện có `securitySchemes.bearerAuth` và metadata `x-signapse-auth` trên từng operation.
+- `x-signapse-auth.type` hiện gồm `permission`, `active-user`, và `public`; frontend vẫn gate UI bằng permission list lấy từ `/me`.
 
 ## Tổng quan thay đổi lớn từ snapshot hiện tại
 
-- Snapshot backend hiện tại gồm `70` operation.
+- Snapshot backend hiện tại gồm `71` operation.
 - Backend đã chuyển domain nội dung canon từ `sources` / `source-documents` sang `news-outlets` / `news-articles`.
 - Backend vẫn giữ các surface `events`, `query`, và `graph-view`, nhưng nhiều payload đã đổi naming từ `sourceDocument*` sang `artifact*` hoặc `news-article`.
 - Surface `events` có thêm workflow derive market reactions cho từng event và batch pending events.
+- Surface `market-charts` mới cung cấp dữ liệu nến OHLCV qua endpoint `GET /market-charts/candles`.
+- Snapshot backend hiện publish metadata permission chính thức qua `x-signapse-auth`, trong đó một số gate frontend cũ cần được rà lại theo permission mới.
 - Frontend hiện đã có route và workbench cho `market-query` và `graph-view`, nhưng vẫn còn lệch contract với snapshot backend mới.
 - Frontend đã có surface canon `news-outlets` và `news-articles`; các route legacy `/sources*`, `/news-sources*`, và `/source-documents*` hiện chỉ còn redirect compatibility.
+- Legacy source implementation files for `/sources` have been removed; only redirect pages remain so old bookmarks continue to land on `/news-outlets`.
 - Surface workspace dùng chuẩn `set-current`, đồng thời `WorkspaceResponse` dùng field có nghĩa `currentWorkspace`.
 - `roles` và `permissions` hiện đã có action và UI frontend, không còn ở trạng thái "chưa triển khai".
 
@@ -81,7 +86,7 @@ Ghi chu:
 
 - `NewsOutletListResponse` va `NewsOutletResponse` hien dung `homepageUrl`, `rssUrl`, `active`, `createdDate`, `lastModifiedDate`.
 - Frontend da dung route canon `/news-outlets`; navigation "Nguon tin" trong `config/site.ts` da tro ve surface nay va duoc gate bang `news-outlet:read`.
-- Cac route legacy `/sources*` va `/news-sources*` chi con redirect ve `/news-outlets*` de giu deeplink va bookmark cu.
+- Cac route legacy `/sources*` va `/news-sources*` chi con redirect ve `/news-outlets*` de giu deeplink va bookmark cu; data layer va list/form/search legacy cua `/sources` da duoc xoa.
 - Snapshot backend khong con field `type`, `systemManaged`, ingest metadata, hoac endpoint `/sources*`.
 
 ### 3. API news articles
@@ -138,7 +143,7 @@ Frontend lien quan:
 Ghi chu:
 
 - `event:read` dung de gate navigation, `/events`, `/events/{id}`, va cac link sang event detail.
-- Event enrich operators va market reaction derivation hien duoc gate bang `source-document:analyze` theo quyet dinh frontend hien tai; neu backend doi permission key trong tuong lai, can kiem tra lai.
+- Snapshot backend hien gate event enrich operators va market reaction derivation bang `news-article:analyze`; FE events da gate bang permission canon nay truoc va chi giu `source-document:analyze` nhu alias compatibility tam thoi.
 - `EventListResponse` va `EventResponse` hien dung `description` thay `summary`, `status` enum `ENRICHMENT_PENDING`, `ENRICHED`, `ENRICHMENT_NO_MATCH`, `ENRICHMENT_FAILED`, `ARCHIVED`, va khong con `active`, `enrichmentStatus`, `enrichmentAttemptedAt`, `enrichmentCompletedAt`, `enrichmentError`.
 - `EventEnrichmentResult.outcome` cung dung enum `ENRICHMENT_PENDING`, `ENRICHED`, `ENRICHMENT_NO_MATCH`, `ENRICHMENT_FAILED`, `ARCHIVED`.
 - Batch enrichment result cua `/events/enrich-pending-assets-and-themes` da co them field `deferredCount`; frontend da surface trong toast summary.
@@ -147,7 +152,30 @@ Ghi chu:
 - `EventMarketReactionDerivationResult` gom `eventId`, `eventTitle`, `eventCanonicalKey`, `reactionCount`, `neutralCount`, `message`; batch result gom `requestedBatchSize`, `selectedCount`, `processedCount`, `skippedCount`, `derivedCount`, `neutralCount`, `failedCount`, `results[]`.
 - Detail event hien sap xep `evidence` truoc `assets` va `themes`, con `id`, `slug`, `canonicalKey`, `createdDate`, `lastModifiedDate` nam trong vung thong tin ky thuat cap thap.
 
-### 5. API market query
+### 5. API market charts
+
+| Phuong thuc | Endpoint backend          | operationId   | Tich hop frontend | Trang thai      | Ghi chu                                                                                                                                      |
+| ----------- | ------------------------- | ------------- | ----------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET         | `/market-charts/candles`  | `getCandles`  | `getMarketChartCandles(request)` | Da trien khai candle workbench | Endpoint moi duoc gate bang `market-chart:read`, tra ve `MarketChartCandleResponse` voi `provider`, `symbol`, `timeframe`, `from`, `to`, va `candles[]` du lieu OHLCV theo moc thoi gian; route `/market-charts` render bang Lightweight Charts + shadcn shell. |
+
+Frontend lien quan:
+
+- `app/api/market-charts/action.ts`
+- `app/lib/market-charts/definitions.ts`
+- `app/lib/market-charts/permissions.ts`
+- `app/(main)/market-charts/page.tsx`
+- `app/(main)/market-charts/market-chart-workbench.tsx`
+- `app/(main)/market-charts/market-chart-canvas.tsx`
+- Surface nay nhieu kha nang se anh huong toi `market-query` neu can hien thi chart context ben canh ket qua phan tich.
+
+Ghi chu:
+
+- Query contract hien duoc khai bao qua object `request` trong query string, tham chieu schema `MarketChartCandleRequest`.
+- `MarketChartCandleRequest` gom `symbol`, `timeframe`, `from`, `to`; snapshot hien tai khong mo ta enum hay danh sach gia tri hop le, trong khi FE data layer hien gioi han `timeframe` theo union `1m`, `5m`, `15m`, `30m`, `1h`, `1d`, `1w`, `1mo`.
+- `MarketChartCandleItemResponse` gom `time`, `open`, `high`, `low`, `close`, `volume`.
+- Frontend da co chart workbench dau tien cho candle bridge; event marker, asset-level chart endpoint, workspace watchlist chart selection va annotation popup van chua trien khai.
+
+### 6. API market query
 
 | Phuong thuc | Endpoint backend | operationId | Tich hop frontend      | Trang thai                         | Ghi chu                                                                                                                                                                                                                                                 |
 | ----------- | ---------------- | ----------- | ---------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -168,7 +196,7 @@ Ghi chu:
 - `MarketQueryKeyEventResponse` da doi `summary` thanh `description`; `app/lib/market-query/definitions.ts` va `app/(main)/market-query/market-query-key-events.tsx` hien van doc field cu.
 - `MarketQueryEvidenceResponse` hien dung `artifactType`, `artifactId`, `artifactTitle`, `artifactUrl`, `newsOutletName`, `publishedAt`, `evidenceRole`, `evidenceConfidence`; FE da doi bo link canon sang `/news-articles/{artifactId}` cho artifact `NEWS_ARTICLE`.
 
-### 6. API graph view
+### 7. API graph view
 
 | Phuong thuc | Endpoint backend | operationId    | Tich hop frontend | Trang thai                         | Ghi chu                                                                                                                                                    |
 | ----------- | ---------------- | -------------- | ----------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -182,7 +210,7 @@ Ghi chu:
 - Frontend `app/lib/graph-view/definitions.ts` va `app/(main)/graph-view/*` da doi sang naming `news-article`, `source-artifact-event`, va `newsOutletName`, nhung hien van doc `metadata.active`.
 - Drill-down cho node bai viet da chuyen sang `/news-articles/{id}`.
 
-### 7. API blogs
+### 8. API blogs
 
 | Phuong thuc | Endpoint backend | operationId      | Tich hop frontend         | Trang thai                            | Ghi chu                                 |
 | ----------- | ---------------- | ---------------- | ------------------------- | ------------------------------------- | --------------------------------------- |
@@ -197,7 +225,7 @@ Ghi chu:
 - Snapshot hien tai tiep tuc dung `visible` cho create request va cho ca list/detail response, trong khi update request van dung `isVisible`.
 - Frontend blogs hien van standardize theo `isVisible` trong definitions va form, nen create payload va mapping list/detail response van la diem drift can xu ly khi dong bo code.
 
-### 8. API cronjobs
+### 9. API cronjobs
 
 | Phuong thuc | Endpoint backend        | operationId | Tich hop frontend            | Trang thai      | Ghi chu                               |
 | ----------- | ----------------------- | ----------- | ---------------------------- | --------------- | ------------------------------------- |
@@ -211,7 +239,7 @@ Ghi chu:
 | POST        | `/cronjobs/{id}/resume` | `resume`    | `resumeCronjob(id)`          | Da trien khai   | Co UX.                                |
 | POST        | `/cronjobs/{id}/stop`   | `stop`      | `-`                          | Chua trien khai | Frontend chua co `stopCronjob()`.     |
 
-### 9. API AI provider configs
+### 10. API AI provider configs
 
 | Phuong thuc | Endpoint backend                        | operationId              | Tich hop frontend                     | Trang thai                               | Ghi chu                                                                                                |
 | ----------- | --------------------------------------- | ------------------------ | ------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------ |
@@ -223,14 +251,14 @@ Ghi chu:
 | PATCH       | `/ai-provider-configs/{id}/set-default` | `setDefault`             | `setAiProviderConfigDefault(id)`      | Da trien khai                            | Da tich hop.                                                                                           |
 | POST        | `/ai-provider-configs/model-catalog`    | `getModelCatalog`        | `getAiProviderModelCatalog(request)`  | Da trien khai                            | Tai model catalog theo credentials.                                                                    |
 
-### 10. API assets
+### 11. API assets
 
 | Phuong thuc | Endpoint backend | operationId | Tich hop frontend         | Trang thai    | Ghi chu                   |
 | ----------- | ---------------- | ----------- | ------------------------- | ------------- | ------------------------- |
 | GET         | `/assets`        | `getAssets` | `getAssets(searchParams)` | Da trien khai | Asset catalog read-only.  |
 | GET         | `/assets/{id}`   | `getAsset`  | `getAssetById(id)`        | Da trien khai | Co helper hydrate detail. |
 
-### 11. API media
+### 12. API media
 
 | Phuong thuc | Endpoint backend | operationId   | Tich hop frontend | Trang thai      | Ghi chu                             |
 | ----------- | ---------------- | ------------- | ----------------- | --------------- | ----------------------------------- |
@@ -239,7 +267,7 @@ Ghi chu:
 | DELETE      | `/medias/{id}`   | `deleteMedia` | `-`               | Chua trien khai | Chua co tich hop.                   |
 | POST        | `/medias/upload` | `upload`      | `-`               | Chua trien khai | Chua co tich hop.                   |
 
-### 12. API economic calendar
+### 13. API economic calendar
 
 | Phương thức | Endpoint backend          | operationId                 | Tích hợp frontend | Trạng thái      | Ghi chú                                                                                                  |
 | ----------- | ------------------------- | --------------------------- | ----------------- | --------------- | -------------------------------------------------------------------------------------------------------- |
@@ -254,7 +282,7 @@ Ghi chú:
 - Detail response có thêm `content`; UI chỉ hiển thị nội dung khi `contentAvailable` là true và `content` có dữ liệu.
 - Frontend không còn phụ thuộc vào các field cũ đã bị backend loại bỏ như `description`, `url`, `externalKey`, `provider`, `countryCode`, `importance`, `ingestedAt`, `rawContent`, hoặc `rawMetadata`.
 
-### 13. API workspace
+### 14. API workspace
 
 | Phuong thuc | Endpoint backend                  | operationId           | Tich hop frontend               | Trang thai                         | Ghi chu                                                                 |
 | ----------- | --------------------------------- | --------------------- | ------------------------------- | ---------------------------------- | ----------------------------------------------------------------------- |
@@ -263,13 +291,13 @@ Ghi chú:
 | PUT         | `/me/workspaces/{id}`             | `updateWorkspace`     | `updateWorkspace(id, request)`  | Da trien khai                      | Rename workspace.                                                       |
 | PATCH       | `/me/workspaces/{id}/set-current` | `setCurrentWorkspace` | `setCurrentWorkspace(id)`       | Da tich hop | Frontend goi dung `/set-current` va gate bang permission chinh thuc `workspace:set-current`. |
 
-### 14. API user
+### 15. API user
 
 | Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai                         | Ghi chu                                                                                                                                  |
 | ----------- | ---------------- | ----------- | ----------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | GET         | `/me`            | `me`        | `getMe()`         | Da trien khai nhung con lech contract | Snapshot hien tai dung `currentWorkspace` thay vi `workspace`, va `mainImage` la `MediaResponse`; FE `BackendMeResponse` van map `workspace` va `mainImage` thanh `string`. |
 
-### 15. API wiki
+### 16. API wiki
 
 Khong con tich hop frontend.
 
@@ -278,20 +306,20 @@ Ghi chu:
 - Toan bo route, action, definition, va UI surface `wiki` da duoc go khoi frontend.
 - Neu backend tai xuat wiki trong tuong lai, nen de xuat mot change moi thay vi tai su dung module cu.
 
-### 16. API roles
+### 17. API roles
 
 | Phuong thuc | Endpoint backend               | operationId             | Tich hop frontend                         | Trang thai    | Ghi chu                                            |
 | ----------- | ------------------------------ | ----------------------- | ----------------------------------------- | ------------- | -------------------------------------------------- |
 | GET         | `/roles`                       | `getRoles`              | `getRoles()`                              | Da trien khai | Trang roles da load danh sach vai tro.             |
 | PUT         | `/roles/{roleKey}/permissions` | `updateRolePermissions` | `updateRolePermissions(roleKey, request)` | Da trien khai | Dialog frontend cho phep cap nhat permission keys. |
 
-### 17. API permissions
+### 18. API permissions
 
 | Phuong thuc | Endpoint backend | operationId      | Tich hop frontend  | Trang thai    | Ghi chu                                                 |
 | ----------- | ---------------- | ---------------- | ------------------ | ------------- | ------------------------------------------------------- |
 | GET         | `/permissions`   | `getPermissions` | `getPermissions()` | Da trien khai | Duoc dung cung role editor de build permission catalog. |
 
-### 18. API watchlists
+### 19. API watchlists
 
 | Phuong thuc | Endpoint backend               | operationId       | Tich hop frontend                            | Trang thai    | Ghi chu                                                 |
 | ----------- | ------------------------------ | ----------------- | -------------------------------------------- | ------------- | ------------------------------------------------------- |
@@ -299,13 +327,13 @@ Ghi chu:
 | POST        | `/watchlists`                  | `createWatchlist` | `addAssetToWorkspaceWatchlist({ assetId })`  | Da trien khai | Sync add theo diff trong workspace editor.              |
 | DELETE      | `/watchlists/assets/{assetId}` | `deleteByAssetId` | `removeAssetFromWorkspaceWatchlist(assetId)` | Da trien khai | Sync remove theo diff.                                  |
 
-### 19. Webhook
+### 20. Webhook
 
 | Phuong thuc | Endpoint backend  | operationId          | Tich hop frontend | Trang thai  | Ghi chu                           |
 | ----------- | ----------------- | -------------------- | ----------------- | ----------- | --------------------------------- |
 | POST        | `/webhooks/clerk` | `handleClerkWebhook` | `-`               | Chi backend | Khong ky vong co frontend caller. |
 
-### 20. Health check
+### 21. Health check
 
 | Phuong thuc | Endpoint backend | operationId   | Tich hop frontend | Trang thai      | Ghi chu               |
 | ----------- | ---------------- | ------------- | ----------------- | --------------- | --------------------- |
@@ -317,7 +345,7 @@ Nhung nhom duoi day van ton tai tren frontend, nhung khong xuat hien trong `docs
 
 | Nhom             | Tinh trang frontend                                                                                                   | Ghi chu                                                                                               |
 | ---------------- | --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| Sources          | `app/api/sources/action.ts`, `app/lib/sources/definitions.ts`, `app/(main)/sources/*`                               | Chi con data layer legacy va route redirect compatibility; surface canon da la `/news-outlets`.      |
+| Sources          | `app/(main)/sources/page.tsx`, `app/(main)/sources/create/page.tsx`, `app/(main)/sources/[id]/page.tsx`             | Chi con route redirect compatibility; data layer va UI legacy cua `/sources` da duoc xoa.            |
 | Source documents | `app/(main)/source-documents/page.tsx`, `app/(main)/source-documents/[id]/page.tsx`                                 | Chi con route redirect compatibility cho deeplink cu; data layer canon da la `news-articles`.             |
 | Topics           | `app/api/topics/action.ts`, `app/lib/topics/definitions.ts`, `app/(main)/topics/*`                                  | Frontend van co module topics, nhung snapshot API hien tai khong co `/topics*`.                     |
 
@@ -383,9 +411,10 @@ type ActionResult<T = void> =
 | Tang van chuyen auth                      | `app/api/auth/action.ts`                                                                                                                                            |
 | News outlets                              | `app/api/news-outlets/action.ts`, `app/lib/news-outlets/definitions.ts`, `app/lib/news-outlets/permissions.ts`, `app/(main)/news-outlets/*`                      |
 | News articles                             | `app/api/news-articles/action.ts`, `app/lib/news-articles/definitions.ts`, `app/lib/news-articles/permissions.ts`, `app/(main)/news-articles/*`                  |
-| Sources (legacy, ngoai snapshot)          | `app/api/sources/action.ts`, `app/lib/sources/definitions.ts`, `app/(main)/sources/*` (redirect compatibility)                                                    |
+| Sources (legacy, ngoai snapshot)          | `app/(main)/sources/page.tsx`, `app/(main)/sources/create/page.tsx`, `app/(main)/sources/[id]/page.tsx` (redirect compatibility)                                  |
 | Source documents (legacy, ngoai snapshot) | `app/(main)/source-documents/page.tsx`, `app/(main)/source-documents/[id]/page.tsx` (redirect compatibility)                                                     |
 | Events                                    | `app/api/events/action.ts`, `app/lib/events/definitions.ts`, `app/lib/events/permissions.ts`, `app/(main)/events/*`                                               |
+| Market charts                             | `app/api/market-charts/action.ts`, `app/lib/market-charts/definitions.ts`, `app/lib/market-charts/permissions.ts`, `app/(main)/market-charts/*`                    |
 | Market query                              | `app/api/query/action.ts`, `app/lib/market-query/definitions.ts`, `app/lib/market-query/permissions.ts`, `app/(main)/market-query/*`                              |
 | Graph view                                | `app/api/graph-view/action.ts`, `app/lib/graph-view/definitions.ts`, `app/lib/graph-view/permissions.ts`, `app/(main)/graph-view/*`                               |
 | Blogs                                     | `app/api/blogs/action.ts`, `app/lib/blogs/definitions.ts`                                                                                                           |
@@ -407,6 +436,9 @@ type ActionResult<T = void> =
 - List/search runtime cua frontend dang dung `$filter/page/size/sort`, trong khi OpenAPI tiep tuc mo ta `specification/pageable` o nhieu list endpoint.
 - Frontend da migrate route canon sang `/news-outlets*` va `/news-articles*`; `/sources*`, `/news-sources*`, va `/source-documents*` chi con redirect compatibility.
 - `news articles`: `linkedEvents[]` da co `eventStatus` enum moi theo enrichment lifecycle va khong con `eventEnrichmentStatus`; FE detail article hien van map theo contract cu cua `events`.
+- `events`: backend gate enrich/market reaction operators bang `news-article:analyze`; FE events da gate bang permission canon nay truoc va chi giu `source-document:analyze` nhu alias compatibility tam thoi.
+- `permission scan`: cac literal FE-only `source-document:*` con lai deu la alias compatibility sau permission canon `news-article:*`; cac permission BE chua co FE literal gom `cronjob:stop` va `media:*` vi cac surface/action nay chua duoc tich hop.
+- `market charts`: backend them `GET /market-charts/candles` va cac schema candle OHLCV; FE da co data layer va workbench `/market-charts` dung Lightweight Charts, nhung `timeframe` dang bi FE constrain thanh enum cuc bo trong khi OpenAPI chi khai bao string.
 - `market query`: spec van mo ta `asOfTime` la optional `date-time`; frontend v1 chu dong omit field nay de backend tu lay thoi diem hien tai va harden parse cho payload runtime co the tra `null` o `publishedAt` va `occurredAt`. Ngoai ra, `keyEvents[]` da doi `summary` thanh `description`, nhung FE van doc field cu.
 - `graph view`: `GraphNodeMetadata` da doi `active` thanh `status`; FE workbench hien van doc `metadata.active`.
 - `user profile`: `GET /me` da doi `workspace` thanh `currentWorkspace`, va `mainImage` la object media; FE `app/lib/users/definitions.ts` hien van map theo contract cu. Hien tac dong runtime thap vi permissions server chi doc `permissions[]`.
