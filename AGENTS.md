@@ -72,6 +72,7 @@ app/(main)/[feature]/
 - Trước thay đổi không tầm thường, khóa scope bằng mục tiêu, giả định, non-goals và tiêu chí hoàn thành rõ ràng.
 - Ưu tiên giải pháp đơn giản nhất đủ yêu cầu; không tạo abstraction, cấu hình hoặc luồng dự phòng khi chưa có nhu cầu rõ.
 - Chỉnh sửa phẫu thuật: chỉ sửa file liên quan trực tiếp, bám style hiện có và không dọn code ngoài scope.
+- Khi thay thế thư viện/vendor UI hoặc chart engine, migration phải xóa sạch source cũ không còn dùng: dependency trong package/lockfile, import/type/helper, adapter, attribution/vendor copy, OpenSpec/docs reference đang active và dead component tạm thời; không giữ code legacy bị disable eslint nếu không có compatibility path đang chạy thật.
 - Kết thúc bằng kiểm chứng phù hợp như lint, typecheck, test hoặc smoke test; nếu chưa chạy được thì nói rõ lý do.
 
 ### Core components
@@ -114,6 +115,17 @@ app/(main)/[feature]/
 - Chỉ dùng `<Card>` cho inner surface có ranh giới thật như form section, detail panel, dashboard tile, access-denied/error panel hoặc repeated item
 - Trang danh sách render trực tiếp shared toolbar, table và pagination surfaces; không thêm main `<Card>`, `<CardHeader>`, `<CardTitle>`, `<CardDescription>` và `<Separator />` bao ngoài
 - Trang chi tiết phải có nút quay lại phía trên nội dung chính; các panel bên trong có thể dùng `<Card>` khi giúp nhóm dữ liệu rõ hơn
+
+### Tối giản nội dung màn hình
+
+- Mỗi màn hình chỉ nên hiển thị text giúp người dùng ra quyết định hoặc hoàn thành tác vụ; không thêm mô tả chỉ để giải thích lại điều đã rõ qua breadcrumb, label, control hoặc dữ liệu.
+- Không lặp lại page identity trong body bằng heading/hero paragraph nếu breadcrumb/app header đã đủ rõ, trừ dashboard hoặc landing surface thật sự cần narrative riêng.
+- Tránh badge trang trí như loại surface, tên kỹ thuật hoặc trạng thái hiển nhiên nếu chúng không thay đổi quyết định của user; badge nên biểu thị trạng thái, phạm vi, permission, loại dữ liệu hoặc tín hiệu scan có giá trị.
+- `CardDescription` chỉ dùng khi description bổ sung ngữ cảnh không suy ra được từ title/metric; không viết mô tả kiểu "Snapshot...", "Danh sách...", "Thông tin..." nếu nội dung card đã tự nói rõ.
+- Các màn hình dữ liệu dày như chart, graph, dashboard hoặc workbench phải ưu tiên controls và dữ liệu chính lên trước; copy dài, implementation detail, roadmap/future feature và legal/vendor note nên chuyển thành tooltip, help text nhỏ, footer legal hoặc tài liệu riêng.
+- Không render panel placeholder cho tính năng tương lai trong main workspace nếu chưa có dữ liệu/action thật; chỉ giữ tín hiệu nhỏ hoặc empty state khi nó trực tiếp giúp user hiểu vì sao dữ liệu vắng mặt.
+- Copy kỹ thuật như backend contract, provider bridge, `from/to`, dependency chart library hoặc DTO chỉ xuất hiện khi cần cho lỗi, empty state, debug/operator context hoặc attribution compliance.
+- Attribution của thư viện/vendor có yêu cầu giấy phép không được xóa im lặng; nếu bỏ logo hoặc attribution inline khỏi bề mặt chính, phải thay bằng notice/link ở vị trí người dùng truy cập được.
 
 ### Bố cục màn hình tạo mới và chỉnh sửa
 
@@ -191,6 +203,7 @@ app/(main)/[feature]/
 - Kiểm tra primary toolbar controls dùng default shadcn height; đánh dấu `h-*`, `min-h-*` hoặc `size="sm"` trong toolbar chính là review finding nếu không có lý do sản phẩm rõ ràng
 - Kiểm tra list toolbar không tự có `mb-*`; table surface phải là nơi sở hữu `mt-4` giữa toolbar/search controls và bảng
 - Đánh dấu top-level main `<Card>` chỉ để lặp lại breadcrumb title và bọc toàn page là review finding
+- Đánh dấu body heading/hero copy, badge trang trí, `CardDescription`, panel placeholder hoặc implementation-detail copy dư thừa là review finding khi chúng lặp lại breadcrumb/control/metric hoặc không giúp user ra quyết định
 - Kiểm tra bảng list dùng shared table surface nhất quán cho shell, header và empty state
 - Đánh dấu list table để nội dung dài làm nở ngang layout, thiếu chiến lược width cho cột chính/metadata, hoặc skeleton lệch width với bảng thật là review finding
 - Đánh dấu wrapper skeleton/list dùng `gap-*` gây double spacing giữa toolbar và `AppListTable` là review finding
@@ -199,7 +212,7 @@ app/(main)/[feature]/
 - Đánh dấu form trần trên workspace, submit/cancel row tự dựng sau `Separator`, skeleton create/update lệch shell hoặc nested card chỉ để lấy border/radius là review finding
 - Kiểm tra mutation có xử lý kiểu `ActionResult`, có pending state, spinner và disable control đúng lúc
 - Kiểm tra action xóa có dùng `AlertDialog`
-- Đánh dấu `any`, skeleton lệch bố cục, toolbar control height drift, toolbar/table spacing drift, main-card shell drift, form-shell drift, table surface drift và UI copy không phải tiếng Việt là review finding
+- Đánh dấu `any`, skeleton lệch bố cục, toolbar control height drift, toolbar/table spacing drift, main-card shell drift, form-shell drift, table surface drift, UI copy dư thừa và UI copy không phải tiếng Việt là review finding
 
 ## Biến môi trường
 

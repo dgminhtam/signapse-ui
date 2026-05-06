@@ -12,10 +12,11 @@ import {
 function createMarketChartCandleQuery(request: MarketChartCandleRequest) {
   const query = new URLSearchParams()
 
-  query.set("symbol", request.symbol.trim())
+  query.set("assetId", String(request.assetId))
   query.set("timeframe", request.timeframe)
   query.set("from", request.from)
   query.set("to", request.to)
+  query.set("includeAnnotations", String(request.includeAnnotations ?? false))
 
   return query.toString()
 }

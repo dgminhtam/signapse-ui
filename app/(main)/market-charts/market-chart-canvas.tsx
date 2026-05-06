@@ -1,33 +1,48 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import {
-  CandlestickSeries,
-  ColorType,
-  createChart,
-  CrosshairMode,
-  HistogramSeries,
-  type CandlestickData,
-  type HistogramData,
-  type UTCTimestamp,
-} from "lightweight-charts"
+  dispose,
+  init,
+  type Chart,
+  type DeepPartial,
+  type KLineData,
+  type Period,
+  type Styles,
+} from "klinecharts"
 import { useTheme } from "next-themes"
 
-import { MarketChartCandleItemResponse } from "@/app/lib/market-charts/definitions"
+import {
+  MarketChartCandleItemResponse,
+  MarketChartTimeframe,
+} from "@/app/lib/market-charts/definitions"
+
+import {
+  type MarketChartAnnotationGroup,
+  type MarketChartAnnotationMarkerPoint,
+  toMarketChartEpochMillis,
+} from "./market-chart-annotations"
 
 interface MarketChartCanvasProps {
   candles: MarketChartCandleItemResponse[]
+  timeframe: MarketChartTimeframe
+  symbol?: string
+  annotationGroups?: MarketChartAnnotationGroup[]
+  selectedAnnotationGroupId?: string | null
+  onAnnotationSelect?: (
+    groupId: string,
+    point: MarketChartAnnotationMarkerPoint
+  ) => void
 }
 
-function toUtcTimestamp(value: string): UTCTimestamp | null {
-  const timestamp = Math.floor(Date.parse(value) / 1000)
-
-  if (!Number.isFinite(timestamp)) {
-    return null
-  }
-
-  return timestamp as UTCTimestamp
+interface MarkerPosition {
+  group: MarketChartAnnotationGroup
+  x: number
+  y: number
 }
+
+const CANDLE_PANE_ID = "candle_pane"
+const VOLUME_PANE_ID = "market-chart-volume"
 
 const colorCache = new Map<string, string>()
 
@@ -53,7 +68,7 @@ function resolveColor(color: string): string {
 
     colorCache.set(color, result)
     return result
-  } catch (err) {
+  } catch {
     return color
   }
 }
@@ -70,55 +85,177 @@ function getCssVariable(name: string, fallback: string) {
   return resolveColor(value)
 }
 
-function createCandlestickData(
-  candles: MarketChartCandleItemResponse[]
-): CandlestickData[] {
-  const dataByTime = new Map<number, CandlestickData>()
+function createKLineData(candles: MarketChartCandleItemResponse[]): KLineData[] {
+  const dataByTime = new Map<number, KLineData>()
 
   for (const candle of candles) {
-    const time = toUtcTimestamp(candle.time)
+    const timestamp = toMarketChartEpochMillis(candle.time)
 
-    if (!time) {
+    if (!timestamp) {
       continue
     }
 
-    dataByTime.set(time, {
-      time,
+    dataByTime.set(timestamp, {
+      timestamp,
       open: candle.open,
       high: candle.high,
       low: candle.low,
       close: candle.close,
+      ...(typeof candle.volume === "number" ? { volume: candle.volume } : {}),
     })
   }
 
   return [...dataByTime.values()].sort((left, right) => {
-    return Number(left.time) - Number(right.time)
+    return left.timestamp - right.timestamp
   })
 }
 
-function createVolumeData(candles: MarketChartCandleItemResponse[]): HistogramData[] {
-  return candles.flatMap((candle) => {
-    const time = toUtcTimestamp(candle.time)
+function createKLinePeriod(timeframe: MarketChartTimeframe): Period {
+  switch (timeframe) {
+    case "1m":
+      return { type: "minute", span: 1 }
+    case "5m":
+      return { type: "minute", span: 5 }
+    case "15m":
+      return { type: "minute", span: 15 }
+    case "30m":
+      return { type: "minute", span: 30 }
+    case "1h":
+      return { type: "hour", span: 1 }
+    case "1d":
+      return { type: "day", span: 1 }
+    case "1w":
+      return { type: "week", span: 1 }
+    case "1mo":
+      return { type: "month", span: 1 }
+    default:
+      return { type: "hour", span: 1 }
+  }
+}
 
-    if (!time || typeof candle.volume !== "number") {
-      return []
-    }
+function createChartStyles(): DeepPartial<Styles> {
+  const textColor = getCssVariable("--muted-foreground", "#737373")
+  const borderColor = getCssVariable("--border", "#e5e5e5")
+  const upColor = getCssVariable("--chart-2", "#14947e")
+  const downColor = getCssVariable("--destructive", "#dc2626")
 
-    return [
-      {
-        time,
-        value: candle.volume,
-        color:
-          candle.close >= candle.open
-            ? "rgba(20, 148, 126, 0.35)"
-            : "rgba(220, 38, 38, 0.32)",
+  return {
+    grid: {
+      horizontal: {
+        color: borderColor,
+        show: true,
+        size: 1,
+        style: "solid",
       },
-    ]
-  })
+      vertical: {
+        color: borderColor,
+        show: true,
+        size: 1,
+        style: "solid",
+      },
+    },
+    candle: {
+      bar: {
+        compareRule: "current_open",
+        downBorderColor: downColor,
+        downColor,
+        downWickColor: downColor,
+        noChangeBorderColor: textColor,
+        noChangeColor: textColor,
+        noChangeWickColor: textColor,
+        upBorderColor: upColor,
+        upColor,
+        upWickColor: upColor,
+      },
+    },
+    indicator: {
+      ohlc: {
+        compareRule: "current_open",
+        downColor: "rgba(220, 38, 38, 0.32)",
+        noChangeColor: "rgba(115, 115, 115, 0.28)",
+        upColor: "rgba(20, 148, 126, 0.35)",
+      },
+    },
+    xAxis: {
+      axisLine: {
+        color: borderColor,
+        size: 1,
+      },
+      tickText: {
+        color: textColor,
+      },
+    },
+    yAxis: {
+      axisLine: {
+        color: borderColor,
+        size: 1,
+      },
+      tickText: {
+        color: textColor,
+      },
+    },
+    crosshair: {
+      horizontal: {
+        line: {
+          color: textColor,
+        },
+        text: {
+          backgroundColor: getCssVariable("--foreground", "#171717"),
+          color: getCssVariable("--background", "#ffffff"),
+        },
+      },
+      vertical: {
+        line: {
+          color: textColor,
+        },
+        text: {
+          backgroundColor: getCssVariable("--foreground", "#171717"),
+          color: getCssVariable("--background", "#ffffff"),
+        },
+      },
+    },
+  }
 }
 
-export function MarketChartCanvas({ candles }: MarketChartCanvasProps) {
+function getMarkerCoordinate(
+  chart: Chart,
+  group: MarketChartAnnotationGroup
+): MarketChartAnnotationMarkerPoint | null {
+  const coordinate = chart.convertToPixel(
+    {
+      timestamp: group.time,
+      value: group.anchorPrice,
+    },
+    {
+      absolute: true,
+      paneId: CANDLE_PANE_ID,
+    }
+  )
+
+  if (Array.isArray(coordinate)) {
+    return null
+  }
+
+  if (typeof coordinate.x !== "number" || typeof coordinate.y !== "number") {
+    return null
+  }
+
+  return {
+    x: coordinate.x,
+    y: coordinate.y,
+  }
+}
+
+export function MarketChartCanvas({
+  candles,
+  timeframe,
+  symbol = "MARKET",
+  annotationGroups = [],
+  selectedAnnotationGroupId,
+  onAnnotationSelect,
+}: MarketChartCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
+  const [markerPositions, setMarkerPositions] = useState<MarkerPosition[]>([])
   const { resolvedTheme } = useTheme()
 
   useEffect(() => {
@@ -128,68 +265,180 @@ export function MarketChartCanvas({ candles }: MarketChartCanvasProps) {
       return
     }
 
-    const backgroundColor = getCssVariable("--card", "#ffffff")
-    const textColor = getCssVariable("--muted-foreground", "#737373")
-    const borderColor = getCssVariable("--border", "#e5e5e5")
-    const upColor = getCssVariable("--chart-2", "#14947e")
-    const downColor = getCssVariable("--destructive", "#dc2626")
-    const chart = createChart(container, {
-      autoSize: true,
-      layout: {
-        background: { type: ColorType.Solid, color: backgroundColor },
-        textColor,
-      },
-      grid: {
-        vertLines: { color: borderColor },
-        horzLines: { color: borderColor },
-      },
-      crosshair: {
-        mode: CrosshairMode.Normal,
-      },
-      rightPriceScale: {
-        borderColor,
-        scaleMargins: {
-          top: 0.08,
-          bottom: 0.24,
+    const chart = init(container, {
+      layout: [
+        {
+          type: "candle",
+          options: {
+            axis: {
+              gap: {
+                bottom: 0.22,
+                top: 0.08,
+              },
+            },
+            id: CANDLE_PANE_ID,
+          },
         },
-      },
-      timeScale: {
-        borderColor,
-        timeVisible: true,
-        secondsVisible: false,
-      },
+        {
+          content: ["VOL"],
+          options: {
+            dragEnabled: false,
+            height: 92,
+            id: VOLUME_PANE_ID,
+            minHeight: 64,
+          },
+          type: "indicator",
+        },
+        {
+          type: "xAxis",
+        },
+      ],
+      locale: "en-US",
+      styles: createChartStyles(),
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      zoomAnchor: "cursor",
     })
-    const candleSeries = chart.addSeries(CandlestickSeries, {
-      upColor,
-      downColor,
-      borderUpColor: upColor,
-      borderDownColor: downColor,
-      wickUpColor: upColor,
-      wickDownColor: downColor,
-    })
-    const volumeSeries = chart.addSeries(HistogramSeries, {
-      priceFormat: {
-        type: "volume",
-      },
-      priceScaleId: "volume",
-    })
-    const candleData = createCandlestickData(candles)
-    const volumeData = createVolumeData(candles)
 
-    candleSeries.setData(candleData)
-    volumeSeries.setData(volumeData)
-    chart.priceScale("volume").applyOptions({
-      scaleMargins: {
-        top: 0.78,
-        bottom: 0,
+    if (!chart) {
+      return
+    }
+
+    const data = createKLineData(candles)
+    const period = createKLinePeriod(timeframe)
+
+    const updateMarkerPositions = () => {
+      const nextPositions = annotationGroups.flatMap((group) => {
+        const point = getMarkerCoordinate(chart, group)
+
+        if (!point) {
+          return []
+        }
+
+        return [
+          {
+            group,
+            x: Math.max(18, Math.min(container.clientWidth - 18, point.x)),
+            y: Math.max(24, Math.min(container.clientHeight - 92, point.y - 18)),
+          },
+        ]
+      })
+
+      setMarkerPositions(nextPositions)
+    }
+
+    const scheduleMarkerPositionUpdate = () => {
+      window.requestAnimationFrame(updateMarkerPositions)
+    }
+
+    chart.setDataLoader({
+      getBars({ type, callback }) {
+        callback(type === "init" ? data : [], {
+          backward: false,
+          forward: false,
+        })
+        scheduleMarkerPositionUpdate()
       },
     })
-    chart.timeScale().fitContent()
+    chart.setSymbol({
+      ticker: symbol,
+      pricePrecision: 4,
+      volumePrecision: 2,
+    })
+    chart.setPeriod(period)
+    chart.setOffsetRightDistance(24)
+    chart.setLeftMinVisibleBarCount(8)
+    chart.setRightMinVisibleBarCount(8)
+    chart.subscribeAction("onVisibleRangeChange", scheduleMarkerPositionUpdate)
+    chart.subscribeAction("onScroll", scheduleMarkerPositionUpdate)
+    chart.subscribeAction("onZoom", scheduleMarkerPositionUpdate)
+
+    const frameId = window.requestAnimationFrame(updateMarkerPositions)
+    const resizeObserver = new ResizeObserver(() => {
+      chart.resize()
+      scheduleMarkerPositionUpdate()
+    })
+
+    resizeObserver.observe(container)
 
     return () => {
-      chart.remove()
+      window.cancelAnimationFrame(frameId)
+      chart.unsubscribeAction("onVisibleRangeChange", scheduleMarkerPositionUpdate)
+      chart.unsubscribeAction("onScroll", scheduleMarkerPositionUpdate)
+      chart.unsubscribeAction("onZoom", scheduleMarkerPositionUpdate)
+      resizeObserver.disconnect()
+      setMarkerPositions([])
+      dispose(chart)
     }
-  }, [candles, resolvedTheme])
+  }, [annotationGroups, candles, resolvedTheme, symbol, timeframe])
 
-  return <div ref={containerRef} className="h-[520px] min-h-[420px] w-full" />
+  return (
+    <div className="relative h-[520px] min-h-[420px] w-full">
+      <div ref={containerRef} className="absolute inset-0" />
+      {markerPositions.map(({ group, x, y }) => {
+        const selected = selectedAnnotationGroupId === group.id
+        const emphasized = selected || group.priority === "high"
+        const count = group.annotations.length
+
+        return (
+          <button
+            key={group.id}
+            type="button"
+            aria-label={
+              count > 1
+                ? `Mở ${count} sự kiện tại ${group.annotations[0]?.time}`
+                : `Mở sự kiện ${group.annotations[0]?.title || ""}`
+            }
+            aria-pressed={selected}
+            className="group absolute z-10 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+            style={{ left: x, top: y }}
+            onClick={(event) => {
+              event.stopPropagation()
+              onAnnotationSelect?.(group.id, { x, y })
+            }}
+          >
+            <span
+              className={
+                emphasized
+                  ? "market-chart-annotation-pulse absolute size-9 rounded-full bg-destructive/25"
+                  : "market-chart-annotation-pulse absolute size-7 rounded-full bg-destructive/20"
+              }
+            />
+            <span
+              className={
+                count > 1
+                  ? "relative flex size-6 items-center justify-center rounded-full border-2 border-background bg-destructive text-[11px] font-semibold text-destructive-foreground shadow-lg ring-2 ring-destructive/30"
+                  : "relative block size-4 rounded-full border-2 border-background bg-destructive shadow-lg ring-2 ring-destructive/30 group-aria-pressed:ring-4"
+              }
+            >
+              {count > 1 ? count : null}
+            </span>
+          </button>
+        )
+      })}
+      <style>
+        {`
+          @media (prefers-reduced-motion: no-preference) {
+            .market-chart-annotation-pulse {
+              animation: market-chart-annotation-pulse 2s ease-out infinite;
+            }
+          }
+
+          @keyframes market-chart-annotation-pulse {
+            0% {
+              opacity: 0.75;
+              transform: scale(0.55);
+            }
+            70% {
+              opacity: 0;
+              transform: scale(1.35);
+            }
+            100% {
+              opacity: 0;
+              transform: scale(1.35);
+            }
+          }
+        `}
+      </style>
+    </div>
+  )
 }

@@ -26,11 +26,21 @@ export const MARKET_CHART_TIMEFRAME_LABELS: Record<MarketChartTimeframe, string>
 
 export const DEFAULT_MARKET_CHART_TIMEFRAME: MarketChartTimeframe = "1h"
 
+export type MarketChartAssetType = "COMMODITY" | "CRYPTO" | "FX" | "INDEX" | string
+
 export interface MarketChartCandleRequest {
-  symbol: string
+  assetId: number
   timeframe: MarketChartTimeframe
   from: string
   to: string
+  includeAnnotations?: boolean
+}
+
+export interface MarketChartAssetResponse {
+  id: number
+  name: string
+  symbol: string
+  type: MarketChartAssetType
 }
 
 export interface MarketChartCandleItemResponse {
@@ -42,13 +52,61 @@ export interface MarketChartCandleItemResponse {
   volume?: number | null
 }
 
+export type MarketChartAnnotationDirection =
+  | "BULLISH"
+  | "BEARISH"
+  | "MIXED"
+  | "NEUTRAL"
+  | string
+
+export interface MarketChartAnnotationEvidenceResponse {
+  sourceDocumentId?: number | null
+  title?: string | null
+  publisher?: string | null
+  url?: string | null
+  publishedAt?: string | null
+  evidenceRole?: string | null
+  confidence?: number | null
+  evidenceNote?: string | null
+}
+
+export interface MarketChartAnnotationLinksResponse {
+  eventDetail?: string | null
+}
+
+export interface MarketChartAnnotationReactionResponse {
+  id?: number | null
+  direction?: MarketChartAnnotationDirection | null
+  timeHorizon?: string | null
+  confidence?: number | null
+  reasoning?: string | null
+  observedAt?: string | null
+}
+
+export interface MarketChartAnnotationResponse {
+  id: string
+  eventId?: number | null
+  assetId?: number | null
+  time: string
+  severity?: string | null
+  direction?: MarketChartAnnotationDirection | null
+  title: string
+  summary?: string | null
+  confidence?: number | null
+  reaction?: MarketChartAnnotationReactionResponse | null
+  evidence: MarketChartAnnotationEvidenceResponse[]
+  links?: MarketChartAnnotationLinksResponse | null
+}
+
 export interface MarketChartCandleResponse {
   provider?: string | null
-  symbol: string
+  symbol?: string | null
+  asset: MarketChartAssetResponse
   timeframe: MarketChartTimeframe
   from: string
   to: string
   candles: MarketChartCandleItemResponse[]
+  annotations: MarketChartAnnotationResponse[]
 }
 
 function isValidDateTime(value: string) {
@@ -57,7 +115,12 @@ function isValidDateTime(value: string) {
 
 export const marketChartCandleRequestSchema = z
   .object({
-    symbol: z.string().trim().min(1, "Vui lòng nhập mã provider symbol."),
+    assetId: z
+      .number({
+        message: "Tài sản biểu đồ không hợp lệ.",
+      })
+      .int("Tài sản biểu đồ không hợp lệ.")
+      .positive("Vui lòng chọn tài sản trong watchlist."),
     timeframe: z.enum(MARKET_CHART_TIMEFRAMES, {
       message: "Khung thời gian không được hỗ trợ.",
     }),
@@ -71,6 +134,7 @@ export const marketChartCandleRequestSchema = z
       .trim()
       .min(1, "Vui lòng chọn thời điểm kết thúc.")
       .refine(isValidDateTime, "Thời điểm kết thúc không hợp lệ."),
+    includeAnnotations: z.boolean().optional(),
   })
   .superRefine((value, context) => {
     const fromTime = Date.parse(value.from)
@@ -85,6 +149,13 @@ export const marketChartCandleRequestSchema = z
     }
   }) satisfies z.ZodType<MarketChartCandleRequest>
 
+export const marketChartAssetResponseSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  symbol: z.string(),
+  type: z.string(),
+}) satisfies z.ZodType<MarketChartAssetResponse>
+
 export const marketChartCandleItemResponseSchema = z.object({
   time: z.string(),
   open: z.number(),
@@ -94,13 +165,54 @@ export const marketChartCandleItemResponseSchema = z.object({
   volume: z.number().nullable().optional(),
 }) satisfies z.ZodType<MarketChartCandleItemResponse>
 
+export const marketChartAnnotationEvidenceResponseSchema = z.object({
+  sourceDocumentId: z.number().nullable().optional(),
+  title: z.string().nullable().optional(),
+  publisher: z.string().nullable().optional(),
+  url: z.string().nullable().optional(),
+  publishedAt: z.string().nullable().optional(),
+  evidenceRole: z.string().nullable().optional(),
+  confidence: z.number().nullable().optional(),
+  evidenceNote: z.string().nullable().optional(),
+}) satisfies z.ZodType<MarketChartAnnotationEvidenceResponse>
+
+export const marketChartAnnotationLinksResponseSchema = z.object({
+  eventDetail: z.string().nullable().optional(),
+}) satisfies z.ZodType<MarketChartAnnotationLinksResponse>
+
+export const marketChartAnnotationReactionResponseSchema = z.object({
+  id: z.number().nullable().optional(),
+  direction: z.string().nullable().optional(),
+  timeHorizon: z.string().nullable().optional(),
+  confidence: z.number().nullable().optional(),
+  reasoning: z.string().nullable().optional(),
+  observedAt: z.string().nullable().optional(),
+}) satisfies z.ZodType<MarketChartAnnotationReactionResponse>
+
+export const marketChartAnnotationResponseSchema = z.object({
+  id: z.string(),
+  eventId: z.number().nullable().optional(),
+  assetId: z.number().nullable().optional(),
+  time: z.string(),
+  severity: z.string().nullable().optional(),
+  direction: z.string().nullable().optional(),
+  title: z.string(),
+  summary: z.string().nullable().optional(),
+  confidence: z.number().nullable().optional(),
+  reaction: marketChartAnnotationReactionResponseSchema.nullable().optional(),
+  evidence: z.array(marketChartAnnotationEvidenceResponseSchema).default([]),
+  links: marketChartAnnotationLinksResponseSchema.nullable().optional(),
+}) satisfies z.ZodType<MarketChartAnnotationResponse>
+
 export const marketChartCandleResponseSchema = z.object({
   provider: z.string().nullable().optional(),
-  symbol: z.string(),
+  symbol: z.string().nullable().optional(),
+  asset: marketChartAssetResponseSchema,
   timeframe: z.enum(MARKET_CHART_TIMEFRAMES),
   from: z.string(),
   to: z.string(),
   candles: z.array(marketChartCandleItemResponseSchema).default([]),
+  annotations: z.array(marketChartAnnotationResponseSchema).default([]),
 }) satisfies z.ZodType<MarketChartCandleResponse>
 
 export function isMarketChartTimeframe(value: string): value is MarketChartTimeframe {

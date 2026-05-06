@@ -16,6 +16,7 @@ export interface GraphViewNodeMetadata {
   url?: string | null
   occurredAt?: string | null
   publishedAt?: string | null
+  status?: string | null
   active?: boolean | null
   confidence?: number | null
 }
@@ -71,6 +72,7 @@ export const graphViewNodeMetadataSchema = z.object({
   url: z.string().nullish(),
   occurredAt: z.string().nullish(),
   publishedAt: z.string().nullish(),
+  status: z.string().nullish(),
   active: z.boolean().nullish(),
   confidence: z.number().nullish(),
 }) satisfies z.ZodType<GraphViewNodeMetadata>

@@ -2,7 +2,7 @@
 
 Tài liệu này ánh xạ snapshot OpenAPI backend trong `docs/api_mapping.json` tới các điểm tích hợp frontend hiện tại của repo.
 
-Xác minh lần cuối: ngày 4 tháng 5 năm 2026
+Xác minh lần cuối: ngày 6 tháng 5 năm 2026
 
 ## Cấu hình cơ sở
 
@@ -29,7 +29,7 @@ Xác minh lần cuối: ngày 4 tháng 5 năm 2026
 - Backend đã chuyển domain nội dung canon từ `sources` / `source-documents` sang `news-outlets` / `news-articles`.
 - Backend vẫn giữ các surface `events`, `query`, và `graph-view`, nhưng nhiều payload đã đổi naming từ `sourceDocument*` sang `artifact*` hoặc `news-article`.
 - Surface `events` có thêm workflow derive market reactions cho từng event và batch pending events.
-- Surface `market-charts` mới cung cấp dữ liệu nến OHLCV qua endpoint `GET /market-charts/candles`.
+- Surface `market-charts` tiep tuc cung cap du lieu nen OHLCV qua endpoint `GET /market-charts/candles`; snapshot moi doi request tu `symbol` sang `assetId` va them annotation payload.
 - Snapshot backend hiện publish metadata permission chính thức qua `x-signapse-auth`, trong đó một số gate frontend cũ cần được rà lại theo permission mới.
 - Frontend hiện đã có route và workbench cho `market-query` và `graph-view`, nhưng vẫn còn lệch contract với snapshot backend mới.
 - Frontend đã có surface canon `news-outlets` và `news-articles`; các route legacy `/sources*`, `/news-sources*`, và `/source-documents*` hiện chỉ còn redirect compatibility.
@@ -156,7 +156,7 @@ Ghi chu:
 
 | Phuong thuc | Endpoint backend          | operationId   | Tich hop frontend | Trang thai      | Ghi chu                                                                                                                                      |
 | ----------- | ------------------------- | ------------- | ----------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET         | `/market-charts/candles`  | `getCandles`  | `getMarketChartCandles(request)` | Da trien khai candle workbench | Endpoint moi duoc gate bang `market-chart:read`, tra ve `MarketChartCandleResponse` voi `provider`, `symbol`, `timeframe`, `from`, `to`, va `candles[]` du lieu OHLCV theo moc thoi gian; route `/market-charts` render bang Lightweight Charts + shadcn shell. |
+| GET         | `/market-charts/candles`  | `getCandles`  | `getMarketChartCandles(request)` | Da dong bo contract assetId va annotation | Endpoint duoc gate backend bang `market-chart:read`; FE gui `assetId`, `timeframe`, `from`, `to`, va `includeAnnotations` theo layer su kien; parse `provider`, optional `symbol`, `asset`, `timeframe`, `from`, `to`, `candles[]`, `annotations[]`. |
 
 Frontend lien quan:
 
@@ -166,14 +166,19 @@ Frontend lien quan:
 - `app/(main)/market-charts/page.tsx`
 - `app/(main)/market-charts/market-chart-workbench.tsx`
 - `app/(main)/market-charts/market-chart-canvas.tsx`
+- `app/api/watchlists/action.ts`
+- `app/lib/watchlists/definitions.ts`
 - Surface nay nhieu kha nang se anh huong toi `market-query` neu can hien thi chart context ben canh ket qua phan tich.
 
 Ghi chu:
 
 - Query contract hien duoc khai bao qua object `request` trong query string, tham chieu schema `MarketChartCandleRequest`.
-- `MarketChartCandleRequest` gom `symbol`, `timeframe`, `from`, `to`; snapshot hien tai khong mo ta enum hay danh sach gia tri hop le, trong khi FE data layer hien gioi han `timeframe` theo union `1m`, `5m`, `15m`, `30m`, `1h`, `1d`, `1w`, `1mo`.
+- `MarketChartCandleRequest` gom `assetId`, `timeframe`, `from`, `to`, va optional `includeAnnotations`; snapshot hien tai khong mo ta enum hay danh sach gia tri hop le cho `timeframe`, trong khi FE data layer hien gioi han `timeframe` theo union `1m`, `5m`, `15m`, `30m`, `1h`, `1d`, `1w`, `1mo`.
 - `MarketChartCandleItemResponse` gom `time`, `open`, `high`, `low`, `close`, `volume`.
-- Frontend da co chart workbench dau tien cho candle bridge; event marker, asset-level chart endpoint, workspace watchlist chart selection va annotation popup van chua trien khai.
+- `MarketChartCandleResponse` co them `asset: MarketChartAssetResponse` va `annotations[]`; annotation gom `eventId`, `assetId`, `time`, `severity`, `direction`, `title`, `summary`, `confidence`, `reaction`, `evidence[]`, va `links.eventDetail`.
+- UI khong expose `from` hoac `to` nhu form input. Route state chi gom `assetId` va `timeframe`; FE resolve asset tu `GET /watchlists`, gui `assetId` cho chart action, va de backend so huu provider-symbol resolution.
+- FE mac dinh giu layer su kien tat va gui `includeAnnotations=false`; khi user bat layer su kien tren bieu do, FE gui `includeAnnotations=true`.
+- UI dung KLineChart de render nen OHLCV, render marker notification tu `annotations[]`, group cac annotation cung moc thoi gian, va mo popup detail/evidence/link su kien khi user chon marker hoac moc su kien accessible ben ngoai canvas. Lazy historical loading va trade recommendation van chua trien khai ve UI.
 
 ### 6. API market query
 
@@ -438,7 +443,7 @@ type ActionResult<T = void> =
 - `news articles`: `linkedEvents[]` da co `eventStatus` enum moi theo enrichment lifecycle va khong con `eventEnrichmentStatus`; FE detail article hien van map theo contract cu cua `events`.
 - `events`: backend gate enrich/market reaction operators bang `news-article:analyze`; FE events da gate bang permission canon nay truoc va chi giu `source-document:analyze` nhu alias compatibility tam thoi.
 - `permission scan`: cac literal FE-only `source-document:*` con lai deu la alias compatibility sau permission canon `news-article:*`; cac permission BE chua co FE literal gom `cronjob:stop` va `media:*` vi cac surface/action nay chua duoc tich hop.
-- `market charts`: backend them `GET /market-charts/candles` va cac schema candle OHLCV; FE da co data layer va workbench `/market-charts` dung Lightweight Charts, nhung `timeframe` dang bi FE constrain thanh enum cuc bo trong khi OpenAPI chi khai bao string.
+- `market charts`: frontend da dong bo action/DTO theo request `assetId`, `includeAnnotations` theo layer su kien, response `asset`, optional `symbol`, va `annotations[]`; UI dung KLineChart cho nen OHLCV va render marker notification/popup detail khi layer su kien duoc bat.
 - `market query`: spec van mo ta `asOfTime` la optional `date-time`; frontend v1 chu dong omit field nay de backend tu lay thoi diem hien tai va harden parse cho payload runtime co the tra `null` o `publishedAt` va `occurredAt`. Ngoai ra, `keyEvents[]` da doi `summary` thanh `description`, nhung FE van doc field cu.
 - `graph view`: `GraphNodeMetadata` da doi `active` thanh `status`; FE workbench hien van doc `metadata.active`.
 - `user profile`: `GET /me` da doi `workspace` thanh `currentWorkspace`, va `mainImage` la object media; FE `app/lib/users/definitions.ts` hien van map theo contract cu. Hien tac dong runtime thap vi permissions server chi doc `permissions[]`.

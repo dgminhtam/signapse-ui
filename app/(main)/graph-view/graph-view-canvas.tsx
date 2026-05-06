@@ -19,13 +19,18 @@ import type {
   Point,
   ViewportAnimationEffectTiming,
 } from "@antv/g6"
-import { Minus, Plus, RotateCcw } from "lucide-react"
+import { ArrowUpRight, ExternalLink, Minus, Plus, RotateCcw, X } from "lucide-react"
+import Link from "next/link"
 import { useTheme } from "next-themes"
 import { useEffect, useMemo, useRef, useState } from "react"
 
-import { getGraphViewRelationLabel } from "@/app/lib/graph-view/definitions"
+import {
+  getGraphViewRelationLabel,
+  parseGraphViewNodeId,
+} from "@/app/lib/graph-view/definitions"
 import type {
   GraphViewEdgeKind,
+  GraphViewNode,
   GraphViewNodeKind,
 } from "@/app/lib/graph-view/definitions"
 import { Button } from "@/components/ui/button"
@@ -69,6 +74,11 @@ type GraphCanvasPalette = {
   labelStrokeWidth: number
   nodeHighlightOpacity: number
   nodeInactiveOpacity: number
+  selectionEdgeOpacity: number
+  selectionInactiveEdgeOpacity: number
+  selectionInactiveNodeOpacity: number
+  selectionNodeHaloColor: string
+  selectionRelatedNodeOpacity: number
   nodeStroke: string
   tooltipSurfaceClassName: string
 }
@@ -112,6 +122,15 @@ const GRAPH_HUD_EDGE_KIND_ORDER = [
   "event-theme",
   "source-artifact-event",
 ] satisfies GraphViewEdgeKind[]
+const GRAPH_SELECTION_STATE_NAMES = [
+  "selected",
+  "selected-related",
+  "selected-inactive",
+]
+const GRAPH_SELECTION_EDGE_STATE_NAMES = [
+  "selected-related",
+  "selected-inactive",
+]
 
 function createGraphCanvasPalette(mode: GraphThemeMode): GraphCanvasPalette {
   if (mode === "dark") {
@@ -129,6 +148,11 @@ function createGraphCanvasPalette(mode: GraphThemeMode): GraphCanvasPalette {
       labelStrokeWidth: 3.2,
       nodeHighlightOpacity: 1,
       nodeInactiveOpacity: 0.66,
+      selectionEdgeOpacity: 0.9,
+      selectionInactiveEdgeOpacity: 0.2,
+      selectionInactiveNodeOpacity: 0.38,
+      selectionNodeHaloColor: "rgba(248, 250, 252, 0.78)",
+      selectionRelatedNodeOpacity: 0.82,
       nodeStroke: "rgba(241, 245, 249, 0.9)",
       tooltipSurfaceClassName:
         "border-border/80 bg-popover/95 text-popover-foreground shadow-xl",
@@ -149,6 +173,11 @@ function createGraphCanvasPalette(mode: GraphThemeMode): GraphCanvasPalette {
     labelStrokeWidth: 2.6,
     nodeHighlightOpacity: 1,
     nodeInactiveOpacity: 0.61,
+    selectionEdgeOpacity: 0.82,
+    selectionInactiveEdgeOpacity: 0.16,
+    selectionInactiveNodeOpacity: 0.28,
+    selectionNodeHaloColor: "rgba(15, 23, 42, 0.44)",
+    selectionRelatedNodeOpacity: 0.72,
     nodeStroke: "rgba(255, 255, 255, 0.88)",
     tooltipSurfaceClassName:
       "border-border/80 bg-popover/95 text-popover-foreground shadow-xl",
@@ -224,6 +253,199 @@ function GraphHudCountChip({
         {count}
       </span>
     </span>
+  )
+}
+
+function formatInspectorDate(value?: string | null) {
+  if (!value) {
+    return null
+  }
+
+  const date = new Date(value)
+
+  if (Number.isNaN(date.getTime())) {
+    return null
+  }
+
+  return new Intl.DateTimeFormat("vi-VN", {
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date)
+}
+
+function formatInspectorConfidence(value?: number | null) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return null
+  }
+
+  const normalizedValue = value <= 1 ? value * 100 : value
+
+  return `${Math.round(normalizedValue)}%`
+}
+
+function getNodeDetailHref(node: GraphViewNode) {
+  const entityReference = parseGraphViewNodeId(node.id)
+
+  if (!entityReference) {
+    return null
+  }
+
+  if (entityReference.kind === "event") {
+    return {
+      href: `/events/${entityReference.entityId}`,
+      label: "Mở sự kiện",
+    }
+  }
+
+  if (entityReference.kind === "news-article") {
+    return {
+      href: `/news-articles/${entityReference.entityId}`,
+      label: "Mở bài viết",
+    }
+  }
+
+  return null
+}
+
+function GraphNodeInspectorField({
+  label,
+  value,
+}: {
+  label: string
+  value?: string | null
+}) {
+  if (!value) {
+    return null
+  }
+
+  return (
+    <div className="min-w-0 rounded-lg border border-border/60 bg-background/55 px-2.5 py-2">
+      <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+        {label}
+      </dt>
+      <dd className="mt-1 truncate text-xs font-medium text-foreground" title={value}>
+        {value}
+      </dd>
+    </div>
+  )
+}
+
+function GraphNodeDetailInspector({
+  node,
+  onClose,
+  relatedEdgeCount,
+  relatedNodeCount,
+}: {
+  node: GraphViewNode
+  onClose: () => void
+  relatedEdgeCount: number
+  relatedNodeCount: number
+}) {
+  const visual = GRAPH_VIEW_NODE_VISUALS[node.kind]
+  const metadata = node.metadata ?? {}
+  const detailHref = getNodeDetailHref(node)
+  const detailActionLabel =
+    node.kind === "event"
+      ? "Đọc sự kiện"
+      : node.kind === "news-article"
+        ? "Đọc bài viết"
+        : detailHref?.label
+  const sourceUrl =
+    node.kind === "news-article" && metadata.url?.trim()
+      ? metadata.url.trim()
+      : null
+  const occurredAt = formatInspectorDate(metadata.occurredAt)
+  const publishedAt = formatInspectorDate(metadata.publishedAt)
+  const confidence = formatInspectorConfidence(metadata.confidence)
+
+  return (
+    <aside className="pointer-events-auto absolute inset-x-3 bottom-14 z-20 max-h-[26rem] overflow-hidden rounded-2xl border border-border/80 bg-popover/95 text-popover-foreground shadow-2xl backdrop-blur-md md:inset-x-auto md:bottom-auto md:right-4 md:top-16 md:max-h-[calc(100%-5rem)] md:w-[22rem]">
+      <div className="flex items-start gap-3 border-b border-border/70 px-3.5 py-3">
+        <span
+          aria-hidden="true"
+          className="mt-1 size-3.5 shrink-0 rounded-full shadow-sm"
+          style={{ backgroundColor: visual.color }}
+        />
+        <div className="min-w-0 flex-1">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+            {visual.label}
+          </p>
+          <h2 className="mt-1 line-clamp-3 text-sm font-semibold leading-snug">
+            {node.label}
+          </h2>
+          {node.secondaryLabel ? (
+            <p className="mt-1 truncate text-xs text-muted-foreground">
+              {node.secondaryLabel}
+            </p>
+          ) : null}
+        </div>
+        <Button
+          aria-label="Đóng chi tiết nút"
+          title="Đóng chi tiết nút"
+          type="button"
+          size="icon-xs"
+          variant="ghost"
+          className="rounded-full"
+          onClick={onClose}
+        >
+          <X aria-hidden="true" className="size-3.5" data-icon="inline-start" />
+        </Button>
+      </div>
+
+      <div className="max-h-[20rem] overflow-y-auto p-3.5 md:max-h-[calc(100vh-11rem)]">
+        <dl className="grid grid-cols-2 gap-2">
+          <GraphNodeInspectorField label="Thời điểm" value={occurredAt} />
+          <GraphNodeInspectorField label="Xuất bản" value={publishedAt} />
+          <GraphNodeInspectorField label="Độ tin cậy" value={confidence} />
+          <GraphNodeInspectorField label="Trạng thái" value={metadata.status} />
+          <GraphNodeInspectorField label="Nguồn tin" value={metadata.newsOutletName} />
+          <GraphNodeInspectorField label="Mã giao dịch" value={metadata.symbol} />
+          <GraphNodeInspectorField label="Loại tài sản" value={metadata.assetType} />
+          <GraphNodeInspectorField label="Slug" value={metadata.slug} />
+          <GraphNodeInspectorField label="Khóa chuẩn" value={metadata.canonicalKey} />
+          <GraphNodeInspectorField
+            label="Nút liên quan"
+            value={String(Math.max(relatedNodeCount - 1, 0))}
+          />
+          <GraphNodeInspectorField
+            label="Cạnh liên quan"
+            value={String(relatedEdgeCount)}
+          />
+        </dl>
+
+        {detailHref || sourceUrl ? (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {detailHref ? (
+              <Button asChild size="sm" variant="secondary">
+                <Link href={detailHref.href}>
+                  <ArrowUpRight
+                    aria-hidden="true"
+                    className="size-4"
+                    data-icon="inline-start"
+                  />
+                  <span>{detailActionLabel}</span>
+                </Link>
+              </Button>
+            ) : null}
+            {sourceUrl ? (
+              <Button asChild size="sm" variant="outline">
+                <a href={sourceUrl} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink
+                    aria-hidden="true"
+                    className="size-4"
+                    data-icon="inline-start"
+                  />
+                  <span>Mở nguồn gốc</span>
+                </a>
+              </Button>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+    </aside>
   )
 }
 
@@ -658,6 +880,22 @@ function createNodeStateStyles(graphPalette: GraphCanvasPalette) {
       opacity: graphPalette.nodeInactiveOpacity,
       shadowBlur: 0,
     },
+    selected: (node: NodeData) => ({
+      ...keepBaseStroke(node),
+      lineWidth: getElementNumberValue(node.style ?? {}, "lineWidth", 2) + 1.4,
+      opacity: 1,
+      shadowBlur: 26,
+      shadowColor: graphPalette.selectionNodeHaloColor,
+    }),
+    "selected-inactive": {
+      opacity: graphPalette.selectionInactiveNodeOpacity,
+      shadowBlur: 0,
+    },
+    "selected-related": (node: NodeData) => ({
+      ...keepBaseStroke(node),
+      opacity: graphPalette.selectionRelatedNodeOpacity,
+      shadowBlur: 10,
+    }),
   }
 }
 
@@ -672,6 +910,15 @@ function createEdgeStateStyles(graphPalette: GraphCanvasPalette) {
     inactive: {
       opacity: graphPalette.edgeInactiveOpacity,
     },
+    "selected-inactive": {
+      opacity: graphPalette.selectionInactiveEdgeOpacity,
+    },
+    "selected-related": (edge: EdgeData) => ({
+      lineWidth:
+        getElementNumberValue(edge.style ?? {}, "lineWidth", 1.3) +
+        graphPalette.edgeHighlightLineWidthBoost,
+      opacity: graphPalette.selectionEdgeOpacity,
+    }),
   }
 }
 
@@ -744,11 +991,78 @@ function clampHoverTooltipPosition(container: HTMLDivElement, x: number, y: numb
   }
 }
 
+function removeGraphElementStates(states: string[], names: readonly string[]) {
+  return states.filter((state) => !names.includes(state))
+}
+
+function applySelectedGraphStates(
+  graph: Graph,
+  graphModel: GraphModel,
+  selectedNodeId: string | null
+) {
+  if (graph.destroyed) {
+    return Promise.resolve()
+  }
+
+  const relatedNodeIds = selectedNodeId
+    ? (graphModel.relatedNodesByNodeId.get(selectedNodeId) ?? new Set([selectedNodeId]))
+    : new Set<string>()
+  const relatedEdgeIds = selectedNodeId
+    ? (graphModel.relatedEdgesByNodeId.get(selectedNodeId) ?? new Set<string>())
+    : new Set<string>()
+  const stateUpdates: Record<string, string[]> = {}
+
+  graphModel.nodes.forEach((node) => {
+    const nextState = removeGraphElementStates(
+      graph.getElementState(node.id),
+      GRAPH_SELECTION_STATE_NAMES
+    )
+
+    if (selectedNodeId) {
+      if (node.id === selectedNodeId) {
+        nextState.push("selected")
+      } else if (relatedNodeIds.has(node.id)) {
+        nextState.push("selected-related")
+      } else {
+        nextState.push("selected-inactive")
+      }
+    }
+
+    stateUpdates[node.id] = nextState
+  })
+
+  graphModel.edges.forEach((edge) => {
+    const nextState = removeGraphElementStates(
+      graph.getElementState(edge.id),
+      GRAPH_SELECTION_EDGE_STATE_NAMES
+    )
+
+    if (selectedNodeId) {
+      nextState.push(
+        relatedEdgeIds.has(edge.id) ? "selected-related" : "selected-inactive"
+      )
+    }
+
+    stateUpdates[edge.id] = nextState
+  })
+
+  if (Object.keys(stateUpdates).length === 0) {
+    return Promise.resolve()
+  }
+
+  return graph.setElementState(stateUpdates, false)
+}
+
 export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
   const { resolvedTheme } = useTheme()
   const containerRef = useRef<HTMLDivElement | null>(null)
   const graphRef = useRef<Graph | null>(null)
+  const graphRenderReadyRef = useRef<Graph | null>(null)
+  const hasAppliedSelectionStateRef = useRef(false)
+  const lastNodeDragAtRef = useRef(0)
   const [hoverTooltip, setHoverTooltip] = useState<HoverTooltipState | null>(null)
+  const [renderReadyVersion, setRenderReadyVersion] = useState(0)
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const graphThemeMode: GraphThemeMode =
     resolvedTheme === "dark" ? "dark" : "light"
   const graphPalette = useMemo(
@@ -759,6 +1073,20 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
     () => createG6GraphData(graphModel, graphPalette),
     [graphModel, graphPalette]
   )
+  const selectedNode = selectedNodeId
+    ? (graphModel.nodeMap.get(selectedNodeId) ?? null)
+    : null
+  const selectedGraphNodeId = selectedNode ? selectedNode.id : null
+  const selectedRelatedNodeCount = selectedGraphNodeId
+    ? (graphModel.relatedNodesByNodeId.get(selectedGraphNodeId)?.size ?? 1)
+    : 0
+  const selectedRelatedEdgeCount = selectedGraphNodeId
+    ? (graphModel.relatedEdgesByNodeId.get(selectedGraphNodeId)?.size ?? 0)
+    : 0
+
+  const clearSelectedNode = () => {
+    setSelectedNodeId(null)
+  }
 
   const handleRecenter = () => {
     const graph = graphRef.current
@@ -866,6 +1194,8 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
     })
 
     graphRef.current = graph
+    graphRenderReadyRef.current = null
+    hasAppliedSelectionStateRef.current = false
 
     const clearNodeActiveState = (nodeId?: string) => {
       if (!nodeId || graph.destroyed) {
@@ -944,14 +1274,49 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
     }
 
     const handleNodeDragStart = (event: { target?: { id?: string } }) => {
+      lastNodeDragAtRef.current = performance.now()
       clearNodeActiveState(event.target?.id)
       setHoverTooltip(null)
+    }
+
+    const handleNodeDragEnd = () => {
+      lastNodeDragAtRef.current = performance.now()
+    }
+
+    const handleNodeClick = (event: { target?: { id?: string } }) => {
+      const nodeId = event.target?.id
+
+      if (!nodeId || graph.destroyed) {
+        return
+      }
+
+      if (performance.now() - lastNodeDragAtRef.current < 180) {
+        return
+      }
+
+      setHoverTooltip(null)
+      setSelectedNodeId(nodeId)
+    }
+
+    const handleCanvasClick = (event: {
+      target?: { id?: string }
+      targetType?: string
+    }) => {
+      if (event.target?.id || event.targetType === "node") {
+        return
+      }
+
+      setHoverTooltip(null)
+      setSelectedNodeId(null)
     }
 
     graph.on("node:pointerenter", handleNodePointerEnter as (event: unknown) => void)
     graph.on("node:pointermove", handleNodePointerMove as (event: unknown) => void)
     graph.on("node:pointerleave", handleNodePointerLeave as (event: unknown) => void)
     graph.on("node:dragstart", handleNodeDragStart as (event: unknown) => void)
+    graph.on("node:dragend", handleNodeDragEnd as (event: unknown) => void)
+    graph.on("node:click", handleNodeClick as (event: unknown) => void)
+    graph.on("canvas:click", handleCanvasClick as (event: unknown) => void)
 
     const renderGraph = async () => {
       try {
@@ -960,6 +1325,9 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
         if (isDisposed || graph.destroyed) {
           return
         }
+
+        graphRenderReadyRef.current = graph
+        setRenderReadyVersion((version) => version + 1)
 
         await graph.fitView({
           direction: "both",
@@ -975,6 +1343,17 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
     }
 
     const destroyGraph = () => {
+      const isCurrentGraph =
+        graphRef.current === graph || graphRenderReadyRef.current === graph
+
+      if (graphRenderReadyRef.current === graph) {
+        graphRenderReadyRef.current = null
+      }
+
+      if (isCurrentGraph) {
+        hasAppliedSelectionStateRef.current = false
+      }
+
       if (!graph.destroyed) {
         graph.destroy()
       }
@@ -1003,11 +1382,19 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
 
     return () => {
       isDisposed = true
+      if (graphRenderReadyRef.current === graph) {
+        graphRenderReadyRef.current = null
+      }
+
+      hasAppliedSelectionStateRef.current = false
       resizeObserver.disconnect()
       graph.off("node:pointerenter", handleNodePointerEnter as (event: unknown) => void)
       graph.off("node:pointermove", handleNodePointerMove as (event: unknown) => void)
       graph.off("node:pointerleave", handleNodePointerLeave as (event: unknown) => void)
       graph.off("node:dragstart", handleNodeDragStart as (event: unknown) => void)
+      graph.off("node:dragend", handleNodeDragEnd as (event: unknown) => void)
+      graph.off("node:click", handleNodeClick as (event: unknown) => void)
+      graph.off("canvas:click", handleCanvasClick as (event: unknown) => void)
 
       if (renderFrameId !== null) {
         window.cancelAnimationFrame(renderFrameId)
@@ -1022,6 +1409,27 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
       destroyGraph()
     }
   }, [graphData, graphModel.nodeMap, graphPalette])
+
+  useEffect(() => {
+    const graph = graphRef.current
+
+    if (!graph || graph.destroyed || graphRenderReadyRef.current !== graph) {
+      return
+    }
+
+    if (!selectedGraphNodeId && !hasAppliedSelectionStateRef.current) {
+      return
+    }
+
+    hasAppliedSelectionStateRef.current = true
+    void applySelectedGraphStates(graph, graphModel, selectedGraphNodeId).catch(
+      (error) => {
+        if (!graph.destroyed && graphRenderReadyRef.current === graph) {
+          console.error(error)
+        }
+      }
+    )
+  }, [graphModel, renderReadyVersion, selectedGraphNodeId])
 
   return (
     <div className="relative h-full min-h-[720px] w-full animate-in duration-500 fade-in lg:min-h-[calc(100svh-8rem)]">
@@ -1048,6 +1456,15 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
             {GRAPH_VIEW_NODE_VISUALS[hoverTooltip.kind].label}
           </p>
         </div>
+      ) : null}
+
+      {selectedNode ? (
+        <GraphNodeDetailInspector
+          node={selectedNode}
+          onClose={clearSelectedNode}
+          relatedEdgeCount={selectedRelatedEdgeCount}
+          relatedNodeCount={selectedRelatedNodeCount}
+        />
       ) : null}
 
       <div className="pointer-events-none absolute inset-x-3 top-3 z-10 flex flex-wrap items-start justify-between gap-2 sm:inset-x-4 sm:top-4">

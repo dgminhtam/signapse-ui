@@ -16,8 +16,10 @@ import { Separator } from "@/components/ui/separator"
 
 export default async function Layout({
   children,
+  quickDetail,
 }: Readonly<{
   children: ReactNode
+  quickDetail?: ReactNode
 }>) {
   const { isAuthenticated } = await auth()
 
@@ -96,6 +98,7 @@ export default async function Layout({
             </div>
           </header>
           <div className="flex flex-1 flex-col gap-4 p-5">{children}</div>
+          {quickDetail}
         </SidebarInset>
       </PermissionProvider>
     </SidebarProvider>

@@ -1,16 +1,13 @@
 "use client"
 
-import { FormEvent, useEffect, useMemo, useState, useTransition } from "react"
+import { useCallback, useEffect, useMemo, useState, useTransition } from "react"
 import {
-  Activity,
   ChartCandlestick,
-  Clock3,
   DatabaseZap,
-  Info,
-  Search,
-  Server,
-  Sparkles,
+  ExternalLink,
+  RefreshCw,
   TriangleAlert,
+  X,
 } from "lucide-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
@@ -23,14 +20,13 @@ import {
   MarketChartCandleResponse,
   MarketChartTimeframe,
   isMarketChartTimeframe,
-  marketChartCandleRequestSchema,
 } from "@/app/lib/market-charts/definitions"
+import { WorkspaceWatchlistAssetListItemResponse } from "@/app/lib/watchlists/definitions"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -43,12 +39,10 @@ import {
 } from "@/components/ui/empty"
 import {
   Field,
-  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
@@ -59,22 +53,33 @@ import {
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
+import { Switch } from "@/components/ui/switch"
 import { cn } from "@/lib/utils"
 
+import {
+  createMarketChartAnnotationGroups,
+  type MarketChartAnnotationGroup,
+  type MarketChartAnnotationMarkerPoint,
+} from "./market-chart-annotations"
 import { MarketChartCanvas } from "./market-chart-canvas"
 
 type WorkbenchPhase = "idle" | "loading" | "success" | "error"
 
-type MarketChartFormState = {
-  symbol: string
+type MarketChartSelectionState = {
+  assetId: string
   timeframe: MarketChartTimeframe
-  from: string
-  to: string
 }
 
-type FormErrors = Partial<Record<keyof MarketChartFormState, string>> & {
+type FormErrors = Partial<Record<keyof MarketChartSelectionState, string>> & {
   form?: string
 }
+
+interface MarketChartWorkbenchProps {
+  watchlistAssets: WorkspaceWatchlistAssetListItemResponse[]
+  watchlistError: string | null
+}
+
+const LATEST_WINDOW_DAYS = 7
 
 const NUMBER_FORMATTER = new Intl.NumberFormat("vi-VN", {
   maximumFractionDigits: 6,
@@ -85,35 +90,6 @@ const COMPACT_NUMBER_FORMATTER = new Intl.NumberFormat("vi-VN", {
   notation: "compact",
 })
 
-function toDateTimeLocalValue(date: Date) {
-  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60_000)
-
-  return localDate.toISOString().slice(0, 16)
-}
-
-function fromIsoToDateTimeLocal(value: string) {
-  const date = new Date(value)
-
-  if (Number.isNaN(date.getTime())) {
-    return ""
-  }
-
-  return toDateTimeLocalValue(date)
-}
-
-function getDefaultFormState(): MarketChartFormState {
-  const to = new Date()
-  const from = new Date(to)
-  from.setDate(to.getDate() - 7)
-
-  return {
-    symbol: "",
-    timeframe: DEFAULT_MARKET_CHART_TIMEFRAME,
-    from: toDateTimeLocalValue(from),
-    to: toDateTimeLocalValue(to),
-  }
-}
-
 function getSingleParam(
   searchParams: URLSearchParams,
   key: string
@@ -122,77 +98,68 @@ function getSingleParam(
   return value?.trim() || null
 }
 
-function createRequestFromSearchParams(
-  searchParams: URLSearchParams
-): MarketChartCandleRequest | null {
-  const symbol = getSingleParam(searchParams, "symbol")
-  const timeframe = getSingleParam(searchParams, "timeframe")
-  const from = getSingleParam(searchParams, "from")
-  const to = getSingleParam(searchParams, "to")
+function getTimeframeFromSearchParams(searchParams: URLSearchParams) {
+  const value = getSingleParam(searchParams, "timeframe")
+  return value && isMarketChartTimeframe(value)
+    ? value
+    : DEFAULT_MARKET_CHART_TIMEFRAME
+}
 
-  if (!symbol && !timeframe && !from && !to) {
-    return null
-  }
-
+function createDefaultSelection(
+  assets: WorkspaceWatchlistAssetListItemResponse[]
+): MarketChartSelectionState {
   return {
-    symbol: symbol || "",
-    timeframe: (
-      timeframe && isMarketChartTimeframe(timeframe) ? timeframe : timeframe || ""
-    ) as MarketChartTimeframe,
-    from: from || "",
-    to: to || "",
+    assetId: assets[0]?.assetId ? String(assets[0].assetId) : "",
+    timeframe: DEFAULT_MARKET_CHART_TIMEFRAME,
   }
 }
 
-function createFormStateFromRequest(
-  request: MarketChartCandleRequest
-): MarketChartFormState {
-  return {
-    symbol: request.symbol,
-    timeframe: isMarketChartTimeframe(request.timeframe)
-      ? request.timeframe
-      : DEFAULT_MARKET_CHART_TIMEFRAME,
-    from: fromIsoToDateTimeLocal(request.from),
-    to: fromIsoToDateTimeLocal(request.to),
-  }
-}
-
-function createRequestFromForm(
-  form: MarketChartFormState
-): MarketChartCandleRequest {
-  return {
-    symbol: form.symbol.trim(),
-    timeframe: form.timeframe,
-    from: new Date(form.from).toISOString(),
-    to: new Date(form.to).toISOString(),
-  }
-}
-
-function createQueryString(request: MarketChartCandleRequest) {
+function createQueryString(selection: MarketChartSelectionState) {
   const query = new URLSearchParams()
 
-  query.set("symbol", request.symbol)
-  query.set("timeframe", request.timeframe)
-  query.set("from", request.from)
-  query.set("to", request.to)
+  query.set("assetId", selection.assetId)
+  query.set("timeframe", selection.timeframe)
 
   return query.toString()
 }
 
-function createFormErrors(
-  issues: { path: PropertyKey[]; message: string }[]
-): FormErrors {
-  return issues.reduce<FormErrors>((errors, issue) => {
-    const key = issue.path[0]
+function createLatestCandleRequest(
+  asset: WorkspaceWatchlistAssetListItemResponse,
+  timeframe: MarketChartTimeframe,
+  includeAnnotations: boolean
+): MarketChartCandleRequest {
+  const to = new Date()
+  const from = new Date(to)
+  from.setDate(to.getDate() - LATEST_WINDOW_DAYS)
 
-    if (key === "symbol" || key === "timeframe" || key === "from" || key === "to") {
-      errors[key] = issue.message
-      return errors
-    }
+  return {
+    assetId: asset.assetId,
+    timeframe,
+    from: from.toISOString(),
+    to: to.toISOString(),
+    includeAnnotations,
+  }
+}
 
-    errors.form = issue.message
-    return errors
-  }, {})
+function findWatchlistAsset(
+  assets: WorkspaceWatchlistAssetListItemResponse[],
+  assetId: string
+) {
+  return assets.find((asset) => String(asset.assetId) === assetId) ?? null
+}
+
+function getDisplayAssetSymbol(
+  data: MarketChartCandleResponse | null,
+  selectedAsset: WorkspaceWatchlistAssetListItemResponse | null
+) {
+  return data?.asset.symbol || selectedAsset?.assetSymbol || data?.symbol || "Chưa chọn"
+}
+
+function getDisplayAssetName(
+  data: MarketChartCandleResponse | null,
+  selectedAsset: WorkspaceWatchlistAssetListItemResponse | null
+) {
+  return data?.asset.name || selectedAsset?.assetName
 }
 
 function formatDateTime(value?: string | null) {
@@ -262,11 +229,11 @@ function SummaryMetric({
   description?: string
 }) {
   return (
-    <div className="rounded-xl border bg-muted/20 p-4">
+    <div className="rounded-xl border bg-muted/20 p-3">
       <div className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
         {label}
       </div>
-      <div className="mt-2 truncate text-lg font-semibold text-foreground">
+      <div className="mt-1 truncate text-lg font-semibold text-foreground">
         {value}
       </div>
       {description ? (
@@ -276,57 +243,158 @@ function SummaryMetric({
   )
 }
 
+function getDirectionLabel(direction?: string | null) {
+  if (direction === "BULLISH") {
+    return "Tích cực"
+  }
+
+  if (direction === "BEARISH") {
+    return "Tiêu cực"
+  }
+
+  if (direction === "MIXED") {
+    return "Trái chiều"
+  }
+
+  return "Trung tính"
+}
+
+function getDirectionBadgeVariant(
+  direction?: string | null
+): "default" | "destructive" | "secondary" | "outline" {
+  if (direction === "BEARISH") {
+    return "destructive"
+  }
+
+  if (direction === "BULLISH") {
+    return "default"
+  }
+
+  if (direction === "MIXED") {
+    return "secondary"
+  }
+
+  return "outline"
+}
+
+function formatConfidence(value?: number | null) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return null
+  }
+
+  const percent = value <= 1 ? value * 100 : value
+
+  return `${Math.round(percent)}%`
+}
+
+function formatAnnotationTime(group: MarketChartAnnotationGroup) {
+  return formatDateTime(group.annotations[0]?.time)
+}
+
+function getFreshnessLabel(
+  data: MarketChartCandleResponse | null,
+  phase: WorkbenchPhase
+) {
+  if (phase === "loading") {
+    return "Đang tải dữ liệu mới nhất"
+  }
+
+  if (data?.to) {
+    return `Cập nhật ${formatDateTime(data.to)}`
+  }
+
+  return "7 ngày gần nhất"
+}
+
+function getAnnotationPopupStyle(point: MarketChartAnnotationMarkerPoint | null) {
+  if (!point) {
+    return {
+      right: "1rem",
+      top: "1rem",
+    }
+  }
+
+  return {
+    left: `clamp(0.75rem, ${Math.round(point.x + 18)}px, calc(100% - 23rem))`,
+    top: `clamp(0.75rem, ${Math.round(point.y - 24)}px, calc(100% - 22rem))`,
+  }
+}
+
 function ChartSurface({
+  annotationLayerEnabled,
+  annotationGroups,
   data,
   error,
   phase,
+  selectedAsset,
+  selectedAnnotationGroup,
+  selectedAnnotationPoint,
+  watchlistError,
+  hasWatchlistAssets,
+  onAnnotationClose,
+  onAnnotationSelect,
   onRetry,
 }: {
+  annotationLayerEnabled: boolean
+  annotationGroups: MarketChartAnnotationGroup[]
   data: MarketChartCandleResponse | null
   error: string | null
   phase: WorkbenchPhase
+  selectedAsset: WorkspaceWatchlistAssetListItemResponse | null
+  selectedAnnotationGroup: MarketChartAnnotationGroup | null
+  selectedAnnotationPoint: MarketChartAnnotationMarkerPoint | null
+  watchlistError: string | null
+  hasWatchlistAssets: boolean
+  onAnnotationClose: () => void
+  onAnnotationSelect: (
+    groupId: string,
+    point?: MarketChartAnnotationMarkerPoint | null
+  ) => void
   onRetry: () => void
 }) {
   const hasCandles = (data?.candles.length ?? 0) > 0
 
   return (
     <section className="overflow-hidden rounded-[28px] border bg-card shadow-sm">
-      <div className="flex flex-col gap-3 border-b bg-muted/20 p-5 lg:flex-row lg:items-start lg:justify-between">
-        <div className="flex min-w-0 flex-col gap-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline">
-              {data?.symbol || "Chưa chọn mã"}
-            </Badge>
-            <Badge variant="secondary">
-              {data?.timeframe
-                ? MARKET_CHART_TIMEFRAME_LABELS[data.timeframe]
-                : "Khung thời gian"}
-            </Badge>
-            {data?.provider ? <Badge variant="outline">{data.provider}</Badge> : null}
-          </div>
-          <div>
-            <h2 className="text-xl font-semibold tracking-tight text-foreground">
-              Biểu đồ nến OHLCV
-            </h2>
-            <p className="mt-1 text-sm leading-6 text-muted-foreground">
-              Dữ liệu lấy từ candle bridge hiện tại của backend. Lớp marker sự kiện sẽ
-              được thêm khi contract annotation sẵn sàng.
-            </p>
-          </div>
-        </div>
-      </div>
+      <div
+        className="relative min-h-[520px] bg-card p-2"
+        onClick={selectedAnnotationGroup ? onAnnotationClose : undefined}
+      >
+        {watchlistError ? (
+          <Empty className="min-h-[520px] border-0 bg-transparent">
+            <EmptyHeader>
+              <EmptyMedia variant="icon" className="bg-destructive/10 text-destructive">
+                <TriangleAlert />
+              </EmptyMedia>
+              <EmptyTitle>Không thể tải watchlist workspace</EmptyTitle>
+              <EmptyDescription>{watchlistError}</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : null}
 
-      <div className="relative min-h-[520px] bg-card p-2">
-        {phase === "idle" ? (
+        {!watchlistError && !hasWatchlistAssets ? (
           <Empty className="min-h-[520px] border-0 bg-transparent">
             <EmptyHeader>
               <EmptyMedia variant="icon">
                 <ChartCandlestick />
               </EmptyMedia>
-              <EmptyTitle>Chưa có biểu đồ nào được tải</EmptyTitle>
+              <EmptyTitle>Chưa có tài sản trong watchlist</EmptyTitle>
               <EmptyDescription>
-                Nhập provider symbol, chọn khung thời gian và khoảng thời gian rồi bấm
-                Tải biểu đồ để kiểm tra dữ liệu nến.
+                Hãy thêm tài sản vào watchlist trước khi xem biểu đồ giá.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : null}
+
+        {!watchlistError && hasWatchlistAssets && phase === "idle" ? (
+          <Empty className="min-h-[520px] border-0 bg-transparent">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <ChartCandlestick />
+              </EmptyMedia>
+              <EmptyTitle>Chọn tài sản để xem biểu đồ</EmptyTitle>
+              <EmptyDescription>
+                Chọn tài sản và khung thời gian để tải dữ liệu mới nhất.
               </EmptyDescription>
             </EmptyHeader>
           </Empty>
@@ -351,13 +419,15 @@ function ChartSurface({
               <EmptyTitle>Không thể tải dữ liệu biểu đồ</EmptyTitle>
               <EmptyDescription>
                 {error ||
-                  "Provider chưa trả về dữ liệu hợp lệ. Hãy kiểm tra symbol, thời gian hoặc thử lại."}
+                  "Chưa thể tải dữ liệu cho tài sản đã chọn. Hãy thử lại sau."}
               </EmptyDescription>
             </EmptyHeader>
-            <Button type="button" variant="outline" onClick={onRetry}>
-              <Search data-icon="inline-start" />
-              Thử lại
-            </Button>
+            {selectedAsset ? (
+              <Button type="button" variant="outline" onClick={onRetry}>
+                <RefreshCw data-icon="inline-start" />
+                Tải lại dữ liệu mới nhất
+              </Button>
+            ) : null}
           </Empty>
         ) : null}
 
@@ -367,34 +437,70 @@ function ChartSurface({
               <EmptyMedia variant="icon">
                 <DatabaseZap />
               </EmptyMedia>
-              <EmptyTitle>Không có dữ liệu nến trong khoảng đã chọn</EmptyTitle>
+              <EmptyTitle>Không có dữ liệu nến cho tài sản đã chọn</EmptyTitle>
               <EmptyDescription>
-                Backend trả về thành công nhưng không có candle cho {data.symbol} từ{" "}
-                {formatDateTime(data.from)} đến {formatDateTime(data.to)}.
+                Chưa có nến cho {getDisplayAssetSymbol(data, selectedAsset)} trong
+                khoảng {formatDateTime(data.from)} đến {formatDateTime(data.to)}.
               </EmptyDescription>
             </EmptyHeader>
           </Empty>
         ) : null}
 
         {phase === "success" && data && hasCandles ? (
-          <MarketChartCanvas candles={data.candles} />
+          <MarketChartCanvas
+            candles={data.candles}
+            timeframe={data.timeframe}
+            symbol={getDisplayAssetSymbol(data, selectedAsset)}
+            annotationGroups={annotationGroups}
+            selectedAnnotationGroupId={selectedAnnotationGroup?.id}
+            onAnnotationSelect={onAnnotationSelect}
+          />
+        ) : null}
+
+        {selectedAnnotationGroup ? (
+          <div
+            className="absolute z-20 hidden w-[min(22rem,calc(100%-1.5rem))] sm:block"
+            style={getAnnotationPopupStyle(selectedAnnotationPoint)}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <MarketChartAnnotationPopup
+              group={selectedAnnotationGroup}
+              onClose={onAnnotationClose}
+            />
+          </div>
         ) : null}
       </div>
 
-      <div className="border-t bg-muted/15 px-5 py-3 text-xs text-muted-foreground">
-        Biểu đồ sử dụng Lightweight Charts của TradingView. Dữ liệu giá đến từ
-        provider do backend cấu hình.
-      </div>
+      {annotationLayerEnabled ? (
+        <MarketChartAnnotationControls
+          groups={annotationGroups}
+          isLoading={phase === "loading"}
+          selectedGroup={selectedAnnotationGroup}
+          onSelectGroup={onAnnotationSelect}
+        />
+      ) : null}
+
+      {selectedAnnotationGroup ? (
+        <div className="border-t bg-muted/10 p-3 sm:hidden">
+          <MarketChartAnnotationPopup
+            group={selectedAnnotationGroup}
+            onClose={onAnnotationClose}
+          />
+        </div>
+      ) : null}
+
     </section>
   )
 }
 
 function MarketChartSummaryPanel({
   data,
+  selectedAsset,
 }: {
   data: MarketChartCandleResponse | null
+  selectedAsset: WorkspaceWatchlistAssetListItemResponse | null
 }) {
-  const summary = useMemo(() => getChartSummary(data), [data])
+  const summary = getChartSummary(data)
   const changeLabel =
     typeof summary.change === "number"
       ? `${summary.change >= 0 ? "+" : ""}${summary.change.toFixed(2)}%`
@@ -408,20 +514,21 @@ function MarketChartSummaryPanel({
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Tóm tắt dữ liệu</CardTitle>
-        <CardDescription>
-          Snapshot của response candle bridge đang hiển thị.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4">
+      <CardHeader className="gap-3">
+        <CardTitle>{getDisplayAssetSymbol(data, selectedAsset)}</CardTitle>
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant={changeVariant}>{changeLabel}</Badge>
           <Badge variant="outline">{summary.candleCount} nến</Badge>
           {data?.provider ? <Badge variant="outline">{data.provider}</Badge> : null}
         </div>
-
+      </CardHeader>
+      <CardContent>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+          <SummaryMetric
+            label="Tài sản"
+            value={getDisplayAssetSymbol(data, selectedAsset)}
+            description={getDisplayAssetName(data, selectedAsset)}
+          />
           <SummaryMetric
             label="Giá đóng gần nhất"
             value={formatNumber(summary.last?.close)}
@@ -441,7 +548,11 @@ function MarketChartSummaryPanel({
           />
           <SummaryMetric
             label="Khoảng dữ liệu"
-            value={data ? `${formatDateTime(data.from)} - ${formatDateTime(data.to)}` : "Chưa có"}
+            value={
+              data
+                ? `${formatDateTime(data.from)} - ${formatDateTime(data.to)}`
+                : "7 ngày gần nhất"
+            }
           />
         </div>
       </CardContent>
@@ -449,70 +560,268 @@ function MarketChartSummaryPanel({
   )
 }
 
-function FutureOverlayPanel() {
+function MarketChartAnnotationDetail({
+  group,
+}: {
+  group: MarketChartAnnotationGroup
+}) {
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          <Info className="size-4 text-muted-foreground" />
-          <CardTitle>Lớp sự kiện</CardTitle>
-        </div>
-        <CardDescription>
-          Khu vực dành cho marker và giải thích tác động khi backend có annotation.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        <div className="rounded-xl border border-dashed bg-muted/20 p-4">
-          <div className="flex items-center gap-2 text-sm font-medium">
-            <Sparkles className="size-4 text-muted-foreground" />
-            Chưa bật event overlay
-          </div>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            MVP hiện chỉ hiển thị candle OHLCV. Không có marker giả, popup sự kiện,
-            lựa chọn watchlist hoặc khuyến nghị giao dịch trong phase này.
-          </p>
-        </div>
+    <div className="rounded-xl border bg-background p-3">
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <Badge variant={getDirectionBadgeVariant(group.direction)}>
+          {getDirectionLabel(group.direction)}
+        </Badge>
+        <Badge variant="outline">{formatAnnotationTime(group)}</Badge>
+        {group.annotations.length > 1 ? (
+          <Badge variant="secondary">{group.annotations.length} sự kiện</Badge>
+        ) : null}
+      </div>
 
-        <div className="grid gap-3">
-          <div className="flex items-start gap-3 text-sm">
-            <Activity className="mt-0.5 size-4 text-muted-foreground" />
-            <span>Dữ liệu giá mô tả chuyển động thị trường theo thời gian.</span>
-          </div>
-          <div className="flex items-start gap-3 text-sm">
-            <Server className="mt-0.5 size-4 text-muted-foreground" />
-            <span>Annotation sẽ cần contract backend riêng theo asset và event.</span>
-          </div>
-          <div className="flex items-start gap-3 text-sm">
-            <Clock3 className="mt-0.5 size-4 text-muted-foreground" />
-            <span>Marker sau này sẽ được neo vào thời điểm event hoặc reaction.</span>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+      <div className="flex flex-col gap-3">
+        {group.annotations.map((annotation) => {
+          const confidence = formatConfidence(
+            annotation.confidence ?? annotation.reaction?.confidence
+          )
+          const eventDetail = annotation.links?.eventDetail
+          const opensInNewTab = eventDetail?.startsWith("http")
+
+          return (
+            <article key={annotation.id} className="flex flex-col gap-2">
+              <div>
+                <h3 className="line-clamp-2 text-sm font-semibold text-foreground">
+                  {annotation.title}
+                </h3>
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+                  {annotation.severity ? (
+                    <Badge variant="outline">{annotation.severity}</Badge>
+                  ) : null}
+                  {confidence ? (
+                    <Badge variant="outline">Tin cậy {confidence}</Badge>
+                  ) : null}
+                </div>
+              </div>
+
+              {annotation.summary ? (
+                <p className="line-clamp-3 text-sm text-muted-foreground">
+                  {annotation.summary}
+                </p>
+              ) : null}
+
+              {annotation.reaction?.reasoning ? (
+                <p className="line-clamp-3 rounded-lg bg-muted/40 p-2 text-xs text-muted-foreground">
+                  {annotation.reaction.reasoning}
+                </p>
+              ) : null}
+
+              {annotation.evidence.length ? (
+                <div className="flex flex-col gap-2">
+                  {annotation.evidence.slice(0, 3).map((evidence, index) => (
+                    <div
+                      key={`${annotation.id}-evidence-${index}`}
+                      className="rounded-lg border bg-muted/20 p-2"
+                    >
+                      <div className="line-clamp-2 text-xs font-medium text-foreground">
+                        {evidence.title || evidence.publisher || "Bằng chứng"}
+                      </div>
+                      <div className="mt-1 text-[11px] text-muted-foreground">
+                        {[
+                          evidence.publisher,
+                          evidence.publishedAt ? formatDateTime(evidence.publishedAt) : null,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+
+              {eventDetail ? (
+                <Button asChild variant="outline" size="sm" className="w-fit">
+                  <a
+                    href={eventDetail}
+                    target={opensInNewTab ? "_blank" : undefined}
+                    rel={opensInNewTab ? "noreferrer" : undefined}
+                  >
+                    Xem sự kiện
+                    <ExternalLink data-icon="inline-end" />
+                  </a>
+                </Button>
+              ) : null}
+            </article>
+          )
+        })}
+      </div>
+    </div>
   )
 }
 
-export function MarketChartWorkbench() {
+function MarketChartAnnotationPopup({
+  group,
+  onClose,
+}: {
+  group: MarketChartAnnotationGroup
+  onClose: () => void
+}) {
+  return (
+    <div className="rounded-2xl border bg-popover p-3 text-popover-foreground shadow-xl">
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className="relative flex size-3 rounded-full bg-destructive">
+            <span className="market-chart-annotation-popup-pulse absolute inset-0 rounded-full bg-destructive/30" />
+          </span>
+          <span className="text-sm font-semibold">Sự kiện</span>
+        </div>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          onClick={onClose}
+          aria-label="Đóng chi tiết sự kiện"
+        >
+          <X />
+        </Button>
+      </div>
+      <MarketChartAnnotationDetail group={group} />
+      <style>
+        {`
+          @media (prefers-reduced-motion: no-preference) {
+            .market-chart-annotation-popup-pulse {
+              animation: market-chart-annotation-popup-pulse 1.8s ease-out infinite;
+            }
+          }
+
+          @keyframes market-chart-annotation-popup-pulse {
+            0% {
+              opacity: 0.7;
+              transform: scale(0.7);
+            }
+            70% {
+              opacity: 0;
+              transform: scale(2.4);
+            }
+            100% {
+              opacity: 0;
+              transform: scale(2.4);
+            }
+          }
+        `}
+      </style>
+    </div>
+  )
+}
+
+function MarketChartAnnotationControls({
+  groups,
+  isLoading,
+  selectedGroup,
+  onSelectGroup,
+}: {
+  groups: MarketChartAnnotationGroup[]
+  isLoading: boolean
+  selectedGroup: MarketChartAnnotationGroup | null
+  onSelectGroup: (
+    groupId: string,
+    point?: MarketChartAnnotationMarkerPoint | null
+  ) => void
+}) {
+  return (
+    <div className="border-t bg-muted/10 p-3">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+          <span className="size-2 rounded-full bg-destructive" />
+          {isLoading ? "Đang tải sự kiện" : `${groups.length} mốc sự kiện`}
+        </div>
+        {isLoading ? (
+          <Skeleton className="h-8 w-full rounded-xl sm:w-64" />
+        ) : groups.length ? (
+          <div className="flex min-w-0 flex-1 gap-2 overflow-x-auto pb-1 sm:justify-end sm:pb-0">
+            {groups.map((group) => {
+              const selected = selectedGroup?.id === group.id
+
+              return (
+                <button
+                  key={group.id}
+                  type="button"
+                  aria-pressed={selected}
+                  className={cn(
+                    "inline-flex shrink-0 items-center gap-2 rounded-full border bg-background px-3 py-1.5 text-xs transition-colors outline-none hover:bg-muted/50 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
+                    selected && "border-primary bg-primary/5"
+                  )}
+                  onClick={() => onSelectGroup(group.id, null)}
+                >
+                  <span className="relative flex size-2 rounded-full bg-destructive" />
+                  <span>{formatAnnotationTime(group)}</span>
+                  {group.annotations.length > 1 ? (
+                    <Badge variant="secondary">{group.annotations.length}</Badge>
+                  ) : null}
+                </button>
+              )
+            })}
+          </div>
+        ) : (
+          <div className="text-xs text-muted-foreground">
+            Chưa có sự kiện trong khoảng hiện tại.
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export function MarketChartWorkbench({
+  watchlistAssets,
+  watchlistError,
+}: MarketChartWorkbenchProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const [form, setForm] = useState<MarketChartFormState>(() => getDefaultFormState())
+  const [selection, setSelection] = useState<MarketChartSelectionState>(() =>
+    createDefaultSelection(watchlistAssets)
+  )
   const [errors, setErrors] = useState<FormErrors>({})
   const [phase, setPhase] = useState<WorkbenchPhase>("idle")
   const [data, setData] = useState<MarketChartCandleResponse | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
-  const [lastRequest, setLastRequest] = useState<MarketChartCandleRequest | null>(null)
+  const [lastAssetId, setLastAssetId] = useState<string | null>(null)
+  const [annotationLayerEnabled, setAnnotationLayerEnabled] = useState(false)
+  const [selectedAnnotationGroupId, setSelectedAnnotationGroupId] = useState<
+    string | null
+  >(null)
+  const [selectedAnnotationPoint, setSelectedAnnotationPoint] =
+    useState<MarketChartAnnotationMarkerPoint | null>(null)
   const [isPending, startTransition] = useTransition()
+  const hasWatchlistAssets = watchlistAssets.length > 0
+  const selectedAsset = findWatchlistAsset(watchlistAssets, selection.assetId)
   const isBusy = phase === "loading" || isPending
+  const annotationGroups = useMemo(() => {
+    if (!annotationLayerEnabled || !data) {
+      return []
+    }
 
-  async function loadCandles(request: MarketChartCandleRequest) {
+    return createMarketChartAnnotationGroups(data.annotations, data.candles)
+  }, [annotationLayerEnabled, data])
+  const selectedAnnotationGroup =
+    annotationGroups.find((group) => group.id === selectedAnnotationGroupId) ??
+    null
+
+  const loadCandles = useCallback(async function loadCandles(
+    asset: WorkspaceWatchlistAssetListItemResponse,
+    timeframe: MarketChartTimeframe,
+    includeAnnotations = annotationLayerEnabled
+  ) {
+    const request = createLatestCandleRequest(asset, timeframe, includeAnnotations)
+
     setPhase("loading")
     setLoadError(null)
-    setLastRequest(request)
+    setLastAssetId(String(asset.assetId))
+    setSelectedAnnotationGroupId(null)
+    setSelectedAnnotationPoint(null)
 
     const result = await getMarketChartCandles(request)
 
     if (!result.success) {
+      setData(null)
       setPhase("error")
       setLoadError(result.error)
       return
@@ -520,220 +829,306 @@ export function MarketChartWorkbench() {
 
     setData(result.data)
     setPhase("success")
-  }
+  }, [annotationLayerEnabled])
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
-      const request = createRequestFromSearchParams(searchParams)
-
-      if (!request) {
-        setForm((current) => ({
-          ...getDefaultFormState(),
-          symbol: current.symbol,
-        }))
+      if (watchlistError) {
         setData(null)
-        setLoadError(null)
-        setErrors({})
+        setErrors({ form: watchlistError })
+        setLoadError(watchlistError)
         setPhase("idle")
-        setLastRequest(null)
+        setLastAssetId(null)
+        setSelectedAnnotationGroupId(null)
+        setSelectedAnnotationPoint(null)
         return
       }
 
-      const parsedRequest = marketChartCandleRequestSchema.safeParse(request)
-      setForm(createFormStateFromRequest(request))
-
-      if (!parsedRequest.success) {
-        setErrors(createFormErrors(parsedRequest.error.issues))
+      if (!hasWatchlistAssets) {
+        setSelection(createDefaultSelection(watchlistAssets))
         setData(null)
-        setLoadError("Tham số biểu đồ trên URL chưa hợp lệ.")
+        setErrors({})
+        setLoadError(null)
+        setPhase("idle")
+        setLastAssetId(null)
+        setSelectedAnnotationGroupId(null)
+        setSelectedAnnotationPoint(null)
+        return
+      }
+
+      const assetId = getSingleParam(searchParams, "assetId")
+      const timeframeParam = getSingleParam(searchParams, "timeframe")
+      const timeframe = getTimeframeFromSearchParams(searchParams)
+
+      if (timeframeParam && !isMarketChartTimeframe(timeframeParam)) {
+        setSelection({
+          assetId: assetId || String(watchlistAssets[0].assetId),
+          timeframe: DEFAULT_MARKET_CHART_TIMEFRAME,
+        })
+        setData(null)
+        setErrors({
+          timeframe: "Khung thời gian trên URL không được hỗ trợ.",
+        })
+        setLoadError("Tham số khung thời gian trên URL chưa hợp lệ.")
         setPhase("error")
-        setLastRequest(null)
+        setLastAssetId(null)
+        setSelectedAnnotationGroupId(null)
+        setSelectedAnnotationPoint(null)
+        return
+      }
+
+      if (!assetId) {
+        const nextSelection = {
+          assetId: String(watchlistAssets[0].assetId),
+          timeframe,
+        }
+        setSelection(nextSelection)
+        setPhase("loading")
+        startTransition(() => {
+          router.replace(`${pathname}?${createQueryString(nextSelection)}`, {
+            scroll: false,
+          })
+        })
+        return
+      }
+
+      const asset = findWatchlistAsset(watchlistAssets, assetId)
+      const nextSelection = { assetId, timeframe }
+      setSelection(nextSelection)
+
+      if (!asset) {
+        setData(null)
+        setErrors({
+          assetId: "Tài sản trên URL không nằm trong watchlist của workspace.",
+        })
+        setLoadError("Tài sản đã chọn không còn nằm trong watchlist workspace.")
+        setPhase("error")
+        setLastAssetId(null)
+        setSelectedAnnotationGroupId(null)
+        setSelectedAnnotationPoint(null)
         return
       }
 
       setErrors({})
-      void loadCandles(parsedRequest.data)
+      void loadCandles(asset, timeframe, annotationLayerEnabled)
     }, 0)
 
     return () => window.clearTimeout(timeoutId)
-  }, [searchParams])
+  }, [
+    annotationLayerEnabled,
+    hasWatchlistAssets,
+    loadCandles,
+    pathname,
+    router,
+    searchParams,
+    watchlistAssets,
+    watchlistError,
+  ])
 
-  function updateForm<Key extends keyof MarketChartFormState>(
-    key: Key,
-    value: MarketChartFormState[Key]
-  ) {
-    setForm((current) => ({ ...current, [key]: value }))
-    setErrors((current) => ({ ...current, [key]: undefined, form: undefined }))
-  }
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-
-    let request: MarketChartCandleRequest
-
-    try {
-      request = createRequestFromForm(form)
-    } catch {
-      setErrors({
-        from: "Thời điểm bắt đầu không hợp lệ.",
-        to: "Thời điểm kết thúc không hợp lệ.",
-      })
-      return
-    }
-
-    const parsedRequest = marketChartCandleRequestSchema.safeParse(request)
-
-    if (!parsedRequest.success) {
-      setErrors(createFormErrors(parsedRequest.error.issues))
-      return
-    }
-
+  function updateRoute(nextSelection: MarketChartSelectionState) {
+    setSelection(nextSelection)
     setErrors({})
-    const nextQuery = createQueryString(parsedRequest.data)
 
-    if (nextQuery === searchParams.toString()) {
-      void loadCandles(parsedRequest.data)
+    if (!nextSelection.assetId) {
+      setData(null)
+      setPhase("idle")
+      setSelectedAnnotationGroupId(null)
+      setSelectedAnnotationPoint(null)
       return
     }
 
     setPhase("loading")
+    setSelectedAnnotationGroupId(null)
+    setSelectedAnnotationPoint(null)
     startTransition(() => {
-      router.replace(`${pathname}?${nextQuery}`, { scroll: false })
+      router.replace(`${pathname}?${createQueryString(nextSelection)}`, {
+        scroll: false,
+      })
     })
   }
 
-  function handleRetry() {
-    if (lastRequest) {
-      void loadCandles(lastRequest)
+  function handleAssetChange(assetId: string) {
+    updateRoute({ ...selection, assetId })
+  }
+
+  function handleTimeframeChange(value: string) {
+    if (!isMarketChartTimeframe(value)) {
+      setErrors((current) => ({
+        ...current,
+        timeframe: "Khung thời gian không được hỗ trợ.",
+      }))
+      return
     }
+
+    updateRoute({ ...selection, timeframe: value })
+  }
+
+  function handleAnnotationLayerChange(checked: boolean) {
+    setAnnotationLayerEnabled(checked)
+    setSelectedAnnotationGroupId(null)
+    setSelectedAnnotationPoint(null)
+
+    if (selectedAsset) {
+      setPhase("loading")
+    }
+  }
+
+  function handleAnnotationSelect(
+    groupId: string,
+    point?: MarketChartAnnotationMarkerPoint | null
+  ) {
+    setSelectedAnnotationGroupId(groupId)
+    setSelectedAnnotationPoint(point ?? null)
+  }
+
+  function handleAnnotationClose() {
+    setSelectedAnnotationGroupId(null)
+    setSelectedAnnotationPoint(null)
+  }
+
+  function handleRefresh() {
+    const asset = selectedAsset || findWatchlistAsset(watchlistAssets, lastAssetId || "")
+
+    if (!asset) {
+      setErrors({
+        assetId: "Hãy chọn một tài sản trong watchlist trước khi tải lại.",
+      })
+      return
+    }
+
+    void loadCandles(asset, selection.timeframe, annotationLayerEnabled)
   }
 
   return (
     <div className="flex flex-col gap-6" aria-busy={isBusy}>
-      <section className="rounded-2xl border bg-muted/15 p-5">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-          <div className="flex flex-col gap-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="secondary">Candle bridge</Badge>
-              <Badge variant="outline">OHLCV</Badge>
-            </div>
-            <div>
-              <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-                Biểu đồ giá
-              </h1>
-              <p className="mt-1 max-w-3xl text-sm leading-6 text-muted-foreground">
-                Kiểm tra dữ liệu nến từ provider-symbol bridge hiện tại trước khi
-                nâng cấp sang biểu đồ theo asset và event marker.
-              </p>
+      <section className="rounded-2xl border bg-muted/15 p-4">
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+            <FieldGroup className="grid flex-1 gap-3 lg:grid-cols-[minmax(260px,1fr)_180px_160px_auto] lg:items-start">
+              <Field data-invalid={!!errors.assetId}>
+                <FieldLabel htmlFor="market-chart-asset">
+                  Tài sản watchlist
+                </FieldLabel>
+                <Select
+                  value={selection.assetId}
+                  onValueChange={handleAssetChange}
+                  disabled={isBusy || !!watchlistError || !hasWatchlistAssets}
+                >
+                  <SelectTrigger
+                    id="market-chart-asset"
+                    aria-invalid={errors.assetId ? true : undefined}
+                  >
+                    <SelectValue placeholder="Chọn tài sản" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {watchlistAssets.map((asset) => (
+                        <SelectItem
+                          key={asset.assetId}
+                          value={String(asset.assetId)}
+                        >
+                          {asset.assetSymbol} - {asset.assetName}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+                <FieldError>{errors.assetId}</FieldError>
+              </Field>
+
+              <Field data-invalid={!!errors.timeframe}>
+                <FieldLabel htmlFor="market-chart-timeframe">Khung</FieldLabel>
+                <Select
+                  value={selection.timeframe}
+                  onValueChange={handleTimeframeChange}
+                  disabled={isBusy || !!watchlistError || !hasWatchlistAssets}
+                >
+                  <SelectTrigger
+                    id="market-chart-timeframe"
+                    aria-invalid={errors.timeframe ? true : undefined}
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {MARKET_CHART_TIMEFRAMES.map((timeframe) => (
+                        <SelectItem key={timeframe} value={timeframe}>
+                          {MARKET_CHART_TIMEFRAME_LABELS[timeframe]}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+                <FieldError>{errors.timeframe}</FieldError>
+              </Field>
+
+              <Field className="lg:pt-6">
+                <div className="flex items-center justify-between gap-3 rounded-lg border bg-background px-3 py-2">
+                  <FieldLabel
+                    htmlFor="market-chart-annotations"
+                    className="text-sm"
+                  >
+                    Sự kiện
+                  </FieldLabel>
+                  <Switch
+                    id="market-chart-annotations"
+                    checked={annotationLayerEnabled}
+                    onCheckedChange={handleAnnotationLayerChange}
+                    disabled={isBusy || !!watchlistError || !selectedAsset}
+                    aria-label="Hiển thị sự kiện trên biểu đồ"
+                  />
+                </div>
+              </Field>
+
+              <Field className="lg:pt-6">
+                <FieldLabel className="sr-only">Tải lại biểu đồ</FieldLabel>
+                <Button
+                  type="button"
+                  disabled={isBusy || !!watchlistError || !selectedAsset}
+                  className="w-full"
+                  onClick={handleRefresh}
+                >
+                  {isBusy ? (
+                    <Spinner data-icon="inline-start" />
+                  ) : (
+                    <RefreshCw data-icon="inline-start" />
+                  )}
+                  {isBusy ? "Đang tải..." : "Tải lại"}
+                </Button>
+              </Field>
+            </FieldGroup>
+
+            <div className="text-xs text-muted-foreground lg:pb-2 lg:text-right">
+              {getFreshnessLabel(data, phase)}
             </div>
           </div>
-
-          <FieldGroup className="grid gap-4 lg:grid-cols-[minmax(220px,1fr)_160px_200px_200px_auto] lg:items-start">
-            <Field data-invalid={!!errors.symbol}>
-              <FieldLabel htmlFor="market-chart-symbol">Provider symbol</FieldLabel>
-              <Input
-                id="market-chart-symbol"
-                value={form.symbol}
-                onChange={(event) => updateForm("symbol", event.target.value)}
-                placeholder="Ví dụ: AAPL hoặc EUR/USD"
-                aria-invalid={errors.symbol ? true : undefined}
-                disabled={isBusy}
-              />
-              <FieldDescription>
-                Nhập đúng symbol mà provider candle đang hỗ trợ.
-              </FieldDescription>
-              <FieldError>{errors.symbol}</FieldError>
-            </Field>
-
-            <Field data-invalid={!!errors.timeframe}>
-              <FieldLabel htmlFor="market-chart-timeframe">Khung</FieldLabel>
-              <Select
-                value={form.timeframe}
-                onValueChange={(value) => {
-                  if (isMarketChartTimeframe(value)) {
-                    updateForm("timeframe", value)
-                  }
-                }}
-                disabled={isBusy}
-              >
-                <SelectTrigger
-                  id="market-chart-timeframe"
-                  aria-invalid={errors.timeframe ? true : undefined}
-                >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {MARKET_CHART_TIMEFRAMES.map((timeframe) => (
-                      <SelectItem key={timeframe} value={timeframe}>
-                        {MARKET_CHART_TIMEFRAME_LABELS[timeframe]}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              <FieldDescription>Backend hỗ trợ khung cố định.</FieldDescription>
-              <FieldError>{errors.timeframe}</FieldError>
-            </Field>
-
-            <Field data-invalid={!!errors.from}>
-              <FieldLabel htmlFor="market-chart-from">Từ lúc</FieldLabel>
-              <Input
-                id="market-chart-from"
-                type="datetime-local"
-                value={form.from}
-                onChange={(event) => updateForm("from", event.target.value)}
-                aria-invalid={errors.from ? true : undefined}
-                disabled={isBusy}
-              />
-              <FieldDescription>Gửi lên backend dưới dạng ISO UTC.</FieldDescription>
-              <FieldError>{errors.from}</FieldError>
-            </Field>
-
-            <Field data-invalid={!!errors.to}>
-              <FieldLabel htmlFor="market-chart-to">Đến lúc</FieldLabel>
-              <Input
-                id="market-chart-to"
-                type="datetime-local"
-                value={form.to}
-                onChange={(event) => updateForm("to", event.target.value)}
-                aria-invalid={errors.to ? true : undefined}
-                disabled={isBusy}
-              />
-              <FieldDescription>Phải sau thời điểm bắt đầu.</FieldDescription>
-              <FieldError>{errors.to}</FieldError>
-            </Field>
-
-            <Field className="lg:pt-6">
-              <FieldLabel className="sr-only">Tải biểu đồ</FieldLabel>
-              <Button type="submit" disabled={isBusy} className="w-full">
-                {isBusy ? <Spinner data-icon="inline-start" /> : <Search data-icon="inline-start" />}
-                {isBusy ? "Đang tải..." : "Tải biểu đồ"}
-              </Button>
-              <FieldDescription className="lg:text-right">
-                Không tự fetch khi đang nhập.
-              </FieldDescription>
-            </Field>
-          </FieldGroup>
 
           {errors.form ? (
             <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-3 text-sm text-destructive">
               {errors.form}
             </div>
           ) : null}
-        </form>
+        </div>
       </section>
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(300px,360px)]">
         <ChartSurface
+          annotationLayerEnabled={annotationLayerEnabled}
+          annotationGroups={annotationGroups}
           data={data}
           error={loadError}
           phase={phase}
-          onRetry={handleRetry}
+          selectedAsset={selectedAsset}
+          selectedAnnotationGroup={selectedAnnotationGroup}
+          selectedAnnotationPoint={selectedAnnotationPoint}
+          watchlistError={watchlistError}
+          hasWatchlistAssets={hasWatchlistAssets}
+          onAnnotationClose={handleAnnotationClose}
+          onAnnotationSelect={handleAnnotationSelect}
+          onRetry={handleRefresh}
         />
         <aside className="flex min-w-0 flex-col gap-5">
-          <MarketChartSummaryPanel data={data} />
-          <FutureOverlayPanel />
+          <MarketChartSummaryPanel data={data} selectedAsset={selectedAsset} />
         </aside>
       </div>
 
