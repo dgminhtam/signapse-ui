@@ -14,11 +14,11 @@ The remaining issue is the chart engine boundary. Lightweight Charts leaks into 
 - Preserve candlestick rendering, volume visibility, theme-aware styling, resize/dispose lifecycle, annotation notification markers, click-to-open annotation popup, mobile fallback, loading/error/empty states, and summary rail.
 - Remove all Lightweight Charts and TradingView attribution remnants from runtime code, dependencies, docs, and active OpenSpec artifacts touched by this feature.
 - Add a clean-migration rule to `AGENTS.md` so future vendor/library swaps do not leave unused source behind.
-- Prepare the chart adapter shape for future lazy historical loading.
+- Prepare the chart adapter shape for the follow-up lazy historical loading change.
 
 **Non-Goals:**
 
-- Do not implement lazy historical loading in this change.
+- Do not implement lazy historical loading in this engine migration change; the follow-up `add-market-chart-lazy-history-loading` change owns that behavior.
 - Do not add realtime subscriptions, indicators, drawing tools, trade recommendations, or alerting.
 - Do not change the backend candle API or add new market chart endpoints.
 - Do not replace shadcn UI shell components or alter global theme tokens.
@@ -30,9 +30,9 @@ The remaining issue is the chart engine boundary. Lightweight Charts leaks into 
 
 Implementation should add `klinecharts` using the latest version resolved by the package manager at apply time, then commit the resolved version in `package.json`/`pnpm-lock.yaml`.
 
-Rationale: the user explicitly wants latest version. KLineChart's current documentation centers APIs such as `init`, `dispose`, `resize`, `setDataLoader`, overlays, and data records with millisecond `timestamp`, which align with future lazy loading and chart overlays.
+Rationale: the user explicitly wants latest version. KLineChart's current documentation centers APIs such as `init`, `dispose`, `resize`, `setDataLoader`, overlays, and data records with millisecond `timestamp`, which align with follow-up lazy loading and chart overlays.
 
-Alternative considered: pin stable `9.8.x`. Rejected for this proposal because the requested direction is latest, and preparing for future lazy loading benefits from following the current API surface.
+Alternative considered: pin stable `9.8.x`. Rejected for this proposal because the requested direction is latest, and preparing for follow-up lazy loading benefits from following the current API surface.
 
 ### Keep a single chart adapter boundary
 
@@ -65,9 +65,9 @@ Either strategy must preserve the product behavior: red notification dot, pulse 
 
 Rationale: KLineChart's overlay model is a better long-term fit, but the current UX requires accessible React popup behavior. The implementation should prioritize reliable interaction over forcing all annotation UI into canvas primitives.
 
-### Prepare lazy-load architecture without implementing lazy-load
+### Prepare lazy-load architecture for a follow-up change
 
-The canvas adapter should be structured so later lazy loading can be added without rewriting the workbench:
+The canvas adapter should be structured so lazy loading can be added without rewriting the workbench:
 
 ```text
 Workbench domain data
@@ -79,10 +79,10 @@ MarketChartCanvas adapter props
 KLineChart instance lifecycle + data apply boundary
         |
         v
-Future: setDataLoader / visible-boundary callback
+Follow-up: setDataLoader / visible-boundary callback
 ```
 
-This change should not call older-window APIs or fetch historical data when the user pans. It may include small internal helper names and comments that make the future boundary clear, but it should not render future-feature copy in the UI.
+This engine migration change should not call older-window APIs or fetch historical data when the user pans. It may include small internal helper names and comments that make the follow-up boundary clear, but it should not render future-feature copy in the UI.
 
 Rationale: the product has already chosen not to expose manual `from/to`, and the intended future model is drag/scroll lazy loading. The current change should avoid painting itself into a corner without shipping unscoped behavior.
 

@@ -1,10 +1,7 @@
 import { Calendar, ExternalLink, FileText, GitBranch, Globe2 } from "lucide-react"
 import Link from "next/link"
 
-import {
-  EVENT_ENRICHMENT_STATUS_LABELS,
-  EVENT_STATUS_LABELS,
-} from "@/app/lib/events/definitions"
+import { EVENT_STATUS_LABELS } from "@/app/lib/events/definitions"
 import {
   LINKED_EVENT_EVIDENCE_ROLE_LABELS,
   NEWS_ARTICLE_STATUS_LABELS,
@@ -14,10 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 
-import {
-  getEventEnrichmentVariant,
-  getEventStatusVariant,
-} from "../events/event-presentation"
+import { getEventStatusVariant } from "../events/event-presentation"
 
 function formatDateTime(value?: string | null) {
   if (!value) {
@@ -138,19 +132,6 @@ export function NewsArticleQuickDetailContent({
                     {linkedEvent.eventStatus ? (
                       <Badge variant={getEventStatusVariant(linkedEvent.eventStatus)}>
                         {EVENT_STATUS_LABELS[linkedEvent.eventStatus]}
-                      </Badge>
-                    ) : null}
-                    {linkedEvent.eventEnrichmentStatus ? (
-                      <Badge
-                        variant={getEventEnrichmentVariant(
-                          linkedEvent.eventEnrichmentStatus
-                        )}
-                      >
-                        {
-                          EVENT_ENRICHMENT_STATUS_LABELS[
-                            linkedEvent.eventEnrichmentStatus
-                          ]
-                        }
                       </Badge>
                     ) : null}
                     {linkedEvent.evidenceRole ? (

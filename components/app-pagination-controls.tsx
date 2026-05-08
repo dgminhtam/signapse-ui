@@ -128,7 +128,8 @@ export function PaginationNavigation({
           <Button
             type="button"
             variant="outline"
-            size="icon"
+            size="icon-sm"
+            className="text-xs"
             aria-label="Đi tới trang trước"
             disabled={isPreviousDisabled}
             onClick={() => onPageChange(currentPage - 1)}
@@ -141,7 +142,7 @@ export function PaginationNavigation({
           if (entry === DOTS) {
             return (
               <PaginationItem key={`${entry}-${index}`}>
-                <PaginationEllipsis />
+                <PaginationEllipsis className="size-8" />
               </PaginationItem>
             )
           }
@@ -153,7 +154,8 @@ export function PaginationNavigation({
               <Button
                 type="button"
                 variant={isCurrentPage ? "default" : "outline"}
-                size="icon"
+                size="icon-sm"
+                className="text-xs"
                 aria-label={`Đi tới trang ${entry}`}
                 aria-current={isCurrentPage ? "page" : undefined}
                 disabled={isPending}
@@ -173,7 +175,8 @@ export function PaginationNavigation({
           <Button
             type="button"
             variant="outline"
-            size="icon"
+            size="icon-sm"
+            className="text-xs"
             aria-label="Đi tới trang sau"
             disabled={isNextDisabled}
             onClick={() => onPageChange(currentPage + 1)}
@@ -217,7 +220,7 @@ export function AppPaginationControls<T>({
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 flex-col gap-1.5">
-          <p className="text-sm text-muted-foreground">{summaryText}</p>
+          <p className="text-xs text-muted-foreground">{summaryText}</p>
         </div>
 
         {page.totalPages > 1 ? (

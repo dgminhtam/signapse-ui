@@ -5,6 +5,7 @@ import {
   dispose,
   init,
   type Chart,
+  type DataLoaderGetBarsParams,
   type DeepPartial,
   type KLineData,
   type Period,
@@ -12,27 +13,48 @@ import {
 } from "klinecharts"
 import { useTheme } from "next-themes"
 
-import {
+import type { ActionResult } from "@/app/lib/definitions"
+import type {
+  MarketChartAnnotationResponse,
   MarketChartCandleItemResponse,
+  MarketChartCandleRequest,
+  MarketChartCandleResponse,
   MarketChartTimeframe,
 } from "@/app/lib/market-charts/definitions"
+import { Spinner } from "@/components/ui/spinner"
+import { cn } from "@/lib/utils"
 
 import {
+  mergeMarketChartAnnotations,
   type MarketChartAnnotationGroup,
   type MarketChartAnnotationMarkerPoint,
   toMarketChartEpochMillis,
 } from "./market-chart-annotations"
 
+export interface MarketChartLoadedData {
+  annotations: MarketChartAnnotationResponse[]
+  candles: MarketChartCandleItemResponse[]
+  from: string | null
+}
+
 interface MarketChartCanvasProps {
+  assetId: number
   candles: MarketChartCandleItemResponse[]
   timeframe: MarketChartTimeframe
   symbol?: string
+  annotations?: MarketChartAnnotationResponse[]
   annotationGroups?: MarketChartAnnotationGroup[]
+  includeAnnotations: boolean
+  resetKey: string
   selectedAnnotationGroupId?: string | null
   onAnnotationSelect?: (
     groupId: string,
     point: MarketChartAnnotationMarkerPoint
   ) => void
+  onLoadedDataChange?: (data: MarketChartLoadedData) => void
+  onLoadOlderCandles: (
+    request: MarketChartCandleRequest
+  ) => Promise<ActionResult<MarketChartCandleResponse>>
 }
 
 interface MarkerPosition {
@@ -41,8 +63,41 @@ interface MarkerPosition {
   y: number
 }
 
+type LazyHistoryState = "idle" | "loading" | "error"
+
+interface LazyHistoryFeedback {
+  error: string | null
+  resetKey: string
+  state: LazyHistoryState
+}
+
 const CANDLE_PANE_ID = "candle_pane"
 const VOLUME_PANE_ID = "market-chart-volume"
+const MINUTE_MS = 60 * 1000
+const HOUR_MS = 60 * MINUTE_MS
+const DAY_MS = 24 * HOUR_MS
+
+const TIMEFRAME_INTERVAL_MS: Record<MarketChartTimeframe, number> = {
+  "1m": MINUTE_MS,
+  "5m": 5 * MINUTE_MS,
+  "15m": 15 * MINUTE_MS,
+  "30m": 30 * MINUTE_MS,
+  "1h": HOUR_MS,
+  "1d": DAY_MS,
+  "1w": 7 * DAY_MS,
+  "1mo": 30 * DAY_MS,
+}
+
+const LAZY_HISTORY_BAR_TARGET: Record<MarketChartTimeframe, number> = {
+  "1m": 360,
+  "5m": 288,
+  "15m": 288,
+  "30m": 240,
+  "1h": 240,
+  "1d": 180,
+  "1w": 104,
+  "1mo": 60,
+}
 
 const colorCache = new Map<string, string>()
 
@@ -85,28 +140,64 @@ function getCssVariable(name: string, fallback: string) {
   return resolveColor(value)
 }
 
-function createKLineData(candles: MarketChartCandleItemResponse[]): KLineData[] {
-  const dataByTime = new Map<number, KLineData>()
-
-  for (const candle of candles) {
-    const timestamp = toMarketChartEpochMillis(candle.time)
-
-    if (!timestamp) {
-      continue
-    }
-
-    dataByTime.set(timestamp, {
-      timestamp,
-      open: candle.open,
-      high: candle.high,
-      low: candle.low,
-      close: candle.close,
-      ...(typeof candle.volume === "number" ? { volume: candle.volume } : {}),
-    })
+function getCssTextVariable(name: string, fallback: string) {
+  if (typeof window === "undefined") {
+    return fallback
   }
 
-  return [...dataByTime.values()].sort((left, right) => {
-    return left.timestamp - right.timestamp
+  return (
+    getComputedStyle(document.documentElement).getPropertyValue(name).trim() ||
+    fallback
+  )
+}
+
+function getCandleTimestamp(candle: MarketChartCandleItemResponse) {
+  return toMarketChartEpochMillis(candle.time)
+}
+
+function normalizeCandleItems(
+  candles: MarketChartCandleItemResponse[]
+): MarketChartCandleItemResponse[] {
+  const candlesByTime = new Map<number, MarketChartCandleItemResponse>()
+
+  for (const candle of candles) {
+    const timestamp = getCandleTimestamp(candle)
+
+    if (timestamp !== null) {
+      candlesByTime.set(timestamp, candle)
+    }
+  }
+
+  return [...candlesByTime.entries()]
+    .sort(([left], [right]) => left - right)
+    .map(([, candle]) => candle)
+}
+
+function mergeCandleItems(
+  current: MarketChartCandleItemResponse[],
+  incoming: MarketChartCandleItemResponse[]
+) {
+  return normalizeCandleItems([...current, ...incoming])
+}
+
+function createKLineData(candles: MarketChartCandleItemResponse[]): KLineData[] {
+  return normalizeCandleItems(candles).flatMap((candle) => {
+    const timestamp = getCandleTimestamp(candle)
+
+    if (timestamp === null) {
+      return []
+    }
+
+    return [
+      {
+        timestamp,
+        open: candle.open,
+        high: candle.high,
+        low: candle.low,
+        close: candle.close,
+        ...(typeof candle.volume === "number" ? { volume: candle.volume } : {}),
+      },
+    ]
   })
 }
 
@@ -133,25 +224,88 @@ function createKLinePeriod(timeframe: MarketChartTimeframe): Period {
   }
 }
 
+function createOlderHistoryRequest({
+  assetId,
+  includeAnnotations,
+  oldestTimestamp,
+  timeframe,
+}: {
+  assetId: number
+  includeAnnotations: boolean
+  oldestTimestamp: number
+  timeframe: MarketChartTimeframe
+}): MarketChartCandleRequest | null {
+  const intervalMs = TIMEFRAME_INTERVAL_MS[timeframe]
+  const barTarget = LAZY_HISTORY_BAR_TARGET[timeframe]
+  const toMs = oldestTimestamp - intervalMs
+  const fromMs = toMs - intervalMs * barTarget
+
+  if (!Number.isFinite(fromMs) || !Number.isFinite(toMs) || fromMs >= toMs) {
+    return null
+  }
+
+  return {
+    assetId,
+    timeframe,
+    from: new Date(fromMs).toISOString(),
+    to: new Date(toMs).toISOString(),
+    includeAnnotations,
+  }
+}
+
+function getOldestLoadedTimestamp(candles: MarketChartCandleItemResponse[]) {
+  const [oldestCandle] = normalizeCandleItems(candles)
+
+  return oldestCandle ? getCandleTimestamp(oldestCandle) : null
+}
+
+function getNewOlderCandles(
+  current: MarketChartCandleItemResponse[],
+  incoming: MarketChartCandleItemResponse[],
+  oldestTimestamp: number
+) {
+  const currentTimes = new Set(
+    current
+      .map((candle) => getCandleTimestamp(candle))
+      .filter((timestamp): timestamp is number => timestamp !== null)
+  )
+
+  return normalizeCandleItems(incoming).filter((candle) => {
+    const timestamp = getCandleTimestamp(candle)
+
+    return (
+      timestamp !== null &&
+      timestamp < oldestTimestamp &&
+      !currentTimes.has(timestamp)
+    )
+  })
+}
+
 function createChartStyles(): DeepPartial<Styles> {
   const textColor = getCssVariable("--muted-foreground", "#737373")
-  const borderColor = getCssVariable("--border", "#e5e5e5")
+  const borderColor = getCssVariable("--muted-foreground", "#737373")
   const upColor = getCssVariable("--chart-2", "#14947e")
   const downColor = getCssVariable("--destructive", "#dc2626")
+  const fontFamily = getCssTextVariable(
+    "--font-sans",
+    "Inter, sans-serif"
+  )
 
   return {
     grid: {
       horizontal: {
         color: borderColor,
+        dashedValue: [4, 4],
         show: true,
-        size: 1,
-        style: "solid",
+        size: 0.25,
+        style: "dashed",
       },
       vertical: {
         color: borderColor,
+        dashedValue: [4, 4],
         show: true,
-        size: 1,
-        style: "solid",
+        size: 0.25,
+        style: "dashed",
       },
     },
     candle: {
@@ -167,6 +321,32 @@ function createChartStyles(): DeepPartial<Styles> {
         upColor,
         upWickColor: upColor,
       },
+      priceMark: {
+        high: {
+          show: false,
+        },
+        low: {
+          show: false,
+        },
+        last: {
+          line: {
+            size: 1
+          },
+          text: {
+            family: fontFamily,
+            size: 10,
+          },
+        },
+      },
+      tooltip: {
+        legend: {
+          family: fontFamily,
+        },
+        title: {
+          family: fontFamily,
+          show: false,
+        },
+      },
     },
     indicator: {
       ohlc: {
@@ -174,6 +354,14 @@ function createChartStyles(): DeepPartial<Styles> {
         downColor: "rgba(220, 38, 38, 0.32)",
         noChangeColor: "rgba(115, 115, 115, 0.28)",
         upColor: "rgba(20, 148, 126, 0.35)",
+      },
+      tooltip: {
+        legend: {
+          family: fontFamily,
+        },
+        title: {
+          family: fontFamily,
+        },
       },
     },
     xAxis: {
@@ -183,6 +371,7 @@ function createChartStyles(): DeepPartial<Styles> {
       },
       tickText: {
         color: textColor,
+        family: fontFamily,
       },
     },
     yAxis: {
@@ -192,6 +381,7 @@ function createChartStyles(): DeepPartial<Styles> {
       },
       tickText: {
         color: textColor,
+        family: fontFamily,
       },
     },
     crosshair: {
@@ -202,6 +392,7 @@ function createChartStyles(): DeepPartial<Styles> {
         text: {
           backgroundColor: getCssVariable("--foreground", "#171717"),
           color: getCssVariable("--background", "#ffffff"),
+          family: fontFamily,
         },
       },
       vertical: {
@@ -211,6 +402,7 @@ function createChartStyles(): DeepPartial<Styles> {
         text: {
           backgroundColor: getCssVariable("--foreground", "#171717"),
           color: getCssVariable("--background", "#ffffff"),
+          family: fontFamily,
         },
       },
     },
@@ -247,16 +439,53 @@ function getMarkerCoordinate(
 }
 
 export function MarketChartCanvas({
-  candles,
-  timeframe,
-  symbol = "MARKET",
+  annotations = [],
   annotationGroups = [],
-  selectedAnnotationGroupId,
+  assetId,
+  candles,
+  includeAnnotations,
   onAnnotationSelect,
+  onLoadedDataChange,
+  onLoadOlderCandles,
+  resetKey,
+  selectedAnnotationGroupId,
+  symbol = "MARKET",
+  timeframe,
 }: MarketChartCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
+  const chartRef = useRef<Chart | null>(null)
+  const activeResetKeyRef = useRef(resetKey)
+  const annotationGroupsRef = useRef(annotationGroups)
+  const loadedAnnotationsRef = useRef<MarketChartAnnotationResponse[]>([])
+  const loadedCandlesRef = useRef<MarketChartCandleItemResponse[]>([])
+  const historyExhaustedRef = useRef(false)
+  const onLoadedDataChangeRef = useRef(onLoadedDataChange)
+  const onLoadOlderCandlesRef = useRef(onLoadOlderCandles)
+  const scheduleMarkerPositionUpdateRef = useRef<() => void>(() => { })
+  const [historyFeedback, setHistoryFeedback] = useState<LazyHistoryFeedback>({
+    error: null,
+    resetKey,
+    state: "idle",
+  })
   const [markerPositions, setMarkerPositions] = useState<MarkerPosition[]>([])
   const { resolvedTheme } = useTheme()
+  const historyState =
+    historyFeedback.resetKey === resetKey ? historyFeedback.state : "idle"
+  const historyError =
+    historyFeedback.resetKey === resetKey ? historyFeedback.error : null
+
+  useEffect(() => {
+    annotationGroupsRef.current = annotationGroups
+    scheduleMarkerPositionUpdateRef.current()
+  }, [annotationGroups])
+
+  useEffect(() => {
+    onLoadedDataChangeRef.current = onLoadedDataChange
+  }, [onLoadedDataChange])
+
+  useEffect(() => {
+    onLoadOlderCandlesRef.current = onLoadOlderCandles
+  }, [onLoadOlderCandles])
 
   useEffect(() => {
     const container = containerRef.current
@@ -264,6 +493,12 @@ export function MarketChartCanvas({
     if (!container) {
       return
     }
+
+    let disposed = false
+    activeResetKeyRef.current = resetKey
+    historyExhaustedRef.current = false
+    loadedAnnotationsRef.current = includeAnnotations ? annotations : []
+    loadedCandlesRef.current = normalizeCandleItems(candles)
 
     const chart = init(container, {
       layout: [
@@ -303,12 +538,20 @@ export function MarketChartCanvas({
       return
     }
 
-    const data = createKLineData(candles)
+    chartRef.current = chart
+
     const period = createKLinePeriod(timeframe)
 
     const updateMarkerPositions = () => {
-      const nextPositions = annotationGroups.flatMap((group) => {
-        const point = getMarkerCoordinate(chart, group)
+      const currentChart = chartRef.current
+      const currentContainer = containerRef.current
+
+      if (!currentChart || !currentContainer) {
+        return
+      }
+
+      const nextPositions = annotationGroupsRef.current.flatMap((group) => {
+        const point = getMarkerCoordinate(currentChart, group)
 
         if (!point) {
           return []
@@ -317,8 +560,11 @@ export function MarketChartCanvas({
         return [
           {
             group,
-            x: Math.max(18, Math.min(container.clientWidth - 18, point.x)),
-            y: Math.max(24, Math.min(container.clientHeight - 92, point.y - 18)),
+            x: Math.max(18, Math.min(currentContainer.clientWidth - 18, point.x)),
+            y: Math.max(
+              24,
+              Math.min(currentContainer.clientHeight - 92, point.y - 18)
+            ),
           },
         ]
       })
@@ -330,13 +576,138 @@ export function MarketChartCanvas({
       window.requestAnimationFrame(updateMarkerPositions)
     }
 
-    chart.setDataLoader({
-      getBars({ type, callback }) {
-        callback(type === "init" ? data : [], {
+    async function loadBars({
+      callback,
+      timestamp,
+      type,
+    }: DataLoaderGetBarsParams) {
+      if (type === "init") {
+        callback(createKLineData(loadedCandlesRef.current), {
+          // KLineChart v10 uses `forward` for the left-edge prepend path.
+          backward: false,
+          forward: loadedCandlesRef.current.length > 0,
+        })
+        scheduleMarkerPositionUpdate()
+        return
+      }
+
+      if (type !== "forward") {
+        callback([], {
+          backward: false,
+          forward: !historyExhaustedRef.current,
+        })
+        return
+      }
+
+      if (historyExhaustedRef.current) {
+        callback([], {
           backward: false,
           forward: false,
         })
-        scheduleMarkerPositionUpdate()
+        return
+      }
+
+      const oldestTimestamp =
+        timestamp ?? getOldestLoadedTimestamp(loadedCandlesRef.current)
+      const request = oldestTimestamp !== null
+        ? createOlderHistoryRequest({
+          assetId,
+          includeAnnotations,
+          oldestTimestamp,
+          timeframe,
+        })
+        : null
+
+      if (oldestTimestamp === null || !request) {
+        historyExhaustedRef.current = true
+        callback([], {
+          backward: false,
+          forward: false,
+        })
+        return
+      }
+
+      const requestResetKey = activeResetKeyRef.current
+      setHistoryFeedback({
+        error: null,
+        resetKey: requestResetKey,
+        state: "loading",
+      })
+
+      const result = await onLoadOlderCandlesRef.current(request)
+
+      if (disposed || activeResetKeyRef.current !== requestResetKey) {
+        return
+      }
+
+      if (!result.success) {
+        setHistoryFeedback({
+          error: result.error,
+          resetKey: requestResetKey,
+          state: "error",
+        })
+        callback([], {
+          backward: false,
+          forward: true,
+        })
+        return
+      }
+
+      const olderCandles = getNewOlderCandles(
+        loadedCandlesRef.current,
+        result.data.candles,
+        oldestTimestamp
+      )
+      const olderData = createKLineData(olderCandles)
+
+      if (!olderData.length) {
+        historyExhaustedRef.current = true
+        setHistoryFeedback({
+          error: null,
+          resetKey: requestResetKey,
+          state: "idle",
+        })
+        callback([], {
+          backward: false,
+          forward: false,
+        })
+        return
+      }
+
+      loadedCandlesRef.current = mergeCandleItems(
+        loadedCandlesRef.current,
+        olderCandles
+      )
+
+      if (includeAnnotations) {
+        loadedAnnotationsRef.current = mergeMarketChartAnnotations(
+          loadedAnnotationsRef.current,
+          result.data.annotations
+        )
+      }
+
+      onLoadedDataChangeRef.current?.({
+        annotations: loadedAnnotationsRef.current,
+        candles: loadedCandlesRef.current,
+        from: loadedCandlesRef.current[0]?.time ?? result.data.from,
+      })
+      setHistoryFeedback({
+        error: null,
+        resetKey: requestResetKey,
+        state: "idle",
+      })
+      callback(olderData, {
+        backward: false,
+        forward: true,
+      })
+      scheduleMarkerPositionUpdate()
+    }
+
+    scheduleMarkerPositionUpdateRef.current = scheduleMarkerPositionUpdate
+
+    chart.setDataLoader({
+      getBars(params) {
+        void loadBars(params)
       },
     })
     chart.setSymbol({
@@ -361,19 +732,52 @@ export function MarketChartCanvas({
     resizeObserver.observe(container)
 
     return () => {
+      disposed = true
       window.cancelAnimationFrame(frameId)
       chart.unsubscribeAction("onVisibleRangeChange", scheduleMarkerPositionUpdate)
       chart.unsubscribeAction("onScroll", scheduleMarkerPositionUpdate)
       chart.unsubscribeAction("onZoom", scheduleMarkerPositionUpdate)
       resizeObserver.disconnect()
+      scheduleMarkerPositionUpdateRef.current = () => { }
+      chartRef.current = null
       setMarkerPositions([])
       dispose(chart)
     }
-  }, [annotationGroups, candles, resolvedTheme, symbol, timeframe])
+  }, [
+    annotations,
+    assetId,
+    candles,
+    includeAnnotations,
+    resetKey,
+    resolvedTheme,
+    symbol,
+    timeframe,
+  ])
 
   return (
     <div className="relative h-[520px] min-h-[420px] w-full">
       <div ref={containerRef} className="absolute inset-0" />
+      {historyState !== "idle" ? (
+        <div
+          className={cn(
+            "pointer-events-none absolute bottom-3 left-3 z-20 flex max-w-[calc(100%-1.5rem)] items-center gap-2 rounded-full border bg-background/95 px-3 py-1.5 text-xs font-medium shadow-sm backdrop-blur",
+            historyState === "error"
+              ? "border-destructive/30 text-destructive"
+              : "text-muted-foreground"
+          )}
+        >
+          {historyState === "loading" ? (
+            <>
+              <Spinner className="size-3" />
+              <span>Đang tải lịch sử...</span>
+            </>
+          ) : (
+            <span>
+              {historyError || "Chưa tải được lịch sử. Kéo lại để thử."}
+            </span>
+          )}
+        </div>
+      ) : null}
       {markerPositions.map(({ group, x, y }) => {
         const selected = selectedAnnotationGroupId === group.id
         const emphasized = selected || group.priority === "high"

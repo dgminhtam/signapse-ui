@@ -1,7 +1,6 @@
 import { Suspense, type ElementType, type ReactNode } from "react"
 import {
   ActivityIcon,
-  BriefcaseBusinessIcon,
   CalendarClockIcon,
   CircleSlashIcon,
   FolderOpenIcon,
@@ -74,7 +73,7 @@ async function WorkspaceOverview() {
             <EmptyTitle>Bạn chưa có quyền xem không gian làm việc</EmptyTitle>
             <EmptyDescription>
               Tài khoản hiện tại cần quyền đọc không gian làm việc để xem tổng quan
-              và các dữ liệu theo phạm vi workspace.
+              và các dữ liệu theo phạm vi không gian làm việc.
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
@@ -207,7 +206,7 @@ function WorkspaceHero({
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary">Đang hoạt động</Badge>
             <span className="text-sm text-muted-foreground">
-              Phạm vi hiện tại của các tính năng workspace
+              Phạm vi hiện tại của các tính năng không gian làm việc
             </span>
           </div>
           <div className="flex flex-col gap-2">
@@ -230,24 +229,18 @@ function WorkspaceHero({
         />
       </div>
 
-      <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <OverviewStat
-          icon={BriefcaseBusinessIcon}
-          label="Không gian"
-          value={workspace.slug || "Chưa có slug"}
-          description="Định danh ngắn của workspace"
-        />
+      <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         <OverviewStat
           icon={TargetIcon}
           label="Tài sản theo dõi"
           value={trackedAssetTotal.toLocaleString("vi-VN")}
-          description="Đang dùng cho phạm vi workspace"
+          description="Đang dùng cho phạm vi không gian làm việc"
         />
         <OverviewStat
           icon={ActivityIcon}
           label="Trạng thái"
           value="Đang hoạt động"
-          description="Được backend đánh dấu là current"
+          description="Đang là phạm vi hiện tại"
         />
         <OverviewStat
           icon={CalendarClockIcon}
@@ -355,7 +348,7 @@ function TrackedAssetsSummary({
             <EmptyMedia variant="icon">
               <TargetIcon />
             </EmptyMedia>
-            <EmptyTitle>Workspace chưa theo dõi tài sản nào</EmptyTitle>
+            <EmptyTitle>Không gian làm việc chưa theo dõi tài sản nào</EmptyTitle>
             <EmptyDescription>
               Thêm các mã tài sản quan trọng để các màn hình phân tích có phạm vi
               theo dõi rõ ràng hơn.
@@ -408,8 +401,7 @@ function WorkspaceTechnicalDetails({ workspace }: { workspace: WorkspaceResponse
       </div>
 
       <div className="grid gap-3">
-        <TechnicalDetail label="ID workspace" value={workspace.id.toString()} />
-        <TechnicalDetail label="Slug" value={workspace.slug || "Chưa có slug"} />
+        <TechnicalDetail label="ID không gian" value={workspace.id.toString()} />
         <TechnicalDetail label="Tạo lúc" value={formatDateTime(workspace.createdDate)} />
         <TechnicalDetail
           label="Cập nhật"
@@ -441,8 +433,8 @@ function WorkspaceOverviewSkeleton() {
           </div>
           <Skeleton className="h-9 w-44" />
         </div>
-        <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, index) => (
+        <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, index) => (
             <div key={index} className="rounded-lg border bg-background p-4">
               <Skeleton className="h-4 w-28" />
               <Skeleton className="mt-3 h-6 w-full" />

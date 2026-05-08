@@ -1,3 +1,5 @@
+import type { EventStatus } from "@/app/lib/events/definitions"
+
 export type NewsArticleStatus =
   | "INGESTED"
   | "DERIVATION_PENDING"
@@ -8,9 +10,7 @@ export type NewsArticleStatus =
 
 export type NewsPrimaryEventDerivationChangeType = "CREATED" | "UPDATED" | "NONE"
 
-export type LinkedEventStatus = "EMERGING" | "CONFIRMED" | "RESOLVED" | "ARCHIVED"
-
-export type LinkedEventEnrichmentStatus = "PENDING" | "SUCCESS" | "NO_MATCH" | "FAILED"
+export type LinkedEventStatus = EventStatus
 
 export type LinkedEventEvidenceRole = "PRIMARY" | "SUPPORTING" | "UPDATE" | "CONTRADICTING"
 
@@ -45,10 +45,8 @@ export interface NewsArticleListResponse {
 export interface LinkedEventSummaryResponse {
   eventId?: number
   eventTitle?: string
-  eventSlug?: string
   eventCanonicalKey?: string
   eventStatus?: LinkedEventStatus
-  eventEnrichmentStatus?: LinkedEventEnrichmentStatus
   evidenceRole?: LinkedEventEvidenceRole
   evidenceConfidence?: number
   evidenceNote?: string
@@ -56,7 +54,6 @@ export interface LinkedEventSummaryResponse {
 
 export interface NewsArticleResponse extends NewsArticleListResponse {
   content?: string
-  externalKey?: string
   linkedEvents?: LinkedEventSummaryResponse[]
   lastModifiedDate?: string
 }

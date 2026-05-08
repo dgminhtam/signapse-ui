@@ -2,10 +2,6 @@ import { Calendar, ExternalLink, FileText, GitBranch, Layers3 } from "lucide-rea
 import Link from "next/link"
 
 import {
-  ARTIFACT_TYPE_LABELS,
-  isNewsArticleArtifact,
-} from "@/app/lib/artifacts/definitions"
-import {
   EVENT_ASSET_RELATION_LABELS,
   EVENT_ASSET_TYPE_LABELS,
   EVENT_EVIDENCE_ROLE_LABELS,
@@ -91,10 +87,9 @@ export function EventQuickDetailContent({
         </p>
       </section>
 
-      <dl className="grid gap-3 sm:grid-cols-3">
+      <dl className="grid gap-3 sm:grid-cols-2">
         <QuickFact label="Độ tin cậy" value={formatConfidence(event.confidence)} />
         <QuickFact label="Xảy ra lúc" value={formatDateTime(event.occurredAt)} />
-        <QuickFact label="Xác nhận lúc" value={formatDateTime(event.confirmedAt)} />
       </dl>
 
       <section className="flex flex-col gap-3">
@@ -107,15 +102,10 @@ export function EventQuickDetailContent({
           <div className="flex flex-col gap-3">
             {evidenceItems.slice(0, 4).map((evidence, index) => (
               <article
-                key={`${evidence.artifactId ?? "evidence"}-${index}`}
+                key={`${evidence.newsArticleId ?? "evidence"}-${index}`}
                 className="rounded-lg border bg-background p-3"
               >
                 <div className="flex flex-wrap items-center gap-2">
-                  {evidence.artifactType ? (
-                    <Badge variant="outline">
-                      {ARTIFACT_TYPE_LABELS[evidence.artifactType]}
-                    </Badge>
-                  ) : null}
                   {evidence.evidenceRole ? (
                     <Badge variant="secondary">
                       {EVENT_EVIDENCE_ROLE_LABELS[evidence.evidenceRole]}
@@ -127,7 +117,7 @@ export function EventQuickDetailContent({
                 </div>
 
                 <h3 className="mt-2 line-clamp-2 text-sm font-medium">
-                  {evidence.artifactTitle || "Bằng chứng chưa có tiêu đề"}
+                  {evidence.newsArticleTitle || "Bằng chứng chưa có tiêu đề"}
                 </h3>
                 <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                   <span>{evidence.newsOutletName || "Chưa có nguồn tin"}</span>
@@ -140,20 +130,19 @@ export function EventQuickDetailContent({
                 ) : null}
 
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {typeof evidence.artifactId === "number" &&
-                  isNewsArticleArtifact(evidence.artifactType) &&
+                  {typeof evidence.newsArticleId === "number" &&
                   canReadNewsArticles ? (
                     <Button asChild size="sm" variant="outline">
-                      <Link href={`/news-articles/${evidence.artifactId}`}>
+                      <Link href={`/news-articles/${evidence.newsArticleId}`}>
                         <FileText aria-hidden="true" data-icon="inline-start" />
                         Xem bài viết
                       </Link>
                     </Button>
                   ) : null}
-                  {evidence.artifactUrl ? (
+                  {evidence.newsArticleUrl ? (
                     <Button asChild size="sm" variant="outline">
                       <a
-                        href={evidence.artifactUrl}
+                        href={evidence.newsArticleUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                       >

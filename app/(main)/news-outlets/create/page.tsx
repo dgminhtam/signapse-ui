@@ -2,14 +2,12 @@ import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
 import { hasPermission } from "@/app/lib/permissions"
-import {
-  NEWS_OUTLET_CREATE_PERMISSION,
-} from "@/app/lib/news-outlets/permissions"
+import { NEWS_OUTLET_CREATE_PERMISSION } from "@/app/lib/news-outlets/permissions"
 import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { AccessDenied } from "@/components/access-denied"
 import { Button } from "@/components/ui/button"
 
-import { NewsOutletForm } from "../news-outlet-form"
+import { NewsOutletCreateForm } from "../news-outlet-create-form"
 
 export default async function CreateNewsOutletPage() {
   const permissions = await getCurrentPermissions()
@@ -34,7 +32,7 @@ export default async function CreateNewsOutletPage() {
         </Button>
       </div>
 
-      <NewsOutletForm />
+      <NewsOutletCreateForm />
     </div>
   )
 }

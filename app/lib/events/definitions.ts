@@ -1,5 +1,3 @@
-import type { ArtifactType } from "@/app/lib/artifacts/definitions"
-
 export type EventStatus =
   | "ENRICHMENT_PENDING"
   | "ENRICHED"
@@ -45,13 +43,11 @@ export type EventEnrichmentOutcome = EventStatus
 export interface EventListResponse {
   id: number
   title: string
-  slug?: string
   canonicalKey?: string
   description?: string
   status: EventStatus
   confidence?: number
   occurredAt?: string
-  confirmedAt?: string
   createdDate: string
   lastModifiedDate?: string
 }
@@ -74,10 +70,9 @@ export interface EventThemeSummaryResponse {
 }
 
 export interface EventEvidenceSummaryResponse {
-  artifactType?: ArtifactType
-  artifactId?: number
-  artifactTitle?: string
-  artifactUrl?: string
+  newsArticleId?: number
+  newsArticleTitle?: string
+  newsArticleUrl?: string
   newsOutletName?: string
   publishedAt?: string | null
   evidenceRole?: EventEvidenceRole

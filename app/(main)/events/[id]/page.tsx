@@ -10,7 +10,6 @@ import {
   GitBranch,
   Hash,
   Layers3,
-  Link2,
   RefreshCcw,
   TrendingUp,
 } from "lucide-react"
@@ -18,10 +17,6 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 
 import { getEventById } from "@/app/api/events/action"
-import {
-  ARTIFACT_TYPE_LABELS,
-  isNewsArticleArtifact,
-} from "@/app/lib/artifacts/definitions"
 import { hasAnyPermission } from "@/app/lib/permissions"
 import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import {
@@ -335,7 +330,7 @@ async function FetchEventData({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex shrink-0 flex-wrap items-center gap-2 xl:justify-end">
             <EventEnrichButton id={event.id} variant="outline" />
             <EventMarketReactionButton id={event.id} />
           </div>
@@ -343,7 +338,7 @@ async function FetchEventData({
       </div>
 
       <div className="flex flex-col gap-8">
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2">
           <DetailCard
             title="Độ tin cậy"
             value={formatConfidence(event.confidence)}
@@ -352,11 +347,6 @@ async function FetchEventData({
           <DetailCard
             title="Xảy ra lúc"
             value={formatDateTime(event.occurredAt)}
-            icon={Calendar}
-          />
-          <DetailCard
-            title="Xác nhận lúc"
-            value={formatDateTime(event.confirmedAt)}
             icon={Calendar}
           />
         </div>
@@ -368,17 +358,12 @@ async function FetchEventData({
             <div className="flex flex-col gap-3">
               {evidenceItems.map((evidence, index) => (
                 <div
-                  key={`${evidence.artifactId ?? "evidence"}-${index}`}
+                  key={`${evidence.newsArticleId ?? "evidence"}-${index}`}
                   className="rounded-lg border border-border bg-muted/20 p-4"
                 >
                   <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
                     <div className="flex flex-col gap-2">
                       <div className="flex flex-wrap items-center gap-2">
-                        {evidence.artifactType ? (
-                          <Badge variant="outline">
-                            {ARTIFACT_TYPE_LABELS[evidence.artifactType]}
-                          </Badge>
-                        ) : null}
                         {evidence.evidenceRole ? (
                           <Badge variant="secondary">
                             {EVENT_EVIDENCE_ROLE_LABELS[evidence.evidenceRole]}
@@ -386,7 +371,7 @@ async function FetchEventData({
                         ) : null}
                       </div>
                       <p className="font-medium text-foreground">
-                        {evidence.artifactTitle || "Chưa có tiêu đề tư liệu"}
+                        {evidence.newsArticleTitle || "Chưa có tiêu đề bài viết"}
                       </p>
                       <div className="flex flex-col gap-1 text-sm text-muted-foreground">
                         <span>
@@ -407,8 +392,7 @@ async function FetchEventData({
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
-                      {typeof evidence.artifactId === "number" &&
-                      isNewsArticleArtifact(evidence.artifactType) &&
+                      {typeof evidence.newsArticleId === "number" &&
                       canReadNewsArticles ? (
                         <Button
                           variant="outline"
@@ -416,13 +400,13 @@ async function FetchEventData({
                           className="gap-2"
                           asChild
                         >
-                          <Link href={`/news-articles/${evidence.artifactId}`}>
+                          <Link href={`/news-articles/${evidence.newsArticleId}`}>
                             <FileText data-icon="inline-start" />
                             Xem bài viết
                           </Link>
                         </Button>
                       ) : null}
-                      {evidence.artifactUrl ? (
+                      {evidence.newsArticleUrl ? (
                         <Button
                           variant="outline"
                           size="sm"
@@ -430,7 +414,7 @@ async function FetchEventData({
                           asChild
                         >
                           <a
-                            href={evidence.artifactUrl}
+                            href={evidence.newsArticleUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                           >
@@ -605,16 +589,6 @@ async function FetchEventData({
             </summary>
             <div className="grid gap-4 border-t border-border p-4 sm:grid-cols-2 xl:grid-cols-3">
               <DetailCard
-                title="Mã sự kiện"
-                value={String(event.id)}
-                icon={Hash}
-              />
-              <DetailCard
-                title="Slug"
-                value={event.slug || "Chưa có"}
-                icon={Link2}
-              />
-              <DetailCard
                 title="Khóa chuẩn"
                 value={event.canonicalKey || "Chưa có"}
                 icon={GitBranch}
@@ -640,18 +614,24 @@ async function FetchEventData({
 function EventDetailSkeleton() {
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-4">
-        <div className="flex gap-2">
-          <Skeleton className="h-5 w-32 rounded-full" />
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+        <div className="flex flex-col gap-4">
+          <div className="flex gap-2">
+            <Skeleton className="h-5 w-32 rounded-full" />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-8 w-72 max-w-full" />
+            <Skeleton className="h-4 w-96 max-w-full" />
+          </div>
         </div>
-        <div className="flex flex-col gap-2">
-          <Skeleton className="h-8 w-2/3" />
-          <Skeleton className="h-4 w-3/4" />
+        <div className="flex shrink-0 gap-2">
+          <Skeleton className="h-9 w-24" />
+          <Skeleton className="h-9 w-24" />
         </div>
       </div>
       <div className="flex flex-col gap-8">
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, index) => (
+        <div className="grid gap-4 sm:grid-cols-2">
+          {Array.from({ length: 2 }).map((_, index) => (
             <div key={index} className="rounded-lg border p-4">
               <Skeleton className="h-4 w-24" />
               <Skeleton className="mt-3 h-5 w-full" />

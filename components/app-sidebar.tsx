@@ -45,6 +45,12 @@ import {
   useSidebar,
 } from "./ui/sidebar"
 
+const USER_MENU_TRIGGER_ID = "app-sidebar-user-menu-trigger"
+
+function getNavCollapsibleContentId(index: number) {
+  return `app-sidebar-nav-${index}-content`
+}
+
 type SimpleUser = {
   imageUrl: string
   fullName: string | null
@@ -105,6 +111,7 @@ function SidebarBrand() {
 
 export function NavMain({ items }: { items: NavItem[] }) {
   const pathname = usePathname()
+
   const matchesPath = (url: string) => {
     if (url === "/") {
       return pathname === "/"
@@ -122,9 +129,10 @@ export function NavMain({ items }: { items: NavItem[] }) {
       <SidebarGroupLabel>Nền tảng</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
-          {items.map((item) => {
+          {items.map((item, itemIndex) => {
             const hasSubItems = (item.items?.length ?? 0) > 0
             const isActive = hasSubItems ? hasActiveSubItem(item.items) : matchesPath(item.url)
+            const collapsibleContentId = getNavCollapsibleContentId(itemIndex)
 
             if (!hasSubItems) {
               return (
@@ -152,7 +160,7 @@ export function NavMain({ items }: { items: NavItem[] }) {
                 className="group/collapsible"
               >
                 <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
+                  <CollapsibleTrigger asChild aria-controls={collapsibleContentId}>
                     <SidebarMenuButton
                       tooltip={item.title}
                       isActive={isActive}
@@ -163,7 +171,7 @@ export function NavMain({ items }: { items: NavItem[] }) {
                       <ChevronRightIcon className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
-                  <CollapsibleContent>
+                  <CollapsibleContent id={collapsibleContentId}>
                     <SidebarMenuSub className="ml-3.5 mr-0 py-1 pr-0">
                       {item.items?.map((subItem) => {
                         const isSubItemActive = matchesPath(subItem.url)
@@ -205,7 +213,7 @@ function NavUser({ user }: NavUserProps) {
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+          <DropdownMenuTrigger asChild id={USER_MENU_TRIGGER_ID}>
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
@@ -226,6 +234,7 @@ function NavUser({ user }: NavUserProps) {
             side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={4}
+            aria-labelledby={USER_MENU_TRIGGER_ID}
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">

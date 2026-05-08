@@ -120,7 +120,7 @@ const GRAPH_HUD_NODE_KIND_ORDER = [
 const GRAPH_HUD_EDGE_KIND_ORDER = [
   "event-asset",
   "event-theme",
-  "source-artifact-event",
+  "news-article-event",
 ] satisfies GraphViewEdgeKind[]
 const GRAPH_SELECTION_STATE_NAMES = [
   "selected",

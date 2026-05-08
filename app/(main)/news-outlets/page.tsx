@@ -90,10 +90,9 @@ function ListSkeleton() {
         <Table>
           <TableHeader>
             <AppListTableHeaderRow>
-              <AppListTableHead className="w-[46%]">Nguồn tin</AppListTableHead>
-              <AppListTableHead className="w-44">Slug</AppListTableHead>
+              <AppListTableHead className="w-[58%]">Nguồn tin</AppListTableHead>
               <AppListTableHead className="w-40">Tạo lúc</AppListTableHead>
-              <AppListTableHead className="w-28 text-center">
+              <AppListTableHead className="w-40 text-center">
                 Kích hoạt
               </AppListTableHead>
               <AppListTableHead className="w-28 text-center">
@@ -107,19 +106,16 @@ function ListSkeleton() {
                 <TableCell className="align-top whitespace-normal">
                   <div className="flex min-w-0 flex-col gap-2">
                     <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-3 w-full" />
-                    <Skeleton className="h-3 w-5/6" />
+                    <Skeleton className="h-3 w-40" />
+                    <Skeleton className="h-3 w-28" />
                   </div>
-                </TableCell>
-                <TableCell className="w-44 max-w-[11rem]">
-                  <Skeleton className="h-6 w-24 rounded" />
                 </TableCell>
                 <TableCell className="w-40">
                   <Skeleton className="h-4 w-28" />
                 </TableCell>
-                <TableCell className="w-28 text-center">
+                <TableCell className="w-40 text-center">
                   <div className="flex justify-center">
-                    <Skeleton className="h-5 w-10 rounded-full" />
+                    <Skeleton className="h-9 w-32 rounded-lg" />
                   </div>
                 </TableCell>
                 <TableCell className="w-28 text-center">

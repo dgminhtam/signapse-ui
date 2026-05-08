@@ -82,7 +82,7 @@ export const siteConfig = {
           permission: NEWS_OUTLET_NAV_PERMISSIONS,
         },
         {
-          title: "Tài liệu nguồn",
+          title: "Bài viết tin tức",
           url: "/news-articles",
           permission: NEWS_ARTICLE_NAV_PERMISSIONS,
         },

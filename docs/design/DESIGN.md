@@ -33,7 +33,7 @@ Signapse không phải landing page marketing. Đây là công cụ vận hành 
 - Tạo một visual language thống nhất cho dashboard Signapse.
 - Áp dụng reference theo hướng token, surface và hierarchy, không hardcode theo từng màn.
 - Giữ UI tiếng Việt chuyên nghiệp, dễ đọc.
-- Giữ Be Vietnam Pro làm font chính cho khả năng đọc tiếng Việt.
+- Giữ Inter làm font chính cho trải nghiệm SaaS/admin gọn và hỗ trợ tiếng Việt tốt.
 - Tăng cảm giác tài chính, phân tích và vận hành mà vẫn giữ mật độ thông tin phù hợp admin tool.
 - Bảo toàn accessibility, responsive layout và skeleton parity.
 
@@ -277,7 +277,7 @@ Các route hidden hoặc legacy redirect không nên là mục tiêu đầu tiê
 - Không giảm mật độ table quá nhiều.
 - Không thêm decorative floating cards nếu không phục vụ dữ liệu.
 - Không dùng animation reveal lớn trong first pass.
-- Không đổi font khỏi Be Vietnam Pro trong first pass.
+- Không đổi font khỏi Inter trong first pass.
 
 ## Visual QA Checklist
 

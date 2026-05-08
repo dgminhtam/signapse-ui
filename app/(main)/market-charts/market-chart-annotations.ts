@@ -20,6 +20,28 @@ export interface MarketChartAnnotationMarkerPoint {
   y: number
 }
 
+export function mergeMarketChartAnnotations(
+  current: MarketChartAnnotationResponse[],
+  incoming: MarketChartAnnotationResponse[]
+): MarketChartAnnotationResponse[] {
+  const annotationsById = new Map<string, MarketChartAnnotationResponse>()
+
+  for (const annotation of current) {
+    annotationsById.set(annotation.id, annotation)
+  }
+
+  for (const annotation of incoming) {
+    annotationsById.set(annotation.id, annotation)
+  }
+
+  return [...annotationsById.values()].sort((left, right) => {
+    const leftTime = toMarketChartEpochMillis(left.time) ?? 0
+    const rightTime = toMarketChartEpochMillis(right.time) ?? 0
+
+    return leftTime - rightTime
+  })
+}
+
 export function toMarketChartEpochMillis(value: string): MarketChartEpochMillis | null {
   const timestamp = Date.parse(value)
 
@@ -112,7 +134,7 @@ export function createMarketChartAnnotationGroups(
   for (const candle of candles) {
     const time = toMarketChartEpochMillis(candle.time)
 
-    if (time) {
+    if (time !== null) {
       candlesByTime.set(Number(time), candle)
     }
   }

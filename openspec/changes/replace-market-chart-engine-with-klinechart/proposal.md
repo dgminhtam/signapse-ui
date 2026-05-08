@@ -6,7 +6,7 @@ The market chart workbench currently uses Lightweight Charts, which introduces T
 
 - Replace the market chart canvas engine from `lightweight-charts` to the latest `klinecharts` package version available at implementation time.
 - Keep the existing watchlist-only asset selection, timeframe selection, latest seven-day rolling window, annotation layer toggle, popup detail UX, summary rail, and shadcn UI shell behavior.
-- Do not implement lazy historical loading in this change; only shape the chart adapter/data model so a later change can plug lazy loading into the engine cleanly.
+- Do not implement lazy historical loading in this engine migration change; only shape the chart adapter/data model so the follow-up lazy-history change can plug into the engine cleanly.
 - Migrate annotation marker rendering from Lightweight Charts coordinate APIs to a KLineChart-compatible overlay or DOM overlay integration.
 - Remove TradingView attribution UI because the screen will no longer use TradingView's chart engine.
 - Remove all obsolete Lightweight Charts code, types, docs references, dependency entries, eslint suppressions, and temporary legacy annotation panel code that no longer has a runtime path.
@@ -16,7 +16,7 @@ The market chart workbench currently uses Lightweight Charts, which introduces T
 
 ### New Capabilities
 
-- `market-chart-klinechart-engine`: Covers rendering market candle data with KLineChart, preserving current chart workbench behavior while removing Lightweight Charts/TradingView implementation dependencies and preparing the adapter boundary for future lazy historical loading.
+- `market-chart-klinechart-engine`: Covers rendering market candle data with KLineChart, preserving current chart workbench behavior while removing Lightweight Charts/TradingView implementation dependencies and preparing the adapter boundary for follow-up lazy historical loading.
 
 ### Modified Capabilities
 

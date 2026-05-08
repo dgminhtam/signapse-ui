@@ -5,7 +5,7 @@ export type GraphViewNodeKind = "event" | "asset" | "theme" | "news-article"
 export type GraphViewEdgeKind =
   | "event-asset"
   | "event-theme"
-  | "source-artifact-event"
+  | "news-article-event"
 
 export interface GraphViewNodeMetadata {
   slug?: string | null
@@ -60,7 +60,7 @@ const graphViewNodeKindSchema = z.enum([
 const graphViewEdgeKindSchema = z.enum([
   "event-asset",
   "event-theme",
-  "source-artifact-event",
+  "news-article-event",
 ])
 
 export const graphViewNodeMetadataSchema = z.object({
@@ -111,7 +111,7 @@ export const GRAPH_VIEW_NODE_KIND_LABELS: Record<GraphViewNodeKind, string> = {
 export const GRAPH_VIEW_EDGE_KIND_LABELS: Record<GraphViewEdgeKind, string> = {
   "event-asset": "Su kien - tai san",
   "event-theme": "Su kien - chu de",
-  "source-artifact-event": "Bang chung - su kien",
+  "news-article-event": "Bang chung - su kien",
 }
 
 export const GRAPH_VIEW_RELATION_TYPE_LABELS: Record<string, string> = {

@@ -10,7 +10,6 @@ import { NEWS_ARTICLE_ANALYZE_PERMISSIONS } from "@/app/lib/news-articles/permis
 import { useHasAnyPermission } from "@/components/permission-provider"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
-import { cn } from "@/lib/utils"
 
 import {
   buildPrimaryEventDerivationSummary,
@@ -66,17 +65,18 @@ export function NewsArticleDeriveEventButton({
       size={size}
       onClick={handleDerive}
       disabled={isPending}
-      className={cn(showText ? "gap-2" : undefined, className)}
+      className={className}
+      aria-label={showText ? "Suy diễn sự kiện chính từ bài viết" : undefined}
     >
       {isPending ? (
-        <Spinner className="h-4 w-4" data-icon="inline-start" />
+        <Spinner data-icon="inline-start" />
       ) : (
-        <GitBranch className="h-4 w-4" data-icon="inline-start" />
+        <GitBranch data-icon="inline-start" />
       )}
       {showText ? (
-        <span>{isPending ? "Đang suy diễn..." : "Suy diễn sự kiện chính"}</span>
+        <span>{isPending ? "Đang suy diễn..." : "Suy diễn sự kiện"}</span>
       ) : (
-        <span className="sr-only">Suy diễn sự kiện chính</span>
+        <span className="sr-only">Suy diễn sự kiện chính từ bài viết</span>
       )}
     </Button>
   )

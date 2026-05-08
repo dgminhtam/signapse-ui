@@ -41,12 +41,15 @@ export async function getGraphView(): Promise<GraphViewResponse> {
 
   if (!parsedResponse.success) {
     const issues = parsedResponse.error.issues
-
-    console.error("Graph view response validation failed", {
+    const validationSummary = {
       issueCount: issues.length,
       issues: summarizeGraphViewValidationIssues(issues),
       truncated: issues.length > GRAPH_VIEW_VALIDATION_ISSUE_LIMIT,
-    })
+    }
+
+    console.error(
+      `Graph view response validation failed ${JSON.stringify(validationSummary)}`
+    )
     throw new Error(
       "Backend trả về dữ liệu biểu đồ tri thức không đúng định dạng mong đợi."
     )

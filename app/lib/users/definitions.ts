@@ -1,8 +1,17 @@
 export interface BackendWorkspaceSummary {
   id: number
   name: string
-  slug: string
-  personal: boolean
+}
+
+export interface BackendMediaResponse {
+  id: number
+  name: string
+  altText?: string
+  urlOriginal: string
+  urlLarge?: string
+  urlMedium?: string
+  urlThumbnail?: string
+  size?: number
 }
 
 export interface BackendMeResponse {
@@ -10,7 +19,7 @@ export interface BackendMeResponse {
   email: string
   firstName: string | null
   lastName: string | null
-  workspace: BackendWorkspaceSummary | null
-  mainImage: string | null
+  currentWorkspace: BackendWorkspaceSummary | null
+  mainImage: BackendMediaResponse | null
   permissions: string[]
 }

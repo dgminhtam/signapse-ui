@@ -5,9 +5,10 @@ import { revalidatePath } from "next/cache"
 import { fetchAuthenticated } from "@/app/api/auth/action"
 import { ActionResult, Page, SearchParams } from "@/app/lib/definitions"
 import {
+  CreateNewsOutletRequest,
   NewsOutletListResponse,
-  NewsOutletRequest,
   NewsOutletResponse,
+  UpdateNewsOutletRequest,
 } from "@/app/lib/news-outlets/definitions"
 import { queryParamsToString } from "@/app/lib/utils"
 
@@ -27,25 +28,30 @@ export async function getActiveNewsOutlets(
   )
 }
 
-export async function getNewsOutletById(id: number): Promise<NewsOutletResponse> {
+export async function getNewsOutletById(
+  id: number
+): Promise<NewsOutletResponse> {
   return fetchAuthenticated<NewsOutletResponse>(`/news-outlets/${id}`)
 }
 
 export async function createNewsOutlet(
-  request: NewsOutletRequest
+  request: CreateNewsOutletRequest
 ): Promise<ActionResult<NewsOutletResponse>> {
   try {
-    const newsOutlet = await fetchAuthenticated<NewsOutletResponse>("/news-outlets", {
-      method: "POST",
-      body: JSON.stringify(request),
-    })
+    const newsOutlet = await fetchAuthenticated<NewsOutletResponse>(
+      "/news-outlets",
+      {
+        method: "POST",
+        body: JSON.stringify(request),
+      }
+    )
 
     revalidatePath("/news-outlets")
 
     return { success: true, data: newsOutlet }
   } catch (error: unknown) {
     const errorMessage =
-      error instanceof Error ? error.message : "Khong the tao nguon tin moi"
+      error instanceof Error ? error.message : "Không thể tạo nguồn tin mới"
 
     return { success: false, error: errorMessage }
   }
@@ -53,7 +59,7 @@ export async function createNewsOutlet(
 
 export async function updateNewsOutlet(
   id: number,
-  request: NewsOutletRequest
+  request: UpdateNewsOutletRequest
 ): Promise<ActionResult<NewsOutletResponse>> {
   try {
     const newsOutlet = await fetchAuthenticated<NewsOutletResponse>(
@@ -70,7 +76,7 @@ export async function updateNewsOutlet(
     return { success: true, data: newsOutlet }
   } catch (error: unknown) {
     const errorMessage =
-      error instanceof Error ? error.message : "Khong the cap nhat nguon tin"
+      error instanceof Error ? error.message : "Không thể cập nhật nguồn tin"
 
     return { success: false, error: errorMessage }
   }
@@ -95,7 +101,7 @@ export async function toggleNewsOutletActive(
     const errorMessage =
       error instanceof Error
         ? error.message
-        : "Khong the cap nhat trang thai nguon tin"
+        : "Không thể cập nhật trạng thái nguồn tin"
 
     return { success: false, error: errorMessage }
   }
@@ -112,7 +118,7 @@ export async function deleteNewsOutlet(id: number): Promise<ActionResult> {
     return { success: true, data: undefined }
   } catch (error: unknown) {
     const errorMessage =
-      error instanceof Error ? error.message : "Khong the xoa nguon tin"
+      error instanceof Error ? error.message : "Không thể xóa nguồn tin"
 
     return { success: false, error: errorMessage }
   }

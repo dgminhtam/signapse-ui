@@ -4,14 +4,12 @@ import { notFound } from "next/navigation"
 
 import { getNewsOutletById } from "@/app/api/news-outlets/action"
 import { hasPermission } from "@/app/lib/permissions"
-import {
-  NEWS_OUTLET_UPDATE_PERMISSION,
-} from "@/app/lib/news-outlets/permissions"
+import { NEWS_OUTLET_UPDATE_PERMISSION } from "@/app/lib/news-outlets/permissions"
 import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { AccessDenied } from "@/components/access-denied"
 import { Button } from "@/components/ui/button"
 
-import { NewsOutletForm } from "../news-outlet-form"
+import { NewsOutletUpdateForm } from "../news-outlet-update-form"
 
 interface EditNewsOutletPageProps {
   params: Promise<{ id: string }>
@@ -49,7 +47,7 @@ export default async function EditNewsOutletPage({
         </Button>
       </div>
 
-      <NewsOutletForm initialData={newsOutlet} />
+      <NewsOutletUpdateForm newsOutlet={newsOutlet} />
     </div>
   )
 }

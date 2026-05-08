@@ -57,7 +57,7 @@ export const GRAPH_VIEW_EDGE_VISUALS = {
     label: "Sự kiện - chủ đề",
     size: 1.25,
   },
-  "source-artifact-event": {
+  "news-article-event": {
     chipClassName:
       "border-rose-300/60 bg-rose-50 text-rose-900 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-100",
     color: "#fb7185",

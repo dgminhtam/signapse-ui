@@ -47,7 +47,7 @@ const NODE_KIND_ORDER: GraphViewNodeKind[] = [
 const EDGE_KIND_ORDER: GraphViewEdgeKind[] = [
   "event-asset",
   "event-theme",
-  "source-artifact-event",
+  "news-article-event",
 ]
 
 function createCountRecord<T extends string>(

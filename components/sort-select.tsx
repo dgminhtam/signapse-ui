@@ -20,6 +20,7 @@ interface SortOption {
 
 interface SortSelectProps {
   className?: string
+  defaultValue?: string
   label?: string
   options: SortOption[]
   placeholder?: string
@@ -29,6 +30,7 @@ interface SortSelectProps {
 
 export function SortSelect({
   className,
+  defaultValue,
   label = "Sắp xếp danh sách",
   options,
   placeholder = "Sắp xếp",
@@ -40,7 +42,7 @@ export function SortSelect({
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
 
-  const currentSort = searchParams.get("sort") || ""
+  const currentSort = searchParams.get("sort") || defaultValue || ""
 
   const onSortChange = (value: string) => {
     const params = new URLSearchParams(searchParams)

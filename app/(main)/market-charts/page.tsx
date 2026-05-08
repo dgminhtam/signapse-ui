@@ -10,6 +10,7 @@ import { WorkspaceWatchlistAssetListItemResponse } from "@/app/lib/watchlists/de
 import { AccessDenied } from "@/components/access-denied"
 import { Skeleton } from "@/components/ui/skeleton"
 
+import { MarketChartSurfaceSkeleton } from "./market-chart-skeleton"
 import { MarketChartWorkbench } from "./market-chart-workbench"
 
 const WATCHLIST_CHART_ASSET_SEARCH = {
@@ -62,22 +63,21 @@ async function MarketChartsContent() {
 
 function MarketChartWorkbenchSkeleton() {
   return (
-    <div className="flex flex-col gap-6">
-      <div className="rounded-2xl border bg-muted/15 p-4">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-          <div className="grid flex-1 gap-3 lg:grid-cols-[minmax(260px,1fr)_180px_auto] lg:items-end">
-            <Skeleton className="h-16 w-full rounded-xl" />
-            <Skeleton className="h-16 w-full rounded-xl" />
-            <Skeleton className="h-10 w-full rounded-md lg:w-32" />
+    <div className="w-full">
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex w-full min-w-0 flex-1 flex-col gap-4 sm:w-auto sm:flex-row sm:items-center">
+            <Skeleton className="h-9 w-full rounded-lg sm:w-80 lg:w-96" />
           </div>
-          <Skeleton className="h-4 w-36 rounded-full lg:mb-3" />
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+            <Skeleton className="h-9 w-full rounded-lg sm:w-[180px]" />
+            <Skeleton className="h-9 w-full rounded-lg sm:w-32" />
+            <Skeleton className="h-9 w-full rounded-lg sm:w-24" />
+          </div>
         </div>
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(300px,360px)]">
-        <Skeleton className="h-[560px] w-full rounded-[28px]" />
-        <Skeleton className="h-80 w-full rounded-2xl" />
-      </div>
+      <MarketChartSurfaceSkeleton className="mt-4" />
     </div>
   )
 }

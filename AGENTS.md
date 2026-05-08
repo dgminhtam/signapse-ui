@@ -13,7 +13,7 @@ Sử dụng slash command: `/dev`, `/build`, `/lint`, `/format`, `/typecheck`
 Đây là dashboard quản trị dùng **Next.js 16 App Router** cho hệ thống tín hiệu giao dịch có tích hợp AI.
 
 - **Xác thực:** Clerk, đính kèm JWT qua `fetchAuthenticated()`
-- **UI:** shadcn/ui từ `@/components/ui/`, Tailwind CSS v4, Lucide icons, Geist font
+- **UI:** shadcn/ui từ `@/components/ui/`, Tailwind CSS v4, Lucide icons, Inter font và Geist Mono
 - **Toast:** chỉ dùng `sonner`, không dùng `alert()`
 - **Validation:** Zod v4 cho validation frontend và mapping DTO backend
 
@@ -132,9 +132,12 @@ app/(main)/[feature]/
 - Màn hình create/update đang active phải dùng focused form shell qua shared component ngoài `components/ui`, không render form trần trực tiếp trên workspace
 - Focused form shell là inner task surface có `rounded-xl`, border, `bg-card`, header gọn, body field và footer action zone; không phải main Card shell lặp lại breadcrumb title
 - Header trong form shell mô tả tác vụ cụ thể như tạo mới hoặc chỉnh sửa; breadcrumb vẫn là page identity chính
+- Màn create và edit không được dùng chung một submit-owning form component; mỗi flow phải có form container riêng như `[feature]-create-form.tsx` và `[feature]-update-form.tsx`, không branch bằng `initialData`, `mode` hoặc `isEdit`
+- Chỉ được share field primitive/helper không phụ thuộc mode nếu helper đó không sở hữu submit, không chứa footer action, không gọi mutation và không branch create/edit
 - Body form dùng `FieldGroup`, `FieldSet` và `gap-*` nhất quán; không lồng thêm `Card` chỉ để lấy border, radius hoặc clipping cho từng section
 - Footer form phải chứa action chính và action phụ, tách khỏi body bằng border/subtle background; không để submit/cancel trong ad hoc action row sau `Separator`
-- Chọn width có chủ đích: form đơn giản dùng `max-w-xl`, form CRUD phổ biến dùng `max-w-2xl`, form dày hoặc có editor/prompt/API key/model picker dùng `max-w-3xl`
+- Với page-level focused form, footer action có thể căn trái khi giúp primary/cancel action tiếp nối cùng trục đọc với field; không đổi default shared footer chỉ vì một màn cần căn trái.
+- Chọn width có chủ đích: form đơn giản dùng `max-w-xl`, form CRUD phổ biến dùng `max-w-2xl`, form URL-heavy hoặc form dày/editor/prompt/API key/model picker dùng `max-w-3xl`; không kéo form full-width nếu chưa có lý do layout mạnh hơn.
 - Form create có action hủy an toàn như quay về danh sách hoặc reset theo flow hiện có; form update phải có nút Hủy `variant="ghost"` reset về dữ liệu ban đầu hoặc luồng an toàn tương đương
 - Skeleton hoặc Suspense fallback của create/update phải mirror form shell gồm header, body và footer để tránh layout shift
 
@@ -162,6 +165,9 @@ app/(main)/[feature]/
 - Mỗi bảng list phải có chiến lược chiều rộng cột rõ ràng: cột nội dung chính được phép co giãn, còn metadata, trạng thái, timestamp và action phải có width hoặc min-width ổn định theo nhiệm vụ scan của từng cột
 - Không để nội dung dài từ backend làm nở bảng ngang trên desktop; cột chứa title, description, URL, slug, model id, prompt name, cron expression hoặc text dài phải dùng `min-w-0` ở wrapper phù hợp và chọn rõ `truncate`, `line-clamp-*`, `break-words` hoặc `whitespace-normal`
 - Vì `TableCell` mặc định `whitespace-nowrap`, cell chứa nội dung nhiều dòng hoặc long-form text phải override cục bộ bằng `whitespace-normal align-top`; không sửa mặc định trong `components/ui/table.tsx` nếu chưa có proposal riêng
+- Switch toggle trạng thái boolean trực tiếp trong row list/table phải dùng capsule trạng thái compact: label trạng thái hiện tại và `<Switch>` nằm trong cùng một surface ổn định, không để label, switch và pending indicator rời rạc.
+- Capsule switch trong row list/table phải có `aria-label` theo từng entity, disabled state rõ khi không có quyền hoặc đang pending, pending feedback không làm đổi width/shift layout, và skeleton phải mirror đúng shape cuối.
+- Rule capsule switch này chỉ áp dụng cho toggle trong row list/table; không áp cho form switch, dialog switch hoặc toolbar switch như control lọc/hiển thị.
 - Horizontal scroll của `Table` chỉ là fallback cho viewport hẹp hoặc bảng dữ liệu rất dày, không phải cơ chế chính để desktop list không vỡ layout
 - Skeleton của bảng list phải mirror cùng column width strategy với bảng thật; không để skeleton khai báo width khác với table runtime
 

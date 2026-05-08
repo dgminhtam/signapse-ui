@@ -63,6 +63,7 @@ export function EventMarketReactionButton({
       onClick={handleDerive}
       disabled={isPending}
       className={cn(showText ? "gap-2" : undefined, className)}
+      aria-label="Suy luận tác động thị trường"
     >
       {isPending ? (
         <Spinner data-icon="inline-start" />
@@ -71,7 +72,7 @@ export function EventMarketReactionButton({
       )}
       {showText ? (
         <span>
-          {isPending ? "Đang suy luận..." : "Suy luận tác động thị trường"}
+          {isPending ? "Đang suy luận..." : "Tác động"}
         </span>
       ) : (
         <span className="sr-only">Suy luận tác động thị trường</span>

@@ -60,7 +60,7 @@ export type MarketChartAnnotationDirection =
   | string
 
 export interface MarketChartAnnotationEvidenceResponse {
-  sourceDocumentId?: number | null
+  newsArticleId?: number | null
   title?: string | null
   publisher?: string | null
   url?: string | null
@@ -166,7 +166,7 @@ export const marketChartCandleItemResponseSchema = z.object({
 }) satisfies z.ZodType<MarketChartCandleItemResponse>
 
 export const marketChartAnnotationEvidenceResponseSchema = z.object({
-  sourceDocumentId: z.number().nullable().optional(),
+  newsArticleId: z.number().nullable().optional(),
   title: z.string().nullable().optional(),
   publisher: z.string().nullable().optional(),
   url: z.string().nullable().optional(),

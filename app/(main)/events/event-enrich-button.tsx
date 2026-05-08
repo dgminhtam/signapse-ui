@@ -65,6 +65,7 @@ export function EventEnrichButton({
       onClick={handleEnrich}
       disabled={isPending}
       className={cn(showText ? "gap-2" : undefined, className)}
+      aria-label="Làm giàu tài sản và chủ đề"
     >
       {isPending ? (
         <Spinner data-icon="inline-start" />
@@ -72,7 +73,7 @@ export function EventEnrichButton({
         <Sparkles data-icon="inline-start" />
       )}
       {showText ? (
-        <span>{isPending ? "Đang làm giàu..." : "Làm giàu tài sản và chủ đề"}</span>
+        <span>{isPending ? "Đang làm giàu..." : "Làm giàu"}</span>
       ) : (
         <span className="sr-only">Làm giàu tài sản và chủ đề</span>
       )}

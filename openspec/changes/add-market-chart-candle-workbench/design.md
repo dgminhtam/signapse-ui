@@ -16,7 +16,7 @@ The frontend already has workspace watchlist APIs through `GET /watchlists`, whe
 - Send `assetId` to the backend candle endpoint and let backend own asset-to-provider-symbol resolution.
 - Parse `asset` and `annotations[]` from the candle response, while keeping annotation rendering disabled for this MVP.
 - Provide clear user feedback for first-run, watchlist loading, empty watchlist, invalid asset selection, candle loading, no-data, API error, and access-denied states.
-- Leave a visible but honest path for future event overlays and lazy historical loading without requiring those backend contracts now.
+- Leave a visible but honest path for event overlays and later older-history loading without requiring additional backend contracts in the MVP.
 
 **Non-Goals:**
 
@@ -24,7 +24,7 @@ The frontend already has workspace watchlist APIs through `GET /watchlists`, whe
 - Do not derive or maintain frontend provider-symbol mapping for candle requests.
 - Do not expose manual `from` or `to` controls.
 - Do not render chart event markers, annotation popups, or annotation side panels in this contract-sync revision.
-- Do not implement lazy loading of older candles yet; only keep the design compatible with it.
+- Do not implement lazy loading of older candles in the original MVP; the follow-up `add-market-chart-lazy-history-loading` change owns the actual older-history behavior.
 - Do not add realtime streaming, indicators, drawing tools, trade recommendations, or alerting.
 - Do not change global shadcn theme tokens or shared `components/ui` primitives.
 
@@ -90,11 +90,11 @@ The UI can describe this as `Dữ liệu 7 ngày gần nhất` and display the a
 
 Rationale: the chart should feel current by default. Manual date entry is unnecessary while the target design is drag or scroll based lazy loading.
 
-### Keep lazy historical loading as a future boundary
+### Keep lazy historical loading compatible with the route model
 
-The initial implementation should not load more candles while panning. The chart canvas and surrounding copy should avoid promising that behavior. However, keeping `from/to` out of the URL and form prepares the model for later cursor-driven fetches when the chart approaches the left edge.
+The initial implementation did not load more candles while panning. Keeping `from/to` out of the URL and form intentionally prepared the model for the follow-up `add-market-chart-lazy-history-loading` change, where the chart approaches the left edge and requests older windows internally.
 
-Future lazy-load shape:
+Lazy-load shape:
 
 ```text
 visible range nears oldest loaded candle

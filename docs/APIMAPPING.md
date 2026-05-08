@@ -2,7 +2,7 @@
 
 Tài liệu này ánh xạ snapshot OpenAPI backend trong `docs/api_mapping.json` tới các điểm tích hợp frontend hiện tại của repo.
 
-Xác minh lần cuối: ngày 6 tháng 5 năm 2026
+Xác minh lần cuối: ngày 8 tháng 5 năm 2026
 
 ## Cấu hình cơ sở
 
@@ -30,6 +30,7 @@ Xác minh lần cuối: ngày 6 tháng 5 năm 2026
 - Backend vẫn giữ các surface `events`, `query`, và `graph-view`, nhưng nhiều payload đã đổi naming từ `sourceDocument*` sang `artifact*` hoặc `news-article`.
 - Surface `events` có thêm workflow derive market reactions cho từng event và batch pending events.
 - Surface `market-charts` tiep tuc cung cap du lieu nen OHLCV qua endpoint `GET /market-charts/candles`; snapshot moi doi request tu `symbol` sang `assetId` va them annotation payload.
+- Snapshot moi tiep tuc toi gian slug: `events`, `news-outlets`, `workspaces`, va `assets` khong con expose `slug`; `NewsOutletListResponse` cung khong con `description`.
 - Snapshot backend hiện publish metadata permission chính thức qua `x-signapse-auth`, trong đó một số gate frontend cũ cần được rà lại theo permission mới.
 - Frontend hiện đã có route và workbench cho `market-query` và `graph-view`, nhưng vẫn còn lệch contract với snapshot backend mới.
 - Frontend đã có surface canon `news-outlets` và `news-articles`; các route legacy `/sources*`, `/news-sources*`, và `/source-documents*` hiện chỉ còn redirect compatibility.
@@ -66,9 +67,9 @@ Ghi chú:
 | Phuong thuc | Endpoint backend                   | operationId             | Tich hop frontend                      | Trang thai    | Ghi chu                                                                                                                                          |
 | ----------- | ---------------------------------- | ----------------------- | -------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | GET         | `/news-outlets`                    | `getNewsOutlets`        | `getNewsOutlets(searchParams)`         | Da trien khai | List route canon `/news-outlets` da dung `Page<NewsOutletListResponse>` va search/sort theo contract moi.                                     |
-| POST        | `/news-outlets`                    | `createNewsOutlet`      | `createNewsOutlet(request)`            | Da trien khai | Form tao moi gui dung cac field `name`, `slug`, `description`, `homepageUrl`, `rssUrl`, `active`.                                             |
-| GET         | `/news-outlets/{id}`               | `getNewsOutlet`         | `getNewsOutletById(id)`                | Da trien khai | Detail-edit route canon `/news-outlets/{id}` da hydrate theo `NewsOutletResponse`.                                                             |
-| PUT         | `/news-outlets/{id}`               | `updateNewsOutlet`      | `updateNewsOutlet(id, request)`        | Da trien khai | Frontend da doi `url` thanh `homepageUrl` va khong con gui field legacy nhu `type` hay `systemManaged`.                                        |
+| POST        | `/news-outlets`                    | `createNewsOutlet`      | `createNewsOutlet(request)`            | Da trien khai | Form tao moi chi gui cac field snapshot moi ho tro: `name`, `description`, `homepageUrl`, `rssUrl`, `active`; khong con gui `slug`.             |
+| GET         | `/news-outlets/{id}`               | `getNewsOutlet`         | `getNewsOutletById(id)`                | Da trien khai | Detail-edit route canon `/news-outlets/{id}` hydrate theo `NewsOutletResponse` khong con `slug`.                                               |
+| PUT         | `/news-outlets/{id}`               | `updateNewsOutlet`      | `updateNewsOutlet(id, request)`        | Da trien khai | Form cap nhat chi gui cac field snapshot moi ho tro va khong con gui `slug` hay cac field legacy nhu `type`, `url`, `systemManaged`.            |
 | DELETE      | `/news-outlets/{id}`               | `deleteNewsOutlet`      | `deleteNewsOutlet(id)`                 | Da trien khai | Action xoa da duoc gate bang permission `news-outlet:delete`.                                                                                   |
 | PATCH       | `/news-outlets/{id}/toggle-active` | `toggleActive`          | `toggleNewsOutletActive(id)`           | Da trien khai | Toggle active da duoc gate bang permission `news-outlet:update` va refresh lai list/detail sau mutation.                                        |
 | GET         | `/news-outlets/active`             | `getActiveNewsOutlets`  | `getActiveNewsOutlets(searchParams)`   | Da trien khai | Helper moi da map dung response paginated `Page<NewsOutletListResponse>`; neu dung cho combobox thi FE can doc `content[]` de flatten khi can. |
@@ -84,7 +85,9 @@ Frontend lien quan:
 
 Ghi chu:
 
-- `NewsOutletListResponse` va `NewsOutletResponse` hien dung `homepageUrl`, `rssUrl`, `active`, `createdDate`, `lastModifiedDate`.
+- `NewsOutletListResponse` hien chi con `id`, `name`, `homepageUrl`, `rssUrl`, `active`, `createdDate`; khong con `slug` hoac `description` tren list item.
+- `NewsOutletResponse` hien dung `id`, `name`, `description`, `homepageUrl`, `rssUrl`, `active`, `createdDate`, `lastModifiedDate`; khong con `slug`.
+- FE `app/lib/news-outlets/definitions.ts`, `app/(main)/news-outlets/news-outlet-create-form.tsx`, va `app/(main)/news-outlets/news-outlet-update-form.tsx` da bo `slug` khoi DTO, form, va payload de khop snapshot moi.
 - Frontend da dung route canon `/news-outlets`; navigation "Nguon tin" trong `config/site.ts` da tro ve surface nay va duoc gate bang `news-outlet:read`.
 - Cac route legacy `/sources*` va `/news-sources*` chi con redirect ve `/news-outlets*` de giu deeplink va bookmark cu; data layer va list/form/search legacy cua `/sources` da duoc xoa.
 - Snapshot backend khong con field `type`, `systemManaged`, ingest metadata, hoac endpoint `/sources*`.
@@ -96,7 +99,7 @@ Day la domain noi dung canon cua snapshot backend hien tai.
 | Phuong thuc | Endpoint backend                            | operationId               | Tich hop frontend                                        | Trang thai                        | Ghi chu                                                                                                                                       |
 | ----------- | ------------------------------------------- | ------------------------- | -------------------------------------------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | GET         | `/news-articles`                            | `getNewsArticles`         | `getNewsArticles(searchParams)`                          | Da trien khai                      | FE list canon nay bo filter `documentType` va cac badge status legacy, dong bo voi schema `NewsArticleListResponse`.                        |
-| GET         | `/news-articles/{id}`                       | `getNewsArticle`          | `getNewsArticleById(id)`                                 | Da trien khai nhung con lech contract | Detail/operator workbench dung `newsOutletId`, `newsOutletName`, `status`, `externalKey`, `linkedEvents`, nhung schema `linkedEvents[]` da doi theo BE. |
+| GET         | `/news-articles/{id}`                       | `getNewsArticle`          | `getNewsArticleById(id)`                                 | Da trien khai nhung con lech contract | Detail/operator workbench dung `newsOutletId`, `newsOutletName`, `status`, `linkedEvents`, nhung schema `linkedEvents[]` da doi theo BE va `externalKey` khong con trong snapshot moi. |
 | DELETE      | `/news-articles/{id}`                       | `deleteNewsArticle`       | `deleteNewsArticle(id)`                                  | Da trien khai                      | Route canon va nut operator da doi naming sang `news-article`.                                                                              |
 | POST        | `/news-articles/{id}/crawl-full-content`    | `crawlFullContent`        | `crawlNewsArticleFullContent(id)`                        | Da trien khai                      | Contract moi tra ve `NewsArticleResponse`.                                                                                                   |
 | POST        | `/news-articles/{id}/derive-primary-event`  | `derivePrimaryEvent`      | `derivePrimaryEventFromNewsArticle(id)`                  | Da trien khai                      | `NewsPrimaryEventDerivationResult` dung `newsArticleId`, `newsArticleTitle`, `status`, `changeType`, `eventId`, `eventCanonicalKey`.      |
@@ -114,10 +117,11 @@ Frontend lien quan:
 
 Ghi chu:
 
-- `NewsArticleListResponse` va `NewsArticleResponse` hien gom `title`, `description`, `content`, `url`, `featureImage`, `newsOutletId`, `newsOutletName`, `publishedAt`, `status`, `externalKey`, `linkedEvents`.
+- `NewsArticleListResponse` hien gom `title`, `description`, `url`, `featureImage`, `newsOutletId`, `newsOutletName`, `publishedAt`, `status`, `createdDate`.
+- `NewsArticleResponse` hien gom `title`, `description`, `content`, `url`, `featureImage`, `newsOutletId`, `newsOutletName`, `publishedAt`, `status`, `createdDate`, `lastModifiedDate`, `linkedEvents`; `externalKey` khong con trong snapshot moi.
 - Enum `status` hien tai la `INGESTED`, `DERIVATION_PENDING`, `EVENT_RESOLVED`, `NO_PRIMARY_EVENT`, `CONTENT_FAILED`, `DERIVATION_FAILED`.
 - `LinkedEventSummaryResponse` hien chi con `eventStatus`, `evidenceRole`, `evidenceConfidence`, `evidenceNote`; `eventStatus` da dung enum `ENRICHMENT_PENDING`, `ENRICHED`, `ENRICHMENT_NO_MATCH`, `ENRICHMENT_FAILED`, `ARCHIVED`, va khong con `eventEnrichmentStatus`.
-- `app/lib/news-articles/definitions.ts` va `app/(main)/news-articles/[id]/page.tsx` hien van map linked event theo lifecycle cu cua `events`, nen can doi naming va badge logic neu FE integrate tiep theo snapshot moi.
+- FE `app/lib/news-articles/definitions.ts`, detail, va quick detail da map `linkedEvents[]` theo `eventStatus` moi va khong con render badge `eventEnrichmentStatus`.
 - Navigation "Noi dung" da tro ve `/news-articles`; route `/source-documents*` chi con redirect sang surface canon moi.
 - Snapshot backend khong con `lifecycleStatus`, `readinessStatus`, `eventDerivationStatus`, `documentType`, hoac endpoint canon `/source-documents*`.
 - Endpoint `POST /news-articles/{id}/analyze` khong con nam trong snapshot OpenAPI hien tai; UI da go manual analyze va workflow phan tich bai viet chuyen sang cronjob.
@@ -127,7 +131,7 @@ Ghi chu:
 | Phuong thuc | Endpoint backend                           | operationId                    | Tich hop frontend                               | Trang thai                         | Ghi chu                                                                                                                                                                    |
 | ----------- | ------------------------------------------ | ------------------------------ | ----------------------------------------------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | GET         | `/events`                                  | `getEvents`                    | `getEvents(searchParams)`                       | Da trien khai                      | Frontend co route `/events`, toolbar batch-enrich + batch derive market reactions + search, sort, phan trang, va render schema moi voi `description`, mot badge `status`, `occurredAt`, `confidence`. |
-| GET         | `/events/{id}`                             | `getEvent`                     | `getEventById(id)`                              | Da trien khai                      | Detail da uu tien status, confidence, thoi diem, description, evidence-first, va render section `marketReactions[]` sau bang chung. |
+| GET         | `/events/{id}`                             | `getEvent`                     | `getEventById(id)`                              | Da trien khai                      | Detail da uu tien status, confidence, thoi diem, description, evidence-first, action cluster ben phai title, va render section `marketReactions[]`. |
 | POST        | `/events/{id}/enrich-assets-and-themes`    | `enrichAssetsAndThemes`        | `enrichEventAssetsAndThemes(id)`                | Da trien khai                      | Co nut operator tren event detail; toast summary da dung `EventEnrichmentResult.outcome` enum `ENRICHMENT_*` + `ARCHIVED`. |
 | POST        | `/events/{id}/derive-market-reactions`     | `deriveMarketReactions`        | `deriveEventMarketReactions(id)`                | Da trien khai                      | Co nut operator tren event detail; toast summary dung `reactionCount`, `neutralCount`, va `message`. |
 | POST        | `/events/enrich-pending-assets-and-themes` | `enrichPendingAssetsAndThemes` | `enrichPendingEventAssetsAndThemes(batchSize?)` | Da trien khai                      | Co nut batch tren event list; batch summary da tinh ca `deferredCount`. |
@@ -144,13 +148,14 @@ Ghi chu:
 
 - `event:read` dung de gate navigation, `/events`, `/events/{id}`, va cac link sang event detail.
 - Snapshot backend hien gate event enrich operators va market reaction derivation bang `news-article:analyze`; FE events da gate bang permission canon nay truoc va chi giu `source-document:analyze` nhu alias compatibility tam thoi.
-- `EventListResponse` va `EventResponse` hien dung `description` thay `summary`, `status` enum `ENRICHMENT_PENDING`, `ENRICHED`, `ENRICHMENT_NO_MATCH`, `ENRICHMENT_FAILED`, `ARCHIVED`, va khong con `active`, `enrichmentStatus`, `enrichmentAttemptedAt`, `enrichmentCompletedAt`, `enrichmentError`.
+- `EventListResponse` va `EventResponse` hien dung `description` thay `summary`, `status` enum `ENRICHMENT_PENDING`, `ENRICHED`, `ENRICHMENT_NO_MATCH`, `ENRICHMENT_FAILED`, `ARCHIVED`, va khong con `slug`, `confirmedAt`, `active`, `enrichmentStatus`, `enrichmentAttemptedAt`, `enrichmentCompletedAt`, `enrichmentError`.
+- `EventEvidenceSummaryResponse` hien dung `newsArticleId`, `newsArticleTitle`, `newsArticleUrl`, `newsOutletName`, `publishedAt`, `evidenceRole`, `confidence`, `evidenceNote`; FE event detail va quick detail da dung cac field `newsArticle*`.
 - `EventEnrichmentResult.outcome` cung dung enum `ENRICHMENT_PENDING`, `ENRICHED`, `ENRICHMENT_NO_MATCH`, `ENRICHMENT_FAILED`, `ARCHIVED`.
 - Batch enrichment result cua `/events/enrich-pending-assets-and-themes` da co them field `deferredCount`; frontend da surface trong toast summary.
 - `EventResponse` co them `marketReactions[]` gom `id`, `assetId`, `assetName`, `assetSymbol`, `assetType`, `direction`, `timeHorizon`, `confidence`, `reasoning`, `observedAt`; FE da map DTO va render trong section `Tac dong thi truong` tren detail event.
 - Market reaction enums moi: `direction` gom `BULLISH`, `BEARISH`, `MIXED`, `NEUTRAL`; `timeHorizon` gom `INTRADAY`, `SHORT_TERM`, `MEDIUM_TERM`, `LONG_TERM`.
 - `EventMarketReactionDerivationResult` gom `eventId`, `eventTitle`, `eventCanonicalKey`, `reactionCount`, `neutralCount`, `message`; batch result gom `requestedBatchSize`, `selectedCount`, `processedCount`, `skippedCount`, `derivedCount`, `neutralCount`, `failedCount`, `results[]`.
-- Detail event hien sap xep `evidence` truoc `assets` va `themes`, con `id`, `slug`, `canonicalKey`, `createdDate`, `lastModifiedDate` nam trong vung thong tin ky thuat cap thap.
+- Detail event hien sap xep `evidence` truoc `marketReactions`, `assets`, va `themes`; vung thong tin ky thuat chi giu cac field snapshot hien tai nhu `canonicalKey`, `createdDate`, `lastModifiedDate`.
 
 ### 5. API market charts
 
@@ -175,10 +180,10 @@ Ghi chu:
 - Query contract hien duoc khai bao qua object `request` trong query string, tham chieu schema `MarketChartCandleRequest`.
 - `MarketChartCandleRequest` gom `assetId`, `timeframe`, `from`, `to`, va optional `includeAnnotations`; snapshot hien tai khong mo ta enum hay danh sach gia tri hop le cho `timeframe`, trong khi FE data layer hien gioi han `timeframe` theo union `1m`, `5m`, `15m`, `30m`, `1h`, `1d`, `1w`, `1mo`.
 - `MarketChartCandleItemResponse` gom `time`, `open`, `high`, `low`, `close`, `volume`.
-- `MarketChartCandleResponse` co them `asset: MarketChartAssetResponse` va `annotations[]`; annotation gom `eventId`, `assetId`, `time`, `severity`, `direction`, `title`, `summary`, `confidence`, `reaction`, `evidence[]`, va `links.eventDetail`.
+- `MarketChartCandleResponse` co them `asset: MarketChartAssetResponse` va `annotations[]`; annotation gom `eventId`, `assetId`, `time`, `severity`, `direction`, `title`, `summary`, `confidence`, `reaction`, `evidence[]`, va `links.eventDetail`; evidence dung `newsArticleId`.
 - UI khong expose `from` hoac `to` nhu form input. Route state chi gom `assetId` va `timeframe`; FE resolve asset tu `GET /watchlists`, gui `assetId` cho chart action, va de backend so huu provider-symbol resolution.
 - FE mac dinh giu layer su kien tat va gui `includeAnnotations=false`; khi user bat layer su kien tren bieu do, FE gui `includeAnnotations=true`.
-- UI dung KLineChart de render nen OHLCV, render marker notification tu `annotations[]`, group cac annotation cung moc thoi gian, va mo popup detail/evidence/link su kien khi user chon marker hoac moc su kien accessible ben ngoai canvas. Lazy historical loading va trade recommendation van chua trien khai ve UI.
+- UI dung KLineChart de render nen OHLCV, render marker notification tu `annotations[]`, group cac annotation cung moc thoi gian, va mo popup detail/evidence/link su kien khi user chon marker hoac moc su kien accessible ben ngoai canvas. Lazy historical loading da duoc trien khai cho huong tai nen cu hon bang chinh endpoint `/market-charts/candles`; trade recommendation van chua trien khai ve UI.
 
 ### 6. API market query
 
@@ -210,9 +215,9 @@ Ghi chu:
 Ghi chu:
 
 - Response snapshot hien tai la `GraphViewResponse` gom `nodes[]` va `edges[]`.
-- `nodes[].kind` hien tai gom `event`, `asset`, `theme`, `news-article`; `edges[].kind` gom `event-asset`, `event-theme`, `source-artifact-event`.
+- `nodes[].kind` hien tai gom `event`, `asset`, `theme`, `news-article`; `edges[].kind` gom `event-asset`, `event-theme`, `news-article-event`.
 - `GraphNodeMetadata` hien da dung `newsOutletName` thay vi `sourceName`, dong thoi doi `active` thanh `status`.
-- Frontend `app/lib/graph-view/definitions.ts` va `app/(main)/graph-view/*` da doi sang naming `news-article`, `source-artifact-event`, va `newsOutletName`, nhung hien van doc `metadata.active`.
+- Frontend `app/lib/graph-view/definitions.ts` va `app/(main)/graph-view/*` da doi sang naming `news-article`, `news-article-event`, va `newsOutletName`, nhung hien van doc `metadata.active`.
 - Drill-down cho node bai viet da chuyen sang `/news-articles/{id}`.
 
 ### 8. API blogs
@@ -263,6 +268,10 @@ Ghi chu:
 | GET         | `/assets`        | `getAssets` | `getAssets(searchParams)` | Da trien khai | Asset catalog read-only.  |
 | GET         | `/assets/{id}`   | `getAsset`  | `getAssetById(id)`        | Da trien khai | Co helper hydrate detail. |
 
+Ghi chu:
+
+- Snapshot moi cua `AssetListResponse` va `AssetResponse` chi gom `id`, `name`, `symbol`, `type` tren list va them `createdDate`, `lastModifiedDate` tren detail; khong co `slug`. FE assets definitions hien khop shape nay.
+
 ### 12. API media
 
 | Phuong thuc | Endpoint backend | operationId   | Tich hop frontend | Trang thai      | Ghi chu                             |
@@ -291,16 +300,16 @@ Ghi chú:
 
 | Phuong thuc | Endpoint backend                  | operationId           | Tich hop frontend               | Trang thai                         | Ghi chu                                                                 |
 | ----------- | --------------------------------- | --------------------- | ------------------------------- | ---------------------------------- | ----------------------------------------------------------------------- |
-| GET         | `/me/workspaces`                  | `getMyWorkspaces`     | `getMyWorkspaces(searchParams)` | Da tich hop | `WorkspaceResponse` frontend dung `currentWorkspace` de xac dinh workspace hien tai. |
-| POST        | `/me/workspaces`                  | `createWorkspace`     | `createWorkspace(request)`      | Da trien khai                      | Chi xu ly metadata workspace.                                           |
-| PUT         | `/me/workspaces/{id}`             | `updateWorkspace`     | `updateWorkspace(id, request)`  | Da trien khai                      | Rename workspace.                                                       |
+| GET         | `/me/workspaces`                  | `getMyWorkspaces`     | `getMyWorkspaces(searchParams)` | Da tich hop | `WorkspaceResponse` frontend dung `currentWorkspace` va khong con doc/hien thi `slug`. |
+| POST        | `/me/workspaces`                  | `createWorkspace`     | `createWorkspace(request)`      | Da tich hop | Snapshot moi chi nhan `name`; workspace switcher chi gui payload `name`.                                           |
+| PUT         | `/me/workspaces/{id}`             | `updateWorkspace`     | `updateWorkspace(id, request)`  | Da tich hop | Snapshot moi chi cap nhat `name`; workspace switcher chi gui payload `name`.                                                       |
 | PATCH       | `/me/workspaces/{id}/set-current` | `setCurrentWorkspace` | `setCurrentWorkspace(id)`       | Da tich hop | Frontend goi dung `/set-current` va gate bang permission chinh thuc `workspace:set-current`. |
 
 ### 15. API user
 
 | Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai                         | Ghi chu                                                                                                                                  |
 | ----------- | ---------------- | ----------- | ----------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| GET         | `/me`            | `me`        | `getMe()`         | Da trien khai nhung con lech contract | Snapshot hien tai dung `currentWorkspace` thay vi `workspace`, va `mainImage` la `MediaResponse`; FE `BackendMeResponse` van map `workspace` va `mainImage` thanh `string`. |
+| GET         | `/me`            | `me`        | `getMe()`         | Da tich hop | `BackendMeResponse` dung `currentWorkspace`, `mainImage` la media object, va permission loader tiep tuc chi doc `permissions[]`. |
 
 ### 16. API wiki
 
@@ -440,13 +449,17 @@ type ActionResult<T = void> =
 
 - List/search runtime cua frontend dang dung `$filter/page/size/sort`, trong khi OpenAPI tiep tuc mo ta `specification/pageable` o nhieu list endpoint.
 - Frontend da migrate route canon sang `/news-outlets*` va `/news-articles*`; `/sources*`, `/news-sources*`, va `/source-documents*` chi con redirect compatibility.
-- `news articles`: `linkedEvents[]` da co `eventStatus` enum moi theo enrichment lifecycle va khong con `eventEnrichmentStatus`; FE detail article hien van map theo contract cu cua `events`.
+- `news articles`: `linkedEvents[]` da co `eventStatus` enum moi theo enrichment lifecycle va khong con `eventEnrichmentStatus`; FE detail va quick detail da map theo contract moi.
 - `events`: backend gate enrich/market reaction operators bang `news-article:analyze`; FE events da gate bang permission canon nay truoc va chi giu `source-document:analyze` nhu alias compatibility tam thoi.
 - `permission scan`: cac literal FE-only `source-document:*` con lai deu la alias compatibility sau permission canon `news-article:*`; cac permission BE chua co FE literal gom `cronjob:stop` va `media:*` vi cac surface/action nay chua duoc tich hop.
 - `market charts`: frontend da dong bo action/DTO theo request `assetId`, `includeAnnotations` theo layer su kien, response `asset`, optional `symbol`, va `annotations[]`; UI dung KLineChart cho nen OHLCV va render marker notification/popup detail khi layer su kien duoc bat.
+- `news outlets`: snapshot moi da bo `slug` khoi create/update/list/detail va bo `description` khoi list item; FE form/DTO da dong bo, list khong render cac field nay, con detail/edit van giu `description` theo response.
+- `workspace`: frontend da bo `slug` khoi create/update/response definitions, workspace switcher payload/UI, va trang tong quan workspace de khop snapshot moi.
+- `news articles`: snapshot moi da bo `externalKey`; `app/lib/news-articles/definitions.ts` da duoc don de khong con giu field nay.
+- `events`: snapshot moi da bo `slug` va `confirmedAt`, va doi evidence sang `newsArticle*`; FE events da dong bo DTO, detail, quick detail, va action layout theo contract hien tai.
 - `market query`: spec van mo ta `asOfTime` la optional `date-time`; frontend v1 chu dong omit field nay de backend tu lay thoi diem hien tai va harden parse cho payload runtime co the tra `null` o `publishedAt` va `occurredAt`. Ngoai ra, `keyEvents[]` da doi `summary` thanh `description`, nhung FE van doc field cu.
 - `graph view`: `GraphNodeMetadata` da doi `active` thanh `status`; FE workbench hien van doc `metadata.active`.
-- `user profile`: `GET /me` da doi `workspace` thanh `currentWorkspace`, va `mainImage` la object media; FE `app/lib/users/definitions.ts` hien van map theo contract cu. Hien tac dong runtime thap vi permissions server chi doc `permissions[]`.
+- `user profile`: `GET /me` da dong bo `BackendMeResponse` theo `currentWorkspace`, `mainImage` media object, va `permissions[]`; runtime hien van chi dung permission loader.
 - `blogs`: create va response dung `visible`, update dung `isVisible`; frontend van can tiep tuc xu ly ky de tranh drift.
 - `ai-provider-configs`: frontend sanitize `apiKey` khoi response truoc khi dua xuong client.
 - `media`: da co trong spec nhung frontend chua co module.

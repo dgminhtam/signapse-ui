@@ -36,6 +36,8 @@ import { cn } from "@/lib/utils"
 
 import { WorkspaceWatchlistEditor } from "./workspace-watchlist-editor"
 
+const WORKSPACE_SWITCHER_TRIGGER_ID = "workspace-switcher-trigger"
+
 interface WorkspaceSwitcherProps {
   workspaces: WorkspaceResponse[]
   currentWorkspace: WorkspaceResponse | null
@@ -67,9 +69,7 @@ export function WorkspaceSwitcher({
   const [isRenameOpen, setIsRenameOpen] = React.useState(false)
   const [isWatchlistOpen, setIsWatchlistOpen] = React.useState(false)
   const [createName, setCreateName] = React.useState("")
-  const [createSlug, setCreateSlug] = React.useState("")
   const [renameName, setRenameName] = React.useState("")
-  const [renameSlug, setRenameSlug] = React.useState("")
 
   const canManageWatchlist =
     !!currentWorkspace &&
@@ -102,7 +102,6 @@ export function WorkspaceSwitcher({
     }
 
     setRenameName(currentWorkspace.name ?? "")
-    setRenameSlug(currentWorkspace.slug ?? "")
     setIsRenameOpen(true)
   }
 
@@ -112,7 +111,6 @@ export function WorkspaceSwitcher({
     }
 
     const name = createName.trim()
-    const slug = createSlug.trim()
 
     if (!name) {
       toast.error("Vui lòng nhập tên không gian làm việc.")
@@ -122,7 +120,6 @@ export function WorkspaceSwitcher({
     startTransition(async () => {
       const result = await createWorkspace({
         name,
-        ...(slug ? { slug } : {}),
       })
 
       if (!result.success) {
@@ -132,7 +129,6 @@ export function WorkspaceSwitcher({
 
       toast.success("Đã tạo không gian làm việc.")
       setCreateName("")
-      setCreateSlug("")
       setIsCreateOpen(false)
       router.refresh()
     })
@@ -144,7 +140,6 @@ export function WorkspaceSwitcher({
     }
 
     const name = renameName.trim()
-    const slug = renameSlug.trim()
 
     if (!name) {
       toast.error("Vui lòng nhập tên không gian làm việc.")
@@ -154,7 +149,6 @@ export function WorkspaceSwitcher({
     startTransition(async () => {
       const result = await updateWorkspace(currentWorkspace.id, {
         name,
-        ...(slug ? { slug } : {}),
       })
 
       if (!result.success) {
@@ -171,7 +165,7 @@ export function WorkspaceSwitcher({
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+        <DropdownMenuTrigger asChild id={WORKSPACE_SWITCHER_TRIGGER_ID}>
           <Button
             type="button"
             variant="outline"
@@ -195,7 +189,11 @@ export function WorkspaceSwitcher({
             )}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-72" align="end">
+        <DropdownMenuContent
+          className="w-72"
+          align="end"
+          aria-labelledby={WORKSPACE_SWITCHER_TRIGGER_ID}
+        >
           <DropdownMenuLabel>Không gian làm việc</DropdownMenuLabel>
           <DropdownMenuGroup>
             {workspaces.length > 0 ? (
@@ -215,7 +213,7 @@ export function WorkspaceSwitcher({
                     <div className="flex min-w-0 flex-1 flex-col">
                       <span className="truncate font-medium">{workspace.name}</span>
                       <span className="truncate text-xs text-muted-foreground">
-                        {isSelected ? "Đang hoạt động" : workspace.slug}
+                        {isSelected ? "Đang hoạt động" : "Có thể chuyển sang"}
                       </span>
                     </div>
                     {isSelected ? <CheckIcon className="size-4 text-primary" /> : null}
@@ -277,13 +275,11 @@ export function WorkspaceSwitcher({
       <WorkspaceFormDialog
         open={canCreateWorkspace && isCreateOpen}
         title="Tạo không gian làm việc mới"
-        description="Nhập tên và slug tùy chọn để tạo không gian làm việc mới."
+        description="Nhập tên cho không gian làm việc mới."
         name={createName}
-        slug={createSlug}
         submitLabel="Tạo không gian làm việc"
         isPending={isPending}
         onNameChange={setCreateName}
-        onSlugChange={setCreateSlug}
         onOpenChange={setIsCreateOpen}
         onSubmit={handleCreateWorkspace}
       />
@@ -291,13 +287,11 @@ export function WorkspaceSwitcher({
       <WorkspaceFormDialog
         open={canRenameWorkspace && isRenameOpen}
         title="Đổi tên không gian làm việc"
-        description="Cập nhật tên hoặc slug cho không gian làm việc đang hoạt động."
+        description="Cập nhật tên cho không gian làm việc đang hoạt động."
         name={renameName}
-        slug={renameSlug}
         submitLabel="Lưu thay đổi"
         isPending={isPending}
         onNameChange={setRenameName}
-        onSlugChange={setRenameSlug}
         onOpenChange={setIsRenameOpen}
         onSubmit={handleRenameWorkspace}
       />
@@ -320,11 +314,9 @@ function WorkspaceFormDialog({
   title,
   description,
   name,
-  slug,
   submitLabel,
   isPending,
   onNameChange,
-  onSlugChange,
   onOpenChange,
   onSubmit,
 }: {
@@ -332,11 +324,9 @@ function WorkspaceFormDialog({
   title: string
   description: string
   name: string
-  slug: string
   submitLabel: string
   isPending: boolean
   onNameChange: (value: string) => void
-  onSlugChange: (value: string) => void
   onOpenChange: (open: boolean) => void
   onSubmit: () => void
 }) {
@@ -369,14 +359,6 @@ function WorkspaceFormDialog({
                 value={name}
                 onChange={(event) => onNameChange(event.target.value)}
                 placeholder="Ví dụ: Nhóm nghiên cứu"
-              />
-            </label>
-            <label className="flex flex-col gap-2 text-sm font-medium">
-              Slug tùy chọn
-              <Input
-                value={slug}
-                onChange={(event) => onSlugChange(event.target.value)}
-                placeholder="nhom-nghien-cuu"
               />
             </label>
           </div>

@@ -1,8 +1,15 @@
-export interface NewsOutletRequest {
+export interface CreateNewsOutletRequest {
   name: string
-  slug?: string
   description?: string
   homepageUrl: string
+  rssUrl?: string
+  active?: boolean
+}
+
+export interface UpdateNewsOutletRequest {
+  name?: string
+  description?: string
+  homepageUrl?: string
   rssUrl?: string
   active?: boolean
 }
@@ -10,7 +17,6 @@ export interface NewsOutletRequest {
 export interface NewsOutletResponse {
   id: number
   name: string
-  slug?: string
   description?: string
   homepageUrl: string
   rssUrl?: string
@@ -22,8 +28,6 @@ export interface NewsOutletResponse {
 export interface NewsOutletListResponse {
   id: number
   name: string
-  slug?: string
-  description?: string
   homepageUrl: string
   rssUrl?: string
   active: boolean

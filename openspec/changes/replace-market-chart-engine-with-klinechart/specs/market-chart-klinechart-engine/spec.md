@@ -48,16 +48,16 @@ The system SHALL preserve annotation notification markers and popup detail inter
 - **WHEN** annotation detail is shown
 - **THEN** the UI does not render a permanent right-side annotation detail panel
 
-### Requirement: KLineChart adapter is ready for future lazy loading
-The system SHALL structure the chart adapter so future lazy historical loading can be added without changing the backend API contract or reintroducing manual `from/to` controls.
+### Requirement: KLineChart adapter supports contained lazy loading
+The system SHALL structure the chart adapter so lazy historical loading can run without changing the backend API contract or reintroducing manual `from/to` controls.
 
-#### Scenario: User pans chart in this migration
-- **WHEN** the user pans or scrolls the chart after this migration
-- **THEN** the UI does not request older historical candle windows yet
+#### Scenario: User pans toward older candles
+- **WHEN** a lazy-history capability is active and the user pans toward older candles
+- **THEN** the integration point remains the KLineChart canvas adapter
 
-#### Scenario: Future loader boundary is contained
-- **WHEN** a future change adds lazy historical loading
-- **THEN** the integration point is the KLineChart canvas adapter rather than the surrounding workbench layout or API DTO definitions
+#### Scenario: Loader boundary is contained
+- **WHEN** lazy historical loading requests older candles
+- **THEN** it does not require manual time controls in the surrounding workbench layout
 
 ### Requirement: Old vendor source is removed cleanly
 The system SHALL remove obsolete Lightweight Charts and TradingView implementation remnants after the migration.

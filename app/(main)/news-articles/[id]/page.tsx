@@ -10,8 +10,6 @@ import {
   Globe2,
   Hash,
   ImageIcon,
-  Layers3,
-  Link2,
   RefreshCcw,
 } from "lucide-react"
 import Link from "next/link"
@@ -19,10 +17,7 @@ import { notFound } from "next/navigation"
 import { Suspense } from "react"
 
 import { getNewsArticleById } from "@/app/api/news-articles/action"
-import {
-  EVENT_ENRICHMENT_STATUS_LABELS,
-  EVENT_STATUS_LABELS,
-} from "@/app/lib/events/definitions"
+import { EVENT_STATUS_LABELS } from "@/app/lib/events/definitions"
 import { EVENT_READ_PERMISSIONS } from "@/app/lib/events/permissions"
 import {
   LINKED_EVENT_EVIDENCE_ROLE_LABELS,
@@ -45,9 +40,8 @@ import {
 } from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
 
-import { getEventEnrichmentVariant, getEventStatusVariant } from "../../events/event-presentation"
-import { NewsArticleCrawlButton } from "../news-article-crawl-button"
-import { NewsArticleDeleteButton } from "../news-article-delete-button"
+import { getEventStatusVariant } from "../../events/event-presentation"
+import { NewsArticleDetailActions } from "../news-article-detail-actions"
 import { NewsArticleDeriveEventButton } from "../news-article-derive-event-button"
 
 interface PageProps {
@@ -103,11 +97,11 @@ function DetailCard({
 }) {
   return (
     <div className="rounded-lg border border-border bg-muted/20 p-4">
-      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+      <div className="flex items-center gap-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
         <Icon className="h-3.5 w-3.5" />
         {title}
       </div>
-      <p className="mt-2 break-words font-medium text-foreground">{value}</p>
+      <p className="mt-2 font-medium break-words text-foreground">{value}</p>
     </div>
   )
 }
@@ -122,7 +116,7 @@ function SectionHeading({
   return (
     <div className="flex items-center gap-2">
       <Icon className="h-4 w-4 text-muted-foreground" />
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+      <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
         {title}
       </h2>
     </div>
@@ -168,16 +162,19 @@ export default async function NewsArticleDetailPage({ params }: PageProps) {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center">
-        <Button asChild variant="ghost" size="sm" className="-ml-2 gap-2">
+        <Button asChild variant="ghost" size="sm" className="-ml-2">
           <Link href="/news-articles">
-            <ArrowLeft className="h-4 w-4" data-icon="inline-start" />
+            <ArrowLeft data-icon="inline-start" />
             Quay lại danh sách
           </Link>
         </Button>
       </div>
 
       <Suspense fallback={<NewsArticleDetailSkeleton />}>
-        <FetchNewsArticleData id={newsArticleId} canReadEvents={canReadEvents} />
+        <FetchNewsArticleData
+          id={newsArticleId}
+          canReadEvents={canReadEvents}
+        />
       </Suspense>
     </div>
   )
@@ -204,6 +201,8 @@ async function FetchNewsArticleData({
 
   const imageUrl = getImageUrl(article)
   const linkedEvents = article.linkedEvents ?? []
+  const description = article.description?.trim()
+  const content = article.content?.trim()
 
   return (
     <div className="flex flex-col gap-6">
@@ -217,7 +216,7 @@ async function FetchNewsArticleData({
             </div>
 
             <div className="flex flex-col gap-1">
-              <h1 className="text-2xl font-semibold leading-tight text-foreground">
+              <h1 className="text-2xl leading-tight font-semibold text-foreground">
                 {article.title}
               </h1>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1 text-sm text-muted-foreground">
@@ -233,215 +232,177 @@ async function FetchNewsArticleData({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2 xl:justify-end">
             <NewsArticleDeriveEventButton id={article.id} />
-            <NewsArticleCrawlButton id={article.id} />
-            <Button variant="outline" size="sm" className="gap-2" asChild>
-              <a href={article.url} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="h-4 w-4" data-icon="inline-start" />
-                Mở liên kết gốc
-              </a>
-            </Button>
-            <NewsArticleDeleteButton
+            <NewsArticleDetailActions
               id={article.id}
               title={article.title}
-              variant="outline"
-              size="sm"
-              showText
-              redirectToListOnSuccess
+              url={article.url}
             />
           </div>
         </div>
       </div>
 
       <div className="flex flex-col gap-8">
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-4 md:grid-cols-3">
-                <DetailCard
-                  title="Trạng thái"
-                  value={NEWS_ARTICLE_STATUS_LABELS[article.status]}
-                  icon={Layers3}
-                />
-                <DetailCard
-                  title="Nguồn tin"
-                  value={article.newsOutletName?.trim() || "Chưa có"}
-                  icon={Globe2}
-                />
-                <DetailCard
-                  title="Xuất bản"
-                  value={formatDateTime(article.publishedAt)}
-                  icon={Calendar}
-                />
-              </div>
-
-              {article.description?.trim() ? (
-                <section className="flex flex-col gap-3">
-                  <SectionHeading title="Mô tả" icon={FileText} />
-                  <div className="rounded-lg border border-border bg-muted/20 p-4">
-                    <p className="whitespace-pre-wrap text-sm leading-7 text-foreground/90">
-                      {article.description}
-                    </p>
-                  </div>
-                </section>
-              ) : null}
-            </div>
+        {description || imageUrl ? (
+          <div
+            className={
+              description && imageUrl
+                ? "grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-stretch"
+                : "grid gap-6"
+            }
+          >
+            {description ? (
+              <section className="flex h-full min-w-0 flex-col gap-3">
+                <SectionHeading title="Mô tả" icon={FileText} />
+                <div className="min-h-[203px] flex-1 rounded-lg border border-border bg-muted/20 p-4">
+                  <p className="text-sm leading-7 whitespace-pre-wrap text-foreground/90">
+                    {description}
+                  </p>
+                </div>
+              </section>
+            ) : null}
 
             {imageUrl ? (
-              <aside className="flex flex-col gap-3">
-                <div className="overflow-hidden rounded-lg border bg-muted">
+              <section className="flex h-full max-w-[360px] flex-col gap-3 xl:max-w-none">
+                <SectionHeading title="Hình ảnh bài viết" icon={ImageIcon} />
+                <div className="aspect-video min-h-[203px] flex-1 overflow-hidden rounded-lg border bg-muted">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={imageUrl}
                     alt={article.featureImage?.altText?.trim() || article.title}
-                    className="aspect-video max-h-[220px] w-full object-cover"
+                    className="h-full w-full object-cover"
                   />
                 </div>
-              </aside>
+              </section>
             ) : null}
           </div>
+        ) : null}
 
-          <section className="flex flex-col gap-3">
-            <SectionHeading title="Nội dung" icon={FileText} />
-            <div className="rounded-lg border border-border p-4">
-              <div className="whitespace-pre-wrap text-sm leading-7 text-foreground/90">
-                {article.content?.trim() || "Chưa có nội dung chi tiết."}
-              </div>
-            </div>
-          </section>
+        <section className="flex flex-col gap-4">
+          <SectionHeading title="Sự kiện liên kết" icon={GitBranch} />
 
-          <section className="flex flex-col gap-4">
-            <SectionHeading title="Sự kiện liên kết" icon={GitBranch} />
+          {linkedEvents.length > 0 ? (
+            <div className="flex flex-col gap-3">
+              {linkedEvents.map((linkedEvent, index) => {
+                const canOpenEvent =
+                  canReadEvents && typeof linkedEvent.eventId === "number"
 
-            {linkedEvents.length > 0 ? (
-              <div className="flex flex-col gap-3">
-                {linkedEvents.map((linkedEvent, index) => {
-                  const canOpenEvent = canReadEvents && typeof linkedEvent.eventId === "number"
-
-                  return (
-                    <div
-                      key={`${linkedEvent.eventId ?? "linked-event"}-${index}`}
-                      className="rounded-lg border border-border bg-muted/20 p-4"
-                    >
-                      <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
-                        <div className="flex flex-col gap-2">
-                          <div className="flex flex-wrap items-center gap-2">
-                            {linkedEvent.eventStatus ? (
-                              <Badge variant={getEventStatusVariant(linkedEvent.eventStatus)}>
-                                {EVENT_STATUS_LABELS[linkedEvent.eventStatus]}
-                              </Badge>
-                            ) : null}
-                            {linkedEvent.eventEnrichmentStatus ? (
-                              <Badge
-                                variant={getEventEnrichmentVariant(linkedEvent.eventEnrichmentStatus)}
-                              >
-                                {
-                                  EVENT_ENRICHMENT_STATUS_LABELS[
-                                  linkedEvent.eventEnrichmentStatus
-                                  ]
-                                }
-                              </Badge>
-                            ) : null}
-                            {linkedEvent.evidenceRole ? (
-                              <Badge variant="secondary">
-                                {LINKED_EVENT_EVIDENCE_ROLE_LABELS[linkedEvent.evidenceRole]}
-                              </Badge>
-                            ) : null}
-                          </div>
-
-                          {canOpenEvent ? (
-                            <Link
-                              href={`/events/${linkedEvent.eventId}`}
-                              className="font-medium text-foreground hover:underline"
+                return (
+                  <div
+                    key={`${linkedEvent.eventId ?? "linked-event"}-${index}`}
+                    className="rounded-lg border border-border bg-muted/20 p-4"
+                  >
+                    <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+                      <div className="flex flex-col gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          {linkedEvent.eventStatus ? (
+                            <Badge
+                              variant={getEventStatusVariant(
+                                linkedEvent.eventStatus
+                              )}
                             >
-                              {linkedEvent.eventTitle || `Sự kiện #${linkedEvent.eventId}`}
-                            </Link>
-                          ) : (
-                            <p className="font-medium text-foreground">
-                              {linkedEvent.eventTitle ||
-                                (typeof linkedEvent.eventId === "number"
-                                  ? `Sự kiện #${linkedEvent.eventId}`
-                                  : "Sự kiện chưa có tiêu đề")}
-                            </p>
-                          )}
-
-                          <div className="flex flex-col gap-1 text-sm text-muted-foreground">
-                            <span>
-                              Khóa chuẩn: {linkedEvent.eventCanonicalKey || "Chưa có"}
-                            </span>
-                            <span>
-                              Độ tin cậy bằng chứng:{" "}
-                              {formatConfidence(linkedEvent.evidenceConfidence)}
-                            </span>
-                          </div>
-
-                          {linkedEvent.evidenceNote?.trim() ? (
-                            <p className="whitespace-pre-wrap text-sm text-foreground/90">
-                              {linkedEvent.evidenceNote}
-                            </p>
+                              {EVENT_STATUS_LABELS[linkedEvent.eventStatus]}
+                            </Badge>
+                          ) : null}
+                          {linkedEvent.evidenceRole ? (
+                            <Badge variant="secondary">
+                              {
+                                LINKED_EVENT_EVIDENCE_ROLE_LABELS[
+                                  linkedEvent.evidenceRole
+                                ]
+                              }
+                            </Badge>
                           ) : null}
                         </div>
 
                         {canOpenEvent ? (
-                          <Button variant="outline" size="sm" className="gap-2" asChild>
-                            <Link href={`/events/${linkedEvent.eventId}`}>
-                              <ExternalLink className="h-4 w-4" data-icon="inline-start" />
-                              Xem sự kiện
-                            </Link>
-                          </Button>
+                          <Link
+                            href={`/events/${linkedEvent.eventId}`}
+                            className="font-medium text-foreground hover:underline"
+                          >
+                            {linkedEvent.eventTitle ||
+                              `Sự kiện #${linkedEvent.eventId}`}
+                          </Link>
+                        ) : (
+                          <p className="font-medium text-foreground">
+                            {linkedEvent.eventTitle ||
+                              (typeof linkedEvent.eventId === "number"
+                                ? `Sự kiện #${linkedEvent.eventId}`
+                                : "Sự kiện chưa có tiêu đề")}
+                          </p>
+                        )}
+
+                        <p className="text-sm text-muted-foreground">
+                          Độ tin cậy bằng chứng:{" "}
+                          {formatConfidence(linkedEvent.evidenceConfidence)}
+                        </p>
+
+                        {linkedEvent.evidenceNote?.trim() ? (
+                          <p className="text-sm whitespace-pre-wrap text-foreground/90">
+                            {linkedEvent.evidenceNote}
+                          </p>
                         ) : null}
                       </div>
-                    </div>
-                  )
-                })}
-              </div>
-            ) : (
-              <SectionEmpty
-                title="Chưa có sự kiện liên kết"
-                description="Bài viết này chưa có sự kiện liên kết trong dữ liệu hiện tại."
-              />
-            )}
-          </section>
 
-          <section className="rounded-lg border border-dashed bg-muted/10">
-            <details>
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4 text-sm font-semibold text-muted-foreground">
-                <span className="inline-flex items-center gap-2 uppercase tracking-wide">
-                  <Hash className="h-4 w-4" />
-                  Thông tin kỹ thuật
-                </span>
-                <ChevronDown className="h-4 w-4" />
-              </summary>
-              <div className="grid gap-4 border-t border-border p-4 sm:grid-cols-2 xl:grid-cols-3">
-                <DetailCard title="Mã bài viết" value={String(article.id)} icon={Hash} />
-                <DetailCard
-                  title="External Key"
-                  value={article.externalKey || "Chưa có"}
-                  icon={Link2}
-                />
-                <DetailCard
-                  title="News Outlet ID"
-                  value={
-                    typeof article.newsOutletId === "number"
-                      ? String(article.newsOutletId)
-                      : "Chưa có"
-                  }
-                  icon={Hash}
-                />
-                <DetailCard title="URL gốc" value={article.url || "Chưa có"} icon={ExternalLink} />
-                <DetailCard
-                  title="Tạo lúc"
-                  value={formatDateTime(article.createdDate)}
-                  icon={Clock3}
-                />
-                <DetailCard
-                  title="Cập nhật"
-                  value={formatDateTime(article.lastModifiedDate)}
-                  icon={RefreshCcw}
-                />
-              </div>
-            </details>
-          </section>
+                      {canOpenEvent ? (
+                        <Button variant="outline" size="sm" asChild>
+                          <Link href={`/events/${linkedEvent.eventId}`}>
+                            <ExternalLink data-icon="inline-start" />
+                            Xem sự kiện
+                          </Link>
+                        </Button>
+                      ) : null}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <SectionEmpty
+              title="Chưa có sự kiện liên kết"
+              description="Bài viết này chưa có sự kiện liên kết trong dữ liệu hiện tại."
+            />
+          )}
+        </section>
+
+        <section className="flex flex-col gap-3">
+          <SectionHeading title="Nội dung" icon={FileText} />
+          <div className="rounded-lg border border-border p-4">
+            <div className="max-w-4xl text-sm leading-7 whitespace-pre-wrap text-foreground/90">
+              {content || "Chưa có nội dung chi tiết."}
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-lg border border-dashed bg-muted/10">
+          <details>
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4 text-sm font-semibold text-muted-foreground">
+              <span className="inline-flex items-center gap-2 tracking-wide uppercase">
+                <Hash className="h-4 w-4" />
+                Thông tin kỹ thuật
+              </span>
+              <ChevronDown className="h-4 w-4" />
+            </summary>
+            <div className="grid gap-4 border-t border-border p-4 sm:grid-cols-2 xl:grid-cols-3">
+              <DetailCard
+                title="URL gốc"
+                value={article.url || "Chưa có"}
+                icon={ExternalLink}
+              />
+              <DetailCard
+                title="Tạo lúc"
+                value={formatDateTime(article.createdDate)}
+                icon={Clock3}
+              />
+              <DetailCard
+                title="Cập nhật"
+                value={formatDateTime(article.lastModifiedDate)}
+                icon={RefreshCcw}
+              />
+            </div>
+          </details>
+        </section>
       </div>
     </div>
   )
@@ -450,43 +411,39 @@ async function FetchNewsArticleData({
 function NewsArticleDetailSkeleton() {
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-4">
-        <div className="flex gap-2">
-          <Skeleton className="h-5 w-24 rounded-full" />
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+        <div className="flex flex-col gap-3">
+          <div className="flex gap-2">
+            <Skeleton className="h-5 w-24 rounded-full" />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-8 w-2/3 min-w-[260px]" />
+            <Skeleton className="h-4 w-1/2 min-w-[220px]" />
+          </div>
         </div>
-        <div className="flex flex-col gap-2">
-          <Skeleton className="h-8 w-2/3" />
-          <Skeleton className="h-4 w-1/2" />
+        <div className="flex shrink-0 items-center gap-2">
+          <Skeleton className="h-8 w-36" />
+          <Skeleton className="size-8" />
         </div>
       </div>
       <div className="flex flex-col gap-8">
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <div className="flex flex-col gap-6">
-            <div className="grid gap-4 md:grid-cols-3">
-              {Array.from({ length: 3 }).map((_, index) => (
-                <div key={index} className="rounded-lg border p-4">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="mt-3 h-5 w-full" />
-                </div>
-              ))}
-            </div>
-            <div className="flex flex-col gap-3">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-28 w-full rounded-lg" />
-            </div>
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-stretch">
+          <div className="flex h-full min-w-0 flex-col gap-3">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="min-h-[203px] flex-1 rounded-lg" />
           </div>
-          <div className="flex flex-col gap-3">
-            <Skeleton className="h-4 w-28" />
-            <Skeleton className="aspect-video max-h-[220px] w-full rounded-lg" />
+          <div className="flex h-full flex-col gap-3">
+            <Skeleton className="h-4 w-36" />
+            <Skeleton className="aspect-video min-h-[203px] flex-1 rounded-lg" />
           </div>
-        </div>
-        <div className="flex flex-col gap-3">
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-40 w-full rounded-lg" />
         </div>
         <div className="flex flex-col gap-3">
           <Skeleton className="h-4 w-32" />
           <Skeleton className="h-32 w-full rounded-lg" />
+        </div>
+        <div className="flex flex-col gap-3">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-56 w-full max-w-4xl rounded-lg" />
         </div>
         <Skeleton className="h-14 w-full rounded-lg" />
       </div>

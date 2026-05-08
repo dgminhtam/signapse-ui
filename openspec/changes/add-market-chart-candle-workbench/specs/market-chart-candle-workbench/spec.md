@@ -119,7 +119,7 @@ The system SHALL provide clear visual states for the market chart workbench life
 - **THEN** the system shows a no-data state that preserves the selected asset, response asset metadata, timeframe, provider, and returned time window
 
 ### Requirement: Future overlay and lazy-load boundaries
-The system SHALL make room for future event overlays and lazy historical loading without exposing unsupported behavior.
+The system SHALL make room for event overlays and lazy historical loading without exposing unsupported behavior.
 
 #### Scenario: Annotation data is unavailable
 - **WHEN** annotation marker rendering has not been explicitly implemented
@@ -129,9 +129,10 @@ The system SHALL make room for future event overlays and lazy historical loading
 - **WHEN** the workbench displays contextual side content for event overlays
 - **THEN** the panel clearly states that event marker support depends on a future backend contract
 
-#### Scenario: Lazy historical loading is not implemented yet
-- **WHEN** the user pans or scrolls the chart
-- **THEN** the system does not claim that older candles are being loaded unless a future lazy-load implementation exists
+#### Scenario: Lazy historical loading keeps route state stable
+- **WHEN** lazy historical loading is available and the user pans toward older candles
+- **THEN** the system keeps `assetId` and `timeframe` as the only chart route state
+- **AND** the system does not expose manual `from` or `to` controls
 
 ### Requirement: Minimal chart workspace
 The system SHALL present the market chart as a data-first workspace with minimal explanatory copy.
