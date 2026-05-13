@@ -95,6 +95,7 @@ app/(main)/[feature]/
 - Icon bên trong button phải dùng `data-icon="inline-start"`
 - `SelectItem` phải nằm trong `SelectGroup`
 - `DropdownMenuItem` phải nằm trong `DropdownMenuGroup`
+- Time metadata hiển thị trên list, detail, drawer hoặc supporting panel phải dùng treatment phụ: luôn có icon inline `size-3`, typography tương đương `text-xs text-muted-foreground tabular-nums`; không dùng `font-medium`, foreground/card value styling hoặc `Badge` cho timestamp thuần nếu timestamp không phải tín hiệu nghiệp vụ.
 
 ### Quy ước theme
 
@@ -103,9 +104,12 @@ app/(main)/[feature]/
 
 ### Quy ước sidebar
 
-- Sidebar hover, open/context và selected/current row color treatment phải theo shadcn neutral sidebar token model, ưu tiên `sidebar-accent` và `sidebar-accent-foreground`; không thêm custom active color token, không dùng global `accent`, và không ép selected row sang `sidebar-primary` nếu chưa có proposal riêng
+- Sidebar active item thật, tức item đại diện cho màn hình hiện tại, dùng `sidebar-primary` và `sidebar-primary-foreground`; `sidebar-primary` phải neutral-consistent với theme hiện tại, không dùng màu preset xanh/tím không liên quan đến visual baseline
+- Sidebar hover dùng `sidebar-accent` và `sidebar-accent-foreground` để là feedback nhẹ, không tranh với active state
+- Sidebar focus-visible giữ `sidebar-ring`; focus là accessibility state, không trộn với selected/current state
+- Sidebar parent đang mở hoặc parent có child active dùng `sidebar-accent` context treatment và font/chevron emphasis nếu cần; parent không dùng màu mạnh hơn child item đang là màn hình hiện tại
+- Không thêm custom active color token, không dùng global `accent`, và không silently đổi `--sidebar-*` để sửa một vấn đề cục bộ nếu chưa có proposal riêng
 - Sidebar item density được xử lý ở `AppSidebar`: parent/top-level row và child row dùng height đồng bộ với input chuẩn khi cần tăng readability
-- Parent group đang mở/active phải thể hiện context nhưng không dùng màu mạnh hơn child item đang là màn hình hiện tại
 - Child list trong sidebar giữ left indent rõ ràng, mở rộng hợp lý về bên phải, và dùng `py-1` để có khoảng thở mà không tạo gap quá lớn giữa parent và children
 
 ### Bố cục trang chuẩn

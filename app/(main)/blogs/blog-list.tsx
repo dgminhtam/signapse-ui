@@ -1,7 +1,7 @@
 "use client"
 
 import { format } from "date-fns"
-import { Edit2, Eye, EyeOff, FileText, Plus, Trash2 } from "lucide-react"
+import { Clock3, Edit2, Eye, EyeOff, FileText, Plus, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
@@ -10,6 +10,7 @@ import { toast } from "sonner"
 import { deleteBlog } from "@/app/api/blogs/action"
 import { BlogPostListResponse } from "@/app/lib/blogs/definitions"
 import { Page } from "@/app/lib/definitions"
+import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { AppPaginationControls } from "@/components/app-pagination-controls"
 import {
   AppListToolbar,
@@ -147,10 +148,12 @@ export function BlogListPage({ blogPage }: BlogListProps) {
                       </Badge>
                     )}
                   </TableCell>
-                  <TableCell className="w-40 text-center text-muted-foreground">
-                    {blog.createdDate
-                      ? format(new Date(blog.createdDate), "dd/MM/yyyy HH:mm")
-                      : "-"}
+                  <TableCell className="w-40 text-center">
+                    <AppTimeMetadata icon={Clock3}>
+                      {blog.createdDate
+                        ? format(new Date(blog.createdDate), "dd/MM/yyyy HH:mm")
+                        : "-"}
+                    </AppTimeMetadata>
                   </TableCell>
                   <TableCell className="w-28 text-center">
                     <div className="flex items-center justify-center gap-2">

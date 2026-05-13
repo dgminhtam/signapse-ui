@@ -9,37 +9,42 @@ import {
   AiProviderModelCatalogRequest,
   AiProviderModelCatalogResponse,
   AiProviderConfigResponse,
-  AiProviderConfigServerResponse,
   AiProviderConfigUpdateRequest,
-  sanitizeAiProviderConfig,
-  sanitizeAiProviderConfigListItem,
+  AiProviderCredentialCreateRequest,
+  AiProviderCredentialResponse,
+  AiProviderCredentialUpdateRequest,
 } from "@/app/lib/ai-provider-configs/definitions"
 import { ActionResult, Page, SearchParams } from "@/app/lib/definitions"
 import { queryParamsToString } from "@/app/lib/utils"
 
-function sanitizeAiProviderConfigPage(
-  page: Page<AiProviderConfigServerResponse>
-): Page<AiProviderConfigListResponse> {
-  return {
-    ...page,
-    content: page.content.map(sanitizeAiProviderConfigListItem),
+function revalidateAiProviderConfig(id?: number) {
+  revalidatePath("/ai-provider-configs")
+
+  if (id) {
+    revalidatePath(`/ai-provider-configs/${id}`)
   }
 }
 
 export async function getAiProviderConfigs(
   searchParams: SearchParams
 ): Promise<Page<AiProviderConfigListResponse>> {
-  const response = await fetchAuthenticated<Page<AiProviderConfigServerResponse>>(
+  return fetchAuthenticated<Page<AiProviderConfigListResponse>>(
     `/ai-provider-configs?${queryParamsToString(searchParams)}`
   )
-  return sanitizeAiProviderConfigPage(response)
 }
 
 export async function getAiProviderConfigById(id: number): Promise<AiProviderConfigResponse> {
-  const response = await fetchAuthenticated<AiProviderConfigServerResponse>(
+  return fetchAuthenticated<AiProviderConfigResponse>(
     `/ai-provider-configs/${id}`
   )
-  return sanitizeAiProviderConfig(response)
+}
+
+export async function getAiProviderCredentials(
+  id: number
+): Promise<AiProviderCredentialResponse[]> {
+  return fetchAuthenticated<AiProviderCredentialResponse[]>(
+    `/ai-provider-configs/${id}/credentials`
+  )
 }
 
 export async function getAiProviderModelCatalog(
@@ -66,12 +71,12 @@ export async function createAiProviderConfig(
   request: AiProviderConfigCreateRequest
 ): Promise<ActionResult<AiProviderConfigResponse>> {
   try {
-    const data = await fetchAuthenticated<AiProviderConfigServerResponse>("/ai-provider-configs", {
+    const data = await fetchAuthenticated<AiProviderConfigResponse>("/ai-provider-configs", {
       method: "POST",
       body: JSON.stringify(request),
     })
-    revalidatePath("/ai-provider-configs")
-    return { success: true, data: sanitizeAiProviderConfig(data) }
+    revalidateAiProviderConfig(data.id)
+    return { success: true, data }
   } catch (error: unknown) {
     return {
       success: false,
@@ -85,16 +90,15 @@ export async function updateAiProviderConfig(
   request: AiProviderConfigUpdateRequest
 ): Promise<ActionResult<AiProviderConfigResponse>> {
   try {
-    const data = await fetchAuthenticated<AiProviderConfigServerResponse>(
+    const data = await fetchAuthenticated<AiProviderConfigResponse>(
       `/ai-provider-configs/${id}`,
       {
         method: "PUT",
         body: JSON.stringify(request),
       }
     )
-    revalidatePath("/ai-provider-configs")
-    revalidatePath(`/ai-provider-configs/${id}`)
-    return { success: true, data: sanitizeAiProviderConfig(data) }
+    revalidateAiProviderConfig(id)
+    return { success: true, data }
   } catch (error: unknown) {
     return {
       success: false,
@@ -107,15 +111,14 @@ export async function setAiProviderConfigDefault(
   id: number
 ): Promise<ActionResult<AiProviderConfigResponse>> {
   try {
-    const data = await fetchAuthenticated<AiProviderConfigServerResponse>(
+    const data = await fetchAuthenticated<AiProviderConfigResponse>(
       `/ai-provider-configs/${id}/set-default`,
       {
         method: "PATCH",
       }
     )
-    revalidatePath("/ai-provider-configs")
-    revalidatePath(`/ai-provider-configs/${id}`)
-    return { success: true, data: sanitizeAiProviderConfig(data) }
+    revalidateAiProviderConfig(id)
+    return { success: true, data }
   } catch (error: unknown) {
     return {
       success: false,
@@ -135,6 +138,72 @@ export async function deleteAiProviderConfig(id: number): Promise<ActionResult> 
     return {
       success: false,
       error: error instanceof Error ? error.message : "Không thể xóa cấu hình nhà cung cấp AI",
+    }
+  }
+}
+
+export async function createAiProviderCredential(
+  id: number,
+  request: AiProviderCredentialCreateRequest
+): Promise<ActionResult<AiProviderCredentialResponse>> {
+  try {
+    const data = await fetchAuthenticated<AiProviderCredentialResponse>(
+      `/ai-provider-configs/${id}/credentials`,
+      {
+        method: "POST",
+        body: JSON.stringify(request),
+      }
+    )
+    revalidateAiProviderConfig(id)
+    return { success: true, data }
+  } catch (error: unknown) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Không thể thêm credential AI",
+    }
+  }
+}
+
+export async function updateAiProviderCredential(
+  id: number,
+  credentialId: number,
+  request: AiProviderCredentialUpdateRequest
+): Promise<ActionResult<AiProviderCredentialResponse>> {
+  try {
+    const data = await fetchAuthenticated<AiProviderCredentialResponse>(
+      `/ai-provider-configs/${id}/credentials/${credentialId}`,
+      {
+        method: "PUT",
+        body: JSON.stringify(request),
+      }
+    )
+    revalidateAiProviderConfig(id)
+    return { success: true, data }
+  } catch (error: unknown) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Không thể cập nhật credential AI",
+    }
+  }
+}
+
+export async function deleteAiProviderCredential(
+  id: number,
+  credentialId: number
+): Promise<ActionResult> {
+  try {
+    await fetchAuthenticated<void>(
+      `/ai-provider-configs/${id}/credentials/${credentialId}`,
+      {
+        method: "DELETE",
+      }
+    )
+    revalidateAiProviderConfig(id)
+    return { success: true, data: undefined }
+  } catch (error: unknown) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Không thể xóa credential AI",
     }
   }
 }

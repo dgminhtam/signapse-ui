@@ -1,4 +1,4 @@
-import { ExternalLink, FileText, GitBranch } from "lucide-react"
+import { Calendar, ExternalLink, FileText, GitBranch } from "lucide-react"
 import Link from "next/link"
 
 import {
@@ -6,6 +6,7 @@ import {
   MARKET_QUERY_EVIDENCE_ROLE_LABELS,
   type MarketQueryEvidenceResponse,
 } from "@/app/lib/market-query/definitions"
+import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 
@@ -123,8 +124,11 @@ function EvidenceRow({
           />
           <DetailValue
             label="Thời điểm xuất bản"
-            value={formatDateTime(evidence.publishedAt)}
-            valueClassName="text-muted-foreground"
+            valueNode={
+              <AppTimeMetadata icon={Calendar}>
+                {formatDateTime(evidence.publishedAt)}
+              </AppTimeMetadata>
+            }
           />
         </div>
       </div>

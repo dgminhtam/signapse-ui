@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import { Calendar, ExternalLink, FileText, GitBranch, Layers3 } from "lucide-react"
 import Link from "next/link"
 
@@ -9,6 +10,7 @@ import {
 } from "@/app/lib/events/definitions"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { AppTimeMetadata } from "@/components/app-time-metadata"
 
 import {
   getEventStatusLabel,
@@ -48,16 +50,22 @@ function formatConfidence(value?: number) {
 function QuickFact({
   label,
   value,
+  valueNode,
 }: {
   label: string
-  value: string
+  value?: string
+  valueNode?: ReactNode
 }) {
   return (
     <div className="rounded-lg border bg-muted/20 p-3">
       <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         {label}
       </dt>
-      <dd className="mt-1 text-sm font-medium text-foreground">{value}</dd>
+      <dd className="mt-1">
+        {valueNode ?? (
+          <span className="text-sm font-medium text-foreground">{value}</span>
+        )}
+      </dd>
     </div>
   )
 }
@@ -89,7 +97,14 @@ export function EventQuickDetailContent({
 
       <dl className="grid gap-3 sm:grid-cols-2">
         <QuickFact label="Độ tin cậy" value={formatConfidence(event.confidence)} />
-        <QuickFact label="Xảy ra lúc" value={formatDateTime(event.occurredAt)} />
+        <QuickFact
+          label="Xảy ra lúc"
+          valueNode={
+            <AppTimeMetadata icon={Calendar}>
+              {formatDateTime(event.occurredAt)}
+            </AppTimeMetadata>
+          }
+        />
       </dl>
 
       <section className="flex flex-col gap-3">
@@ -121,7 +136,9 @@ export function EventQuickDetailContent({
                 </h3>
                 <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                   <span>{evidence.newsOutletName || "Chưa có nguồn tin"}</span>
-                  <span>{formatDateTime(evidence.publishedAt)}</span>
+                  <AppTimeMetadata icon={Calendar}>
+                    {formatDateTime(evidence.publishedAt)}
+                  </AppTimeMetadata>
                 </div>
                 {evidence.evidenceNote?.trim() ? (
                   <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted-foreground">
@@ -200,9 +217,10 @@ export function EventQuickDetailContent({
         </section>
       ) : null}
 
-      <section className="flex items-center gap-2 rounded-lg border bg-muted/20 p-3 text-xs text-muted-foreground">
-        <Calendar className="size-4 shrink-0" />
-        Cập nhật lần cuối: {formatDateTime(event.lastModifiedDate)}
+      <section className="rounded-lg border bg-muted/20 p-3">
+        <AppTimeMetadata icon={Calendar}>
+          Cập nhật lần cuối: {formatDateTime(event.lastModifiedDate)}
+        </AppTimeMetadata>
       </section>
     </div>
   )

@@ -8,6 +8,7 @@ import {
   NewsArticleResponse,
   getNewsArticleStatusVariant,
 } from "@/app/lib/news-articles/definitions"
+import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 
@@ -75,10 +76,9 @@ export function NewsArticleQuickDetailContent({
             <Globe2 className="size-4" />
             {article.newsOutletName?.trim() || "Chưa có nguồn tin"}
           </span>
-          <span className="inline-flex items-center gap-1.5">
-            <Calendar className="size-4" />
+          <AppTimeMetadata icon={Calendar}>
             {formatDateTime(article.publishedAt)}
-          </span>
+          </AppTimeMetadata>
         </div>
 
         {article.description?.trim() ? (

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react"
 import {
+  CalendarClock,
   ChartCandlestick,
   DatabaseZap,
   RefreshCw,
@@ -28,6 +29,7 @@ import {
   AppListToolbarLeading,
   AppListToolbarTrailing,
 } from "@/components/app-list-toolbar"
+import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -424,7 +426,15 @@ function ChartSurface({
               <EmptyTitle>Không có dữ liệu nến cho tài sản đã chọn</EmptyTitle>
               <EmptyDescription>
                 Chưa có nến cho {getDisplayAssetSymbol(data, selectedAsset)} trong
-                khoảng {formatDateTime(data.from)} đến {formatDateTime(data.to)}.
+                khoảng hiện tại.
+                <span className="mt-1 flex flex-wrap justify-center gap-3">
+                  <AppTimeMetadata icon={CalendarClock}>
+                    Từ {formatDateTime(data.from)}
+                  </AppTimeMetadata>
+                  <AppTimeMetadata icon={CalendarClock}>
+                    Đến {formatDateTime(data.to)}
+                  </AppTimeMetadata>
+                </span>
               </EmptyDescription>
             </EmptyHeader>
           </Empty>
@@ -501,7 +511,9 @@ function MarketChartAnnotationDetail({
           {getDirectionLabel(group.direction)}
         </Badge>
         {confidence ? <Badge variant="outline">Tin cậy {confidence}</Badge> : null}
-        <Badge variant="outline">{formatAnnotationTime(group)}</Badge>
+        <AppTimeMetadata icon={CalendarClock}>
+          {formatAnnotationTime(group)}
+        </AppTimeMetadata>
         {group.annotations.length > 1 ? (
           <Badge variant="secondary">{group.annotations.length} sự kiện</Badge>
         ) : null}
@@ -631,7 +643,9 @@ function MarketChartAnnotationControls({
           <span aria-hidden="true" />
         )}
         {freshnessLabel ? (
-          <div className="sm:text-right">{freshnessLabel}</div>
+          <div className="sm:text-right">
+            <AppTimeMetadata icon={RefreshCw}>{freshnessLabel}</AppTimeMetadata>
+          </div>
         ) : null}
       </div>
     </div>

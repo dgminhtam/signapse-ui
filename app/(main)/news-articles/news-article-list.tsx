@@ -1,7 +1,7 @@
 "use client"
 
 import { format } from "date-fns"
-import { Calendar, Eye, ExternalLink, Newspaper } from "lucide-react"
+import { Calendar, Clock3, Eye, ExternalLink, Newspaper } from "lucide-react"
 import Link from "next/link"
 
 import { Page } from "@/app/lib/definitions"
@@ -10,6 +10,7 @@ import {
   NEWS_ARTICLE_STATUS_LABELS,
   getNewsArticleStatusVariant,
 } from "@/app/lib/news-articles/definitions"
+import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { AppPaginationControls } from "@/components/app-pagination-controls"
 import {
   AppListToolbar,
@@ -124,15 +125,14 @@ export function NewsArticleList({ newsArticlePage }: NewsArticleListProps) {
                       {article.newsOutletName?.trim() || "Chưa có nguồn tin"}
                     </span>
                   </TableCell>
-                  <TableCell className="w-44 text-sm text-muted-foreground">
+                  <TableCell className="w-44">
                     <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-3.5 w-3.5" />
-                        <span>{formatDateTime(article.publishedAt)}</span>
-                      </div>
-                      <span className="text-xs text-muted-foreground">
+                      <AppTimeMetadata icon={Calendar}>
+                        {formatDateTime(article.publishedAt)}
+                      </AppTimeMetadata>
+                      <AppTimeMetadata icon={Clock3}>
                         Tạo lúc {formatDateTime(article.createdDate)}
-                      </span>
+                      </AppTimeMetadata>
                     </div>
                   </TableCell>
                   <TableCell className="w-32">

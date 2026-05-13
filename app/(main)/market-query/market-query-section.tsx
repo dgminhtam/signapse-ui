@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import { Layers3, type LucideIcon } from "lucide-react"
 
 import {
@@ -58,11 +59,13 @@ export function SectionEmpty({
 export function DetailValue({
   label,
   value,
+  valueNode,
   meta,
   valueClassName,
 }: {
   label: string
-  value: string
+  value?: string
+  valueNode?: ReactNode
   meta?: string | null
   valueClassName?: string
 }) {
@@ -71,7 +74,11 @@ export function DetailValue({
       <span className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
         {label}
       </span>
-      <p className={cn("text-sm leading-6 text-foreground", valueClassName)}>{value}</p>
+      {valueNode ?? (
+        <p className={cn("text-sm leading-6 text-foreground", valueClassName)}>
+          {value}
+        </p>
+      )}
       {meta ? <p className="text-xs leading-5 text-muted-foreground">{meta}</p> : null}
     </div>
   )

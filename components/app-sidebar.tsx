@@ -141,7 +141,7 @@ export function NavMain({ items }: { items: NavItem[] }) {
                     asChild
                     tooltip={item.title}
                     isActive={isActive}
-                    className="h-9 rounded-lg data-active:font-semibold"
+                    className="h-9 rounded-lg data-active:bg-sidebar-primary data-active:font-semibold data-active:text-sidebar-primary-foreground data-active:hover:bg-sidebar-primary data-active:hover:text-sidebar-primary-foreground"
                   >
                     <Link href={item.url}>
                       {item.icon && <item.icon />}
@@ -181,7 +181,7 @@ export function NavMain({ items }: { items: NavItem[] }) {
                             <SidebarMenuSubButton
                               isActive={isSubItemActive}
                               asChild
-                              className="h-9 rounded-lg data-active:font-semibold"
+                              className="h-9 rounded-lg data-active:bg-sidebar-primary data-active:font-semibold data-active:text-sidebar-primary-foreground data-active:hover:bg-sidebar-primary data-active:hover:text-sidebar-primary-foreground"
                             >
                               <Link href={subItem.url}>
                                 <span>{subItem.title}</span>

@@ -13,7 +13,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { Suspense, type ElementType } from "react"
+import { Suspense, type ElementType, type ReactNode } from "react"
 
 import { getEconomicCalendarEntryById } from "@/app/api/economic-calendar/action"
 import {
@@ -28,6 +28,7 @@ import { ECONOMIC_CALENDAR_READ_PERMISSIONS } from "@/app/lib/economic-calendar/
 import { hasAnyPermission } from "@/app/lib/permissions"
 import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { AccessDenied } from "@/components/access-denied"
+import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -71,10 +72,12 @@ function isNotFoundError(error: unknown) {
 function DetailCard({
   title,
   value,
+  valueNode,
   icon: Icon,
 }: {
   title: string
-  value: string
+  value?: string
+  valueNode?: ReactNode
   icon: ElementType
 }) {
   return (
@@ -83,7 +86,11 @@ function DetailCard({
         <Icon className="h-3.5 w-3.5" />
         {title}
       </div>
-      <p className="mt-2 break-words font-medium text-foreground">{value}</p>
+      <div className="mt-2">
+        {valueNode ?? (
+          <p className="break-words font-medium text-foreground">{value}</p>
+        )}
+      </div>
     </div>
   )
 }
@@ -184,10 +191,9 @@ async function FetchEconomicCalendarEntryData({ id }: { id: number }) {
                 <Landmark className="h-4 w-4" />
                 Tiền tệ {formatCurrency(entry.currencyCode)}
               </span>
-              <span className="inline-flex items-center gap-1.5">
-                <CalendarClock className="h-4 w-4" />
+              <AppTimeMetadata icon={CalendarClock}>
                 Công bố {formatDateTime(entry.scheduledAt)}
-              </span>
+              </AppTimeMetadata>
             </div>
           </div>
         </div>
@@ -212,7 +218,11 @@ async function FetchEconomicCalendarEntryData({ id }: { id: number }) {
             />
             <DetailCard
               title="Đồng bộ"
-              value={formatDateTime(entry.syncedAt)}
+              valueNode={
+                <AppTimeMetadata icon={RefreshCcw}>
+                  {formatDateTime(entry.syncedAt)}
+                </AppTimeMetadata>
+              }
               icon={RefreshCcw}
             />
           </div>
@@ -260,12 +270,20 @@ async function FetchEconomicCalendarEntryData({ id }: { id: number }) {
                 />
                 <DetailCard
                   title="Tạo lúc"
-                  value={formatDateTime(entry.createdDate)}
+                  valueNode={
+                    <AppTimeMetadata icon={Clock3}>
+                      {formatDateTime(entry.createdDate)}
+                    </AppTimeMetadata>
+                  }
                   icon={Clock3}
                 />
                 <DetailCard
                   title="Cập nhật"
-                  value={formatDateTime(entry.lastModifiedDate)}
+                  valueNode={
+                    <AppTimeMetadata icon={RefreshCcw}>
+                      {formatDateTime(entry.lastModifiedDate)}
+                    </AppTimeMetadata>
+                  }
                   icon={RefreshCcw}
                 />
               </div>

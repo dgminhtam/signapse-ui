@@ -1,20 +1,41 @@
-export type AiProviderType = "GEMINI" | "OPENAI" | "ZAI"
+export const AI_PROVIDER_TYPES = ["GEMINI", "GROQ", "OPENAI", "ZAI"] as const
+
+export type AiProviderType = (typeof AI_PROVIDER_TYPES)[number]
+
+export interface AiProviderCredentialCreateRequest {
+  label?: string
+  apiKey: string
+}
+
+export interface AiProviderCredentialUpdateRequest {
+  label?: string
+  apiKey?: string
+}
+
+export interface AiProviderCredentialResponse {
+  id: number
+  label?: string
+  keyPreview?: string
+  lastUsedDate?: string
+  rateLimitedUntil?: string
+  createdDate?: string
+  lastModifiedDate?: string
+}
 
 export interface AiProviderConfigCreateRequest {
   providerType: AiProviderType
   name: string
   description?: string
-  apiKey: string
   model: string
   baseUrl?: string
   defaultProvider?: boolean
+  credentials: AiProviderCredentialCreateRequest[]
 }
 
 export interface AiProviderConfigUpdateRequest {
   providerType?: AiProviderType
   name?: string
   description?: string
-  apiKey?: string
   model?: string
   baseUrl?: string
   defaultProvider?: boolean
@@ -30,29 +51,12 @@ interface AiProviderConfigPublicFields {
   defaultProvider: boolean
   createdDate: string
   lastModifiedDate: string
+  credentials: AiProviderCredentialResponse[]
 }
 
-export interface AiProviderConfigResponse extends AiProviderConfigPublicFields {}
+export type AiProviderConfigResponse = AiProviderConfigPublicFields
 
-export interface AiProviderConfigListResponse extends AiProviderConfigPublicFields {}
-
-export interface AiProviderConfigServerResponse extends AiProviderConfigPublicFields {
-  apiKey: string
-}
-
-export function sanitizeAiProviderConfig(
-  config: AiProviderConfigServerResponse
-): AiProviderConfigResponse {
-  const { apiKey: _apiKey, ...publicConfig } = config
-  return publicConfig
-}
-
-export function sanitizeAiProviderConfigListItem(
-  config: AiProviderConfigServerResponse
-): AiProviderConfigListResponse {
-  const { apiKey: _apiKey, ...publicConfig } = config
-  return publicConfig
-}
+export type AiProviderConfigListResponse = AiProviderConfigPublicFields
 
 export interface AiProviderModelCatalogRequest {
   providerType: AiProviderType

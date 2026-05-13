@@ -1,7 +1,8 @@
-import { GitBranch } from "lucide-react"
+import { Calendar, GitBranch } from "lucide-react"
 import Link from "next/link"
 
 import type { MarketQueryKeyEventResponse } from "@/app/lib/market-query/definitions"
+import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { Badge } from "@/components/ui/badge"
 
 import {
@@ -66,7 +67,11 @@ function KeyEventCard({
         <Badge variant={getConfidenceVariant(event.confidence)}>
           Độ tin cậy {formatConfidence(event.confidence)}
         </Badge>
-        {event.occurredAt ? <Badge variant="outline">{formatDateTime(event.occurredAt)}</Badge> : null}
+        {event.occurredAt ? (
+          <AppTimeMetadata icon={Calendar}>
+            {formatDateTime(event.occurredAt)}
+          </AppTimeMetadata>
+        ) : null}
       </div>
 
       <div className="flex flex-col gap-2">

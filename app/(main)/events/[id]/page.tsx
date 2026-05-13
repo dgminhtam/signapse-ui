@@ -1,4 +1,4 @@
-import { Suspense, type ElementType } from "react"
+import { Suspense, type ElementType, type ReactNode } from "react"
 import { format } from "date-fns"
 import {
   ArrowLeft,
@@ -31,6 +31,7 @@ import {
 import { EVENT_READ_PERMISSIONS } from "@/app/lib/events/permissions"
 import { NEWS_ARTICLE_READ_PERMISSIONS } from "@/app/lib/news-articles/permissions"
 import { AccessDenied } from "@/components/access-denied"
+import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -106,10 +107,12 @@ function isNotFoundError(error: unknown) {
 function DetailCard({
   title,
   value,
+  valueNode,
   icon: Icon,
 }: {
   title: string
-  value: string
+  value?: string
+  valueNode?: ReactNode
   icon: ElementType
 }) {
   return (
@@ -118,7 +121,11 @@ function DetailCard({
         <Icon className="h-3.5 w-3.5" />
         {title}
       </div>
-      <p className="mt-2 font-medium break-words text-foreground">{value}</p>
+      <div className="mt-2">
+        {valueNode ?? (
+          <p className="font-medium break-words text-foreground">{value}</p>
+        )}
+      </div>
     </div>
   )
 }
@@ -236,9 +243,9 @@ function MarketReactionCard({
           {reaction.reasoning?.trim() ||
             "Chưa có diễn giải chi tiết cho tác động này."}
         </p>
-        <div className="text-xs text-muted-foreground">
+        <AppTimeMetadata icon={Calendar}>
           Quan sát lúc: {formatDateTime(reaction.observedAt)}
-        </div>
+        </AppTimeMetadata>
       </CardContent>
     </Card>
   )
@@ -346,7 +353,11 @@ async function FetchEventData({
           />
           <DetailCard
             title="Xảy ra lúc"
-            value={formatDateTime(event.occurredAt)}
+            valueNode={
+              <AppTimeMetadata icon={Calendar}>
+                {formatDateTime(event.occurredAt)}
+              </AppTimeMetadata>
+            }
             icon={Calendar}
           />
         </div>
@@ -377,9 +388,9 @@ async function FetchEventData({
                         <span>
                           Nguồn tin: {evidence.newsOutletName || "Chưa có"}
                         </span>
-                        <span>
+                        <AppTimeMetadata icon={Calendar}>
                           Xuất bản: {formatDateTime(evidence.publishedAt)}
-                        </span>
+                        </AppTimeMetadata>
                         <span>
                           Độ tin cậy: {formatConfidence(evidence.confidence)}
                         </span>
@@ -595,12 +606,20 @@ async function FetchEventData({
               />
               <DetailCard
                 title="Tạo lúc"
-                value={formatDateTime(event.createdDate)}
+                valueNode={
+                  <AppTimeMetadata icon={Clock3}>
+                    {formatDateTime(event.createdDate)}
+                  </AppTimeMetadata>
+                }
                 icon={Clock3}
               />
               <DetailCard
                 title="Cập nhật"
-                value={formatDateTime(event.lastModifiedDate)}
+                valueNode={
+                  <AppTimeMetadata icon={RefreshCcw}>
+                    {formatDateTime(event.lastModifiedDate)}
+                  </AppTimeMetadata>
+                }
                 icon={RefreshCcw}
               />
             </div>

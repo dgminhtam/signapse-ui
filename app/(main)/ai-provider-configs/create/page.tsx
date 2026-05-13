@@ -1,12 +1,15 @@
 import Link from "next/link"
+import { Suspense } from "react"
 import { ArrowLeft } from "lucide-react"
 
 import { hasPermission } from "@/app/lib/permissions"
 import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { AccessDenied } from "@/components/access-denied"
+import { AppFormShellSkeleton } from "@/components/app-form-shell"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 
-import { AiProviderConfigForm } from "../ai-provider-config-form"
+import { AiProviderConfigCreateForm } from "../ai-provider-config-create-form"
 
 export default async function CreateAiProviderConfigPage() {
   const permissions = await getCurrentPermissions()
@@ -31,7 +34,64 @@ export default async function CreateAiProviderConfigPage() {
         </Button>
       </div>
 
-      <AiProviderConfigForm />
+      <Suspense fallback={<AiProviderConfigCreateSkeleton />}>
+        <AiProviderConfigCreateForm />
+      </Suspense>
     </div>
+  )
+}
+
+function AiProviderConfigCreateSkeleton() {
+  return (
+    <AppFormShellSkeleton width="lg">
+      <div className="flex flex-col gap-2 px-6 pt-6">
+        <Skeleton className="h-6 w-72 max-w-full" />
+        <Skeleton className="h-4 w-full max-w-xl" />
+      </div>
+
+      <div className="px-6 py-6">
+        <div className="flex flex-col gap-7">
+          <Skeleton className="h-9 w-full" />
+          <Skeleton className="h-9 w-full" />
+
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex flex-col gap-2">
+                <Skeleton className="h-5 w-40" />
+                <Skeleton className="h-4 w-64 max-w-full" />
+              </div>
+              <Skeleton className="h-9 w-36" />
+            </div>
+
+            <div className="flex flex-col gap-4 rounded-lg border p-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="flex flex-col gap-2">
+                  <Skeleton className="h-5 w-28" />
+                  <Skeleton className="h-4 w-72 max-w-full" />
+                </div>
+                <div className="flex gap-2">
+                  <Skeleton className="h-9 w-40" />
+                  <Skeleton className="size-8" />
+                </div>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <Skeleton className="h-9 w-full" />
+                <Skeleton className="h-9 w-full" />
+              </div>
+            </div>
+          </div>
+
+          <Skeleton className="h-9 w-full" />
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-16 w-full" />
+        </div>
+      </div>
+
+      <div className="flex flex-col-reverse gap-3 border-t bg-muted/20 px-6 py-4 sm:flex-row sm:justify-end">
+        <Skeleton className="h-9 w-full sm:w-20" />
+        <Skeleton className="h-9 w-full sm:w-32" />
+      </div>
+    </AppFormShellSkeleton>
   )
 }

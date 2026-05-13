@@ -1,7 +1,7 @@
 "use client"
 
 import { format } from "date-fns"
-import { CalendarClock, Eye, Landmark } from "lucide-react"
+import { CalendarClock, Eye, Landmark, RefreshCcw } from "lucide-react"
 import Link from "next/link"
 
 import { Page } from "@/app/lib/definitions"
@@ -13,6 +13,7 @@ import {
   getEconomicCalendarStatusLabel,
   getEconomicCalendarStatusVariant,
 } from "@/app/lib/economic-calendar/definitions"
+import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { AppPaginationControls } from "@/components/app-pagination-controls"
 import {
   AppListToolbar,
@@ -165,15 +166,14 @@ export function EconomicCalendarList({
                       )}
                     </Badge>
                   </TableCell>
-                  <TableCell className="w-44 text-sm text-muted-foreground">
+                  <TableCell className="w-44">
                     <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-2">
-                        <CalendarClock className="h-3.5 w-3.5" />
-                        <span>Công bố {formatDateTime(entry.scheduledAt)}</span>
-                      </div>
-                      <span className="text-xs">
+                      <AppTimeMetadata icon={CalendarClock}>
+                        Công bố {formatDateTime(entry.scheduledAt)}
+                      </AppTimeMetadata>
+                      <AppTimeMetadata icon={RefreshCcw}>
                         Đồng bộ {formatDateTime(entry.syncedAt)}
-                      </span>
+                      </AppTimeMetadata>
                     </div>
                   </TableCell>
                   <TableCell className="w-40 max-w-[10rem] text-sm text-muted-foreground">

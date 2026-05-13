@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { format } from "date-fns"
+import { Clock3, RefreshCw } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
@@ -16,6 +17,7 @@ import {
   AppFormShellBody,
   AppFormShellFooter,
 } from "@/components/app-form-shell"
+import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 
@@ -98,8 +100,10 @@ export function NewsOutletUpdateForm({
               <div className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                 Tạo lúc
               </div>
-              <p className="mt-2 text-sm font-medium text-foreground">
+              <p className="mt-2">
+                <AppTimeMetadata icon={Clock3}>
                 {formatDateTime(newsOutlet.createdDate)}
+                </AppTimeMetadata>
               </p>
             </div>
 
@@ -107,8 +111,10 @@ export function NewsOutletUpdateForm({
               <div className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                 Cập nhật lần cuối
               </div>
-              <p className="mt-2 text-sm font-medium text-foreground">
+              <p className="mt-2">
+                <AppTimeMetadata icon={RefreshCw}>
                 {formatDateTime(newsOutlet.lastModifiedDate)}
+                </AppTimeMetadata>
               </p>
             </div>
           </div>

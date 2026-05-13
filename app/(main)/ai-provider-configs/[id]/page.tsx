@@ -8,7 +8,8 @@ import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { AccessDenied } from "@/components/access-denied"
 import { Button } from "@/components/ui/button"
 
-import { AiProviderConfigForm } from "../ai-provider-config-form"
+import { AiProviderCredentialPanel } from "../ai-provider-credential-panel"
+import { AiProviderConfigUpdateForm } from "../ai-provider-config-update-form"
 
 interface EditAiProviderConfigPageProps {
   params: Promise<{ id: string }>
@@ -46,7 +47,8 @@ export default async function EditAiProviderConfigPage({
         </Button>
       </div>
 
-      <AiProviderConfigForm initialData={providerConfig} />
+      <AiProviderConfigUpdateForm initialData={providerConfig} />
+      <AiProviderCredentialPanel provider={providerConfig} />
     </div>
   )
 }

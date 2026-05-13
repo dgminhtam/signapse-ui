@@ -1,7 +1,7 @@
 "use client"
 
 import { format } from "date-fns"
-import { Bot, Edit2, Plus, ShieldCheck, Star, Trash2 } from "lucide-react"
+import { Bot, Clock3, Edit2, KeyRound, Plus, ShieldCheck, Star, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
@@ -26,6 +26,7 @@ import {
   AppListTableHeaderRow,
 } from "@/components/app-list-table"
 import { AppSelectPageSize } from "@/components/app-select-page-size"
+import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { useHasPermission } from "@/components/permission-provider"
 import { SortSelect } from "@/components/sort-select"
 import {
@@ -143,6 +144,10 @@ export function AiProviderConfigListPage({
                       <span className="line-clamp-1 text-xs break-words text-muted-foreground">
                         {provider.description || "Chưa có mô tả."}
                       </span>
+                      <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                        <KeyRound className="size-3 shrink-0" aria-hidden="true" />
+                        {provider.credentials?.length || 0} credential
+                      </span>
                     </div>
                   </TableCell>
                   <TableCell className="w-36">
@@ -156,8 +161,10 @@ export function AiProviderConfigListPage({
                       <SetDefaultButton provider={provider} />
                     ) : null}
                   </TableCell>
-                  <TableCell className="w-40 text-sm text-muted-foreground tabular-nums">
-                    {format(new Date(provider.createdDate), "dd/MM/yyyy HH:mm")}
+                  <TableCell className="w-40">
+                    <AppTimeMetadata icon={Clock3}>
+                      {format(new Date(provider.createdDate), "dd/MM/yyyy HH:mm")}
+                    </AppTimeMetadata>
                   </TableCell>
                   <TableCell className="w-28">
                     <div className="flex justify-end gap-1">

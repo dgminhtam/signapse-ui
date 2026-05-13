@@ -1,7 +1,7 @@
 "use client"
 
 import { format } from "date-fns"
-import { Edit2, FileText, Plus, Trash2 } from "lucide-react"
+import { Clock3, Edit2, FileText, Plus, RefreshCcw, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
@@ -33,6 +33,7 @@ import {
   AppListTableHeaderRow,
 } from "@/components/app-list-table"
 import { AppSelectPageSize } from "@/components/app-select-page-size"
+import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { useHasAnyPermission } from "@/components/permission-provider"
 import { SortSelect } from "@/components/sort-select"
 import {
@@ -182,11 +183,15 @@ export function SystemPromptList({ promptPage }: SystemPromptListProps) {
                   <TableCell className="w-28 text-sm text-muted-foreground">
                     {formatSystemPromptContentLength(prompt.content)}
                   </TableCell>
-                  <TableCell className="w-40 text-sm text-muted-foreground tabular-nums">
-                    {formatDateTime(prompt.lastModifiedDate)}
+                  <TableCell className="w-40">
+                    <AppTimeMetadata icon={RefreshCcw}>
+                      {formatDateTime(prompt.lastModifiedDate)}
+                    </AppTimeMetadata>
                   </TableCell>
-                  <TableCell className="w-40 text-sm text-muted-foreground tabular-nums">
-                    {formatDateTime(prompt.createdDate)}
+                  <TableCell className="w-40">
+                    <AppTimeMetadata icon={Clock3}>
+                      {formatDateTime(prompt.createdDate)}
+                    </AppTimeMetadata>
                   </TableCell>
                   <TableCell className="w-28">
                     <div className="flex justify-end gap-1">

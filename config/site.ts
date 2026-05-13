@@ -14,6 +14,7 @@ import { MARKET_QUERY_NAV_PERMISSIONS } from "@/app/lib/market-query/permissions
 import { NEWS_ARTICLE_NAV_PERMISSIONS } from "@/app/lib/news-articles/permissions"
 import { NEWS_OUTLET_NAV_PERMISSIONS } from "@/app/lib/news-outlets/permissions"
 import { SYSTEM_PROMPT_NAV_PERMISSIONS } from "@/app/lib/system-prompts/permissions"
+import { TELEGRAM_NAV_PERMISSIONS } from "@/app/lib/telegram/permissions"
 
 export interface NavSubItem {
   title: string
@@ -113,6 +114,11 @@ export const siteConfig = {
       url: "#",
       icon: Settings2,
       items: [
+        {
+          title: "Telegram",
+          url: "/telegram",
+          permission: TELEGRAM_NAV_PERMISSIONS,
+        },
         {
           title: "Nhà cung cấp AI",
           url: "/ai-provider-configs",

@@ -2,19 +2,43 @@
 
 import { useState } from "react"
 import { useAuth } from "@clerk/nextjs"
-import { Copy, Key, RefreshCw, CheckCircle2, ChevronRight, Terminal, Info } from "lucide-react"
+import { Clock3, Copy, Key, RefreshCw, CheckCircle2, ChevronRight, Terminal, Info } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
+import { AppTimeMetadata } from "@/components/app-time-metadata"
+
+type DecodedTokenPayload = Record<string, unknown> & {
+  exp?: number
+  iat?: number
+  sub?: string
+}
+
+type DecodedToken = {
+  header: Record<string, unknown>
+  payload: DecodedTokenPayload
+}
+
+function formatJwtTimestamp(value: unknown) {
+  if (typeof value !== "number") {
+    return "Unavailable"
+  }
+
+  return new Date(value * 1000).toLocaleString()
+}
+
+function formatJwtSubject(value: unknown) {
+  return typeof value === "string" ? value : "Unavailable"
+}
 
 export function DeveloperTokenClient() {
   const { getToken } = useAuth()
   const [token, setToken] = useState<string>("")
   const [loading, setLoading] = useState(false)
-  const [decoded, setDecoded] = useState<{ header: any; payload: any } | null>(null)
+  const [decoded, setDecoded] = useState<DecodedToken | null>(null)
 
-  const decodeJWT = (token: string) => {
+  const decodeJWT = (token: string): DecodedToken | null => {
     try {
       const parts = token.split(".")
       if (parts.length < 2) return null
@@ -38,8 +62,8 @@ export function DeveloperTokenClient() {
       )
 
       return {
-        header: JSON.parse(jsonHeader),
-        payload: JSON.parse(jsonPayload),
+        header: JSON.parse(jsonHeader) as Record<string, unknown>,
+        payload: JSON.parse(jsonPayload) as DecodedTokenPayload,
       }
     } catch (e) {
       console.error("JWT Decode Error:", e)
@@ -192,17 +216,21 @@ export function DeveloperTokenClient() {
             <div className="grid gap-4 sm:grid-cols-3">
                <div className="p-3 rounded-md bg-muted/50 border">
                   <div className="text-[10px] text-muted-foreground uppercase mb-1">Subject (User ID)</div>
-                  <div className="text-xs font-mono truncate">{decoded.payload.sub}</div>
+                  <div className="text-xs font-mono truncate">
+                    {formatJwtSubject(decoded.payload.sub)}
+                  </div>
                </div>
                <div className="p-3 rounded-md bg-muted/50 border">
                   <div className="text-[10px] text-muted-foreground uppercase mb-1">Issued At</div>
-                  <div className="text-xs">{new Date(decoded.payload.iat * 1000).toLocaleString()}</div>
+                  <AppTimeMetadata icon={Clock3}>
+                    {formatJwtTimestamp(decoded.payload.iat)}
+                  </AppTimeMetadata>
                </div>
                <div className="p-3 rounded-md bg-muted/50 border">
                   <div className="text-[10px] text-muted-foreground uppercase mb-1">Expires At</div>
-                  <div className="text-xs font-medium text-amber-600">
-                    {new Date(decoded.payload.exp * 1000).toLocaleString()}
-                  </div>
+                  <AppTimeMetadata icon={Clock3}>
+                    {formatJwtTimestamp(decoded.payload.exp)}
+                  </AppTimeMetadata>
                </div>
             </div>
           )}

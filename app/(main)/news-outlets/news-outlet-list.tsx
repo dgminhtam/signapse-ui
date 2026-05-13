@@ -2,6 +2,7 @@
 
 import { format } from "date-fns"
 import {
+  Clock3,
   Edit2,
   ExternalLink,
   Globe,
@@ -39,6 +40,7 @@ import {
   AppListTableHeaderRow,
 } from "@/components/app-list-table"
 import { AppSelectPageSize } from "@/components/app-select-page-size"
+import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { useHasPermission } from "@/components/permission-provider"
 import { SortSelect } from "@/components/sort-select"
 import {
@@ -211,8 +213,10 @@ export function NewsOutletListPage({ newsOutletPage }: NewsOutletListProps) {
                     </div>
                   </TableCell>
 
-                  <TableCell className="w-40 text-sm text-muted-foreground">
-                    {formatDateTime(newsOutlet.createdDate)}
+                  <TableCell className="w-40">
+                    <AppTimeMetadata icon={Clock3}>
+                      {formatDateTime(newsOutlet.createdDate)}
+                    </AppTimeMetadata>
                   </TableCell>
 
                   <TableCell className="w-40 text-center">

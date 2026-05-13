@@ -19,10 +19,18 @@ import type {
   Point,
   ViewportAnimationEffectTiming,
 } from "@antv/g6"
-import { ArrowUpRight, ExternalLink, Minus, Plus, RotateCcw, X } from "lucide-react"
+import {
+  ArrowUpRight,
+  Calendar,
+  ExternalLink,
+  Minus,
+  Plus,
+  RotateCcw,
+  X,
+} from "lucide-react"
 import Link from "next/link"
 import { useTheme } from "next-themes"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 
 import {
   getGraphViewRelationLabel,
@@ -33,6 +41,7 @@ import type {
   GraphViewNode,
   GraphViewNodeKind,
 } from "@/app/lib/graph-view/definitions"
+import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -313,11 +322,13 @@ function getNodeDetailHref(node: GraphViewNode) {
 function GraphNodeInspectorField({
   label,
   value,
+  valueNode,
 }: {
   label: string
   value?: string | null
+  valueNode?: ReactNode
 }) {
-  if (!value) {
+  if (!value && !valueNode) {
     return null
   }
 
@@ -326,8 +337,10 @@ function GraphNodeInspectorField({
       <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
         {label}
       </dt>
-      <dd className="mt-1 truncate text-xs font-medium text-foreground" title={value}>
-        {value}
+      <dd className="mt-1 truncate" title={value ?? undefined}>
+        {valueNode ?? (
+          <span className="text-xs font-medium text-foreground">{value}</span>
+        )}
       </dd>
     </div>
   )
@@ -397,8 +410,20 @@ function GraphNodeDetailInspector({
 
       <div className="max-h-[20rem] overflow-y-auto p-3.5 md:max-h-[calc(100vh-11rem)]">
         <dl className="grid grid-cols-2 gap-2">
-          <GraphNodeInspectorField label="Thời điểm" value={occurredAt} />
-          <GraphNodeInspectorField label="Xuất bản" value={publishedAt} />
+          <GraphNodeInspectorField
+            label="Thời điểm"
+            value={occurredAt}
+            valueNode={
+              <AppTimeMetadata icon={Calendar}>{occurredAt}</AppTimeMetadata>
+            }
+          />
+          <GraphNodeInspectorField
+            label="Xuất bản"
+            value={publishedAt}
+            valueNode={
+              <AppTimeMetadata icon={Calendar}>{publishedAt}</AppTimeMetadata>
+            }
+          />
           <GraphNodeInspectorField label="Độ tin cậy" value={confidence} />
           <GraphNodeInspectorField label="Trạng thái" value={metadata.status} />
           <GraphNodeInspectorField label="Nguồn tin" value={metadata.newsOutletName} />

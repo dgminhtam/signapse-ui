@@ -14,7 +14,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { Suspense } from "react"
+import { Suspense, type ElementType, type ReactNode } from "react"
 
 import { getNewsArticleById } from "@/app/api/news-articles/action"
 import { EVENT_STATUS_LABELS } from "@/app/lib/events/definitions"
@@ -29,6 +29,7 @@ import { NEWS_ARTICLE_READ_PERMISSIONS } from "@/app/lib/news-articles/permissio
 import { hasAnyPermission } from "@/app/lib/permissions"
 import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { AccessDenied } from "@/components/access-denied"
+import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -89,11 +90,13 @@ function isNotFoundError(error: unknown) {
 function DetailCard({
   title,
   value,
+  valueNode,
   icon: Icon,
 }: {
   title: string
-  value: string
-  icon: React.ElementType
+  value?: string
+  valueNode?: ReactNode
+  icon: ElementType
 }) {
   return (
     <div className="rounded-lg border border-border bg-muted/20 p-4">
@@ -101,7 +104,11 @@ function DetailCard({
         <Icon className="h-3.5 w-3.5" />
         {title}
       </div>
-      <p className="mt-2 font-medium break-words text-foreground">{value}</p>
+      <div className="mt-2">
+        {valueNode ?? (
+          <p className="font-medium break-words text-foreground">{value}</p>
+        )}
+      </div>
     </div>
   )
 }
@@ -111,7 +118,7 @@ function SectionHeading({
   icon: Icon,
 }: {
   title: string
-  icon: React.ElementType
+  icon: ElementType
 }) {
   return (
     <div className="flex items-center gap-2">
@@ -224,10 +231,9 @@ async function FetchNewsArticleData({
                   <Globe2 className="h-4 w-4" />
                   {article.newsOutletName?.trim() || "Chưa có nguồn tin"}
                 </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <Calendar className="h-4 w-4" />
+                <AppTimeMetadata icon={Calendar}>
                   {formatDateTime(article.publishedAt)}
-                </span>
+                </AppTimeMetadata>
               </div>
             </div>
           </div>
@@ -392,12 +398,20 @@ async function FetchNewsArticleData({
               />
               <DetailCard
                 title="Tạo lúc"
-                value={formatDateTime(article.createdDate)}
+                valueNode={
+                  <AppTimeMetadata icon={Clock3}>
+                    {formatDateTime(article.createdDate)}
+                  </AppTimeMetadata>
+                }
                 icon={Clock3}
               />
               <DetailCard
                 title="Cập nhật"
-                value={formatDateTime(article.lastModifiedDate)}
+                valueNode={
+                  <AppTimeMetadata icon={RefreshCcw}>
+                    {formatDateTime(article.lastModifiedDate)}
+                  </AppTimeMetadata>
+                }
                 icon={RefreshCcw}
               />
             </div>

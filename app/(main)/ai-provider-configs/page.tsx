@@ -114,6 +114,7 @@ function ListSkeleton() {
                   <div className="flex min-w-0 flex-col gap-2">
                     <Skeleton className="h-4 w-32" />
                     <Skeleton className="h-3 w-44" />
+                    <Skeleton className="h-3 w-24" />
                   </div>
                 </TableCell>
                 <TableCell className="w-36">

@@ -14,6 +14,7 @@ import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { resolveActiveWorkspace } from "@/app/lib/workspaces/active"
 import { WorkspaceResponse } from "@/app/lib/workspaces/definitions"
 import { WorkspaceWatchlistAssetListItemResponse } from "@/app/lib/watchlists/definitions"
+import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { Badge } from "@/components/ui/badge"
 import {
   Empty,
@@ -245,7 +246,11 @@ function WorkspaceHero({
         <OverviewStat
           icon={CalendarClockIcon}
           label="Cập nhật"
-          value={formatDateTime(workspace.lastModifiedDate)}
+          valueNode={
+            <AppTimeMetadata icon={CalendarClockIcon}>
+              {formatDateTime(workspace.lastModifiedDate)}
+            </AppTimeMetadata>
+          }
           description="Lần ghi nhận gần nhất"
         />
       </div>
@@ -257,11 +262,13 @@ function OverviewStat({
   icon: Icon,
   label,
   value,
+  valueNode,
   description,
 }: {
   icon: ElementType
   label: string
-  value: string
+  value?: string
+  valueNode?: ReactNode
   description: string
 }) {
   return (
@@ -270,7 +277,9 @@ function OverviewStat({
         <Icon className="size-4" />
         <span>{label}</span>
       </div>
-      <div className="truncate text-lg font-semibold text-foreground">{value}</div>
+      {valueNode ?? (
+        <div className="truncate text-lg font-semibold text-foreground">{value}</div>
+      )}
       <div className="text-xs text-muted-foreground">{description}</div>
     </div>
   )
@@ -402,21 +411,44 @@ function WorkspaceTechnicalDetails({ workspace }: { workspace: WorkspaceResponse
 
       <div className="grid gap-3">
         <TechnicalDetail label="ID không gian" value={workspace.id.toString()} />
-        <TechnicalDetail label="Tạo lúc" value={formatDateTime(workspace.createdDate)} />
+        <TechnicalDetail
+          label="Tạo lúc"
+          valueNode={
+            <AppTimeMetadata icon={CalendarClockIcon}>
+              {formatDateTime(workspace.createdDate)}
+            </AppTimeMetadata>
+          }
+        />
         <TechnicalDetail
           label="Cập nhật"
-          value={formatDateTime(workspace.lastModifiedDate)}
+          valueNode={
+            <AppTimeMetadata icon={CalendarClockIcon}>
+              {formatDateTime(workspace.lastModifiedDate)}
+            </AppTimeMetadata>
+          }
         />
       </div>
     </section>
   )
 }
 
-function TechnicalDetail({ label, value }: { label: string; value: string }) {
+function TechnicalDetail({
+  label,
+  value,
+  valueNode,
+}: {
+  label: string
+  value?: string
+  valueNode?: ReactNode
+}) {
   return (
     <div className="flex items-center justify-between gap-4 rounded-lg bg-muted/30 px-3 py-2">
       <span className="text-sm text-muted-foreground">{label}</span>
-      <span className="truncate text-right text-sm font-medium text-foreground">{value}</span>
+      {valueNode ?? (
+        <span className="truncate text-right text-sm font-medium text-foreground">
+          {value}
+        </span>
+      )}
     </div>
   )
 }

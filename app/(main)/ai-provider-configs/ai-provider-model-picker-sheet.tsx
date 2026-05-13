@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Bot, Check } from "lucide-react"
 
 import { AiProviderModelOptionResponse } from "@/app/lib/ai-provider-configs/definitions"
@@ -36,16 +36,33 @@ export function AiProviderModelPickerSheet({
   onOpenChange,
   onConfirm,
 }: AiProviderModelPickerSheetProps) {
-  const [selectedModel, setSelectedModel] = useState(currentModel)
-
-  useEffect(() => {
-    if (!open) return
-    setSelectedModel(models.some((model) => model.id === currentModel) ? currentModel : "")
-  }, [currentModel, models, open])
+  const contentKey = `${currentModel}:${models.map((model) => model.id).join("|")}`
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-xl">
+      <ModelPickerSheetContent
+        key={contentKey}
+        currentModel={currentModel}
+        models={models}
+        onOpenChange={onOpenChange}
+        onConfirm={onConfirm}
+      />
+    </Sheet>
+  )
+}
+
+function ModelPickerSheetContent({
+  currentModel,
+  models,
+  onOpenChange,
+  onConfirm,
+}: Omit<AiProviderModelPickerSheetProps, "open">) {
+  const [selectedModel, setSelectedModel] = useState(
+    models.some((model) => model.id === currentModel) ? currentModel : ""
+  )
+
+  return (
+    <SheetContent side="right" className="w-full sm:max-w-xl">
         <SheetHeader>
           <SheetTitle>Chọn model AI</SheetTitle>
           <SheetDescription>
@@ -104,6 +121,5 @@ export function AiProviderModelPickerSheet({
           </Button>
         </SheetFooter>
       </SheetContent>
-    </Sheet>
   )
 }

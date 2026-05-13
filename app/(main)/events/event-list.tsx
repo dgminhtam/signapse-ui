@@ -6,6 +6,7 @@ import Link from "next/link"
 
 import { Page } from "@/app/lib/definitions"
 import { EventListResponse } from "@/app/lib/events/definitions"
+import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { AppPaginationControls } from "@/components/app-pagination-controls"
 import {
   AppListToolbar,
@@ -138,13 +139,10 @@ export function EventList({ eventPage }: EventListProps) {
                       {getEventStatusLabel(event.status)}
                     </Badge>
                   </TableCell>
-                  <TableCell className="w-44 text-sm text-muted-foreground">
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-3.5 w-3.5" />
-                        <span>{formatDateTime(event.occurredAt)}</span>
-                      </div>
-                    </div>
+                  <TableCell className="w-44">
+                    <AppTimeMetadata icon={Calendar}>
+                      {formatDateTime(event.occurredAt)}
+                    </AppTimeMetadata>
                   </TableCell>
                   <TableCell className="w-28 text-sm text-muted-foreground">
                     {formatConfidence(event.confidence)}

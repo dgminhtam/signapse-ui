@@ -15,6 +15,7 @@ import {
   AppListTableHeaderRow,
 } from "@/components/app-list-table"
 import { AppSelectPageSize } from "@/components/app-select-page-size"
+import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { useHasPermission } from "@/components/permission-provider"
 import { SortSelect } from "@/components/sort-select"
 import { CronjobSearch } from "./cronjob-search"
@@ -217,13 +218,15 @@ export function CronjobListPage({ cronjobPage }: CronjobListProps) {
                       {cronjob.cronExpression}
                     </span>
                   </TableCell>
-                  <TableCell className="w-40 text-center text-sm text-muted-foreground">
-                    {cronjob.nextTriggeredTime
-                      ? format(
-                          new Date(cronjob.nextTriggeredTime),
-                          "dd/MM/yyyy HH:mm"
-                        )
-                      : "-"}
+                  <TableCell className="w-40 text-center">
+                    <AppTimeMetadata icon={Clock}>
+                      {cronjob.nextTriggeredTime
+                        ? format(
+                            new Date(cronjob.nextTriggeredTime),
+                            "dd/MM/yyyy HH:mm"
+                          )
+                        : "-"}
+                    </AppTimeMetadata>
                   </TableCell>
                   <TableCell className="w-44 text-center">
                     <div className="flex items-center justify-center gap-1">
