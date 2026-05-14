@@ -10,4 +10,12 @@ export const providerOptions: { value: AiProviderType; label: string }[] = [
   { value: "ZAI", label: "ZAI" },
 ]
 
+export function getProviderOptionLabel(providerType?: AiProviderType) {
+  return (
+    providerOptions.find((provider) => provider.value === providerType)?.label ??
+    providerType ??
+    "Nhà cung cấp AI"
+  )
+}
+
 export { AI_PROVIDER_TYPES }

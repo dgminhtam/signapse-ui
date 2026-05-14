@@ -3,7 +3,7 @@ import { Suspense } from "react"
 import { getAiProviderConfigs } from "@/app/api/ai-provider-configs/action"
 import { hasPermission } from "@/app/lib/permissions"
 import { getCurrentPermissions } from "@/app/lib/permissions-server"
-import { buildFilterQuery, buildSortQuery } from "@/app/lib/utils"
+import { buildSortQuery } from "@/app/lib/utils"
 import { AccessDenied } from "@/components/access-denied"
 import {
   AppListTable,
@@ -56,14 +56,13 @@ async function AiProviderConfigsContent({
     page = "1",
     size = "10",
     sort = "id_desc",
-    ...filterParams
   } = resolvedParams
 
   const providerPage = await getAiProviderConfigs({
     page: Math.max(0, Number(page) - 1),
     size: Number(size),
     sort: buildSortQuery(sort as string),
-    filter: buildFilterQuery(filterParams),
+    filter: "",
   })
 
   return <AiProviderConfigListPage providerPage={providerPage} />
@@ -75,7 +74,6 @@ function ListSkeleton() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex w-full flex-1 flex-col gap-4 sm:w-auto sm:flex-row sm:items-center">
           <Skeleton className="h-9 w-[180px]" />
-          <Skeleton className="h-9 w-full max-w-sm" />
         </div>
         <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
           <Skeleton className="h-9 w-full sm:w-[200px]" />
@@ -87,13 +85,10 @@ function ListSkeleton() {
         <Table>
           <TableHeader>
             <AppListTableHeaderRow>
-              <AppListTableHead className="w-[32%]">
+              <AppListTableHead className="w-[34%]">
                 <Skeleton className="h-4 w-24" />
               </AppListTableHead>
-              <AppListTableHead className="w-36">
-                <Skeleton className="h-4 w-20" />
-              </AppListTableHead>
-              <AppListTableHead className="w-[24%]">
+              <AppListTableHead className="w-[30%]">
                 <Skeleton className="h-4 w-24" />
               </AppListTableHead>
               <AppListTableHead className="w-36 text-center">
@@ -117,11 +112,11 @@ function ListSkeleton() {
                     <Skeleton className="h-3 w-24" />
                   </div>
                 </TableCell>
-                <TableCell className="w-36">
-                  <Skeleton className="h-6 w-20 rounded-full" />
-                </TableCell>
-                <TableCell className="w-[24%] max-w-[18rem]">
-                  <Skeleton className="h-4 w-24" />
+                <TableCell className="w-[30%] max-w-[20rem] align-top whitespace-normal">
+                  <div className="flex min-w-0 flex-col gap-2">
+                    <Skeleton className="h-4 w-36" />
+                    <Skeleton className="h-5 w-24 rounded-full" />
+                  </div>
                 </TableCell>
                 <TableCell className="w-36 text-center">
                   <Skeleton className="mx-auto h-6 w-12 rounded-full" />

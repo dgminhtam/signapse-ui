@@ -52,7 +52,6 @@ function AiProviderConfigCreateSkeleton() {
       <div className="px-6 py-6">
         <div className="flex flex-col gap-7">
           <Skeleton className="h-9 w-full" />
-          <Skeleton className="h-9 w-full" />
 
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
@@ -64,25 +63,27 @@ function AiProviderConfigCreateSkeleton() {
             </div>
 
             <div className="flex flex-col gap-4 rounded-lg border p-4">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div className="flex flex-col gap-2">
-                  <Skeleton className="h-5 w-28" />
-                  <Skeleton className="h-4 w-72 max-w-full" />
-                </div>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <Skeleton className="h-3 w-24" />
                 <div className="flex gap-2">
-                  <Skeleton className="h-9 w-40" />
+                  <Skeleton className="h-8 w-36" />
                   <Skeleton className="size-8" />
                 </div>
               </div>
-              <div className="grid gap-4 md:grid-cols-2">
-                <Skeleton className="h-9 w-full" />
-                <Skeleton className="h-9 w-full" />
+              <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(14rem,0.75fr)]">
+                <div className="flex flex-col gap-2">
+                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-9 w-full" />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-9 w-full" />
+                </div>
               </div>
             </div>
           </div>
 
           <Skeleton className="h-9 w-full" />
-          <Skeleton className="h-24 w-full" />
           <Skeleton className="h-24 w-full" />
           <Skeleton className="h-16 w-full" />
         </div>

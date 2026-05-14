@@ -72,7 +72,7 @@ function ModelPickerSheetContent({
 
         <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 pb-4">
           {models.length === 0 ? (
-            <Empty className="min-h-[280px] rounded-lg border border-dashed">
+            <Empty className="min-h-[280px] border">
               <EmptyHeader>
                 <EmptyMedia variant="icon">
                   <Bot />
@@ -108,7 +108,7 @@ function ModelPickerSheetContent({
           )}
         </div>
 
-        <SheetFooter className="border-t">
+        <SheetFooter>
           <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
             Đóng
           </Button>

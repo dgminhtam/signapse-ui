@@ -1,7 +1,14 @@
 "use client"
 
 import { format } from "date-fns"
-import { Clock3, KeyRound, Plus, RefreshCw, TimerReset, Trash2 } from "lucide-react"
+import {
+  Clock3,
+  KeyRound,
+  Plus,
+  RefreshCw,
+  TimerReset,
+  Trash2,
+} from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
 import { toast } from "sonner"
@@ -9,11 +16,14 @@ import { toast } from "sonner"
 import {
   createAiProviderCredential,
   deleteAiProviderCredential,
+  getAiProviderModelCatalog,
   updateAiProviderCredential,
 } from "@/app/api/ai-provider-configs/action"
 import {
   AiProviderConfigResponse,
   AiProviderCredentialResponse,
+  AiProviderModelCatalogRequest,
+  AiProviderModelOptionResponse,
 } from "@/app/lib/ai-provider-configs/definitions"
 import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { useHasPermission } from "@/components/permission-provider"
@@ -46,6 +56,12 @@ import {
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 
+import {
+  AiProviderCredentialModelActionButton,
+  AiProviderCredentialModelSummary,
+} from "./ai-provider-credential-model-control"
+import { AiProviderModelPickerDialog } from "./ai-provider-model-picker-dialog"
+
 interface AiProviderCredentialPanelProps {
   provider: AiProviderConfigResponse
 }
@@ -57,38 +73,9 @@ export function AiProviderCredentialPanel({
   const canCreateCredential = useHasPermission("ai-provider-config:create")
   const canUpdateCredential = useHasPermission("ai-provider-config:update")
   const canDeleteCredential = useHasPermission("ai-provider-config:delete")
-  const router = useRouter()
-  const [label, setLabel] = useState("")
-  const [apiKey, setApiKey] = useState("")
-  const [isPending, startTransition] = useTransition()
-
-  function handleCreate() {
-    const trimmedApiKey = apiKey.trim()
-
-    if (!trimmedApiKey) {
-      toast.error("Vui lòng nhập API key.")
-      return
-    }
-
-    const trimmedLabel = label.trim()
-
-    startTransition(async () => {
-      const result = await createAiProviderCredential(provider.id, {
-        ...(trimmedLabel ? { label: trimmedLabel } : {}),
-        apiKey: trimmedApiKey,
-      })
-
-      if (result.success) {
-        toast.success("Đã thêm credential AI.")
-        setLabel("")
-        setApiKey("")
-        router.refresh()
-        return
-      }
-
-      toast.error(result.error)
-    })
-  }
+  const canFetchModelCatalog = useHasPermission(
+    "ai-provider-config:model-catalog"
+  )
 
   return (
     <section className="w-full max-w-3xl overflow-hidden rounded-xl border bg-card shadow-sm">
@@ -97,7 +84,7 @@ export function AiProviderCredentialPanel({
           Credential
         </h2>
         <p className="text-sm leading-6 text-muted-foreground">
-          Quản lý các API key đã lưu cho cấu hình này. Hệ thống chỉ hiển thị preview, không trả về key đầy đủ.
+          Quản lý API key và model đã chọn cho từng credential.
         </p>
       </header>
 
@@ -107,10 +94,11 @@ export function AiProviderCredentialPanel({
             {credentials.map((credential) => (
               <CredentialItem
                 key={credential.id}
-                providerId={provider.id}
+                provider={provider}
                 credential={credential}
                 canUpdate={canUpdateCredential}
                 canDelete={canDeleteCredential}
+                canFetchModelCatalog={canFetchModelCatalog}
               />
             ))}
           </div>
@@ -122,92 +110,97 @@ export function AiProviderCredentialPanel({
               </EmptyMedia>
               <EmptyTitle>Chưa có credential</EmptyTitle>
               <EmptyDescription>
-                Thêm API key để cấu hình này có credential sử dụng với backend.
+                Thêm API key và chọn model để cấu hình này có thể sử dụng với
+                backend.
               </EmptyDescription>
             </EmptyHeader>
           </Empty>
         )}
 
         {canCreateCredential ? (
-          <div className="rounded-lg border bg-muted/20 p-4">
-            <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor="newCredentialLabel">Nhãn credential mới</FieldLabel>
-                <Input
-                  id="newCredentialLabel"
-                  value={label}
-                  onChange={(event) => setLabel(event.target.value)}
-                  placeholder="Ví dụ: Key dự phòng"
-                />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="newCredentialApiKey">
-                  API key mới <span className="text-destructive">*</span>
-                </FieldLabel>
-                <Input
-                  id="newCredentialApiKey"
-                  type="password"
-                  value={apiKey}
-                  onChange={(event) => setApiKey(event.target.value)}
-                  placeholder="Dán API key mới"
-                  autoComplete="new-password"
-                />
-                <FieldDescription>
-                  Key đầy đủ chỉ được gửi một lần khi tạo credential.
-                </FieldDescription>
-              </Field>
-              <div>
-                <Button type="button" onClick={handleCreate} disabled={isPending}>
-                  {isPending ? (
-                    <Spinner data-icon="inline-start" />
-                  ) : (
-                    <Plus data-icon="inline-start" />
-                  )}
-                  Thêm credential
-                </Button>
-              </div>
-            </FieldGroup>
-          </div>
+          <CreateCredentialForm
+            provider={provider}
+            canFetchModelCatalog={canFetchModelCatalog}
+          />
         ) : null}
       </div>
     </section>
   )
 }
 
-function CredentialItem({
-  providerId,
-  credential,
-  canUpdate,
-  canDelete,
+function CreateCredentialForm({
+  provider,
+  canFetchModelCatalog,
 }: {
-  providerId: number
-  credential: AiProviderCredentialResponse
-  canUpdate: boolean
-  canDelete: boolean
+  provider: AiProviderConfigResponse
+  canFetchModelCatalog: boolean
 }) {
   const router = useRouter()
-  const [label, setLabel] = useState(credential.label || "")
   const [apiKey, setApiKey] = useState("")
-  const [isUpdating, startUpdating] = useTransition()
+  const [model, setModel] = useState("")
+  const [modelOptions, setModelOptions] = useState<
+    AiProviderModelOptionResponse[]
+  >([])
+  const [isModelDialogOpen, setIsModelDialogOpen] = useState(false)
+  const [isAuthenticating, startAuthenticating] = useTransition()
+  const [isCreating, startCreating] = useTransition()
 
-  function handleUpdate() {
-    const trimmedLabel = label.trim()
+  function handleApiKeyChange(value: string) {
+    setApiKey(value)
+    setModel("")
+    setModelOptions([])
+  }
+
+  function handleAuthenticateAndSelectModel() {
     const trimmedApiKey = apiKey.trim()
 
-    if (!trimmedLabel && !trimmedApiKey) {
-      toast.error("Vui lòng nhập nhãn hoặc API key mới để cập nhật.")
+    if (!trimmedApiKey) {
+      toast.error("Vui lòng nhập API key để xác thực.")
       return
     }
 
-    startUpdating(async () => {
-      const result = await updateAiProviderCredential(providerId, credential.id, {
-        label: trimmedLabel,
-        ...(trimmedApiKey ? { apiKey: trimmedApiKey } : {}),
+    const request: AiProviderModelCatalogRequest = {
+      providerType: provider.providerType,
+      apiKey: trimmedApiKey,
+      baseUrl: provider.baseUrl?.trim() || undefined,
+    }
+
+    startAuthenticating(async () => {
+      const result = await getAiProviderModelCatalog(request)
+
+      if (result.success) {
+        setModelOptions(result.data.models)
+        setIsModelDialogOpen(true)
+        toast.success("Xác thực credential thành công")
+        return
+      }
+
+      setModelOptions([])
+      setIsModelDialogOpen(false)
+      toast.error(result.error || "Không thể xác thực credential")
+    })
+  }
+
+  function handleCreate() {
+    const trimmedApiKey = apiKey.trim()
+    const trimmedModel = model.trim()
+
+    if (!trimmedApiKey || !trimmedModel) {
+      toast.error("Vui lòng xác thực API key và chọn model.")
+      return
+    }
+
+    startCreating(async () => {
+      const result = await createAiProviderCredential(provider.id, {
+        apiKey: trimmedApiKey,
+        model: trimmedModel,
       })
 
       if (result.success) {
-        toast.success("Đã cập nhật credential AI.")
+        toast.success("Đã thêm credential AI.")
         setApiKey("")
+        setModel("")
+        setModelOptions([])
         router.refresh()
         return
       }
@@ -217,90 +210,272 @@ function CredentialItem({
   }
 
   return (
-    <div className="flex flex-col gap-4 rounded-lg border p-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex min-w-0 flex-col gap-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="font-medium text-foreground">
-              {credential.label || `Credential #${credential.id}`}
-            </span>
-            {credential.keyPreview ? (
-              <Badge variant="secondary">{credential.keyPreview}</Badge>
-            ) : null}
+    <>
+      <div className="rounded-lg border bg-muted/20 p-4">
+        <FieldGroup>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-sm font-medium">API key và model mới</div>
+            <AiProviderCredentialModelActionButton
+              model={model}
+              isPending={isAuthenticating}
+              disabled={!canFetchModelCatalog || isAuthenticating || isCreating}
+              onClick={handleAuthenticateAndSelectModel}
+            />
           </div>
-          <div className="flex flex-wrap gap-x-4 gap-y-1">
-            {formatDate(credential.lastUsedDate) ? (
-              <AppTimeMetadata icon={Clock3}>
-                Dùng gần nhất: {formatDate(credential.lastUsedDate)}
-              </AppTimeMetadata>
+
+          <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(14rem,0.75fr)]">
+            <Field>
+              <FieldLabel htmlFor="newCredentialApiKey">
+                API key mới <span className="text-destructive">*</span>
+              </FieldLabel>
+              <Input
+                id="newCredentialApiKey"
+                type="password"
+                value={apiKey}
+                onChange={(event) => handleApiKeyChange(event.target.value)}
+                placeholder="Dán API key mới"
+                autoComplete="new-password"
+              />
+              <FieldDescription>
+                Key đầy đủ chỉ được gửi một lần khi tạo credential.
+              </FieldDescription>
+            </Field>
+
+            <Field>
+              <FieldLabel>
+                Model <span className="text-destructive">*</span>
+              </FieldLabel>
+              <AiProviderCredentialModelSummary model={model} />
+            </Field>
+          </div>
+
+          <div>
+            <Button
+              type="button"
+              onClick={handleCreate}
+              disabled={isCreating || !apiKey.trim() || !model.trim()}
+            >
+              {isCreating ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <Plus data-icon="inline-start" />
+              )}
+              Thêm credential
+            </Button>
+          </div>
+        </FieldGroup>
+      </div>
+
+      <AiProviderModelPickerDialog
+        currentModel={model}
+        models={modelOptions}
+        open={isModelDialogOpen}
+        onOpenChange={setIsModelDialogOpen}
+        onConfirm={(modelId) => {
+          setModel(modelId)
+          setIsModelDialogOpen(false)
+          toast.success("Đã chọn model cho credential")
+        }}
+      />
+    </>
+  )
+}
+
+function CredentialItem({
+  provider,
+  credential,
+  canUpdate,
+  canDelete,
+  canFetchModelCatalog,
+}: {
+  provider: AiProviderConfigResponse
+  credential: AiProviderCredentialResponse
+  canUpdate: boolean
+  canDelete: boolean
+  canFetchModelCatalog: boolean
+}) {
+  const router = useRouter()
+  const [apiKey, setApiKey] = useState("")
+  const [model, setModel] = useState("")
+  const [modelOptions, setModelOptions] = useState<
+    AiProviderModelOptionResponse[]
+  >([])
+  const [isModelDialogOpen, setIsModelDialogOpen] = useState(false)
+  const [isAuthenticating, startAuthenticating] = useTransition()
+  const [isUpdating, startUpdating] = useTransition()
+
+  function handleApiKeyChange(value: string) {
+    setApiKey(value)
+    setModel("")
+    setModelOptions([])
+  }
+
+  function handleAuthenticateAndSelectModel() {
+    const trimmedApiKey = apiKey.trim()
+
+    if (!trimmedApiKey) {
+      toast.error("Vui lòng nhập API key mới để xác thực.")
+      return
+    }
+
+    const request: AiProviderModelCatalogRequest = {
+      providerType: provider.providerType,
+      apiKey: trimmedApiKey,
+      baseUrl: provider.baseUrl?.trim() || undefined,
+    }
+
+    startAuthenticating(async () => {
+      const result = await getAiProviderModelCatalog(request)
+
+      if (result.success) {
+        setModelOptions(result.data.models)
+        setIsModelDialogOpen(true)
+        toast.success("Xác thực credential thành công")
+        return
+      }
+
+      setModelOptions([])
+      setIsModelDialogOpen(false)
+      toast.error(result.error || "Không thể xác thực credential")
+    })
+  }
+
+  function handleUpdate() {
+    const trimmedApiKey = apiKey.trim()
+    const trimmedModel = model.trim()
+
+    if (!trimmedApiKey || !trimmedModel) {
+      toast.error("Vui lòng xác thực API key mới và chọn model.")
+      return
+    }
+
+    startUpdating(async () => {
+      const result = await updateAiProviderCredential(provider.id, credential.id, {
+        apiKey: trimmedApiKey,
+        model: trimmedModel,
+      })
+
+      if (result.success) {
+        toast.success("Đã cập nhật credential AI.")
+        setApiKey("")
+        setModel("")
+        setModelOptions([])
+        router.refresh()
+        return
+      }
+
+      toast.error(result.error)
+    })
+  }
+
+  return (
+    <>
+      <div className="flex flex-col gap-4 rounded-lg border p-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex min-w-0 flex-col gap-2">
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
+              <span className="min-w-0 break-all font-medium text-foreground">
+                {credential.model || "Chưa chọn model"}
+              </span>
+              {credential.keyPreview ? (
+                <Badge variant="secondary">{credential.keyPreview}</Badge>
+              ) : null}
+            </div>
+            <div className="flex flex-wrap gap-x-4 gap-y-1">
+              {formatDate(credential.lastUsedDate) ? (
+                <AppTimeMetadata icon={Clock3}>
+                  Dùng gần nhất: {formatDate(credential.lastUsedDate)}
+                </AppTimeMetadata>
+              ) : null}
+              {formatDate(credential.rateLimitedUntil) ? (
+                <AppTimeMetadata icon={TimerReset}>
+                  Rate limit đến: {formatDate(credential.rateLimitedUntil)}
+                </AppTimeMetadata>
+              ) : null}
+              {formatDate(credential.createdDate) ? (
+                <AppTimeMetadata icon={Clock3}>
+                  Tạo lúc: {formatDate(credential.createdDate)}
+                </AppTimeMetadata>
+              ) : null}
+              {formatDate(credential.lastModifiedDate) ? (
+                <AppTimeMetadata icon={RefreshCw}>
+                  Cập nhật: {formatDate(credential.lastModifiedDate)}
+                </AppTimeMetadata>
+              ) : null}
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+            {canUpdate ? (
+              <AiProviderCredentialModelActionButton
+                model={model}
+                isPending={isAuthenticating}
+                disabled={
+                  !canFetchModelCatalog || isAuthenticating || isUpdating
+                }
+                onClick={handleAuthenticateAndSelectModel}
+              />
             ) : null}
-            {formatDate(credential.rateLimitedUntil) ? (
-              <AppTimeMetadata icon={TimerReset}>
-                Rate limit đến: {formatDate(credential.rateLimitedUntil)}
-              </AppTimeMetadata>
-            ) : null}
-            {formatDate(credential.createdDate) ? (
-              <AppTimeMetadata icon={Clock3}>
-                Tạo lúc: {formatDate(credential.createdDate)}
-              </AppTimeMetadata>
-            ) : null}
-            {formatDate(credential.lastModifiedDate) ? (
-              <AppTimeMetadata icon={RefreshCw}>
-                Cập nhật: {formatDate(credential.lastModifiedDate)}
-              </AppTimeMetadata>
+            {canDelete ? (
+              <DeleteCredentialButton
+                providerId={provider.id}
+                credential={credential}
+              />
             ) : null}
           </div>
         </div>
-        {canDelete ? (
-          <DeleteCredentialButton
-            providerId={providerId}
-            credential={credential}
-          />
+
+        {canUpdate ? (
+          <FieldGroup>
+            <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(14rem,0.75fr)]">
+              <Field>
+                <FieldLabel htmlFor={`credential-${credential.id}-api-key`}>
+                  API key mới
+                </FieldLabel>
+                <Input
+                  id={`credential-${credential.id}-api-key`}
+                  type="password"
+                  value={apiKey}
+                  onChange={(event) => handleApiKeyChange(event.target.value)}
+                  placeholder="Dán API key mới để xác thực lại model"
+                  autoComplete="new-password"
+                />
+              </Field>
+              <Field>
+                <FieldLabel>
+                  Model <span className="text-destructive">*</span>
+                </FieldLabel>
+                <AiProviderCredentialModelSummary model={model} />
+              </Field>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleUpdate}
+              disabled={isUpdating || !apiKey.trim() || !model.trim()}
+            >
+              {isUpdating ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <RefreshCw data-icon="inline-start" />
+              )}
+              Cập nhật
+            </Button>
+          </FieldGroup>
         ) : null}
       </div>
 
-      {canUpdate ? (
-        <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-end">
-          <Field>
-            <FieldLabel htmlFor={`credential-${credential.id}-label`}>
-              Nhãn credential
-            </FieldLabel>
-            <Input
-              id={`credential-${credential.id}-label`}
-              value={label}
-              onChange={(event) => setLabel(event.target.value)}
-              placeholder="Nhãn credential"
-            />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor={`credential-${credential.id}-api-key`}>
-              API key mới
-            </FieldLabel>
-            <Input
-              id={`credential-${credential.id}-api-key`}
-              type="password"
-              value={apiKey}
-              onChange={(event) => setApiKey(event.target.value)}
-              placeholder="Để trống nếu chỉ đổi nhãn"
-              autoComplete="new-password"
-            />
-          </Field>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleUpdate}
-            disabled={isUpdating}
-          >
-            {isUpdating ? (
-              <Spinner data-icon="inline-start" />
-            ) : (
-              <RefreshCw data-icon="inline-start" />
-            )}
-            Cập nhật
-          </Button>
-        </div>
-      ) : null}
-    </div>
+      <AiProviderModelPickerDialog
+        currentModel={model}
+        models={modelOptions}
+        open={isModelDialogOpen}
+        onOpenChange={setIsModelDialogOpen}
+        onConfirm={(modelId) => {
+          setModel(modelId)
+          setIsModelDialogOpen(false)
+          toast.success("Đã chọn model cho credential")
+        }}
+      />
+    </>
   )
 }
 
@@ -314,6 +489,8 @@ function DeleteCredentialButton({
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const credentialName =
+    credential.model || credential.keyPreview || `#${credential.id}`
 
   function handleDelete() {
     startTransition(async () => {
@@ -348,8 +525,8 @@ function DeleteCredentialButton({
           <AlertDialogTitle>Xóa credential AI?</AlertDialogTitle>
           <AlertDialogDescription>
             Hành động này không thể hoàn tác. Credential{" "}
-            <strong>{credential.label || credential.keyPreview || `#${credential.id}`}</strong>{" "}
-            sẽ bị xóa khỏi cấu hình nhà cung cấp AI.
+            <strong>{credentialName}</strong> sẽ bị xóa khỏi cấu hình nhà cung
+            cấp AI.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

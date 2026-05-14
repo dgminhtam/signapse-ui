@@ -3,17 +3,16 @@
 import { Control, Controller } from "react-hook-form"
 import * as z from "zod"
 
+import { AppFormSwitchField } from "@/components/app-form-switch-field"
 import {
   Field,
   FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
-  FieldLegend,
   FieldSet,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 
 export const newsOutletFormSchema = z.object({
@@ -155,23 +154,14 @@ export function NewsOutletFormFields({
             name="active"
             control={control}
             render={({ field }) => (
-              <Field className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <div className="flex flex-col gap-0.5">
-                  <FieldLabel htmlFor="active">
-                    Kích hoạt nguồn tin
-                  </FieldLabel>
-                  <FieldDescription>
-                    Cho phép hệ thống tiếp tục sử dụng nguồn tin này trong quy
-                    trình xử lý nội dung.
-                  </FieldDescription>
-                </div>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                  disabled={isSubmitting}
-                  id="active"
-                />
-              </Field>
+              <AppFormSwitchField
+                id="active"
+                label="Kích hoạt nguồn tin"
+                description="Cho phép hệ thống sử dụng nguồn tin này trong quy trình xử lý nội dung."
+                checked={field.value}
+                onCheckedChange={field.onChange}
+                disabled={isSubmitting}
+              />
             )}
           />
         </FieldGroup>

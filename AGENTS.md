@@ -77,8 +77,10 @@ app/(main)/[feature]/
 
 ### Core components
 
-- Không chỉnh sửa file trong `@/components/ui/`, đặc biệt là các component shadcn phức tạp như `sidebar.tsx`
-- Nếu có lỗi như hydration mismatch, hãy sửa ở nơi sử dụng như `app-sidebar.tsx`, không sửa bên trong `@/components/ui/`
+- `components.json` và các file trong `@/components/ui/` dùng shadcn preset `radix-nova` làm baseline chính thức (`base=radix`, `baseColor=neutral`, `iconLibrary=lucide`)
+- Không tự chỉnh visual chrome trong `@/components/ui/`; khi cần đồng bộ wrapper shadcn phải dùng workflow `pnpm dlx shadcn@latest add ... --dry-run` và `--diff`, rồi sync theo preset hoặc proposal wrapper rõ ràng
+- Nếu có lỗi như hydration mismatch hoặc layout bug, hãy sửa ở nơi sử dụng như `app-sidebar.tsx`, không sửa bên trong wrapper shadcn chỉ để xử lý bug của app
+- Với component shadcn phức tạp như `sidebar.tsx`, không patch thủ công cho nhu cầu cục bộ; chỉ sync theo preset shadcn hoặc thay đổi qua proposal có scope rõ
 
 ### Gọi API
 
@@ -88,7 +90,13 @@ app/(main)/[feature]/
 ### Quy ước UI
 
 - Dùng `@/components/ui/` cho shadcn primitives
-- Không dùng `@workspace/ui`
+- App code và feature code chỉ được dùng component shadcn đã bọc trong `@/components/ui/`; không import trực tiếp primitive gốc như `radix-ui`, `vaul` hoặc thư viện UI nền khi đã có hoặc có thể bổ sung component shadcn tương ứng
+- Import primitive gốc chỉ được phép bên trong file wrapper shadcn ở `components/ui/*`; các màn hình, feature component và shared app component phải compose qua wrapper shadcn
+- Không tự ý cài thêm thư viện UI bên ngoài cho nhu cầu component chuẩn; chỉ được thêm khi có proposal hoặc quyết định rõ ràng của người dùng giải thích vì sao shadcn không đáp ứng được
+- Khi thêm, sửa, debug, style hoặc compose shadcn component, bắt buộc tham khảo skill `.codex/skills/shadcn` và kiểm tra docs shadcn tương ứng trước khi implement
+- Feature/shared app code phải dùng default chrome của shadcn `radix-nova`; không thêm `h-*`, `min-h-*`, `rounded-*`, padding, text color, background, border, ring, shadow hoặc typography class lên shadcn primitives chỉ để đổi height, radius, màu, viền hoặc mật độ mặc định
+- `className` trên shadcn primitives chỉ nên dùng cho layout thật sự như width, max-width, flex/grid, gap, alignment, max-height, overflow, truncate hoặc responsive constraints; không dùng để tái tạo chrome mà wrapper shadcn đã sở hữu
+- Khi cần compact control, ưu tiên variant/size có sẵn của shadcn; chỉ hard-code height/radius khi không có size/variant phù hợp và có lý do sản phẩm rõ ràng
 - Dùng relative import như `./component-name` cho component nằm cùng feature
 - Ưu tiên `gap-*` trong layout `flex` hoặc `grid`, không dùng `space-y-*`
 - Empty state phải dùng component `<Empty>`
@@ -99,8 +107,8 @@ app/(main)/[feature]/
 
 ### Quy ước theme
 
-- Theme token trong `app/globals.css` và `tailwind.baseColor` trong `components.json` phải lấy shadcn neutral default làm baseline; không tự pha token global/sidebar để sửa một vấn đề cục bộ nếu chưa có proposal riêng
-- Khi cần tăng hierarchy, density hoặc spacing cho component cụ thể, ưu tiên composition/class ở nơi sử dụng hoặc shared app-level surface; không silently đổi `--primary`, `--accent`, `--sidebar-*` hoặc chart tokens làm lệch baseline shadcn
+- Theme token trong `app/globals.css` và `tailwind.baseColor` trong `components.json` phải lấy shadcn `radix-nova` neutral default làm baseline; không tự pha token global/sidebar để sửa một vấn đề cục bộ nếu chưa có proposal riêng
+- Khi cần tăng hierarchy, density hoặc spacing cho app-level surface cụ thể, ưu tiên composition/layout class ở nơi sử dụng hoặc shared app-level surface; không silently đổi `--primary`, `--accent`, `--sidebar-*`, chart tokens hoặc wrapper chrome làm lệch baseline shadcn `radix-nova`
 
 ### Quy ước sidebar
 
@@ -143,6 +151,8 @@ app/(main)/[feature]/
 - Với page-level focused form, footer action có thể căn trái khi giúp primary/cancel action tiếp nối cùng trục đọc với field; không đổi default shared footer chỉ vì một màn cần căn trái.
 - Chọn width có chủ đích: form đơn giản dùng `max-w-xl`, form CRUD phổ biến dùng `max-w-2xl`, form URL-heavy hoặc form dày/editor/prompt/API key/model picker dùng `max-w-3xl`; không kéo form full-width nếu chưa có lý do layout mạnh hơn.
 - Form create có action hủy an toàn như quay về danh sách hoặc reset theo flow hiện có; form update phải có nút Hủy `variant="ghost"` reset về dữ liệu ban đầu hoặc luồng an toàn tương đương
+- Switch boolean trong màn create/update/detail phải dùng treatment field compact: label hierarchy như field thường, switch căn phải hoặc cùng hàng hợp lý, description chỉ giữ khi giải thích hậu quả/phạm vi không hiển nhiên; không dùng nested Card hoặc block `p-4` chỉ để bọc một switch.
+- Rule form/detail switch này không áp cho switch capsule trong row list/table, toolbar/workbench toggle, dialog permission matrix hoặc route row switch vì đó là các ngữ cảnh density riêng.
 - Skeleton hoặc Suspense fallback của create/update phải mirror form shell gồm header, body và footer để tránh layout shift
 
 ### Bố cục toolbar
@@ -151,7 +161,7 @@ app/(main)/[feature]/
 - Bên phải: cụm view controls như filter tĩnh, sort và số mục mỗi trang
 - Page size selector thuộc cụm controls bên phải, không đặt lại trong footer phân trang
 - Dùng `flex-col sm:flex-row sm:justify-between` để responsive
-- Primary controls trong toolbar danh sách như search input, action chính, sort select và page size select phải dùng height mặc định của shadcn primitives (`Input`, `Button`, `SelectTrigger`); không tự thêm `h-*`, `min-h-*` hoặc `size="sm"` chỉ để chỉnh chiều cao
+- Primary controls trong toolbar danh sách như search input, action chính, sort select và page size select phải dùng size/chrome mặc định của shadcn `radix-nova` primitives (`Input`, `Button`, `SelectTrigger`); không tự thêm `h-*`, `min-h-*`, `rounded-*`, padding hoặc `size="sm"` chỉ để chỉnh chiều cao, radius hay mật độ
 - Sort select và page size select trong toolbar dùng disable-only pending feedback khi URL transition đang chạy; không render `<Spinner>` bên trong trigger hoặc bên cạnh select vì đây là view control phụ và có thể làm rối/shift layout
 - Page size selector của list dùng options chuẩn `10`, `20`, `50`, `100` và default `10`; chỉ override khi có lý do sản phẩm rõ ràng
 - Wrapper toolbar chỉ quản layout nội bộ, gap, alignment và responsive width; không bọc thêm card/chrome hoặc padding riêng làm lệch chiều cao so với search input
@@ -210,7 +220,8 @@ app/(main)/[feature]/
 
 - Review theo các rule trong file này, không dựa trên metadata Claude cũ
 - Kiểm tra trang danh sách dùng cardless workspace, toolbar đúng bố cục và loading feedback phù hợp
-- Kiểm tra primary toolbar controls dùng default shadcn height; đánh dấu `h-*`, `min-h-*` hoặc `size="sm"` trong toolbar chính là review finding nếu không có lý do sản phẩm rõ ràng
+- Kiểm tra app code không override visual chrome của shadcn `radix-nova` primitives; đánh dấu `h-*`, `min-h-*`, `rounded-*`, padding, foreground/background, border, ring, shadow hoặc typography class trên primitive là review finding nếu class đó không phải layout-only hoặc không có lý do sản phẩm rõ ràng
+- Kiểm tra primary toolbar controls dùng default shadcn `radix-nova` size/chrome; đánh dấu `h-*`, `min-h-*`, `rounded-*`, padding hoặc `size="sm"` trong toolbar chính là review finding nếu không có lý do sản phẩm rõ ràng
 - Kiểm tra list toolbar không tự có `mb-*`; table surface phải là nơi sở hữu `mt-4` giữa toolbar/search controls và bảng
 - Đánh dấu top-level main `<Card>` chỉ để lặp lại breadcrumb title và bọc toàn page là review finding
 - Đánh dấu body heading/hero copy, badge trang trí, `CardDescription`, panel placeholder hoặc implementation-detail copy dư thừa là review finding khi chúng lặp lại breadcrumb/control/metric hoặc không giúp user ra quyết định

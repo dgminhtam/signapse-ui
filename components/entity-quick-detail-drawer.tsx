@@ -34,7 +34,7 @@ export function EntityQuickDetailDrawer({
 
   return (
     <Drawer open onOpenChange={(open) => !open && router.back()}>
-      <DrawerContent className="h-[min(76svh,760px)] max-h-[min(76svh,760px)] gap-0 overflow-hidden rounded-t-2xl border-t shadow-2xl">
+      <DrawerContent className="h-[min(76svh,760px)] max-h-[min(76svh,760px)] gap-0 overflow-hidden">
         <DrawerHeader className="border-b px-5 py-4 text-left">
           <div className="mx-auto flex w-full max-w-5xl flex-col gap-1.5">
             <DrawerTitle className="line-clamp-2 leading-snug">

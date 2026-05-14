@@ -2,7 +2,7 @@
 
 Tài liệu này ánh xạ snapshot OpenAPI backend trong `docs/api_mapping.json` tới các điểm tích hợp frontend hiện tại của repo.
 
-Xác minh lần cuối: ngày 13 tháng 5 năm 2026
+Xác minh lần cuối: ngày 14 tháng 5 năm 2026
 
 ## Cấu hình cơ sở
 
@@ -39,6 +39,7 @@ Xác minh lần cuối: ngày 13 tháng 5 năm 2026
 - `roles` và `permissions` hiện đã có action và UI frontend, không còn ở trạng thái "chưa triển khai".
 - Snapshot mới thêm surface `telegram` gồm bot connections, destinations, feature settings, market analysis schedules, và webhook Telegram.
 - Snapshot mới thêm credential sub-resource cho `ai-provider-configs` để quản lý nhiều API key theo từng provider config mà không expose full key.
+- Snapshot mới tiếp tục giản lược `ai-provider-configs`: config request/response không còn `name` và top-level `model`; credential dùng field `model` thay cho `label`.
 
 ## Phạm vi endpoint
 
@@ -253,25 +254,26 @@ Ghi chu:
 
 ### 10. API AI provider configs
 
-| Phuong thuc | Endpoint backend                                       | operationId              | Tich hop frontend                                       | Trang thai                               | Ghi chu                                                                                                                                    |
-| ----------- | ------------------------------------------------------ | ------------------------ | ------------------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| GET         | `/ai-provider-configs`                                 | `getAiProviderConfigs`   | `getAiProviderConfigs(searchParams)`                    | Da trien khai nhung co lech runtime/spec | Runtime frontend dung `$filter/page/size/sort`; response dung `credentials[]` preview, khong con full `apiKey`.                            |
-| POST        | `/ai-provider-configs`                                 | `createAiProviderConfig` | `createAiProviderConfig(request)`                       | Da trien khai                            | Payload tao moi gui nhieu initial credential qua `credentials: [{ label?, apiKey }, ...]` theo contract moi, khong gui top-level `apiKey`. |
-| GET         | `/ai-provider-configs/{id}`                            | `getAiProviderConfig`    | `getAiProviderConfigById(id)`                           | Da trien khai                            | Detail/edit doc `credentials[]` va chi hien thi `keyPreview`.                                                                              |
-| PUT         | `/ai-provider-configs/{id}`                            | `updateAiProviderConfig` | `updateAiProviderConfig(id, request)`                   | Da trien khai                            | Update metadata khong gui `apiKey`; key rotation di qua credential sub-resource.                                                           |
-| DELETE      | `/ai-provider-configs/{id}`                            | `deleteAiProviderConfig` | `deleteAiProviderConfig(id)`                            | Da trien khai                            | Duoc boc trong `ActionResult`.                                                                                                             |
-| PATCH       | `/ai-provider-configs/{id}/set-default`                | `setDefault`             | `setAiProviderConfigDefault(id)`                        | Da trien khai                            | Da tich hop.                                                                                                                               |
-| POST        | `/ai-provider-configs/model-catalog`                   | `getModelCatalog`        | `getAiProviderModelCatalog(request)`                    | Da trien khai                            | Tai model catalog bang API key tam thoi; ho tro enum provider `GEMINI`, `GROQ`, `OPENAI`, `ZAI`.                                           |
-| GET         | `/ai-provider-configs/{id}/credentials`                | `getCredentials`         | `getAiProviderCredentials(id)`                          | Da trien khai                            | Doc danh sach credential, response `AiProviderCredentialResponse[]`; permission `ai-provider-config:read`.                                 |
-| POST        | `/ai-provider-configs/{id}/credentials`                | `createCredential`       | `createAiProviderCredential(id, request)`               | Da trien khai                            | Tao credential tu `label`, `apiKey`; permission `ai-provider-config:create`.                                                               |
-| PUT         | `/ai-provider-configs/{id}/credentials/{credentialId}` | `updateCredential`       | `updateAiProviderCredential(id, credentialId, request)` | Da trien khai                            | Cap nhat credential tu `label`, optional `apiKey`; permission `ai-provider-config:update`.                                                 |
-| DELETE      | `/ai-provider-configs/{id}/credentials/{credentialId}` | `deleteCredential`       | `deleteAiProviderCredential(id, credentialId)`          | Da trien khai                            | Xoa credential qua `AlertDialog`; permission `ai-provider-config:delete`.                                                                  |
+| Phuong thuc | Endpoint backend                                       | operationId              | Tich hop frontend                                       | Trang thai                            | Ghi chu                                                                                                                                                      |
+| ----------- | ------------------------------------------------------ | ------------------------ | ------------------------------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| GET         | `/ai-provider-configs`                                 | `getAiProviderConfigs`   | `getAiProviderConfigs(searchParams)`                    | Da trien khai nhung con lech runtime | Runtime frontend van dung `page/size/sort` va gui `filter` rong theo helper hien tai; FE da bo search/sort theo `name` vi `SpecificationAiProviderConfig` dang rong. |
+| POST        | `/ai-provider-configs`                                 | `createAiProviderConfig` | `createAiProviderConfig(request)`                       | Da trien khai                         | Gui `providerType`, `description`, `baseUrl`, `defaultProvider`, va `credentials[]`; moi credential gui `apiKey` + `model`.                                  |
+| GET         | `/ai-provider-configs/{id}`                            | `getAiProviderConfig`    | `getAiProviderConfigById(id)`                           | Da trien khai                         | Detail doc metadata config va `credentials[]` voi `model`, `keyPreview`, timestamps; khong con doc `name`, top-level `model`, hoac `label`.                  |
+| PUT         | `/ai-provider-configs/{id}`                            | `updateAiProviderConfig` | `updateAiProviderConfig(id, request)`                   | Da trien khai                         | Update metadata config: `providerType`, `description`, `baseUrl`, `defaultProvider`; model duoc cap nhat tren tung credential.                              |
+| DELETE      | `/ai-provider-configs/{id}`                            | `deleteAiProviderConfig` | `deleteAiProviderConfig(id)`                            | Da trien khai                         | Duoc boc trong `ActionResult`.                                                                                                                               |
+| PATCH       | `/ai-provider-configs/{id}/set-default`                | `setDefault`             | `setAiProviderConfigDefault(id)`                        | Da trien khai                         | Da tich hop.                                                                                                                                                 |
+| POST        | `/ai-provider-configs/model-catalog`                   | `getModelCatalog`        | `getAiProviderModelCatalog(request)`                    | Da trien khai                         | Tai model catalog bang `providerType`, `apiKey`, `baseUrl`; UI goi theo tung credential truoc khi cho chon model.                                           |
+| GET         | `/ai-provider-configs/{id}/credentials`                | `getCredentials`         | `getAiProviderCredentials(id)`                          | Da trien khai                         | Doc danh sach credential, response `AiProviderCredentialResponse[]`; permission `ai-provider-config:read`.                                                   |
+| POST        | `/ai-provider-configs/{id}/credentials`                | `createCredential`       | `createAiProviderCredential(id, request)`               | Da trien khai                         | Tao credential bang `apiKey` va `model`; UI yeu cau validate API key va chon model truoc khi submit.                                                        |
+| PUT         | `/ai-provider-configs/{id}/credentials/{credentialId}` | `updateCredential`       | `updateAiProviderCredential(id, credentialId, request)` | Da trien khai                         | Cap nhat credential bang optional `apiKey`, `model`; UI update yeu cau API key moi duoc validate va chon model moi.                                        |
+| DELETE      | `/ai-provider-configs/{id}/credentials/{credentialId}` | `deleteCredential`       | `deleteAiProviderCredential(id, credentialId)`          | Da trien khai                         | Xoa credential qua `AlertDialog`; permission `ai-provider-config:delete`.                                                                                    |
 
 Ghi chu:
 
-- `AiProviderCredentialResponse` gom `id`, `label`, `keyPreview`, `lastUsedDate`, `rateLimitedUntil`, `createdDate`, `lastModifiedDate`; khong expose full `apiKey`.
-- `CreateAiProviderConfigRequest` bat buoc `credentials[]`; FE create form cho phep them nhieu initial credential va gui toan bo collection trong payload tao moi.
-- `UpdateAiProviderConfigRequest` khong con `apiKey`; FE edit form chi cap nhat metadata, credential add/update/delete nam trong panel rieng.
+- `AiProviderCredentialResponse` gom `id`, `model`, `keyPreview`, `lastUsedDate`, `rateLimitedUntil`, `createdDate`, `lastModifiedDate`; khong expose full `apiKey` va khong con `label`.
+- `CreateAiProviderConfigRequest` bat buoc `credentials[]`; moi credential bat buoc `apiKey` va `model`. Config create khong con `name` hay top-level `model`.
+- `UpdateAiProviderConfigRequest` chi con `providerType`, `description`, `baseUrl`, `defaultProvider`; credential add/update/delete nam trong sub-resource rieng.
+- `SpecificationAiProviderConfig` trong snapshot hien la `{}`, nen UI tam thoi khong render search/filter theo `name` va chi giu sort `id_asc/id_desc` cho den khi BE xac nhan runtime filter moi.
 - Enum provider hien gom `GEMINI`, `GROQ`, `OPENAI`, `ZAI`; FE da dong bo type, validation, select option, va model catalog request.
 
 ### 11. API assets
@@ -502,11 +504,11 @@ type ActionResult<T = void> =
 - `news articles`: snapshot moi da bo `externalKey`; `app/lib/news-articles/definitions.ts` da duoc don de khong con giu field nay.
 - `events`: snapshot moi da bo `slug` va `confirmedAt`, va doi evidence sang `newsArticle*`; FE events da dong bo DTO, detail, quick detail, va action layout theo contract hien tai.
 - `telegram`: snapshot moi them day du endpoint quan tri Telegram, nhung frontend chua co route/action/type/permission/navigation tuong ung.
-- `ai-provider credentials`: FE da dong bo DTO/action/UI theo `/ai-provider-configs/{id}/credentials*`; create config gui nhieu initial credential qua `credentials[]`, edit metadata khong gui top-level `apiKey`, va credential panel chi hien thi `keyPreview`.
+- `ai-provider credentials`: snapshot moi doi credential `label` thanh `model` va bo top-level config `name`/`model`; FE hien van giu `name`, top-level `model`, va credential `label` trong definitions, form, list, detail, va credential panel.
 - `market query`: spec van mo ta `asOfTime` la optional `date-time`; frontend v1 chu dong omit field nay de backend tu lay thoi diem hien tai va harden parse cho payload runtime co the tra `null` o `publishedAt` va `occurredAt`. Ngoai ra, `keyEvents[]` da doi `summary` thanh `description`, nhung FE van doc field cu.
 - `graph view`: `GraphNodeMetadata` da doi `active` thanh `status`; FE workbench hien van doc `metadata.active`.
 - `user profile`: `GET /me` da dong bo `BackendMeResponse` theo `currentWorkspace`, `mainImage` media object, va `permissions[]`; runtime hien van chi dung permission loader.
 - `blogs`: create va response dung `visible`, update dung `isVisible`; frontend van can tiep tuc xu ly ky de tranh drift.
-- `ai-provider-configs`: snapshot khong con expose full `apiKey` tren config response; frontend doc `credentials[]` preview va ho tro provider enum `GROQ`.
+- `ai-provider-configs`: snapshot khong con expose full `apiKey` tren config response; frontend da doc `credentials[]` preview va ho tro provider enum `GROQ`, nhung can doi tiep UI/DTO theo contract khong con `name`/top-level `model`.
 - `media`: da co trong spec nhung frontend chua co module.
 - `topics`: van ton tai tren frontend, nhung khong con nam trong snapshot API hien tai.

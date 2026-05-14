@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { Dialog as DialogPrimitive } from "radix-ui"
 import {
   BriefcaseBusinessIcon,
   CheckIcon,
@@ -9,7 +8,6 @@ import {
   ListPlusIcon,
   PencilIcon,
   PlusIcon,
-  XIcon,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
@@ -21,6 +19,15 @@ import {
 } from "@/app/api/workspaces/action"
 import { WorkspaceResponse } from "@/app/lib/workspaces/definitions"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -203,7 +210,9 @@ export function WorkspaceSwitcher({
                 return (
                   <DropdownMenuItem
                     key={workspace.id}
-                    disabled={isPending || !canSetCurrentWorkspace || isSelected}
+                    disabled={
+                      isPending || !canSetCurrentWorkspace || isSelected
+                    }
                     onSelect={() => void handleSwitchWorkspace(workspace)}
                     className="gap-2 p-2"
                   >
@@ -211,12 +220,16 @@ export function WorkspaceSwitcher({
                       <BriefcaseBusinessIcon className="size-4 text-muted-foreground" />
                     </div>
                     <div className="flex min-w-0 flex-1 flex-col">
-                      <span className="truncate font-medium">{workspace.name}</span>
+                      <span className="truncate font-medium">
+                        {workspace.name}
+                      </span>
                       <span className="truncate text-xs text-muted-foreground">
                         {isSelected ? "Đang hoạt động" : "Có thể chuyển sang"}
                       </span>
                     </div>
-                    {isSelected ? <CheckIcon className="size-4 text-primary" /> : null}
+                    {isSelected ? (
+                      <CheckIcon className="size-4 text-primary" />
+                    ) : null}
                   </DropdownMenuItem>
                 )
               })
@@ -331,54 +344,36 @@ function WorkspaceFormDialog({
   onSubmit: () => void
 }) {
   return (
-    <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
-      <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/10 backdrop-blur-xs data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0" />
-        <DialogPrimitive.Content className="fixed top-1/2 left-1/2 z-50 w-[min(520px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-xl border bg-popover text-popover-foreground shadow-lg data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0">
-          <div className="flex items-start justify-between gap-4 border-b px-6 py-5">
-            <div className="flex flex-col gap-1">
-              <DialogPrimitive.Title className="text-lg font-medium text-foreground">
-                {title}
-              </DialogPrimitive.Title>
-              <DialogPrimitive.Description className="text-sm text-muted-foreground">
-                {description}
-              </DialogPrimitive.Description>
-            </div>
-            <DialogPrimitive.Close asChild>
-              <Button type="button" variant="ghost" size="icon-sm" disabled={isPending}>
-                <XIcon />
-                <span className="sr-only">Đóng</span>
-              </Button>
-            </DialogPrimitive.Close>
-          </div>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
+        </DialogHeader>
 
-          <div className="flex flex-col gap-4 px-6 py-5">
-            <label className="flex flex-col gap-2 text-sm font-medium">
-              Tên không gian làm việc *
-              <Input
-                value={name}
-                onChange={(event) => onNameChange(event.target.value)}
-                placeholder="Ví dụ: Nhóm nghiên cứu"
-              />
-            </label>
-          </div>
+        <div className="flex flex-col gap-4">
+          <label className="flex flex-col gap-2 text-sm font-medium">
+            Tên không gian làm việc *
+            <Input
+              value={name}
+              onChange={(event) => onNameChange(event.target.value)}
+              placeholder="Ví dụ: Nhóm nghiên cứu"
+            />
+          </label>
+        </div>
 
-          <div className="flex items-center justify-end gap-3 border-t px-6 py-4">
-            <Button
-              type="button"
-              variant="ghost"
-              disabled={isPending}
-              onClick={() => onOpenChange(false)}
-            >
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button type="button" variant="ghost" disabled={isPending}>
               Hủy
             </Button>
-            <Button type="button" disabled={isPending} onClick={onSubmit}>
-              {isPending ? <Spinner data-icon="inline-start" /> : null}
-              {submitLabel}
-            </Button>
-          </div>
-        </DialogPrimitive.Content>
-      </DialogPrimitive.Portal>
-    </DialogPrimitive.Root>
+          </DialogClose>
+          <Button type="button" disabled={isPending} onClick={onSubmit}>
+            {isPending ? <Spinner data-icon="inline-start" /> : null}
+            {submitLabel}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }

@@ -13,6 +13,7 @@ import {
   AppFormShellBody,
   AppFormShellFooter,
 } from "@/components/app-form-shell"
+import { AppFormSwitchField } from "@/components/app-form-switch-field"
 import { Button } from "@/components/ui/button"
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
@@ -23,7 +24,6 @@ import {
   InputGroupTextarea,
 } from "@/components/ui/input-group"
 import { Spinner } from "@/components/ui/spinner"
-import { Switch } from "@/components/ui/switch"
 
 export const createBlogSchema = z.object({
   title: z
@@ -48,7 +48,7 @@ export type CreateBlogRequest = z.infer<typeof createBlogSchema>
 export function CreateBlogForm() {
   const router = useRouter()
   const form = useForm<CreateBlogRequest>({
-    resolver: zodResolver(createBlogSchema as any),
+    resolver: zodResolver(createBlogSchema as never),
     defaultValues: {
       title: "",
       slug: "",
@@ -200,19 +200,13 @@ export function CreateBlogForm() {
         name="isVisible"
         control={form.control}
         render={({ field }) => (
-          <Field>
-            <div className="flex items-center justify-between rounded-lg border p-4">
-              <div className="flex flex-col gap-0.5">
-                <FieldLabel className="text-base">
-                  Hiển thị công khai
-                </FieldLabel>
-                <p className="text-sm text-muted-foreground">
-                  Công khai bài viết này trên cửa hàng
-                </p>
-              </div>
-              <Switch checked={field.value} onCheckedChange={field.onChange} />
-            </div>
-          </Field>
+          <AppFormSwitchField
+            id="isVisible"
+            label="Hiển thị công khai"
+            description="Bài viết sẽ hiển thị công khai trên cửa hàng."
+            checked={field.value ?? false}
+            onCheckedChange={field.onChange}
+          />
         )}
       />
 
