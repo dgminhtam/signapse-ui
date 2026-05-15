@@ -3,6 +3,11 @@ import { cookies } from "next/headers"
 import type { ReactNode } from "react"
 
 import { getMyWorkspaces } from "@/app/api/workspaces/action"
+import {
+  canCreatePersonalNotes,
+  canReadPersonalNotes,
+  canUpdatePersonalNotes,
+} from "@/app/lib/personal-notes/permissions"
 import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { resolveActiveWorkspace } from "@/app/lib/workspaces/active"
 import { WorkspaceResponse } from "@/app/lib/workspaces/definitions"
@@ -10,6 +15,7 @@ import { AppBreadcrumb } from "@/components/app-breadcrumbs"
 import { AppSidebar } from "@/components/app-sidebar"
 import { ModeToggle } from "@/components/mode-toggle"
 import { PermissionProvider } from "@/components/permission-provider"
+import { PersonalNotesQuickSheet } from "@/components/personal-notes-quick-sheet"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { WorkspaceSwitcher } from "@/components/workspace-switcher"
 import { Separator } from "@/components/ui/separator"
@@ -40,6 +46,7 @@ export default async function Layout({
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "true"
   const permissions = await getCurrentPermissions()
   const canReadWorkspace = permissions.includes("workspace:read")
+  const canReadNotes = canReadPersonalNotes(permissions)
   let workspaces: WorkspaceResponse[] = []
 
   if (canReadWorkspace) {
@@ -91,6 +98,12 @@ export default async function Layout({
                     canCreateWatchlist={permissions.includes("watchlist:create")}
                     canDeleteWatchlist={permissions.includes("watchlist:delete")}
                     className="min-w-0 flex-1 md:flex-none"
+                  />
+                ) : null}
+                {canReadNotes ? (
+                  <PersonalNotesQuickSheet
+                    canCreate={canCreatePersonalNotes(permissions)}
+                    canUpdate={canUpdatePersonalNotes(permissions)}
                   />
                 ) : null}
                 <ModeToggle />

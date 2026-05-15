@@ -10,6 +10,10 @@ import {
 } from "@/app/lib/cronjobs/definitions"
 import { revalidatePath } from "next/cache"
 
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback
+}
+
 export async function getCronjobs(
   searchParams: SearchParams
 ): Promise<Page<CronjobListResponse>> {
@@ -22,51 +26,31 @@ export async function getCronjobById(id: number): Promise<CronjobResponse> {
   return fetchAuthenticated<CronjobResponse>(`/cronjobs/${id}`)
 }
 
-export async function createCronjob(
-  request: CronjobRequest
-): Promise<ActionResult<CronjobResponse>> {
-  try {
-    const cronjob = await fetchAuthenticated<CronjobResponse>("/cronjobs", {
-      method: "POST",
-      body: JSON.stringify(request),
-    })
-    revalidatePath("/cronjobs")
-    return { success: true, data: cronjob }
-  } catch (error: any) {
-    return { success: false, error: error.message || "Failed to create cronjob" }
-  }
-}
-
 export async function updateCronjob(
   id: number,
   request: CronjobRequest
 ): Promise<ActionResult<CronjobResponse>> {
   try {
-    const cronjob = await fetchAuthenticated<CronjobResponse>(`/cronjobs/${id}`, {
-      method: "PATCH",
-      body: JSON.stringify(request),
-    })
+    const cronjob = await fetchAuthenticated<CronjobResponse>(
+      `/cronjobs/${id}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(request),
+      }
+    )
     revalidatePath("/cronjobs")
-    revalidatePath(`/cronjobs/${id}`)
     return { success: true, data: cronjob }
-  } catch (error: any) {
-    return { success: false, error: error.message || "Failed to update cronjob" }
+  } catch (error: unknown) {
+    return {
+      success: false,
+      error: getErrorMessage(error, "Failed to update cronjob"),
+    }
   }
 }
 
-export async function deleteCronjob(id: number): Promise<ActionResult> {
-  try {
-    await fetchAuthenticated<void>(`/cronjobs/${id}`, {
-      method: "DELETE",
-    })
-    revalidatePath("/cronjobs")
-    return { success: true, data: undefined }
-  } catch (error: any) {
-    return { success: false, error: error.message || "Failed to delete cronjob" }
-  }
-}
-
-export async function startCronjob(id: number): Promise<ActionResult<CronjobResponse>> {
+export async function startCronjob(
+  id: number
+): Promise<ActionResult<CronjobResponse>> {
   try {
     const cronjob = await fetchAuthenticated<CronjobResponse>(
       `/cronjobs/${id}/start`,
@@ -76,12 +60,17 @@ export async function startCronjob(id: number): Promise<ActionResult<CronjobResp
     )
     revalidatePath("/cronjobs")
     return { success: true, data: cronjob }
-  } catch (error: any) {
-    return { success: false, error: error.message || "Failed to start cronjob" }
+  } catch (error: unknown) {
+    return {
+      success: false,
+      error: getErrorMessage(error, "Failed to start cronjob"),
+    }
   }
 }
 
-export async function pauseCronjob(id: number): Promise<ActionResult<CronjobResponse>> {
+export async function pauseCronjob(
+  id: number
+): Promise<ActionResult<CronjobResponse>> {
   try {
     const cronjob = await fetchAuthenticated<CronjobResponse>(
       `/cronjobs/${id}/pause`,
@@ -91,12 +80,17 @@ export async function pauseCronjob(id: number): Promise<ActionResult<CronjobResp
     )
     revalidatePath("/cronjobs")
     return { success: true, data: cronjob }
-  } catch (error: any) {
-    return { success: false, error: error.message || "Failed to pause cronjob" }
+  } catch (error: unknown) {
+    return {
+      success: false,
+      error: getErrorMessage(error, "Failed to pause cronjob"),
+    }
   }
 }
 
-export async function resumeCronjob(id: number): Promise<ActionResult<CronjobResponse>> {
+export async function resumeCronjob(
+  id: number
+): Promise<ActionResult<CronjobResponse>> {
   try {
     const cronjob = await fetchAuthenticated<CronjobResponse>(
       `/cronjobs/${id}/resume`,
@@ -106,7 +100,10 @@ export async function resumeCronjob(id: number): Promise<ActionResult<CronjobRes
     )
     revalidatePath("/cronjobs")
     return { success: true, data: cronjob }
-  } catch (error: any) {
-    return { success: false, error: error.message || "Failed to resume cronjob" }
+  } catch (error: unknown) {
+    return {
+      success: false,
+      error: getErrorMessage(error, "Failed to resume cronjob"),
+    }
   }
 }

@@ -5,7 +5,11 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useDebouncedCallback } from "use-debounce"
 import { useOptimistic, useTransition } from "react"
 
-import { Input } from "@/components/ui/input"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group"
 import { Spinner } from "@/components/ui/spinner"
 
 const SEARCH_PARAM_KEY = "jobName[containsIgnoreCase]"
@@ -40,25 +44,29 @@ export function CronjobSearch() {
   }, 300)
 
   return (
-    <div className="relative flex w-full items-center sm:w-80 lg:w-96">
+    <div className="w-full sm:w-80 lg:w-96">
       <label htmlFor={SEARCH_INPUT_ID} className="sr-only">
         Tìm tác vụ định kỳ
       </label>
-      <Search className="absolute left-2.5 h-4 w-4 text-muted-foreground" />
-      <Input
-        id={SEARCH_INPUT_ID}
-        type="search"
-        placeholder="Tìm theo tên tác vụ..."
-        className="w-full bg-background pl-9 pr-10"
-        value={value}
-        onChange={(event) => {
-          setValue(event.target.value)
-          handleSearch(event.target.value)
-        }}
-      />
-      {isPending ? (
-        <Spinner className="absolute right-2.5 h-4 w-4 text-muted-foreground" />
-      ) : null}
+      <InputGroup>
+        <InputGroupAddon>
+          {isPending ? (
+            <Spinner aria-label="Đang tìm kiếm" />
+          ) : (
+            <Search aria-hidden="true" />
+          )}
+        </InputGroupAddon>
+        <InputGroupInput
+          id={SEARCH_INPUT_ID}
+          type="search"
+          placeholder="Tìm theo tên tác vụ..."
+          value={value}
+          onChange={(event) => {
+            setValue(event.target.value)
+            handleSearch(event.target.value)
+          }}
+        />
+      </InputGroup>
     </div>
   )
 }

@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { Bot, Check } from "lucide-react"
+import { useId, useState } from "react"
+import { Bot } from "lucide-react"
 
 import { AiProviderModelOptionResponse } from "@/app/lib/ai-provider-configs/definitions"
 import { Button } from "@/components/ui/button"
@@ -20,6 +20,15 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldLabel,
+  FieldTitle,
+} from "@/components/ui/field"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 interface AiProviderModelPickerDialogProps {
   currentModel: string
@@ -55,66 +64,66 @@ function ModelPickerDialogContent({
   models,
   onConfirm,
 }: Omit<AiProviderModelPickerDialogProps, "open" | "onOpenChange">) {
+  const modelChoiceId = useId()
   const [selectedModel, setSelectedModel] = useState(
     models.some((model) => model.id === currentModel) ? currentModel : ""
   )
 
   return (
-    <DialogContent className="flex max-h-[min(80vh,720px)] flex-col sm:max-w-[720px]">
+    <DialogContent className="flex h-[min(80vh,720px)] flex-col overflow-hidden sm:max-w-[720px]">
       <DialogHeader>
-        <DialogTitle>Chọn model AI</DialogTitle>
+        <DialogTitle>Chọn model</DialogTitle>
         <DialogDescription>
           Chọn một model từ danh sách đã xác thực thành công với nhà cung cấp
           AI.
         </DialogDescription>
       </DialogHeader>
 
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        {models.length === 0 ? (
-          <Empty className="min-h-[280px] border">
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <Bot />
-              </EmptyMedia>
-              <EmptyTitle>Không có model khả dụng</EmptyTitle>
-              <EmptyDescription>
-                Xác thực đã thành công nhưng nhà cung cấp hiện không trả về
-                model nào để chọn.
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        ) : (
-          <div className="flex flex-col gap-3">
-            {models.map((model) => {
-              const isSelected = selectedModel === model.id
+      {models.length === 0 ? (
+        <Empty className="min-h-[280px] border">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Bot />
+            </EmptyMedia>
+            <EmptyTitle>Không có model khả dụng</EmptyTitle>
+            <EmptyDescription>
+              Xác thực đã thành công nhưng nhà cung cấp hiện không trả về model
+              nào để chọn.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      ) : (
+        <ScrollArea className="min-h-0 flex-1">
+          <RadioGroup
+            value={selectedModel}
+            onValueChange={setSelectedModel}
+            className="pr-4"
+            aria-label="Danh sách model AI"
+          >
+            {models.map((model, index) => {
+              const optionId = `${modelChoiceId}-${index}`
 
               return (
-                <button
-                  key={model.id}
-                  type="button"
-                  onClick={() => setSelectedModel(model.id)}
-                  className="flex w-full items-start justify-between gap-4 rounded-lg border px-4 py-3 text-left transition-colors hover:border-primary/60 hover:bg-muted/40"
-                  aria-pressed={isSelected}
-                >
-                  <div className="flex min-w-0 flex-col gap-1">
-                    <span className="font-medium break-words text-foreground">
-                      {model.label || model.id}
-                    </span>
-                    {model.label && model.label !== model.id ? (
-                      <span className="text-sm break-all text-muted-foreground">
-                        {model.id}
-                      </span>
-                    ) : null}
-                  </div>
-                  {isSelected ? (
-                    <Check className="shrink-0 text-primary" />
-                  ) : null}
-                </button>
+                <FieldLabel key={model.id} htmlFor={optionId}>
+                  <Field orientation="horizontal">
+                    <FieldContent className="min-w-0">
+                      <FieldTitle className="min-w-0 break-words">
+                        {model.label || model.id}
+                      </FieldTitle>
+                      {model.label && model.label !== model.id ? (
+                        <FieldDescription className="break-all">
+                          {model.id}
+                        </FieldDescription>
+                      ) : null}
+                    </FieldContent>
+                    <RadioGroupItem value={model.id} id={optionId} />
+                  </Field>
+                </FieldLabel>
               )
             })}
-          </div>
-        )}
-      </div>
+          </RadioGroup>
+        </ScrollArea>
+      )}
 
       <DialogFooter>
         <Button
@@ -122,7 +131,7 @@ function ModelPickerDialogContent({
           onClick={() => onConfirm(selectedModel)}
           disabled={!selectedModel || models.length === 0}
         >
-          Xác nhận model
+          Xác nhận
         </Button>
       </DialogFooter>
     </DialogContent>

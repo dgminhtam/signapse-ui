@@ -1,18 +1,17 @@
-import { Geist_Mono, Inter } from "next/font/google"
+import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
 import { cn } from "@/lib/utils";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Providers } from "@/components/providers";
 import NextTopLoader from 'nextjs-toploader';
 
-const fontSans = Inter({
-  subsets: ["latin-ext"],
-  weight: ["400", "500", "600", "700"],
+const fontSans = Geist({
+  subsets: ["latin", "latin-ext"],
   variable: "--font-sans",
 })
 
 const fontMono = Geist_Mono({
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
   variable: "--font-mono",
 })
 

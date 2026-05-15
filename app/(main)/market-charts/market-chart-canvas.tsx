@@ -288,7 +288,7 @@ function createChartStyles(): DeepPartial<Styles> {
   const downColor = getCssVariable("--destructive", "#dc2626")
   const fontFamily = getCssTextVariable(
     "--font-sans",
-    "Inter, sans-serif"
+    "Geist, sans-serif"
   )
 
   return {

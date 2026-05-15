@@ -995,7 +995,7 @@ export function MarketChartWorkbench({
             </Field>
 
             <Field className="w-full gap-1 sm:w-auto">
-              <div className="flex h-9 w-full items-center justify-between gap-3 rounded-lg border border-input bg-transparent px-2.5 text-sm shadow-xs sm:w-auto dark:bg-input/30">
+              <div className="flex h-8 w-full items-center justify-between gap-3 rounded-lg border border-input bg-transparent px-2.5 text-sm shadow-xs sm:w-auto dark:bg-input/30">
                 <FieldLabel
                   htmlFor="market-chart-annotations"
                   className="text-sm"

@@ -1649,7 +1649,7 @@ function FeatureRouteSwitch({
 
   return (
     <div
-      className="mx-auto inline-flex h-9 w-32 items-center justify-between gap-2 rounded-lg border border-input bg-transparent px-2.5 text-sm shadow-xs data-[disabled=true]:opacity-60"
+      className="mx-auto inline-flex h-8 w-32 items-center justify-between gap-2 rounded-lg border border-input bg-transparent px-2.5 text-sm shadow-xs data-[disabled=true]:opacity-60"
       data-disabled={disabled ? true : undefined}
     >
       <span

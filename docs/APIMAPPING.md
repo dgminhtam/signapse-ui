@@ -2,7 +2,7 @@
 
 Tài liệu này ánh xạ snapshot OpenAPI backend trong `docs/api_mapping.json` tới các điểm tích hợp frontend hiện tại của repo.
 
-Xác minh lần cuối: ngày 14 tháng 5 năm 2026
+Xác minh lần cuối: ngày 15 tháng 5 năm 2026
 
 ## Cấu hình cơ sở
 
@@ -25,7 +25,7 @@ Xác minh lần cuối: ngày 14 tháng 5 năm 2026
 
 ## Tổng quan thay đổi lớn từ snapshot hiện tại
 
-- Snapshot backend hiện tại gồm `93` operation.
+- Snapshot backend hiện tại gồm `96` operation.
 - Backend đã chuyển domain nội dung canon từ `sources` / `source-documents` sang `news-outlets` / `news-articles`.
 - Backend vẫn giữ các surface `events`, `query`, và `graph-view`, nhưng nhiều payload đã đổi naming từ `sourceDocument*` sang `artifact*` hoặc `news-article`.
 - Surface `events` có thêm workflow derive market reactions cho từng event và batch pending events.
@@ -40,6 +40,8 @@ Xác minh lần cuối: ngày 14 tháng 5 năm 2026
 - Snapshot mới thêm surface `telegram` gồm bot connections, destinations, feature settings, market analysis schedules, và webhook Telegram.
 - Snapshot mới thêm credential sub-resource cho `ai-provider-configs` để quản lý nhiều API key theo từng provider config mà không expose full key.
 - Snapshot mới tiếp tục giản lược `ai-provider-configs`: config request/response không còn `name` và top-level `model`; credential dùng field `model` thay cho `label`.
+- Snapshot mới giản lược `cronjobs`: không còn endpoint create/delete cronjob; update schedule chỉ nhận `expression`.
+- Snapshot mới thêm personal notes dưới `/me/notes` cho ghi chú HTML cá nhân của user hiện tại.
 
 ## Phạm vi endpoint
 
@@ -240,17 +242,20 @@ Ghi chu:
 
 ### 9. API cronjobs
 
-| Phuong thuc | Endpoint backend        | operationId | Tich hop frontend            | Trang thai      | Ghi chu                               |
-| ----------- | ----------------------- | ----------- | ---------------------------- | --------------- | ------------------------------------- |
-| GET         | `/cronjobs`             | `list`      | `getCronjobs(searchParams)`  | Da trien khai   | Tra ve `Page<CronjobListResponse>`.   |
-| POST        | `/cronjobs`             | `create`    | `createCronjob(request)`     | Da trien khai   | Dung `CronjobRequest`.                |
-| GET         | `/cronjobs/{id}`        | `get`       | `getCronjobById(id)`         | Da trien khai   | Tra ve `CronjobResponse`.             |
-| PATCH       | `/cronjobs/{id}`        | `update`    | `updateCronjob(id, request)` | Da trien khai   | Frontend va backend deu dung `PATCH`. |
-| DELETE      | `/cronjobs/{id}`        | `delete`    | `deleteCronjob(id)`          | Da trien khai   | Duoc boc trong `ActionResult`.        |
-| POST        | `/cronjobs/{id}/start`  | `start`     | `startCronjob(id)`           | Da trien khai   | Co UX.                                |
-| POST        | `/cronjobs/{id}/pause`  | `pause`     | `pauseCronjob(id)`           | Da trien khai   | Co UX.                                |
-| POST        | `/cronjobs/{id}/resume` | `resume`    | `resumeCronjob(id)`          | Da trien khai   | Co UX.                                |
-| POST        | `/cronjobs/{id}/stop`   | `stop`      | `-`                          | Chua trien khai | Frontend chua co `stopCronjob()`.     |
+| Phuong thuc | Endpoint backend        | operationId | Tich hop frontend            | Trang thai                 | Ghi chu                                                                       |
+| ----------- | ----------------------- | ----------- | ---------------------------- | -------------------------- | ----------------------------------------------------------------------------- |
+| GET         | `/cronjobs`             | `list`      | `getCronjobs(searchParams)`  | Da trien khai              | Tra ve `Page<CronjobListResponse>`.                                           |
+| GET         | `/cronjobs/{id}`        | `get`       | `getCronjobById(id)`         | Da trien khai              | Co action typed, khong con route detail/update frontend.                      |
+| PATCH       | `/cronjobs/{id}`        | `update`    | `updateCronjob(id, request)` | Da trien khai              | FE cap nhat inline tren list va chi gui `{ expression }`.                     |
+| POST        | `/cronjobs/{id}/start`  | `start`     | `startCronjob(id)`           | Da trien khai              | Co UX.                                                                        |
+| POST        | `/cronjobs/{id}/pause`  | `pause`     | `pauseCronjob(id)`           | Da trien khai              | Co UX.                                                                        |
+| POST        | `/cronjobs/{id}/resume` | `resume`    | `resumeCronjob(id)`          | Da trien khai              | Co UX.                                                                        |
+| POST        | `/cronjobs/{id}/stop`   | `stop`      | `-`                          | Khong tich hop co chu dich | Backend co endpoint nhung frontend khong expose stop trong scope UI hien tai. |
+
+Ghi chu:
+
+- Snapshot moi khong con `POST /cronjobs` va `DELETE /cronjobs/{id}`; FE da go create/delete flow va khong con gate `cronjob:create`/`cronjob:delete` tren UI cronjobs.
+- `CronjobRequest` trong snapshot moi chi con `expression`; FE da dong bo request type va update inline tren list theo contract nay.
 
 ### 10. API AI provider configs
 
@@ -326,7 +331,23 @@ Ghi chú:
 | ----------- | ---------------- | ----------- | ----------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | GET         | `/me`            | `me`        | `getMe()`         | Da tich hop | `BackendMeResponse` dung `currentWorkspace`, `mainImage` la media object, va permission loader tiep tuc chi doc `permissions[]`. |
 
-### 16. API wiki
+### 16. API personal notes
+
+| Phuong thuc | Endpoint backend | operationId          | Tich hop frontend | Trang thai      | Ghi chu                                                            |
+| ----------- | ---------------- | -------------------- | ----------------- | --------------- | ------------------------------------------------------------------ |
+| GET         | `/me/notes`      | `getPersonalNotes`   | `getPersonalNotes(searchParams)`   | Da tich hop | Route `/notes` va quick Sheet header dung `Page<PersonalNoteResponse>`; permission `personal-note:read`. |
+| POST        | `/me/notes`      | `createPersonalNote` | `createPersonalNote(request)`      | Da tich hop | Tao note bang `contentHtml`; permission `personal-note:create`.                              |
+| GET         | `/me/notes/{id}` | `getPersonalNote`    | `getPersonalNote(id)`              | Da tich hop | Doc detail note de nap vao editor/viewer; permission `personal-note:read`.                  |
+| PUT         | `/me/notes/{id}` | `updatePersonalNote` | `updatePersonalNote(id, request)`  | Da tich hop | Cap nhat duy nhat `contentHtml`; permission `personal-note:update`.                         |
+| DELETE      | `/me/notes/{id}` | `deletePersonalNote` | `deletePersonalNote(id)`           | Da tich hop | Xoa note qua AlertDialog; permission `personal-note:delete`.                                |
+
+Ghi chu:
+
+- `CreatePersonalNoteRequest` va `UpdatePersonalNoteRequest` chi co `contentHtml`.
+- `PersonalNoteResponse` gom `id`, `contentHtml`, `createdDate`, `lastModifiedDate`.
+- Frontend co route `/notes`, quick Sheet trong header, action/definitions/permission helper, editor HTML app-level, va presentation mode cho screen share.
+
+### 17. API wiki
 
 Khong con tich hop frontend.
 
@@ -335,20 +356,20 @@ Ghi chu:
 - Toan bo route, action, definition, va UI surface `wiki` da duoc go khoi frontend.
 - Neu backend tai xuat wiki trong tuong lai, nen de xuat mot change moi thay vi tai su dung module cu.
 
-### 17. API roles
+### 18. API roles
 
 | Phuong thuc | Endpoint backend               | operationId             | Tich hop frontend                         | Trang thai    | Ghi chu                                            |
 | ----------- | ------------------------------ | ----------------------- | ----------------------------------------- | ------------- | -------------------------------------------------- |
 | GET         | `/roles`                       | `getRoles`              | `getRoles()`                              | Da trien khai | Trang roles da load danh sach vai tro.             |
 | PUT         | `/roles/{roleKey}/permissions` | `updateRolePermissions` | `updateRolePermissions(roleKey, request)` | Da trien khai | Dialog frontend cho phep cap nhat permission keys. |
 
-### 18. API permissions
+### 19. API permissions
 
 | Phuong thuc | Endpoint backend | operationId      | Tich hop frontend  | Trang thai    | Ghi chu                                                 |
 | ----------- | ---------------- | ---------------- | ------------------ | ------------- | ------------------------------------------------------- |
 | GET         | `/permissions`   | `getPermissions` | `getPermissions()` | Da trien khai | Duoc dung cung role editor de build permission catalog. |
 
-### 19. API watchlists
+### 20. API watchlists
 
 | Phuong thuc | Endpoint backend               | operationId       | Tich hop frontend                            | Trang thai    | Ghi chu                                                 |
 | ----------- | ------------------------------ | ----------------- | -------------------------------------------- | ------------- | ------------------------------------------------------- |
@@ -356,7 +377,7 @@ Ghi chu:
 | POST        | `/watchlists`                  | `createWatchlist` | `addAssetToWorkspaceWatchlist({ assetId })`  | Da trien khai | Sync add theo diff trong workspace editor.              |
 | DELETE      | `/watchlists/assets/{assetId}` | `deleteByAssetId` | `removeAssetFromWorkspaceWatchlist(assetId)` | Da trien khai | Sync remove theo diff.                                  |
 
-### 20. API telegram
+### 21. API telegram
 
 | Phuong thuc | Endpoint backend                                   | operationId            | Tich hop frontend | Trang thai      | Ghi chu                                                                                                                                            |
 | ----------- | -------------------------------------------------- | ---------------------- | ----------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -385,14 +406,14 @@ Ghi chu:
 - Enum feature key cua Telegram gom `ECONOMIC_CALENDAR_ALERT`, `MARKET_NEWS_ALERT`, `SCHEDULED_MARKET_ANALYSIS`; day la enum cua feature setting, khong phai system prompt type.
 - Snapshot import nhieu schema Telegram Bot API cho webhook `Update`; FE admin khong nen model toan bo nhom schema nay neu chi tich hop man hinh cau hinh.
 
-### 21. Webhook
+### 22. Webhook
 
 | Phuong thuc | Endpoint backend                    | operationId            | Tich hop frontend | Trang thai  | Ghi chu                                                     |
 | ----------- | ----------------------------------- | ---------------------- | ----------------- | ----------- | ----------------------------------------------------------- |
 | POST        | `/webhooks/clerk`                   | `handleClerkWebhook`   | `-`               | Chi backend | Khong ky vong co frontend caller.                           |
 | POST        | `/webhooks/telegram/{connectionId}` | `handleTelegramUpdate` | `-`               | Chi backend | Webhook nhan `Update` tu Telegram, khong ky vong FE caller. |
 
-### 22. Health check
+### 23. Health check
 
 | Phuong thuc | Endpoint backend | operationId   | Tich hop frontend | Trang thai      | Ghi chu               |
 | ----------- | ---------------- | ------------- | ----------------- | --------------- | --------------------- |
@@ -482,6 +503,7 @@ type ActionResult<T = void> =
 | Assets                                    | `app/api/assets/action.ts`, `app/lib/assets/definitions.ts`                                                                                                     |
 | Economic calendar                         | `app/api/economic-calendar/action.ts`, `app/lib/economic-calendar/definitions.ts`, `app/lib/economic-calendar/permissions.ts`, `app/(main)/economic-calendar/*` |
 | User profile                              | `app/api/user/action.ts`, `app/lib/users/definitions.ts`                                                                                                        |
+| Personal notes                            | `app/api/personal-notes/action.ts`, `app/lib/personal-notes/definitions.ts`, `app/lib/personal-notes/permissions.ts`, `app/(main)/notes/*`, `components/personal-notes-quick-sheet.tsx` |
 | Workspace                                 | `app/api/workspaces/action.ts`, `app/lib/workspaces/definitions.ts`                                                                                             |
 | Watchlists                                | `app/api/watchlists/action.ts`, `app/lib/watchlists/definitions.ts`, `components/workspace-watchlist-editor.tsx`, `components/asset-multi-select-combobox.tsx`  |
 | Telegram                                  | `-`                                                                                                                                                             |
@@ -505,6 +527,8 @@ type ActionResult<T = void> =
 - `events`: snapshot moi da bo `slug` va `confirmedAt`, va doi evidence sang `newsArticle*`; FE events da dong bo DTO, detail, quick detail, va action layout theo contract hien tai.
 - `telegram`: snapshot moi them day du endpoint quan tri Telegram, nhung frontend chua co route/action/type/permission/navigation tuong ung.
 - `ai-provider credentials`: snapshot moi doi credential `label` thanh `model` va bo top-level config `name`/`model`; FE hien van giu `name`, top-level `model`, va credential `label` trong definitions, form, list, detail, va credential panel.
+- `cronjobs`: FE da bo create/delete flow va doi update schedule sang inline list chi gui `expression`; endpoint `stop` duoc ghi nhan nhung khong tich hop co chu dich.
+- `personal notes`: frontend da map `/me/notes*` vao action, DTO, permission helper, quick Sheet header, route `/notes`, editor HTML, explicit save, presentation mode, va delete confirmation. Contract hien van chi co `contentHtml`, nen UI derive label tu HTML da sanitize thay vi luu title rieng.
 - `market query`: spec van mo ta `asOfTime` la optional `date-time`; frontend v1 chu dong omit field nay de backend tu lay thoi diem hien tai va harden parse cho payload runtime co the tra `null` o `publishedAt` va `occurredAt`. Ngoai ra, `keyEvents[]` da doi `summary` thanh `description`, nhung FE van doc field cu.
 - `graph view`: `GraphNodeMetadata` da doi `active` thanh `status`; FE workbench hien van doc `metadata.active`.
 - `user profile`: `GET /me` da dong bo `BackendMeResponse` theo `currentWorkspace`, `mainImage` media object, va `permissions[]`; runtime hien van chi dung permission loader.

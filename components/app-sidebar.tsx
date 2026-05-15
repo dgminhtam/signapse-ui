@@ -128,7 +128,7 @@ export function NavMain({ items }: { items: NavItem[] }) {
     <SidebarGroup>
       <SidebarGroupLabel>Nền tảng</SidebarGroupLabel>
       <SidebarGroupContent>
-        <SidebarMenu>
+        <SidebarMenu className="gap-1">
           {items.map((item, itemIndex) => {
             const hasSubItems = (item.items?.length ?? 0) > 0
             const isActive = hasSubItems ? hasActiveSubItem(item.items) : matchesPath(item.url)
@@ -141,7 +141,7 @@ export function NavMain({ items }: { items: NavItem[] }) {
                     asChild
                     tooltip={item.title}
                     isActive={isActive}
-                    className="h-9 rounded-lg data-active:bg-sidebar-primary data-active:font-semibold data-active:text-sidebar-primary-foreground data-active:hover:bg-sidebar-primary data-active:hover:text-sidebar-primary-foreground"
+                    className="h-8 rounded-lg font-medium data-active:bg-sidebar-primary data-active:text-sidebar-primary-foreground data-active:hover:bg-sidebar-primary data-active:hover:text-sidebar-primary-foreground"
                   >
                     <Link href={item.url}>
                       {item.icon && <item.icon />}
@@ -163,8 +163,8 @@ export function NavMain({ items }: { items: NavItem[] }) {
                   <CollapsibleTrigger asChild aria-controls={collapsibleContentId}>
                     <SidebarMenuButton
                       tooltip={item.title}
-                      isActive={isActive}
-                      className="h-9 rounded-lg data-active:bg-sidebar-accent data-active:font-semibold data-active:text-sidebar-accent-foreground data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                      isActive={false}
+                      className="h-8 rounded-lg font-medium"
                     >
                       {item.icon && <item.icon />}
                       <span>{item.title}</span>
@@ -181,7 +181,7 @@ export function NavMain({ items }: { items: NavItem[] }) {
                             <SidebarMenuSubButton
                               isActive={isSubItemActive}
                               asChild
-                              className="h-9 rounded-lg data-active:bg-sidebar-primary data-active:font-semibold data-active:text-sidebar-primary-foreground data-active:hover:bg-sidebar-primary data-active:hover:text-sidebar-primary-foreground"
+                              className="h-8 rounded-lg font-medium data-active:bg-sidebar-primary data-active:text-sidebar-primary-foreground data-active:hover:bg-sidebar-primary data-active:hover:text-sidebar-primary-foreground"
                             >
                               <Link href={subItem.url}>
                                 <span>{subItem.title}</span>

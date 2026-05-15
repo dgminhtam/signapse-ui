@@ -5,7 +5,11 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useState, useTransition } from "react"
 import { useDebouncedCallback } from "use-debounce"
 
-import { Input } from "@/components/ui/input"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group"
 import { Spinner } from "@/components/ui/spinner"
 
 export function NewsOutletSearch() {
@@ -34,27 +38,29 @@ export function NewsOutletSearch() {
   }, 300)
 
   return (
-    <div className="relative w-full sm:w-80 lg:w-96">
+    <div className="w-full sm:w-80 lg:w-96">
       <label htmlFor="news-outlet-search" className="sr-only">
         Tìm nguồn tin
       </label>
-      <Search className="absolute top-2.5 left-2.5 h-4 w-4 text-muted-foreground" />
-      <Input
-        id="news-outlet-search"
-        type="search"
-        placeholder="Tìm theo tên nguồn tin..."
-        className="pl-8"
-        value={value}
-        onChange={(event) => {
-          setValue(event.target.value)
-          handleSearch(event.target.value)
-        }}
-      />
-      {isPending ? (
-        <div className="absolute top-2.5 right-2.5">
-          <Spinner className="size-4" />
-        </div>
-      ) : null}
+      <InputGroup>
+        <InputGroupAddon>
+          {isPending ? (
+            <Spinner aria-label="Đang tìm kiếm" />
+          ) : (
+            <Search aria-hidden="true" />
+          )}
+        </InputGroupAddon>
+        <InputGroupInput
+          id="news-outlet-search"
+          type="search"
+          placeholder="Tìm theo tên nguồn tin..."
+          value={value}
+          onChange={(event) => {
+            setValue(event.target.value)
+            handleSearch(event.target.value)
+          }}
+        />
+      </InputGroup>
     </div>
   )
 }

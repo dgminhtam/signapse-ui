@@ -28,7 +28,7 @@ function AppListToolbarLeading({
     <div
       data-slot="app-list-toolbar-leading"
       className={cn(
-        "flex w-full min-w-0 flex-1 flex-col gap-4 sm:w-auto sm:flex-row sm:items-center",
+        "flex w-full min-w-0 flex-1 flex-col gap-2 sm:w-auto sm:flex-row sm:items-center",
         className
       )}
       {...props}

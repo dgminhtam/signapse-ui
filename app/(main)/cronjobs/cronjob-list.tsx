@@ -2,6 +2,7 @@
 
 import { CronjobListResponse } from "@/app/lib/cronjobs/definitions"
 import { Page } from "@/app/lib/definitions"
+import { updateCronjob } from "@/app/api/cronjobs/action"
 import { AppPaginationControls } from "@/components/app-pagination-controls"
 import {
   AppListToolbar,
@@ -22,6 +23,15 @@ import { CronjobSearch } from "./cronjob-search"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
+import { Field, FieldError, FieldLabel } from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
+import { Spinner } from "@/components/ui/spinner"
+import {
   Table,
   TableBody,
   TableCell,
@@ -29,116 +39,72 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import {
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-  EmptyDescription,
-} from "@/components/ui/empty"
-import {
-  Edit2,
-  Plus,
-  Trash2,
-  FileClock,
-  Play,
-  Pause,
-  RotateCcw,
+  Check,
   CheckCircle,
   Clock,
+  FileClock,
+  Pause,
+  Pencil,
+  Play,
+  RotateCcw,
+  X,
 } from "lucide-react"
-import Link from "next/link"
 import { format } from "date-fns"
 import {
-  deleteCronjob,
-  startCronjob,
   pauseCronjob,
   resumeCronjob,
+  startCronjob,
 } from "@/app/api/cronjobs/action"
 import { useRouter } from "next/navigation"
-import { useState, useTransition } from "react"
+import { FormEvent, useState, useTransition } from "react"
 import { toast } from "sonner"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Spinner } from "@/components/ui/spinner"
 
 interface CronjobListProps {
   cronjobPage: Page<CronjobListResponse>
 }
+
+const CRON_EXPRESSION_MAX_LENGTH = 100
 
 function getStatusBadge(status: string | undefined) {
   const statusValue = status || "SCHEDULED"
   switch (statusValue) {
     case "RUNNING":
       return (
-        <Badge
-          variant="default"
-          className="gap-1 bg-green-500/10 text-green-700 dark:text-green-400"
-        >
-          <Play className="h-3 w-3" /> Đang chạy
+        <Badge>
+          <Play data-icon="inline-start" /> Đang chạy
         </Badge>
       )
     case "PAUSED":
       return (
-        <Badge
-          variant="secondary"
-          className="gap-1 bg-yellow-500/10 text-yellow-700 dark:text-yellow-400"
-        >
-          <Pause className="h-3 w-3" /> Tạm dừng
+        <Badge variant="secondary">
+          <Pause data-icon="inline-start" /> Tạm dừng
         </Badge>
       )
     case "COMPLETE":
       return (
-        <Badge
-          variant="secondary"
-          className="gap-1 bg-blue-500/10 text-blue-700 dark:text-blue-400"
-        >
-          <CheckCircle className="h-3 w-3" /> Hoàn tất
+        <Badge variant="secondary">
+          <CheckCircle data-icon="inline-start" /> Hoàn tất
         </Badge>
       )
     case "SCHEDULED":
       return (
-        <Badge
-          variant="secondary"
-          className="gap-1 bg-gray-500/10 text-gray-700 dark:text-gray-400"
-        >
-          <Clock className="h-3 w-3" /> Đã lên lịch
+        <Badge variant="secondary">
+          <Clock data-icon="inline-start" /> Đã lên lịch
         </Badge>
       )
     default:
-      return (
-        <Badge variant="secondary" className="gap-1">
-          {status}
-        </Badge>
-      )
+      return <Badge variant="secondary">{status}</Badge>
   }
 }
 
 export function CronjobListPage({ cronjobPage }: CronjobListProps) {
   const cronjobs = cronjobPage.content
-  const canCreateCronjob = useHasPermission("cronjob:create")
   const canUpdateCronjob = useHasPermission("cronjob:update")
-  const canDeleteCronjob = useHasPermission("cronjob:delete")
 
   return (
     <div className="w-full">
       <AppListToolbar>
         <AppListToolbarLeading>
-          {canCreateCronjob ? (
-            <Button asChild>
-              <Link href="/cronjobs/create">
-                <Plus data-icon="inline-start" />
-                Tạo cronjob
-              </Link>
-            </Button>
-          ) : null}
           <CronjobSearch />
         </AppListToolbarLeading>
         <AppListToolbarTrailing>
@@ -165,7 +131,7 @@ export function CronjobListPage({ cronjobPage }: CronjobListProps) {
         <Table>
           <TableHeader>
             <AppListTableHeaderRow>
-              <AppListTableHead className="w-[30%]">
+              <AppListTableHead className="w-[32%]">
                 Tên tác vụ
               </AppListTableHead>
               <AppListTableHead className="w-36 text-center">
@@ -174,13 +140,13 @@ export function CronjobListPage({ cronjobPage }: CronjobListProps) {
               <AppListTableHead className="w-36 text-center">
                 Trạng thái
               </AppListTableHead>
-              <AppListTableHead className="w-48 text-center">
+              <AppListTableHead className="w-64 text-center">
                 Biểu thức cron
               </AppListTableHead>
               <AppListTableHead className="w-40 text-center">
                 Lần chạy kế tiếp
               </AppListTableHead>
-              <AppListTableHead className="w-44 text-center">
+              <AppListTableHead className="w-32 text-center">
                 Thao tác
               </AppListTableHead>
             </AppListTableHeaderRow>
@@ -194,12 +160,9 @@ export function CronjobListPage({ cronjobPage }: CronjobListProps) {
                 >
                   <TableCell className="align-top font-medium whitespace-normal text-foreground">
                     <div className="flex min-w-0 flex-col gap-1">
-                      <Link
-                        href={`/cronjobs/${cronjob.id}`}
-                        className="line-clamp-1 break-words"
-                      >
+                      <span className="line-clamp-1 break-words">
                         {cronjob.jobName}
-                      </Link>
+                      </span>
                       {cronjob.description && (
                         <span className="line-clamp-2 text-xs break-words text-muted-foreground">
                           {cronjob.description}
@@ -213,10 +176,11 @@ export function CronjobListPage({ cronjobPage }: CronjobListProps) {
                   <TableCell className="w-36 text-center">
                     {getStatusBadge(cronjob.jobStatus)}
                   </TableCell>
-                  <TableCell className="w-48 max-w-[12rem] text-center font-mono text-sm text-muted-foreground">
-                    <span className="block truncate">
-                      {cronjob.cronExpression}
-                    </span>
+                  <TableCell className="w-64 text-center whitespace-normal">
+                    <CronExpressionCell
+                      cronjob={cronjob}
+                      canUpdate={canUpdateCronjob}
+                    />
                   </TableCell>
                   <TableCell className="w-40 text-center">
                     <AppTimeMetadata icon={Clock}>
@@ -228,29 +192,12 @@ export function CronjobListPage({ cronjobPage }: CronjobListProps) {
                         : "-"}
                     </AppTimeMetadata>
                   </TableCell>
-                  <TableCell className="w-44 text-center">
+                  <TableCell className="w-32 text-center">
                     <div className="flex items-center justify-center gap-1">
                       <StatusActions
                         id={cronjob.id}
                         status={cronjob.jobStatus}
                       />
-                      {canUpdateCronjob ? (
-                        <Button
-                          asChild
-                          variant="ghost"
-                          size="icon"
-                          className="text-muted-foreground hover:text-foreground"
-                          title="Chỉnh sửa cronjob"
-                        >
-                          <Link href={`/cronjobs/${cronjob.id}`}>
-                            <Edit2 />
-                            <span className="sr-only">Chỉnh sửa cronjob</span>
-                          </Link>
-                        </Button>
-                      ) : null}
-                      {canDeleteCronjob ? (
-                        <DeleteCronjobButton id={cronjob.id} />
-                      ) : null}
                     </div>
                   </TableCell>
                 </TableRow>
@@ -261,9 +208,9 @@ export function CronjobListPage({ cronjobPage }: CronjobListProps) {
                   <EmptyMedia variant="icon">
                     <FileClock />
                   </EmptyMedia>
-                  <EmptyTitle>Chưa có cronjob</EmptyTitle>
+                  <EmptyTitle>Chưa có tác vụ định kỳ</EmptyTitle>
                   <EmptyDescription>
-                    Tạo cronjob đầu tiên để bắt đầu quản lý lịch chạy hệ thống.
+                    Chưa có tác vụ hệ thống nào được backend cung cấp.
                   </EmptyDescription>
                 </EmptyHeader>
               </AppListTableEmptyState>
@@ -274,6 +221,139 @@ export function CronjobListPage({ cronjobPage }: CronjobListProps) {
 
       <AppPaginationControls page={cronjobPage} className="mt-4" />
     </div>
+  )
+}
+
+function CronExpressionCell({
+  cronjob,
+  canUpdate,
+}: {
+  cronjob: CronjobListResponse
+  canUpdate: boolean
+}) {
+  const [isEditing, setIsEditing] = useState(false)
+  const [draftExpression, setDraftExpression] = useState(cronjob.cronExpression)
+  const [error, setError] = useState<string | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
+  const router = useRouter()
+
+  const handleCancel = () => {
+    setDraftExpression(cronjob.cronExpression)
+    setError(null)
+    setIsEditing(false)
+  }
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    const expression = draftExpression.trim()
+    if (!expression) {
+      setError("Biểu thức cron là bắt buộc.")
+      return
+    }
+
+    if (expression.length > CRON_EXPRESSION_MAX_LENGTH) {
+      setError("Biểu thức cron quá dài.")
+      return
+    }
+
+    setError(null)
+    setIsSaving(true)
+    const result = await updateCronjob(cronjob.id, { expression })
+    setIsSaving(false)
+
+    if (result.success) {
+      toast.success("Đã cập nhật lịch chạy cronjob.")
+      setDraftExpression(expression)
+      setIsEditing(false)
+      router.refresh()
+    } else {
+      toast.error(result.error || "Không thể cập nhật lịch chạy cronjob.")
+    }
+  }
+
+  if (!isEditing) {
+    return (
+      <div className="flex min-w-0 items-center justify-center gap-1">
+        <span className="block min-w-0 truncate font-mono text-sm text-muted-foreground">
+          {cronjob.cronExpression}
+        </span>
+        {canUpdate ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            title="Chỉnh sửa biểu thức cron"
+            onClick={() => {
+              setDraftExpression(cronjob.cronExpression)
+              setError(null)
+              setIsEditing(true)
+            }}
+          >
+            <Pencil data-icon="inline-start" />
+            <span className="sr-only">Chỉnh sửa biểu thức cron</span>
+          </Button>
+        ) : null}
+      </div>
+    )
+  }
+
+  return (
+    <form
+      className="flex items-center justify-center gap-1"
+      onSubmit={handleSubmit}
+    >
+      <Field data-invalid={Boolean(error)} className="min-w-0 flex-1">
+        <FieldLabel
+          htmlFor={`cron-expression-${cronjob.id}`}
+          className="sr-only"
+        >
+          Biểu thức cron
+        </FieldLabel>
+        <Input
+          id={`cron-expression-${cronjob.id}`}
+          value={draftExpression}
+          onChange={(event) => {
+            setDraftExpression(event.target.value)
+            if (error) {
+              setError(null)
+            }
+          }}
+          autoComplete="off"
+          aria-invalid={Boolean(error)}
+          disabled={isSaving}
+          className="min-w-[8rem]"
+        />
+        {error ? <FieldError>{error}</FieldError> : null}
+      </Field>
+      <div className="flex items-center gap-1">
+        <Button
+          type="submit"
+          variant="ghost"
+          size="icon-xs"
+          title="Lưu biểu thức cron"
+          disabled={isSaving}
+        >
+          {isSaving ? (
+            <Spinner data-icon="inline-start" />
+          ) : (
+            <Check data-icon="inline-start" />
+          )}
+          <span className="sr-only">Lưu biểu thức cron</span>
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-xs"
+          title="Hủy chỉnh sửa"
+          disabled={isSaving}
+          onClick={handleCancel}
+        >
+          <X data-icon="inline-start" />
+          <span className="sr-only">Hủy chỉnh sửa</span>
+        </Button>
+      </div>
+    </form>
   )
 }
 
@@ -325,20 +405,19 @@ function StatusActions({ id, status }: { id: number; status: string }) {
   return (
     <>
       {(statusValue === "SCHEDULED" || statusValue === "COMPLETE") && (
-        <div className="flex items-center gap-1">
+        <>
           {canStartCronjob ? (
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-green-600 hover:bg-green-500/10 hover:text-green-700"
               title="Khởi chạy"
               disabled={isPending}
               onClick={handleStart}
             >
               {isPending ? (
-                <Spinner className="size-4" />
+                <Spinner data-icon="inline-start" />
               ) : (
-                <Play className="h-4 w-4" />
+                <Play data-icon="inline-start" />
               )}
               <span className="sr-only">Khởi chạy</span>
             </Button>
@@ -347,95 +426,36 @@ function StatusActions({ id, status }: { id: number; status: string }) {
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-yellow-600 hover:bg-yellow-500/10 hover:text-yellow-700"
               title="Tạm dừng"
               disabled={isPending}
               onClick={handlePause}
             >
               {isPending ? (
-                <Spinner className="size-4" />
+                <Spinner data-icon="inline-start" />
               ) : (
-                <Pause className="h-4 w-4" />
+                <Pause data-icon="inline-start" />
               )}
               <span className="sr-only">Tạm dừng</span>
             </Button>
           ) : null}
-        </div>
+        </>
       )}
       {statusValue === "PAUSED" && canResumeCronjob ? (
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 text-blue-600 hover:bg-blue-500/10 hover:text-blue-700"
           title="Tiếp tục"
           disabled={isPending}
           onClick={handleResume}
         >
           {isPending ? (
-            <Spinner className="size-4" />
+            <Spinner data-icon="inline-start" />
           ) : (
-            <RotateCcw className="h-4 w-4" />
+            <RotateCcw data-icon="inline-start" />
           )}
           <span className="sr-only">Tiếp tục</span>
         </Button>
       ) : null}
     </>
-  )
-}
-
-function DeleteCronjobButton({ id }: { id: number }) {
-  const [isPending, startTransition] = useTransition()
-  const [open, setOpen] = useState(false)
-  const router = useRouter()
-
-  const handleDelete = async () => {
-    startTransition(async () => {
-      const result = await deleteCronjob(id)
-      if (result.success) {
-        toast.success("Đã xóa cronjob.")
-        setOpen(false)
-        router.refresh()
-      } else {
-        toast.error(result.error || "Không thể xóa cronjob.")
-      }
-    })
-  }
-
-  return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-          title="Xóa cronjob"
-        >
-          <Trash2 />
-          <span className="sr-only">Xóa cronjob</span>
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Bạn có chắc chắn muốn xóa?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Hành động này không thể hoàn tác. Cronjob đã chọn sẽ bị xóa vĩnh
-            viễn khỏi hệ thống.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>Hủy</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={(e) => {
-              e.preventDefault()
-              handleDelete()
-            }}
-            disabled={isPending}
-            className="bg-red-500 hover:bg-red-600"
-          >
-            {isPending ? "Đang xóa..." : "Xóa cronjob"}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
   )
 }

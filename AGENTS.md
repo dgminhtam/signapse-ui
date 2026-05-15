@@ -13,7 +13,7 @@ Sử dụng slash command: `/dev`, `/build`, `/lint`, `/format`, `/typecheck`
 Đây là dashboard quản trị dùng **Next.js 16 App Router** cho hệ thống tín hiệu giao dịch có tích hợp AI.
 
 - **Xác thực:** Clerk, đính kèm JWT qua `fetchAuthenticated()`
-- **UI:** shadcn/ui từ `@/components/ui/`, Tailwind CSS v4, Lucide icons, Inter font và Geist Mono
+- **UI:** shadcn/ui từ `@/components/ui/`, Tailwind CSS v4, Lucide icons, Geist font và Geist Mono
 - **Toast:** chỉ dùng `sonner`, không dùng `alert()`
 - **Validation:** Zod v4 cho validation frontend và mapping DTO backend
 
@@ -54,7 +54,8 @@ app/(main)/[feature]/
 - Khi cập nhật URL từ search, dùng `startTransition()` với `router.replace()`
 - Giá trị search phải được `trim()` trước khi ghi lên URL; nếu rỗng sau khi trim thì phải xóa query param tương ứng
 - Search input phải có `type="search"`, `id` và `label` dạng `sr-only`
-- Search phải hiển thị `<Spinner>` inline trong lúc pending route transition
+- Search input trên trang danh sách phải compose bằng `InputGroup`, `InputGroupInput` và `InputGroupAddon` theo shadcn; icon search ở trạng thái idle nằm trong leading `InputGroupAddon`, không tự đặt icon absolute, không tự set `h-*`/`w-*` cho icon hoặc padding input chỉ để canh icon
+- Search phải hiển thị `<Spinner>` inline trong lúc pending route transition bằng cách thay thế icon search trong cùng leading `InputGroupAddon`; không dùng trailing spinner addon, spinner ngoài input, absolute positioning hoặc reserved trailing width chỉ để canh spinner
 - Nếu search theo nhiều field, khai báo query key thành hằng số cục bộ rõ nghĩa trong file search
 - Search trên trang danh sách phải dùng wrapper responsive thống nhất `w-full sm:w-80 lg:w-96`: mobile chiếm đủ chiều ngang toolbar, desktop giữ độ rộng đồng đều; không dùng tự phát `max-w-sm` hoặc `flex-1 shrink-0` làm search dài/ngắn lệch giữa các màn
 - Search trong toolbar danh sách phải nằm ở vùng leading cùng action chính; các view controls như filter tĩnh, sort và page size nằm ở vùng trailing, ưu tiên dùng `AppListToolbar`, `AppListToolbarLeading` và `AppListToolbarTrailing`
@@ -112,10 +113,11 @@ app/(main)/[feature]/
 
 ### Quy ước sidebar
 
-- Sidebar active item thật, tức item đại diện cho màn hình hiện tại, dùng `sidebar-primary` và `sidebar-primary-foreground`; `sidebar-primary` phải neutral-consistent với theme hiện tại, không dùng màu preset xanh/tím không liên quan đến visual baseline
-- Sidebar hover dùng `sidebar-accent` và `sidebar-accent-foreground` để là feedback nhẹ, không tranh với active state
+- Sidebar active item thật, tức item đại diện cho màn hình hiện tại, dùng `sidebar-primary` và `sidebar-primary-foreground` như neutral selected surface trong `AppSidebar`; `sidebar-primary` phải là nền xám selected rõ hơn hover nhưng không mang cảm giác CTA/inverse button
+- Sidebar hover dùng `sidebar-accent` và `sidebar-accent-foreground` làm feedback nhẹ, không tranh với active state
 - Sidebar focus-visible giữ `sidebar-ring`; focus là accessibility state, không trộn với selected/current state
-- Sidebar parent đang mở hoặc parent có child active dùng `sidebar-accent` context treatment và font/chevron emphasis nếu cần; parent không dùng màu mạnh hơn child item đang là màn hình hiện tại
+- Sidebar parent đang mở không dùng background state; trạng thái expanded chỉ cần chevron rotate
+- Sidebar active item và parent có child active không tự tăng font weight chỉ vì state; active/current page được thể hiện bằng nền selected, parent context giữ yên tĩnh và không dùng background mạnh hơn child item đang là màn hình hiện tại
 - Không thêm custom active color token, không dùng global `accent`, và không silently đổi `--sidebar-*` để sửa một vấn đề cục bộ nếu chưa có proposal riêng
 - Sidebar item density được xử lý ở `AppSidebar`: parent/top-level row và child row dùng height đồng bộ với input chuẩn khi cần tăng readability
 - Child list trong sidebar giữ left indent rõ ràng, mở rộng hợp lý về bên phải, và dùng `py-1` để có khoảng thở mà không tạo gap quá lớn giữa parent và children

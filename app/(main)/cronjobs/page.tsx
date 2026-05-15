@@ -68,8 +68,7 @@ function CronjobListSkeleton() {
     <div className="flex flex-col">
       <div className="flex flex-col gap-4 sm:flex-row sm:justify-between">
         <div className="flex w-full flex-1 items-center gap-4 sm:w-auto">
-          <Skeleton className="h-9 w-[160px]" />
-          <Skeleton className="h-9 w-full max-w-sm" />
+          <Skeleton className="h-9 w-full sm:w-80 lg:w-96" />
         </div>
         <Skeleton className="h-9 w-[180px]" />
       </div>
@@ -78,7 +77,7 @@ function CronjobListSkeleton() {
         <Table>
           <TableHeader>
             <AppListTableHeaderRow>
-              <AppListTableHead className="w-[30%]">
+              <AppListTableHead className="w-[32%]">
                 <Skeleton className="h-4 w-32" />
               </AppListTableHead>
               <AppListTableHead className="w-36 text-center">
@@ -87,13 +86,13 @@ function CronjobListSkeleton() {
               <AppListTableHead className="w-36 text-center">
                 <Skeleton className="mx-auto h-4 w-24" />
               </AppListTableHead>
-              <AppListTableHead className="w-48 text-center">
+              <AppListTableHead className="w-64 text-center">
                 <Skeleton className="mx-auto h-4 w-32" />
               </AppListTableHead>
               <AppListTableHead className="w-40 text-center">
                 <Skeleton className="mx-auto h-4 w-32" />
               </AppListTableHead>
-              <AppListTableHead className="w-44 text-center">
+              <AppListTableHead className="w-32 text-center">
                 <Skeleton className="ml-auto h-4 w-20" />
               </AppListTableHead>
             </AppListTableHeaderRow>
@@ -113,15 +112,14 @@ function CronjobListSkeleton() {
                 <TableCell className="w-36 text-center">
                   <Skeleton className="mx-auto h-4 w-24" />
                 </TableCell>
-                <TableCell className="w-48 text-center">
+                <TableCell className="w-64 text-center">
                   <Skeleton className="mx-auto h-4 w-32 font-mono" />
                 </TableCell>
                 <TableCell className="w-40 text-center">
                   <Skeleton className="mx-auto h-4 w-32" />
                 </TableCell>
-                <TableCell className="w-44 text-center">
+                <TableCell className="w-32 text-center">
                   <div className="flex justify-end gap-2">
-                    <Skeleton className="h-8 w-8" />
                     <Skeleton className="h-8 w-8" />
                   </div>
                 </TableCell>

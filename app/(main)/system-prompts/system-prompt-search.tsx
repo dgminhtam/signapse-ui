@@ -5,7 +5,11 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState, useTransition } from "react"
 import { useDebouncedCallback } from "use-debounce"
 
-import { Input } from "@/components/ui/input"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group"
 import { Spinner } from "@/components/ui/spinner"
 
 const SEARCH_PARAM_KEY =
@@ -43,25 +47,29 @@ export function SystemPromptSearch() {
   }, 300)
 
   return (
-    <div className="relative flex w-full sm:w-80 lg:w-96">
+    <div className="w-full sm:w-80 lg:w-96">
       <label htmlFor={SEARCH_INPUT_ID} className="sr-only">
         Tìm prompt hệ thống
       </label>
-      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-      <Input
-        id={SEARCH_INPUT_ID}
-        type="search"
-        className="pl-9 pr-10"
-        placeholder="Tìm theo loại hoặc nội dung prompt..."
-        value={value}
-        onChange={(event) => {
-          setValue(event.target.value)
-          handleSearch(event.target.value)
-        }}
-      />
-      {isPending ? (
-        <Spinner className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-      ) : null}
+      <InputGroup>
+        <InputGroupAddon>
+          {isPending ? (
+            <Spinner aria-label="Đang tìm kiếm" />
+          ) : (
+            <Search aria-hidden="true" />
+          )}
+        </InputGroupAddon>
+        <InputGroupInput
+          id={SEARCH_INPUT_ID}
+          type="search"
+          placeholder="Tìm theo loại hoặc nội dung prompt..."
+          value={value}
+          onChange={(event) => {
+            setValue(event.target.value)
+            handleSearch(event.target.value)
+          }}
+        />
+      </InputGroup>
     </div>
   )
 }

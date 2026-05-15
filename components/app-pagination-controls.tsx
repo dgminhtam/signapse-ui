@@ -128,8 +128,7 @@ export function PaginationNavigation({
           <Button
             type="button"
             variant="outline"
-            size="icon-sm"
-            className="text-xs"
+            size="icon"
             aria-label="Đi tới trang trước"
             disabled={isPreviousDisabled}
             onClick={() => onPageChange(currentPage - 1)}
@@ -154,8 +153,7 @@ export function PaginationNavigation({
               <Button
                 type="button"
                 variant={isCurrentPage ? "default" : "outline"}
-                size="icon-sm"
-                className="text-xs"
+                size="icon"
                 aria-label={`Đi tới trang ${entry}`}
                 aria-current={isCurrentPage ? "page" : undefined}
                 disabled={isPending}
@@ -175,8 +173,7 @@ export function PaginationNavigation({
           <Button
             type="button"
             variant="outline"
-            size="icon-sm"
-            className="text-xs"
+            size="icon"
             aria-label="Đi tới trang sau"
             disabled={isNextDisabled}
             onClick={() => onPageChange(currentPage + 1)}

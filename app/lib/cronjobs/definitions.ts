@@ -1,11 +1,7 @@
 export type CronjobStatus = "RUNNING" | "PAUSED" | "COMPLETE" | "SCHEDULED"
 
 export interface CronjobRequest {
-  jobName: string
-  jobGroup: string
-  jobClass: string
   expression: string
-  description?: string
 }
 
 export interface CronjobResponse {
