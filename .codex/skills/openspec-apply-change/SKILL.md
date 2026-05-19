@@ -70,6 +70,7 @@ Implement tasks from an OpenSpec change.
    - Show which task is being worked on
    - Make the code changes required
    - Keep changes minimal and focused
+   - If a pending task is smoke/browser/visual/manual/auth/backend-data QA that the user owns and Codex cannot reliably run, preserve its details as a non-checkbox `User-owned manual QA` note or a checked transfer note instead of treating it as an implementation blocker
    - Mark task complete in the tasks file: `- [ ]` → `- [x]`
    - Continue to next task
 

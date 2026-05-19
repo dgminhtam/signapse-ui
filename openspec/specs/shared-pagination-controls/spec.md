@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+Define shared pagination controls for admin list pages, including page-size selection, result summaries, URL-driven navigation, and accessible state presentation.
+
+## Requirements
 
 ### Requirement: Unified pagination controls surface
 

@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+Document the Financial Command Surface visual direction for Signapse without claiming implementation of global tokens, app shell, shared surfaces, or pilot screens.
+
+## Requirements
 
 ### Requirement: Persistent Design Direction Document
 

@@ -74,7 +74,8 @@ app/(main)/[feature]/
 - Ưu tiên giải pháp đơn giản nhất đủ yêu cầu; không tạo abstraction, cấu hình hoặc luồng dự phòng khi chưa có nhu cầu rõ.
 - Chỉnh sửa phẫu thuật: chỉ sửa file liên quan trực tiếp, bám style hiện có và không dọn code ngoài scope.
 - Khi thay thế thư viện/vendor UI hoặc chart engine, migration phải xóa sạch source cũ không còn dùng: dependency trong package/lockfile, import/type/helper, adapter, attribution/vendor copy, OpenSpec/docs reference đang active và dead component tạm thời; không giữ code legacy bị disable eslint nếu không có compatibility path đang chạy thật.
-- Kết thúc bằng kiểm chứng phù hợp như lint, typecheck, test hoặc smoke test; nếu chưa chạy được thì nói rõ lý do.
+- Kết thúc phần agent-owned bằng kiểm chứng phù hợp như lint, typecheck và OpenSpec validation nếu có; nếu chưa chạy được thì nói rõ lý do.
+- Khi tạo hoặc cập nhật OpenSpec `tasks.md`, verification checklist mặc định chỉ gồm các kiểm chứng Codex có thể chạy từ repo như lint, typecheck, OpenSpec validation, static search hoặc code review xác định. Không thêm smoke/browser/visual/manual/auth/backend-data QA thành checkbox `- [ ]` chặn archive trừ khi người dùng yêu cầu rõ; nếu cần ghi nhận, đặt dưới ghi chú không checkbox như `User-owned manual QA`.
 
 ### Core components
 

@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+Define workspace-scoped watchlist management using the backend-supported tracked-asset API and safe synchronization behavior.
+
+## Requirements
 
 ### Requirement: Active workspace watchlist management
 The system SHALL let authorized users manage a single tracked-asset watchlist for the active workspace using the existing backend watchlist API.

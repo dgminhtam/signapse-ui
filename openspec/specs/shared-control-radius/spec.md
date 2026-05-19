@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+Define the default radius treatment for shared reusable controls while keeping broader surface-radius cleanup out of scope.
+
+## Requirements
 
 ### Requirement: Core controls use rounded-lg radius
 The system SHALL render core reusable control primitives with `rounded-lg` as their default visible radius.

@@ -98,6 +98,7 @@ After completing all artifacts, summarize:
 - The schema defines what each artifact should contain - follow it
 - Read dependency artifacts for context before creating new ones
 - Use `template` as the structure for your output file - fill in its sections
+- For Signapse `tasks.md`, default verification checklist items must stay agent-owned: lint, typecheck, OpenSpec validation, static search, deterministic code review, or targeted non-auth tests. Do not add smoke/browser/visual/manual/auth/backend-data QA as unchecked archive-gating tasks unless the user explicitly requests it; capture those expectations as non-checkbox `User-owned manual QA` notes instead.
 - **IMPORTANT**: `context` and `rules` are constraints for YOU, not content for the file
   - Do NOT copy `<context>`, `<rules>`, `<project_context>` blocks into the artifact
   - These guide what you write, but should never appear in the output
