@@ -30,6 +30,7 @@ import {
   isHTMLElement,
 } from "lexical";
 
+import { useLocalization } from "@/app/lib/i18n/provider";
 import {
   $createImageNode,
   $isImageNode,
@@ -52,6 +53,7 @@ export function InsertImageUriDialogBody({
 }: {
   onClick: (payload: InsertImagePayload) => void;
 }) {
+  const { dictionary } = useLocalization();
   const [src, setSrc] = useState("");
   const [altText, setAltText] = useState("");
 
@@ -60,20 +62,24 @@ export function InsertImageUriDialogBody({
   return (
     <FieldGroup>
       <Field>
-        <FieldLabel htmlFor="image-url">Image URL</FieldLabel>
+        <FieldLabel htmlFor="image-url">
+          {dictionary.editor.image.urlLabel}
+        </FieldLabel>
         <Input
           id="image-url"
-          placeholder="i.e. https://source.unsplash.com/random"
+          placeholder={dictionary.editor.image.urlPlaceholder}
           onChange={(e) => setSrc(e.target.value)}
           value={src}
           data-test-id="image-modal-url-input"
         />
       </Field>
       <Field>
-        <FieldLabel htmlFor="alt-text">Alt Text</FieldLabel>
+        <FieldLabel htmlFor="alt-text">
+          {dictionary.editor.image.altLabel}
+        </FieldLabel>
         <Input
           id="alt-text"
-          placeholder="Random unsplash image"
+          placeholder={dictionary.editor.image.altPlaceholder}
           onChange={(e) => setAltText(e.target.value)}
           value={altText}
           data-test-id="image-modal-alt-text-input"
@@ -86,7 +92,7 @@ export function InsertImageUriDialogBody({
           onClick={() => onClick({ altText, src })}
           data-test-id="image-modal-confirm-btn"
         >
-          Confirm
+          {dictionary.editor.insert.confirm}
         </Button>
       </DialogFooter>
     </FieldGroup>
@@ -98,6 +104,7 @@ export function InsertImageUploadedDialogBody({
 }: {
   onClick: (payload: InsertImagePayload) => void;
 }) {
+  const { dictionary } = useLocalization();
   const [src, setSrc] = useState("");
   const [altText, setAltText] = useState("");
 
@@ -119,7 +126,9 @@ export function InsertImageUploadedDialogBody({
   return (
     <FieldGroup>
       <Field>
-        <FieldLabel htmlFor="image-upload">Image Upload</FieldLabel>
+        <FieldLabel htmlFor="image-upload">
+          {dictionary.editor.image.uploadLabel}
+        </FieldLabel>
         <Input
           id="image-upload"
           type="file"
@@ -129,10 +138,12 @@ export function InsertImageUploadedDialogBody({
         />
       </Field>
       <Field>
-        <FieldLabel htmlFor="alt-text">Alt Text</FieldLabel>
+        <FieldLabel htmlFor="alt-text">
+          {dictionary.editor.image.altLabel}
+        </FieldLabel>
         <Input
           id="alt-text"
-          placeholder="Descriptive alternative text"
+          placeholder={dictionary.editor.image.uploadAltPlaceholder}
           onChange={(e) => setAltText(e.target.value)}
           value={altText}
           data-test-id="image-modal-alt-text-input"
@@ -145,7 +156,7 @@ export function InsertImageUploadedDialogBody({
           onClick={() => onClick({ altText, src })}
           data-test-id="image-modal-file-upload-btn"
         >
-          Confirm
+          {dictionary.editor.insert.confirm}
         </Button>
       </DialogFooter>
     </FieldGroup>
@@ -159,6 +170,7 @@ export function InsertImageDialog({
   activeEditor: LexicalEditor;
   onClose: () => void;
 }): JSX.Element {
+  const { dictionary } = useLocalization();
   const hasModifier = useRef(false);
 
   useEffect(() => {
@@ -181,8 +193,8 @@ export function InsertImageDialog({
   return (
     <Tabs defaultValue="url">
       <TabsList className="w-full">
-        <TabsTrigger value="url">URL</TabsTrigger>
-        <TabsTrigger value="file">File</TabsTrigger>
+        <TabsTrigger value="url">{dictionary.editor.image.urlTab}</TabsTrigger>
+        <TabsTrigger value="file">{dictionary.editor.image.fileTab}</TabsTrigger>
       </TabsList>
       <TabsContent value="url">
         <InsertImageUriDialogBody onClick={onClick} />

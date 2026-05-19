@@ -15,6 +15,7 @@ import { NEWS_ARTICLE_NAV_PERMISSIONS } from "@/app/lib/news-articles/permission
 import { NEWS_OUTLET_NAV_PERMISSIONS } from "@/app/lib/news-outlets/permissions"
 import { SYSTEM_PROMPT_NAV_PERMISSIONS } from "@/app/lib/system-prompts/permissions"
 import { TELEGRAM_NAV_PERMISSIONS } from "@/app/lib/telegram/permissions"
+import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
 
 export interface NavSubItem {
   title: string
@@ -46,106 +47,108 @@ function hasPermissionMatch(
   return requirement.some((permission) => permissions.includes(permission))
 }
 
-export const siteConfig = {
+export function createSiteConfig(dictionary: Dictionary) {
+  return {
   teams: [
     {
       name: "Signapse",
       logo: GalleryVerticalEnd,
-      plan: "Trang quản trị",
+      plan: dictionary.common.adminDashboard,
     },
   ],
   brand: {
     name: "Signapse",
     logo: GalleryVerticalEnd,
-    subtitle: "Trang quản trị",
+    subtitle: dictionary.common.adminDashboard,
   },
   navMain: [
     {
-      title: "Biểu đồ tri thức",
+      title: dictionary.navigation.knowledgeGraph,
       url: "/graph-view",
       icon: LayoutDashboard,
       permission: GRAPH_VIEW_NAV_PERMISSIONS,
     },
     {
-      title: "Biểu đồ giá",
+      title: dictionary.navigation.marketCharts,
       url: "/market-charts",
       icon: ChartCandlestick,
       permission: MARKET_CHART_NAV_PERMISSIONS,
     },
     {
-      title: "Nội dung",
+      title: dictionary.navigation.content,
       url: "#",
       icon: Newspaper,
       items: [
         {
-          title: "Nguồn tin",
+          title: dictionary.navigation.newsOutlets,
           url: "/news-outlets",
           permission: NEWS_OUTLET_NAV_PERMISSIONS,
         },
         {
-          title: "Bài viết tin tức",
+          title: dictionary.navigation.newsArticles,
           url: "/news-articles",
           permission: NEWS_ARTICLE_NAV_PERMISSIONS,
         },
         {
-          title: "Sự kiện",
+          title: dictionary.navigation.events,
           url: "/events",
           permission: EVENT_NAV_PERMISSIONS,
         },
         {
-          title: "Lịch kinh tế",
+          title: dictionary.navigation.economicCalendar,
           url: "/economic-calendar",
           permission: ECONOMIC_CALENDAR_NAV_PERMISSIONS,
         },
         {
-          title: "Truy vấn thị trường",
+          title: dictionary.navigation.marketQuery,
           url: "/market-query",
           permission: MARKET_QUERY_NAV_PERMISSIONS,
         },
         {
-          title: "Blog",
+          title: dictionary.navigation.blogs,
           url: "/blogs",
           permission: "blog:read",
         },
       ],
     },
     {
-      title: "Cài đặt",
+      title: dictionary.navigation.settings,
       url: "#",
       icon: Settings2,
       items: [
         {
-          title: "Telegram",
+          title: dictionary.navigation.telegram,
           url: "/telegram",
           permission: TELEGRAM_NAV_PERMISSIONS,
         },
         {
-          title: "Nhà cung cấp AI",
+          title: dictionary.navigation.aiProviders,
           url: "/ai-provider-configs",
           permission: "ai-provider-config:read",
         },
         {
-          title: "Prompt hệ thống",
+          title: dictionary.navigation.systemPrompts,
           url: "/system-prompts",
           permission: SYSTEM_PROMPT_NAV_PERMISSIONS,
         },
         {
-          title: "Tác vụ định kỳ",
+          title: dictionary.navigation.cronjobs,
           url: "/cronjobs",
           permission: "cronjob:read",
         },
         {
-          title: "Vai trò",
+          title: dictionary.navigation.roles,
           url: "/roles",
           permission: "role:update",
         },
         {
-          title: "Token nhà phát triển",
+          title: dictionary.navigation.developerToken,
           url: "/developer-token",
         },
       ],
     },
   ] satisfies NavItem[],
+  }
 }
 
 export function filterNavItemsByPermissions(

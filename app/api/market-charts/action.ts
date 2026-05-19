@@ -2,10 +2,12 @@
 
 import { fetchAuthenticated } from "@/app/api/auth/action"
 import { ActionResult } from "@/app/lib/definitions"
+import { getDictionary } from "@/app/lib/i18n/dictionaries"
+import { getRequestLocale } from "@/app/lib/i18n/server"
 import {
   MarketChartCandleRequest,
   MarketChartCandleResponse,
-  marketChartCandleRequestSchema,
+  getMarketChartCandleRequestSchema,
   marketChartCandleResponseSchema,
 } from "@/app/lib/market-charts/definitions"
 
@@ -24,14 +26,15 @@ function createMarketChartCandleQuery(request: MarketChartCandleRequest) {
 export async function getMarketChartCandles(
   request: MarketChartCandleRequest
 ): Promise<ActionResult<MarketChartCandleResponse>> {
-  const parsedRequest = marketChartCandleRequestSchema.safeParse(request)
+  const dictionary = await getDictionary(await getRequestLocale())
+  const parsedRequest = getMarketChartCandleRequestSchema(dictionary).safeParse(request)
 
   if (!parsedRequest.success) {
     return {
       success: false,
       error:
         parsedRequest.error.issues[0]?.message ||
-        "Yêu cầu tải biểu đồ giá không hợp lệ.",
+        dictionary.marketCharts.validationInvalid,
     }
   }
 
@@ -45,7 +48,7 @@ export async function getMarketChartCandles(
       console.error("Market chart candle response validation failed", parsedResponse.error.issues)
       return {
         success: false,
-        error: "Backend trả về dữ liệu nến không đúng định dạng mong đợi.",
+        error: dictionary.marketCharts.responseInvalid,
       }
     }
 
@@ -59,7 +62,7 @@ export async function getMarketChartCandles(
       error:
         error instanceof Error
           ? error.message
-          : "Không thể tải dữ liệu biểu đồ giá trong lúc này.",
+          : dictionary.marketCharts.loadError,
     }
   }
 }

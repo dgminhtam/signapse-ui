@@ -14,6 +14,8 @@ import { Popover as PopoverPrimitive } from "radix-ui";
 
 // import { TwitterIcon, YoutubeIcon } from "lucide-react"
 
+import type { Dictionary } from "@/app/lib/i18n/dictionary-types";
+import { useLocalization } from "@/app/lib/i18n/provider";
 import { useEditorModal } from "@/components/editor-x/use-modal";
 import { INSERT_TWEET_COMMAND } from "@/components/editor-x/twitter-plugin";
 import { INSERT_YOUTUBE_COMMAND } from "@/components/editor-x/youtube-plugin";
@@ -157,6 +159,20 @@ export const TwitterEmbedConfig: CustomEmbedConfig = {
 
 export const EmbedConfigs = [TwitterEmbedConfig, YoutubeEmbedConfig];
 
+export function getEmbedContentName(
+  embedConfig: CustomEmbedConfig,
+  dictionary: Dictionary,
+) {
+  switch (embedConfig.type) {
+    case "youtube-video":
+      return dictionary.editor.insert.youtubeVideo;
+    case "tweet":
+      return dictionary.editor.insert.tweet;
+    default:
+      return embedConfig.contentName;
+  }
+}
+
 const debounce = (callback: (text: string) => void, delay: number) => {
   let timeoutId: number;
   return (text: string) => {
@@ -174,6 +190,7 @@ export function AutoEmbedDialog({
   embedConfig: CustomEmbedConfig;
   onClose: () => void;
 }): JSX.Element {
+  const { dictionary } = useLocalization();
   const [text, setText] = useState("");
   const [editor] = useLexicalComposerContext();
   const [embedResult, setEmbedResult] = useState<EmbedMatchResult | null>(null);
@@ -222,7 +239,7 @@ export function AutoEmbedDialog({
             onClick={onClick}
             data-test-id={`${embedConfig.type}-embed-modal-submit-btn`}
           >
-            Embed
+            {dictionary.editor.insert.embed}
           </Button>
         </DialogFooter>
       </div>
@@ -231,12 +248,19 @@ export function AutoEmbedDialog({
 }
 
 export function AutoEmbedPlugin(): JSX.Element {
+  const { dictionary, formatMessage } = useLocalization();
   const [modal, showModal] = useEditorModal();
 
   const openEmbedModal = (embedConfig: CustomEmbedConfig) => {
-    showModal(`Embed ${embedConfig.contentName}`, (onClose) => (
-      <AutoEmbedDialog embedConfig={embedConfig} onClose={onClose} />
-    ));
+    const contentName = getEmbedContentName(embedConfig, dictionary);
+    showModal(
+      formatMessage(dictionary.editor.insert.embedContent, {
+        content: contentName,
+      }),
+      (onClose) => (
+        <AutoEmbedDialog embedConfig={embedConfig} onClose={onClose} />
+      ),
+    );
   };
 
   const getMenuOptions = (
@@ -244,13 +268,19 @@ export function AutoEmbedPlugin(): JSX.Element {
     embedFn: () => void,
     dismissFn: () => void,
   ) => {
+    const contentName = getEmbedContentName(activeEmbedConfig, dictionary);
     return [
-      new AutoEmbedOption("Dismiss", {
+      new AutoEmbedOption(dictionary.editor.insert.dismiss, {
         onSelect: dismissFn,
       }),
-      new AutoEmbedOption(`Embed ${activeEmbedConfig.contentName}`, {
-        onSelect: embedFn,
-      }),
+      new AutoEmbedOption(
+        formatMessage(dictionary.editor.insert.embedContent, {
+          content: contentName,
+        }),
+        {
+          onSelect: embedFn,
+        },
+      ),
     ];
   };
 

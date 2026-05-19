@@ -4,6 +4,7 @@ import { INSERT_TABLE_COMMAND } from "@lexical/table";
 import { type LexicalEditor } from "lexical";
 import { useState } from "react";
 
+import { useLocalization } from "@/app/lib/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,7 @@ export function InsertTableDialog({
   activeEditor: LexicalEditor;
   onClose: () => void;
 }): JSX.Element {
+  const { dictionary } = useLocalization();
   const [rows, setRows] = useState("5");
   const [columns, setColumns] = useState("5");
   const row = Number(rows);
@@ -41,10 +43,10 @@ export function InsertTableDialog({
   return (
     <>
       <div className="grid gap-2">
-        <Label htmlFor="table-modal-rows">Rows</Label>
+        <Label htmlFor="table-modal-rows">{dictionary.editor.table.rows}</Label>
         <Input
           id="table-modal-rows"
-          placeholder="# of rows (1-500)"
+          placeholder={dictionary.editor.table.rowsPlaceholder}
           onChange={(e) => setRows(e.target.value)}
           value={rows}
           data-test-id="table-modal-rows"
@@ -52,10 +54,12 @@ export function InsertTableDialog({
         />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="table-modal-columns">Columns</Label>
+        <Label htmlFor="table-modal-columns">
+          {dictionary.editor.table.columns}
+        </Label>
         <Input
           id="table-modal-columns"
-          placeholder="# of columns (1-50)"
+          placeholder={dictionary.editor.table.columnsPlaceholder}
           onChange={(e) => setColumns(e.target.value)}
           value={columns}
           data-test-id="table-modal-columns"
@@ -64,7 +68,7 @@ export function InsertTableDialog({
       </div>
       <DialogFooter data-test-id="table-model-confirm-insert">
         <Button disabled={isDisabled} onClick={onClick}>
-          Confirm
+          {dictionary.editor.insert.confirm}
         </Button>
       </DialogFooter>
     </>

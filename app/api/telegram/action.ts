@@ -5,28 +5,38 @@ import { z } from "zod"
 
 import { fetchAuthenticated } from "@/app/api/auth/action"
 import { ActionResult } from "@/app/lib/definitions"
+import { getDictionary } from "@/app/lib/i18n/dictionaries"
+import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
+import { getRequestLocale } from "@/app/lib/i18n/server"
 import {
-  createTelegramBotConnectionSchema,
-  createTelegramLinkTokenSchema,
   CreateTelegramBotConnectionRequest,
   CreateTelegramLinkTokenRequest,
-  saveTelegramMarketAnalysisScheduleSchema,
+  getCreateTelegramBotConnectionSchema,
+  getCreateTelegramLinkTokenSchema,
+  getSaveTelegramMarketAnalysisScheduleSchema,
+  getUpdateTelegramBotConnectionSchema,
+  getUpdateTelegramDestinationSchema,
+  getUpdateTelegramFeatureSettingSchema,
   SaveTelegramMarketAnalysisScheduleRequest,
   TelegramBotConnectionResponse,
   TelegramDestinationResponse,
   TelegramFeatureSettingResponse,
   TelegramLinkTokenResponse,
   TelegramMarketAnalysisScheduleResponse,
-  updateTelegramBotConnectionSchema,
   UpdateTelegramBotConnectionRequest,
-  updateTelegramDestinationSchema,
   UpdateTelegramDestinationRequest,
-  updateTelegramFeatureSettingSchema,
   UpdateTelegramFeatureSettingRequest,
 } from "@/app/lib/telegram/definitions"
 
-function getValidationError(error: z.ZodError): string {
-  return error.issues[0]?.message ?? "Dữ liệu Telegram không hợp lệ."
+async function getTelegramDictionary() {
+  return getDictionary(await getRequestLocale())
+}
+
+function getValidationError(
+  error: z.ZodError,
+  dictionary: Dictionary
+): string {
+  return error.issues[0]?.message ?? dictionary.telegram.validationInvalid
 }
 
 function getActionError(error: unknown, fallback: string): string {
@@ -72,10 +82,11 @@ export async function getTelegramMarketAnalysisSchedules(): Promise<
 export async function createTelegramBotConnection(
   request: CreateTelegramBotConnectionRequest
 ): Promise<ActionResult<TelegramBotConnectionResponse>> {
-  const parsed = createTelegramBotConnectionSchema.safeParse(request)
+  const dictionary = await getTelegramDictionary()
+  const parsed = getCreateTelegramBotConnectionSchema(dictionary).safeParse(request)
 
   if (!parsed.success) {
-    return { success: false, error: getValidationError(parsed.error) }
+    return { success: false, error: getValidationError(parsed.error, dictionary) }
   }
 
   try {
@@ -93,7 +104,7 @@ export async function createTelegramBotConnection(
   } catch (error: unknown) {
     return {
       success: false,
-      error: getActionError(error, "Không thể kết nối bot Telegram."),
+      error: getActionError(error, dictionary.telegram.bot.createError),
     }
   }
 }
@@ -102,10 +113,11 @@ export async function updateTelegramBotConnection(
   id: number,
   request: UpdateTelegramBotConnectionRequest
 ): Promise<ActionResult<TelegramBotConnectionResponse>> {
-  const parsed = updateTelegramBotConnectionSchema.safeParse(request)
+  const dictionary = await getTelegramDictionary()
+  const parsed = getUpdateTelegramBotConnectionSchema().safeParse(request)
 
   if (!parsed.success) {
-    return { success: false, error: getValidationError(parsed.error) }
+    return { success: false, error: getValidationError(parsed.error, dictionary) }
   }
 
   try {
@@ -123,7 +135,7 @@ export async function updateTelegramBotConnection(
   } catch (error: unknown) {
     return {
       success: false,
-      error: getActionError(error, "Không thể cập nhật bot Telegram."),
+      error: getActionError(error, dictionary.telegram.bot.updateError),
     }
   }
 }
@@ -131,6 +143,8 @@ export async function updateTelegramBotConnection(
 export async function disableTelegramBotConnection(
   id: number
 ): Promise<ActionResult<TelegramBotConnectionResponse>> {
+  const dictionary = await getTelegramDictionary()
+
   try {
     const data = await fetchAuthenticated<TelegramBotConnectionResponse>(
       `/telegram/bot-connections/${id}/disable`,
@@ -145,7 +159,7 @@ export async function disableTelegramBotConnection(
   } catch (error: unknown) {
     return {
       success: false,
-      error: getActionError(error, "Không thể tạm dừng bot Telegram."),
+      error: getActionError(error, dictionary.telegram.bot.pauseError),
     }
   }
 }
@@ -153,6 +167,8 @@ export async function disableTelegramBotConnection(
 export async function deleteTelegramBotConnection(
   id: number
 ): Promise<ActionResult> {
+  const dictionary = await getTelegramDictionary()
+
   try {
     await fetchAuthenticated<void>(`/telegram/bot-connections/${id}`, {
       method: "DELETE",
@@ -164,7 +180,7 @@ export async function deleteTelegramBotConnection(
   } catch (error: unknown) {
     return {
       success: false,
-      error: getActionError(error, "Không thể xóa bot Telegram."),
+      error: getActionError(error, dictionary.telegram.bot.deleteError),
     }
   }
 }
@@ -172,10 +188,11 @@ export async function deleteTelegramBotConnection(
 export async function createTelegramLinkToken(
   request: CreateTelegramLinkTokenRequest
 ): Promise<ActionResult<TelegramLinkTokenResponse>> {
-  const parsed = createTelegramLinkTokenSchema.safeParse(request)
+  const dictionary = await getTelegramDictionary()
+  const parsed = getCreateTelegramLinkTokenSchema().safeParse(request)
 
   if (!parsed.success) {
-    return { success: false, error: getValidationError(parsed.error) }
+    return { success: false, error: getValidationError(parsed.error, dictionary) }
   }
 
   try {
@@ -191,7 +208,7 @@ export async function createTelegramLinkToken(
   } catch (error: unknown) {
     return {
       success: false,
-      error: getActionError(error, "Không thể tạo lệnh liên kết Telegram."),
+      error: getActionError(error, dictionary.telegram.destination.createLinkError),
     }
   }
 }
@@ -200,10 +217,11 @@ export async function updateTelegramDestination(
   id: number,
   request: UpdateTelegramDestinationRequest
 ): Promise<ActionResult<TelegramDestinationResponse>> {
-  const parsed = updateTelegramDestinationSchema.safeParse(request)
+  const dictionary = await getTelegramDictionary()
+  const parsed = getUpdateTelegramDestinationSchema().safeParse(request)
 
   if (!parsed.success) {
-    return { success: false, error: getValidationError(parsed.error) }
+    return { success: false, error: getValidationError(parsed.error, dictionary) }
   }
 
   try {
@@ -221,7 +239,7 @@ export async function updateTelegramDestination(
   } catch (error: unknown) {
     return {
       success: false,
-      error: getActionError(error, "Không thể cập nhật điểm nhận Telegram."),
+      error: getActionError(error, dictionary.telegram.destination.updateError),
     }
   }
 }
@@ -229,6 +247,8 @@ export async function updateTelegramDestination(
 export async function disableTelegramDestination(
   id: number
 ): Promise<ActionResult<TelegramDestinationResponse>> {
+  const dictionary = await getTelegramDictionary()
+
   try {
     const data = await fetchAuthenticated<TelegramDestinationResponse>(
       `/telegram/destinations/${id}/disable`,
@@ -243,7 +263,7 @@ export async function disableTelegramDestination(
   } catch (error: unknown) {
     return {
       success: false,
-      error: getActionError(error, "Không thể tạm dừng điểm nhận Telegram."),
+      error: getActionError(error, dictionary.telegram.destination.pauseError),
     }
   }
 }
@@ -251,6 +271,8 @@ export async function disableTelegramDestination(
 export async function deleteTelegramDestination(
   id: number
 ): Promise<ActionResult> {
+  const dictionary = await getTelegramDictionary()
+
   try {
     await fetchAuthenticated<void>(`/telegram/destinations/${id}`, {
       method: "DELETE",
@@ -262,7 +284,7 @@ export async function deleteTelegramDestination(
   } catch (error: unknown) {
     return {
       success: false,
-      error: getActionError(error, "Không thể xóa điểm nhận Telegram."),
+      error: getActionError(error, dictionary.telegram.destination.deleteError),
     }
   }
 }
@@ -270,10 +292,11 @@ export async function deleteTelegramDestination(
 export async function updateTelegramFeatureSetting(
   request: UpdateTelegramFeatureSettingRequest
 ): Promise<ActionResult<TelegramFeatureSettingResponse>> {
-  const parsed = updateTelegramFeatureSettingSchema.safeParse(request)
+  const dictionary = await getTelegramDictionary()
+  const parsed = getUpdateTelegramFeatureSettingSchema().safeParse(request)
 
   if (!parsed.success) {
-    return { success: false, error: getValidationError(parsed.error) }
+    return { success: false, error: getValidationError(parsed.error, dictionary) }
   }
 
   try {
@@ -291,7 +314,7 @@ export async function updateTelegramFeatureSetting(
   } catch (error: unknown) {
     return {
       success: false,
-      error: getActionError(error, "Không thể cập nhật định tuyến Telegram."),
+      error: getActionError(error, dictionary.telegram.routing.updateError),
     }
   }
 }
@@ -299,10 +322,12 @@ export async function updateTelegramFeatureSetting(
 export async function createTelegramMarketAnalysisSchedule(
   request: SaveTelegramMarketAnalysisScheduleRequest
 ): Promise<ActionResult<TelegramMarketAnalysisScheduleResponse>> {
-  const parsed = saveTelegramMarketAnalysisScheduleSchema.safeParse(request)
+  const dictionary = await getTelegramDictionary()
+  const parsed =
+    getSaveTelegramMarketAnalysisScheduleSchema(dictionary).safeParse(request)
 
   if (!parsed.success) {
-    return { success: false, error: getValidationError(parsed.error) }
+    return { success: false, error: getValidationError(parsed.error, dictionary) }
   }
 
   try {
@@ -321,7 +346,7 @@ export async function createTelegramMarketAnalysisSchedule(
   } catch (error: unknown) {
     return {
       success: false,
-      error: getActionError(error, "Không thể tạo lịch phân tích Telegram."),
+      error: getActionError(error, dictionary.telegram.schedule.createError),
     }
   }
 }
@@ -330,10 +355,12 @@ export async function updateTelegramMarketAnalysisSchedule(
   id: number,
   request: SaveTelegramMarketAnalysisScheduleRequest
 ): Promise<ActionResult<TelegramMarketAnalysisScheduleResponse>> {
-  const parsed = saveTelegramMarketAnalysisScheduleSchema.safeParse(request)
+  const dictionary = await getTelegramDictionary()
+  const parsed =
+    getSaveTelegramMarketAnalysisScheduleSchema(dictionary).safeParse(request)
 
   if (!parsed.success) {
-    return { success: false, error: getValidationError(parsed.error) }
+    return { success: false, error: getValidationError(parsed.error, dictionary) }
   }
 
   try {
@@ -352,7 +379,7 @@ export async function updateTelegramMarketAnalysisSchedule(
   } catch (error: unknown) {
     return {
       success: false,
-      error: getActionError(error, "Không thể cập nhật lịch phân tích Telegram."),
+      error: getActionError(error, dictionary.telegram.schedule.updateError),
     }
   }
 }
@@ -360,6 +387,8 @@ export async function updateTelegramMarketAnalysisSchedule(
 export async function disableTelegramMarketAnalysisSchedule(
   id: number
 ): Promise<ActionResult<TelegramMarketAnalysisScheduleResponse>> {
+  const dictionary = await getTelegramDictionary()
+
   try {
     const data =
       await fetchAuthenticated<TelegramMarketAnalysisScheduleResponse>(
@@ -375,7 +404,7 @@ export async function disableTelegramMarketAnalysisSchedule(
   } catch (error: unknown) {
     return {
       success: false,
-      error: getActionError(error, "Không thể tạm dừng lịch phân tích Telegram."),
+      error: getActionError(error, dictionary.telegram.schedule.pauseError),
     }
   }
 }
@@ -383,6 +412,8 @@ export async function disableTelegramMarketAnalysisSchedule(
 export async function deleteTelegramMarketAnalysisSchedule(
   id: number
 ): Promise<ActionResult> {
+  const dictionary = await getTelegramDictionary()
+
   try {
     await fetchAuthenticated<void>(
       `/telegram/market-analysis-schedules/${id}`,
@@ -397,7 +428,7 @@ export async function deleteTelegramMarketAnalysisSchedule(
   } catch (error: unknown) {
     return {
       success: false,
-      error: getActionError(error, "Không thể xóa lịch phân tích Telegram."),
+      error: getActionError(error, dictionary.telegram.schedule.deleteError),
     }
   }
 }

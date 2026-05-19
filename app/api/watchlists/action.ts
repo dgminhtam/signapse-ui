@@ -2,6 +2,7 @@
 
 import { fetchAuthenticated } from "@/app/api/auth/action"
 import { ActionResult, Page, SearchParams } from "@/app/lib/definitions"
+import { getServerDictionary } from "@/app/lib/i18n/server"
 import { queryParamsToString } from "@/app/lib/utils"
 import {
   AddWorkspaceWatchlistAssetRequest,
@@ -28,8 +29,9 @@ export async function addAssetToWorkspaceWatchlist(
 
     return { success: true, data: watchlistAsset }
   } catch (error: unknown) {
+    const dictionary = await getServerDictionary()
     const errorMessage =
-      error instanceof Error ? error.message : "Không thể thêm tài sản vào danh sách theo dõi."
+      error instanceof Error ? error.message : dictionary.watchlist.addError
     return { success: false, error: errorMessage }
   }
 }
@@ -42,8 +44,9 @@ export async function removeAssetFromWorkspaceWatchlist(assetId: number): Promis
 
     return { success: true, data: undefined }
   } catch (error: unknown) {
+    const dictionary = await getServerDictionary()
     const errorMessage =
-      error instanceof Error ? error.message : "Không thể gỡ tài sản khỏi danh sách theo dõi."
+      error instanceof Error ? error.message : dictionary.watchlist.removeError
     return { success: false, error: errorMessage }
   }
 }

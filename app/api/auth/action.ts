@@ -2,6 +2,9 @@
 
 import { auth } from '@clerk/nextjs/server';
 
+import { getDictionary } from '@/app/lib/i18n/dictionaries';
+import { getRequestLocale } from '@/app/lib/i18n/server';
+
 const API_TIMEOUT_MS = 60000;
 type ApiFetchError = Error & { status?: number };
 
@@ -11,17 +14,23 @@ async function apiFetch<T>(
   timeoutMs = API_TIMEOUT_MS
 ): Promise<T> {
 
+  const locale = await getRequestLocale();
+  const dictionary = await getDictionary(locale);
   const BASE_URL = process.env.API_BASE_URL;
   if (!BASE_URL) {
-    throw new Error("Thiếu biến môi trường API_BASE_URL");
+    throw new Error(dictionary.errors.missingApiBaseUrl);
   }
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   const isFormData = options.body instanceof FormData;
-  const defaultHeaders: Record<string, string> = {};
+  const hasBody = options.body !== undefined && options.body !== null;
+  const defaultHeaders: Record<string, string> = {
+    Accept: 'application/json',
+    'Accept-Language': locale,
+  };
 
-  if (!isFormData) {
+  if (hasBody && !isFormData) {
     defaultHeaders['Content-Type'] = 'application/json';
   }
 
@@ -48,7 +57,7 @@ async function apiFetch<T>(
 
     if (!response.ok) {
       const errorText = await response.text();
-      let errorMessage = "Đã xảy ra lỗi";
+      let errorMessage = dictionary.errors.generic;
       try {
         if (errorText) {
           const errorJson = JSON.parse(errorText);
@@ -83,19 +92,20 @@ async function apiFetch<T>(
     if (isNotFoundError) {
       throw error;
     }
-    console.error("Lỗi apiFetch:", error);
+    console.error("apiFetch error:", error);
     throw error;
   }
 }
 
 export async function getClerkToken(): Promise<string> {
   const { getToken, userId } = await auth();
+  const dictionary = await getDictionary(await getRequestLocale());
   if (!userId) {
-    throw new Error('Chưa xác thực (User ID not found)');
+    throw new Error(dictionary.errors.unauthenticated);
   }
   const token = await getToken({ template: 'aflower' });
   if (!token) {
-    throw new Error('Không lấy được token (getToken failed)');
+    throw new Error(dictionary.errors.missingToken);
   }
   return token;
 }

@@ -2,22 +2,25 @@
 
 import { fetchAuthenticated } from "@/app/api/auth/action"
 import { ActionResult } from "@/app/lib/definitions"
+import { getDictionary } from "@/app/lib/i18n/dictionaries"
+import { getRequestLocale } from "@/app/lib/i18n/server"
 import {
   MarketQueryRequest,
   MarketQueryResponse,
-  marketQueryRequestSchema,
+  getMarketQueryRequestSchema,
   marketQueryResponseSchema,
 } from "@/app/lib/market-query/definitions"
 
 export async function queryMarket(
   request: MarketQueryRequest
 ): Promise<ActionResult<MarketQueryResponse>> {
-  const parsedRequest = marketQueryRequestSchema.safeParse(request)
+  const dictionary = await getDictionary(await getRequestLocale())
+  const parsedRequest = getMarketQueryRequestSchema(dictionary).safeParse(request)
 
   if (!parsedRequest.success) {
     return {
       success: false,
-      error: parsedRequest.error.issues[0]?.message || "Yêu cầu truy vấn không hợp lệ.",
+      error: parsedRequest.error.issues[0]?.message || dictionary.marketQuery.validationInvalid,
     }
   }
 
@@ -41,7 +44,7 @@ export async function queryMarket(
       console.error("Market query response validation failed", parsedResponse.error.issues)
       return {
         success: false,
-        error: "Hệ thống trả về dữ liệu truy vấn không đúng định dạng mong đợi.",
+        error: dictionary.marketQuery.responseInvalid,
       }
     }
 
@@ -55,7 +58,7 @@ export async function queryMarket(
       error:
         error instanceof Error
           ? error.message
-          : "Không thể thực hiện truy vấn thị trường trong lúc này.",
+          : dictionary.marketQuery.queryError,
     }
   }
 }

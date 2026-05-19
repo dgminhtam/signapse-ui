@@ -15,6 +15,7 @@ import {
   type BaseSelection,
 } from "lexical";
 
+import { useLocalization } from "@/app/lib/i18n/provider";
 import { useToolbarContext } from "@/components/editor-x/toolbar-context";
 import { useUpdateToolbarHandler } from "@/components/editor-x/use-update-toolbar";
 import {
@@ -40,6 +41,7 @@ function getCodeLanguageOptions(): [string, string][] {
 const CODE_LANGUAGE_OPTIONS = getCodeLanguageOptions();
 
 export function CodeLanguageToolbarPlugin() {
+  const { dictionary } = useLocalization();
   const { activeEditor } = useToolbarContext();
   const [codeLanguage, setCodeLanguage] = useState<string>("");
   const [selectedElementKey, setSelectedElementKey] = useState<string | null>(
@@ -98,7 +100,7 @@ export function CodeLanguageToolbarPlugin() {
   return (
     <Select value={codeLanguage} onValueChange={onCodeLanguageSelect}>
       <SelectTrigger onMouseDown={(e) => e.stopPropagation()}>
-        <SelectValue placeholder="Select Language" />
+        <SelectValue placeholder={dictionary.editor.toolbar.selectLanguage} />
       </SelectTrigger>
       <SelectContent onCloseAutoFocus={(e) => e.preventDefault()}>
         {CODE_LANGUAGE_OPTIONS.map(([value, label]) => (

@@ -2,6 +2,7 @@
 
 import { fetchAuthenticated } from "@/app/api/auth/action"
 import { ActionResult, Page, SearchParams } from "@/app/lib/definitions"
+import { getServerDictionary } from "@/app/lib/i18n/server"
 import {
   CreatePersonalNoteRequest,
   PersonalNoteResponse,
@@ -36,8 +37,9 @@ export async function createPersonalNote(
 
     return { success: true, data: note }
   } catch (error: unknown) {
+    const dictionary = await getServerDictionary()
     const errorMessage =
-      error instanceof Error ? error.message : "Không thể tạo ghi chú"
+      error instanceof Error ? error.message : dictionary.personalNotes.createError
 
     return { success: false, error: errorMessage }
   }
@@ -60,8 +62,9 @@ export async function updatePersonalNote(
 
     return { success: true, data: note }
   } catch (error: unknown) {
+    const dictionary = await getServerDictionary()
     const errorMessage =
-      error instanceof Error ? error.message : "Không thể lưu ghi chú"
+      error instanceof Error ? error.message : dictionary.personalNotes.saveError
 
     return { success: false, error: errorMessage }
   }
@@ -75,8 +78,9 @@ export async function deletePersonalNote(id: number): Promise<ActionResult> {
 
     return { success: true, data: undefined }
   } catch (error: unknown) {
+    const dictionary = await getServerDictionary()
     const errorMessage =
-      error instanceof Error ? error.message : "Không thể xóa ghi chú"
+      error instanceof Error ? error.message : dictionary.personalNotes.deleteError
 
     return { success: false, error: errorMessage }
   }

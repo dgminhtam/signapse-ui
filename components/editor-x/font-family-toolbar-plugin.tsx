@@ -8,6 +8,7 @@ import { $getSelection, $isRangeSelection, type BaseSelection } from "lexical";
 
 import { ChevronDownIcon, TypeIcon } from "lucide-react";
 
+import { useLocalization } from "@/app/lib/i18n/provider";
 import { useToolbarContext } from "@/components/editor-x/toolbar-context";
 import { useUpdateToolbarHandler } from "@/components/editor-x/use-update-toolbar";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,7 @@ const FONT_FAMILY_OPTIONS = [
 ];
 
 export function FontFamilyToolbarPlugin() {
+  const { dictionary } = useLocalization();
   const style = "font-family";
   const [fontFamily, setFontFamily] = useState("Arial");
 
@@ -60,7 +62,7 @@ export function FontFamilyToolbarPlugin() {
     [activeEditor, style],
   );
 
-  const buttonAriaLabel = "Formatting options for font family";
+  const buttonAriaLabel = dictionary.editor.toolbar.fontFamilyOptions;
 
   return (
     <DropdownMenu>

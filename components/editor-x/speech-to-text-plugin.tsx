@@ -13,6 +13,7 @@ import {
 
 import { MicIcon } from "lucide-react";
 
+import { useLocalization } from "@/app/lib/i18n/provider";
 import { useReport } from "@/components/editor-x/use-report";
 import { CAN_USE_DOM } from "@/components/editor-x/can-use-dom";
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,7 @@ export const SUPPORT_SPEECH_RECOGNITION: boolean =
   ("SpeechRecognition" in window || "webkitSpeechRecognition" in window);
 
 function SpeechToTextPluginImpl() {
+  const { dictionary } = useLocalization();
   const [editor] = useLexicalComposerContext();
   const [isEnabled, setIsEnabled] = useState<boolean>(false);
   const [isSpeechToText, setIsSpeechToText] = useState(false);
@@ -129,15 +131,19 @@ function SpeechToTextPluginImpl() {
             setIsSpeechToText(!isSpeechToText);
           }}
           variant={isSpeechToText ? "secondary" : "ghost"}
-          title="Speech To Text"
-          aria-label={`${isSpeechToText ? "Enable" : "Disable"} speech to text`}
+          title={dictionary.editor.speechToText.title}
+          aria-label={
+            isSpeechToText
+              ? dictionary.editor.speechToText.disable
+              : dictionary.editor.speechToText.enable
+          }
           className="p-2"
           size={"sm"}
         >
           <MicIcon className="size-4" />
         </Button>
       </TooltipTrigger>
-      <TooltipContent>Speech To Text</TooltipContent>
+      <TooltipContent>{dictionary.editor.speechToText.title}</TooltipContent>
     </Tooltip>
   );
 }

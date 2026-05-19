@@ -10,6 +10,7 @@ import {
 
 import { CircleCheckIcon, CopyIcon } from "lucide-react";
 
+import { useLocalization } from "@/app/lib/i18n/provider";
 import { useDebounce } from "@/components/editor-x/use-debounce";
 
 interface Props {
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export function CopyButton({ editor, getCodeDOMNode }: Props) {
+  const { dictionary } = useLocalization();
   const [isCopyCompleted, setCopyCompleted] = useState<boolean>(false);
 
   const removeSuccessIcon = useDebounce(() => {
@@ -57,7 +59,7 @@ export function CopyButton({ editor, getCodeDOMNode }: Props) {
     <button
       className="text-foreground/50 flex shrink-0 cursor-pointer items-center rounded border border-transparent bg-none p-1 uppercase"
       onClick={handleClick}
-      aria-label="copy"
+      aria-label={dictionary.editor.toolbar.copy}
     >
       {isCopyCompleted ? (
         <CircleCheckIcon className="size-4" />

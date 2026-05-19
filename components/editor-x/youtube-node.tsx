@@ -17,6 +17,8 @@ import type {
   Spread,
 } from "lexical";
 
+import { useLocalization } from "@/app/lib/i18n/provider";
+
 type YouTubeComponentProps = Readonly<{
   className: Readonly<{
     base: string;
@@ -33,6 +35,8 @@ function YouTubeComponent({
   nodeKey,
   videoID,
 }: YouTubeComponentProps) {
+  const { dictionary } = useLocalization();
+
   return (
     <BlockWithAlignableContents
       className={className}
@@ -46,7 +50,7 @@ function YouTubeComponent({
         frameBorder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowFullScreen={true}
-        title="YouTube video"
+        title={dictionary.editor.insert.youtubeVideo}
       />
     </BlockWithAlignableContents>
   );
@@ -116,7 +120,7 @@ export class YouTubeNode extends DecoratorBlockNode {
       "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture",
     );
     element.setAttribute("allowfullscreen", "true");
-    element.setAttribute("title", "YouTube video");
+    element.setAttribute("title", "YouTube");
     return { element };
   }
 

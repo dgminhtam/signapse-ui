@@ -4,6 +4,8 @@ import { ExternalLink } from "lucide-react"
 import { useRouter } from "next/navigation"
 import type { ReactNode } from "react"
 
+import { useLocalization } from "@/app/lib/i18n/provider"
+import { LocalizedLink } from "@/components/localized-link"
 import { Button } from "@/components/ui/button"
 import {
   Drawer,
@@ -27,10 +29,12 @@ export function EntityQuickDetailDrawer({
   children,
   description,
   fullDetailHref,
-  fullDetailLabel = "Mở trang đầy đủ",
+  fullDetailLabel,
   title,
 }: EntityQuickDetailDrawerProps) {
   const router = useRouter()
+  const { dictionary } = useLocalization()
+  const resolvedFullDetailLabel = fullDetailLabel ?? dictionary.common.openFullPage
 
   return (
     <Drawer open onOpenChange={(open) => !open && router.back()}>
@@ -54,14 +58,14 @@ export function EntityQuickDetailDrawer({
           <div className="mx-auto flex w-full max-w-5xl flex-col gap-2 sm:flex-row sm:justify-end">
             {fullDetailHref ? (
               <Button asChild variant="outline">
-                <a href={fullDetailHref}>
+                <LocalizedLink href={fullDetailHref}>
                   <ExternalLink aria-hidden="true" data-icon="inline-start" />
-                  {fullDetailLabel}
-                </a>
+                  {resolvedFullDetailLabel}
+                </LocalizedLink>
               </Button>
             ) : null}
             <DrawerClose asChild>
-              <Button type="button">Đóng</Button>
+              <Button type="button">{dictionary.common.close}</Button>
             </DrawerClose>
           </div>
         </DrawerFooter>

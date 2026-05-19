@@ -1,5 +1,8 @@
+"use client"
+
 import { ShieldAlert } from "lucide-react"
 
+import { useLocalization } from "@/app/lib/i18n/provider"
 import {
   Empty,
   EmptyDescription,
@@ -15,23 +18,26 @@ interface AccessDeniedProps {
 }
 
 export function AccessDenied({
-  title = "Không có quyền truy cập",
+  title,
   description,
   permission,
 }: AccessDeniedProps) {
+  const { dictionary } = useLocalization()
+  const resolvedTitle = title ?? dictionary.errors.accessDeniedTitle
+
   return (
     <Empty className="min-h-[320px] rounded-lg border border-dashed">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <ShieldAlert />
         </EmptyMedia>
-        <EmptyTitle>{title}</EmptyTitle>
+        <EmptyTitle>{resolvedTitle}</EmptyTitle>
         <EmptyDescription>
           {description}
           {permission ? (
             <>
               {" "}
-              Quyền yêu cầu: <code>{permission}</code>.
+              {dictionary.errors.requiredPermission}: <code>{permission}</code>.
             </>
           ) : null}
         </EmptyDescription>

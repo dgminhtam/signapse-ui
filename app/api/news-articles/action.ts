@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache"
 
 import { fetchAuthenticated } from "@/app/api/auth/action"
 import { ActionResult, Page, SearchParams } from "@/app/lib/definitions"
+import { getDictionary } from "@/app/lib/i18n/dictionaries"
+import { getRequestLocale } from "@/app/lib/i18n/server"
 import {
   MediaReferenceRequest,
   NewsArticleListResponse,
@@ -46,9 +48,13 @@ export async function deleteNewsArticle(id: number): Promise<ActionResult> {
 
     return { success: true, data: undefined }
   } catch (error: unknown) {
+    const dictionary = await getDictionary(await getRequestLocale())
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Không thể xóa bài viết tin tức.",
+      error:
+        error instanceof Error
+          ? error.message
+          : dictionary.newsArticles.deleteError,
     }
   }
 }
@@ -68,10 +74,13 @@ export async function crawlNewsArticleFullContent(
 
     return { success: true, data }
   } catch (error: unknown) {
+    const dictionary = await getDictionary(await getRequestLocale())
     return {
       success: false,
       error:
-        error instanceof Error ? error.message : "Không thể tải lại nội dung đầy đủ.",
+        error instanceof Error
+          ? error.message
+          : dictionary.newsArticles.featureImageError,
     }
   }
 }
@@ -91,10 +100,13 @@ export async function derivePrimaryEventFromNewsArticle(
 
     return { success: true, data }
   } catch (error: unknown) {
+    const dictionary = await getDictionary(await getRequestLocale())
     return {
       success: false,
       error:
-        error instanceof Error ? error.message : "Không thể suy diễn sự kiện chính.",
+        error instanceof Error
+          ? error.message
+          : dictionary.newsArticles.deriveEventError,
     }
   }
 }
@@ -115,10 +127,13 @@ export async function derivePendingNewsArticleEvents(
 
     return { success: true, data }
   } catch (error: unknown) {
+    const dictionary = await getDictionary(await getRequestLocale())
     return {
       success: false,
       error:
-        error instanceof Error ? error.message : "Không thể suy diễn lô bài viết đang chờ.",
+        error instanceof Error
+          ? error.message
+          : dictionary.newsArticles.derivePendingError,
     }
   }
 }
@@ -140,10 +155,13 @@ export async function updateNewsArticleFeatureImage(
 
     return { success: true, data }
   } catch (error: unknown) {
+    const dictionary = await getDictionary(await getRequestLocale())
     return {
       success: false,
       error:
-        error instanceof Error ? error.message : "Không thể cập nhật ảnh đại diện bài viết.",
+        error instanceof Error
+          ? error.message
+          : dictionary.newsArticles.reloadContentError,
     }
   }
 }

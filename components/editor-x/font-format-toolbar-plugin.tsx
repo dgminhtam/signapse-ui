@@ -15,18 +15,20 @@ import {
   UnderlineIcon,
 } from "lucide-react";
 
+import { useLocalization } from "@/app/lib/i18n/provider";
 import { useToolbarContext } from "@/components/editor-x/toolbar-context";
 import { useUpdateToolbarHandler } from "@/components/editor-x/use-update-toolbar";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 const FORMATS = [
-  { format: "bold", icon: BoldIcon, label: "Bold" },
-  { format: "italic", icon: ItalicIcon, label: "Italic" },
-  { format: "underline", icon: UnderlineIcon, label: "Underline" },
-  { format: "strikethrough", icon: StrikethroughIcon, label: "Strikethrough" },
+  { format: "bold", icon: BoldIcon, labelKey: "bold" },
+  { format: "italic", icon: ItalicIcon, labelKey: "italic" },
+  { format: "underline", icon: UnderlineIcon, labelKey: "underline" },
+  { format: "strikethrough", icon: StrikethroughIcon, labelKey: "strikethrough" },
 ] as const;
 
 export function FontFormatToolbarPlugin() {
+  const { dictionary } = useLocalization();
   const { activeEditor } = useToolbarContext();
   const [activeFormats, setActiveFormats] = useState<string[]>([]);
 
@@ -61,11 +63,11 @@ export function FontFormatToolbarPlugin() {
       variant="outline"
       size="sm"
     >
-      {FORMATS.map(({ format, icon: Icon, label }) => (
+      {FORMATS.map(({ format, icon: Icon, labelKey }) => (
         <ToggleGroupItem
           key={format}
           value={format}
-          aria-label={label}
+          aria-label={dictionary.editor.toolbar[labelKey]}
           onClick={() => {
             activeEditor.dispatchCommand(
               FORMAT_TEXT_COMMAND,

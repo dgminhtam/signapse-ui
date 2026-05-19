@@ -5,6 +5,7 @@ import { ChevronsUpDownIcon, SearchIcon, XIcon } from "lucide-react"
 
 import { getAssets } from "@/app/api/assets/action"
 import { AssetListResponse } from "@/app/lib/assets/definitions"
+import { useLocalization } from "@/app/lib/i18n/provider"
 import { buildFilterQuery } from "@/app/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -30,6 +31,7 @@ export function AssetMultiSelectCombobox({
   onSelectedAssetsChange,
   disabled = false,
 }: AssetMultiSelectComboboxProps) {
+  const { dictionary, formatMessage, formatNumber } = useLocalization()
   const [open, setOpen] = React.useState(false)
   const [searchTerm, setSearchTerm] = React.useState("")
   const deferredSearchTerm = React.useDeferredValue(searchTerm)
@@ -69,7 +71,7 @@ export function AssetMultiSelectCombobox({
         }
 
         const errorMessage =
-          error instanceof Error ? error.message : "Không thể tải danh sách tài sản"
+          error instanceof Error ? error.message : dictionary.assets.loadError
         setLoadError(errorMessage)
         setOptions([])
       } finally {
@@ -108,7 +110,7 @@ export function AssetMultiSelectCombobox({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="flex flex-col gap-3">
       <DropdownMenu open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger asChild>
           <Button
@@ -119,8 +121,10 @@ export function AssetMultiSelectCombobox({
           >
             <span className="truncate">
               {selectedAssets.length > 0
-                ? `Đã chọn ${selectedAssets.length} tài sản`
-                : "Chọn tài sản theo dõi"}
+                ? formatMessage(dictionary.assets.selectedCount, {
+                  count: formatNumber(selectedAssets.length),
+                })
+                : dictionary.assets.chooseTracked}
             </span>
             {isLoading ? <Spinner className="size-4" /> : <ChevronsUpDownIcon className="size-4" />}
           </Button>
@@ -137,13 +141,13 @@ export function AssetMultiSelectCombobox({
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
                 onKeyDown={(event) => event.stopPropagation()}
-                placeholder="Tìm theo tên hoặc mã tài sản"
+                placeholder={dictionary.assets.searchPlaceholder}
                 className="pl-8"
               />
             </div>
           </div>
 
-          <DropdownMenuLabel>Kho tài sản</DropdownMenuLabel>
+          <DropdownMenuLabel>{dictionary.assets.library}</DropdownMenuLabel>
 
           {loadError ? (
             <div className="px-2 pb-2 text-sm text-destructive">{loadError}</div>
@@ -151,7 +155,7 @@ export function AssetMultiSelectCombobox({
 
           {!loadError && !isLoading && options.length === 0 ? (
             <div className="px-2 pb-2 text-sm text-muted-foreground">
-              Không tìm thấy tài sản phù hợp.
+              {dictionary.assets.emptySearch}
             </div>
           ) : null}
 
@@ -203,7 +207,7 @@ export function AssetMultiSelectCombobox({
         </div>
       ) : (
         <p className="text-sm text-muted-foreground">
-          Workspace này chưa có tài sản nào trong danh sách theo dõi.
+          {dictionary.assets.emptyTracked}
         </p>
       )}
     </div>

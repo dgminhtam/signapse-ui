@@ -30,6 +30,8 @@ import {
   defineExtension,
 } from "lexical";
 
+import type { Dictionary } from "@/app/lib/i18n/dictionary-types";
+import { useLocalization } from "@/app/lib/i18n/provider";
 import { ActionsPlugin } from "@/components/editor-x/actions-plugin";
 import { AutoCompletePlugin } from "@/components/editor-x/auto-complete-plugin";
 import { AutoEmbedPlugin } from "@/components/editor-x/auto-embed-plugin";
@@ -124,24 +126,30 @@ function normalizeHtml(value: string) {
   return value.trim().length > 0 ? value : EMPTY_HTML;
 }
 
-function createPickerOptions() {
+function createPickerOptions(
+  dictionary: Dictionary,
+  formatMessage: (
+    message: string,
+    values?: Record<string, string | number>,
+  ) => string,
+) {
   return [
-    ParagraphPickerPlugin(),
-    HeadingPickerPlugin({ n: 1 }),
-    HeadingPickerPlugin({ n: 2 }),
-    HeadingPickerPlugin({ n: 3 }),
-    BulletedListPickerPlugin(),
-    NumberedListPickerPlugin(),
-    CheckListPickerPlugin(),
-    QuotePickerPlugin(),
-    CodePickerPlugin(),
-    DividerPickerPlugin(),
-    TablePickerPlugin(),
-    ImagePickerPlugin(),
-    ColumnsLayoutPickerPlugin(),
-    DateTimePickerPlugin(),
-    EmbedsPickerPlugin({ embed: "youtube-video" }),
-    EmbedsPickerPlugin({ embed: "tweet" }),
+    ParagraphPickerPlugin(dictionary),
+    HeadingPickerPlugin({ dictionary, n: 1 }),
+    HeadingPickerPlugin({ dictionary, n: 2 }),
+    HeadingPickerPlugin({ dictionary, n: 3 }),
+    BulletedListPickerPlugin(dictionary),
+    NumberedListPickerPlugin(dictionary),
+    CheckListPickerPlugin(dictionary),
+    QuotePickerPlugin(dictionary),
+    CodePickerPlugin(dictionary),
+    DividerPickerPlugin(dictionary),
+    TablePickerPlugin(dictionary),
+    ImagePickerPlugin(dictionary),
+    ColumnsLayoutPickerPlugin(dictionary),
+    DateTimePickerPlugin(dictionary),
+    EmbedsPickerPlugin({ dictionary, embed: "youtube-video", formatMessage }),
+    EmbedsPickerPlugin({ dictionary, embed: "tweet", formatMessage }),
   ];
 }
 
@@ -229,19 +237,21 @@ interface XEditorProps {
 function XEditor({
   className,
   editorClassName,
-  placeholder = "Nhập ghi chú...",
+  placeholder,
   readOnly = false,
   value,
   onChange,
 }: XEditorProps) {
+  const { dictionary, formatMessage } = useLocalization();
   const [floatingAnchorElem, setFloatingAnchorElem] =
     React.useState<HTMLDivElement | null>(null);
   const [isLinkEditMode, setIsLinkEditMode] = React.useState(false);
 
   const pickerOptions = React.useMemo<ComponentPickerOption[]>(
-    () => createPickerOptions(),
-    [],
+    () => createPickerOptions(dictionary, formatMessage),
+    [dictionary, formatMessage],
   );
+  const editorPlaceholder = placeholder ?? dictionary.editor.placeholder;
 
   const appExtension = React.useMemo(
     () =>
@@ -356,7 +366,7 @@ function XEditor({
           <div className="relative min-h-0 flex-1 overflow-hidden">
             <div className="min-h-0 h-full" ref={setAnchorRef}>
               <ContentEditable
-                placeholder={placeholder}
+                placeholder={editorPlaceholder}
                 className={cn(
                   "h-full min-h-[320px] max-w-none text-sm leading-7",
                   readOnly && "cursor-default",
@@ -369,7 +379,13 @@ function XEditor({
               <>
                 <ComponentPickerMenuPlugin
                   baseOptions={pickerOptions}
-                  dynamicOptionsFn={DynamicTablePickerPlugin}
+                  dynamicOptionsFn={({ queryString }) =>
+                    DynamicTablePickerPlugin({
+                      dictionary,
+                      formatMessage,
+                      queryString,
+                    })
+                  }
                 />
                 <EmojiPickerPlugin />
                 <AutoEmbedPlugin />
@@ -387,7 +403,13 @@ function XEditor({
                 <DraggableBlockPlugin
                   anchorElem={floatingAnchorElem}
                   baseOptions={pickerOptions}
-                  dynamicOptionsFn={DynamicTablePickerPlugin}
+                  dynamicOptionsFn={({ queryString }) =>
+                    DynamicTablePickerPlugin({
+                      dictionary,
+                      formatMessage,
+                      queryString,
+                    })
+                  }
                 />
                 <FloatingTextFormatToolbarPlugin
                   anchorElem={floatingAnchorElem}

@@ -1,9 +1,12 @@
 "use client"
 
 import React from "react"
-import Link from "next/link"
+import { LocalizedLink as Link } from "@/components/localized-link"
 import { usePathname } from "next/navigation"
 
+import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
+import { useLocalization } from "@/app/lib/i18n/provider"
+import { stripLocaleFromPathname } from "@/app/lib/i18n/routing"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -13,34 +16,43 @@ import {
   BreadcrumbSeparator,
 } from "./ui/breadcrumb"
 
-const FRIENDLY_SEGMENT_NAMES: Record<string, string> = {
-  categories: "Danh mục",
-  create: "Tạo mới",
-  "ai-provider-configs": "Nhà cung cấp AI",
-  blogs: "Blog",
-  cronjobs: "Tác vụ định kỳ",
-  "developer-token": "Token nhà phát triển",
-  "economic-calendar": "Lịch kinh tế",
-  events: "Sự kiện",
-  "graph-view": "Biểu đồ tri thức",
-  "market-charts": "Biểu đồ giá",
-  "market-query": "Truy vấn thị trường",
-  "news-articles": "Bài viết tin tức",
-  "news-outlets": "Nguồn tin",
-  roles: "Vai trò",
-  "source-documents": "Tài liệu nguồn",
-  "system-prompts": "Prompt hệ thống",
+function getFriendlySegmentNames(
+  dictionary: Dictionary
+): Record<string, string> {
+  return {
+    categories: dictionary.navigation.categories,
+    create: dictionary.common.create,
+    "ai-provider-configs": dictionary.navigation.aiProviders,
+    blogs: dictionary.navigation.blogs,
+    cronjobs: dictionary.navigation.cronjobs,
+    "developer-token": dictionary.navigation.developerToken,
+    "economic-calendar": dictionary.navigation.economicCalendar,
+    events: dictionary.navigation.events,
+    "graph-view": dictionary.navigation.knowledgeGraph,
+    "market-charts": dictionary.navigation.marketCharts,
+    "market-query": dictionary.navigation.marketQuery,
+    "news-articles": dictionary.navigation.newsArticles,
+    "news-outlets": dictionary.navigation.newsOutlets,
+    roles: dictionary.navigation.roles,
+    "source-documents": dictionary.navigation.sourceDocuments,
+    "system-prompts": dictionary.navigation.systemPrompts,
+  }
 }
 
-function formatSegment(segment: string, index: number) {
+function formatSegment(
+  segment: string,
+  index: number,
+  dictionary: Dictionary
+) {
   const decodedSegment = decodeURIComponent(segment)
+  const friendlySegmentNames = getFriendlySegmentNames(dictionary)
 
-  if (FRIENDLY_SEGMENT_NAMES[decodedSegment]) {
-    return FRIENDLY_SEGMENT_NAMES[decodedSegment]
+  if (friendlySegmentNames[decodedSegment]) {
+    return friendlySegmentNames[decodedSegment]
   }
 
   if (index > 0) {
-    return "Chi tiết"
+    return dictionary.common.detail
   }
 
   return decodedSegment
@@ -52,21 +64,22 @@ function formatSegment(segment: string, index: number) {
 
 export function AppBreadcrumb() {
   const pathname = usePathname()
-  const segments = pathname.split("/").filter(Boolean)
+  const { dictionary } = useLocalization()
+  const segments = stripLocaleFromPathname(pathname).split("/").filter(Boolean)
 
   return (
-    <Breadcrumb className="min-w-0">
+    <Breadcrumb className="min-w-0" aria-label={dictionary.navigation.breadcrumb}>
       <BreadcrumbList className="flex-nowrap">
         <BreadcrumbItem className="hidden md:block">
           <BreadcrumbLink asChild>
-            <Link href="/">Trang chủ</Link>
+            <Link href="/">{dictionary.common.home}</Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
 
         {segments.map((segment, index) => {
           const href = `/${segments.slice(0, index + 1).join("/")}`
           const isLast = index === segments.length - 1
-          const title = formatSegment(segment, index)
+          const title = formatSegment(segment, index, dictionary)
 
           return (
             <React.Fragment key={href}>

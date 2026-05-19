@@ -13,15 +13,26 @@ Xác minh lần cuối: ngày 15 tháng 5 năm 2026
 | Hàm auth chính       | `fetchAuthenticated()` trong `app/api/auth/action.ts` |
 | Hàm public           | `fetchPublic()` trong `app/api/auth/action.ts`        |
 | Kiểu mutation result | `ActionResult<T>` trong `app/lib/definitions.ts`      |
+| Locale frontend      | URL prefix `/{lang}` (`vi` / `en`, fallback `vi`)          |
 
 ## Quy ước dùng chung
 
 - Các request được bảo vệ đi qua `fetchAuthenticated()`.
 - `apiFetch()` đọc `response.text()` trước khi parse JSON.
+- `apiFetch()` resolve app locale from the active route locale (`x-signapse-locale` set by `proxy.ts` for page/action requests, with referer route fallback) and sends the same value as `Accept-Language` for both `fetchAuthenticated()` and `fetchPublic()`.
+- `apiFetch()` gửi `Accept: application/json` mặc định, nhưng chỉ gửi `Content-Type: application/json` khi request có JSON body và không phải `FormData`.
 - Frontend runtime list/search đang serialize query thành `$filter`, `page`, `size`, `sort` thông qua `queryParamsToString()`.
 - OpenAPI vẫn mô tả list query bằng `specification` và `pageable`, nên cần tách biệt giữa spec contract và effective runtime contract mà frontend đang gọi.
 - Snapshot backend hiện có `securitySchemes.bearerAuth` và metadata `x-signapse-auth` trên từng operation.
 - `x-signapse-auth.type` hiện gồm `permission`, `active-user`, và `public`; frontend vẫn gate UI bằng permission list lấy từ `/me`.
+
+## Contract ngôn ngữ frontend/backend
+
+- Frontend uses the URL prefix `/{lang}` as the product language source of truth. Valid values are `vi` and `en`; unprefixed page requests are redirected by `proxy.ts` using `Accept-Language`, with `/vi` fallback.
+- Backend-generated human-facing message được yêu cầu bằng HTTP header chuẩn `Accept-Language`, ví dụ `Accept-Language: vi` hoặc `Accept-Language: en`. Frontend không gửi custom header như `Language`.
+- Localized backend error giữ nguyên response shape hiện tại: frontend đọc và render trường `message` như backend trả về, không suy luận hoặc mutate thêm field `language`.
+- Backend có thể trả `Content-Language` và `Vary: Accept-Language` cho response localized. Frontend không cần header này để render UI thường ngày; smoke check có thể dùng để debug contract.
+- Frontend không dịch canonical API identifiers hoặc domain content ở lớp API mapping, gồm enum values, permission keys, provider ids, endpoint paths, request field names, `$filter` fields, upstream provider content, persisted content, và AI-generated records.
 
 ## Tổng quan thay đổi lớn từ snapshot hiện tại
 

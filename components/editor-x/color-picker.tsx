@@ -6,6 +6,7 @@ import { type VariantProps, cva } from "class-variance-authority";
 import { PipetteIcon } from "lucide-react";
 import { Slider as SliderPrimitive, Slot as SlotPrimitive } from "radix-ui";
 
+import { useLocalization } from "@/app/lib/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -1270,6 +1271,7 @@ interface ColorPickerSwatchProps extends React.ComponentProps<"div"> {
 
 function ColorPickerSwatch(props: ColorPickerSwatchProps) {
   const { asChild, className, ...swatchProps } = props;
+  const { dictionary, formatMessage } = useLocalization();
   const context = useColorPickerContext("ColorPickerSwatch");
 
   const color = useColorPickerStore((state) => state.color);
@@ -1297,8 +1299,10 @@ function ColorPickerSwatch(props: ColorPickerSwatchProps) {
   }, [color]);
 
   const ariaLabel = !color
-    ? "No color selected"
-    : `Current color: ${colorToString(color, format)}`;
+    ? dictionary.editor.colorPicker.noColorSelected
+    : formatMessage(dictionary.editor.colorPicker.currentColor, {
+        value: colorToString(color, format),
+      });
 
   const SwatchPrimitive = asChild ? SlotPrimitive.Root : "div";
 
@@ -1326,7 +1330,8 @@ interface ColorPickerEyeDropperProps extends React.ComponentProps<
 > {}
 
 function ColorPickerEyeDropper(props: ColorPickerEyeDropperProps) {
-  const { children, size, ...buttonProps } = props;
+  const { children, size, "aria-label": ariaLabel, ...buttonProps } = props;
+  const { dictionary } = useLocalization();
   const context = useColorPickerContext("ColorPickerEyeDropper");
   const store = useColorPickerStoreContext("ColorPickerEyeDropper");
 
@@ -1363,6 +1368,7 @@ function ColorPickerEyeDropper(props: ColorPickerEyeDropperProps) {
       {...buttonProps}
       variant="outline"
       size={buttonSize}
+      aria-label={ariaLabel ?? dictionary.editor.colorPicker.eyeDropper}
       onClick={onEyeDropper}
       disabled={context.disabled}
     >
@@ -1528,6 +1534,7 @@ interface FormatInputProps extends ColorPickerInputProps {
 }
 
 function HexInput(props: FormatInputProps) {
+  const { dictionary } = useLocalization();
   const {
     color,
     onColorChange,
@@ -1564,7 +1571,7 @@ function HexInput(props: FormatInputProps) {
   if (withoutAlpha) {
     return (
       <InputGroupItem
-        aria-label="Hex color value"
+        aria-label={dictionary.editor.colorPicker.hexValue}
         position="isolated"
         {...inputProps}
         placeholder="#000000"
@@ -1582,7 +1589,7 @@ function HexInput(props: FormatInputProps) {
       className={cn("flex items-center", className)}
     >
       <InputGroupItem
-        aria-label="Hex color value"
+        aria-label={dictionary.editor.colorPicker.hexValue}
         position="first"
         {...inputProps}
         placeholder="#000000"
@@ -1592,7 +1599,7 @@ function HexInput(props: FormatInputProps) {
         disabled={context.disabled}
       />
       <InputGroupItem
-        aria-label="Alpha transparency percentage"
+        aria-label={dictionary.editor.colorPicker.alphaPercentage}
         position="last"
         {...inputProps}
         placeholder="100"
@@ -1610,6 +1617,7 @@ function HexInput(props: FormatInputProps) {
 }
 
 function RgbInput(props: FormatInputProps) {
+  const { dictionary } = useLocalization();
   const {
     color,
     onColorChange,
@@ -1642,7 +1650,7 @@ function RgbInput(props: FormatInputProps) {
       className={cn("flex items-center", className)}
     >
       <InputGroupItem
-        aria-label="Red color component (0-255)"
+        aria-label={dictionary.editor.colorPicker.redComponent}
         position="first"
         {...inputProps}
         placeholder="0"
@@ -1656,7 +1664,7 @@ function RgbInput(props: FormatInputProps) {
         disabled={context.disabled}
       />
       <InputGroupItem
-        aria-label="Green color component (0-255)"
+        aria-label={dictionary.editor.colorPicker.greenComponent}
         position="middle"
         {...inputProps}
         placeholder="0"
@@ -1670,7 +1678,7 @@ function RgbInput(props: FormatInputProps) {
         disabled={context.disabled}
       />
       <InputGroupItem
-        aria-label="Blue color component (0-255)"
+        aria-label={dictionary.editor.colorPicker.blueComponent}
         position={withoutAlpha ? "last" : "middle"}
         {...inputProps}
         placeholder="0"
@@ -1685,7 +1693,7 @@ function RgbInput(props: FormatInputProps) {
       />
       {!withoutAlpha && (
         <InputGroupItem
-          aria-label="Alpha transparency percentage"
+          aria-label={dictionary.editor.colorPicker.alphaPercentage}
           position="last"
           {...inputProps}
           placeholder="100"
@@ -1704,6 +1712,7 @@ function RgbInput(props: FormatInputProps) {
 }
 
 function HslInput(props: FormatInputProps) {
+  const { dictionary } = useLocalization();
   const {
     color,
     onColorChange,
@@ -1745,7 +1754,7 @@ function HslInput(props: FormatInputProps) {
       className={cn("flex items-center", className)}
     >
       <InputGroupItem
-        aria-label="Hue degree (0-360)"
+        aria-label={dictionary.editor.colorPicker.hueDegree}
         position="first"
         {...inputProps}
         placeholder="0"
@@ -1759,7 +1768,7 @@ function HslInput(props: FormatInputProps) {
         disabled={context.disabled}
       />
       <InputGroupItem
-        aria-label="Saturation percentage (0-100)"
+        aria-label={dictionary.editor.colorPicker.saturationPercentage}
         position="middle"
         {...inputProps}
         placeholder="0"
@@ -1773,7 +1782,7 @@ function HslInput(props: FormatInputProps) {
         disabled={context.disabled}
       />
       <InputGroupItem
-        aria-label="Lightness percentage (0-100)"
+        aria-label={dictionary.editor.colorPicker.lightnessPercentage}
         position={withoutAlpha ? "last" : "middle"}
         {...inputProps}
         placeholder="0"
@@ -1788,7 +1797,7 @@ function HslInput(props: FormatInputProps) {
       />
       {!withoutAlpha && (
         <InputGroupItem
-          aria-label="Alpha transparency percentage"
+          aria-label={dictionary.editor.colorPicker.alphaPercentage}
           position="last"
           {...inputProps}
           placeholder="100"
@@ -1811,6 +1820,7 @@ interface HsbInputProps extends Omit<FormatInputProps, "color"> {
 }
 
 function HsbInput(props: HsbInputProps) {
+  const { dictionary } = useLocalization();
   const {
     hsv,
     onColorChange,
@@ -1852,7 +1862,7 @@ function HsbInput(props: HsbInputProps) {
       className={cn("flex items-center", className)}
     >
       <InputGroupItem
-        aria-label="Hue degree (0-360)"
+        aria-label={dictionary.editor.colorPicker.hueDegree}
         position="first"
         {...inputProps}
         placeholder="0"
@@ -1866,7 +1876,7 @@ function HsbInput(props: HsbInputProps) {
         disabled={context.disabled}
       />
       <InputGroupItem
-        aria-label="Saturation percentage (0-100)"
+        aria-label={dictionary.editor.colorPicker.saturationPercentage}
         position="middle"
         {...inputProps}
         placeholder="0"
@@ -1880,7 +1890,7 @@ function HsbInput(props: HsbInputProps) {
         disabled={context.disabled}
       />
       <InputGroupItem
-        aria-label="Brightness percentage (0-100)"
+        aria-label={dictionary.editor.colorPicker.brightnessPercentage}
         position={withoutAlpha ? "last" : "middle"}
         {...inputProps}
         placeholder="0"
@@ -1895,7 +1905,7 @@ function HsbInput(props: HsbInputProps) {
       />
       {!withoutAlpha && (
         <InputGroupItem
-          aria-label="Alpha transparency percentage"
+          aria-label={dictionary.editor.colorPicker.alphaPercentage}
           position="last"
           {...inputProps}
           placeholder="100"

@@ -2,22 +2,33 @@
 
 import * as React from "react"
 import { ThemeProvider as NextThemesProvider } from "next-themes"
+import { AppLocale } from "@/app/lib/i18n/config"
+import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
+import { LocalizationProvider } from "@/app/lib/i18n/provider"
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 
-export function Providers({ children }: { children: React.ReactNode }) {
+interface ProvidersProps {
+  locale: AppLocale
+  dictionary: Dictionary
+  children: React.ReactNode
+}
+
+export function Providers({ locale, dictionary, children }: ProvidersProps) {
   return (
-    <NextThemesProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
-      enableColorScheme
-    >
-      <TooltipProvider delayDuration={0}>
-        {children}
-      </TooltipProvider>
-      <Toaster richColors position="top-right" />
-    </NextThemesProvider>
+    <LocalizationProvider locale={locale} dictionary={dictionary}>
+      <NextThemesProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+        enableColorScheme
+      >
+        <TooltipProvider delayDuration={0}>
+          {children}
+        </TooltipProvider>
+        <Toaster richColors position="top-right" />
+      </NextThemesProvider>
+    </LocalizationProvider>
   )
 }

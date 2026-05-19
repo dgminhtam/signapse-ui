@@ -24,6 +24,7 @@ import {
   isMeaningfulPersonalNoteHtml,
   PersonalNoteResponse,
 } from "@/app/lib/personal-notes/definitions"
+import { useLocalization } from "@/app/lib/i18n/provider"
 import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { PersonalNoteDiscardDialog } from "@/components/personal-note-discard-dialog"
 import { PersonalNoteEditor } from "@/components/personal-note-editor"
@@ -50,30 +51,16 @@ interface PersonalNotesQuickSheetProps {
   canUpdate: boolean
 }
 
+const PERSONAL_NOTES_SHEET_CONTENT_ID = "personal-notes-quick-sheet-content"
+
 type PendingDiscardAction = null | (() => void)
-
-function formatDateTime(value?: string | null) {
-  if (!value) {
-    return "Chưa có dữ liệu"
-  }
-
-  const date = new Date(value)
-
-  if (Number.isNaN(date.getTime())) {
-    return "Ngày không hợp lệ"
-  }
-
-  return new Intl.DateTimeFormat("vi-VN", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date)
-}
 
 function PersonalNotesQuickSheet({
   canCreate,
   canUpdate,
 }: PersonalNotesQuickSheetProps) {
   const router = useRouter()
+  const { dictionary, formatDateTime, formatMessage } = useLocalization()
   const [open, setOpen] = React.useState(false)
   const [notes, setNotes] = React.useState<PersonalNoteResponse[]>([])
   const [selectedNote, setSelectedNote] =
@@ -125,12 +112,12 @@ function PersonalNotesQuickSheet({
       }
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Không thể tải ghi chú"
+        error instanceof Error ? error.message : dictionary.personalNotes.loadError
       toast.error(message)
     } finally {
       setIsLoading(false)
     }
-  }, [hydrateNote])
+  }, [dictionary.personalNotes.loadError, hydrateNote])
 
   React.useEffect(() => {
     if (open) {
@@ -181,7 +168,7 @@ function PersonalNotesQuickSheet({
         hydrateNote(note)
       } catch (error) {
         const message =
-          error instanceof Error ? error.message : "Không thể tải ghi chú"
+          error instanceof Error ? error.message : dictionary.personalNotes.loadError
         toast.error(message)
       }
     })
@@ -209,7 +196,7 @@ function PersonalNotesQuickSheet({
       return
     }
 
-    toast.success("Đã lưu ghi chú.")
+    toast.success(dictionary.personalNotes.saved)
     hydrateNote(result.data)
     void loadNotes()
     router.refresh()
@@ -222,13 +209,14 @@ function PersonalNotesQuickSheet({
   return (
     <>
       <Sheet open={open} onOpenChange={handleOpenChange}>
-        <SheetTrigger asChild>
+        <SheetTrigger asChild aria-controls={PERSONAL_NOTES_SHEET_CONTENT_ID}>
           <Button type="button" variant="outline">
             <StickyNoteIcon data-icon="inline-start" />
-            Ghi chú
+            {dictionary.personalNotes.trigger}
           </Button>
         </SheetTrigger>
         <SheetContent
+          id={PERSONAL_NOTES_SHEET_CONTENT_ID}
           className={cn(
             "gap-0 overflow-hidden",
             isFullscreen
@@ -236,13 +224,15 @@ function PersonalNotesQuickSheet({
               : "!w-[calc(100vw-1rem)] !max-w-[calc(100vw-1rem)] sm:!w-[min(80vw,calc(100vw-2rem))] sm:!max-w-[calc(100vw-2rem)]"
           )}
         >
-          <SheetTitle className="sr-only">Ghi chú</SheetTitle>
+          <SheetTitle className="sr-only">
+            {dictionary.personalNotes.trigger}
+          </SheetTitle>
 
           <div className="flex items-center gap-2 border-b p-3 pr-12">
             {canCreate ? (
               <Button type="button" onClick={handleNewNote}>
                 <PlusIcon data-icon="inline-start" />
-                Ghi chú mới
+                {dictionary.personalNotes.newNote}
               </Button>
             ) : null}
             <Button
@@ -250,7 +240,9 @@ function PersonalNotesQuickSheet({
               variant="outline"
               size="icon"
               aria-label={
-                isFullscreen ? "Thu nhỏ ghi chú" : "Phóng to ghi chú"
+                isFullscreen
+                  ? dictionary.personalNotes.collapse
+                  : dictionary.personalNotes.expand
               }
               onClick={handleToggleFullscreen}
             >
@@ -285,10 +277,22 @@ function PersonalNotesQuickSheet({
                         onClick={() => void handleSelectNote(note.id)}
                       >
                         <span className="truncate text-sm font-medium">
-                          {getPersonalNoteLabel(note.contentHtml)}
+                          {getPersonalNoteLabel(
+                            note.contentHtml,
+                            dictionary.personalNotes.untitled
+                          )}
                         </span>
                         <AppTimeMetadata icon={CalendarClockIcon}>
-                          Cập nhật {formatDateTime(updatedAt)}
+                          {formatMessage(dictionary.personalNotes.updatedAt, {
+                            time: formatDateTime(
+                              updatedAt,
+                              {
+                                dateStyle: "medium",
+                                timeStyle: "short",
+                              },
+                              dictionary.common.notAvailable
+                            ),
+                          })}
                         </AppTimeMetadata>
                       </button>
                     )
@@ -299,9 +303,9 @@ function PersonalNotesQuickSheet({
                       <EmptyMedia variant="icon">
                         <FileTextIcon />
                       </EmptyMedia>
-                      <EmptyTitle>Chưa có ghi chú</EmptyTitle>
+                      <EmptyTitle>{dictionary.personalNotes.emptyTitle}</EmptyTitle>
                       <EmptyDescription>
-                        Tạo ghi chú đầu tiên để lưu công thức hoặc lệnh trade.
+                        {dictionary.personalNotes.emptyDescription}
                       </EmptyDescription>
                     </EmptyHeader>
                   </Empty>
@@ -324,7 +328,9 @@ function PersonalNotesQuickSheet({
                 onCancel={() => setDraftHtml(savedHtml)}
                 onSave={() => void handleSave()}
                 savedLabel={
-                  selectedNote ? "Đã tải ghi chú đã lưu" : "Ghi chú mới"
+                  selectedNote
+                    ? dictionary.personalNotes.loadedSavedNote
+                    : dictionary.personalNotes.newNote
                 }
               />
             </section>

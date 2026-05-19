@@ -1,5 +1,7 @@
 import { z } from "zod"
 
+import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
+
 export type GraphViewNodeKind = "event" | "asset" | "theme" | "news-article"
 
 export type GraphViewEdgeKind =
@@ -101,31 +103,6 @@ export const graphViewResponseSchema = z.object({
   edges: z.array(graphViewEdgeSchema),
 }) satisfies z.ZodType<GraphViewResponse>
 
-export const GRAPH_VIEW_NODE_KIND_LABELS: Record<GraphViewNodeKind, string> = {
-  event: "Su kien",
-  asset: "Tai san",
-  theme: "Chu de",
-  "news-article": "Bai viet tin tuc",
-}
-
-export const GRAPH_VIEW_EDGE_KIND_LABELS: Record<GraphViewEdgeKind, string> = {
-  "event-asset": "Su kien - tai san",
-  "event-theme": "Su kien - chu de",
-  "news-article-event": "Bang chung - su kien",
-}
-
-export const GRAPH_VIEW_RELATION_TYPE_LABELS: Record<string, string> = {
-  PRIMARY_SUBJECT: "Chu the chinh",
-  AFFECTED_ASSET: "Tai san bi anh huong",
-  REFERENCE_ASSET: "Tai san tham chieu",
-  PRIMARY_THEME: "Chu de chinh",
-  SECONDARY_THEME: "Chu de phu",
-  PRIMARY: "Chinh",
-  SUPPORTING: "Ho tro",
-  UPDATE: "Cap nhat",
-  CONTRADICTING: "Mau thuan",
-}
-
 const graphNodeIdPattern = /^(event|asset|theme|news-article):(\d+)$/
 
 export function parseGraphViewNodeId(nodeId: string): GraphViewEntityReference | null {
@@ -165,6 +142,10 @@ export function getGraphViewNodeEntityId(
   return parsed.entityId
 }
 
-export function getGraphViewRelationLabel(relationType: string): string {
-  return GRAPH_VIEW_RELATION_TYPE_LABELS[relationType] || relationType
+export function getGraphViewRelationLabel(
+  relationType: string,
+  dictionary: Dictionary
+): string {
+  const relationLabels = dictionary.graphView.relationTypes as Record<string, string>
+  return relationLabels[relationType] || relationType
 }

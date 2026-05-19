@@ -8,6 +8,7 @@ import { $getSelection, $isRangeSelection, type BaseSelection } from "lexical";
 
 import { MinusIcon, PlusIcon } from "lucide-react";
 
+import { useLocalization } from "@/app/lib/i18n/provider";
 import { useToolbarContext } from "@/components/editor-x/toolbar-context";
 import { useUpdateToolbarHandler } from "@/components/editor-x/use-update-toolbar";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ const MIN_FONT_SIZE = 1;
 const MAX_FONT_SIZE = 72;
 
 export function FontSizeToolbarPlugin() {
+  const { dictionary } = useLocalization();
   const style = "font-size";
   const [fontSize, setFontSize] = useState(DEFAULT_FONT_SIZE);
 
@@ -60,6 +62,7 @@ export function FontSizeToolbarPlugin() {
         size="icon-sm"
         onClick={() => updateFontSize(fontSize - 1)}
         disabled={fontSize <= MIN_FONT_SIZE}
+        aria-label={dictionary.editor.toolbar.decreaseFontSize}
       >
         <MinusIcon />
       </Button>
@@ -71,12 +74,14 @@ export function FontSizeToolbarPlugin() {
         className="h-7 w-12 text-center"
         min={MIN_FONT_SIZE}
         max={MAX_FONT_SIZE}
+        aria-label={dictionary.editor.toolbar.fontSize}
       />
       <Button
         variant="outline"
         size="icon-sm"
         onClick={() => updateFontSize(fontSize + 1)}
         disabled={fontSize >= MAX_FONT_SIZE}
+        aria-label={dictionary.editor.toolbar.increaseFontSize}
       >
         <PlusIcon />
       </Button>

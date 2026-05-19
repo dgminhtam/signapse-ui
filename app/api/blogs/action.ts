@@ -2,6 +2,8 @@
 
 import { fetchAuthenticated } from '@/app/api/auth/action';
 import { SearchParams, Page, ActionResult } from '@/app/lib/definitions';
+import { getDictionary } from '@/app/lib/i18n/dictionaries';
+import { getRequestLocale } from '@/app/lib/i18n/server';
 import { queryParamsToString } from '@/app/lib/utils';
 import { BlogPost, BlogPostListResponse, CreateBlogPostRequest, UpdateBlogPostRequest } from '@/app/lib/blogs/definitions';
 import { revalidatePath } from 'next/cache';
@@ -22,8 +24,12 @@ export async function createBlog(request: CreateBlogPostRequest): Promise<Action
         });
         revalidatePath("/blogs");
         return { success: true, data: blog };
-    } catch (error: any) {
-        return { success: false, error: error.message || "Failed to create blog" };
+    } catch (error: unknown) {
+        const dictionary = await getDictionary(await getRequestLocale());
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : dictionary.blogs.unexpectedError,
+        };
     }
 }
 
@@ -36,8 +42,12 @@ export async function updateBlog(id: number, request: UpdateBlogPostRequest): Pr
         revalidatePath("/blogs");
         revalidatePath(`/blogs/${id}`);
         return { success: true, data: blog };
-    } catch (error: any) {
-        return { success: false, error: error.message || "Failed to update blog" };
+    } catch (error: unknown) {
+        const dictionary = await getDictionary(await getRequestLocale());
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : dictionary.blogs.unexpectedError,
+        };
     }
 }
 
@@ -48,7 +58,11 @@ export async function deleteBlog(id: number): Promise<ActionResult> {
         });
         revalidatePath("/blogs");
         return { success: true, data: undefined };
-    } catch (error: any) {
-        return { success: false, error: error.message || "Failed to delete blog" };
+    } catch (error: unknown) {
+        const dictionary = await getDictionary(await getRequestLocale());
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : dictionary.blogs.deleteError,
+        };
     }
 }

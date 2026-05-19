@@ -2,23 +2,31 @@ import { INSERT_TABLE_COMMAND } from "@lexical/table";
 
 import { TableIcon } from "lucide-react";
 
+import type { Dictionary } from "@/app/lib/i18n/dictionary-types";
 import { ComponentPickerOption } from "@/components/editor-x/component-picker-option";
 import { InsertTableDialog } from "@/components/editor-x/table-plugin";
 
-export function TablePickerPlugin() {
-  return new ComponentPickerOption("Table", {
+export function TablePickerPlugin(dictionary: Dictionary) {
+  return new ComponentPickerOption(dictionary.editor.insert.table, {
     icon: <TableIcon className="size-4" />,
     keywords: ["table", "grid", "spreadsheet", "rows", "columns"],
     onSelect: (_, editor, showModal) =>
-      showModal("Insert Table", (onClose) => (
+      showModal(dictionary.editor.insert.insertTable, (onClose) => (
         <InsertTableDialog activeEditor={editor} onClose={onClose} />
       )),
   });
 }
 
 export function DynamicTablePickerPlugin({
+  dictionary,
+  formatMessage,
   queryString,
 }: {
+  dictionary: Dictionary;
+  formatMessage: (
+    message: string,
+    values?: Record<string, string | number>,
+  ) => string;
   queryString: string;
 }) {
   const options: Array<ComponentPickerOption> = [];
@@ -38,12 +46,18 @@ export function DynamicTablePickerPlugin({
     options.push(
       ...colOptions.map(
         (columns) =>
-          new ComponentPickerOption(`${rows}x${columns} Table`, {
+          new ComponentPickerOption(
+            formatMessage(dictionary.editor.table.sizeOption, {
+              columns,
+              rows,
+            }),
+            {
             icon: <i className="icon table" />,
             keywords: ["table"],
             onSelect: (_, editor) =>
               editor.dispatchCommand(INSERT_TABLE_COMMAND, { columns, rows }),
-          }),
+            },
+          ),
       ),
     );
   }

@@ -27,6 +27,8 @@ import {
   createCommand,
 } from "lexical";
 
+import { useLocalization } from "@/app/lib/i18n/provider";
+
 type ImageStatus =
   | { error: true }
   | { error: false; width: number; height: number };
@@ -167,6 +169,8 @@ function LazyImage({
 }
 
 function BrokenImage(): JSX.Element {
+  const { dictionary } = useLocalization();
+
   return (
     <img
       src={""}
@@ -176,7 +180,7 @@ function BrokenImage(): JSX.Element {
         width: 200,
       }}
       draggable="false"
-      alt="Broken image"
+      alt={dictionary.editor.image.brokenAlt}
     />
   );
 }

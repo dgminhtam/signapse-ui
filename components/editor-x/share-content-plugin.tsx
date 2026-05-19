@@ -11,6 +11,7 @@ import { CLEAR_HISTORY_COMMAND } from "lexical";
 import { SendIcon } from "lucide-react";
 import { toast } from "sonner";
 
+import { useLocalization } from "@/app/lib/i18n/provider";
 import {
   docFromHash,
   docToHash,
@@ -23,6 +24,7 @@ import {
 } from "@/components/ui/tooltip";
 
 export function ShareContentPlugin() {
+  const { dictionary } = useLocalization();
   const [editor] = useLexicalComposerContext();
   async function shareDoc(doc: SerializedDocument): Promise<void> {
     const url = new URL(window.location.toString());
@@ -51,19 +53,19 @@ export function ShareContentPlugin() {
                 source: "editor",
               }),
             ).then(
-              () => toast.success("URL copied to clipboard"),
-              () => toast.error("URL could not be copied to clipboard"),
+              () => toast.success(dictionary.editor.share.copied),
+              () => toast.error(dictionary.editor.share.copyError),
             )
           }
-          title="Share"
-          aria-label="Share Playground link to current editor state"
+          title={dictionary.editor.share.title}
+          aria-label={dictionary.editor.share.aria}
           size={"sm"}
           className="p-2"
         >
           <SendIcon className="size-4" />
         </Button>
       </TooltipTrigger>
-      <TooltipContent>Share Content</TooltipContent>
+      <TooltipContent>{dictionary.editor.share.tooltip}</TooltipContent>
     </Tooltip>
   );
 }

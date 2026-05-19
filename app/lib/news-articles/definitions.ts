@@ -80,31 +80,6 @@ export interface PendingNewsEventDerivationBatchResult {
   results?: NewsPrimaryEventDerivationResult[]
 }
 
-export const NEWS_ARTICLE_STATUS_LABELS: Record<NewsArticleStatus, string> = {
-  INGESTED: "Đã nạp",
-  DERIVATION_PENDING: "Chờ suy diễn",
-  EVENT_RESOLVED: "Đã gắn sự kiện",
-  NO_PRIMARY_EVENT: "Không có sự kiện chính",
-  CONTENT_FAILED: "Lỗi nội dung",
-  DERIVATION_FAILED: "Lỗi suy diễn",
-}
-
-export const NEWS_PRIMARY_EVENT_DERIVATION_CHANGE_TYPE_LABELS: Record<
-  NewsPrimaryEventDerivationChangeType,
-  string
-> = {
-  CREATED: "Tạo mới",
-  UPDATED: "Cập nhật",
-  NONE: "Không đổi",
-}
-
-export const LINKED_EVENT_EVIDENCE_ROLE_LABELS: Record<LinkedEventEvidenceRole, string> = {
-  PRIMARY: "Chính",
-  SUPPORTING: "Hỗ trợ",
-  UPDATE: "Cập nhật",
-  CONTRADICTING: "Mâu thuẫn",
-}
-
 export function getNewsArticleStatusVariant(
   status?: NewsArticleStatus
 ): "outline" | "secondary" | "destructive" {

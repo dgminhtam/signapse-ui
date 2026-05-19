@@ -2,6 +2,8 @@
 
 import { fetchAuthenticated } from "@/app/api/auth/action"
 import { SearchParams, Page, ActionResult } from "@/app/lib/definitions"
+import { getDictionary } from "@/app/lib/i18n/dictionaries"
+import { getRequestLocale } from "@/app/lib/i18n/server"
 import { queryParamsToString } from "@/app/lib/utils"
 import {
   CronjobRequest,
@@ -41,9 +43,10 @@ export async function updateCronjob(
     revalidatePath("/cronjobs")
     return { success: true, data: cronjob }
   } catch (error: unknown) {
+    const dictionary = await getDictionary(await getRequestLocale())
     return {
       success: false,
-      error: getErrorMessage(error, "Failed to update cronjob"),
+      error: getErrorMessage(error, dictionary.cronjobs.cronUpdateError),
     }
   }
 }
@@ -61,9 +64,10 @@ export async function startCronjob(
     revalidatePath("/cronjobs")
     return { success: true, data: cronjob }
   } catch (error: unknown) {
+    const dictionary = await getDictionary(await getRequestLocale())
     return {
       success: false,
-      error: getErrorMessage(error, "Failed to start cronjob"),
+      error: getErrorMessage(error, dictionary.cronjobs.startError),
     }
   }
 }
@@ -81,9 +85,10 @@ export async function pauseCronjob(
     revalidatePath("/cronjobs")
     return { success: true, data: cronjob }
   } catch (error: unknown) {
+    const dictionary = await getDictionary(await getRequestLocale())
     return {
       success: false,
-      error: getErrorMessage(error, "Failed to pause cronjob"),
+      error: getErrorMessage(error, dictionary.cronjobs.pauseError),
     }
   }
 }
@@ -101,9 +106,10 @@ export async function resumeCronjob(
     revalidatePath("/cronjobs")
     return { success: true, data: cronjob }
   } catch (error: unknown) {
+    const dictionary = await getDictionary(await getRequestLocale())
     return {
       success: false,
-      error: getErrorMessage(error, "Failed to resume cronjob"),
+      error: getErrorMessage(error, dictionary.cronjobs.resumeError),
     }
   }
 }

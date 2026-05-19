@@ -11,10 +11,12 @@ import {
   LogOutIcon,
   SparklesIcon,
 } from "lucide-react"
-import Link from "next/link"
+import { LocalizedLink as Link } from "@/components/localized-link"
 import { usePathname } from "next/navigation"
 
-import { NavItem, filterNavItemsByPermissions, siteConfig } from "@/config/site"
+import { useLocalization } from "@/app/lib/i18n/provider"
+import { stripLocaleFromPathname } from "@/app/lib/i18n/routing"
+import { NavItem, createSiteConfig, filterNavItemsByPermissions } from "@/config/site"
 
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./ui/collapsible"
@@ -69,7 +71,12 @@ export function AppSidebar({
   permissions,
   ...props
 }: AppSidebarProps) {
-  const visibleNavItems = filterNavItemsByPermissions(siteConfig.navMain, permissions)
+  const { dictionary } = useLocalization()
+  const localizedSiteConfig = createSiteConfig(dictionary)
+  const visibleNavItems = filterNavItemsByPermissions(
+    localizedSiteConfig.navMain,
+    permissions
+  )
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -86,20 +93,22 @@ export function AppSidebar({
 }
 
 function SidebarBrand() {
-  const Logo = siteConfig.brand.logo
+  const { dictionary } = useLocalization()
+  const localizedSiteConfig = createSiteConfig(dictionary)
+  const Logo = localizedSiteConfig.brand.logo
 
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <SidebarMenuButton asChild size="lg" tooltip={siteConfig.brand.name}>
+        <SidebarMenuButton asChild size="lg" tooltip={localizedSiteConfig.brand.name}>
           <Link href="/">
             <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
               <Logo className="size-4" />
             </div>
             <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
-              <span className="truncate font-medium">{siteConfig.brand.name}</span>
+              <span className="truncate font-medium">{localizedSiteConfig.brand.name}</span>
               <span className="truncate text-xs text-muted-foreground">
-                {siteConfig.brand.subtitle}
+                {localizedSiteConfig.brand.subtitle}
               </span>
             </div>
           </Link>
@@ -111,13 +120,15 @@ function SidebarBrand() {
 
 export function NavMain({ items }: { items: NavItem[] }) {
   const pathname = usePathname()
+  const { dictionary } = useLocalization()
+  const pathWithoutLocale = stripLocaleFromPathname(pathname)
 
   const matchesPath = (url: string) => {
     if (url === "/") {
-      return pathname === "/"
+      return pathWithoutLocale === "/"
     }
 
-    return pathname === url || pathname.startsWith(`${url}/`)
+    return pathWithoutLocale === url || pathWithoutLocale.startsWith(`${url}/`)
   }
 
   const hasActiveSubItem = (subItems?: { title: string; url: string }[]) => {
@@ -126,7 +137,7 @@ export function NavMain({ items }: { items: NavItem[] }) {
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Nền tảng</SidebarGroupLabel>
+      <SidebarGroupLabel>{dictionary.navigation.platform}</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu className="gap-1">
           {items.map((item, itemIndex) => {
@@ -208,6 +219,7 @@ interface NavUserProps {
 
 function NavUser({ user }: NavUserProps) {
   const { isMobile } = useSidebar()
+  const { dictionary } = useLocalization()
 
   return (
     <SidebarMenu>
@@ -252,22 +264,22 @@ function NavUser({ user }: NavUserProps) {
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <SparklesIcon />
-                Nâng cấp gói
+                {dictionary.auth.upgrade}
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <BadgeCheckIcon />
-                Tài khoản
+                {dictionary.auth.account}
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <CreditCardIcon />
-                Thanh toán
+                {dictionary.auth.billing}
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <BellIcon />
-                Thông báo
+                {dictionary.auth.notifications}
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
@@ -276,7 +288,7 @@ function NavUser({ user }: NavUserProps) {
                 <SignOutButton>
                   <div className="flex w-full items-center gap-2 px-1 py-1.5">
                     <LogOutIcon />
-                    <span>Đăng xuất</span>
+                    <span>{dictionary.auth.signOut}</span>
                   </div>
                 </SignOutButton>
               </DropdownMenuItem>

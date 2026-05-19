@@ -19,6 +19,8 @@ import type {
   Spread,
 } from "lexical";
 
+import { useLocalization } from "@/app/lib/i18n/provider";
+
 const WIDGET_SCRIPT_URL = "https://platform.twitter.com/widgets.js";
 
 type TweetComponentProps = Readonly<{
@@ -56,6 +58,7 @@ function TweetComponent({
   onLoad,
   tweetID,
 }: TweetComponentProps) {
+  const { dictionary } = useLocalization();
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const previousTweetIDRef = useRef<string>("");
@@ -108,7 +111,9 @@ function TweetComponent({
       format={format}
       nodeKey={nodeKey}
     >
-      {isTweetLoading ? loadingComponent : null}
+      {isTweetLoading
+        ? (loadingComponent ?? dictionary.editor.insert.tweetLoading)
+        : null}
       <div
         style={{ display: "inline-block", width: "550px" }}
         ref={containerRef}
@@ -199,7 +204,6 @@ export class TweetNode extends DecoratorBlockNode {
       <TweetComponent
         className={className}
         format={this.__format}
-        loadingComponent="Loading..."
         nodeKey={this.getKey()}
         tweetID={this.__id}
       />

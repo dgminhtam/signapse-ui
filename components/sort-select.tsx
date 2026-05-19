@@ -3,6 +3,7 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useTransition } from "react"
 
+import { useLocalization } from "@/app/lib/i18n/provider"
 import {
   Select,
   SelectContent,
@@ -31,16 +32,19 @@ interface SortSelectProps {
 export function SortSelect({
   className,
   defaultValue,
-  label = "Sắp xếp danh sách",
+  label,
   options,
-  placeholder = "Sắp xếp",
+  placeholder,
   showLabel = false,
   triggerClassName,
 }: SortSelectProps) {
+  const { dictionary } = useLocalization()
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
+  const resolvedLabel = label ?? dictionary.lists.sortLabel
+  const resolvedPlaceholder = placeholder ?? dictionary.lists.sortPlaceholder
 
   const currentSort = searchParams.get("sort") || defaultValue || ""
 
@@ -63,15 +67,15 @@ export function SortSelect({
   return (
     <div className={cn("flex items-center gap-2", className)}>
       {showLabel ? (
-        <span className="text-sm text-muted-foreground">{label}</span>
+        <span className="text-sm text-muted-foreground">{resolvedLabel}</span>
       ) : null}
       <Select value={currentSort} onValueChange={onSortChange} disabled={isPending}>
         <SelectTrigger
           className={cn("w-full sm:w-[200px]", triggerClassName)}
-          aria-label={label}
+          aria-label={resolvedLabel}
           aria-busy={isPending}
         >
-          <SelectValue placeholder={placeholder} />
+          <SelectValue placeholder={resolvedPlaceholder} />
         </SelectTrigger>
         <SelectContent align="end">
           <SelectGroup>

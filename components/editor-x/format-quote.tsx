@@ -2,14 +2,17 @@ import { $createQuoteNode } from "@lexical/rich-text";
 import { $setBlocksType } from "@lexical/selection";
 import { $getSelection } from "lexical";
 
+import { useLocalization } from "@/app/lib/i18n/provider";
 import { useToolbarContext } from "@/components/editor-x/toolbar-context";
-import { blockTypeToBlockName } from "@/components/editor-x/block-format-data";
+import { getBlockTypeToBlockName } from "@/components/editor-x/block-format-data";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
 const BLOCK_FORMAT_VALUE = "quote";
 
 export function FormatQuote() {
+  const { dictionary } = useLocalization();
   const { activeEditor, blockType } = useToolbarContext();
+  const blockTypeToBlockName = getBlockTypeToBlockName(dictionary);
 
   const formatQuote = () => {
     if (blockType !== "quote") {

@@ -3,6 +3,7 @@
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 
 import { Page } from "@/app/lib/definitions"
+import { useLocalization } from "@/app/lib/i18n/provider"
 import { Button } from "@/components/ui/button"
 import {
   Pagination,
@@ -59,17 +60,20 @@ interface AppPaginationControlsProps<T> {
 export function PaginationPageSizeSelect({
   className,
   isPending,
-  label = "Số mục mỗi trang",
+  label,
   onValueChange,
   options = DEFAULT_PAGE_SIZE_OPTIONS,
   showLabel = true,
   triggerClassName,
   value,
 }: PaginationPageSizeSelectProps) {
+  const { dictionary, formatMessage } = useLocalization()
+  const resolvedLabel = label ?? dictionary.pagination.pageSize
+
   return (
     <div className={cn("flex items-center gap-2", className)}>
       {showLabel ? (
-        <span className="text-sm text-muted-foreground">{label}</span>
+        <span className="text-sm text-muted-foreground">{resolvedLabel}</span>
       ) : null}
       <Select
         value={value.toString()}
@@ -78,7 +82,7 @@ export function PaginationPageSizeSelect({
       >
         <SelectTrigger
           className={cn("w-full sm:w-[120px]", triggerClassName)}
-          aria-label={label}
+          aria-label={resolvedLabel}
           aria-busy={isPending}
         >
           <SelectValue />
@@ -87,7 +91,7 @@ export function PaginationPageSizeSelect({
           <SelectGroup>
             {options.map((option) => (
               <SelectItem key={option} value={option.toString()}>
-                {option} / trang
+                {formatMessage(dictionary.pagination.perPage, { count: option })}
               </SelectItem>
             ))}
           </SelectGroup>
@@ -105,6 +109,7 @@ export function PaginationNavigation({
   siblingCount = 1,
   totalPageCount,
 }: PaginationNavigationProps) {
+  const { dictionary, formatMessage } = useLocalization()
   const paginationRange = getPaginationRange({
     currentPage,
     siblingCount,
@@ -121,7 +126,7 @@ export function PaginationNavigation({
   return (
     <Pagination
       className={cn("mx-0 w-full justify-start sm:justify-end", className)}
-      aria-label="Điều hướng phân trang"
+      aria-label={dictionary.pagination.navigationLabel}
     >
       <PaginationContent className="flex-wrap justify-start sm:justify-end">
         <PaginationItem>
@@ -129,7 +134,7 @@ export function PaginationNavigation({
             type="button"
             variant="outline"
             size="icon"
-            aria-label="Đi tới trang trước"
+            aria-label={dictionary.pagination.goToPrevious}
             disabled={isPreviousDisabled}
             onClick={() => onPageChange(currentPage - 1)}
           >
@@ -154,7 +159,9 @@ export function PaginationNavigation({
                 type="button"
                 variant={isCurrentPage ? "default" : "outline"}
                 size="icon"
-                aria-label={`Đi tới trang ${entry}`}
+                aria-label={formatMessage(dictionary.pagination.goToPage, {
+                  page: entry,
+                })}
                 aria-current={isCurrentPage ? "page" : undefined}
                 disabled={isPending}
                 onClick={() => {
@@ -174,7 +181,7 @@ export function PaginationNavigation({
             type="button"
             variant="outline"
             size="icon"
-            aria-label="Đi tới trang sau"
+            aria-label={dictionary.pagination.goToNext}
             disabled={isNextDisabled}
             onClick={() => onPageChange(currentPage + 1)}
           >
@@ -190,6 +197,7 @@ export function AppPaginationControls<T>({
   className,
   page,
 }: AppPaginationControlsProps<T>) {
+  const { dictionary, formatMessage, formatNumber } = useLocalization()
   const { isPending, setPage } = useAppPaginationQuery({
     defaultSize: page.size,
     totalPages: page.totalPages,
@@ -205,8 +213,12 @@ export function AppPaginationControls<T>({
 
   const summaryText =
     page.totalElements > 0
-      ? `Hiển thị ${visibleItems.start}-${visibleItems.end} trên ${page.totalElements} kết quả`
-      : "Chưa có dữ liệu để hiển thị"
+      ? formatMessage(dictionary.pagination.displayedResults, {
+        from: formatNumber(visibleItems.start),
+        to: formatNumber(visibleItems.end),
+        total: formatNumber(page.totalElements),
+      })
+      : dictionary.pagination.noResults
 
   return (
     <div

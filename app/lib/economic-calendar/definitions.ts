@@ -1,3 +1,5 @@
+import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
+
 export type EconomicCalendarStatus = "PENDING" | "AVAILABLE" | string
 
 export interface EconomicCalendarListResponse {
@@ -29,14 +31,17 @@ export interface EconomicCalendarSyncResponse {
 }
 
 export function formatEconomicCalendarValue(
-  value?: string | null,
-  fallback = "Chưa có"
+  value: string | null | undefined,
+  fallback: string
 ) {
   return value?.trim() || fallback
 }
 
-export function getEconomicCalendarImpactLabel(impact?: string | null) {
-  return formatEconomicCalendarValue(impact, "Chưa có tác động")
+export function getEconomicCalendarImpactLabel(
+  impact: string | null | undefined,
+  dictionary: Dictionary
+) {
+  return formatEconomicCalendarValue(impact, dictionary.economicCalendar.noImpact)
 }
 
 export function getEconomicCalendarImpactVariant(
@@ -47,23 +52,26 @@ export function getEconomicCalendarImpactVariant(
 
 export function getEconomicCalendarStatusLabel(
   status?: string | null,
-  contentAvailable?: boolean
+  contentAvailable?: boolean,
+  dictionary?: Dictionary
 ) {
+  const labels = dictionary?.economicCalendar.statusLabels
+
   switch (status?.toUpperCase()) {
     case "AVAILABLE":
-      return "Có dữ liệu"
+      return labels?.AVAILABLE ?? "AVAILABLE"
     case "PENDING":
-      return "Đang chờ"
+      return labels?.PENDING ?? "PENDING"
     default:
       if (contentAvailable === true) {
-        return "Có dữ liệu"
+        return labels?.AVAILABLE ?? "AVAILABLE"
       }
 
       if (contentAvailable === false) {
-        return "Đang chờ"
+        return labels?.PENDING ?? "PENDING"
       }
 
-      return "Chưa rõ"
+      return labels?.UNKNOWN ?? "UNKNOWN"
   }
 }
 

@@ -25,6 +25,7 @@ import {
 
 import { GripVerticalIcon, PlusIcon } from "lucide-react";
 
+import { useLocalization } from "@/app/lib/i18n/provider";
 import { useEditorModal } from "@/components/editor-x/use-modal";
 import { Button } from "@/components/ui/button";
 import {
@@ -62,6 +63,7 @@ export function DraggableBlockPlugin({
     queryString: string;
   }) => Array<ComponentPickerOption>;
 }): JSX.Element | null {
+  const { dictionary } = useLocalization();
   const [editor] = useLexicalComposerContext();
   const [modal, showModal] = useEditorModal();
   const menuRef = useRef<HTMLDivElement>(null);
@@ -224,12 +226,12 @@ export function DraggableBlockPlugin({
             >
               <Command>
                 <CommandInput
-                  placeholder="Filter blocks..."
+                  placeholder={dictionary.editor.picker.filterBlocks}
                   value={queryString}
                   onValueChange={setQueryString}
                 />
                 <CommandList>
-                  <CommandEmpty>No results found.</CommandEmpty>
+                  <CommandEmpty>{dictionary.editor.picker.noResults}</CommandEmpty>
                   <CommandGroup>
                     {options.map((option, i) => (
                       <CommandItem
@@ -269,7 +271,7 @@ export function DraggableBlockPlugin({
             <Button
               variant="ghost"
               size="icon-xs"
-              title="Click to add below (Alt/Ctrl: add above)"
+              title={dictionary.editor.picker.addBlock}
               className="cursor-pointer rounded-sm text-muted-foreground hover:bg-accent hover:text-foreground"
               onClick={openComponentPicker}
             >

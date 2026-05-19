@@ -35,6 +35,7 @@ import {
   UnderlineIcon,
 } from "lucide-react";
 
+import { useLocalization } from "@/app/lib/i18n/provider";
 import { getDOMRangeRect } from "@/components/editor-x/get-dom-range-rect";
 import { getSelectedNode } from "@/components/editor-x/get-selected-node";
 import { setFloatingElemPosition } from "@/components/editor-x/set-floating-elem-position";
@@ -66,6 +67,7 @@ function TextFormatFloatingToolbar({
   isUnderline: boolean;
   setIsLinkEditMode: Dispatch<boolean>;
 }): JSX.Element {
+  const { dictionary } = useLocalization();
   const popupCharStylesEditorRef = useRef<HTMLDivElement | null>(null);
 
   const insertLink = useCallback(() => {
@@ -213,7 +215,7 @@ function TextFormatFloatingToolbar({
           >
             <ToggleGroupItem
               value="bold"
-              aria-label="Toggle bold"
+              aria-label={dictionary.editor.toolbar.toggleBold}
               onClick={() => {
                 editor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold");
               }}
@@ -223,7 +225,7 @@ function TextFormatFloatingToolbar({
             </ToggleGroupItem>
             <ToggleGroupItem
               value="italic"
-              aria-label="Toggle italic"
+              aria-label={dictionary.editor.toolbar.toggleItalic}
               onClick={() => {
                 editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic");
               }}
@@ -233,7 +235,7 @@ function TextFormatFloatingToolbar({
             </ToggleGroupItem>
             <ToggleGroupItem
               value="underline"
-              aria-label="Toggle underline"
+              aria-label={dictionary.editor.toolbar.toggleUnderline}
               onClick={() => {
                 editor.dispatchCommand(FORMAT_TEXT_COMMAND, "underline");
               }}
@@ -243,7 +245,7 @@ function TextFormatFloatingToolbar({
             </ToggleGroupItem>
             <ToggleGroupItem
               value="strikethrough"
-              aria-label="Toggle strikethrough"
+              aria-label={dictionary.editor.toolbar.toggleStrikethrough}
               onClick={() => {
                 editor.dispatchCommand(FORMAT_TEXT_COMMAND, "strikethrough");
               }}
@@ -254,7 +256,7 @@ function TextFormatFloatingToolbar({
             <Separator orientation="vertical" />
             <ToggleGroupItem
               value="code"
-              aria-label="Toggle code"
+              aria-label={dictionary.editor.toolbar.toggleCode}
               onClick={() => {
                 editor.dispatchCommand(FORMAT_TEXT_COMMAND, "code");
               }}
@@ -264,7 +266,7 @@ function TextFormatFloatingToolbar({
             </ToggleGroupItem>
             <ToggleGroupItem
               value="link"
-              aria-label="Toggle link"
+              aria-label={dictionary.editor.toolbar.toggleLink}
               onClick={insertLink}
               size="sm"
             >
@@ -280,7 +282,7 @@ function TextFormatFloatingToolbar({
           >
             <ToggleGroupItem
               value="subscript"
-              aria-label="Toggle subscript"
+              aria-label={dictionary.editor.toolbar.toggleSubscript}
               onClick={() => {
                 editor.dispatchCommand(FORMAT_TEXT_COMMAND, "subscript");
               }}
@@ -290,7 +292,7 @@ function TextFormatFloatingToolbar({
             </ToggleGroupItem>
             <ToggleGroupItem
               value="superscript"
-              aria-label="Toggle superscript"
+              aria-label={dictionary.editor.toolbar.toggleSuperscript}
               onClick={() => {
                 editor.dispatchCommand(FORMAT_TEXT_COMMAND, "superscript");
               }}

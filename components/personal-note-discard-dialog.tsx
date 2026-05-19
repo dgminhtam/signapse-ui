@@ -10,6 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { useLocalization } from "@/app/lib/i18n/provider"
 
 interface PersonalNoteDiscardDialogProps {
   onConfirm: () => void
@@ -22,20 +23,25 @@ function PersonalNoteDiscardDialog({
   onOpenChange,
   open,
 }: PersonalNoteDiscardDialogProps) {
+  const { dictionary } = useLocalization()
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Bỏ thay đổi chưa lưu?</AlertDialogTitle>
+          <AlertDialogTitle>
+            {dictionary.personalNotes.discardTitle}
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            Nội dung bạn vừa chỉnh sửa chưa được lưu. Nếu tiếp tục, các thay
-            đổi này sẽ bị mất.
+            {dictionary.personalNotes.discardDescription}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Tiếp tục chỉnh sửa</AlertDialogCancel>
+          <AlertDialogCancel>
+            {dictionary.personalNotes.continueEditing}
+          </AlertDialogCancel>
           <AlertDialogAction variant="destructive" onClick={onConfirm}>
-            Bỏ thay đổi
+            {dictionary.personalNotes.discardChanges}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -10,6 +10,7 @@ import {
 
 import { LinkIcon } from "lucide-react";
 
+import { useLocalization } from "@/app/lib/i18n/provider";
 import { useToolbarContext } from "@/components/editor-x/toolbar-context";
 import { useUpdateToolbarHandler } from "@/components/editor-x/use-update-toolbar";
 import { getSelectedNode } from "@/components/editor-x/get-selected-node";
@@ -21,6 +22,7 @@ export function LinkToolbarPlugin({
 }: {
   setIsLinkEditMode: (isEditMode: boolean) => void;
 }) {
+  const { dictionary } = useLocalization();
   const { activeEditor } = useToolbarContext();
   const [isLink, setIsLink] = useState(false);
 
@@ -80,7 +82,7 @@ export function LinkToolbarPlugin({
     <Toggle
       variant={"outline"}
       size="sm"
-      aria-label="Toggle link"
+      aria-label={dictionary.editor.toolbar.toggleLink}
       onClick={insertLink}
     >
       <LinkIcon className="h-4 w-4" />

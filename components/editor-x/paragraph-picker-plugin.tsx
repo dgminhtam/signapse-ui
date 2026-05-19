@@ -7,10 +7,11 @@ import {
 
 import { TextIcon } from "lucide-react";
 
+import type { Dictionary } from "@/app/lib/i18n/dictionary-types";
 import { ComponentPickerOption } from "@/components/editor-x/component-picker-option";
 
-export function ParagraphPickerPlugin() {
-  return new ComponentPickerOption("Paragraph", {
+export function ParagraphPickerPlugin(dictionary: Dictionary) {
+  return new ComponentPickerOption(dictionary.editor.block.paragraph, {
     icon: <TextIcon className="size-4" />,
     keywords: ["normal", "paragraph", "p", "text"],
     onSelect: (_, editor) =>

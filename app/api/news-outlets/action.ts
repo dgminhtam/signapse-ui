@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache"
 
 import { fetchAuthenticated } from "@/app/api/auth/action"
 import { ActionResult, Page, SearchParams } from "@/app/lib/definitions"
+import { getDictionary } from "@/app/lib/i18n/dictionaries"
+import { getRequestLocale } from "@/app/lib/i18n/server"
 import {
   CreateNewsOutletRequest,
   NewsOutletListResponse,
@@ -50,8 +52,9 @@ export async function createNewsOutlet(
 
     return { success: true, data: newsOutlet }
   } catch (error: unknown) {
+    const dictionary = await getDictionary(await getRequestLocale())
     const errorMessage =
-      error instanceof Error ? error.message : "Không thể tạo nguồn tin mới"
+      error instanceof Error ? error.message : dictionary.newsOutlets.createError
 
     return { success: false, error: errorMessage }
   }
@@ -75,8 +78,9 @@ export async function updateNewsOutlet(
 
     return { success: true, data: newsOutlet }
   } catch (error: unknown) {
+    const dictionary = await getDictionary(await getRequestLocale())
     const errorMessage =
-      error instanceof Error ? error.message : "Không thể cập nhật nguồn tin"
+      error instanceof Error ? error.message : dictionary.newsOutlets.updateError
 
     return { success: false, error: errorMessage }
   }
@@ -98,10 +102,11 @@ export async function toggleNewsOutletActive(
 
     return { success: true, data: newsOutlet }
   } catch (error: unknown) {
+    const dictionary = await getDictionary(await getRequestLocale())
     const errorMessage =
       error instanceof Error
         ? error.message
-        : "Không thể cập nhật trạng thái nguồn tin"
+        : dictionary.newsOutlets.toggleError
 
     return { success: false, error: errorMessage }
   }
@@ -117,8 +122,9 @@ export async function deleteNewsOutlet(id: number): Promise<ActionResult> {
 
     return { success: true, data: undefined }
   } catch (error: unknown) {
+    const dictionary = await getDictionary(await getRequestLocale())
     const errorMessage =
-      error instanceof Error ? error.message : "Không thể xóa nguồn tin"
+      error instanceof Error ? error.message : dictionary.newsOutlets.deleteError
 
     return { success: false, error: errorMessage }
   }

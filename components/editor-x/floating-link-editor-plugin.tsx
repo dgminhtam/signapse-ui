@@ -34,6 +34,7 @@ import {
 
 import { Check, Pencil, Trash, X } from "lucide-react";
 
+import { useLocalization } from "@/app/lib/i18n/provider";
 import { getSelectedNode } from "@/components/editor-x/get-selected-node";
 import { setFloatingElemPositionForLinkEditor } from "@/components/editor-x/set-floating-elem-position-for-link-editor";
 import { sanitizeUrl } from "@/components/editor-x/url";
@@ -55,6 +56,7 @@ function FloatingLinkEditor({
   isLinkEditMode: boolean;
   setIsLinkEditMode: Dispatch<boolean>;
 }): JSX.Element {
+  const { dictionary } = useLocalization();
   const editorRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [linkUrl, setLinkUrl] = useState("");
@@ -234,10 +236,12 @@ function FloatingLinkEditor({
             onChange={(event) => setEditedLinkUrl(event.target.value)}
             onKeyDown={monitorInputInteraction}
             className="flex-grow"
+            aria-label={dictionary.editor.link.url}
           />
           <Button
             size="icon"
             variant="ghost"
+            aria-label={dictionary.editor.link.cancel}
             onClick={() => {
               setIsLinkEditMode(false);
               setIsLink(false);
@@ -248,6 +252,7 @@ function FloatingLinkEditor({
           </Button>
           <Button
             size="icon"
+            aria-label={dictionary.editor.link.apply}
             onClick={handleLinkSubmission}
             className="shrink-0"
           >
@@ -268,6 +273,7 @@ function FloatingLinkEditor({
             <Button
               size="icon"
               variant="ghost"
+              aria-label={dictionary.editor.link.edit}
               onClick={() => {
                 setEditedLinkUrl(linkUrl);
                 setIsLinkEditMode(true);
@@ -278,6 +284,7 @@ function FloatingLinkEditor({
             <Button
               size="icon"
               variant="destructive"
+              aria-label={dictionary.editor.link.remove}
               onClick={() => {
                 editor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
               }}

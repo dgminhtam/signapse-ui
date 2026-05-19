@@ -17,6 +17,7 @@ import {
   setCurrentWorkspace,
   updateWorkspace,
 } from "@/app/api/workspaces/action"
+import { useLocalization } from "@/app/lib/i18n/provider"
 import { WorkspaceResponse } from "@/app/lib/workspaces/definitions"
 import { Button } from "@/components/ui/button"
 import {
@@ -71,6 +72,7 @@ export function WorkspaceSwitcher({
   className,
 }: WorkspaceSwitcherProps) {
   const router = useRouter()
+  const { dictionary, formatMessage } = useLocalization()
   const [isPending, startTransition] = React.useTransition()
   const [isCreateOpen, setIsCreateOpen] = React.useState(false)
   const [isRenameOpen, setIsRenameOpen] = React.useState(false)
@@ -98,7 +100,9 @@ export function WorkspaceSwitcher({
         return
       }
 
-      toast.success(`Đã chuyển sang không gian làm việc "${workspace.name}".`)
+      toast.success(
+        formatMessage(dictionary.workspace.switched, { name: workspace.name })
+      )
       router.refresh()
     })
   }
@@ -120,7 +124,7 @@ export function WorkspaceSwitcher({
     const name = createName.trim()
 
     if (!name) {
-      toast.error("Vui lòng nhập tên không gian làm việc.")
+      toast.error(dictionary.workspace.nameRequired)
       return
     }
 
@@ -134,7 +138,7 @@ export function WorkspaceSwitcher({
         return
       }
 
-      toast.success("Đã tạo không gian làm việc.")
+      toast.success(dictionary.workspace.created)
       setCreateName("")
       setIsCreateOpen(false)
       router.refresh()
@@ -149,7 +153,7 @@ export function WorkspaceSwitcher({
     const name = renameName.trim()
 
     if (!name) {
-      toast.error("Vui lòng nhập tên không gian làm việc.")
+      toast.error(dictionary.workspace.nameRequired)
       return
     }
 
@@ -163,7 +167,7 @@ export function WorkspaceSwitcher({
         return
       }
 
-      toast.success("Đã cập nhật không gian làm việc.")
+      toast.success(dictionary.workspace.updated)
       setIsRenameOpen(false)
       router.refresh()
     })
@@ -186,7 +190,7 @@ export function WorkspaceSwitcher({
                 <BriefcaseBusinessIcon className="size-4" />
               </span>
               <span className="max-w-44 truncate text-sm font-medium md:max-w-52">
-                {currentWorkspace?.name ?? "Chưa chọn"}
+                {currentWorkspace?.name ?? dictionary.workspace.noneSelected}
               </span>
             </span>
             {isPending ? (
@@ -201,7 +205,7 @@ export function WorkspaceSwitcher({
           align="end"
           aria-labelledby={WORKSPACE_SWITCHER_TRIGGER_ID}
         >
-          <DropdownMenuLabel>Không gian làm việc</DropdownMenuLabel>
+          <DropdownMenuLabel>{dictionary.workspace.switcherLabel}</DropdownMenuLabel>
           <DropdownMenuGroup>
             {workspaces.length > 0 ? (
               workspaces.map((workspace) => {
@@ -224,7 +228,9 @@ export function WorkspaceSwitcher({
                         {workspace.name}
                       </span>
                       <span className="truncate text-xs text-muted-foreground">
-                        {isSelected ? "Đang hoạt động" : "Có thể chuyển sang"}
+                        {isSelected
+                          ? dictionary.workspace.active
+                          : dictionary.workspace.switchable}
                       </span>
                     </div>
                     {isSelected ? (
@@ -235,7 +241,7 @@ export function WorkspaceSwitcher({
               })
             ) : (
               <DropdownMenuItem disabled className="p-2 text-muted-foreground">
-                Chưa có không gian làm việc
+                {dictionary.workspace.empty}
               </DropdownMenuItem>
             )}
           </DropdownMenuGroup>
@@ -257,7 +263,7 @@ export function WorkspaceSwitcher({
               }}
             >
               <PlusIcon className="size-4" />
-              Tạo không gian làm việc
+              {dictionary.workspace.createAction}
             </DropdownMenuItem>
             <DropdownMenuItem
               className={canRenameWorkspace ? "gap-2 p-2" : "hidden"}
@@ -268,7 +274,7 @@ export function WorkspaceSwitcher({
               }}
             >
               <PencilIcon className="size-4" />
-              Đổi tên không gian làm việc
+              {dictionary.workspace.renameAction}
             </DropdownMenuItem>
             <DropdownMenuItem
               className={canManageWatchlist ? "gap-2 p-2" : "hidden"}
@@ -279,7 +285,7 @@ export function WorkspaceSwitcher({
               }}
             >
               <ListPlusIcon className="size-4" />
-              Quản lý tài sản theo dõi
+              {dictionary.workspace.manageWatchlist}
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>
@@ -287,10 +293,10 @@ export function WorkspaceSwitcher({
 
       <WorkspaceFormDialog
         open={canCreateWorkspace && isCreateOpen}
-        title="Tạo không gian làm việc mới"
-        description="Nhập tên cho không gian làm việc mới."
+        title={dictionary.workspace.createTitle}
+        description={dictionary.workspace.createDescription}
         name={createName}
-        submitLabel="Tạo không gian làm việc"
+        submitLabel={dictionary.workspace.createAction}
         isPending={isPending}
         onNameChange={setCreateName}
         onOpenChange={setIsCreateOpen}
@@ -299,10 +305,10 @@ export function WorkspaceSwitcher({
 
       <WorkspaceFormDialog
         open={canRenameWorkspace && isRenameOpen}
-        title="Đổi tên không gian làm việc"
-        description="Cập nhật tên cho không gian làm việc đang hoạt động."
+        title={dictionary.workspace.renameTitle}
+        description={dictionary.workspace.renameDescription}
         name={renameName}
-        submitLabel="Lưu thay đổi"
+        submitLabel={dictionary.workspace.saveChanges}
         isPending={isPending}
         onNameChange={setRenameName}
         onOpenChange={setIsRenameOpen}
@@ -343,6 +349,8 @@ function WorkspaceFormDialog({
   onOpenChange: (open: boolean) => void
   onSubmit: () => void
 }) {
+  const { dictionary } = useLocalization()
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -353,11 +361,11 @@ function WorkspaceFormDialog({
 
         <div className="flex flex-col gap-4">
           <label className="flex flex-col gap-2 text-sm font-medium">
-            Tên không gian làm việc *
+            {dictionary.workspace.nameLabel}
             <Input
               value={name}
               onChange={(event) => onNameChange(event.target.value)}
-              placeholder="Ví dụ: Nhóm nghiên cứu"
+              placeholder={dictionary.workspace.namePlaceholder}
             />
           </label>
         </div>
@@ -365,7 +373,7 @@ function WorkspaceFormDialog({
         <DialogFooter>
           <DialogClose asChild>
             <Button type="button" variant="ghost" disabled={isPending}>
-              Hủy
+              {dictionary.common.cancel}
             </Button>
           </DialogClose>
           <Button type="button" disabled={isPending} onClick={onSubmit}>

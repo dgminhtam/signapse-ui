@@ -1,4 +1,3 @@
-const UNTITLED_NOTE_LABEL = "Ghi chú chưa có tiêu đề"
 const MAX_NOTE_LABEL_LENGTH = 80
 const MAX_NOTE_EXCERPT_LENGTH = 160
 
@@ -86,21 +85,27 @@ function truncateText(value: string, maxLength: number) {
   return `${value.slice(0, maxLength).trimEnd()}...`
 }
 
-export function getPersonalNoteLabel(contentHtml?: string | null) {
+export function getPersonalNoteLabel(
+  contentHtml: string | null | undefined,
+  untitledLabel: string
+) {
   const text = getPersonalNoteText(contentHtml)
 
   if (!text) {
-    return UNTITLED_NOTE_LABEL
+    return untitledLabel
   }
 
   return truncateText(text, MAX_NOTE_LABEL_LENGTH)
 }
 
-export function getPersonalNoteExcerpt(contentHtml?: string | null) {
+export function getPersonalNoteExcerpt(
+  contentHtml: string | null | undefined,
+  emptyPreview: string
+) {
   const text = getPersonalNoteText(contentHtml)
 
   if (!text) {
-    return "Chưa có nội dung để xem trước."
+    return emptyPreview
   }
 
   return truncateText(text, MAX_NOTE_EXCERPT_LENGTH)

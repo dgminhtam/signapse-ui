@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache"
 
 import { fetchAuthenticated } from "@/app/api/auth/action"
 import { ActionResult, Page, SearchParams } from "@/app/lib/definitions"
+import { getDictionary } from "@/app/lib/i18n/dictionaries"
+import { getRequestLocale } from "@/app/lib/i18n/server"
 import {
   CreateSystemPromptRequest,
   SystemPromptResponse,
@@ -25,6 +27,10 @@ function revalidateSystemPromptRoutes(promptType?: string) {
   }
 
   revalidatePath("/system-prompts/[promptType]", "page")
+}
+
+async function getSystemPromptsDictionary() {
+  return getDictionary(await getRequestLocale())
 }
 
 export async function getSystemPrompts(
@@ -54,12 +60,14 @@ export async function createSystemPrompt(
 
     return { success: true, data }
   } catch (error: unknown) {
+    const dictionary = await getSystemPromptsDictionary()
+
     return {
       success: false,
       error:
         error instanceof Error
           ? error.message
-          : "Không thể tạo prompt hệ thống.",
+          : dictionary.systemPrompts.createError,
     }
   }
 }
@@ -81,12 +89,14 @@ export async function updateSystemPrompt(
 
     return { success: true, data }
   } catch (error: unknown) {
+    const dictionary = await getSystemPromptsDictionary()
+
     return {
       success: false,
       error:
         error instanceof Error
           ? error.message
-          : "Không thể cập nhật prompt hệ thống.",
+          : dictionary.systemPrompts.updateError,
     }
   }
 }
@@ -103,10 +113,12 @@ export async function deleteSystemPrompt(
 
     return { success: true, data: undefined }
   } catch (error: unknown) {
+    const dictionary = await getSystemPromptsDictionary()
+
     return {
       success: false,
       error:
-        error instanceof Error ? error.message : "Không thể xóa prompt hệ thống.",
+        error instanceof Error ? error.message : dictionary.systemPrompts.deleteError,
     }
   }
 }

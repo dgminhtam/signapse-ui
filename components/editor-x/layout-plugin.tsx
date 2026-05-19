@@ -37,6 +37,7 @@ import {
   $isLayoutItemNode,
   LayoutItemNode,
 } from "@/components/editor-x/layout-item-node";
+import { useLocalization } from "@/app/lib/i18n/provider";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -46,13 +47,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const LAYOUTS = [
-  { label: "2 columns (equal width)", value: "1fr 1fr" },
-  { label: "2 columns (25% - 75%)", value: "1fr 3fr" },
-  { label: "3 columns (equal width)", value: "1fr 1fr 1fr" },
-  { label: "3 columns (25% - 50% - 25%)", value: "1fr 2fr 1fr" },
-  { label: "4 columns (equal width)", value: "1fr 1fr 1fr 1fr" },
-];
+function getLayouts(dictionary: ReturnType<typeof useLocalization>["dictionary"]) {
+  return [
+    { label: dictionary.editor.layout.twoEqual, value: "1fr 1fr" },
+    { label: dictionary.editor.layout.twoQuarter, value: "1fr 3fr" },
+    { label: dictionary.editor.layout.threeEqual, value: "1fr 1fr 1fr" },
+    { label: dictionary.editor.layout.threeMixed, value: "1fr 2fr 1fr" },
+    { label: dictionary.editor.layout.fourEqual, value: "1fr 1fr 1fr 1fr" },
+  ];
+}
+
+const DEFAULT_LAYOUT_VALUE = "1fr 1fr";
 
 export function InsertLayoutDialog({
   activeEditor,
@@ -61,8 +66,10 @@ export function InsertLayoutDialog({
   activeEditor: LexicalEditor;
   onClose: () => void;
 }): JSX.Element {
-  const [layout, setLayout] = useState(LAYOUTS[0].value);
-  const buttonLabel = LAYOUTS.find((item) => item.value === layout)?.label;
+  const { dictionary } = useLocalization();
+  const localizedLayouts = getLayouts(dictionary);
+  const [layout, setLayout] = useState(DEFAULT_LAYOUT_VALUE);
+  const buttonLabel = localizedLayouts.find((item) => item.value === layout)?.label;
 
   const onClick = () => {
     activeEditor.dispatchCommand(INSERT_LAYOUT_COMMAND, layout);
@@ -76,14 +83,14 @@ export function InsertLayoutDialog({
           <SelectValue placeholder={buttonLabel} />
         </SelectTrigger>
         <SelectContent className="w-full">
-          {LAYOUTS.map(({ label, value }) => (
+          {localizedLayouts.map(({ label, value }) => (
             <SelectItem key={value} value={value}>
               {label}
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
-      <Button onClick={onClick}>Insert</Button>
+      <Button onClick={onClick}>{dictionary.editor.insert.insert}</Button>
     </>
   );
 }

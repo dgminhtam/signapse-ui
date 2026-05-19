@@ -10,44 +10,48 @@ import {
   TextIcon,
 } from "lucide-react";
 
-export const blockTypeToBlockName: Record<
+import type { Dictionary } from "@/app/lib/i18n/dictionary-types";
+
+export function getBlockTypeToBlockName(dictionary: Dictionary): Record<
   string,
   { label: string; icon: React.ReactNode }
-> = {
-  paragraph: {
-    label: "Paragraph",
-    icon: <TextIcon className="size-4" />,
-  },
-  h1: {
-    label: "Heading 1",
-    icon: <Heading1Icon className="size-4" />,
-  },
-  h2: {
-    label: "Heading 2",
-    icon: <Heading2Icon className="size-4" />,
-  },
-  h3: {
-    label: "Heading 3",
-    icon: <Heading3Icon className="size-4" />,
-  },
-  number: {
-    label: "Numbered List",
-    icon: <ListOrderedIcon className="size-4" />,
-  },
-  bullet: {
-    label: "Bulleted List",
-    icon: <ListIcon className="size-4" />,
-  },
-  check: {
-    label: "Check List",
-    icon: <ListTodoIcon className="size-4" />,
-  },
-  code: {
-    label: "Code Block",
-    icon: <CodeIcon className="size-4" />,
-  },
-  quote: {
-    label: "Quote",
-    icon: <QuoteIcon className="size-4" />,
-  },
-};
+> {
+  return {
+    paragraph: {
+      label: dictionary.editor.block.paragraph,
+      icon: <TextIcon className="size-4" />,
+    },
+    h1: {
+      label: dictionary.editor.block.heading1,
+      icon: <Heading1Icon className="size-4" />,
+    },
+    h2: {
+      label: dictionary.editor.block.heading2,
+      icon: <Heading2Icon className="size-4" />,
+    },
+    h3: {
+      label: dictionary.editor.block.heading3,
+      icon: <Heading3Icon className="size-4" />,
+    },
+    number: {
+      label: dictionary.editor.block.numberedList,
+      icon: <ListOrderedIcon className="size-4" />,
+    },
+    bullet: {
+      label: dictionary.editor.block.bulletedList,
+      icon: <ListIcon className="size-4" />,
+    },
+    check: {
+      label: dictionary.editor.block.checkList,
+      icon: <ListTodoIcon className="size-4" />,
+    },
+    code: {
+      label: dictionary.editor.block.codeBlock,
+      icon: <CodeIcon className="size-4" />,
+    },
+    quote: {
+      label: dictionary.editor.block.quote,
+      icon: <QuoteIcon className="size-4" />,
+    },
+  };
+}

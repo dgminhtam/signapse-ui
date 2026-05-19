@@ -8,6 +8,7 @@ import { $getSelection, $isRangeSelection, type BaseSelection } from "lexical";
 
 import { PaintBucketIcon } from "lucide-react";
 
+import { useLocalization } from "@/app/lib/i18n/provider";
 import { useToolbarContext } from "@/components/editor-x/toolbar-context";
 import { useUpdateToolbarHandler } from "@/components/editor-x/use-update-toolbar";
 import {
@@ -24,6 +25,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 export function FontBackgroundToolbarPlugin() {
+  const { dictionary } = useLocalization();
   const { activeEditor } = useToolbarContext();
 
   const [bgColor, setBgColor] = useState("#fff");
@@ -79,7 +81,11 @@ export function FontBackgroundToolbarPlugin() {
       }}
     >
       <ColorPickerTrigger asChild>
-        <Button variant={"outline"} size={"icon-sm"}>
+        <Button
+          variant={"outline"}
+          size={"icon-sm"}
+          aria-label={dictionary.editor.toolbar.backgroundColor}
+        >
           <PaintBucketIcon className="size-4" />
         </Button>
       </ColorPickerTrigger>

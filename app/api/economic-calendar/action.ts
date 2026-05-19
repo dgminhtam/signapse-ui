@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache"
 
 import { fetchAuthenticated } from "@/app/api/auth/action"
 import { ActionResult, Page, SearchParams } from "@/app/lib/definitions"
+import { getDictionary } from "@/app/lib/i18n/dictionaries"
+import { getRequestLocale } from "@/app/lib/i18n/server"
 import {
   EconomicCalendarListResponse,
   EconomicCalendarResponse,
@@ -51,12 +53,13 @@ export async function syncEconomicCalendarEntries(): Promise<
 
     return { success: true, data }
   } catch (error: unknown) {
+    const dictionary = await getDictionary(await getRequestLocale())
     return {
       success: false,
       error:
         error instanceof Error
           ? error.message
-          : "Không thể đồng bộ dữ liệu lịch kinh tế.",
+          : dictionary.economicCalendar.syncError,
     }
   }
 }

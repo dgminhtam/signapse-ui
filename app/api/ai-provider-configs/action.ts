@@ -15,6 +15,8 @@ import {
   AiProviderCredentialUpdateRequest,
 } from "@/app/lib/ai-provider-configs/definitions"
 import { ActionResult, Page, SearchParams } from "@/app/lib/definitions"
+import { getDictionary } from "@/app/lib/i18n/dictionaries"
+import { getRequestLocale } from "@/app/lib/i18n/server"
 import { queryParamsToString } from "@/app/lib/utils"
 
 function revalidateAiProviderConfig(id?: number) {
@@ -23,6 +25,10 @@ function revalidateAiProviderConfig(id?: number) {
   if (id) {
     revalidatePath(`/ai-provider-configs/${id}`)
   }
+}
+
+async function getAiProviderConfigDictionary() {
+  return getDictionary(await getRequestLocale())
 }
 
 export async function getAiProviderConfigs(
@@ -60,9 +66,14 @@ export async function getAiProviderModelCatalog(
     )
     return { success: true, data }
   } catch (error: unknown) {
+    const dictionary = await getAiProviderConfigDictionary()
+
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Không thể xác thực và tải danh sách model",
+      error:
+        error instanceof Error
+          ? error.message
+          : dictionary.aiProviderConfigs.modelCatalogError,
     }
   }
 }
@@ -78,9 +89,14 @@ export async function createAiProviderConfig(
     revalidateAiProviderConfig(data.id)
     return { success: true, data }
   } catch (error: unknown) {
+    const dictionary = await getAiProviderConfigDictionary()
+
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Không thể tạo cấu hình nhà cung cấp AI",
+      error:
+        error instanceof Error
+          ? error.message
+          : dictionary.aiProviderConfigs.createError,
     }
   }
 }
@@ -100,9 +116,14 @@ export async function updateAiProviderConfig(
     revalidateAiProviderConfig(id)
     return { success: true, data }
   } catch (error: unknown) {
+    const dictionary = await getAiProviderConfigDictionary()
+
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Không thể cập nhật cấu hình nhà cung cấp AI",
+      error:
+        error instanceof Error
+          ? error.message
+          : dictionary.aiProviderConfigs.updateError,
     }
   }
 }
@@ -120,9 +141,14 @@ export async function setAiProviderConfigDefault(
     revalidateAiProviderConfig(id)
     return { success: true, data }
   } catch (error: unknown) {
+    const dictionary = await getAiProviderConfigDictionary()
+
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Không thể đặt nhà cung cấp AI mặc định",
+      error:
+        error instanceof Error
+          ? error.message
+          : dictionary.aiProviderConfigs.setDefaultError,
     }
   }
 }
@@ -135,9 +161,14 @@ export async function deleteAiProviderConfig(id: number): Promise<ActionResult> 
     revalidatePath("/ai-provider-configs")
     return { success: true, data: undefined }
   } catch (error: unknown) {
+    const dictionary = await getAiProviderConfigDictionary()
+
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Không thể xóa cấu hình nhà cung cấp AI",
+      error:
+        error instanceof Error
+          ? error.message
+          : dictionary.aiProviderConfigs.deleteConfigError,
     }
   }
 }
@@ -157,9 +188,14 @@ export async function createAiProviderCredential(
     revalidateAiProviderConfig(id)
     return { success: true, data }
   } catch (error: unknown) {
+    const dictionary = await getAiProviderConfigDictionary()
+
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Không thể thêm credential AI",
+      error:
+        error instanceof Error
+          ? error.message
+          : dictionary.aiProviderConfigs.credentialCreateError,
     }
   }
 }
@@ -180,9 +216,14 @@ export async function updateAiProviderCredential(
     revalidateAiProviderConfig(id)
     return { success: true, data }
   } catch (error: unknown) {
+    const dictionary = await getAiProviderConfigDictionary()
+
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Không thể cập nhật credential AI",
+      error:
+        error instanceof Error
+          ? error.message
+          : dictionary.aiProviderConfigs.credentialUpdateError,
     }
   }
 }
@@ -201,9 +242,14 @@ export async function deleteAiProviderCredential(
     revalidateAiProviderConfig(id)
     return { success: true, data: undefined }
   } catch (error: unknown) {
+    const dictionary = await getAiProviderConfigDictionary()
+
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Không thể xóa credential AI",
+      error:
+        error instanceof Error
+          ? error.message
+          : dictionary.aiProviderConfigs.credentialDeleteError,
     }
   }
 }

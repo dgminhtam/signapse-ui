@@ -1,33 +1,5 @@
 import { SearchParams, Sort } from "./definitions";
 
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('vi-VN', {
-    style: 'currency',
-    currency: 'VND',
-
-  }).format(amount);
-}
-
-export function formatDate(dateString: string | Date): string {
-  if (!dateString) {
-    return "N/A";
-  }
-
-  const date = new Date(dateString);
-
-  if (isNaN(date.getTime())) {
-    return "Ngày không hợp lệ";
-  }
-
-  return new Intl.DateTimeFormat("vi-VN", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  }).format(date);
-}
 function sanitize(term: string): string {
   return term.replace(/'/g, "''");
 }

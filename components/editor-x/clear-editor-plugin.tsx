@@ -3,6 +3,7 @@ import { CLEAR_EDITOR_COMMAND } from "lexical";
 
 import { Trash2Icon } from "lucide-react";
 
+import { useLocalization } from "@/app/lib/i18n/provider";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -21,6 +22,7 @@ import {
 } from "@/components/ui/tooltip";
 
 export function ClearEditorActionPlugin() {
+  const { dictionary } = useLocalization();
   const [editor] = useLexicalComposerContext();
 
   return (
@@ -28,24 +30,29 @@ export function ClearEditorActionPlugin() {
       <Tooltip disableHoverableContent>
         <TooltipTrigger asChild>
           <DialogTrigger asChild>
-            <Button size={"sm"} variant={"ghost"} className="p-2">
+            <Button
+              size={"sm"}
+              variant={"ghost"}
+              className="p-2"
+              aria-label={dictionary.editor.clearEditor.title}
+            >
               <Trash2Icon className="h-4 w-4" />
             </Button>
           </DialogTrigger>
         </TooltipTrigger>
-        <TooltipContent>Clear Editor</TooltipContent>
+        <TooltipContent>{dictionary.editor.clearEditor.title}</TooltipContent>
       </Tooltip>
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Clear Editor</DialogTitle>
+          <DialogTitle>{dictionary.editor.clearEditor.title}</DialogTitle>
           <DialogDescription>
-            Are you sure you want to clear the editor?
+            {dictionary.editor.clearEditor.description}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline">{dictionary.editor.clearEditor.cancel}</Button>
           </DialogClose>
 
           <DialogClose asChild>
@@ -55,7 +62,7 @@ export function ClearEditorActionPlugin() {
                 editor.dispatchCommand(CLEAR_EDITOR_COMMAND, undefined);
               }}
             >
-              Clear
+              {dictionary.editor.clearEditor.clear}
             </Button>
           </DialogClose>
         </DialogFooter>

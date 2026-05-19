@@ -1,5 +1,6 @@
 import { z } from "zod"
 
+import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
 import { WorkspaceWatchlistAssetListItemResponse } from "@/app/lib/watchlists/definitions"
 import { WorkspaceResponse } from "@/app/lib/workspaces/definitions"
 
@@ -95,58 +96,72 @@ export interface TelegramLinkTokenResponse {
   expiresAt?: string
 }
 
-export const createTelegramBotConnectionSchema = z.object({
-  botToken: z.string().trim().min(1, "Vui lòng nhập token bot."),
-  displayLabel: z.string().trim().optional(),
-})
+export function getCreateTelegramBotConnectionSchema(dictionary: Dictionary) {
+  return z.object({
+    botToken: z.string().trim().min(1, dictionary.telegram.botTokenRequired),
+    displayLabel: z.string().trim().optional(),
+  })
+}
 
-export const updateTelegramBotConnectionSchema = z.object({
-  displayLabel: z.string().trim().optional(),
-})
+export function getUpdateTelegramBotConnectionSchema() {
+  return z.object({
+    displayLabel: z.string().trim().optional(),
+  })
+}
 
-export const createTelegramLinkTokenSchema = z.object({
-  botConnectionId: z.coerce.number().int().positive(),
-})
+export function getCreateTelegramLinkTokenSchema() {
+  return z.object({
+    botConnectionId: z.coerce.number().int().positive(),
+  })
+}
 
-export const updateTelegramDestinationSchema = z.object({
-  displayLabel: z.string().trim().optional(),
-})
+export function getUpdateTelegramDestinationSchema() {
+  return z.object({
+    displayLabel: z.string().trim().optional(),
+  })
+}
 
-export const updateTelegramFeatureSettingSchema = z.object({
-  featureKey: z.enum(TELEGRAM_FEATURE_KEYS),
-  workspaceId: z.coerce.number().int().positive(),
-  destinationId: z.coerce.number().int().positive(),
-  enabled: z.boolean().optional(),
-})
+export function getUpdateTelegramFeatureSettingSchema() {
+  return z.object({
+    featureKey: z.enum(TELEGRAM_FEATURE_KEYS),
+    workspaceId: z.coerce.number().int().positive(),
+    destinationId: z.coerce.number().int().positive(),
+    enabled: z.boolean().optional(),
+  })
+}
 
-export const saveTelegramMarketAnalysisScheduleSchema = z.object({
-  name: z.string().trim().min(1, "Vui lòng nhập tên lịch."),
-  workspaceId: z.coerce.number().int().positive(),
-  destinationId: z.coerce.number().int().positive(),
-  timezone: z.string().trim().min(1, "Vui lòng nhập múi giờ."),
-  localTimes: z
-    .array(z.string().trim().min(1))
-    .min(1, "Vui lòng nhập ít nhất một giờ gửi."),
-  assetIds: z.array(z.coerce.number().int().positive()).optional(),
-})
+export function getSaveTelegramMarketAnalysisScheduleSchema(
+  dictionary: Dictionary
+) {
+  return z.object({
+    name: z.string().trim().min(1, dictionary.telegram.scheduleNameRequired),
+    workspaceId: z.coerce.number().int().positive(),
+    destinationId: z.coerce.number().int().positive(),
+    timezone: z.string().trim().min(1, dictionary.telegram.timezoneRequired),
+    localTimes: z
+      .array(z.string().trim().min(1))
+      .min(1, dictionary.telegram.localTimeRequired),
+    assetIds: z.array(z.coerce.number().int().positive()).optional(),
+  })
+}
 
 export type CreateTelegramBotConnectionRequest = z.infer<
-  typeof createTelegramBotConnectionSchema
+  ReturnType<typeof getCreateTelegramBotConnectionSchema>
 >
 export type UpdateTelegramBotConnectionRequest = z.infer<
-  typeof updateTelegramBotConnectionSchema
+  ReturnType<typeof getUpdateTelegramBotConnectionSchema>
 >
 export type CreateTelegramLinkTokenRequest = z.infer<
-  typeof createTelegramLinkTokenSchema
+  ReturnType<typeof getCreateTelegramLinkTokenSchema>
 >
 export type UpdateTelegramDestinationRequest = z.infer<
-  typeof updateTelegramDestinationSchema
+  ReturnType<typeof getUpdateTelegramDestinationSchema>
 >
 export type UpdateTelegramFeatureSettingRequest = z.infer<
-  typeof updateTelegramFeatureSettingSchema
+  ReturnType<typeof getUpdateTelegramFeatureSettingSchema>
 >
 export type SaveTelegramMarketAnalysisScheduleRequest = z.infer<
-  typeof saveTelegramMarketAnalysisScheduleSchema
+  ReturnType<typeof getSaveTelegramMarketAnalysisScheduleSchema>
 >
 
 export interface TelegramSectionAccess {

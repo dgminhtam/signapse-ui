@@ -2,14 +2,17 @@ import { $createCodeNode } from "@lexical/code";
 import { $setBlocksType } from "@lexical/selection";
 import { $getSelection, $isRangeSelection } from "lexical";
 
+import { useLocalization } from "@/app/lib/i18n/provider";
 import { useToolbarContext } from "@/components/editor-x/toolbar-context";
-import { blockTypeToBlockName } from "@/components/editor-x/block-format-data";
+import { getBlockTypeToBlockName } from "@/components/editor-x/block-format-data";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
 const BLOCK_FORMAT_VALUE = "code";
 
 export function FormatCodeBlock() {
+  const { dictionary } = useLocalization();
   const { activeEditor, blockType } = useToolbarContext();
+  const blockTypeToBlockName = getBlockTypeToBlockName(dictionary);
 
   const formatCode = () => {
     if (blockType !== "code") {

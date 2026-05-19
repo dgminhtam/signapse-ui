@@ -9,9 +9,10 @@ import {
 
 import { ChevronDownIcon } from "lucide-react";
 
+import { useLocalization } from "@/app/lib/i18n/provider";
 import { useToolbarContext } from "@/components/editor-x/toolbar-context";
 import { useUpdateToolbarHandler } from "@/components/editor-x/use-update-toolbar";
-import { blockTypeToBlockName } from "@/components/editor-x/block-format-data";
+import { getBlockTypeToBlockName } from "@/components/editor-x/block-format-data";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -24,7 +25,9 @@ export function BlockFormatDropDown({
 }: {
   children: React.ReactNode;
 }) {
+  const { dictionary } = useLocalization();
   const { activeEditor, blockType, setBlockType } = useToolbarContext();
+  const blockTypeToBlockName = getBlockTypeToBlockName(dictionary);
 
   function $updateToolbar(selection: BaseSelection) {
     if ($isRangeSelection(selection)) {
@@ -59,7 +62,7 @@ export function BlockFormatDropDown({
             ? element.getTag()
             : element.getType();
           if (type in blockTypeToBlockName) {
-            setBlockType(type as keyof typeof blockTypeToBlockName);
+            setBlockType(type);
           }
         }
       }

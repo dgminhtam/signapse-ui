@@ -9,11 +9,13 @@ import {
 
 import { SubscriptIcon, SuperscriptIcon } from "lucide-react";
 
+import { useLocalization } from "@/app/lib/i18n/provider";
 import { useToolbarContext } from "@/components/editor-x/toolbar-context";
 import { useUpdateToolbarHandler } from "@/components/editor-x/use-update-toolbar";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 export function SubSuperToolbarPlugin() {
+  const { dictionary } = useLocalization();
   const { activeEditor } = useToolbarContext();
   const [isSubscript, setIsSubscript] = useState(false);
   const [isSuperscript, setIsSuperscript] = useState(false);
@@ -37,7 +39,7 @@ export function SubSuperToolbarPlugin() {
       <ToggleGroupItem
         value="subscript"
         size="sm"
-        aria-label="Toggle subscript"
+        aria-label={dictionary.editor.toolbar.toggleSubscript}
         onClick={() => {
           activeEditor.dispatchCommand(FORMAT_TEXT_COMMAND, "subscript");
         }}
@@ -48,7 +50,7 @@ export function SubSuperToolbarPlugin() {
       <ToggleGroupItem
         value="superscript"
         size="sm"
-        aria-label="Toggle superscript"
+        aria-label={dictionary.editor.toolbar.toggleSuperscript}
         onClick={() => {
           activeEditor.dispatchCommand(FORMAT_TEXT_COMMAND, "superscript");
         }}

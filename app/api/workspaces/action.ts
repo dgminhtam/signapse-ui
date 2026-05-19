@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache"
 
 import { fetchAuthenticated } from "@/app/api/auth/action"
 import { ActionResult, Page, SearchParams } from "@/app/lib/definitions"
+import { getServerDictionary } from "@/app/lib/i18n/server"
 import {
   WorkspaceCreateRequest,
   WorkspaceResponse,
@@ -30,8 +31,9 @@ export async function createWorkspace(
     revalidatePath("/", "layout")
     return { success: true, data: workspace }
   } catch (error: unknown) {
+    const dictionary = await getServerDictionary()
     const errorMessage =
-      error instanceof Error ? error.message : "Không thể tạo không gian làm việc."
+      error instanceof Error ? error.message : dictionary.workspace.createError
     return { success: false, error: errorMessage }
   }
 }
@@ -48,8 +50,9 @@ export async function updateWorkspace(
     revalidatePath("/", "layout")
     return { success: true, data: workspace }
   } catch (error: unknown) {
+    const dictionary = await getServerDictionary()
     const errorMessage =
-      error instanceof Error ? error.message : "Không thể cập nhật không gian làm việc."
+      error instanceof Error ? error.message : dictionary.workspace.updateError
     return { success: false, error: errorMessage }
   }
 }
@@ -65,8 +68,9 @@ export async function setCurrentWorkspace(id: number): Promise<ActionResult<Work
     revalidatePath("/", "layout")
     return { success: true, data: workspace }
   } catch (error: unknown) {
+    const dictionary = await getServerDictionary()
     const errorMessage =
-      error instanceof Error ? error.message : "Không thể chuyển không gian làm việc."
+      error instanceof Error ? error.message : dictionary.workspace.switchError
     return { success: false, error: errorMessage }
   }
 }

@@ -14,10 +14,10 @@ import {
   type NodeKey,
 } from "lexical";
 
-import { format } from "date-fns";
 import { setHours, setMinutes } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 
+import { useLocalization } from "@/app/lib/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -36,6 +36,18 @@ import {
 } from "@/components/editor-x/date-time-node";
 
 const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+const DATE_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+}
+const DATE_OPTIONS: Intl.DateTimeFormatOptions = {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+}
 
 export default function DateTimeComponent({
   dateTime,
@@ -46,6 +58,7 @@ export default function DateTimeComponent({
   format: number;
   nodeKey: NodeKey;
 }): JSX.Element {
+  const { dictionary, formatDateTime } = useLocalization();
   const [editor] = useLexicalComposerContext();
   const [selected, setSelected] = useState(dateTime);
   const [includeTime, setIncludeTime] = useState(() => {
@@ -121,7 +134,11 @@ export default function DateTimeComponent({
   };
 
   const displayLabel = dateTime
-    ? format(dateTime, includeTime ? "PPP p" : "PPP")
+    ? formatDateTime(
+        dateTime,
+        includeTime ? DATE_TIME_OPTIONS : DATE_OPTIONS,
+        "",
+      )
     : null;
 
   return (
@@ -144,7 +161,7 @@ export default function DateTimeComponent({
           )}
         >
           <CalendarIcon className="size-3.5" />
-          {displayLabel ?? <span>Pick a date</span>}
+          {displayLabel ?? <span>{dictionary.editor.dateTime.pickDate}</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">

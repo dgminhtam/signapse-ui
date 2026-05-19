@@ -11,6 +11,7 @@ import {
   removeAssetFromWorkspaceWatchlist,
 } from "@/app/api/watchlists/action"
 import { AssetListResponse } from "@/app/lib/assets/definitions"
+import { useLocalization } from "@/app/lib/i18n/provider"
 import { WorkspaceResponse } from "@/app/lib/workspaces/definitions"
 import { Button } from "@/components/ui/button"
 import {
@@ -64,6 +65,7 @@ export function WorkspaceWatchlistEditor({
   canDeleteWatchlist,
 }: WorkspaceWatchlistEditorProps) {
   const router = useRouter()
+  const { dictionary, formatMessage, formatNumber } = useLocalization()
   const [isPending, startTransition] = React.useTransition()
   const [isLoading, setIsLoading] = React.useState(false)
   const [loadError, setLoadError] = React.useState<string | null>(null)
@@ -102,7 +104,7 @@ export function WorkspaceWatchlistEditor({
       const errorMessage =
         error instanceof Error
           ? error.message
-          : "Không thể tải tài sản theo dõi."
+          : dictionary.watchlist.loadErrorFallback
       setLoadError(errorMessage)
       setInitialAssets([])
       setSelectedAssets([])
@@ -142,7 +144,7 @@ export function WorkspaceWatchlistEditor({
     )
 
     if (assetsToRemove.length === 0 && assetsToAdd.length === 0) {
-      toast.success("Không có thay đổi để lưu.")
+      toast.success(dictionary.watchlist.noChanges)
       onOpenChange(false)
       return
     }
@@ -164,16 +166,14 @@ export function WorkspaceWatchlistEditor({
       )
 
       if (failedOperations.length > 0) {
-        toast.error(
-          "Không thể đồng bộ đầy đủ tài sản theo dõi. Dữ liệu mới nhất đã được tải lại."
-        )
+        toast.error(dictionary.watchlist.partialFailure)
         await loadWorkspaceWatchlistState()
         router.refresh()
         return
       }
 
       setInitialAssets([...selectedAssets])
-      toast.success(`Đã cập nhật tài sản theo dõi cho "${workspace.name}".`)
+      toast.success(formatMessage(dictionary.watchlist.updated, { name: workspace.name }))
       onOpenChange(false)
       router.refresh()
     })
@@ -187,10 +187,11 @@ export function WorkspaceWatchlistEditor({
     <Dialog open={open} onOpenChange={handleDialogOpenChange}>
       <DialogContent className="sm:max-w-[720px]">
         <DialogHeader>
-          <DialogTitle>Quản lý tài sản theo dõi</DialogTitle>
+          <DialogTitle>{dictionary.watchlist.title}</DialogTitle>
           <DialogDescription>
-            Danh sách này được lưu theo không gian làm việc đang hoạt động:{" "}
-            {workspace?.name ?? "chưa có không gian làm việc"}.
+            {formatMessage(dictionary.watchlist.description, {
+              name: workspace?.name ?? dictionary.watchlist.noWorkspaceName,
+            })}
           </DialogDescription>
         </DialogHeader>
 
@@ -202,11 +203,10 @@ export function WorkspaceWatchlistEditor({
                   <FolderOpenIcon />
                 </EmptyMedia>
                 <EmptyTitle>
-                  Chưa có không gian làm việc đang hoạt động
+                  {dictionary.watchlist.noWorkspaceTitle}
                 </EmptyTitle>
                 <EmptyDescription>
-                  Hãy chọn một không gian làm việc trước khi quản lý tài sản
-                  theo dõi.
+                  {dictionary.watchlist.noWorkspaceDescription}
                 </EmptyDescription>
               </EmptyHeader>
             </Empty>
@@ -219,11 +219,10 @@ export function WorkspaceWatchlistEditor({
                   <ShieldAlertIcon />
                 </EmptyMedia>
                 <EmptyTitle>
-                  Bạn chưa có quyền quản lý tài sản theo dõi
+                  {dictionary.watchlist.permissionTitle}
                 </EmptyTitle>
                 <EmptyDescription>
-                  Tài khoản hiện tại cần quyền đọc, thêm và gỡ tài sản trong
-                  danh sách theo dõi của không gian làm việc này.
+                  {dictionary.watchlist.permissionDescription}
                 </EmptyDescription>
               </EmptyHeader>
             </Empty>
@@ -232,14 +231,13 @@ export function WorkspaceWatchlistEditor({
           {canShowEditorBody ? (
             <>
               <div className="rounded-lg border bg-muted/20 p-4 text-sm text-muted-foreground">
-                Tìm tài sản theo tên hoặc mã. Mọi thay đổi sẽ được đồng bộ với
-                danh sách tài sản theo dõi của không gian làm việc hiện tại.
+                {dictionary.watchlist.helper}
               </div>
 
               {loadError ? (
                 <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4">
                   <div className="text-sm font-medium text-destructive">
-                    Không thể tải tài sản theo dõi hiện tại
+                    {dictionary.watchlist.loadErrorTitle}
                   </div>
                   <div className="mt-1 text-sm text-muted-foreground">
                     {loadError}
@@ -256,7 +254,7 @@ export function WorkspaceWatchlistEditor({
                       ) : (
                         <RefreshCwIcon data-icon="inline-start" />
                       )}
-                      Thử lại
+                      {dictionary.common.retry}
                     </Button>
                   </div>
                 </div>
@@ -266,7 +264,7 @@ export function WorkspaceWatchlistEditor({
                 <div className="flex min-h-40 items-center justify-center rounded-lg border border-dashed">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Spinner />
-                    Đang tải tài sản theo dõi...
+                    {dictionary.watchlist.loading}
                   </div>
                 </div>
               ) : (
@@ -282,14 +280,16 @@ export function WorkspaceWatchlistEditor({
 
         <p className="text-sm text-muted-foreground">
           {canShowEditorBody
-            ? `Đã chọn ${selectedAssets.length} tài sản cho không gian làm việc này.`
-            : "Chỉ có thể quản lý tài sản theo dõi khi đã chọn không gian làm việc phù hợp."}
+            ? formatMessage(dictionary.watchlist.selectedCount, {
+              count: formatNumber(selectedAssets.length),
+            })
+            : dictionary.watchlist.blockedSummary}
         </p>
 
         <DialogFooter>
           <DialogClose asChild>
             <Button type="button" variant="ghost" disabled={isPending}>
-              {canShowEditorBody ? "Hủy" : "Đóng"}
+              {canShowEditorBody ? dictionary.common.cancel : dictionary.common.close}
             </Button>
           </DialogClose>
           {canManageWorkspaceWatchlist ? (
@@ -301,10 +301,10 @@ export function WorkspaceWatchlistEditor({
               {isPending ? (
                 <>
                   <Spinner data-icon="inline-start" />
-                  Đang lưu...
+                  {dictionary.watchlist.saving}
                 </>
               ) : (
-                "Lưu danh sách"
+                dictionary.watchlist.saveList
               )}
             </Button>
           ) : null}

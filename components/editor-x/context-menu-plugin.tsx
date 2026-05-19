@@ -27,13 +27,17 @@ import {
   Scissors,
   Trash2,
 } from "lucide-react";
+import { toast } from "sonner";
+
+import { useLocalization } from "@/app/lib/i18n/provider";
 
 export function ContextMenuPlugin(): JSX.Element {
+  const { dictionary } = useLocalization();
   const [editor] = useLexicalComposerContext();
 
   const items = useMemo(() => {
     return [
-      new NodeContextMenuOption(`Remove Link`, {
+      new NodeContextMenuOption(dictionary.editor.contextMenu.removeLink, {
         $onSelect: () => {
           editor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
         },
@@ -44,21 +48,21 @@ export function ContextMenuPlugin(): JSX.Element {
       new NodeContextMenuSeparator({
         $showOn: (node: LexicalNode) => $isLinkNode(node.getParent()),
       }),
-      new NodeContextMenuOption(`Cut`, {
+      new NodeContextMenuOption(dictionary.editor.contextMenu.cut, {
         $onSelect: () => {
           editor.dispatchCommand(CUT_COMMAND, null);
         },
         disabled: false,
         icon: <Scissors className="h-4 w-4" />,
       }),
-      new NodeContextMenuOption(`Copy`, {
+      new NodeContextMenuOption(dictionary.editor.contextMenu.copy, {
         $onSelect: () => {
           editor.dispatchCommand(COPY_COMMAND, null);
         },
         disabled: false,
         icon: <Copy className="h-4 w-4" />,
       }),
-      new NodeContextMenuOption(`Paste`, {
+      new NodeContextMenuOption(dictionary.editor.contextMenu.paste, {
         $onSelect: () => {
           navigator.clipboard.read().then(async function (..._args) {
             const data = new DataTransfer();
@@ -71,7 +75,7 @@ export function ContextMenuPlugin(): JSX.Element {
               name: "clipboard-read",
             });
             if (permission.state === "denied") {
-              alert("Not allowed to paste from clipboard.");
+              toast.error(dictionary.editor.contextMenu.pasteDenied);
               return;
             }
 
@@ -90,7 +94,7 @@ export function ContextMenuPlugin(): JSX.Element {
         disabled: false,
         icon: <Clipboard className="h-4 w-4" />,
       }),
-      new NodeContextMenuOption(`Paste as Plain Text`, {
+      new NodeContextMenuOption(dictionary.editor.contextMenu.pastePlainText, {
         $onSelect: () => {
           navigator.clipboard.read().then(async function (..._args) {
             const permission = await navigator.permissions.query({
@@ -99,7 +103,7 @@ export function ContextMenuPlugin(): JSX.Element {
             });
 
             if (permission.state === "denied") {
-              alert("Not allowed to paste from clipboard.");
+              toast.error(dictionary.editor.contextMenu.pasteDenied);
               return;
             }
 
@@ -117,7 +121,7 @@ export function ContextMenuPlugin(): JSX.Element {
         icon: <ClipboardType className="h-4 w-4" />,
       }),
       new NodeContextMenuSeparator(),
-      new NodeContextMenuOption(`Delete Node`, {
+      new NodeContextMenuOption(dictionary.editor.contextMenu.deleteNode, {
         $onSelect: () => {
           const selection = $getSelection();
           if ($isRangeSelection(selection)) {
@@ -140,7 +144,7 @@ export function ContextMenuPlugin(): JSX.Element {
         icon: <Trash2 className="h-4 w-4" />,
       }),
     ];
-  }, [editor]);
+  }, [dictionary, editor]);
 
   return (
     <NodeContextMenuPlugin

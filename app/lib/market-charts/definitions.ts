@@ -1,5 +1,7 @@
 import { z } from "zod"
 
+import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
+
 export const MARKET_CHART_TIMEFRAMES = [
   "1m",
   "5m",
@@ -13,15 +15,10 @@ export const MARKET_CHART_TIMEFRAMES = [
 
 export type MarketChartTimeframe = (typeof MARKET_CHART_TIMEFRAMES)[number]
 
-export const MARKET_CHART_TIMEFRAME_LABELS: Record<MarketChartTimeframe, string> = {
-  "1m": "1 phút",
-  "5m": "5 phút",
-  "15m": "15 phút",
-  "30m": "30 phút",
-  "1h": "1 giờ",
-  "1d": "1 ngày",
-  "1w": "1 tuần",
-  "1mo": "1 tháng",
+export function getMarketChartTimeframeLabels(
+  dictionary: Dictionary
+): Record<MarketChartTimeframe, string> {
+  return dictionary.marketCharts.timeframes
 }
 
 export const DEFAULT_MARKET_CHART_TIMEFRAME: MarketChartTimeframe = "1h"
@@ -113,41 +110,43 @@ function isValidDateTime(value: string) {
   return !Number.isNaN(Date.parse(value))
 }
 
-export const marketChartCandleRequestSchema = z
-  .object({
-    assetId: z
-      .number({
-        message: "Tài sản biểu đồ không hợp lệ.",
-      })
-      .int("Tài sản biểu đồ không hợp lệ.")
-      .positive("Vui lòng chọn tài sản trong watchlist."),
-    timeframe: z.enum(MARKET_CHART_TIMEFRAMES, {
-      message: "Khung thời gian không được hỗ trợ.",
-    }),
-    from: z
-      .string()
-      .trim()
-      .min(1, "Vui lòng chọn thời điểm bắt đầu.")
-      .refine(isValidDateTime, "Thời điểm bắt đầu không hợp lệ."),
-    to: z
-      .string()
-      .trim()
-      .min(1, "Vui lòng chọn thời điểm kết thúc.")
-      .refine(isValidDateTime, "Thời điểm kết thúc không hợp lệ."),
-    includeAnnotations: z.boolean().optional(),
-  })
-  .superRefine((value, context) => {
-    const fromTime = Date.parse(value.from)
-    const toTime = Date.parse(value.to)
+export function getMarketChartCandleRequestSchema(dictionary: Dictionary) {
+  return z
+    .object({
+      assetId: z
+        .number({
+          message: dictionary.marketCharts.invalidAsset,
+        })
+        .int(dictionary.marketCharts.invalidAsset)
+        .positive(dictionary.marketCharts.selectWatchlistAsset),
+      timeframe: z.enum(MARKET_CHART_TIMEFRAMES, {
+        message: dictionary.marketCharts.unsupportedTimeframe,
+      }),
+      from: z
+        .string()
+        .trim()
+        .min(1, dictionary.marketCharts.fromRequired)
+        .refine(isValidDateTime, dictionary.marketCharts.fromInvalid),
+      to: z
+        .string()
+        .trim()
+        .min(1, dictionary.marketCharts.toRequired)
+        .refine(isValidDateTime, dictionary.marketCharts.toInvalid),
+      includeAnnotations: z.boolean().optional(),
+    })
+    .superRefine((value, context) => {
+      const fromTime = Date.parse(value.from)
+      const toTime = Date.parse(value.to)
 
-    if (!Number.isNaN(fromTime) && !Number.isNaN(toTime) && fromTime >= toTime) {
-      context.addIssue({
-        code: "custom",
-        path: ["to"],
-        message: "Thời điểm kết thúc phải sau thời điểm bắt đầu.",
-      })
-    }
-  }) satisfies z.ZodType<MarketChartCandleRequest>
+      if (!Number.isNaN(fromTime) && !Number.isNaN(toTime) && fromTime >= toTime) {
+        context.addIssue({
+          code: "custom",
+          path: ["to"],
+          message: dictionary.marketCharts.toAfterFrom,
+        })
+      }
+    }) satisfies z.ZodType<MarketChartCandleRequest>
+}
 
 export const marketChartAssetResponseSchema = z.object({
   id: z.number(),

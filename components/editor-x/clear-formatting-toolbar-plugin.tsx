@@ -13,10 +13,12 @@ import {
 
 import { EraserIcon } from "lucide-react";
 
+import { useLocalization } from "@/app/lib/i18n/provider";
 import { useToolbarContext } from "@/components/editor-x/toolbar-context";
 import { Button } from "@/components/ui/button";
 
 export function ClearFormattingToolbarPlugin() {
+  const { dictionary } = useLocalization();
   const { activeEditor } = useToolbarContext();
 
   const clearFormatting = useCallback(() => {
@@ -77,7 +79,7 @@ export function ClearFormattingToolbarPlugin() {
 
   return (
     <Button
-      aria-label="Clear formatting"
+      aria-label={dictionary.editor.toolbar.clearFormatting}
       variant={"outline"}
       size={"icon-sm"}
       onClick={clearFormatting}

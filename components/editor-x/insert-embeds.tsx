@@ -1,10 +1,15 @@
 import { INSERT_EMBED_COMMAND } from "@lexical/react/LexicalAutoEmbedPlugin";
 
+import { useLocalization } from "@/app/lib/i18n/provider";
 import { useToolbarContext } from "@/components/editor-x/toolbar-context";
-import { EmbedConfigs } from "@/components/editor-x/auto-embed-plugin";
+import {
+  EmbedConfigs,
+  getEmbedContentName,
+} from "@/components/editor-x/auto-embed-plugin";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
 export function InsertEmbeds() {
+  const { dictionary } = useLocalization();
   const { activeEditor } = useToolbarContext();
   return EmbedConfigs.map((embedConfig) => (
     <DropdownMenuItem
@@ -15,7 +20,7 @@ export function InsertEmbeds() {
     >
       <div className="flex items-center gap-1">
         {embedConfig.icon}
-        <span>{embedConfig.contentName}</span>
+        <span>{getEmbedContentName(embedConfig, dictionary)}</span>
       </div>
     </DropdownMenuItem>
   ));

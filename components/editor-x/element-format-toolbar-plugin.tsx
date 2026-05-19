@@ -21,6 +21,7 @@ import {
   IndentIncreaseIcon,
 } from "lucide-react";
 
+import { useLocalization } from "@/app/lib/i18n/provider";
 import { useToolbarContext } from "@/components/editor-x/toolbar-context";
 import { useUpdateToolbarHandler } from "@/components/editor-x/use-update-toolbar";
 import { getSelectedNode } from "@/components/editor-x/get-selected-node";
@@ -31,28 +32,32 @@ const ELEMENT_FORMAT_OPTIONS: {
   [key in Exclude<ElementFormatType, "start" | "end" | "">]: {
     icon: React.ReactNode;
     iconRTL: string;
-    name: string;
+    labelKey:
+      | "leftAlign"
+      | "centerAlign"
+      | "rightAlign"
+      | "justifyAlign";
   };
 } = {
   left: {
     icon: <AlignLeftIcon className="size-4" />,
     iconRTL: "left-align",
-    name: "Left Align",
+    labelKey: "leftAlign",
   },
   center: {
     icon: <AlignCenterIcon className="size-4" />,
     iconRTL: "center-align",
-    name: "Center Align",
+    labelKey: "centerAlign",
   },
   right: {
     icon: <AlignRightIcon className="size-4" />,
     iconRTL: "right-align",
-    name: "Right Align",
+    labelKey: "rightAlign",
   },
   justify: {
     icon: <AlignJustifyIcon className="size-4" />,
     iconRTL: "justify-align",
-    name: "Justify Align",
+    labelKey: "justifyAlign",
   },
 } as const;
 
@@ -61,6 +66,7 @@ export function ElementFormatToolbarPlugin({
 }: {
   separator?: boolean;
 }) {
+  const { dictionary } = useLocalization();
   const { activeEditor } = useToolbarContext();
   const [elementFormat, setElementFormat] = useState<ElementFormatType>("left");
 
@@ -121,7 +127,7 @@ export function ElementFormatToolbarPlugin({
             value={value}
             variant={"outline"}
             size="sm"
-            aria-label={option.name}
+            aria-label={dictionary.editor.toolbar[option.labelKey]}
           >
             {option.icon}
           </ToggleGroupItem>
@@ -137,7 +143,7 @@ export function ElementFormatToolbarPlugin({
       >
         <ToggleGroupItem
           value="outdent"
-          aria-label="Outdent"
+          aria-label={dictionary.editor.toolbar.outdent}
           variant={"outline"}
           size="sm"
         >
@@ -147,7 +153,7 @@ export function ElementFormatToolbarPlugin({
         <ToggleGroupItem
           value="indent"
           variant={"outline"}
-          aria-label="Indent"
+          aria-label={dictionary.editor.toolbar.indent}
           size="sm"
         >
           <IndentIncreaseIcon className="size-4" />

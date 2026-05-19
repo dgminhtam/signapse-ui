@@ -2,6 +2,7 @@
 
 import { SaveIcon } from "lucide-react"
 
+import { useLocalization } from "@/app/lib/i18n/provider"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
@@ -23,13 +24,15 @@ function PersonalNoteSaveBar({
   isPending,
   onCancel,
   onSave,
-  savedLabel = "Chưa lưu",
+  savedLabel,
 }: PersonalNoteSaveBarProps) {
+  const { dictionary } = useLocalization()
+  const resolvedSavedLabel = savedLabel ?? dictionary.personalNotes.unsaved
   const statusLabel = isPending
-    ? "Đang lưu..."
+    ? dictionary.personalNotes.saving
     : dirty
-      ? "Có thay đổi chưa lưu"
-      : savedLabel
+      ? dictionary.personalNotes.dirty
+      : resolvedSavedLabel
 
   return (
     <div
@@ -47,7 +50,7 @@ function PersonalNoteSaveBar({
             disabled={isPending}
             onClick={onCancel}
           >
-            Hủy
+            {dictionary.common.cancel}
           </Button>
         ) : null}
         <Button
@@ -60,7 +63,7 @@ function PersonalNoteSaveBar({
           ) : (
             <SaveIcon data-icon="inline-start" />
           )}
-          Lưu
+          {dictionary.common.save}
         </Button>
       </div>
     </div>

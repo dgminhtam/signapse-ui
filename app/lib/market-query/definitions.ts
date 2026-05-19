@@ -1,6 +1,7 @@
 import { z } from "zod"
 
 import { artifactTypes, type ArtifactType } from "@/app/lib/artifacts/definitions"
+import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
 
 export type MarketQueryEvidenceRole =
   | "PRIMARY"
@@ -46,10 +47,12 @@ export interface MarketQueryResponse {
   evidence?: MarketQueryEvidenceResponse[]
 }
 
-export const marketQueryRequestSchema = z.object({
-  question: z.string().trim().min(1, "Vui lòng nhập câu hỏi."),
-  asOfTime: z.string().datetime().nullish(),
-}) satisfies z.ZodType<MarketQueryRequest>
+export function getMarketQueryRequestSchema(dictionary: Dictionary) {
+  return z.object({
+    question: z.string().trim().min(1, dictionary.marketQuery.questionRequired),
+    asOfTime: z.string().datetime().nullish(),
+  }) satisfies z.ZodType<MarketQueryRequest>
+}
 
 export const marketQueryEvidenceResponseSchema = z.object({
   eventId: z.number().int().optional(),
@@ -84,17 +87,14 @@ export const marketQueryResponseSchema = z.object({
   evidence: z.array(marketQueryEvidenceResponseSchema).optional(),
 }) satisfies z.ZodType<MarketQueryResponse>
 
-export const MARKET_QUERY_ARTIFACT_TYPE_LABELS: Record<ArtifactType, string> = {
-  NEWS_ARTICLE: "Tài liệu nguồn tin tức",
-  ECONOMIC_CALENDAR_ENTRY: "Mục lịch kinh tế",
-  RESEARCH_DOCUMENT: "Tài liệu nghiên cứu",
-  STRATEGY_PLAYBOOK: "Playbook chiến lược",
-  OTHER: "Khác",
+export function getMarketQueryArtifactTypeLabels(
+  dictionary: Dictionary
+): Record<ArtifactType, string> {
+  return dictionary.marketQuery.artifactTypes
 }
 
-export const MARKET_QUERY_EVIDENCE_ROLE_LABELS: Record<MarketQueryEvidenceRole, string> = {
-  PRIMARY: "Chính",
-  SUPPORTING: "Hỗ trợ",
-  UPDATE: "Cập nhật",
-  CONTRADICTING: "Mâu thuẫn",
+export function getMarketQueryEvidenceRoleLabels(
+  dictionary: Dictionary
+): Record<MarketQueryEvidenceRole, string> {
+  return dictionary.marketQuery.evidenceRoles
 }

@@ -1,6 +1,8 @@
 "use server"
 
 import { fetchAuthenticated } from "@/app/api/auth/action"
+import { getDictionary } from "@/app/lib/i18n/dictionaries"
+import { getRequestLocale } from "@/app/lib/i18n/server"
 import {
   GraphViewResponse,
   graphViewResponseSchema,
@@ -36,6 +38,7 @@ function summarizeGraphViewValidationIssues(
 }
 
 export async function getGraphView(): Promise<GraphViewResponse> {
+  const dictionary = await getDictionary(await getRequestLocale())
   const response = await fetchAuthenticated<unknown>("/graph-view")
   const parsedResponse = graphViewResponseSchema.safeParse(response)
 
@@ -50,9 +53,7 @@ export async function getGraphView(): Promise<GraphViewResponse> {
     console.error(
       `Graph view response validation failed ${JSON.stringify(validationSummary)}`
     )
-    throw new Error(
-      "Backend trả về dữ liệu biểu đồ tri thức không đúng định dạng mong đợi."
-    )
+    throw new Error(dictionary.graphView.responseInvalid)
   }
 
   return parsedResponse.data

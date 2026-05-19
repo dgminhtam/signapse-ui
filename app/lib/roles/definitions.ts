@@ -1,3 +1,5 @@
+import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
+
 export interface PermissionResponse {
   id: number
   key: string
@@ -30,9 +32,12 @@ function getPermissionGroupKey(permissionKey: string): string {
   return prefix?.trim() || LEGACY_PERMISSION_GROUP_KEY
 }
 
-function formatPermissionGroupTitle(groupKey: string): string {
+function formatPermissionGroupTitle(
+  groupKey: string,
+  dictionary: Dictionary
+): string {
   if (groupKey === LEGACY_PERMISSION_GROUP_KEY) {
-    return "Unknown/Legacy"
+    return dictionary.roles.legacyGroup
   }
 
   return groupKey
@@ -43,7 +48,8 @@ function formatPermissionGroupTitle(groupKey: string): string {
 }
 
 export function groupPermissionsByResource(
-  permissions: PermissionResponse[]
+  permissions: PermissionResponse[],
+  dictionary: Dictionary
 ): PermissionGroup[] {
   const grouped = new Map<string, PermissionResponse[]>()
 
@@ -62,7 +68,7 @@ export function groupPermissionsByResource(
     })
     .map(([key, groupedPermissions]) => ({
       key,
-      title: formatPermissionGroupTitle(key),
+      title: formatPermissionGroupTitle(key, dictionary),
       permissions: [...groupedPermissions].sort((left, right) =>
         left.key.localeCompare(right.key)
       ),

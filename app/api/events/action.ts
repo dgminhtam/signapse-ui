@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache"
 
 import { fetchAuthenticated } from "@/app/api/auth/action"
 import { ActionResult, Page, SearchParams } from "@/app/lib/definitions"
+import { getDictionary } from "@/app/lib/i18n/dictionaries"
+import { getRequestLocale } from "@/app/lib/i18n/server"
 import {
   EventEnrichmentResult,
   EventListResponse,
@@ -52,12 +54,13 @@ export async function enrichEventAssetsAndThemes(
 
     return { success: true, data }
   } catch (error: unknown) {
+    const dictionary = await getDictionary(await getRequestLocale())
     return {
       success: false,
       error:
         error instanceof Error
           ? error.message
-          : "Không thể làm giàu liên kết tài sản và chủ đề cho sự kiện",
+          : dictionary.events.enrichError,
     }
   }
 }
@@ -78,12 +81,13 @@ export async function enrichPendingEventAssetsAndThemes(
 
     return { success: true, data }
   } catch (error: unknown) {
+    const dictionary = await getDictionary(await getRequestLocale())
     return {
       success: false,
       error:
         error instanceof Error
           ? error.message
-          : "Không thể làm giàu các sự kiện đang chờ",
+          : dictionary.events.enrichPendingError,
     }
   }
 }
@@ -103,12 +107,13 @@ export async function deriveEventMarketReactions(
 
     return { success: true, data }
   } catch (error: unknown) {
+    const dictionary = await getDictionary(await getRequestLocale())
     return {
       success: false,
       error:
         error instanceof Error
           ? error.message
-          : "Không thể suy luận tác động thị trường cho sự kiện",
+          : dictionary.events.marketReactionError,
     }
   }
 }
@@ -130,12 +135,13 @@ export async function derivePendingEventMarketReactions(
 
     return { success: true, data }
   } catch (error: unknown) {
+    const dictionary = await getDictionary(await getRequestLocale())
     return {
       success: false,
       error:
         error instanceof Error
           ? error.message
-          : "Không thể suy luận tác động thị trường cho các sự kiện đang chờ",
+          : dictionary.events.marketReactionPendingError,
     }
   }
 }

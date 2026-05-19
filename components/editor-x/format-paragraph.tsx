@@ -5,14 +5,17 @@ import {
   $isRangeSelection,
 } from "lexical";
 
+import { useLocalization } from "@/app/lib/i18n/provider";
 import { useToolbarContext } from "@/components/editor-x/toolbar-context";
-import { blockTypeToBlockName } from "@/components/editor-x/block-format-data";
+import { getBlockTypeToBlockName } from "@/components/editor-x/block-format-data";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
 const BLOCK_FORMAT_VALUE = "paragraph";
 
 export function FormatParagraph() {
+  const { dictionary } = useLocalization();
   const { activeEditor } = useToolbarContext();
+  const blockTypeToBlockName = getBlockTypeToBlockName(dictionary);
 
   const formatParagraph = () => {
     activeEditor.update(() => {

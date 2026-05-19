@@ -1,3 +1,6 @@
+import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
+import { formatMessage } from "@/app/lib/i18n/messages"
+
 export const SYSTEM_PROMPT_TYPES = [
   "NEWS_FILTER",
   "NEWS_ANALYSIS",
@@ -34,67 +37,47 @@ export interface UpdateSystemPromptRequest {
   content: string
 }
 
-const SYSTEM_PROMPT_TYPE_LABELS: Record<SystemPromptType, string> = {
-  NEWS_FILTER: "Lọc tin tức",
-  NEWS_ANALYSIS: "Phân tích tin tức",
-  SIGNAL_GENERATION: "Tạo tín hiệu",
-  DECISION_MAKING: "Ra quyết định",
-  CONTENT_EXTRACTION: "Trích xuất nội dung",
-  SENTIMENT_ANALYSIS: "Phân tích cảm xúc",
-  TITLE_GENERATION: "Tạo tiêu đề",
-  SUMMARY_GENERATION: "Tạo tóm tắt",
-  CONTENT_CLEANING: "Làm sạch nội dung",
-  FIRECRAWL_SOURCE_DOCUMENT_FILTER: "Lọc tài liệu Firecrawl",
-  NEWS_PRIMARY_EVENT_DERIVATION: "Suy luận sự kiện chính từ tin tức",
-  EVENT_ASSET_THEME_ENRICHMENT: "Làm giàu tài sản và chủ đề",
-  EVENT_MARKET_REACTION_DERIVATION: "Suy luận tác động thị trường",
-  EVENT_GROUNDED_MARKET_QUERY_SYNTHESIS: "Tổng hợp truy vấn thị trường",
-}
-
-const SYSTEM_PROMPT_TYPE_GROUPS: Record<SystemPromptType, string> = {
-  NEWS_FILTER: "Tin tức",
-  NEWS_ANALYSIS: "Tin tức",
-  SIGNAL_GENERATION: "Giao dịch / quyết định",
-  DECISION_MAKING: "Giao dịch / quyết định",
-  CONTENT_EXTRACTION: "Nội dung",
-  SENTIMENT_ANALYSIS: "Nội dung",
-  TITLE_GENERATION: "Nội dung",
-  SUMMARY_GENERATION: "Nội dung",
-  CONTENT_CLEANING: "Nội dung",
-  FIRECRAWL_SOURCE_DOCUMENT_FILTER: "Tin tức",
-  NEWS_PRIMARY_EVENT_DERIVATION: "Sự kiện",
-  EVENT_ASSET_THEME_ENRICHMENT: "Sự kiện",
-  EVENT_MARKET_REACTION_DERIVATION: "Sự kiện",
-  EVENT_GROUNDED_MARKET_QUERY_SYNTHESIS: "Truy vấn thị trường",
-}
-
-export const SYSTEM_PROMPT_TYPE_OPTIONS = SYSTEM_PROMPT_TYPES.map((type) => ({
-  value: type,
-  label: SYSTEM_PROMPT_TYPE_LABELS[type],
-  group: SYSTEM_PROMPT_TYPE_GROUPS[type],
-}))
-
 export function isSystemPromptType(value: string): value is SystemPromptType {
   return SYSTEM_PROMPT_TYPES.includes(value as SystemPromptType)
 }
 
-export function getSystemPromptTypeLabel(promptType: string) {
+export function getSystemPromptTypeLabel(
+  promptType: string,
+  dictionary: Dictionary
+) {
   if (isSystemPromptType(promptType)) {
-    return SYSTEM_PROMPT_TYPE_LABELS[promptType]
+    return dictionary.systemPrompts.typeLabels[promptType]
   }
 
   return promptType
 }
 
-export function getSystemPromptWorkflowGroup(promptType: string) {
+export function getSystemPromptWorkflowGroup(
+  promptType: string,
+  dictionary: Dictionary
+) {
   if (isSystemPromptType(promptType)) {
-    return SYSTEM_PROMPT_TYPE_GROUPS[promptType]
+    return dictionary.systemPrompts.workflowGroups[promptType]
   }
 
-  return "Khác"
+  return dictionary.systemPrompts.otherGroup
 }
 
-export function formatSystemPromptContentLength(content?: string) {
+export function getSystemPromptTypeOptions(dictionary: Dictionary) {
+  return SYSTEM_PROMPT_TYPES.map((type) => ({
+    value: type,
+    label: dictionary.systemPrompts.typeLabels[type],
+    group: dictionary.systemPrompts.workflowGroups[type],
+  }))
+}
+
+export function formatSystemPromptContentLength(
+  content: string | undefined,
+  dictionary: Dictionary,
+  formatNumber: (value: number) => string = String
+) {
   const length = content?.length ?? 0
-  return `${length.toLocaleString("vi-VN")} ký tự`
+  return formatMessage(dictionary.systemPrompts.contentLength, {
+    count: formatNumber(length),
+  })
 }

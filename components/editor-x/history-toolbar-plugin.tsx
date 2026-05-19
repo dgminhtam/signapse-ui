@@ -12,11 +12,13 @@ import {
 
 import { RedoIcon, UndoIcon } from "lucide-react";
 
+import { useLocalization } from "@/app/lib/i18n/provider";
 import { useToolbarContext } from "@/components/editor-x/toolbar-context";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 
 export function HistoryToolbarPlugin() {
+  const { dictionary } = useLocalization();
   const [editor] = useLexicalComposerContext();
   const { activeEditor, $updateToolbar } = useToolbarContext();
   const [isEditable, setIsEditable] = useState(editor.isEditable());
@@ -62,9 +64,9 @@ export function HistoryToolbarPlugin() {
         onClick={() => {
           activeEditor.dispatchCommand(UNDO_COMMAND, undefined);
         }}
-        title={IS_APPLE ? "Undo (⌘Z)" : "Undo (Ctrl+Z)"}
+        title={IS_APPLE ? dictionary.editor.toolbar.undoMac : dictionary.editor.toolbar.undoWindows}
         type="button"
-        aria-label="Undo"
+        aria-label={dictionary.editor.toolbar.undo}
         size="icon-sm"
         variant={"outline"}
       >
@@ -75,9 +77,9 @@ export function HistoryToolbarPlugin() {
         onClick={() => {
           activeEditor.dispatchCommand(REDO_COMMAND, undefined);
         }}
-        title={IS_APPLE ? "Redo (⇧⌘Z)" : "Redo (Ctrl+Y)"}
+        title={IS_APPLE ? dictionary.editor.toolbar.redoMac : dictionary.editor.toolbar.redoWindows}
         type="button"
-        aria-label="Redo"
+        aria-label={dictionary.editor.toolbar.redo}
         variant={"outline"}
         size="icon-sm"
       >
