@@ -1,6 +1,12 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react"
 import {
   dispose,
   init,
@@ -8,6 +14,7 @@ import {
   type DataLoaderGetBarsParams,
   type DeepPartial,
   type KLineData,
+  type OverlayStyle,
   type Period,
   type Styles,
 } from "klinecharts"
@@ -31,11 +38,38 @@ import {
   type MarketChartAnnotationMarkerPoint,
   toMarketChartEpochMillis,
 } from "./market-chart-annotations"
+import {
+  createMarketChartDrawingGroupId,
+  createMarketChartDrawingMode,
+  createMarketChartDrawingOverlay,
+  registerMarketChartDrawingOverlays,
+  type MarketChartDrawingTool,
+} from "./market-chart-drawing"
 
 export interface MarketChartLoadedData {
   annotations: MarketChartAnnotationResponse[]
   candles: MarketChartCandleItemResponse[]
   from: string | null
+}
+
+export type MarketChartIndicatorName =
+  | "MA"
+  | "EMA"
+  | "BOLL"
+  | "MACD"
+  | "RSI"
+  | "KDJ"
+
+export interface MarketChartCanvasHandle {
+  clearDrawings: () => boolean
+  captureScreenshot: () => string | null
+  deleteSelectedDrawing: () => boolean
+  resize: () => void
+  setDrawingMagnet: (enabled: boolean) => boolean
+  setDrawingsLocked: (locked: boolean) => boolean
+  setDrawingsVisible: (visible: boolean) => boolean
+  setDrawingTool: (tool: MarketChartDrawingTool | null) => boolean
+  setIndicators: (indicators: MarketChartIndicatorName[]) => boolean
 }
 
 interface MarketChartCanvasProps {
@@ -48,10 +82,15 @@ interface MarketChartCanvasProps {
   includeAnnotations: boolean
   resetKey: string
   selectedAnnotationGroupId?: string | null
+  activeIndicators?: MarketChartIndicatorName[]
+  className?: string
+  drawingToolActive?: boolean
   onAnnotationSelect?: (
     groupId: string,
     point: MarketChartAnnotationMarkerPoint
   ) => void
+  onDrawingSelectionChange?: (hasSelectedDrawing: boolean) => void
+  onDrawingToolComplete?: () => void
   onLoadedDataChange?: (data: MarketChartLoadedData) => void
   onLoadOlderCandles: (
     request: MarketChartCandleRequest
@@ -66,6 +105,55 @@ interface MarkerPosition {
 
 type LazyHistoryState = "idle" | "loading" | "error"
 
+type AnnotationMarkerColorClassNames = {
+  dot: string
+  foreground: string
+  pulse: string
+  ring: string
+}
+
+function getAnnotationMarkerColorClassNames(
+  direction: MarketChartAnnotationGroup["direction"]
+): AnnotationMarkerColorClassNames {
+  switch (direction) {
+    case "BULLISH":
+      return {
+        dot: "bg-emerald-500",
+        foreground: "text-white",
+        pulse: "bg-emerald-500/20",
+        ring: "ring-emerald-500/30",
+      }
+    case "BEARISH":
+      return {
+        dot: "bg-destructive",
+        foreground: "text-destructive-foreground",
+        pulse: "bg-destructive/20",
+        ring: "ring-destructive/30",
+      }
+    case "NEUTRAL":
+      return {
+        dot: "bg-amber-500",
+        foreground: "text-white",
+        pulse: "bg-amber-500/20",
+        ring: "ring-amber-500/30",
+      }
+    case "MIXED":
+      return {
+        dot: "bg-orange-500",
+        foreground: "text-white",
+        pulse: "bg-orange-500/20",
+        ring: "ring-orange-500/30",
+      }
+    default:
+      return {
+        dot: "bg-muted-foreground",
+        foreground: "text-background",
+        pulse: "bg-muted-foreground/20",
+        ring: "ring-muted-foreground/30",
+      }
+  }
+}
+
 interface LazyHistoryFeedback {
   error: string | null
   resetKey: string
@@ -74,6 +162,19 @@ interface LazyHistoryFeedback {
 
 const CANDLE_PANE_ID = "candle_pane"
 const VOLUME_PANE_ID = "market-chart-volume"
+const MARKET_CHART_INDICATORS: MarketChartIndicatorName[] = [
+  "MA",
+  "EMA",
+  "BOLL",
+  "MACD",
+  "RSI",
+  "KDJ",
+]
+const MARKET_CHART_MAIN_PANE_INDICATORS = new Set<MarketChartIndicatorName>([
+  "MA",
+  "EMA",
+  "BOLL",
+])
 const MINUTE_MS = 60 * 1000
 const HOUR_MS = 60 * MINUTE_MS
 const DAY_MS = 24 * HOUR_MS
@@ -188,7 +289,9 @@ function mergeCandleItems(
   return normalizeCandleItems([...current, ...incoming])
 }
 
-function createKLineData(candles: MarketChartCandleItemResponse[]): KLineData[] {
+function createKLineData(
+  candles: MarketChartCandleItemResponse[]
+): KLineData[] {
   return normalizeCandleItems(candles).flatMap((candle) => {
     const timestamp = getCandleTimestamp(candle)
 
@@ -294,10 +397,7 @@ function createChartStyles(): DeepPartial<Styles> {
   const borderColor = getCssVariable("--muted-foreground", "#737373")
   const upColor = getCssVariable("--chart-2", "#14947e")
   const downColor = getCssVariable("--destructive", "#dc2626")
-  const fontFamily = getCssTextVariable(
-    "--font-sans",
-    "Geist, sans-serif"
-  )
+  const fontFamily = getCssTextVariable("--font-sans", "Geist, sans-serif")
 
   return {
     grid: {
@@ -338,7 +438,7 @@ function createChartStyles(): DeepPartial<Styles> {
         },
         last: {
           line: {
-            size: 1
+            size: 1,
           },
           text: {
             family: fontFamily,
@@ -417,6 +517,42 @@ function createChartStyles(): DeepPartial<Styles> {
   }
 }
 
+function createDrawingOverlayStyles(): DeepPartial<OverlayStyle> {
+  const color = getCssVariable("--foreground", "#171717")
+  const mutedColor = getCssVariable("--muted-foreground", "#737373")
+  const selectedColor = getCssVariable("--primary", "#171717")
+
+  return {
+    circle: {
+      borderColor: color,
+      borderSize: 1,
+      color: "transparent",
+      style: "stroke",
+    },
+    line: {
+      color,
+      size: 1,
+      style: "solid",
+    },
+    point: {
+      activeBorderColor: selectedColor,
+      activeBorderSize: 2,
+      activeColor: selectedColor,
+      activeRadius: 4,
+      borderColor: mutedColor,
+      borderSize: 1,
+      color,
+      radius: 3,
+    },
+    rect: {
+      borderColor: color,
+      borderSize: 1,
+      color: "transparent",
+      style: "stroke",
+    },
+  }
+}
+
 function getMarkerCoordinate(
   chart: Chart,
   group: MarketChartAnnotationGroup
@@ -446,20 +582,62 @@ function getMarkerCoordinate(
   }
 }
 
-export function MarketChartCanvas({
-  annotations = [],
-  annotationGroups = [],
-  assetId,
-  candles,
-  includeAnnotations,
-  onAnnotationSelect,
-  onLoadedDataChange,
-  onLoadOlderCandles,
-  resetKey,
-  selectedAnnotationGroupId,
-  symbol = "MARKET",
-  timeframe,
-}: MarketChartCanvasProps) {
+function syncChartIndicators(
+  chart: Chart,
+  activeIndicators: MarketChartIndicatorName[]
+) {
+  const enabledIndicators = new Set(activeIndicators)
+
+  for (const indicator of MARKET_CHART_INDICATORS) {
+    const existingIndicators = chart.getIndicators({ name: indicator })
+    const enabled = enabledIndicators.has(indicator)
+
+    if (enabled && existingIndicators.length === 0) {
+      const isMainPaneIndicator =
+        MARKET_CHART_MAIN_PANE_INDICATORS.has(indicator)
+      const paneOptions = isMainPaneIndicator
+        ? { id: CANDLE_PANE_ID }
+        : {
+            height: 96,
+            id: `market-chart-indicator-${indicator.toLowerCase()}`,
+            minHeight: 64,
+          }
+
+      chart.createIndicator(indicator, isMainPaneIndicator, paneOptions)
+      continue
+    }
+
+    if (!enabled && existingIndicators.length > 0) {
+      chart.removeIndicator({ name: indicator })
+    }
+  }
+}
+
+export const MarketChartCanvas = forwardRef<
+  MarketChartCanvasHandle,
+  MarketChartCanvasProps
+>(function MarketChartCanvas(
+  {
+    annotations = [],
+    annotationGroups = [],
+    assetId,
+    activeIndicators = [],
+    candles,
+    className,
+    drawingToolActive = false,
+    includeAnnotations,
+    onAnnotationSelect,
+    onDrawingSelectionChange,
+    onDrawingToolComplete,
+    onLoadedDataChange,
+    onLoadOlderCandles,
+    resetKey,
+    selectedAnnotationGroupId,
+    symbol = "MARKET",
+    timeframe,
+  },
+  ref
+) {
   const {
     dictionary,
     formatDateTime,
@@ -470,13 +648,24 @@ export function MarketChartCanvas({
   const containerRef = useRef<HTMLDivElement | null>(null)
   const chartRef = useRef<Chart | null>(null)
   const activeResetKeyRef = useRef(resetKey)
+  const activeDrawingDraftIdRef = useRef<string | null>(null)
+  const activeDrawingToolRef = useRef<MarketChartDrawingTool | null>(null)
   const annotationGroupsRef = useRef(annotationGroups)
+  const drawingGroupIdRef = useRef(
+    createMarketChartDrawingGroupId({ assetId, timeframe })
+  )
+  const drawingLockedRef = useRef(false)
+  const drawingMagnetRef = useRef(false)
+  const drawingVisibleRef = useRef(true)
   const loadedAnnotationsRef = useRef<MarketChartAnnotationResponse[]>([])
   const loadedCandlesRef = useRef<MarketChartCandleItemResponse[]>([])
   const historyExhaustedRef = useRef(false)
+  const onDrawingSelectionChangeRef = useRef(onDrawingSelectionChange)
+  const onDrawingToolCompleteRef = useRef(onDrawingToolComplete)
   const onLoadedDataChangeRef = useRef(onLoadedDataChange)
   const onLoadOlderCandlesRef = useRef(onLoadOlderCandles)
-  const scheduleMarkerPositionUpdateRef = useRef<() => void>(() => { })
+  const scheduleMarkerPositionUpdateRef = useRef<() => void>(() => {})
+  const selectedDrawingIdRef = useRef<string | null>(null)
   const [historyFeedback, setHistoryFeedback] = useState<LazyHistoryFeedback>({
     error: null,
     resetKey,
@@ -499,8 +688,223 @@ export function MarketChartCanvas({
   }, [onLoadedDataChange])
 
   useEffect(() => {
+    onDrawingSelectionChangeRef.current = onDrawingSelectionChange
+  }, [onDrawingSelectionChange])
+
+  useEffect(() => {
+    onDrawingToolCompleteRef.current = onDrawingToolComplete
+  }, [onDrawingToolComplete])
+
+  useEffect(() => {
     onLoadOlderCandlesRef.current = onLoadOlderCandles
   }, [onLoadOlderCandles])
+
+  useEffect(() => {
+    drawingGroupIdRef.current = createMarketChartDrawingGroupId({
+      assetId,
+      timeframe,
+    })
+  }, [assetId, timeframe])
+
+  function clearDrawingSelection() {
+    selectedDrawingIdRef.current = null
+    onDrawingSelectionChangeRef.current?.(false)
+  }
+
+  function cancelActiveDrawingDraft() {
+    const chart = chartRef.current
+    const draftId = activeDrawingDraftIdRef.current
+
+    if (chart && draftId) {
+      chart.removeOverlay({ id: draftId })
+    }
+
+    activeDrawingDraftIdRef.current = null
+    activeDrawingToolRef.current = null
+  }
+
+  function setActiveDrawingTool(tool: MarketChartDrawingTool | null) {
+    const chart = chartRef.current
+
+    if (!chart) {
+      return false
+    }
+
+    cancelActiveDrawingDraft()
+
+    if (!tool) {
+      return true
+    }
+
+    const overlayId = chart.createOverlay(
+      createMarketChartDrawingOverlay({
+        groupId: drawingGroupIdRef.current,
+        isLocked: false,
+        isMagnetEnabled: drawingMagnetRef.current,
+        isVisible: drawingVisibleRef.current,
+        onDeselected(event) {
+          if (selectedDrawingIdRef.current === event.overlay.id) {
+            clearDrawingSelection()
+          }
+        },
+        onDrawEnd(event) {
+          activeDrawingDraftIdRef.current = null
+          activeDrawingToolRef.current = null
+          selectedDrawingIdRef.current = event.overlay.id
+          if (drawingLockedRef.current) {
+            event.chart.overrideOverlay({
+              id: event.overlay.id,
+              lock: true,
+            })
+          }
+          onDrawingSelectionChangeRef.current?.(true)
+          onDrawingToolCompleteRef.current?.()
+        },
+        onRemoved(event) {
+          if (activeDrawingDraftIdRef.current === event.overlay.id) {
+            activeDrawingDraftIdRef.current = null
+          }
+
+          if (selectedDrawingIdRef.current === event.overlay.id) {
+            clearDrawingSelection()
+          }
+        },
+        onSelected(event) {
+          selectedDrawingIdRef.current = event.overlay.id
+          onDrawingSelectionChangeRef.current?.(true)
+        },
+        paneId: CANDLE_PANE_ID,
+        styles: createDrawingOverlayStyles(),
+        tool,
+      })
+    )
+
+    if (!overlayId || Array.isArray(overlayId)) {
+      return false
+    }
+
+    activeDrawingDraftIdRef.current = overlayId
+    activeDrawingToolRef.current = tool
+    return true
+  }
+
+  function setDrawingGroupLock(locked: boolean) {
+    const chart = chartRef.current
+
+    drawingLockedRef.current = locked
+
+    if (!chart) {
+      return false
+    }
+
+    const overlays = chart.getOverlays({ groupId: drawingGroupIdRef.current })
+
+    if (overlays.length > 0) {
+      chart.overrideOverlay({ groupId: drawingGroupIdRef.current, lock: locked })
+    }
+
+    return true
+  }
+
+  function setDrawingGroupVisibility(visible: boolean) {
+    const chart = chartRef.current
+
+    drawingVisibleRef.current = visible
+
+    if (!chart) {
+      return false
+    }
+
+    const overlays = chart.getOverlays({ groupId: drawingGroupIdRef.current })
+
+    if (overlays.length > 0) {
+      chart.overrideOverlay({
+        groupId: drawingGroupIdRef.current,
+        visible,
+      })
+    }
+
+    return true
+  }
+
+  function setDrawingGroupMagnet(enabled: boolean) {
+    const chart = chartRef.current
+
+    drawingMagnetRef.current = enabled
+
+    if (!chart) {
+      return false
+    }
+
+    const overlays = chart.getOverlays({ groupId: drawingGroupIdRef.current })
+
+    if (overlays.length > 0) {
+      chart.overrideOverlay({
+        groupId: drawingGroupIdRef.current,
+        mode: createMarketChartDrawingMode(enabled),
+      })
+    }
+
+    return true
+  }
+
+  function deleteSelectedDrawing() {
+    const chart = chartRef.current
+    const selectedDrawingId = selectedDrawingIdRef.current
+
+    if (!chart || !selectedDrawingId) {
+      return false
+    }
+
+    const removed = chart.removeOverlay({ id: selectedDrawingId })
+
+    if (removed) {
+      clearDrawingSelection()
+    }
+
+    return removed
+  }
+
+  function clearDrawings() {
+    const chart = chartRef.current
+
+    if (!chart) {
+      return false
+    }
+
+    cancelActiveDrawingDraft()
+    clearDrawingSelection()
+    chart.removeOverlay({ groupId: drawingGroupIdRef.current })
+    return true
+  }
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      clearDrawings,
+      captureScreenshot() {
+        return chartRef.current?.getConvertPictureUrl(true, "png") ?? null
+      },
+      deleteSelectedDrawing,
+      resize() {
+        chartRef.current?.resize()
+      },
+      setDrawingMagnet: setDrawingGroupMagnet,
+      setDrawingsLocked: setDrawingGroupLock,
+      setDrawingsVisible: setDrawingGroupVisibility,
+      setDrawingTool: setActiveDrawingTool,
+      setIndicators(indicators) {
+        const chart = chartRef.current
+
+        if (!chart) {
+          return false
+        }
+
+        syncChartIndicators(chart, indicators)
+        return true
+      },
+    })
+  )
 
   useEffect(() => {
     const container = containerRef.current
@@ -511,9 +915,13 @@ export function MarketChartCanvas({
 
     let disposed = false
     activeResetKeyRef.current = resetKey
+    activeDrawingDraftIdRef.current = null
+    activeDrawingToolRef.current = null
+    clearDrawingSelection()
     historyExhaustedRef.current = false
     loadedAnnotationsRef.current = includeAnnotations ? annotations : []
     loadedCandlesRef.current = normalizeCandleItems(candles)
+    registerMarketChartDrawingOverlays()
 
     const chart = init(container, {
       layout: [
@@ -575,7 +983,10 @@ export function MarketChartCanvas({
         return [
           {
             group,
-            x: Math.max(18, Math.min(currentContainer.clientWidth - 18, point.x)),
+            x: Math.max(
+              18,
+              Math.min(currentContainer.clientWidth - 18, point.x)
+            ),
             y: Math.max(
               24,
               Math.min(currentContainer.clientHeight - 92, point.y - 18)
@@ -624,14 +1035,15 @@ export function MarketChartCanvas({
 
       const oldestTimestamp =
         timestamp ?? getOldestLoadedTimestamp(loadedCandlesRef.current)
-      const request = oldestTimestamp !== null
-        ? createOlderHistoryRequest({
-          assetId,
-          includeAnnotations,
-          oldestTimestamp,
-          timeframe,
-        })
-        : null
+      const request =
+        oldestTimestamp !== null
+          ? createOlderHistoryRequest({
+              assetId,
+              includeAnnotations,
+              oldestTimestamp,
+              timeframe,
+            })
+          : null
 
       if (oldestTimestamp === null || !request) {
         historyExhaustedRef.current = true
@@ -749,12 +1161,19 @@ export function MarketChartCanvas({
     return () => {
       disposed = true
       window.cancelAnimationFrame(frameId)
-      chart.unsubscribeAction("onVisibleRangeChange", scheduleMarkerPositionUpdate)
+      chart.unsubscribeAction(
+        "onVisibleRangeChange",
+        scheduleMarkerPositionUpdate
+      )
       chart.unsubscribeAction("onScroll", scheduleMarkerPositionUpdate)
       chart.unsubscribeAction("onZoom", scheduleMarkerPositionUpdate)
       resizeObserver.disconnect()
-      scheduleMarkerPositionUpdateRef.current = () => { }
+      scheduleMarkerPositionUpdateRef.current = () => {}
+      activeDrawingDraftIdRef.current = null
+      activeDrawingToolRef.current = null
+      selectedDrawingIdRef.current = null
       chartRef.current = null
+      onDrawingSelectionChangeRef.current?.(false)
       setMarkerPositions([])
       dispose(chart)
     }
@@ -770,8 +1189,37 @@ export function MarketChartCanvas({
     intlLocale,
   ])
 
+  useEffect(() => {
+    const chart = chartRef.current
+
+    if (!chart) {
+      return
+    }
+
+    syncChartIndicators(chart, activeIndicators)
+  }, [activeIndicators])
+
+  useEffect(() => {
+    if (!drawingToolActive) {
+      return
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        cancelActiveDrawingDraft()
+        onDrawingToolCompleteRef.current?.()
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [drawingToolActive])
+
   return (
-    <div className="relative h-[520px] min-h-[420px] w-full">
+    <div className={cn("relative h-[520px] min-h-[420px] w-full", className)}>
       <div ref={containerRef} className="absolute inset-0" />
       {historyState !== "idle" ? (
         <div
@@ -798,6 +1246,9 @@ export function MarketChartCanvas({
         const selected = selectedAnnotationGroupId === group.id
         const emphasized = selected || group.priority === "high"
         const count = group.annotations.length
+        const colorClassNames = getAnnotationMarkerColorClassNames(
+          group.direction
+        )
 
         return (
           <button
@@ -818,7 +1269,10 @@ export function MarketChartCanvas({
                   })
             }
             aria-pressed={selected}
-            className="group absolute z-10 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+            className={cn(
+              "group absolute z-10 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+              drawingToolActive ? "pointer-events-none" : null
+            )}
             style={{ left: x, top: y }}
             onClick={(event) => {
               event.stopPropagation()
@@ -826,18 +1280,21 @@ export function MarketChartCanvas({
             }}
           >
             <span
-              className={
-                emphasized
-                  ? "market-chart-annotation-pulse absolute size-9 rounded-full bg-destructive/25"
-                  : "market-chart-annotation-pulse absolute size-7 rounded-full bg-destructive/20"
-              }
+              className={cn(
+                "market-chart-annotation-pulse absolute rounded-full",
+                emphasized ? "size-9" : "size-7",
+                colorClassNames.pulse
+              )}
             />
             <span
-              className={
+              className={cn(
                 count > 1
-                  ? "relative flex size-6 items-center justify-center rounded-full border-2 border-background bg-destructive text-[11px] font-semibold text-destructive-foreground shadow-lg ring-2 ring-destructive/30"
-                  : "relative block size-4 rounded-full border-2 border-background bg-destructive shadow-lg ring-2 ring-destructive/30 group-aria-pressed:ring-4"
-              }
+                  ? "relative flex size-6 items-center justify-center rounded-full border-2 border-background text-[11px] font-semibold shadow-lg ring-2"
+                  : "relative block size-4 rounded-full border-2 border-background shadow-lg ring-2 group-aria-pressed:ring-4",
+                colorClassNames.dot,
+                colorClassNames.ring,
+                count > 1 ? colorClassNames.foreground : null
+              )}
             >
               {count > 1 ? formatNumber(count) : null}
             </span>
@@ -870,4 +1327,4 @@ export function MarketChartCanvas({
       </style>
     </div>
   )
-}
+})

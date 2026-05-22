@@ -2,12 +2,19 @@ import { z } from "zod"
 
 import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
 
-export type GraphViewNodeKind = "event" | "asset" | "theme" | "news-article"
+export type GraphViewNodeKind =
+  | "event"
+  | "asset"
+  | "theme"
+  | "news-article"
+  | "narrative"
 
 export type GraphViewEdgeKind =
   | "event-asset"
   | "event-theme"
   | "news-article-event"
+  | "narrative-event"
+  | "narrative-asset"
 
 export interface GraphViewNodeMetadata {
   slug?: string | null
@@ -19,8 +26,10 @@ export interface GraphViewNodeMetadata {
   occurredAt?: string | null
   publishedAt?: string | null
   status?: string | null
+  narrativeStatus?: string | null
   active?: boolean | null
   confidence?: number | null
+  thesis?: string | null
 }
 
 export interface GraphViewNode {
@@ -57,12 +66,15 @@ const graphViewNodeKindSchema = z.enum([
   "asset",
   "theme",
   "news-article",
+  "narrative",
 ])
 
 const graphViewEdgeKindSchema = z.enum([
   "event-asset",
   "event-theme",
   "news-article-event",
+  "narrative-event",
+  "narrative-asset",
 ])
 
 export const graphViewNodeMetadataSchema = z.object({
@@ -75,8 +87,10 @@ export const graphViewNodeMetadataSchema = z.object({
   occurredAt: z.string().nullish(),
   publishedAt: z.string().nullish(),
   status: z.string().nullish(),
+  narrativeStatus: z.string().nullish(),
   active: z.boolean().nullish(),
   confidence: z.number().nullish(),
+  thesis: z.string().nullish(),
 }) satisfies z.ZodType<GraphViewNodeMetadata>
 
 export const graphViewNodeSchema = z.object({
@@ -103,7 +117,7 @@ export const graphViewResponseSchema = z.object({
   edges: z.array(graphViewEdgeSchema),
 }) satisfies z.ZodType<GraphViewResponse>
 
-const graphNodeIdPattern = /^(event|asset|theme|news-article):(\d+)$/
+const graphNodeIdPattern = /^(event|asset|theme|news-article|narrative):(\d+)$/
 
 export function parseGraphViewNodeId(nodeId: string): GraphViewEntityReference | null {
   const match = graphNodeIdPattern.exec(nodeId)

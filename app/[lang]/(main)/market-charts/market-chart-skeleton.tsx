@@ -1,6 +1,34 @@
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
+function MarketChartToolbarSkeleton() {
+  return (
+    <div className="border-b bg-card p-2">
+      <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center">
+          <Skeleton className="h-8 w-full rounded-lg sm:max-w-md" />
+          <div className="flex max-w-full gap-1 overflow-hidden rounded-lg p-px">
+            {["w-10", "w-10", "w-12", "w-12", "w-10", "w-10"].map(
+              (width, index) => (
+                <Skeleton
+                  key={`${width}-${index}`}
+                  className={cn("h-7 rounded-lg", width)}
+                />
+              )
+            )}
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2 lg:justify-end">
+          <Skeleton className="h-7 w-20 rounded-lg" />
+          <Skeleton className="h-7 w-24 rounded-lg" />
+          <Skeleton className="h-7 w-24 rounded-lg" />
+          <Skeleton className="h-7 w-28 rounded-lg" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function MarketChartPlotSkeleton() {
   return (
     <div className="relative mt-3 min-h-0 flex-1 overflow-hidden rounded-lg border border-border/50 bg-muted/20">
@@ -83,7 +111,13 @@ function MarketChartSurfaceSkeleton({
   }
 
   return (
-    <section className={cn("rounded-xl border border-border bg-card", className)}>
+    <section
+      className={cn(
+        "overflow-hidden rounded-xl border border-border bg-card",
+        className
+      )}
+    >
+      <MarketChartToolbarSkeleton />
       <div
         className={cn(
           "min-h-[520px] bg-card p-2",

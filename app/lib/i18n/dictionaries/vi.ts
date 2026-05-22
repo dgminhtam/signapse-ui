@@ -126,7 +126,7 @@ export const vi = {
     namePlaceholder: "Ví dụ: Nhóm nghiên cứu",
     saveChanges: "Lưu thay đổi",
     nameRequired: "Vui lòng nhập tên không gian làm việc.",
-    switched: "Đã chuyển sang không gian làm việc \"{name}\".",
+    switched: 'Đã chuyển sang không gian làm việc "{name}".',
     created: "Đã tạo không gian làm việc.",
     updated: "Đã cập nhật không gian làm việc.",
     createError: "Không thể tạo không gian làm việc.",
@@ -153,10 +153,9 @@ export const vi = {
     noChanges: "Không có thay đổi để lưu.",
     partialFailure:
       "Không thể đồng bộ đầy đủ tài sản theo dõi. Dữ liệu mới nhất đã được tải lại.",
-    updated: "Đã cập nhật tài sản theo dõi cho \"{name}\".",
+    updated: 'Đã cập nhật tài sản theo dõi cho "{name}".',
     loading: "Đang tải tài sản theo dõi...",
-    selectedCount:
-      "Đã chọn {count} tài sản cho không gian làm việc này.",
+    selectedCount: "Đã chọn {count} tài sản cho không gian làm việc này.",
     blockedSummary:
       "Chỉ có thể quản lý tài sản theo dõi khi đã chọn không gian làm việc phù hợp.",
     saveList: "Lưu danh sách",
@@ -176,8 +175,7 @@ export const vi = {
     heroDescription:
       "Không gian này quyết định danh sách tài sản theo dõi và là ngữ cảnh chính cho các luồng phân tích thị trường trong Signapse.",
     trackedAssets: "Tài sản theo dõi",
-    trackedAssetsStatDescription:
-      "Đang dùng cho phạm vi không gian làm việc",
+    trackedAssetsStatDescription: "Đang dùng cho phạm vi không gian làm việc",
     status: "Trạng thái",
     statusDescription: "Đang là phạm vi hiện tại",
     updated: "Cập nhật",
@@ -189,8 +187,7 @@ export const vi = {
     trackedAssetsDeniedDescription:
       "Tài khoản cần quyền đọc tài sản và danh sách theo dõi để xem module này.",
     trackedAssetsLoadErrorTitle: "Không thể tải tài sản theo dõi",
-    noTrackedAssetsTitle:
-      "Không gian làm việc chưa theo dõi tài sản nào",
+    noTrackedAssetsTitle: "Không gian làm việc chưa theo dõi tài sản nào",
     noTrackedAssetsDescription:
       "Thêm các mã tài sản quan trọng để các màn hình phân tích có phạm vi theo dõi rõ ràng hơn.",
     technicalTitle: "Thông tin kỹ thuật",
@@ -214,8 +211,7 @@ export const vi = {
     saved: "Đã lưu ghi chú.",
     updatedAt: "Cập nhật {time}",
     emptyTitle: "Chưa có ghi chú",
-    emptyDescription:
-      "Tạo ghi chú đầu tiên để lưu công thức hoặc lệnh trade.",
+    emptyDescription: "Tạo ghi chú đầu tiên để lưu công thức hoặc lệnh trade.",
     untitled: "Ghi chú chưa có tiêu đề",
     emptyPreview: "Chưa có nội dung để xem trước.",
     loadedSavedNote: "Đã tải ghi chú đã lưu",
@@ -236,8 +232,7 @@ export const vi = {
     notFoundEmptyDescription:
       "Hãy đóng bảng chi tiết để quay lại biểu đồ tri thức.",
     errorTitle: "Không thể tải chi tiết",
-    errorDescription:
-      "Đã xảy ra lỗi khi mở nội dung từ biểu đồ tri thức.",
+    errorDescription: "Đã xảy ra lỗi khi mở nội dung từ biểu đồ tri thức.",
     errorEmptyDescription:
       "Vui lòng đóng bảng chi tiết và thử mở lại từ biểu đồ tri thức.",
   },
@@ -248,8 +243,7 @@ export const vi = {
     library: "Kho tài sản",
     loadError: "Không thể tải danh sách tài sản",
     emptySearch: "Không tìm thấy tài sản phù hợp.",
-    emptyTracked:
-      "Workspace này chưa có tài sản nào trong danh sách theo dõi.",
+    emptyTracked: "Workspace này chưa có tài sản nào trong danh sách theo dõi.",
   },
   blogs: {
     readDenied: "Bạn không có quyền xem danh sách bài viết.",
@@ -271,8 +265,7 @@ export const vi = {
     hidden: "Ẩn",
     edit: "Chỉnh sửa bài viết",
     emptyTitle: "Chưa có bài viết",
-    emptyDescription:
-      "Tạo bài viết đầu tiên để bắt đầu xuất bản nội dung.",
+    emptyDescription: "Tạo bài viết đầu tiên để bắt đầu xuất bản nội dung.",
     delete: "Xóa bài viết",
     deleteTitle: "Bạn có chắc chắn muốn xóa?",
     deleteDescription:
@@ -306,8 +299,7 @@ export const vi = {
     createSuccess: "Tạo bài viết thành công",
     createPending: "Đang tạo...",
     errorTitle: "Đã có lỗi xảy ra",
-    errorDescription:
-      "Không thể tải danh sách bài viết do lỗi kết nối nội bộ.",
+    errorDescription: "Không thể tải danh sách bài viết do lỗi kết nối nội bộ.",
     unexpectedError: "Đã có lỗi không mong muốn xảy ra. Vui lòng thử lại.",
   },
   newsOutlets: {
@@ -348,7 +340,7 @@ export const vi = {
     deleteDescription:
       "Hành động này không thể hoàn tác. Nguồn tin {name} sẽ bị xóa vĩnh viễn khỏi hệ thống.",
     deletePending: "Đang xóa...",
-    deleted: "Đã xóa nguồn tin \"{name}\".",
+    deleted: 'Đã xóa nguồn tin "{name}".',
     deleteError: "Không thể xóa nguồn tin",
     createTitle: "Tạo nguồn tin",
     createDescription:
@@ -387,8 +379,7 @@ export const vi = {
     errorDescription: "Không thể tải dữ liệu nguồn tin lúc này.",
   },
   newsArticles: {
-    readDenied:
-      "Bạn không có quyền truy cập khu vực quản lý bài viết tin tức.",
+    readDenied: "Bạn không có quyền truy cập khu vực quản lý bài viết tin tức.",
     detailDenied: "Bạn không có quyền xem chi tiết bài viết tin tức.",
     quickAccessDeniedTitle: "Không có quyền xem bài viết",
     quickAccessDeniedDescription:
@@ -413,8 +404,7 @@ export const vi = {
     viewDetail: "Xem chi tiết",
     openOriginalLink: "Mở liên kết gốc",
     emptyTitle: "Chưa có bài viết tin tức",
-    emptyDescription:
-      "Không có bài viết nào khớp với bộ lọc hiện tại.",
+    emptyDescription: "Không có bài viết nào khớp với bộ lọc hiện tại.",
     delete: "Xóa bài viết",
     deleteShort: "Xóa",
     deleteTitle: "Bạn có chắc chắn muốn xóa?",
@@ -479,11 +469,9 @@ export const vi = {
     derivationSummary: {
       eventCreated: "Đã suy diễn và tạo sự kiện mới.",
       eventUpdated: "Đã suy diễn và cập nhật sự kiện hiện có.",
-      eventUnchanged:
-        "Đã suy diễn nhưng không thay đổi sự kiện hiện có.",
+      eventUnchanged: "Đã suy diễn nhưng không thay đổi sự kiện hiện có.",
       eventResolved: "Đã suy diễn sự kiện chính thành công.",
-      noPrimaryEvent:
-        "Đã suy diễn nhưng chưa tìm thấy sự kiện chính phù hợp.",
+      noPrimaryEvent: "Đã suy diễn nhưng chưa tìm thấy sự kiện chính phù hợp.",
       pending: "Yêu cầu suy diễn đã được tiếp nhận.",
       failed: "Suy diễn sự kiện chính không thành công.",
       contentFailed: "Không thể suy diễn vì bài viết đang lỗi nội dung.",
@@ -533,8 +521,7 @@ export const vi = {
     noEvidenceTitle: "Chưa có bằng chứng",
     noEvidenceDescription:
       "Sự kiện này chưa có bằng chứng chi tiết trong dữ liệu hiện tại.",
-    noEvidenceQuick:
-      "Sự kiện này chưa có bằng chứng trong dữ liệu hiện tại.",
+    noEvidenceQuick: "Sự kiện này chưa có bằng chứng trong dữ liệu hiện tại.",
     articleUntitled: "Chưa có tiêu đề bài viết",
     evidenceUntitled: "Bằng chứng chưa có tiêu đề",
     newsOutlet: "Nguồn tin",
@@ -579,13 +566,11 @@ export const vi = {
     marketReactionAria: "Suy luận tác động thị trường",
     marketReactionPending: "Đang suy luận...",
     marketReactionBatch: "Suy luận tác động hàng loạt",
-    marketReactionError:
-      "Không thể suy luận tác động thị trường cho sự kiện.",
+    marketReactionError: "Không thể suy luận tác động thị trường cho sự kiện.",
     marketReactionPendingError:
       "Không thể suy luận tác động thị trường cho các sự kiện đang chờ.",
     errorTitle: "Không thể tải sự kiện",
-    errorDescription:
-      "Đã có lỗi xảy ra trong khi tải dữ liệu sự kiện.",
+    errorDescription: "Đã có lỗi xảy ra trong khi tải dữ liệu sự kiện.",
     statusLabels: {
       ENRICHMENT_PENDING: "Chờ làm giàu",
       ENRICHED: "Đã làm giàu",
@@ -639,8 +624,7 @@ export const vi = {
       failed: "Làm giàu liên kết tài sản và chủ đề không thành công.",
       archived: "Sự kiện đã được lưu trữ, không có thay đổi làm giàu mới.",
       counts: "Tài sản: {assets}, chủ đề: {themes}.",
-      noPending:
-        "Không có sự kiện nào đang chờ làm giàu trong lô hiện tại.",
+      noPending: "Không có sự kiện nào đang chờ làm giàu trong lô hiện tại.",
       batch:
         "Đã chạy làm giàu cho sự kiện chờ: đã xử lý {processed}/{selected}, thành công {enriched}, không khớp {noMatch}, bỏ qua {skipped}, hoãn {deferred}, lỗi {failed}.",
     },
@@ -683,8 +667,7 @@ export const vi = {
     previous: "Previous",
     viewDetail: "Xem chi tiết lịch kinh tế",
     emptyTitle: "Chưa có dữ liệu lịch kinh tế",
-    emptyDescription:
-      "Không có mục lịch kinh tế nào khớp với bộ lọc hiện tại.",
+    emptyDescription: "Không có mục lịch kinh tế nào khớp với bộ lọc hiện tại.",
     sync: "Đồng bộ lịch kinh tế",
     syncPending: "Đang đồng bộ...",
     syncError: "Không thể đồng bộ lịch kinh tế.",
@@ -753,8 +736,7 @@ export const vi = {
     viewDetails: "Xem chi tiết",
     legacyPreserved: "Quyền kế thừa sẽ được bảo toàn khi gửi cập nhật.",
     readOnly: "Chỉ đọc",
-    tip:
-      "Bạn có thể tìm kiếm theo từ khóa, hoặc thao tác theo từng nhóm để cập nhật quyền nhanh hơn.",
+    tip: "Bạn có thể tìm kiếm theo từ khóa, hoặc thao tác theo từng nhóm để cập nhật quyền nhanh hơn.",
     unsavedChanges: "Bạn có thay đổi chưa lưu trong hộp thoại này.",
     noChanges: "Chưa có thay đổi nào cần lưu.",
     reset: "Đặt lại",
@@ -784,8 +766,7 @@ export const vi = {
     noCreatedDate: "Chưa có dữ liệu",
     editConfig: "Chỉnh sửa cấu hình",
     emptyTitle: "Chưa có cấu hình nhà cung cấp AI",
-    emptyDescription:
-      "Thêm cấu hình đầu tiên để bắt đầu quản lý tích hợp AI.",
+    emptyDescription: "Thêm cấu hình đầu tiên để bắt đầu quản lý tích hợp AI.",
     defaultBadge: "Mặc định",
     setDefault: "Đặt mặc định",
     setDefaultSuccess: "Đã cập nhật nhà cung cấp AI mặc định.",
@@ -816,14 +797,11 @@ export const vi = {
     apiKeyPlaceholder: "Dán API key của nhà cung cấp",
     apiKeyNewPlaceholder: "Dán API key mới",
     apiKeyUpdatePlaceholder: "Dán API key mới để xác thực lại model",
-    apiKeyDescription:
-      "Key đầy đủ chỉ được gửi một lần khi tạo credential.",
+    apiKeyDescription: "Key đầy đủ chỉ được gửi một lần khi tạo credential.",
     model: "Model",
-    baseUrlDescription:
-      "Chỉ nhập khi nhà cung cấp yêu cầu endpoint tùy chỉnh.",
+    baseUrlDescription: "Chỉ nhập khi nhà cung cấp yêu cầu endpoint tùy chỉnh.",
     description: "Mô tả",
-    descriptionPlaceholder:
-      "Mô tả ngắn gọn mục đích sử dụng của cấu hình này",
+    descriptionPlaceholder: "Mô tả ngắn gọn mục đích sử dụng của cấu hình này",
     defaultProvider: "Nhà cung cấp mặc định",
     defaultProviderDescription:
       "Đặt cấu hình này làm nhà cung cấp AI mặc định cho toàn hệ thống.",
@@ -846,8 +824,7 @@ export const vi = {
     authenticateSuccess: "Xác thực credential thành công",
     authenticateError: "Không thể xác thực credential",
     modelSelected: "Đã chọn model cho credential",
-    missingCredentialAndModel:
-      "Vui lòng xác thực API key và chọn model.",
+    missingCredentialAndModel: "Vui lòng xác thực API key và chọn model.",
     missingNewCredentialAndModel:
       "Vui lòng xác thực API key mới và chọn model.",
     modelActionPending: "Đang kiểm tra...",
@@ -886,11 +863,9 @@ export const vi = {
     confirm: "Xác nhận",
     confirmModel: "Xác nhận model",
     close: "Đóng",
-    modelCatalogError:
-      "Không thể xác thực và tải danh sách model.",
+    modelCatalogError: "Không thể xác thực và tải danh sách model.",
     errorTitle: "Đã xảy ra lỗi",
-    errorDescription:
-      "Không thể tải cấu hình nhà cung cấp AI do lỗi hệ thống.",
+    errorDescription: "Không thể tải cấu hình nhà cung cấp AI do lỗi hệ thống.",
   },
   marketQuery: {
     readDenied: "Bạn không có quyền sử dụng công cụ truy vấn thị trường.",
@@ -954,14 +929,12 @@ export const vi = {
     },
     answer: {
       title: "Kết luận",
-      description:
-        "Phần trả lời trực tiếp cho câu hỏi đang được hiển thị.",
+      description: "Phần trả lời trực tiếp cho câu hỏi đang được hiển thị.",
       empty: "Hệ thống chưa trả về nội dung kết luận cụ thể.",
     },
     trust: {
       title: "Tín hiệu tin cậy",
-      description:
-        "Độ chắc chắn, giới hạn hiện tại và phạm vi tài sản đã xét.",
+      description: "Độ chắc chắn, giới hạn hiện tại và phạm vi tài sản đã xét.",
       confidenceLabel: "Độ tin cậy",
       confidenceDescription:
         "Giá trị này phản ánh mức chắc chắn của kết luận hiện tại.",
@@ -1012,8 +985,7 @@ export const vi = {
       viewSteps: "Xem {count} bước tổng hợp",
       viewDetails: "Xem chi tiết tổng hợp",
       emptyTitle: "Chưa có chuỗi tổng hợp",
-      emptyDescription:
-        "Hệ thống chưa trả về chuỗi tổng hợp cho truy vấn này.",
+      emptyDescription: "Hệ thống chưa trả về chuỗi tổng hợp cho truy vấn này.",
     },
     state: {
       analyzing: "Đang phân tích",
@@ -1037,10 +1009,8 @@ export const vi = {
       notAvailable: "Chưa có",
       blockedEventAndSource:
         "Bạn chưa có quyền mở chi tiết sự kiện và tài liệu nguồn liên quan.",
-      blockedEvent:
-        "Bạn chưa có quyền mở chi tiết sự kiện liên quan.",
-      blockedSourceDocument:
-        "Bạn chưa có quyền mở tài liệu nguồn liên quan.",
+      blockedEvent: "Bạn chưa có quyền mở chi tiết sự kiện liên quan.",
+      blockedSourceDocument: "Bạn chưa có quyền mở tài liệu nguồn liên quan.",
       eventFallback: "Mã sự kiện #{id}",
       sourceDocumentFallback: "Mã tài liệu nguồn #{id}",
     },
@@ -1089,6 +1059,59 @@ export const vi = {
       refresh: "Tải lại",
       refreshing: "Đang tải...",
       refreshLatestData: "Tải lại dữ liệu mới nhất",
+      indicatorLabel: "Chỉ báo",
+      indicatorAria: "Mở tùy chọn chỉ báo",
+      indicatorUnavailable: "Chưa thể cập nhật chỉ báo cho biểu đồ.",
+      screenshotLabel: "Chụp ảnh",
+      screenshotAria: "Chụp ảnh biểu đồ hiện tại",
+      screenshotUnavailable: "Chưa thể chụp ảnh biểu đồ lúc này.",
+      screenshotSuccess: "Đã chụp ảnh biểu đồ.",
+      fullscreenLabel: "Toàn màn hình",
+      fullscreenAria: "Mở biểu đồ toàn màn hình",
+      exitFullscreenLabel: "Thu gọn",
+      exitFullscreenAria: "Thoát toàn màn hình",
+      fullscreenUnavailable: "Trình duyệt chưa hỗ trợ toàn màn hình.",
+      fullscreenFailed: "Chưa thể chuyển chế độ toàn màn hình.",
+    },
+    indicators: {
+      title: "Chỉ báo",
+      options: {
+        MA: "MA",
+        EMA: "EMA",
+        BOLL: "BOLL",
+        MACD: "MACD",
+        RSI: "RSI",
+        KDJ: "KDJ",
+      },
+    },
+    drawings: {
+      toolbarLabel: "Công cụ vẽ trên biểu đồ",
+      toolsLabel: "Chọn công cụ vẽ",
+      collapse: "Thu gọn công cụ vẽ",
+      expand: "Mở rộng công cụ vẽ",
+      magnet: "Bật bắt dính giá",
+      lock: "Khóa bản vẽ",
+      unlock: "Mở khóa bản vẽ",
+      show: "Hiển thị bản vẽ",
+      hide: "Ẩn bản vẽ",
+      deleteSelected: "Xóa bản vẽ đang chọn",
+      clearAll: "Xóa tất cả bản vẽ",
+      clearAllTitle: "Xóa tất cả bản vẽ?",
+      clearAllDescription:
+        "Hành động này chỉ xóa các bản vẽ trên biểu đồ hiện tại và không ảnh hưởng đến dữ liệu sự kiện.",
+      clearAllConfirm: "Xóa bản vẽ",
+      cancel: "Hủy",
+      unavailable: "Chưa thể cập nhật công cụ vẽ cho biểu đồ.",
+      deleteUnavailable: "Chưa thể xóa bản vẽ đang chọn.",
+      clearUnavailable: "Chưa thể xóa các bản vẽ lúc này.",
+      tools: {
+        "horizontal-line": "Đường ngang",
+        "trend-line": "Đường xu hướng",
+        channel: "Kênh giá",
+        fibonacci: "Fibonacci",
+        circle: "Vòng tròn",
+        rectangle: "Vùng giá",
+      },
     },
     empty: {
       watchlistErrorTitle: "Không thể tải watchlist workspace",
@@ -1102,15 +1125,13 @@ export const vi = {
       loadErrorDescription:
         "Chưa thể tải dữ liệu cho tài sản đã chọn. Hãy thử lại sau.",
       noCandlesTitle: "Không có dữ liệu nến cho tài sản đã chọn",
-      noCandlesDescription:
-        "Chưa có nến cho {symbol} trong khoảng hiện tại.",
+      noCandlesDescription: "Chưa có nến cho {symbol} trong khoảng hiện tại.",
     },
     state: {
       loadingAnnouncement: "Đang tải dữ liệu biểu đồ giá.",
       successAnnouncement: "Đã tải xong dữ liệu biểu đồ giá.",
       errorAnnouncement: "Không thể tải dữ liệu biểu đồ giá.",
-      unsupportedTimeframeUrl:
-        "Khung thời gian trên URL không được hỗ trợ.",
+      unsupportedTimeframeUrl: "Khung thời gian trên URL không được hỗ trợ.",
       unsupportedTimeframeUrlError:
         "Tham số khung thời gian trên URL chưa hợp lệ.",
       assetMissingUrl:
@@ -1168,8 +1189,7 @@ export const vi = {
     responseInvalid:
       "Backend trả về dữ liệu biểu đồ tri thức không đúng định dạng mong đợi.",
     errorTitle: "Không thể tải biểu đồ tri thức",
-    errorDescription:
-      "Đã có lỗi xảy ra trong khi tải bề mặt duyệt tri thức.",
+    errorDescription: "Đã có lỗi xảy ra trong khi tải bề mặt duyệt tri thức.",
     emptyTitle: "Chưa có dữ liệu để dựng biểu đồ",
     emptyDescription:
       "Backend chưa trả về nút nào cho /graph-view. Khi payload có dữ liệu, canvas sẽ tự dựng lại từ cùng contract hiện tại.",
@@ -1178,11 +1198,14 @@ export const vi = {
       asset: "Tài sản",
       theme: "Chủ đề",
       "news-article": "Bài viết",
+      narrative: "Luận điểm",
     },
     edgeKinds: {
       "event-asset": "Sự kiện - tài sản",
       "event-theme": "Sự kiện - chủ đề",
       "news-article-event": "Bằng chứng - sự kiện",
+      "narrative-event": "Luận điểm - sự kiện",
+      "narrative-asset": "Luận điểm - tài sản",
     },
     relationTypes: {
       PRIMARY_SUBJECT: "Chủ thể chính",
@@ -1206,6 +1229,8 @@ export const vi = {
       publishedAt: "Xuất bản",
       confidence: "Độ tin cậy",
       status: "Trạng thái",
+      narrativeStatus: "Trạng thái luận điểm",
+      thesis: "Luận đề",
       newsOutlet: "Nguồn tin",
       symbol: "Mã giao dịch",
       assetType: "Loại tài sản",
@@ -1375,7 +1400,8 @@ export const vi = {
     },
     clearEditor: {
       title: "Xóa nội dung trình soạn thảo",
-      description: "Bạn có chắc muốn xóa toàn bộ nội dung trong trình soạn thảo?",
+      description:
+        "Bạn có chắc muốn xóa toàn bộ nội dung trong trình soạn thảo?",
       cancel: "Hủy",
       clear: "Xóa",
     },
@@ -1455,8 +1481,7 @@ export const vi = {
       noDestinationPermission: "Bạn chưa có quyền xem điểm nhận.",
       needsLink: "Cần liên kết",
       routing: "Định tuyến",
-      configuredRoutes:
-        "{configured}/{total} luồng đã bật trong {workspace}.",
+      configuredRoutes: "{configured}/{total} luồng đã bật trong {workspace}.",
       noWorkspace: "Chưa có không gian làm việc hiện tại.",
       routesEnabled: "Có luồng bật",
       needsReview: "Cần rà soát",
@@ -1518,8 +1543,7 @@ export const vi = {
         "Token chỉ nhập khi tạo mới và không hiển thị lại sau khi lưu.",
       formEditTitle: "Thông tin bot",
       formCreateTitle: "Bot Telegram mới",
-      formEditDescription:
-        "Chỉ cập nhật tên hiển thị cho bot đã kết nối.",
+      formEditDescription: "Chỉ cập nhật tên hiển thị cho bot đã kết nối.",
       formCreateDescription:
         "Dán token bot do BotFather cấp để Signapse xác thực và đăng ký webhook.",
       tokenLabel: "Token bot",
@@ -1604,8 +1628,7 @@ export const vi = {
       enabledColumn: "Bật gửi",
       accessLimited: "Không có quyền xem định tuyến",
       noWorkspaceSelected: "Chưa chọn không gian",
-      destinationUpdateError:
-        "Không thể cập nhật điểm nhận cho định tuyến.",
+      destinationUpdateError: "Không thể cập nhật điểm nhận cho định tuyến.",
       destinationUpdateSuccess: "Đã cập nhật điểm nhận định tuyến.",
       statusUpdateError: "Không thể cập nhật trạng thái định tuyến.",
       enabledSuccess: "Đã bật định tuyến Telegram.",
@@ -1657,8 +1680,7 @@ export const vi = {
       timezoneLabel: "Múi giờ",
       localTimesLabel: "Giờ gửi",
       localTimesPlaceholder: "07:30, 13:30, 19:30",
-      localTimesDescription:
-        "Nhập nhiều mốc giờ, cách nhau bằng dấu phẩy.",
+      localTimesDescription: "Nhập nhiều mốc giờ, cách nhau bằng dấu phẩy.",
       assetsLabel: "Tài sản",
       assetsPlaceholder: "BTC, ETH, XAUUSD",
       assetsDescription:
@@ -1748,8 +1770,7 @@ export const vi = {
     updateError: "Không thể cập nhật prompt hệ thống.",
     deleteError: "Không thể xóa prompt hệ thống.",
     errorTitle: "Đã xảy ra lỗi",
-    errorDescription:
-      "Không thể tải dữ liệu prompt hệ thống do lỗi hệ thống.",
+    errorDescription: "Không thể tải dữ liệu prompt hệ thống do lỗi hệ thống.",
     otherGroup: "Khác",
     typeLabels: {
       NEWS_FILTER: "Lọc tin tức",
@@ -1765,8 +1786,7 @@ export const vi = {
       NEWS_PRIMARY_EVENT_DERIVATION: "Suy luận sự kiện chính từ tin tức",
       EVENT_ASSET_THEME_ENRICHMENT: "Làm giàu tài sản và chủ đề",
       EVENT_MARKET_REACTION_DERIVATION: "Suy luận tác động thị trường",
-      EVENT_GROUNDED_MARKET_QUERY_SYNTHESIS:
-        "Tổng hợp truy vấn thị trường",
+      EVENT_GROUNDED_MARKET_QUERY_SYNTHESIS: "Tổng hợp truy vấn thị trường",
     },
     workflowGroups: {
       NEWS_FILTER: "Tin tức",

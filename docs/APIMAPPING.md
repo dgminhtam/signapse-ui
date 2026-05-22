@@ -2,7 +2,7 @@
 
 Tài liệu này ánh xạ snapshot OpenAPI backend trong `docs/api_mapping.json` tới các điểm tích hợp frontend hiện tại của repo.
 
-Xác minh lần cuối: ngày 15 tháng 5 năm 2026
+Xác minh lần cuối: ngày 22 tháng 5 năm 2026
 
 ## Cấu hình cơ sở
 
@@ -36,7 +36,7 @@ Xác minh lần cuối: ngày 15 tháng 5 năm 2026
 
 ## Tổng quan thay đổi lớn từ snapshot hiện tại
 
-- Snapshot backend hiện tại gồm `96` operation.
+- Snapshot backend hiện tại gồm `105` operation.
 - Backend đã chuyển domain nội dung canon từ `sources` / `source-documents` sang `news-outlets` / `news-articles`.
 - Backend vẫn giữ các surface `events`, `query`, và `graph-view`, nhưng nhiều payload đã đổi naming từ `sourceDocument*` sang `artifact*` hoặc `news-article`.
 - Surface `events` có thêm workflow derive market reactions cho từng event và batch pending events.
@@ -53,6 +53,8 @@ Xác minh lần cuối: ngày 15 tháng 5 năm 2026
 - Snapshot mới tiếp tục giản lược `ai-provider-configs`: config request/response không còn `name` và top-level `model`; credential dùng field `model` thay cho `label`.
 - Snapshot mới giản lược `cronjobs`: không còn endpoint create/delete cronjob; update schedule chỉ nhận `expression`.
 - Snapshot mới thêm personal notes dưới `/me/notes` cho ghi chú HTML cá nhân của user hiện tại.
+- Snapshot mới thêm API `languages`, persisted preferred language trên `/me/preferred-language`, và field `preferredLanguage` trong `UserResponse`.
+- Snapshot mới thêm domain `narratives`, đồng thời mở rộng `market-query` với `keyNarratives[]` và `graph-view` với node/edge narrative.
 
 ## Phạm vi endpoint
 
@@ -205,7 +207,7 @@ Ghi chu:
 
 | Phuong thuc | Endpoint backend | operationId | Tich hop frontend      | Trang thai                            | Ghi chu                                                                                                                                                                                                                                          |
 | ----------- | ---------------- | ----------- | ---------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| POST        | `/query`         | `query`     | `queryMarket(request)` | Da trien khai nhung con lech contract | Route `/market-query` render workbench briefing gom `answer`, `reasoningChain`, `keyEvents`, `assetsConsidered`, `confidence`, `limitations`, va `evidence`; FE evidence da doi sang naming `artifact*`, nhung `keyEvents[]` da co rename field. |
+| POST        | `/query`         | `query`     | `queryMarket(request)` | Da trien khai nhung con lech contract | Route `/market-query` render workbench briefing gom `answer`, `reasoningChain`, `keyEvents`, `assetsConsidered`, `confidence`, `limitations`, va `evidence`; FE chua map `keyNarratives[]`. |
 
 Frontend lien quan:
 
@@ -220,23 +222,44 @@ Ghi chu:
 - Spec request cua `POST /query` van cho phep field optional `asOfTime`, nhung workbench frontend v1 chu dong khong gui field nay de backend tu lay thoi diem hien tai.
 - Snapshot OpenAPI hien tai mo ta `evidence[].publishedAt` va `keyEvents[].occurredAt` la `date-time` string; frontend market-query definitions dang cho phep them `null` de tuong thich voi payload runtime da quan sat.
 - `MarketQueryKeyEventResponse` da doi `summary` thanh `description`; `app/lib/market-query/definitions.ts` va `app/(main)/market-query/market-query-key-events.tsx` hien van doc field cu.
+- `MarketQueryResponse` co them `keyNarratives[]`; `MarketQueryKeyNarrativeResponse` gom `id`, `title`, `thesis`, `status`, `confidence`, `primaryAssetSymbol`, `primaryThemeSlug`, `supportingEventIds`. FE chua co type/schema/UI cho field nay.
 - `MarketQueryEvidenceResponse` hien dung `artifactType`, `artifactId`, `artifactTitle`, `artifactUrl`, `newsOutletName`, `publishedAt`, `evidenceRole`, `evidenceConfidence`; FE da doi bo link canon sang `/news-articles/{artifactId}` cho artifact `NEWS_ARTICLE`.
 
 ### 7. API graph view
 
 | Phuong thuc | Endpoint backend | operationId    | Tich hop frontend | Trang thai                            | Ghi chu                                                                                                                                                                              |
 | ----------- | ---------------- | -------------- | ----------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| GET         | `/graph-view`    | `getGraphView` | `getGraphView()`  | Da trien khai nhung con lech contract | Frontend co route `/graph-view`, page shell duoc gate bang `graph-view:read`, va workbench Sigma browse graph theo payload `nodes[]` + `edges[]`, nhung metadata node da doi schema. |
+| GET         | `/graph-view`    | `getGraphView` | `getGraphView()`  | Da trien khai | Frontend co route `/graph-view`, page shell duoc gate bang `graph-view:read`, va workbench G6 browse graph theo payload `nodes[]` + `edges[]`, gom narrative node/edge runtime. |
 
 Ghi chu:
 
 - Response snapshot hien tai la `GraphViewResponse` gom `nodes[]` va `edges[]`.
-- `nodes[].kind` hien tai gom `event`, `asset`, `theme`, `news-article`; `edges[].kind` gom `event-asset`, `event-theme`, `news-article-event`.
-- `GraphNodeMetadata` hien da dung `newsOutletName` thay vi `sourceName`, dong thoi doi `active` thanh `status`.
-- Frontend `app/lib/graph-view/definitions.ts` va `app/(main)/graph-view/*` da doi sang naming `news-article`, `news-article-event`, va `newsOutletName`, nhung hien van doc `metadata.active`.
+- `nodes[].kind` hien tai gom `event`, `asset`, `theme`, `news-article`, `narrative`; `edges[].kind` gom `event-asset`, `event-theme`, `news-article-event`, `narrative-event`, `narrative-asset`.
+- `GraphNodeMetadata` hien da dung `newsOutletName` thay vi `sourceName`, dong thoi doi `active` thanh `status` va them `narrativeStatus`, `thesis`.
+- Frontend `app/lib/graph-view/definitions.ts` va `app/[lang]/(main)/graph-view/*` da model/render `news-article`, `news-article-event`, `narrative`, `narrative-event`, `narrative-asset`, `newsOutletName`, `narrativeStatus`, va `thesis`.
+- `docs/api_mapping.json` hien van stale neu chua duoc refresh tu backend OpenAPI moi; runtime BE source da co narrative graph kinds.
 - Drill-down cho node bai viet da chuyen sang `/news-articles/{id}`.
 
-### 8. API blogs
+### 8. API narratives
+
+| Phuong thuc | Endpoint backend                      | operationId                 | Tich hop frontend | Trang thai      | Ghi chu                                                        |
+| ----------- | ------------------------------------- | --------------------------- | ----------------- | --------------- | -------------------------------------------------------------- |
+| GET         | `/narratives`                         | `getNarratives`             | `-`               | Chua trien khai | Tra ve `PageNarrativeSummaryResponse`; permission `narrative:read`. |
+| GET         | `/narratives/{id}`                    | `getNarrative`              | `-`               | Chua trien khai | Detail gom core narrative, `assets[]`, va `events[]`; permission `narrative:read`. |
+| PUT         | `/narratives/{id}/status`             | `updateStatus`              | `-`               | Chua trien khai | Cap nhat status qua `UpdateNarrativeStatusRequest`; permission `narrative:manage`. |
+| POST        | `/narratives/{id}/archive`            | `archiveNarrative`          | `-`               | Chua trien khai | Archive narrative; permission `narrative:manage`.             |
+| POST        | `/narratives/{id}/refresh`            | `refreshNarrative`          | `-`               | Chua trien khai | Refresh mot narrative; permission `narrative:manage`.         |
+| POST        | `/narratives/refresh-event/{eventId}` | `refreshNarrativesForEvent` | `-`               | Chua trien khai | Refresh narratives theo event; permission `narrative:manage`. |
+| POST        | `/narratives/refresh-pending`         | `refreshPendingNarratives`  | `-`               | Chua trien khai | Batch refresh pending narratives; permission `narrative:manage`. |
+
+Ghi chu:
+
+- `NarrativeSummaryResponse` gom `title`, `slug`, `thesis`, `summary`, `status`, `confidence`, `firstObservedAt`, `lastUpdatedAt`, primary asset/theme fields.
+- `NarrativeResponse` them `assets[]` va `events[]`; asset relation enum gom `PRIMARY`, `AFFECTED`, event relation enum gom `DRIVER`, `SUPPORTING`, `CONTRADICTING`.
+- `status` gom `EMERGING`, `ACTIVE`, `WEAKENING`, `INVALIDATED`, `ARCHIVED`.
+- Frontend hien chua co route, action, definitions, permissions, navigation, list/detail, hay operator UI cho narratives.
+
+### 9. API blogs
 
 | Phuong thuc | Endpoint backend | operationId      | Tich hop frontend         | Trang thai                            | Ghi chu                                 |
 | ----------- | ---------------- | ---------------- | ------------------------- | ------------------------------------- | --------------------------------------- |
@@ -251,7 +274,7 @@ Ghi chu:
 - Snapshot hien tai tiep tuc dung `visible` cho create request va cho ca list/detail response, trong khi update request van dung `isVisible`.
 - Frontend blogs hien van standardize theo `isVisible` trong definitions va form, nen create payload va mapping list/detail response van la diem drift can xu ly khi dong bo code.
 
-### 9. API cronjobs
+### 10. API cronjobs
 
 | Phuong thuc | Endpoint backend        | operationId | Tich hop frontend            | Trang thai                 | Ghi chu                                                                       |
 | ----------- | ----------------------- | ----------- | ---------------------------- | -------------------------- | ----------------------------------------------------------------------------- |
@@ -268,7 +291,7 @@ Ghi chu:
 - Snapshot moi khong con `POST /cronjobs` va `DELETE /cronjobs/{id}`; FE da go create/delete flow va khong con gate `cronjob:create`/`cronjob:delete` tren UI cronjobs.
 - `CronjobRequest` trong snapshot moi chi con `expression`; FE da dong bo request type va update inline tren list theo contract nay.
 
-### 10. API AI provider configs
+### 11. API AI provider configs
 
 | Phuong thuc | Endpoint backend                                       | operationId              | Tich hop frontend                                       | Trang thai                            | Ghi chu                                                                                                                                                      |
 | ----------- | ------------------------------------------------------ | ------------------------ | ------------------------------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -292,7 +315,7 @@ Ghi chu:
 - `SpecificationAiProviderConfig` trong snapshot hien la `{}`, nen UI tam thoi khong render search/filter theo `name` va chi giu sort `id_asc/id_desc` cho den khi BE xac nhan runtime filter moi.
 - Enum provider hien gom `GEMINI`, `GROQ`, `OPENAI`, `ZAI`; FE da dong bo type, validation, select option, va model catalog request.
 
-### 11. API assets
+### 12. API assets
 
 | Phuong thuc | Endpoint backend | operationId | Tich hop frontend         | Trang thai    | Ghi chu                   |
 | ----------- | ---------------- | ----------- | ------------------------- | ------------- | ------------------------- |
@@ -303,7 +326,7 @@ Ghi chu:
 
 - Snapshot moi cua `AssetListResponse` va `AssetResponse` chi gom `id`, `name`, `symbol`, `type` tren list va them `createdDate`, `lastModifiedDate` tren detail; khong co `slug`. FE assets definitions hien khop shape nay.
 
-### 12. API media
+### 13. API media
 
 | Phuong thuc | Endpoint backend | operationId   | Tich hop frontend | Trang thai      | Ghi chu                             |
 | ----------- | ---------------- | ------------- | ----------------- | --------------- | ----------------------------------- |
@@ -312,7 +335,7 @@ Ghi chu:
 | DELETE      | `/medias/{id}`   | `deleteMedia` | `-`               | Chua trien khai | Chua co tich hop.                   |
 | POST        | `/medias/upload` | `upload`      | `-`               | Chua trien khai | Chua co tich hop.                   |
 
-### 13. API economic calendar
+### 14. API economic calendar
 
 | Phương thức | Endpoint backend          | operationId                   | Tích hợp frontend                          | Trạng thái    | Ghi chú                                                                                                                                  |
 | ----------- | ------------------------- | ----------------------------- | ------------------------------------------ | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
@@ -327,7 +350,7 @@ Ghi chú:
 - Detail response có thêm `content`; UI chỉ hiển thị nội dung khi `contentAvailable` là true và `content` có dữ liệu.
 - Frontend không còn phụ thuộc vào các field cũ đã bị backend loại bỏ như `description`, `url`, `externalKey`, `provider`, `countryCode`, `importance`, `ingestedAt`, `rawContent`, hoặc `rawMetadata`.
 
-### 14. API workspace
+### 15. API workspace
 
 | Phuong thuc | Endpoint backend                  | operationId           | Tich hop frontend               | Trang thai  | Ghi chu                                                                                      |
 | ----------- | --------------------------------- | --------------------- | ------------------------------- | ----------- | -------------------------------------------------------------------------------------------- |
@@ -336,13 +359,25 @@ Ghi chú:
 | PUT         | `/me/workspaces/{id}`             | `updateWorkspace`     | `updateWorkspace(id, request)`  | Da tich hop | Snapshot moi chi cap nhat `name`; workspace switcher chi gui payload `name`.                 |
 | PATCH       | `/me/workspaces/{id}/set-current` | `setCurrentWorkspace` | `setCurrentWorkspace(id)`       | Da tich hop | Frontend goi dung `/set-current` va gate bang permission chinh thuc `workspace:set-current`. |
 
-### 15. API user
+### 16. API user
 
 | Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai  | Ghi chu                                                                                                                          |
 | ----------- | ---------------- | ----------- | ----------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| GET         | `/me`            | `me`        | `getMe()`         | Da tich hop | `BackendMeResponse` dung `currentWorkspace`, `mainImage` la media object, va permission loader tiep tuc chi doc `permissions[]`. |
+| GET         | `/me`            | `me`        | `getMe()`         | Da tich hop nhung con lech contract | `UserResponse` co them `preferredLanguage`; `BackendMeResponse` hien chua map field nay, permission loader tiep tuc chi doc `permissions[]`. |
 
-### 16. API personal notes
+### 17. API languages
+
+| Phuong thuc | Endpoint backend          | operationId               | Tich hop frontend | Trang thai      | Ghi chu                                                                    |
+| ----------- | ------------------------- | ------------------------- | ----------------- | --------------- | -------------------------------------------------------------------------- |
+| GET         | `/languages`              | `getLanguages`            | `-`               | Chua trien khai | Tra ve `LanguageCatalogResponse`; auth type `active-user`.                 |
+| PATCH       | `/me/preferred-language`  | `updatePreferredLanguage` | `-`               | Chua trien khai | Luu preferred language bang `{ isoCode }` va tra ve `UserResponse`.        |
+
+Ghi chu:
+
+- `LanguageCatalogResponse` gom `currentLanguage`, `preferredLanguage`, `languages[]`; `LanguageResponse` gom `id`, `isoCode`, `name`.
+- Frontend hien da co URL locale prefix, `Accept-Language`, va language selector theo route local state, nhung chua goi `/languages` hay persist `/me/preferred-language`.
+
+### 18. API personal notes
 
 | Phuong thuc | Endpoint backend | operationId          | Tich hop frontend | Trang thai      | Ghi chu                                                            |
 | ----------- | ---------------- | -------------------- | ----------------- | --------------- | ------------------------------------------------------------------ |
@@ -358,7 +393,7 @@ Ghi chu:
 - `PersonalNoteResponse` gom `id`, `contentHtml`, `createdDate`, `lastModifiedDate`.
 - Frontend co route `/notes`, quick Sheet trong header, action/definitions/permission helper, editor HTML app-level, va presentation mode cho screen share.
 
-### 17. API wiki
+### 19. API wiki
 
 Khong con tich hop frontend.
 
@@ -367,20 +402,20 @@ Ghi chu:
 - Toan bo route, action, definition, va UI surface `wiki` da duoc go khoi frontend.
 - Neu backend tai xuat wiki trong tuong lai, nen de xuat mot change moi thay vi tai su dung module cu.
 
-### 18. API roles
+### 20. API roles
 
 | Phuong thuc | Endpoint backend               | operationId             | Tich hop frontend                         | Trang thai    | Ghi chu                                            |
 | ----------- | ------------------------------ | ----------------------- | ----------------------------------------- | ------------- | -------------------------------------------------- |
 | GET         | `/roles`                       | `getRoles`              | `getRoles()`                              | Da trien khai | Trang roles da load danh sach vai tro.             |
 | PUT         | `/roles/{roleKey}/permissions` | `updateRolePermissions` | `updateRolePermissions(roleKey, request)` | Da trien khai | Dialog frontend cho phep cap nhat permission keys. |
 
-### 19. API permissions
+### 21. API permissions
 
 | Phuong thuc | Endpoint backend | operationId      | Tich hop frontend  | Trang thai    | Ghi chu                                                 |
 | ----------- | ---------------- | ---------------- | ------------------ | ------------- | ------------------------------------------------------- |
 | GET         | `/permissions`   | `getPermissions` | `getPermissions()` | Da trien khai | Duoc dung cung role editor de build permission catalog. |
 
-### 20. API watchlists
+### 22. API watchlists
 
 | Phuong thuc | Endpoint backend               | operationId       | Tich hop frontend                            | Trang thai    | Ghi chu                                                 |
 | ----------- | ------------------------------ | ----------------- | -------------------------------------------- | ------------- | ------------------------------------------------------- |
@@ -388,43 +423,44 @@ Ghi chu:
 | POST        | `/watchlists`                  | `createWatchlist` | `addAssetToWorkspaceWatchlist({ assetId })`  | Da trien khai | Sync add theo diff trong workspace editor.              |
 | DELETE      | `/watchlists/assets/{assetId}` | `deleteByAssetId` | `removeAssetFromWorkspaceWatchlist(assetId)` | Da trien khai | Sync remove theo diff.                                  |
 
-### 21. API telegram
+### 23. API telegram
 
-| Phuong thuc | Endpoint backend                                   | operationId            | Tich hop frontend | Trang thai      | Ghi chu                                                                                                                                            |
-| ----------- | -------------------------------------------------- | ---------------------- | ----------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET         | `/telegram/bot-connections`                        | `getConnections`       | `-`               | Chua trien khai | Doc danh sach bot connection; permission `telegram-bot-connection:read`.                                                                           |
-| POST        | `/telegram/bot-connections`                        | `createConnection`     | `-`               | Chua trien khai | Tao bot connection tu `botToken`, `displayLabel`; permission `telegram-bot-connection:manage`.                                                     |
-| PATCH       | `/telegram/bot-connections/{id}`                   | `updateConnection`     | `-`               | Chua trien khai | Cap nhat `displayLabel`; permission `telegram-bot-connection:manage`.                                                                              |
-| PATCH       | `/telegram/bot-connections/{id}/disable`           | `disableConnection`    | `-`               | Chua trien khai | Disable bot connection va tra ve `TelegramBotConnectionResponse`; permission `telegram-bot-connection:manage`.                                     |
-| DELETE      | `/telegram/bot-connections/{id}`                   | `removeConnection`     | `-`               | Chua trien khai | Xoa bot connection; permission `telegram-bot-connection:manage`; action huy lien ket nen can confirm dialog khi FE tich hop.                       |
-| GET         | `/telegram/destinations`                           | `getDestinations`      | `-`               | Chua trien khai | Doc chat/channel da link; permission `telegram-destination:read`.                                                                                  |
-| POST        | `/telegram/destinations/link-token`                | `createLinkToken`      | `-`               | Chua trien khai | Tao link token tu `botConnectionId` de user link destination qua Telegram; permission `telegram-destination:manage`.                               |
-| PATCH       | `/telegram/destinations/{id}`                      | `updateDestination`    | `-`               | Chua trien khai | Cap nhat `displayLabel`; permission `telegram-destination:manage`.                                                                                 |
-| PATCH       | `/telegram/destinations/{id}/disable`              | `disableDestination`   | `-`               | Chua trien khai | Disable destination va tra ve `TelegramDestinationResponse`; permission `telegram-destination:manage`.                                             |
-| DELETE      | `/telegram/destinations/{id}`                      | `removeDestination`    | `-`               | Chua trien khai | Xoa destination; permission `telegram-destination:manage`.                                                                                         |
-| GET         | `/telegram/feature-settings`                       | `getFeatureSettings`   | `-`               | Chua trien khai | Doc cau hinh feature Telegram; permission `telegram-feature-setting:read`.                                                                         |
-| PUT         | `/telegram/feature-settings`                       | `updateFeatureSetting` | `-`               | Chua trien khai | Update `featureKey`, `workspaceId`, `destinationId`, `enabled`; permission `telegram-feature-setting:update`.                                      |
-| GET         | `/telegram/market-analysis-schedules`              | `getSchedules`         | `-`               | Chua trien khai | Doc lich gui phan tich thi truong; permission `telegram-market-analysis-schedule:read`.                                                            |
-| POST        | `/telegram/market-analysis-schedules`              | `createSchedule`       | `-`               | Chua trien khai | Tao lich bang `name`, `workspaceId`, `destinationId`, `timezone`, `localTimes`, `assetIds`; permission `telegram-market-analysis-schedule:manage`. |
-| PUT         | `/telegram/market-analysis-schedules/{id}`         | `updateSchedule`       | `-`               | Chua trien khai | Cap nhat lich market analysis voi cung request tao moi; permission `telegram-market-analysis-schedule:manage`.                                     |
-| PATCH       | `/telegram/market-analysis-schedules/{id}/disable` | `disableSchedule`      | `-`               | Chua trien khai | Disable schedule va tra ve `TelegramMarketAnalysisScheduleResponse`; permission `telegram-market-analysis-schedule:manage`.                        |
-| DELETE      | `/telegram/market-analysis-schedules/{id}`         | `removeSchedule`       | `-`               | Chua trien khai | Xoa schedule; permission `telegram-market-analysis-schedule:manage`.                                                                               |
+| Phuong thuc | Endpoint backend                                   | operationId            | Tich hop frontend                                  | Trang thai                            | Ghi chu                                                                                                                                            |
+| ----------- | -------------------------------------------------- | ---------------------- | -------------------------------------------------- | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET         | `/telegram/bot-connections`                        | `getConnections`       | `getTelegramBotConnections()`                      | Da tich hop                           | Doc danh sach bot connection; permission `telegram-bot-connection:read`.                                                                           |
+| POST        | `/telegram/bot-connections`                        | `createConnection`     | `createTelegramBotConnection(request)`             | Da tich hop                           | Tao bot connection tu `botToken`, `displayLabel`; permission `telegram-bot-connection:manage`.                                                     |
+| PATCH       | `/telegram/bot-connections/{id}`                   | `updateConnection`     | `updateTelegramBotConnection(id, request)`         | Da tich hop                           | Cap nhat `displayLabel`; permission `telegram-bot-connection:manage`.                                                                              |
+| PATCH       | `/telegram/bot-connections/{id}/disable`           | `disableConnection`    | `disableTelegramBotConnection(id)`                 | Da tich hop                           | Disable bot connection va tra ve `TelegramBotConnectionResponse`; permission `telegram-bot-connection:manage`.                                     |
+| DELETE      | `/telegram/bot-connections/{id}`                   | `removeConnection`     | `deleteTelegramBotConnection(id)`                  | Da tich hop                           | Xoa bot connection qua `AlertDialog`; permission `telegram-bot-connection:manage`.                                                                |
+| GET         | `/telegram/destinations`                           | `getDestinations`      | `getTelegramDestinations()`                        | Da tich hop                           | Doc chat/channel da link; permission `telegram-destination:read`.                                                                                  |
+| POST        | `/telegram/destinations/link-token`                | `createLinkToken`      | `createTelegramLinkToken(request)`                 | Da tich hop                           | Tao link token tu `botConnectionId` de user link destination qua Telegram; permission `telegram-destination:manage`.                               |
+| PATCH       | `/telegram/destinations/{id}`                      | `updateDestination`    | `updateTelegramDestination(id, request)`           | Da tich hop                           | Cap nhat `displayLabel`; permission `telegram-destination:manage`.                                                                                 |
+| PATCH       | `/telegram/destinations/{id}/disable`              | `disableDestination`   | `disableTelegramDestination(id)`                   | Da tich hop                           | Disable destination va tra ve `TelegramDestinationResponse`; permission `telegram-destination:manage`.                                             |
+| DELETE      | `/telegram/destinations/{id}`                      | `removeDestination`    | `deleteTelegramDestination(id)`                    | Da tich hop                           | Xoa destination qua `AlertDialog`; permission `telegram-destination:manage`.                                                                       |
+| GET         | `/telegram/feature-settings`                       | `getFeatureSettings`   | `getTelegramFeatureSettings()`                     | Da tich hop nhung con lech contract | Response them `outputLanguage`; FE definitions/UI chua map field nay.                                                                              |
+| PUT         | `/telegram/feature-settings`                       | `updateFeatureSetting` | `updateTelegramFeatureSetting(request)`            | Da tich hop nhung con lech contract | Request them optional `outputLanguageIsoCode`; FE hien chua gui field nay.                                                                         |
+| GET         | `/telegram/market-analysis-schedules`              | `getSchedules`         | `getTelegramMarketAnalysisSchedules()`             | Da tich hop nhung con lech contract | Response them `outputLanguage`; FE definitions/UI chua map field nay.                                                                              |
+| POST        | `/telegram/market-analysis-schedules`              | `createSchedule`       | `createTelegramMarketAnalysisSchedule(request)`    | Da tich hop nhung con lech contract | Request them optional `outputLanguageIsoCode`; FE hien chua gui field nay.                                                                         |
+| PUT         | `/telegram/market-analysis-schedules/{id}`         | `updateSchedule`       | `updateTelegramMarketAnalysisSchedule(id, request)` | Da tich hop nhung con lech contract | Request them optional `outputLanguageIsoCode`; FE hien chua gui field nay.                                                                         |
+| PATCH       | `/telegram/market-analysis-schedules/{id}/disable` | `disableSchedule`      | `disableTelegramMarketAnalysisSchedule(id)`        | Da tich hop                           | Disable schedule va tra ve `TelegramMarketAnalysisScheduleResponse`; permission `telegram-market-analysis-schedule:manage`.                        |
+| DELETE      | `/telegram/market-analysis-schedules/{id}`         | `removeSchedule`       | `deleteTelegramMarketAnalysisSchedule(id)`         | Da tich hop                           | Xoa schedule qua `AlertDialog`; permission `telegram-market-analysis-schedule:manage`.                                                            |
 
 Ghi chu:
 
-- Frontend hien chua co route, action, definitions, permissions, hay navigation cho surface Telegram.
+- Frontend hien co route `/telegram`, action, definitions, permission helper, navigation, va UI quan tri bot/destination/routing/schedule.
 - DTO chinh moi gom `TelegramBotConnectionResponse`, `TelegramDestinationResponse`, `TelegramFeatureSettingResponse`, `TelegramMarketAnalysisScheduleResponse`, `TelegramLinkTokenResponse`, va `ScheduledAssetResponse`.
 - Enum feature key cua Telegram gom `ECONOMIC_CALENDAR_ALERT`, `MARKET_NEWS_ALERT`, `SCHEDULED_MARKET_ANALYSIS`; day la enum cua feature setting, khong phai system prompt type.
+- Snapshot moi them `outputLanguageIsoCode` trong request feature setting/schedule va `outputLanguage` trong response; FE Telegram chua expose cau hinh output language.
 - Snapshot import nhieu schema Telegram Bot API cho webhook `Update`; FE admin khong nen model toan bo nhom schema nay neu chi tich hop man hinh cau hinh.
 
-### 22. Webhook
+### 24. Webhook
 
 | Phuong thuc | Endpoint backend                    | operationId            | Tich hop frontend | Trang thai  | Ghi chu                                                     |
 | ----------- | ----------------------------------- | ---------------------- | ----------------- | ----------- | ----------------------------------------------------------- |
 | POST        | `/webhooks/clerk`                   | `handleClerkWebhook`   | `-`               | Chi backend | Khong ky vong co frontend caller.                           |
 | POST        | `/webhooks/telegram/{connectionId}` | `handleTelegramUpdate` | `-`               | Chi backend | Webhook nhan `Update` tu Telegram, khong ky vong FE caller. |
 
-### 23. Health check
+### 25. Health check
 
 | Phuong thuc | Endpoint backend | operationId   | Tich hop frontend | Trang thai      | Ghi chu               |
 | ----------- | ---------------- | ------------- | ----------------- | --------------- | --------------------- |
@@ -508,16 +544,18 @@ type ActionResult<T = void> =
 | Market charts                             | `app/api/market-charts/action.ts`, `app/lib/market-charts/definitions.ts`, `app/lib/market-charts/permissions.ts`, `app/(main)/market-charts/*`                 |
 | Market query                              | `app/api/query/action.ts`, `app/lib/market-query/definitions.ts`, `app/lib/market-query/permissions.ts`, `app/(main)/market-query/*`                            |
 | Graph view                                | `app/api/graph-view/action.ts`, `app/lib/graph-view/definitions.ts`, `app/lib/graph-view/permissions.ts`, `app/(main)/graph-view/*`                             |
+| Narratives                                | `-`                                                                                                                                                             |
 | Blogs                                     | `app/api/blogs/action.ts`, `app/lib/blogs/definitions.ts`                                                                                                       |
 | Cronjobs                                  | `app/api/cronjobs/action.ts`, `app/lib/cronjobs/definitions.ts`                                                                                                 |
 | AI provider configs                       | `app/api/ai-provider-configs/action.ts`, `app/lib/ai-provider-configs/definitions.ts`                                                                           |
 | Assets                                    | `app/api/assets/action.ts`, `app/lib/assets/definitions.ts`                                                                                                     |
 | Economic calendar                         | `app/api/economic-calendar/action.ts`, `app/lib/economic-calendar/definitions.ts`, `app/lib/economic-calendar/permissions.ts`, `app/(main)/economic-calendar/*` |
 | User profile                              | `app/api/user/action.ts`, `app/lib/users/definitions.ts`                                                                                                        |
+| Languages                                 | `components/language-selector.tsx`, `app/lib/i18n/*` (route-locale only; no backend language action yet)                                                        |
 | Personal notes                            | `app/api/personal-notes/action.ts`, `app/lib/personal-notes/definitions.ts`, `app/lib/personal-notes/permissions.ts`, `app/(main)/notes/*`, `components/personal-notes-quick-sheet.tsx` |
 | Workspace                                 | `app/api/workspaces/action.ts`, `app/lib/workspaces/definitions.ts`                                                                                             |
 | Watchlists                                | `app/api/watchlists/action.ts`, `app/lib/watchlists/definitions.ts`, `components/workspace-watchlist-editor.tsx`, `components/asset-multi-select-combobox.tsx`  |
-| Telegram                                  | `-`                                                                                                                                                             |
+| Telegram                                  | `app/api/telegram/action.ts`, `app/lib/telegram/definitions.ts`, `app/lib/telegram/permissions.ts`, `app/[lang]/(main)/telegram/*`                              |
 | Roles va permissions                      | `app/api/roles/action.ts`, `app/lib/roles/definitions.ts`, `app/(main)/roles/*`                                                                                 |
 | Route user cuc bo                         | `app/api/user/route.ts`                                                                                                                                         |
 | Media                                     | `-`                                                                                                                                                             |
@@ -530,19 +568,21 @@ type ActionResult<T = void> =
 - Frontend da migrate route canon sang `/news-outlets*` va `/news-articles*`; `/sources*`, `/news-sources*`, va `/source-documents*` chi con redirect compatibility.
 - `news articles`: `linkedEvents[]` da co `eventStatus` enum moi theo enrichment lifecycle va khong con `eventEnrichmentStatus`; FE detail va quick detail da map theo contract moi.
 - `events`: backend gate enrich/market reaction operators bang `news-article:analyze`; FE events da gate bang permission canon nay truoc va chi giu `source-document:analyze` nhu alias compatibility tam thoi.
-- `permission scan`: cac literal FE-only `source-document:*` con lai deu la alias compatibility sau permission canon `news-article:*`; cac permission BE chua co FE literal gom `cronjob:stop`, `media:*`, va cac permission `telegram-*` vi cac surface/action nay chua duoc tich hop.
+- `permission scan`: cac literal FE-only `source-document:*` con lai deu la alias compatibility sau permission canon `news-article:*`; cac permission BE chua co FE literal gom `cronjob:stop`, `media:*`, va `narrative:*` vi cac surface/action nay chua duoc tich hop.
 - `market charts`: frontend da dong bo action/DTO theo request `assetId`, `includeAnnotations` theo layer su kien, response `asset`, optional `symbol`, va `annotations[]`; UI dung KLineChart cho nen OHLCV va render marker notification/popup detail khi layer su kien duoc bat.
 - `news outlets`: snapshot moi da bo `slug` khoi create/update/list/detail va bo `description` khoi list item; FE form/DTO da dong bo, list khong render cac field nay, con detail/edit van giu `description` theo response.
 - `workspace`: frontend da bo `slug` khoi create/update/response definitions, workspace switcher payload/UI, va trang tong quan workspace de khop snapshot moi.
 - `news articles`: snapshot moi da bo `externalKey`; `app/lib/news-articles/definitions.ts` da duoc don de khong con giu field nay.
 - `events`: snapshot moi da bo `slug` va `confirmedAt`, va doi evidence sang `newsArticle*`; FE events da dong bo DTO, detail, quick detail, va action layout theo contract hien tai.
-- `telegram`: snapshot moi them day du endpoint quan tri Telegram, nhung frontend chua co route/action/type/permission/navigation tuong ung.
+- `telegram`: frontend da co route/action/type/permission/navigation cho surface Telegram, nhung snapshot moi them `outputLanguageIsoCode` request va `outputLanguage` response cho feature setting/schedule ma FE chua expose.
 - `ai-provider credentials`: snapshot moi doi credential `label` thanh `model` va bo top-level config `name`/`model`; FE hien van giu `name`, top-level `model`, va credential `label` trong definitions, form, list, detail, va credential panel.
 - `cronjobs`: FE da bo create/delete flow va doi update schedule sang inline list chi gui `expression`; endpoint `stop` duoc ghi nhan nhung khong tich hop co chu dich.
 - `personal notes`: frontend da map `/me/notes*` vao action, DTO, permission helper, quick Sheet header, route `/notes`, editor HTML, explicit save, presentation mode, va delete confirmation. Contract hien van chi co `contentHtml`, nen UI derive label tu HTML da sanitize thay vi luu title rieng.
-- `market query`: spec van mo ta `asOfTime` la optional `date-time`; frontend v1 chu dong omit field nay de backend tu lay thoi diem hien tai va harden parse cho payload runtime co the tra `null` o `publishedAt` va `occurredAt`. Ngoai ra, `keyEvents[]` da doi `summary` thanh `description`, nhung FE van doc field cu.
-- `graph view`: `GraphNodeMetadata` da doi `active` thanh `status`; FE workbench hien van doc `metadata.active`.
-- `user profile`: `GET /me` da dong bo `BackendMeResponse` theo `currentWorkspace`, `mainImage` media object, va `permissions[]`; runtime hien van chi dung permission loader.
+- `languages`: frontend da co URL locale va `Accept-Language`, nhung chua co backend action cho `GET /languages` va `PATCH /me/preferred-language`; `LanguageSelector` hien chi doi route locale.
+- `narratives`: snapshot moi them `/narratives*`, graph narrative node/edge, va market query `keyNarratives[]`; FE chua co module narratives rieng hoac market-query narrative panel, nhung Graph View da model/render narrative node/edge.
+- `market query`: spec van mo ta `asOfTime` la optional `date-time`; frontend v1 chu dong omit field nay de backend tu lay thoi diem hien tai va harden parse cho payload runtime co the tra `null` o `publishedAt` va `occurredAt`. Ngoai ra, `keyEvents[]` da doi `summary` thanh `description`, FE van doc field cu, va FE chua doc `keyNarratives[]`.
+- `graph view`: `GraphNodeMetadata` da doi `active` thanh `status` va them `narrativeStatus`/`thesis`; FE Graph View da model/render node kind `narrative` va edge kind `narrative-event`/`narrative-asset`.
+- `user profile`: `GET /me` da dong bo `currentWorkspace`, `mainImage` media object, va `permissions[]`, nhung snapshot moi them `preferredLanguage`; runtime hien van chi dung permission loader.
 - `blogs`: create va response dung `visible`, update dung `isVisible`; frontend van can tiep tuc xu ly ky de tranh drift.
 - `ai-provider-configs`: snapshot khong con expose full `apiKey` tren config response; frontend da doc `credentials[]` preview va ho tro provider enum `GROQ`, nhung can doi tiep UI/DTO theo contract khong con `name`/top-level `model`.
 - `media`: da co trong spec nhung frontend chua co module.

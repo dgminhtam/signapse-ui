@@ -29,6 +29,12 @@ export const GRAPH_VIEW_NODE_VISUALS = {
     color: "#be123c",
     size: 22,
   },
+  narrative: {
+    chipClassName:
+      "border-violet-300/60 bg-violet-50 text-violet-900 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-100",
+    color: "#7c3aed",
+    size: 26,
+  },
 } satisfies Record<
   GraphViewNodeKind,
   {
@@ -57,6 +63,18 @@ export const GRAPH_VIEW_EDGE_VISUALS = {
     color: "#fb7185",
     size: 1.6,
   },
+  "narrative-event": {
+    chipClassName:
+      "border-violet-300/60 bg-violet-50 text-violet-900 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-100",
+    color: "#a78bfa",
+    size: 1.5,
+  },
+  "narrative-asset": {
+    chipClassName:
+      "border-fuchsia-300/60 bg-fuchsia-50 text-fuchsia-900 dark:border-fuchsia-500/30 dark:bg-fuchsia-500/10 dark:text-fuchsia-100",
+    color: "#d946ef",
+    size: 1.35,
+  },
 } satisfies Record<
   GraphViewEdgeKind,
   {
@@ -84,6 +102,10 @@ export function getGraphViewNodeVisuals(dictionary: Dictionary) {
       ...GRAPH_VIEW_NODE_VISUALS["news-article"],
       label: dictionary.graphView.nodeKinds["news-article"],
     },
+    narrative: {
+      ...GRAPH_VIEW_NODE_VISUALS.narrative,
+      label: dictionary.graphView.nodeKinds.narrative,
+    },
   } satisfies Record<
     GraphViewNodeKind,
     (typeof GRAPH_VIEW_NODE_VISUALS)[GraphViewNodeKind] & { label: string }
@@ -103,6 +125,14 @@ export function getGraphViewEdgeVisuals(dictionary: Dictionary) {
     "news-article-event": {
       ...GRAPH_VIEW_EDGE_VISUALS["news-article-event"],
       label: dictionary.graphView.edgeKinds["news-article-event"],
+    },
+    "narrative-event": {
+      ...GRAPH_VIEW_EDGE_VISUALS["narrative-event"],
+      label: dictionary.graphView.edgeKinds["narrative-event"],
+    },
+    "narrative-asset": {
+      ...GRAPH_VIEW_EDGE_VISUALS["narrative-asset"],
+      label: dictionary.graphView.edgeKinds["narrative-asset"],
     },
   } satisfies Record<
     GraphViewEdgeKind,

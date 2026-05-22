@@ -28,7 +28,6 @@ import {
   RotateCcw,
   X,
 } from "lucide-react"
-import { LocalizedLink as Link } from "@/components/localized-link"
 import { useTheme } from "next-themes"
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 
@@ -51,6 +50,10 @@ import {
   getGraphViewNodeVisuals,
 } from "./graph-view-visuals"
 import type { GraphModel } from "./graph-view-workbench"
+import {
+  LocalEntityQuickDetailDrawer,
+  type LocalQuickDetailEntity,
+} from "../local-entity-quick-detail-drawer"
 
 type ClusterState = {
   clusterByNodeId: Map<string, string>
@@ -136,11 +139,14 @@ const GRAPH_HUD_NODE_KIND_ORDER = [
   "asset",
   "theme",
   "news-article",
+  "narrative",
 ] satisfies GraphViewNodeKind[]
 const GRAPH_HUD_EDGE_KIND_ORDER = [
   "event-asset",
   "event-theme",
   "news-article-event",
+  "narrative-event",
+  "narrative-asset",
 ] satisfies GraphViewEdgeKind[]
 const GRAPH_SELECTION_STATE_NAMES = [
   "selected",
@@ -304,7 +310,7 @@ function formatInspectorConfidence(
   })
 }
 
-function getNodeDetailHref(
+function getNodeQuickDetailAction(
   node: GraphViewNode,
   dictionary: LocalizationContext["dictionary"]
 ) {
@@ -316,14 +322,20 @@ function getNodeDetailHref(
 
   if (entityReference.kind === "event") {
     return {
-      href: `/events/${entityReference.entityId}`,
+      entity: {
+        id: entityReference.entityId,
+        kind: "event" as const,
+      },
       label: dictionary.graphView.inspector.openEvent,
     }
   }
 
   if (entityReference.kind === "news-article") {
     return {
-      href: `/news-articles/${entityReference.entityId}`,
+      entity: {
+        id: entityReference.entityId,
+        kind: "news-article" as const,
+      },
       label: dictionary.graphView.inspector.openArticle,
     }
   }
@@ -349,9 +361,11 @@ function GraphNodeInspectorField({
       <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
         {label}
       </dt>
-      <dd className="mt-1 truncate" title={value ?? undefined}>
+      <dd className="mt-1 min-w-0" title={value ?? undefined}>
         {valueNode ?? (
-          <span className="text-xs font-medium text-foreground">{value}</span>
+          <span className="block truncate text-xs font-medium text-foreground">
+            {value}
+          </span>
         )}
       </dd>
     </div>
@@ -361,11 +375,13 @@ function GraphNodeInspectorField({
 function GraphNodeDetailInspector({
   node,
   onClose,
+  onOpenQuickDetail,
   relatedEdgeCount,
   relatedNodeCount,
 }: {
   node: GraphViewNode
   onClose: () => void
+  onOpenQuickDetail: (entity: LocalQuickDetailEntity) => void
   relatedEdgeCount: number
   relatedNodeCount: number
 }) {
@@ -374,13 +390,13 @@ function GraphNodeDetailInspector({
   const nodeVisuals = getGraphViewNodeVisuals(dictionary)
   const visual = nodeVisuals[node.kind]
   const metadata = node.metadata ?? {}
-  const detailHref = getNodeDetailHref(node, dictionary)
+  const quickDetailAction = getNodeQuickDetailAction(node, dictionary)
   const detailActionLabel =
     node.kind === "event"
       ? dictionary.graphView.inspector.readEvent
       : node.kind === "news-article"
         ? dictionary.graphView.inspector.readArticle
-        : detailHref?.label
+        : quickDetailAction?.label
   const sourceUrl =
     node.kind === "news-article" && metadata.url?.trim()
       ? metadata.url.trim()
@@ -448,6 +464,21 @@ function GraphNodeDetailInspector({
             value={metadata.status}
           />
           <GraphNodeInspectorField
+            label={dictionary.graphView.inspector.narrativeStatus}
+            value={metadata.narrativeStatus}
+          />
+          <GraphNodeInspectorField
+            label={dictionary.graphView.inspector.thesis}
+            value={metadata.thesis}
+            valueNode={
+              metadata.thesis ? (
+                <span className="line-clamp-3 text-xs font-medium text-foreground">
+                  {metadata.thesis}
+                </span>
+              ) : undefined
+            }
+          />
+          <GraphNodeInspectorField
             label={dictionary.graphView.inspector.newsOutlet}
             value={metadata.newsOutletName}
           />
@@ -477,18 +508,21 @@ function GraphNodeDetailInspector({
           />
         </dl>
 
-        {detailHref || sourceUrl ? (
+        {quickDetailAction || sourceUrl ? (
           <div className="mt-3 flex flex-wrap gap-2">
-            {detailHref ? (
-              <Button asChild size="sm" variant="secondary">
-                <Link href={detailHref.href}>
-                  <ArrowUpRight
-                    aria-hidden="true"
-                    className="size-4"
-                    data-icon="inline-start"
-                  />
-                  <span>{detailActionLabel}</span>
-                </Link>
+            {quickDetailAction ? (
+              <Button
+                size="sm"
+                type="button"
+                variant="secondary"
+                onClick={() => onOpenQuickDetail(quickDetailAction.entity)}
+              >
+                <ArrowUpRight
+                  aria-hidden="true"
+                  className="size-4"
+                  data-icon="inline-start"
+                />
+                <span>{detailActionLabel}</span>
               </Button>
             ) : null}
             {sourceUrl ? (
@@ -639,7 +673,7 @@ function inferClusterState(
   })
 
   graphModel.nodes.forEach((node) => {
-    if (node.kind !== "news-article") {
+    if (node.kind !== "news-article" && node.kind !== "narrative") {
       return
     }
 
@@ -654,18 +688,48 @@ function inferClusterState(
       return graphModel.nodeMap.get(otherNodeId)?.kind === "event"
     })
 
-    if (!eventEdge) {
+    if (eventEdge) {
+      const eventNodeId =
+        eventEdge.sourceNodeId === node.id
+          ? eventEdge.targetNodeId
+          : eventEdge.sourceNodeId
+      const inheritedClusterKey = clusterByNodeId.get(eventNodeId)
+
+      if (inheritedClusterKey) {
+        clusterByNodeId.set(node.id, inheritedClusterKey)
+        return
+      }
+    }
+
+    if (node.kind !== "narrative") {
       return
     }
 
-    const eventNodeId =
-      eventEdge.sourceNodeId === node.id
-        ? eventEdge.targetNodeId
-        : eventEdge.sourceNodeId
-    const inheritedClusterKey = clusterByNodeId.get(eventNodeId)
+    const anchorEdge = graphModel.edges.find((edge) => {
+      if (edge.sourceNodeId !== node.id && edge.targetNodeId !== node.id) {
+        return false
+      }
 
-    if (inheritedClusterKey) {
-      clusterByNodeId.set(node.id, inheritedClusterKey)
+      const otherNodeId =
+        edge.sourceNodeId === node.id ? edge.targetNodeId : edge.sourceNodeId
+      const otherNode = graphModel.nodeMap.get(otherNodeId)
+
+      return otherNode?.kind === "asset" || otherNode?.kind === "theme"
+    })
+
+    if (!anchorEdge) {
+      return
+    }
+
+    const anchorNodeId =
+      anchorEdge.sourceNodeId === node.id
+        ? anchorEdge.targetNodeId
+        : anchorEdge.sourceNodeId
+    const anchorNode = graphModel.nodeMap.get(anchorNodeId)
+
+    if (anchorNode) {
+      clusterByNodeId.set(node.id, anchorNode.id)
+      clusterLabelByKey.set(anchorNode.id, anchorNode.label)
     }
   })
 
@@ -696,7 +760,12 @@ function shouldShowLabel(
     return true
   }
 
-  return nodeKind === "asset" || nodeKind === "theme" || edgeCount >= 4
+  return (
+    nodeKind === "asset" ||
+    nodeKind === "theme" ||
+    (nodeKind === "narrative" && edgeCount >= 3) ||
+    edgeCount >= 4
+  )
 }
 
 function createG6GraphData(
@@ -1130,6 +1199,8 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
   const hasAppliedSelectionStateRef = useRef(false)
   const lastNodeDragAtRef = useRef(0)
   const [hoverTooltip, setHoverTooltip] = useState<HoverTooltipState | null>(null)
+  const [quickDetailEntity, setQuickDetailEntity] =
+    useState<LocalQuickDetailEntity | null>(null)
   const [renderReadyVersion, setRenderReadyVersion] = useState(0)
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const graphThemeMode: GraphThemeMode =
@@ -1546,10 +1617,16 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
         <GraphNodeDetailInspector
           node={selectedNode}
           onClose={clearSelectedNode}
+          onOpenQuickDetail={setQuickDetailEntity}
           relatedEdgeCount={selectedRelatedEdgeCount}
           relatedNodeCount={selectedRelatedNodeCount}
         />
       ) : null}
+
+      <LocalEntityQuickDetailDrawer
+        entity={quickDetailEntity}
+        onClose={() => setQuickDetailEntity(null)}
+      />
 
       <div className="pointer-events-none absolute inset-x-3 top-3 z-10 flex flex-wrap items-start justify-between gap-2 sm:inset-x-4 sm:top-4">
         <div className="rounded-full border border-border/80 bg-background/88 px-3 py-1.5 text-xs font-semibold text-foreground shadow-sm backdrop-blur">

@@ -1,29 +1,34 @@
-# Hydration Mismatch trên Overlay Radix/shadcn
+---
+name: hydration-mismatch
+description: Investigate and fix hydration mismatches on Radix/shadcn overlays in Signapse without hiding the root cause.
+---
 
-## Scope
+# Hydration Mismatch On Radix/shadcn Overlays
 
-Áp dụng khi gặp hydration mismatch trên các overlay Radix/shadcn: `Dialog`, `Sheet`, `AlertDialog`, `Popover` hoặc trigger/content tương ứng.
+Use this skill when a hydration mismatch involves `Dialog`, `Sheet`, `AlertDialog`, `Popover`, or related trigger/content composition.
 
-## Quy trình điều tra
+## Investigation
 
-Phải điều tra root cause **trước khi sửa**. Kiểm tra lần lượt:
+Always investigate the root cause before changing implementation. Check these common causes first:
 
-1. Branch render dùng `typeof window`
-2. `Date.now()` / `Math.random()` trong render
-3. Format locale trong render
-4. Conditional render theo permission/client state
-5. Nesting HTML không hợp lệ
-6. Khả năng browser extension can thiệp DOM
+- Render branches that depend on `typeof window`.
+- `Date.now()` or `Math.random()` in render output.
+- Locale-sensitive formatting during render.
+- Conditional rendering based on permission or client-only state.
+- Invalid HTML nesting.
+- Browser extensions mutating the DOM.
 
-## Cách xử lý
+## Preferred Fix
 
-- Nếu mismatch chỉ là id accessibility do Radix sinh (như `aria-controls`), **ưu tiên cấp deterministic id** tại usage app-level cho trigger/content đang bị ảnh hưởng
-- Singleton overlay có thể dùng constant id
-- Overlay lặp theo row/list phải derive id từ stable entity key hoặc nguồn deterministic không collision
+- Keep SSR enabled by default.
+- If the mismatch is only a Radix-generated accessibility id such as `aria-controls`, provide a deterministic id at app usage level.
+- Singleton overlays can use a constant id.
+- Repeated row/list overlays must derive ids from a stable entity key or another deterministic non-colliding source.
 
-## Không được làm
+## Do Not Do
 
-- Không dùng `dynamic(..., { ssr: false })`, mount-only wrapper hoặc `suppressHydrationWarning` để che lỗi
-- Giữ SSR mặc định
-- Không patch `components/ui/*` chỉ để sửa issue cục bộ
-- Nếu pattern lặp nhiều nơi thì tạo proposal cho helper hoặc wrapper app-level riêng
+- Do not use `dynamic(..., { ssr: false })` just to hide the mismatch.
+- Do not add mount-only wrappers just to hide the mismatch.
+- Do not use `suppressHydrationWarning` as a blanket fix.
+- Do not patch `components/ui/*` for a local app-level issue.
+- If the pattern repeats across many usages, create an OpenSpec proposal for an app-level helper or wrapper.

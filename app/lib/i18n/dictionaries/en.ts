@@ -128,7 +128,7 @@ export const en: Dictionary = {
     namePlaceholder: "Example: Research team",
     saveChanges: "Save changes",
     nameRequired: "Please enter a workspace name.",
-    switched: "Switched to workspace \"{name}\".",
+    switched: 'Switched to workspace "{name}".',
     created: "Workspace created.",
     updated: "Workspace updated.",
     createError: "Could not create workspace.",
@@ -154,7 +154,7 @@ export const en: Dictionary = {
     noChanges: "There are no changes to save.",
     partialFailure:
       "Could not fully sync tracked assets. The latest data has been reloaded.",
-    updated: "Updated tracked assets for \"{name}\".",
+    updated: 'Updated tracked assets for "{name}".',
     loading: "Loading tracked assets...",
     selectedCount: "{count} assets selected for this workspace.",
     blockedSummary:
@@ -176,21 +176,18 @@ export const en: Dictionary = {
     heroDescription:
       "This workspace controls the tracked asset list and is the main context for Signapse market analysis flows.",
     trackedAssets: "Tracked assets",
-    trackedAssetsStatDescription:
-      "Used for the current workspace scope",
+    trackedAssetsStatDescription: "Used for the current workspace scope",
     status: "Status",
     statusDescription: "Currently selected scope",
     updated: "Updated",
     lastRecorded: "Most recent record",
-    trackedAssetsDescription:
-      "This list is saved under the active workspace.",
+    trackedAssetsDescription: "This list is saved under the active workspace.",
     watchlistLoadError: "Could not load tracked assets.",
     trackedAssetsDeniedTitle: "No permission to view tracked assets",
     trackedAssetsDeniedDescription:
       "The account needs asset read and watchlist read permissions to view this module.",
     trackedAssetsLoadErrorTitle: "Could not load tracked assets",
-    noTrackedAssetsTitle:
-      "This workspace is not tracking any assets yet",
+    noTrackedAssetsTitle: "This workspace is not tracking any assets yet",
     noTrackedAssetsDescription:
       "Add important asset symbols so analysis screens have a clearer tracking scope.",
     technicalTitle: "Technical information",
@@ -292,7 +289,8 @@ export const en: Dictionary = {
     titleRequired: "Title is required",
     titleTooLong: "Title is too long",
     slugRequired: "Slug is required",
-    slugInvalid: "Slug can only contain lowercase letters, numbers, and hyphens",
+    slugInvalid:
+      "Slug can only contain lowercase letters, numbers, and hyphens",
     shortDescriptionLabel: "Short description",
     shortDescriptionPlaceholder: "Enter a short description...",
     contentLabel: "Content",
@@ -346,7 +344,7 @@ export const en: Dictionary = {
     deleteDescription:
       "This action cannot be undone. News outlet {name} will be permanently deleted from the system.",
     deletePending: "Deleting...",
-    deleted: "Deleted news outlet \"{name}\".",
+    deleted: 'Deleted news outlet "{name}".',
     deleteError: "Could not delete news outlet",
     createTitle: "Create news outlet",
     createDescription:
@@ -386,8 +384,7 @@ export const en: Dictionary = {
     errorDescription: "Could not load news outlet data right now.",
   },
   newsArticles: {
-    readDenied:
-      "You do not have permission to access news article management.",
+    readDenied: "You do not have permission to access news article management.",
     detailDenied: "You do not have permission to view news article details.",
     quickAccessDeniedTitle: "No access to this article",
     quickAccessDeniedDescription:
@@ -548,12 +545,10 @@ export const en: Dictionary = {
       "This event has no inferred per-asset market reaction results yet.",
     relatedAssets: "Related assets",
     noAssetsTitle: "No related assets yet",
-    noAssetsDescription:
-      "This event has no asset links in the current data.",
+    noAssetsDescription: "This event has no asset links in the current data.",
     relatedThemes: "Related themes",
     noThemesTitle: "No related themes yet",
-    noThemesDescription:
-      "This event has no theme links in the current data.",
+    noThemesDescription: "This event has no theme links in the current data.",
     noAssetName: "No asset name",
     noAssetSymbol: "No symbol",
     noThemeName: "No theme name",
@@ -575,8 +570,7 @@ export const en: Dictionary = {
     marketReactionAria: "Infer market reaction",
     marketReactionPending: "Inferring...",
     marketReactionBatch: "Infer impacts in batch",
-    marketReactionError:
-      "Could not infer market reactions for this event.",
+    marketReactionError: "Could not infer market reactions for this event.",
     marketReactionPendingError:
       "Could not infer market reactions for pending events.",
     errorTitle: "Could not load event",
@@ -634,8 +628,7 @@ export const en: Dictionary = {
       failed: "Asset and theme enrichment failed.",
       archived: "The event is archived, so no enrichment changes were made.",
       counts: "Assets: {assets}, themes: {themes}.",
-      noPending:
-        "There are no events pending enrichment in the current batch.",
+      noPending: "There are no events pending enrichment in the current batch.",
       batch:
         "Ran enrichment for pending events: processed {processed}/{selected}, enriched {enriched}, no match {noMatch}, skipped {skipped}, deferred {deferred}, failed {failed}.",
     },
@@ -679,8 +672,7 @@ export const en: Dictionary = {
     previous: "Previous",
     viewDetail: "View economic calendar details",
     emptyTitle: "No economic calendar data yet",
-    emptyDescription:
-      "No economic calendar entries match the current filters.",
+    emptyDescription: "No economic calendar entries match the current filters.",
     sync: "Sync economic calendar",
     syncPending: "Syncing...",
     syncError: "Could not sync the economic calendar.",
@@ -747,10 +739,10 @@ export const en: Dictionary = {
       "These permissions no longer appear in the current catalog, but they will be preserved when you save changes.",
     legacySearchOpen: "Open because search has matches",
     viewDetails: "View details",
-    legacyPreserved: "Legacy permissions will be preserved when updates are sent.",
+    legacyPreserved:
+      "Legacy permissions will be preserved when updates are sent.",
     readOnly: "Read only",
-    tip:
-      "Search by keyword or work group by group to update permissions faster.",
+    tip: "Search by keyword or work group by group to update permissions faster.",
     unsavedChanges: "You have unsaved changes in this dialog.",
     noChanges: "There are no changes to save.",
     reset: "Reset",
@@ -780,8 +772,7 @@ export const en: Dictionary = {
     noCreatedDate: "No data",
     editConfig: "Edit config",
     emptyTitle: "No AI provider configs yet",
-    emptyDescription:
-      "Add the first config to start managing AI integrations.",
+    emptyDescription: "Add the first config to start managing AI integrations.",
     defaultBadge: "Default",
     setDefault: "Set default",
     setDefaultSuccess: "Default AI provider updated.",
@@ -818,8 +809,7 @@ export const en: Dictionary = {
     baseUrlDescription:
       "Only enter this when the provider requires a custom endpoint.",
     description: "Description",
-    descriptionPlaceholder:
-      "Briefly describe how this config will be used",
+    descriptionPlaceholder: "Briefly describe how this config will be used",
     defaultProvider: "Default provider",
     defaultProviderDescription:
       "Use this config as the system-wide default AI provider.",
@@ -842,8 +832,7 @@ export const en: Dictionary = {
     authenticateSuccess: "Credential authenticated successfully",
     authenticateError: "Could not authenticate credential",
     modelSelected: "Model selected for credential",
-    missingCredentialAndModel:
-      "Authenticate the API key and choose a model.",
+    missingCredentialAndModel: "Authenticate the API key and choose a model.",
     missingNewCredentialAndModel:
       "Authenticate the new API key and choose a model.",
     modelActionPending: "Checking...",
@@ -882,8 +871,7 @@ export const en: Dictionary = {
     confirm: "Confirm",
     confirmModel: "Confirm model",
     close: "Close",
-    modelCatalogError:
-      "Could not authenticate and load the model list.",
+    modelCatalogError: "Could not authenticate and load the model list.",
     errorTitle: "Something went wrong",
     errorDescription:
       "Could not load AI provider configs due to a system error.",
@@ -961,7 +949,8 @@ export const en: Dictionary = {
       confidenceDescription:
         "This value reflects the certainty of the current conclusion.",
       limitationsLabel: "Current limitations",
-      limitationsEmpty: "The system has not returned limitations for this query.",
+      limitationsEmpty:
+        "The system has not returned limitations for this query.",
       assetsLabel: "Assets considered",
       assetsEmpty: "The system has not returned the assets considered.",
     },
@@ -1057,8 +1046,7 @@ export const en: Dictionary = {
   marketCharts: {
     readDenied:
       "You need market chart access and workspace watchlist read permission to open this area.",
-    watchlistLoadError:
-      "Could not load the workspace watchlist assets.",
+    watchlistLoadError: "Could not load the workspace watchlist assets.",
     validationInvalid: "The market chart request is invalid.",
     responseInvalid:
       "The backend returned candle data in an unexpected format.",
@@ -1084,6 +1072,59 @@ export const en: Dictionary = {
       refresh: "Refresh",
       refreshing: "Loading...",
       refreshLatestData: "Reload latest data",
+      indicatorLabel: "Indicators",
+      indicatorAria: "Open indicator options",
+      indicatorUnavailable: "Could not update chart indicators yet.",
+      screenshotLabel: "Screenshot",
+      screenshotAria: "Capture the current chart",
+      screenshotUnavailable: "Could not capture the chart right now.",
+      screenshotSuccess: "Chart screenshot captured.",
+      fullscreenLabel: "Full screen",
+      fullscreenAria: "Open the chart in full screen",
+      exitFullscreenLabel: "Exit",
+      exitFullscreenAria: "Exit full screen",
+      fullscreenUnavailable: "This browser does not support full screen.",
+      fullscreenFailed: "Could not switch full screen mode.",
+    },
+    indicators: {
+      title: "Indicators",
+      options: {
+        MA: "MA",
+        EMA: "EMA",
+        BOLL: "BOLL",
+        MACD: "MACD",
+        RSI: "RSI",
+        KDJ: "KDJ",
+      },
+    },
+    drawings: {
+      toolbarLabel: "Chart drawing tools",
+      toolsLabel: "Choose drawing tool",
+      collapse: "Collapse drawing tools",
+      expand: "Expand drawing tools",
+      magnet: "Toggle price magnet",
+      lock: "Lock drawings",
+      unlock: "Unlock drawings",
+      show: "Show drawings",
+      hide: "Hide drawings",
+      deleteSelected: "Delete selected drawing",
+      clearAll: "Clear all drawings",
+      clearAllTitle: "Clear all drawings?",
+      clearAllDescription:
+        "This only removes drawings on the current chart and does not affect event data.",
+      clearAllConfirm: "Clear drawings",
+      cancel: "Cancel",
+      unavailable: "Could not update drawing tools for this chart.",
+      deleteUnavailable: "Could not delete the selected drawing.",
+      clearUnavailable: "Could not clear drawings right now.",
+      tools: {
+        "horizontal-line": "Horizontal line",
+        "trend-line": "Trend line",
+        channel: "Price channel",
+        fibonacci: "Fibonacci",
+        circle: "Circle",
+        rectangle: "Price area",
+      },
     },
     empty: {
       watchlistErrorTitle: "Could not load workspace watchlist",
@@ -1091,8 +1132,7 @@ export const en: Dictionary = {
       noWatchlistAssetsDescription:
         "Add an asset to the watchlist before viewing price charts.",
       idleTitle: "Choose an asset to view the chart",
-      idleDescription:
-        "Choose an asset and timeframe to load the latest data.",
+      idleDescription: "Choose an asset and timeframe to load the latest data.",
       loadErrorTitle: "Could not load chart data",
       loadErrorDescription:
         "Could not load data for the selected asset. Try again later.",
@@ -1104,8 +1144,7 @@ export const en: Dictionary = {
       loadingAnnouncement: "Loading price chart data.",
       successAnnouncement: "Price chart data loaded.",
       errorAnnouncement: "Could not load price chart data.",
-      unsupportedTimeframeUrl:
-        "The timeframe in the URL is not supported.",
+      unsupportedTimeframeUrl: "The timeframe in the URL is not supported.",
       unsupportedTimeframeUrlError:
         "The timeframe parameter in the URL is invalid.",
       assetMissingUrl:
@@ -1173,11 +1212,14 @@ export const en: Dictionary = {
       asset: "Asset",
       theme: "Theme",
       "news-article": "Article",
+      narrative: "Narrative",
     },
     edgeKinds: {
       "event-asset": "Event - asset",
       "event-theme": "Event - theme",
       "news-article-event": "Evidence - event",
+      "narrative-event": "Narrative - event",
+      "narrative-asset": "Narrative - asset",
     },
     relationTypes: {
       PRIMARY_SUBJECT: "Primary subject",
@@ -1201,6 +1243,8 @@ export const en: Dictionary = {
       publishedAt: "Published",
       confidence: "Confidence",
       status: "Status",
+      narrativeStatus: "Narrative status",
+      thesis: "Thesis",
       newsOutlet: "News outlet",
       symbol: "Ticker",
       assetType: "Asset type",
@@ -1228,8 +1272,7 @@ export const en: Dictionary = {
     headerFormat: "Header format",
     tokenLifespan:
       "Tokens have a short lifespan, usually about 1 minute. Fetch a new token if you receive a 401 error.",
-    testingTools:
-      "Use this token for testing with Postman, Insomnia, or cURL.",
+    testingTools: "Use this token for testing with Postman, Insomnia, or cURL.",
     toolkitTitle: "Toolkit",
     tokenReady: "Token ready",
     fetchNewToken: "Fetch new token",
@@ -1435,8 +1478,7 @@ export const en: Dictionary = {
       },
       SCHEDULED_MARKET_ANALYSIS: {
         label: "Scheduled market analysis",
-        description:
-          "Route AI market analysis on fixed daily send schedules.",
+        description: "Route AI market analysis on fixed daily send schedules.",
       },
     },
     readiness: {
@@ -1451,8 +1493,7 @@ export const en: Dictionary = {
         "You do not have permission to view destinations.",
       needsLink: "Needs linking",
       routing: "Routing",
-      configuredRoutes:
-        "{configured}/{total} routes enabled in {workspace}.",
+      configuredRoutes: "{configured}/{total} routes enabled in {workspace}.",
       noWorkspace: "No current workspace.",
       routesEnabled: "Routes enabled",
       needsReview: "Needs review",
@@ -1520,7 +1561,8 @@ export const en: Dictionary = {
         "Paste the token issued by BotFather so Signapse can verify the bot and register a webhook.",
       tokenLabel: "Bot token",
       tokenPlaceholder: "123456:ABC...",
-      tokenDescription: "The token is only sent once when creating the connection.",
+      tokenDescription:
+        "The token is only sent once when creating the connection.",
       displayName: "Display name",
       displayNamePlaceholder: "Market alert bot",
       saveBot: "Save bot",
@@ -1564,7 +1606,8 @@ export const en: Dictionary = {
         "Create a /start command, then send it in Telegram to verify a chat, group, or channel.",
       commandBot: "Bot receiving /start",
       botPlaceholder: "Choose an active bot",
-      botDescription: "The new destination will be attached to the selected bot.",
+      botDescription:
+        "The new destination will be attached to the selected bot.",
       linkCommand: "Link command",
       expiresAt: "Expires: {time}",
       copyCommand: "Copy command",
@@ -1742,7 +1785,8 @@ export const en: Dictionary = {
     updateError: "Could not update the system prompt.",
     deleteError: "Could not delete the system prompt.",
     errorTitle: "Something went wrong",
-    errorDescription: "Could not load system prompt data due to a system error.",
+    errorDescription:
+      "Could not load system prompt data due to a system error.",
     otherGroup: "Other",
     typeLabels: {
       NEWS_FILTER: "News filter",
