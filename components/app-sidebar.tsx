@@ -269,9 +269,11 @@ function NavUser({ user }: NavUserProps) {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheckIcon />
-                {dictionary.auth.account}
+              <DropdownMenuItem asChild>
+                <Link href="/account">
+                  <BadgeCheckIcon />
+                  {dictionary.auth.account}
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <CreditCardIcon />

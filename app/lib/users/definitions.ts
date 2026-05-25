@@ -14,11 +14,20 @@ export interface BackendMediaResponse {
   size?: number
 }
 
+export interface UpdateUserProfileRequest {
+  fullName: string
+  dateOfBirth: string
+  phoneNumber: string
+}
+
 export interface BackendMeResponse {
   id: number
   email: string
   firstName: string | null
   lastName: string | null
+  dateOfBirth: string | null
+  phoneNumber: string | null
+  role_name: string | null
   currentWorkspace: BackendWorkspaceSummary | null
   mainImage: BackendMediaResponse | null
   permissions: string[]

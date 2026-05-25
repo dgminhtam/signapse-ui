@@ -20,6 +20,7 @@ function getFriendlySegmentNames(
   dictionary: Dictionary
 ): Record<string, string> {
   return {
+    account: dictionary.accountProfile.title,
     categories: dictionary.navigation.categories,
     create: dictionary.common.create,
     "ai-provider-configs": dictionary.navigation.aiProviders,
