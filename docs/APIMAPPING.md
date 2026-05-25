@@ -2,7 +2,7 @@
 
 Tài liệu này ánh xạ snapshot OpenAPI backend trong `docs/api_mapping.json` tới các điểm tích hợp frontend hiện tại của repo.
 
-Xác minh lần cuối: ngày 22 tháng 5 năm 2026
+Xác minh lần cuối: ngày 25 tháng 5 năm 2026
 
 ## Cấu hình cơ sở
 
@@ -36,7 +36,7 @@ Xác minh lần cuối: ngày 22 tháng 5 năm 2026
 
 ## Tổng quan thay đổi lớn từ snapshot hiện tại
 
-- Snapshot backend hiện tại gồm `105` operation.
+- Snapshot backend hiện tại gồm `104` operation.
 - Backend đã chuyển domain nội dung canon từ `sources` / `source-documents` sang `news-outlets` / `news-articles`.
 - Backend vẫn giữ các surface `events`, `query`, và `graph-view`, nhưng nhiều payload đã đổi naming từ `sourceDocument*` sang `artifact*` hoặc `news-article`.
 - Surface `events` có thêm workflow derive market reactions cho từng event và batch pending events.
@@ -55,6 +55,7 @@ Xác minh lần cuối: ngày 22 tháng 5 năm 2026
 - Snapshot mới thêm personal notes dưới `/me/notes` cho ghi chú HTML cá nhân của user hiện tại.
 - Snapshot mới thêm API `languages`, persisted preferred language trên `/me/preferred-language`, và field `preferredLanguage` trong `UserResponse`.
 - Snapshot mới thêm domain `narratives`, đồng thời mở rộng `market-query` với `keyNarratives[]` và `graph-view` với node/edge narrative.
+- Snapshot mới bỏ endpoint `POST /news-articles/{id}/crawl-full-content`, mở rộng `system-prompts` với `responseSchema`/`localizedNames`, và thêm `evidenceNote` cho market query evidence.
 
 ## Phạm vi endpoint
 
@@ -62,10 +63,10 @@ Xác minh lần cuối: ngày 22 tháng 5 năm 2026
 
 | Phương thức | Endpoint backend               | operationId          | Tích hợp frontend                | Trạng thái    | Ghi chú                                                                  |
 | ----------- | ------------------------------ | -------------------- | -------------------------------- | ------------- | ------------------------------------------------------------------------ |
-| GET         | `/system-prompts`              | `getSystemPrompts`   | `getSystemPrompts(searchParams)` | Đã triển khai | List route `/system-prompts` dùng `Page<SystemPromptResponse>`.          |
-| POST        | `/system-prompts`              | `createSystemPrompt` | `createSystemPrompt(request)`    | Đã triển khai | Form tạo mới gửi `promptType` và `content`, validate tối đa 10000 ký tự. |
-| GET         | `/system-prompts/{promptType}` | `getSystemPrompt`    | `getSystemPromptByType(type)`    | Đã triển khai | Trang chi tiết/chỉnh sửa dùng `promptType` đã URL-encode.                |
-| PUT         | `/system-prompts/{promptType}` | `updateSystemPrompt` | `updateSystemPrompt(type, data)` | Đã triển khai | Form cập nhật chỉ sửa `content`, giữ `promptType` readonly.              |
+| GET         | `/system-prompts`              | `getSystemPrompts`   | `getSystemPrompts(searchParams)` | Đã triển khai | List route `/system-prompts` dùng `Page<SystemPromptResponse>` và ưu tiên tên localized/backend khi hiển thị. |
+| POST        | `/system-prompts`              | `createSystemPrompt` | `createSystemPrompt(request)`    | Đã triển khai | Form tạo mới gửi `promptType`, `content`, `responseSchema`, và `localizedNames` khi user nhập tên hiển thị. |
+| GET         | `/system-prompts/{promptType}` | `getSystemPrompt`    | `getSystemPromptByType(type)`    | Đã triển khai | Trang chỉnh sửa dùng `promptType` đã URL-encode, load nội dung prompt, tên localized, và schema đầu ra. |
+| PUT         | `/system-prompts/{promptType}` | `updateSystemPrompt` | `updateSystemPrompt(type, data)` | Đã triển khai | Form cập nhật gửi `content`, `responseSchema`, và `localizedNames` khi tên hiển thị được chỉnh sửa. |
 | DELETE      | `/system-prompts/{promptType}` | `deleteSystemPrompt` | `deleteSystemPrompt(type)`       | Đã triển khai | Action xóa có `AlertDialog` và gate bằng `system-prompt:delete`.         |
 
 Frontend liên quan:
@@ -77,8 +78,10 @@ Frontend liên quan:
 
 Ghi chú:
 
-- Enum `promptType` trong snapshot hiện tại vẫn giữ nhóm legacy `NEWS_FILTER`, `NEWS_ANALYSIS`, `SIGNAL_GENERATION`, `DECISION_MAKING`, `CONTENT_EXTRACTION`, `SENTIMENT_ANALYSIS`, `TITLE_GENERATION`, `SUMMARY_GENERATION`, `CONTENT_CLEANING`, đồng thời mở rộng thêm `FIRECRAWL_SOURCE_DOCUMENT_FILTER`, `NEWS_PRIMARY_EVENT_DERIVATION`, `EVENT_ASSET_THEME_ENRICHMENT`, `EVENT_MARKET_REACTION_DERIVATION`, và `EVENT_GROUNDED_MARKET_QUERY_SYNTHESIS`.
-- Frontend v1 validate `content` không được rỗng sau khi `trim()` và không vượt quá `10000` ký tự, khớp giới hạn tối đa trong schema backend.
+- Enum `promptType` trong snapshot hiện tại gồm `FIRECRAWL_SOURCE_DOCUMENT_FILTER`, `NEWS_ARTICLE_CONTENT_LOCALIZATION`, `NEWS_PRIMARY_EVENT_DERIVATION`, `EVENT_ASSET_THEME_ENRICHMENT`, `EVENT_MARKET_REACTION_DERIVATION`, `EVENT_NARRATIVE_REFRESH`, `EVENT_GROUNDED_MARKET_QUERY_SYNTHESIS`, `TELEGRAM_CALENDAR_ALERT_ASSESSMENT`, `TELEGRAM_NEWS_ALERT_ASSESSMENT`, và `TELEGRAM_MARKET_ANALYSIS`; nhóm legacy `NEWS_FILTER`, `NEWS_ANALYSIS`, `SIGNAL_GENERATION`, `DECISION_MAKING`, `CONTENT_EXTRACTION`, `SENTIMENT_ANALYSIS`, `TITLE_GENERATION`, `SUMMARY_GENERATION`, `CONTENT_CLEANING` không còn trong snapshot.
+- `CreateSystemPromptRequest` hiện yêu cầu `promptType`, `content`, `responseSchema`; `UpdateSystemPromptRequest` có thêm optional `responseSchema` và `localizedNames`.
+- `SystemPromptResponse` hiện có thêm `name`, `responseSchema`, `localizedNames`; `responseSchema` dùng schema `JsonNode`, frontend model bằng JSON value và cung cấp schema editor dạng builder + JSON.
+- Frontend validate `content` không được rỗng sau khi `trim()` và không vượt quá `10000` ký tự; `responseSchema` phải là JSON parse được trước khi submit.
 
 ### 2. API news outlets
 
@@ -119,7 +122,6 @@ Day la domain noi dung canon cua snapshot backend hien tai.
 | GET         | `/news-articles`                            | `getNewsArticles`         | `getNewsArticles(searchParams)`              | Da trien khai                         | FE list canon nay bo filter `documentType` va cac badge status legacy, dong bo voi schema `NewsArticleListResponse`.                                                                   |
 | GET         | `/news-articles/{id}`                       | `getNewsArticle`          | `getNewsArticleById(id)`                     | Da trien khai nhung con lech contract | Detail/operator workbench dung `newsOutletId`, `newsOutletName`, `status`, `linkedEvents`, nhung schema `linkedEvents[]` da doi theo BE va `externalKey` khong con trong snapshot moi. |
 | DELETE      | `/news-articles/{id}`                       | `deleteNewsArticle`       | `deleteNewsArticle(id)`                      | Da trien khai                         | Route canon va nut operator da doi naming sang `news-article`.                                                                                                                         |
-| POST        | `/news-articles/{id}/crawl-full-content`    | `crawlFullContent`        | `crawlNewsArticleFullContent(id)`            | Da trien khai                         | Contract moi tra ve `NewsArticleResponse`.                                                                                                                                             |
 | POST        | `/news-articles/{id}/derive-primary-event`  | `derivePrimaryEvent`      | `derivePrimaryEventFromNewsArticle(id)`      | Da trien khai                         | `NewsPrimaryEventDerivationResult` dung `newsArticleId`, `newsArticleTitle`, `status`, `changeType`, `eventId`, `eventCanonicalKey`.                                                   |
 | POST        | `/news-articles/derive-pending-news-events` | `derivePendingNewsEvents` | `derivePendingNewsArticleEvents(batchSize?)` | Da trien khai                         | Batch result dung `PendingNewsEventDerivationBatchResult` va summary helper moi theo naming `news-article`.                                                                            |
 | PATCH       | `/news-articles/{id}/feature-image`         | `updateFeatureImage`      | `updateNewsArticleFeatureImage(id, request)` | Da trien khai                         | Data layer canon nam trong `app/api/news-articles/action.ts`.                                                                                                                          |
@@ -142,7 +144,7 @@ Ghi chu:
 - FE `app/lib/news-articles/definitions.ts`, detail, va quick detail da map `linkedEvents[]` theo `eventStatus` moi va khong con render badge `eventEnrichmentStatus`.
 - Navigation "Noi dung" da tro ve `/news-articles`; route `/source-documents*` chi con redirect sang surface canon moi.
 - Snapshot backend khong con `lifecycleStatus`, `readinessStatus`, `eventDerivationStatus`, `documentType`, hoac endpoint canon `/source-documents*`.
-- Endpoint `POST /news-articles/{id}/analyze` khong con nam trong snapshot OpenAPI hien tai; UI da go manual analyze va workflow phan tich bai viet chuyen sang cronjob.
+- Endpoint `POST /news-articles/{id}/analyze` va `POST /news-articles/{id}/crawl-full-content` khong con nam trong snapshot OpenAPI hien tai; FE da go manual analyze, nhung `crawlNewsArticleFullContent()` va menu crawl tren detail hien con go endpoint da bi bo.
 
 ### 4. API events
 
@@ -223,7 +225,7 @@ Ghi chu:
 - Snapshot OpenAPI hien tai mo ta `evidence[].publishedAt` va `keyEvents[].occurredAt` la `date-time` string; frontend market-query definitions dang cho phep them `null` de tuong thich voi payload runtime da quan sat.
 - `MarketQueryKeyEventResponse` da doi `summary` thanh `description`; `app/lib/market-query/definitions.ts` va `app/(main)/market-query/market-query-key-events.tsx` hien van doc field cu.
 - `MarketQueryResponse` co them `keyNarratives[]`; `MarketQueryKeyNarrativeResponse` gom `id`, `title`, `thesis`, `status`, `confidence`, `primaryAssetSymbol`, `primaryThemeSlug`, `supportingEventIds`. FE chua co type/schema/UI cho field nay.
-- `MarketQueryEvidenceResponse` hien dung `artifactType`, `artifactId`, `artifactTitle`, `artifactUrl`, `newsOutletName`, `publishedAt`, `evidenceRole`, `evidenceConfidence`; FE da doi bo link canon sang `/news-articles/{artifactId}` cho artifact `NEWS_ARTICLE`.
+- `MarketQueryEvidenceResponse` hien dung `eventId`, `eventTitle`, `newsArticleId`, `newsArticleTitle`, `newsArticleUrl`, `newsOutletName`, `publishedAt`, `evidenceRole`, `evidenceConfidence`, `evidenceNote`; FE market-query definitions/list hien van doc `artifact*` va chua render `evidenceNote`.
 
 ### 7. API graph view
 
@@ -569,10 +571,11 @@ type ActionResult<T = void> =
 - `news articles`: `linkedEvents[]` da co `eventStatus` enum moi theo enrichment lifecycle va khong con `eventEnrichmentStatus`; FE detail va quick detail da map theo contract moi.
 - `events`: backend gate enrich/market reaction operators bang `news-article:analyze`; FE events da gate bang permission canon nay truoc va chi giu `source-document:analyze` nhu alias compatibility tam thoi.
 - `permission scan`: cac literal FE-only `source-document:*` con lai deu la alias compatibility sau permission canon `news-article:*`; cac permission BE chua co FE literal gom `cronjob:stop`, `media:*`, va `narrative:*` vi cac surface/action nay chua duoc tich hop.
+- `system prompts`: frontend đã đồng bộ enum prompt type hiện tại, DTO `name`/`responseSchema`/`localizedNames`, create request bắt buộc `responseSchema`, và form schema editor dạng builder + JSON.
 - `market charts`: frontend da dong bo action/DTO theo request `assetId`, `includeAnnotations` theo layer su kien, response `asset`, optional `symbol`, va `annotations[]`; UI dung KLineChart cho nen OHLCV va render marker notification/popup detail khi layer su kien duoc bat.
 - `news outlets`: snapshot moi da bo `slug` khoi create/update/list/detail va bo `description` khoi list item; FE form/DTO da dong bo, list khong render cac field nay, con detail/edit van giu `description` theo response.
 - `workspace`: frontend da bo `slug` khoi create/update/response definitions, workspace switcher payload/UI, va trang tong quan workspace de khop snapshot moi.
-- `news articles`: snapshot moi da bo `externalKey`; `app/lib/news-articles/definitions.ts` da duoc don de khong con giu field nay.
+- `news articles`: snapshot moi da bo `externalKey`; `app/lib/news-articles/definitions.ts` da duoc don de khong con giu field nay. Snapshot ngay 25/5 tiep tuc bo endpoint crawl full content, nhung FE van con action `crawlNewsArticleFullContent()` va menu crawl tren detail.
 - `events`: snapshot moi da bo `slug` va `confirmedAt`, va doi evidence sang `newsArticle*`; FE events da dong bo DTO, detail, quick detail, va action layout theo contract hien tai.
 - `telegram`: frontend da co route/action/type/permission/navigation cho surface Telegram, nhung snapshot moi them `outputLanguageIsoCode` request va `outputLanguage` response cho feature setting/schedule ma FE chua expose.
 - `ai-provider credentials`: snapshot moi doi credential `label` thanh `model` va bo top-level config `name`/`model`; FE hien van giu `name`, top-level `model`, va credential `label` trong definitions, form, list, detail, va credential panel.
@@ -580,7 +583,7 @@ type ActionResult<T = void> =
 - `personal notes`: frontend da map `/me/notes*` vao action, DTO, permission helper, quick Sheet header, route `/notes`, editor HTML, explicit save, presentation mode, va delete confirmation. Contract hien van chi co `contentHtml`, nen UI derive label tu HTML da sanitize thay vi luu title rieng.
 - `languages`: frontend da co URL locale va `Accept-Language`, nhung chua co backend action cho `GET /languages` va `PATCH /me/preferred-language`; `LanguageSelector` hien chi doi route locale.
 - `narratives`: snapshot moi them `/narratives*`, graph narrative node/edge, va market query `keyNarratives[]`; FE chua co module narratives rieng hoac market-query narrative panel, nhung Graph View da model/render narrative node/edge.
-- `market query`: spec van mo ta `asOfTime` la optional `date-time`; frontend v1 chu dong omit field nay de backend tu lay thoi diem hien tai va harden parse cho payload runtime co the tra `null` o `publishedAt` va `occurredAt`. Ngoai ra, `keyEvents[]` da doi `summary` thanh `description`, FE van doc field cu, va FE chua doc `keyNarratives[]`.
+- `market query`: spec van mo ta `asOfTime` la optional `date-time`; frontend v1 chu dong omit field nay de backend tu lay thoi diem hien tai va harden parse cho payload runtime co the tra `null` o `publishedAt` va `occurredAt`. Ngoai ra, `keyEvents[]` da doi `summary` thanh `description`, evidence da doi sang `newsArticle*` va them `evidenceNote`, FE van doc `summary`/`artifact*` va chua doc `keyNarratives[]`/`evidenceNote`.
 - `graph view`: `GraphNodeMetadata` da doi `active` thanh `status` va them `narrativeStatus`/`thesis`; FE Graph View da model/render node kind `narrative` va edge kind `narrative-event`/`narrative-asset`.
 - `user profile`: `GET /me` da dong bo `currentWorkspace`, `mainImage` media object, va `permissions[]`, nhung snapshot moi them `preferredLanguage`; runtime hien van chi dung permission loader.
 - `blogs`: create va response dung `visible`, update dung `isVisible`; frontend van can tiep tuc xu ly ky de tranh drift.

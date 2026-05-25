@@ -2,28 +2,36 @@ import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
 import { formatMessage } from "@/app/lib/i18n/messages"
 
 export const SYSTEM_PROMPT_TYPES = [
-  "NEWS_FILTER",
-  "NEWS_ANALYSIS",
-  "SIGNAL_GENERATION",
-  "DECISION_MAKING",
-  "CONTENT_EXTRACTION",
-  "SENTIMENT_ANALYSIS",
-  "TITLE_GENERATION",
-  "SUMMARY_GENERATION",
-  "CONTENT_CLEANING",
   "FIRECRAWL_SOURCE_DOCUMENT_FILTER",
+  "NEWS_ARTICLE_CONTENT_LOCALIZATION",
   "NEWS_PRIMARY_EVENT_DERIVATION",
   "EVENT_ASSET_THEME_ENRICHMENT",
   "EVENT_MARKET_REACTION_DERIVATION",
+  "EVENT_NARRATIVE_REFRESH",
   "EVENT_GROUNDED_MARKET_QUERY_SYNTHESIS",
+  "TELEGRAM_CALENDAR_ALERT_ASSESSMENT",
+  "TELEGRAM_NEWS_ALERT_ASSESSMENT",
+  "TELEGRAM_MARKET_ANALYSIS",
 ] as const
 
 export type SystemPromptType = (typeof SYSTEM_PROMPT_TYPES)[number]
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue }
+
+export type LocalizedNames = Record<string, string>
 
 export interface SystemPromptResponse {
   id: number
   promptType: SystemPromptType
+  name?: string
   content: string
+  responseSchema?: JsonValue
+  localizedNames?: LocalizedNames
   createdDate?: string
   lastModifiedDate?: string
 }
@@ -31,10 +39,14 @@ export interface SystemPromptResponse {
 export interface CreateSystemPromptRequest {
   promptType: SystemPromptType
   content: string
+  responseSchema: JsonValue
+  localizedNames?: LocalizedNames
 }
 
 export interface UpdateSystemPromptRequest {
-  content: string
+  content?: string
+  responseSchema?: JsonValue
+  localizedNames?: LocalizedNames
 }
 
 export function isSystemPromptType(value: string): value is SystemPromptType {
@@ -50,6 +62,27 @@ export function getSystemPromptTypeLabel(
   }
 
   return promptType
+}
+
+export function getSystemPromptDisplayName(
+  prompt: Pick<
+    SystemPromptResponse,
+    "promptType" | "name" | "localizedNames"
+  >,
+  dictionary: Dictionary,
+  locale?: string
+) {
+  const localizedName = locale ? prompt.localizedNames?.[locale]?.trim() : ""
+
+  if (localizedName) {
+    return localizedName
+  }
+
+  if (prompt.name?.trim()) {
+    return prompt.name
+  }
+
+  return getSystemPromptTypeLabel(prompt.promptType, dictionary)
 }
 
 export function getSystemPromptWorkflowGroup(

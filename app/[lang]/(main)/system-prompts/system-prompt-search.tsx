@@ -14,7 +14,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { useLocalization } from "@/app/lib/i18n/provider"
 
 const SEARCH_PARAM_KEY =
-  "promptType[containsIgnoreCase],content[containsIgnoreCase]"
+  "promptType[containsIgnoreCase],name[containsIgnoreCase],content[containsIgnoreCase]"
 const SEARCH_INPUT_ID = "system-prompt-search"
 
 export function SystemPromptSearch() {

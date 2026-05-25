@@ -10,7 +10,7 @@ import { deleteSystemPrompt } from "@/app/api/system-prompts/action"
 import { Page } from "@/app/lib/definitions"
 import {
   formatSystemPromptContentLength,
-  getSystemPromptTypeLabel,
+  getSystemPromptDisplayName,
   getSystemPromptWorkflowGroup,
   SystemPromptResponse,
 } from "@/app/lib/system-prompts/definitions"
@@ -87,7 +87,7 @@ export function SystemPromptList({ promptPage }: SystemPromptListProps) {
   const canCreate = useHasAnyPermission(SYSTEM_PROMPT_CREATE_PERMISSIONS)
   const canUpdate = useHasAnyPermission(SYSTEM_PROMPT_UPDATE_PERMISSIONS)
   const canDelete = useHasAnyPermission(SYSTEM_PROMPT_DELETE_PERMISSIONS)
-  const { dictionary, formatDateTime, formatNumber } = useLocalization()
+  const { dictionary, formatDateTime, formatNumber, locale } = useLocalization()
   const t = dictionary.systemPrompts
   const formatPromptDateTime = (value?: string) =>
     formatDateTime(
@@ -164,16 +164,18 @@ export function SystemPromptList({ promptPage }: SystemPromptListProps) {
                           href={getPromptHref(prompt.promptType)}
                           className="line-clamp-1 font-medium break-words text-foreground hover:underline"
                         >
-                          {getSystemPromptTypeLabel(
-                            prompt.promptType,
-                            dictionary
+                          {getSystemPromptDisplayName(
+                            prompt,
+                            dictionary,
+                            locale
                           )}
                         </Link>
                       ) : (
                         <span className="line-clamp-1 font-medium break-words text-foreground">
-                          {getSystemPromptTypeLabel(
-                            prompt.promptType,
-                            dictionary
+                          {getSystemPromptDisplayName(
+                            prompt,
+                            dictionary,
+                            locale
                           )}
                         </span>
                       )}
@@ -255,9 +257,9 @@ function DeletePromptButton({ prompt }: { prompt: SystemPromptResponse }) {
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
-  const { dictionary, formatMessage } = useLocalization()
+  const { dictionary, formatMessage, locale } = useLocalization()
   const t = dictionary.systemPrompts
-  const promptLabel = getSystemPromptTypeLabel(prompt.promptType, dictionary)
+  const promptLabel = getSystemPromptDisplayName(prompt, dictionary, locale)
 
   const handleDelete = () => {
     startTransition(async () => {
