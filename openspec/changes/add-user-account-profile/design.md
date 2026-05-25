@@ -13,10 +13,10 @@ The current backend user response type includes `email`, `firstName`, `lastName`
 - Add a protected account profile page under `app/[lang]/(main)/account/`.
 - Let signed-in users reach the page from the existing avatar account menu.
 - Present account content as two tabs: personal information and billing.
-- Provide a personal information edit form for avatar, full name, date of birth, disabled email, phone number, and role classification.
-- Treat full name, date of birth, email, and phone number as required profile information.
+- Provide a personal information edit form for avatar, last name, first name, date of birth, disabled email, phone number, and role classification.
+- Treat first name, last name, date of birth, email, and phone number as required profile information.
 - Keep email disabled and exclude it from profile update requests.
-- Extend the user profile contract with `dateOfBirth`, `phoneNumber`, and `role_name`.
+- Extend the user profile contract with `birthDay`, `phoneNumber`, and `role_name`.
 - Show an upgrade account button next to the role classification.
 - Use existing Signapse form shell, shadcn wrappers, i18n dictionaries, sonner toast, and route localization helpers.
 
@@ -62,7 +62,7 @@ The personal information tab should use `AppFormShell`, `AppFormShellBody`, and 
 The backend user response should include:
 
 ```ts
-dateOfBirth: string | null
+birthDay: string | null
 phoneNumber: string | null
 role_name: string | null
 ```
@@ -71,9 +71,10 @@ The update request should only send editable profile fields:
 
 ```ts
 interface UpdateUserProfileRequest {
-  fullName: string
-  dateOfBirth: string
-  phoneNumber: string
+  firstName: string
+  lastName: string
+  birthDay: string
+  mobilePhone: string
 }
 ```
 
@@ -93,9 +94,9 @@ The personal information tab should show the current user's role classification 
 
 An upgrade account button should be rendered next to the role classification. For the MVP, the button can switch focus to the billing tab or link to the billing area once tab URL state is chosen. It should not start a fake checkout, mutate the role locally, or imply a completed upgrade when no billing backend exists.
 
-### Use one full-name field in the UI
+### Use separate first and last name fields in the UI
 
-The user-facing form should expose `Họ tên` as one required field. If the backend continues to persist `firstName` and `lastName`, the action boundary should either split the submitted full name or the backend should accept `fullName` and own that mapping. The frontend should avoid exposing separate first-name and last-name fields because the requested UI is a single full-name field.
+The user-facing form should expose separate required name fields. In Vietnamese, `Họ` maps to `lastName` and `Tên` maps to `firstName`; the form should render `Họ` before `Tên`. When saving, the action maps the visible date and phone fields to backend request fields `birthDay` and `mobilePhone`.
 
 ### Keep billing as a placeholder tab only
 
@@ -103,8 +104,7 @@ The billing tab should exist so users can enter the area from the tab list or up
 
 ## Risks / Trade-offs
 
-- Backend contract may not yet support `dateOfBirth`, `phoneNumber`, `role_name`, or profile update -> Keep the frontend action boundary narrow and fail with localized server-action errors until backend support exists.
-- Full-name mapping can be lossy if backend only stores first and last names -> Prefer a backend `fullName` update contract, or use a documented simple split at the action boundary as an interim implementation.
+- Backend contract may not yet support `birthDay`, `phoneNumber`, `role_name`, or profile update field `mobilePhone` -> Keep the frontend action boundary narrow and fail with localized server-action errors until backend support exists.
 - Avatar editing can become a separate media workflow -> Display avatar in this change and only add upload if a compatible endpoint already exists.
 - Disabled email must still be understandable as account identity information -> Use the disabled input state, exclude it from submit mapping, and keep concise helper text if needed.
 - Upgrade CTA needs a target before real billing exists -> Route it to the billing tab/area only, and keep the billing content as an empty state until product scope is defined.
@@ -112,7 +112,7 @@ The billing tab should exist so users can enter the area from the tab list or up
 
 ## Migration Plan
 
-1. Extend user profile TypeScript definitions with `dateOfBirth`, `phoneNumber`, `role_name`, and update request/result types.
+1. Extend user profile TypeScript definitions with `birthDay`, `phoneNumber`, `role_name`, and update request/result types.
 2. Add or update server actions for reading `/me` and updating editable profile fields through `fetchAuthenticated()`.
 3. Create the protected account route files under `app/[lang]/(main)/account/`.
 4. Build the tabbed account page with the personal form, role display, upgrade CTA, and billing empty state.
@@ -122,7 +122,4 @@ The billing tab should exist so users can enter the area from the tab list or up
 
 ## Open Questions
 
-- Should the account billing tab be URL-addressable with a query parameter such as `?tab=billing`, or is in-page tab state enough for the first version?
-- Will the backend accept `fullName`, or should the frontend split the submitted full name into `firstName` and `lastName` until the backend contract changes?
-- Is avatar upload in scope for the first implementation, or should the first version display the existing avatar only?
 - None.

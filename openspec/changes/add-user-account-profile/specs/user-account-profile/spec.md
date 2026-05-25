@@ -34,7 +34,7 @@ The system SHALL load user profile data with date of birth, phone number, and cu
 #### Scenario: Profile data is requested
 - **WHEN** the account page loads the current user profile
 - **THEN** the profile response includes `email`
-- **AND** the profile response includes `dateOfBirth`
+- **AND** the profile response includes `birthDay` in `yyyy-MM-dd` format
 - **AND** the profile response includes `phoneNumber`
 - **AND** the profile response includes `role_name`
 - **AND** the profile response includes the existing profile image data when available
@@ -49,20 +49,20 @@ The system SHALL load user profile data with date of birth, phone number, and cu
 - **THEN** the personal information area displays the current user's `role_name`
 
 ### Requirement: Personal information form edits only editable profile fields
-The system SHALL allow users to update full name, date of birth, and phone number while keeping email disabled and role classification read-only.
+The system SHALL allow users to update first name, last name, date of birth, and phone number while keeping email disabled and role classification read-only.
 
 #### Scenario: User views personal information
 - **WHEN** the personal information tab is active
-- **THEN** the form displays avatar, full name, date of birth, email, phone number, and role classification
-- **AND** full name is marked and validated as required
+- **THEN** the form displays avatar, last name, first name, date of birth, email, phone number, and role classification
+- **AND** last name and first name are marked and validated as required
 - **AND** date of birth is marked and validated as required
 - **AND** email is marked as required account information
 - **AND** phone number is marked and validated as required
 - **AND** role classification is displayed as read-only account information
 
 #### Scenario: User edits profile fields
-- **WHEN** the user changes full name, date of birth, or phone number and saves
-- **THEN** the update request sends full name, date of birth, and phone number
+- **WHEN** the user changes first name, last name, date of birth, or phone number and saves
+- **THEN** the update request sends `firstName`, `lastName`, `birthDay`, and `mobilePhone`
 - **AND** the update request does not send email
 - **AND** the update request does not send `role_name`
 - **AND** the user receives localized success or error feedback

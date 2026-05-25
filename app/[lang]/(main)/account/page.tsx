@@ -14,12 +14,34 @@ interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-function getFullName(firstName?: string | null, lastName?: string | null) {
-  return [firstName, lastName].filter(Boolean).join(" ").trim()
+function getDisplayName(firstName?: string | null, lastName?: string | null) {
+  return [lastName, firstName].filter(Boolean).join(" ").trim()
 }
 
-function getAvatarFallback(fullName: string, email: string) {
-  const source = fullName || email
+function getNameParts(
+  firstName?: string | null,
+  lastName?: string | null,
+  fallbackFullName?: string | null
+) {
+  const trimmedFirstName = firstName?.trim() ?? ""
+  const trimmedLastName = lastName?.trim() ?? ""
+
+  if (trimmedFirstName || trimmedLastName || !fallbackFullName) {
+    return {
+      firstName: trimmedFirstName,
+      lastName: trimmedLastName,
+    }
+  }
+
+  const nameParts = fallbackFullName.trim().split(/\s+/).filter(Boolean)
+  return {
+    firstName: nameParts.at(-1) ?? "",
+    lastName: nameParts.slice(0, -1).join(" "),
+  }
+}
+
+function getAvatarFallback(displayName: string, email: string) {
+  const source = displayName || email
   const initials = source
     .split(/\s+/)
     .filter(Boolean)
@@ -38,11 +60,45 @@ function getPrimaryEmail(user: Awaited<ReturnType<typeof currentUser>>) {
   )
 }
 
+function getFirstNonEmptyValue(...values: Array<string | null | undefined>) {
+  return values.find((value) => value?.trim())?.trim() ?? ""
+}
+
+function getDateInputValue(...values: Array<string | null | undefined>) {
+  const value = getFirstNonEmptyValue(...values)
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return value
+  }
+
+  const date = new Date(value)
+
+  if (Number.isNaN(date.getTime())) {
+    return ""
+  }
+
+  const dateParts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date)
+  const year = dateParts.find((part) => part.type === "year")?.value
+  const month = dateParts.find((part) => part.type === "month")?.value
+  const day = dateParts.find((part) => part.type === "day")?.value
+
+  return year && month && day ? `${year}-${month}-${day}` : ""
+}
+
 export default async function AccountPage({ searchParams }: PageProps) {
   const [dictionary, profile, clerkUser, resolvedSearchParams] =
     await Promise.all([getServerDictionary(), getMe(), currentUser(), searchParams])
-  const fullName =
-    getFullName(profile.firstName, profile.lastName) || clerkUser?.fullName || ""
+  const nameParts = getNameParts(
+    profile.firstName,
+    profile.lastName,
+    clerkUser?.fullName
+  )
+  const displayName = getDisplayName(nameParts.firstName, nameParts.lastName)
   const email = profile.email || getPrimaryEmail(clerkUser)
   const avatarUrl =
     profile.mainImage?.urlThumbnail ??
@@ -52,11 +108,12 @@ export default async function AccountPage({ searchParams }: PageProps) {
     ""
   const initialData: AccountProfileInitialData = {
     avatarUrl,
-    avatarFallback: getAvatarFallback(fullName, email),
-    fullName,
-    dateOfBirth: profile.dateOfBirth ?? "",
+    avatarFallback: getAvatarFallback(displayName, email),
+    firstName: nameParts.firstName,
+    lastName: nameParts.lastName,
+    dateOfBirth: getDateInputValue(profile.birthDay, profile.dateOfBirth),
     email,
-    phoneNumber: profile.phoneNumber ?? "",
+    phoneNumber: getFirstNonEmptyValue(profile.phoneNumber, profile.mobilePhone),
     roleName: profile.role_name ?? "",
   }
   const activeTab = resolvedSearchParams.tab === "billing" ? "billing" : "personal"
@@ -73,6 +130,14 @@ export default async function AccountPage({ searchParams }: PageProps) {
       </TabsList>
       <TabsContent value="personal" className="pt-4">
         <AccountProfileForm
+          key={[
+            initialData.firstName,
+            initialData.lastName,
+            initialData.dateOfBirth,
+            initialData.email,
+            initialData.phoneNumber,
+            initialData.avatarUrl,
+          ].join("|")}
           initialData={initialData}
           upgradeHref="/account?tab=billing"
         />

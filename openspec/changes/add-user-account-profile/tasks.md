@@ -1,7 +1,7 @@
 ## 1. User Profile Contract
 
-- [x] 1.1 Extend `BackendMeResponse` with `dateOfBirth`, `phoneNumber`, and `role_name`.
-- [x] 1.2 Add a profile update request type that includes `fullName`, `dateOfBirth`, and `phoneNumber`, excluding email.
+- [x] 1.1 Extend `BackendMeResponse` with `birthDay`, `phoneNumber`, and `role_name`.
+- [x] 1.2 Add a profile update request type that includes `firstName`, `lastName`, `birthDay`, and `mobilePhone`, excluding email.
 - [x] 1.3 Add or update user server actions to submit editable profile fields through `fetchAuthenticated()` and return localized action errors.
 - [x] 1.4 Add role display fallback when `role_name` is empty.
 
@@ -16,7 +16,7 @@
 
 - [x] 3.1 Build `account-profile-form.tsx` with `AppFormShell`, `FieldGroup`, shadcn form controls, Zod validation, sonner toast, and pending submit spinner.
 - [x] 3.2 Render avatar from the current profile image/Clerk fallback without adding upload behavior unless an existing compatible endpoint is available.
-- [x] 3.3 Make full name, date of birth, and phone number required and editable.
+- [x] 3.3 Make first name, last name, date of birth, and phone number required and editable.
 - [x] 3.4 Render email as required account information but disabled, and exclude email from the update request.
 - [x] 3.5 Add a cancel action with `variant="ghost"` that resets the form to initial profile data.
 - [x] 3.6 Render role classification as read-only profile information and keep it out of the update request.
@@ -36,4 +36,4 @@
 - [x] 5.3 Run lint.
 - [x] 5.4 Static-review account/profile source for locale-preserving links, no hardcoded UI copy, disabled email submit exclusion, read-only role submit exclusion, shadcn wrapper composition, and `(main)` route placement.
 
-User-owned manual QA note: confirm the backend profile update endpoint persists `dateOfBirth` and `phoneNumber`, and that `/me` returns `role_name`, once backend support is available.
+User-owned manual QA note: confirm the backend profile update endpoint persists request fields `birthDay` and `mobilePhone`, and that `/me` returns `role_name`, once backend support is available.

@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { CreditCard, Save, Trash2 } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import type { ChangeEvent } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { toast } from "sonner"
@@ -35,7 +35,8 @@ import { Spinner } from "@/components/ui/spinner"
 export interface AccountProfileInitialData {
   avatarUrl: string
   avatarFallback: string
-  fullName: string
+  firstName: string
+  lastName: string
   dateOfBirth: string
   email: string
   phoneNumber: string
@@ -49,7 +50,8 @@ interface AccountProfileFormProps {
 
 function getAccountProfileSchema(t: Dictionary["accountProfile"]) {
   return z.object({
-    fullName: z.string().trim().min(1, t.fullNameRequired),
+    firstName: z.string().trim().min(1, t.firstNameRequired),
+    lastName: z.string().trim().min(1, t.lastNameRequired),
     dateOfBirth: z
       .string()
       .trim()
@@ -78,12 +80,22 @@ export function AccountProfileForm({
   const avatarInputRef = useRef<HTMLInputElement>(null)
   const [avatarUrl, setAvatarUrl] = useState(initialData.avatarUrl)
   const [objectAvatarUrl, setObjectAvatarUrl] = useState<string | null>(null)
-  const defaultValues: AccountProfileFormValues = {
-    fullName: initialData.fullName,
-    dateOfBirth: initialData.dateOfBirth,
-    email: initialData.email,
-    phoneNumber: initialData.phoneNumber,
-  }
+  const defaultValues: AccountProfileFormValues = useMemo(
+    () => ({
+      firstName: initialData.firstName,
+      lastName: initialData.lastName,
+      dateOfBirth: initialData.dateOfBirth,
+      email: initialData.email,
+      phoneNumber: initialData.phoneNumber,
+    }),
+    [
+      initialData.dateOfBirth,
+      initialData.email,
+      initialData.firstName,
+      initialData.lastName,
+      initialData.phoneNumber,
+    ]
+  )
   const form = useForm<AccountProfileFormValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(getAccountProfileSchema(t) as any),
@@ -130,9 +142,10 @@ export function AccountProfileForm({
 
   async function onSubmit(values: AccountProfileFormValues) {
     const result = await updateMyProfile({
-      fullName: values.fullName.trim(),
-      dateOfBirth: values.dateOfBirth.trim(),
-      phoneNumber: values.phoneNumber.trim(),
+      firstName: values.firstName.trim(),
+      lastName: values.lastName.trim(),
+      birthDay: values.dateOfBirth.trim(),
+      mobilePhone: values.phoneNumber.trim(),
     })
 
     if (result.success) {
@@ -145,12 +158,7 @@ export function AccountProfileForm({
   }
 
   function handleCancel() {
-    form.reset(defaultValues)
-    setAvatarUrl(initialData.avatarUrl)
-
-    if (avatarInputRef.current) {
-      avatarInputRef.current.value = ""
-    }
+    router.back()
   }
 
   return (
@@ -182,7 +190,12 @@ export function AccountProfileForm({
                   aria-label={t.uploadAvatar}
                 >
                   <Avatar className="size-20">
-                    <AvatarImage src={avatarUrl} alt={initialData.fullName} />
+                    <AvatarImage
+                      src={avatarUrl}
+                      alt={[initialData.lastName, initialData.firstName]
+                        .filter(Boolean)
+                        .join(" ")}
+                    />
                     <AvatarFallback>{initialData.avatarFallback}</AvatarFallback>
                   </Avatar>
                 </button>
@@ -202,18 +215,40 @@ export function AccountProfileForm({
             </Field>
 
             <Controller
-              name="fullName"
+              name="lastName"
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="account-full-name">
-                    {t.fullName} <span className="text-destructive">*</span>
+                  <FieldLabel htmlFor="account-last-name">
+                    {t.lastName} <span className="text-destructive">*</span>
                   </FieldLabel>
                   <Input
                     {...field}
-                    id="account-full-name"
+                    id="account-last-name"
                     aria-invalid={fieldState.invalid}
-                    placeholder={t.fullNamePlaceholder}
+                    placeholder={t.lastNamePlaceholder}
+                    disabled={isSubmitting}
+                  />
+                  {fieldState.invalid ? (
+                    <FieldError errors={[fieldState.error]} />
+                  ) : null}
+                </Field>
+              )}
+            />
+
+            <Controller
+              name="firstName"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="account-first-name">
+                    {t.firstName} <span className="text-destructive">*</span>
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    id="account-first-name"
+                    aria-invalid={fieldState.invalid}
+                    placeholder={t.firstNamePlaceholder}
                     disabled={isSubmitting}
                   />
                   {fieldState.invalid ? (
