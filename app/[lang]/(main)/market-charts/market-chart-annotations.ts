@@ -20,17 +20,44 @@ export interface MarketChartAnnotationMarkerPoint {
   y: number
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null
+}
+
+function isValidMarketChartAnnotation(
+  annotation: unknown
+): annotation is MarketChartAnnotationResponse {
+  return (
+    isRecord(annotation) &&
+    typeof annotation.id === "string" &&
+    toMarketChartEpochMillis(annotation.time) !== null
+  )
+}
+
+function isValidMarketChartCandle(
+  candle: unknown
+): candle is MarketChartCandleItemResponse {
+  return (
+    isRecord(candle) &&
+    toMarketChartEpochMillis(candle.time) !== null &&
+    typeof candle.high === "number" &&
+    Number.isFinite(candle.high) &&
+    typeof candle.close === "number" &&
+    Number.isFinite(candle.close)
+  )
+}
+
 export function mergeMarketChartAnnotations(
   current: MarketChartAnnotationResponse[],
   incoming: MarketChartAnnotationResponse[]
 ): MarketChartAnnotationResponse[] {
   const annotationsById = new Map<string, MarketChartAnnotationResponse>()
 
-  for (const annotation of current) {
+  for (const annotation of current.filter(isValidMarketChartAnnotation)) {
     annotationsById.set(annotation.id, annotation)
   }
 
-  for (const annotation of incoming) {
+  for (const annotation of incoming.filter(isValidMarketChartAnnotation)) {
     annotationsById.set(annotation.id, annotation)
   }
 
@@ -42,7 +69,13 @@ export function mergeMarketChartAnnotations(
   })
 }
 
-export function toMarketChartEpochMillis(value: string): MarketChartEpochMillis | null {
+export function toMarketChartEpochMillis(
+  value: unknown
+): MarketChartEpochMillis | null {
+  if (typeof value !== "string") {
+    return null
+  }
+
   const timestamp = Date.parse(value)
 
   if (!Number.isFinite(timestamp)) {
@@ -124,14 +157,16 @@ export function createMarketChartAnnotationGroups(
   annotations: MarketChartAnnotationResponse[],
   candles: MarketChartCandleItemResponse[]
 ): MarketChartAnnotationGroup[] {
-  const candleTimes = candles
+  const validCandles = candles.filter(isValidMarketChartCandle)
+  const validAnnotations = annotations.filter(isValidMarketChartAnnotation)
+  const candleTimes = validCandles
     .map((candle) => toMarketChartEpochMillis(candle.time))
     .filter((time): time is MarketChartEpochMillis => time !== null)
     .sort((left, right) => Number(left) - Number(right))
   const candlesByTime = new Map<number, MarketChartCandleItemResponse>()
   const groupsByTime = new Map<number, MarketChartAnnotationResponse[]>()
 
-  for (const candle of candles) {
+  for (const candle of validCandles) {
     const time = toMarketChartEpochMillis(candle.time)
 
     if (time !== null) {
@@ -139,16 +174,16 @@ export function createMarketChartAnnotationGroups(
     }
   }
 
-  for (const annotation of annotations) {
+  for (const annotation of validAnnotations) {
     const annotationTime = toMarketChartEpochMillis(annotation.time)
 
-    if (!annotationTime) {
+    if (annotationTime === null) {
       continue
     }
 
     const candleTime = resolveNearestCandleTime(annotationTime, candleTimes)
 
-    if (!candleTime) {
+    if (candleTime === null) {
       continue
     }
 

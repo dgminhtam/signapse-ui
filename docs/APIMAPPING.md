@@ -2,7 +2,7 @@
 
 Tài liệu này ánh xạ snapshot OpenAPI backend trong `docs/api_mapping.json` tới các điểm tích hợp frontend hiện tại của repo.
 
-Xác minh lần cuối: ngày 25 tháng 5 năm 2026
+Xác minh lần cuối: ngày 26 tháng 5 năm 2026
 
 ## Cấu hình cơ sở
 
@@ -36,7 +36,7 @@ Xác minh lần cuối: ngày 25 tháng 5 năm 2026
 
 ## Tổng quan thay đổi lớn từ snapshot hiện tại
 
-- Snapshot backend hiện tại gồm `104` operation.
+- Snapshot backend hiện tại gồm `105` operation.
 - Backend đã chuyển domain nội dung canon từ `sources` / `source-documents` sang `news-outlets` / `news-articles`.
 - Backend vẫn giữ các surface `events`, `query`, và `graph-view`, nhưng nhiều payload đã đổi naming từ `sourceDocument*` sang `artifact*` hoặc `news-article`.
 - Surface `events` có thêm workflow derive market reactions cho từng event và batch pending events.
@@ -56,6 +56,7 @@ Xác minh lần cuối: ngày 25 tháng 5 năm 2026
 - Snapshot mới thêm API `languages`, persisted preferred language trên `/me/preferred-language`, và field `preferredLanguage` trong `UserResponse`.
 - Snapshot mới thêm domain `narratives`, đồng thời mở rộng `market-query` với `keyNarratives[]` và `graph-view` với node/edge narrative.
 - Snapshot mới bỏ endpoint `POST /news-articles/{id}/crawl-full-content`, mở rộng `system-prompts` với `responseSchema`/`localizedNames`, và thêm `evidenceNote` cho market query evidence.
+- Snapshot mới thêm `POST /watchlists/assets` để bulk create watchlist assets; `responseSchema` của system prompts hiện là JSON object inline, không còn component schema `JsonNode`.
 
 ## Phạm vi endpoint
 
@@ -80,7 +81,7 @@ Ghi chú:
 
 - Enum `promptType` trong snapshot hiện tại gồm `FIRECRAWL_SOURCE_DOCUMENT_FILTER`, `NEWS_ARTICLE_CONTENT_LOCALIZATION`, `NEWS_PRIMARY_EVENT_DERIVATION`, `EVENT_ASSET_THEME_ENRICHMENT`, `EVENT_MARKET_REACTION_DERIVATION`, `EVENT_NARRATIVE_REFRESH`, `EVENT_GROUNDED_MARKET_QUERY_SYNTHESIS`, `TELEGRAM_CALENDAR_ALERT_ASSESSMENT`, `TELEGRAM_NEWS_ALERT_ASSESSMENT`, và `TELEGRAM_MARKET_ANALYSIS`; nhóm legacy `NEWS_FILTER`, `NEWS_ANALYSIS`, `SIGNAL_GENERATION`, `DECISION_MAKING`, `CONTENT_EXTRACTION`, `SENTIMENT_ANALYSIS`, `TITLE_GENERATION`, `SUMMARY_GENERATION`, `CONTENT_CLEANING` không còn trong snapshot.
 - `CreateSystemPromptRequest` hiện yêu cầu `promptType`, `content`, `responseSchema`; `UpdateSystemPromptRequest` có thêm optional `responseSchema` và `localizedNames`.
-- `SystemPromptResponse` hiện có thêm `name`, `responseSchema`, `localizedNames`; `responseSchema` dùng schema `JsonNode`, frontend model bằng JSON value và cung cấp schema editor dạng builder + JSON.
+- `SystemPromptResponse` hiện có thêm `name`, `responseSchema`, `localizedNames`; `responseSchema` là JSON object inline (`type: object`, `additionalProperties: {}`), frontend model bằng JSON value và cung cấp schema editor dạng builder + JSON.
 - Frontend validate `content` không được rỗng sau khi `trim()` và không vượt quá `10000` ký tự; `responseSchema` phải là JSON parse được trước khi submit.
 
 ### 2. API news outlets
@@ -422,7 +423,8 @@ Ghi chu:
 | Phuong thuc | Endpoint backend               | operationId       | Tich hop frontend                            | Trang thai    | Ghi chu                                                 |
 | ----------- | ------------------------------ | ----------------- | -------------------------------------------- | ------------- | ------------------------------------------------------- |
 | GET         | `/watchlists`                  | `getWatchlist`    | `getWorkspaceWatchlistAssets(searchParams)`  | Da trien khai | Frontend da doi naming sang workspace watchlist assets. |
-| POST        | `/watchlists`                  | `createWatchlist` | `addAssetToWorkspaceWatchlist({ assetId })`  | Da trien khai | Sync add theo diff trong workspace editor.              |
+| POST        | `/watchlists`                  | `createWatchlist` | `-`                                          | Legacy | Single add endpoint con trong snapshot nhung FE workspace watchlist editor da chuyen sang bulk add. |
+| POST        | `/watchlists/assets`           | `createWatchlistAssets` | `addAssetsToWorkspaceWatchlist({ assetIds })` | Da trien khai | Bulk add toi da 100 `assetIds` moi request; permission `watchlist:create`. |
 | DELETE      | `/watchlists/assets/{assetId}` | `deleteByAssetId` | `removeAssetFromWorkspaceWatchlist(assetId)` | Da trien khai | Sync remove theo diff.                                  |
 
 ### 23. API telegram
@@ -575,6 +577,7 @@ type ActionResult<T = void> =
 - `market charts`: frontend da dong bo action/DTO theo request `assetId`, `includeAnnotations` theo layer su kien, response `asset`, optional `symbol`, va `annotations[]`; UI dung KLineChart cho nen OHLCV va render marker notification/popup detail khi layer su kien duoc bat.
 - `news outlets`: snapshot moi da bo `slug` khoi create/update/list/detail va bo `description` khoi list item; FE form/DTO da dong bo, list khong render cac field nay, con detail/edit van giu `description` theo response.
 - `workspace`: frontend da bo `slug` khoi create/update/response definitions, workspace switcher payload/UI, va trang tong quan workspace de khop snapshot moi.
+- `watchlists`: FE workspace watchlist editor da chuyen add flow sang bulk endpoint `POST /watchlists/assets` voi request `{ assetIds }`, chunk toi da 100 id moi request; remove flow van dung `DELETE /watchlists/assets/{assetId}`.
 - `news articles`: snapshot moi da bo `externalKey`; `app/lib/news-articles/definitions.ts` da duoc don de khong con giu field nay. Snapshot ngay 25/5 tiep tuc bo endpoint crawl full content, nhung FE van con action `crawlNewsArticleFullContent()` va menu crawl tren detail.
 - `events`: snapshot moi da bo `slug` va `confirmedAt`, va doi evidence sang `newsArticle*`; FE events da dong bo DTO, detail, quick detail, va action layout theo contract hien tai.
 - `telegram`: frontend da co route/action/type/permission/navigation cho surface Telegram, nhung snapshot moi them `outputLanguageIsoCode` request va `outputLanguage` response cho feature setting/schedule ma FE chua expose.

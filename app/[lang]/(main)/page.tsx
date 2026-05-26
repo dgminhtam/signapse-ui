@@ -1,13 +1,14 @@
-import { Suspense, type ElementType, type ReactNode } from "react"
+import { Suspense, type ReactNode } from "react"
 import {
-  ActivityIcon,
   CalendarClockIcon,
   CircleSlashIcon,
   FolderOpenIcon,
+  ScrollTextIcon,
   ShieldAlertIcon,
   TargetIcon,
 } from "lucide-react"
 
+import { getNarratives } from "@/app/api/narratives/action"
 import { getWorkspaceWatchlistAssets } from "@/app/api/watchlists/action"
 import { getMyWorkspaces } from "@/app/api/workspaces/action"
 import type { AppLocale } from "@/app/lib/i18n/config"
@@ -16,8 +17,15 @@ import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
 import {
   formatDateTime as formatLocalizedDateTime,
   formatNumber,
+  formatPercent,
 } from "@/app/lib/i18n/format"
+import { formatMessage } from "@/app/lib/i18n/messages"
 import { getRequestLocale } from "@/app/lib/i18n/server"
+import type {
+  NarrativeStatus,
+  NarrativeSummaryResponse,
+} from "@/app/lib/narratives/definitions"
+import { canReadNarratives } from "@/app/lib/narratives/permissions"
 import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { resolveActiveWorkspace } from "@/app/lib/workspaces/active"
 import { WorkspaceResponse } from "@/app/lib/workspaces/definitions"
@@ -49,10 +57,22 @@ const WATCHLIST_PREVIEW_SEARCH = {
   sort: [{ field: "createdDate", direction: "desc" as const }],
 }
 
+const NARRATIVE_PREVIEW_SEARCH = {
+  filter: "",
+  page: 0,
+  size: 3,
+  sort: [{ field: "lastUpdatedAt", direction: "desc" as const }],
+}
+
 interface WatchlistPreviewState {
   assets: WorkspaceWatchlistAssetListItemResponse[]
   error: string | null
   total: number
+}
+
+interface NarrativePreviewState {
+  narratives: NarrativeSummaryResponse[]
+  error: string | null
 }
 
 export default function Page() {
@@ -74,6 +94,7 @@ async function WorkspaceOverview() {
   const canReadWatchlist = permissions.includes("watchlist:read")
   const canCreateWatchlist = permissions.includes("watchlist:create")
   const canDeleteWatchlist = permissions.includes("watchlist:delete")
+  const canReadNarrativePreview = canReadNarratives(permissions)
 
   if (!canReadWorkspace) {
     return (
@@ -142,17 +163,17 @@ async function WorkspaceOverview() {
     )
   }
 
-  const watchlistPreview = await loadWatchlistPreview(
-    canReadAsset && canReadWatchlist,
-    dictionary
-  )
+  const [watchlistPreview, narrativePreview] = await Promise.all([
+    loadWatchlistPreview(canReadAsset && canReadWatchlist, dictionary),
+    loadNarrativePreview(canReadNarrativePreview, dictionary),
+  ])
 
   return (
     <WorkspaceOverviewShell>
       <div className="flex flex-col gap-6">
-        <WorkspaceHero
+        <WorkspaceOverviewPanel
           workspace={currentWorkspace}
-          trackedAssetTotal={watchlistPreview.total}
+          preview={watchlistPreview}
           canReadAsset={canReadAsset}
           canReadWatchlist={canReadWatchlist}
           canCreateWatchlist={canCreateWatchlist}
@@ -160,23 +181,12 @@ async function WorkspaceOverview() {
           dictionary={dictionary}
           locale={locale}
         />
-
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
-          <TrackedAssetsSummary
-            workspace={currentWorkspace}
-            preview={watchlistPreview}
-            canReadAsset={canReadAsset}
-            canReadWatchlist={canReadWatchlist}
-            canCreateWatchlist={canCreateWatchlist}
-            canDeleteWatchlist={canDeleteWatchlist}
-            dictionary={dictionary}
-          />
-          <WorkspaceTechnicalDetails
-            workspace={currentWorkspace}
-            dictionary={dictionary}
-            locale={locale}
-          />
-        </div>
+        <NarrativeOverviewSection
+          canReadNarrativePreview={canReadNarrativePreview}
+          narrativePreview={narrativePreview}
+          dictionary={dictionary}
+          locale={locale}
+        />
       </div>
     </WorkspaceOverviewShell>
   )
@@ -208,13 +218,37 @@ async function loadWatchlistPreview(
   }
 }
 
+async function loadNarrativePreview(
+  canReadNarrativePreview: boolean,
+  dictionary: Dictionary
+): Promise<NarrativePreviewState> {
+  if (!canReadNarrativePreview) {
+    return { narratives: [], error: null }
+  }
+
+  try {
+    const response = await getNarratives(NARRATIVE_PREVIEW_SEARCH)
+    return {
+      narratives: response.content ?? [],
+      error: null,
+    }
+  } catch (error: unknown) {
+    return {
+      narratives: [],
+      error: error instanceof Error
+        ? error.message
+        : dictionary.workspaceOverview.narrativesLoadError,
+    }
+  }
+}
+
 function WorkspaceOverviewShell({ children }: { children: ReactNode }) {
   return <>{children}</>
 }
 
-function WorkspaceHero({
+function WorkspaceOverviewPanel({
   workspace,
-  trackedAssetTotal,
+  preview,
   canReadAsset,
   canReadWatchlist,
   canCreateWatchlist,
@@ -223,7 +257,7 @@ function WorkspaceHero({
   locale,
 }: {
   workspace: WorkspaceResponse
-  trackedAssetTotal: number
+  preview: WatchlistPreviewState
   canReadAsset: boolean
   canReadWatchlist: boolean
   canCreateWatchlist: boolean
@@ -231,52 +265,21 @@ function WorkspaceHero({
   dictionary: Dictionary
   locale: AppLocale
 }) {
+  const canReadTrackedAssets = canReadAsset && canReadWatchlist
+  const canManageTrackedAssets = canReadTrackedAssets && canCreateWatchlist && canDeleteWatchlist
+  const hasAssets = preview.assets.length > 0
+
   return (
-    <section className="rounded-xl border bg-muted/20 p-5">
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+    <section className="flex flex-col gap-4 rounded-xl border p-5">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="flex min-w-0 flex-col gap-3">
+          <h2 className="truncate text-2xl font-semibold tracking-tight text-foreground">
+            {workspace.name}
+          </h2>
+          <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
+            {dictionary.workspaceOverview.description}
+          </p>
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="secondary">{dictionary.workspaceOverview.active}</Badge>
-            <span className="text-sm text-muted-foreground">
-              {dictionary.workspaceOverview.currentScope}
-            </span>
-          </div>
-          <div className="flex flex-col gap-2">
-            <h2 className="truncate text-2xl font-semibold tracking-tight text-foreground">
-              {workspace.name}
-            </h2>
-            <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
-              {dictionary.workspaceOverview.heroDescription}
-            </p>
-          </div>
-        </div>
-
-        <WorkspaceOverviewActions
-          workspace={workspace}
-          canReadAsset={canReadAsset}
-          canReadWatchlist={canReadWatchlist}
-          canCreateWatchlist={canCreateWatchlist}
-          canDeleteWatchlist={canDeleteWatchlist}
-        />
-      </div>
-
-      <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        <OverviewStat
-          icon={TargetIcon}
-          label={dictionary.workspaceOverview.trackedAssets}
-          value={formatNumber(trackedAssetTotal, locale)}
-          description={dictionary.workspaceOverview.trackedAssetsStatDescription}
-        />
-        <OverviewStat
-          icon={ActivityIcon}
-          label={dictionary.workspaceOverview.status}
-          value={dictionary.workspaceOverview.active}
-          description={dictionary.workspaceOverview.statusDescription}
-        />
-        <OverviewStat
-          icon={CalendarClockIcon}
-          label={dictionary.workspaceOverview.updated}
-          valueNode={
             <AppTimeMetadata icon={CalendarClockIcon}>
               {formatWorkspaceOverviewDateTime(
                 workspace.lastModifiedDate,
@@ -284,72 +287,7 @@ function WorkspaceHero({
                 locale
               )}
             </AppTimeMetadata>
-          }
-          description={dictionary.workspaceOverview.lastRecorded}
-        />
-      </div>
-    </section>
-  )
-}
-
-function OverviewStat({
-  icon: Icon,
-  label,
-  value,
-  valueNode,
-  description,
-}: {
-  icon: ElementType
-  label: string
-  value?: string
-  valueNode?: ReactNode
-  description: string
-}) {
-  return (
-    <div className="flex min-w-0 flex-col gap-3 rounded-lg border bg-background p-4">
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Icon className="size-4" />
-        <span>{label}</span>
-      </div>
-      {valueNode ?? (
-        <div className="truncate text-lg font-semibold text-foreground">{value}</div>
-      )}
-      <div className="text-xs text-muted-foreground">{description}</div>
-    </div>
-  )
-}
-
-function TrackedAssetsSummary({
-  workspace,
-  preview,
-  canReadAsset,
-  canReadWatchlist,
-  canCreateWatchlist,
-  canDeleteWatchlist,
-  dictionary,
-}: {
-  workspace: WorkspaceResponse
-  preview: WatchlistPreviewState
-  canReadAsset: boolean
-  canReadWatchlist: boolean
-  canCreateWatchlist: boolean
-  canDeleteWatchlist: boolean
-  dictionary: Dictionary
-}) {
-  const canReadTrackedAssets = canReadAsset && canReadWatchlist
-  const canManageTrackedAssets = canReadTrackedAssets && canCreateWatchlist && canDeleteWatchlist
-  const hasAssets = preview.assets.length > 0
-
-  return (
-    <section className="flex flex-col gap-4 rounded-xl border p-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex flex-col gap-1">
-          <h3 className="font-medium text-foreground">
-            {dictionary.workspaceOverview.trackedAssets}
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            {dictionary.workspaceOverview.trackedAssetsDescription}
-          </p>
+          </div>
         </div>
         {canManageTrackedAssets ? (
           <WorkspaceOverviewActions
@@ -363,56 +301,63 @@ function TrackedAssetsSummary({
         ) : null}
       </div>
 
-      {!canReadTrackedAssets ? (
-        <Empty className="min-h-56 border">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <ShieldAlertIcon />
-            </EmptyMedia>
-            <EmptyTitle>{dictionary.workspaceOverview.trackedAssetsDeniedTitle}</EmptyTitle>
-            <EmptyDescription>
-              {dictionary.workspaceOverview.trackedAssetsDeniedDescription}
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      ) : null}
-
-      {canReadTrackedAssets && preview.error ? (
-        <Empty className="min-h-56 border">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <CircleSlashIcon />
-            </EmptyMedia>
-            <EmptyTitle>{dictionary.workspaceOverview.trackedAssetsLoadErrorTitle}</EmptyTitle>
-            <EmptyDescription>{preview.error}</EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      ) : null}
-
-      {canReadTrackedAssets && !preview.error && !hasAssets ? (
-        <Empty className="min-h-56 border">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <TargetIcon />
-            </EmptyMedia>
-            <EmptyTitle>{dictionary.workspaceOverview.noTrackedAssetsTitle}</EmptyTitle>
-            <EmptyDescription>
-              {dictionary.workspaceOverview.noTrackedAssetsDescription}
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      ) : null}
-
-      {canReadTrackedAssets && !preview.error && hasAssets ? (
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-wrap gap-2">
-            {preview.assets.map((asset) => (
-              <Badge key={asset.assetId} variant="outline">
-                {asset.assetSymbol}
-              </Badge>
-            ))}
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="font-medium text-foreground">
+              {dictionary.workspaceOverview.trackedAssets}
+            </h3>
+            {canReadTrackedAssets ? (
+              <Badge variant="secondary">{formatNumber(preview.total, locale)}</Badge>
+            ) : null}
           </div>
-          <div className="grid gap-3 md:grid-cols-2">
+          <p className="text-sm text-muted-foreground">
+            {dictionary.workspaceOverview.trackedAssetsDescription}
+          </p>
+        </div>
+
+        {!canReadTrackedAssets ? (
+          <Empty className="min-h-56 border">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <ShieldAlertIcon />
+              </EmptyMedia>
+              <EmptyTitle>{dictionary.workspaceOverview.trackedAssetsDeniedTitle}</EmptyTitle>
+              <EmptyDescription>
+                {dictionary.workspaceOverview.trackedAssetsDeniedDescription}
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : null}
+
+        {canReadTrackedAssets && preview.error ? (
+          <Empty className="min-h-56 border">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <CircleSlashIcon />
+              </EmptyMedia>
+              <EmptyTitle>{dictionary.workspaceOverview.trackedAssetsLoadErrorTitle}</EmptyTitle>
+              <EmptyDescription>{preview.error}</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : null}
+
+        {canReadTrackedAssets && !preview.error && !hasAssets ? (
+          <Empty className="min-h-56 border">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <TargetIcon />
+              </EmptyMedia>
+              <EmptyTitle>{dictionary.workspaceOverview.noTrackedAssetsTitle}</EmptyTitle>
+              <EmptyDescription>
+                {dictionary.workspaceOverview.noTrackedAssetsDescription}
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : null}
+
+        {canReadTrackedAssets && !preview.error && hasAssets ? (
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {preview.assets.map((asset) => (
               <div
                 key={asset.id}
@@ -430,112 +375,227 @@ function TrackedAssetsSummary({
               </div>
             ))}
           </div>
+        ) : null}
+      </div>
+    </section>
+  )
+}
+
+function NarrativeOverviewSection({
+  canReadNarrativePreview,
+  narrativePreview,
+  dictionary,
+  locale,
+}: {
+  canReadNarrativePreview: boolean
+  narrativePreview: NarrativePreviewState
+  dictionary: Dictionary
+  locale: AppLocale
+}) {
+  if (!canReadNarrativePreview) {
+    return null
+  }
+
+  const visibleNarratives = narrativePreview.narratives.slice(
+    0,
+    NARRATIVE_PREVIEW_SEARCH.size
+  )
+  const hasNarratives = visibleNarratives.length > 0
+
+  return (
+    <section className="flex flex-col gap-4 rounded-xl border p-5">
+      <div className="flex flex-col gap-1">
+        <h3 className="font-medium text-foreground">
+          {dictionary.workspaceOverview.narratives}
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          {dictionary.workspaceOverview.narrativesDescription}
+        </p>
+      </div>
+
+      {narrativePreview.error ? (
+        <Empty className="min-h-40 border">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <CircleSlashIcon />
+            </EmptyMedia>
+            <EmptyTitle>{dictionary.workspaceOverview.narrativesLoadErrorTitle}</EmptyTitle>
+            <EmptyDescription>{narrativePreview.error}</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      ) : null}
+
+      {!narrativePreview.error && !hasNarratives ? (
+        <Empty className="min-h-40 border">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <ScrollTextIcon />
+            </EmptyMedia>
+            <EmptyTitle>{dictionary.workspaceOverview.noNarrativesTitle}</EmptyTitle>
+            <EmptyDescription>
+              {dictionary.workspaceOverview.noNarrativesDescription}
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      ) : null}
+
+      {!narrativePreview.error && hasNarratives ? (
+        <div className="divide-y">
+          {visibleNarratives.map((narrative) => (
+            <NarrativePreviewRow
+              key={narrative.id}
+              narrative={narrative}
+              dictionary={dictionary}
+              locale={locale}
+            />
+          ))}
         </div>
       ) : null}
     </section>
   )
 }
 
-function WorkspaceTechnicalDetails({
-  workspace,
+function NarrativePreviewRow({
+  narrative,
   dictionary,
   locale,
 }: {
-  workspace: WorkspaceResponse
+  narrative: NarrativeSummaryResponse
   dictionary: Dictionary
   locale: AppLocale
 }) {
+  const title = narrative.title?.trim() || dictionary.workspaceOverview.narrativeUntitled
+  const body =
+    narrative.thesis?.trim() ||
+    narrative.summary?.trim() ||
+    dictionary.workspaceOverview.narrativeSummaryEmpty
+  const primaryAsset =
+    narrative.primaryAssetSymbol?.trim() ||
+    narrative.primaryAssetName?.trim() ||
+    null
+
   return (
-    <section className="flex flex-col gap-4 rounded-xl border p-5">
-      <div className="flex flex-col gap-1">
-        <h3 className="font-medium text-foreground">
-          {dictionary.workspaceOverview.technicalTitle}
-        </h3>
-        <p className="text-sm text-muted-foreground">
-          {dictionary.workspaceOverview.technicalDescription}
-        </p>
+    <article className="flex flex-col gap-2 py-3 first:pt-0 last:pb-0">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <h4 className="min-w-0 text-sm font-medium text-foreground">
+          {title}
+        </h4>
+        <div className="flex shrink-0 flex-wrap gap-2">
+          {narrative.status ? (
+            <Badge variant={getNarrativeStatusVariant(narrative.status)}>
+              {getNarrativeStatusLabel(narrative.status, dictionary)}
+            </Badge>
+          ) : null}
+          {typeof narrative.confidence === "number" ? (
+            <Badge variant="outline">
+              {formatMessage(dictionary.workspaceOverview.narrativeConfidence, {
+                value: formatPercent(narrative.confidence, locale, {
+                  maximumFractionDigits: 0,
+                }),
+              })}
+            </Badge>
+          ) : null}
+        </div>
       </div>
 
-      <div className="grid gap-3">
-        <TechnicalDetail
-          label={dictionary.workspaceOverview.workspaceId}
-          value={workspace.id.toString()}
-        />
-        <TechnicalDetail
-          label={dictionary.workspaceOverview.createdAt}
-          valueNode={
-            <AppTimeMetadata icon={CalendarClockIcon}>
-              {formatWorkspaceOverviewDateTime(
-                workspace.createdDate,
-                dictionary,
-                locale
-              )}
-            </AppTimeMetadata>
-          }
-        />
-        <TechnicalDetail
-          label={dictionary.workspaceOverview.updated}
-          valueNode={
-            <AppTimeMetadata icon={CalendarClockIcon}>
-              {formatWorkspaceOverviewDateTime(
-                workspace.lastModifiedDate,
-                dictionary,
-                locale
-              )}
-            </AppTimeMetadata>
-          }
-        />
+      <p className="line-clamp-2 text-sm leading-6 text-muted-foreground">
+        {body}
+      </p>
+
+      <div className="flex flex-wrap items-center gap-2">
+        {primaryAsset ? (
+          <Badge variant="secondary">{primaryAsset}</Badge>
+        ) : null}
+        {narrative.lastUpdatedAt ? (
+          <AppTimeMetadata icon={CalendarClockIcon}>
+            {formatWorkspaceOverviewDateTime(
+              narrative.lastUpdatedAt,
+              dictionary,
+              locale
+            )}
+          </AppTimeMetadata>
+        ) : null}
       </div>
-    </section>
+    </article>
   )
 }
 
-function TechnicalDetail({
-  label,
-  value,
-  valueNode,
-}: {
-  label: string
-  value?: string
-  valueNode?: ReactNode
-}) {
-  return (
-    <div className="flex items-center justify-between gap-4 rounded-lg bg-muted/30 px-3 py-2">
-      <span className="text-sm text-muted-foreground">{label}</span>
-      {valueNode ?? (
-        <span className="truncate text-right text-sm font-medium text-foreground">
-          {value}
-        </span>
-      )}
-    </div>
-  )
+function getNarrativeStatusLabel(
+  status: NarrativeStatus,
+  dictionary: Dictionary
+) {
+  const labels = dictionary.workspaceOverview.narrativeStatuses as Record<string, string>
+  return labels[status] ?? status
+}
+
+function getNarrativeStatusVariant(
+  status: NarrativeStatus
+): "default" | "secondary" | "outline" | "destructive" {
+  switch (status) {
+    case "ACTIVE":
+      return "default"
+    case "EMERGING":
+    case "WEAKENING":
+      return "secondary"
+    case "INVALIDATED":
+      return "destructive"
+    case "ARCHIVED":
+    default:
+      return "outline"
+  }
 }
 
 function WorkspaceOverviewSkeleton() {
   return (
     <div className="flex flex-col gap-6">
-      <div className="rounded-xl border bg-muted/20 p-5">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+      <div className="rounded-xl border p-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex flex-1 flex-col gap-3">
-            <Skeleton className="h-5 w-32" />
             <Skeleton className="h-8 w-full max-w-md" />
-            <Skeleton className="h-4 w-full max-w-2xl" />
+            <Skeleton className="h-4 w-full max-w-3xl" />
+            <Skeleton className="h-4 w-48" />
           </div>
           <Skeleton className="h-9 w-44" />
         </div>
-        <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-4 flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-5 w-40" />
+            <Skeleton className="h-4 w-full max-w-lg" />
+          </div>
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <Skeleton key={index} className="h-16 rounded-lg" />
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="flex flex-col gap-4 rounded-xl border p-5">
+        <div className="flex flex-col gap-2">
+          <Skeleton className="h-5 w-44" />
+          <Skeleton className="h-4 w-full max-w-xl" />
+        </div>
+        <div className="divide-y">
           {Array.from({ length: 3 }).map((_, index) => (
-            <div key={index} className="rounded-lg border bg-background p-4">
-              <Skeleton className="h-4 w-28" />
-              <Skeleton className="mt-3 h-6 w-full" />
-              <Skeleton className="mt-3 h-3 w-32" />
+            <div
+              key={index}
+              className="flex flex-col gap-2 py-3 first:pt-0 last:pb-0"
+            >
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <Skeleton className="h-4 w-full max-w-sm" />
+                <div className="flex gap-2">
+                  <Skeleton className="h-5 w-20" />
+                  <Skeleton className="h-5 w-24" />
+                </div>
+              </div>
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-2/3" />
+              <div className="flex gap-2">
+                <Skeleton className="h-5 w-16" />
+                <Skeleton className="h-4 w-36" />
+              </div>
             </div>
           ))}
         </div>
-      </div>
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
-        <Skeleton className="h-80 rounded-xl" />
-        <Skeleton className="h-80 rounded-xl" />
       </div>
     </div>
   )

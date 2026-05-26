@@ -42,6 +42,7 @@ export const vi = {
   },
   navigation: {
     platform: "Nền tảng",
+    overview: "Tổng quan",
     knowledgeGraph: "Biểu đồ tri thức",
     marketCharts: "Biểu đồ giá",
     content: "Nội dung",
@@ -170,16 +171,9 @@ export const vi = {
     noActiveTitle: "Chưa có không gian làm việc đang hoạt động",
     noActiveDescription:
       "Hãy tạo hoặc chọn một không gian làm việc để bắt đầu theo dõi tài sản, truy vấn thị trường và khám phá dữ liệu theo đúng phạm vi.",
-    active: "Đang hoạt động",
-    currentScope: "Phạm vi hiện tại của các tính năng không gian làm việc",
-    heroDescription:
-      "Không gian này quyết định danh sách tài sản theo dõi và là ngữ cảnh chính cho các luồng phân tích thị trường trong Signapse.",
+    description:
+      "Không gian làm việc đang áp dụng cho các màn hình phân tích. Kiểm tra tài sản theo dõi bên dưới để bảo đảm dữ liệu đúng phạm vi.",
     trackedAssets: "Tài sản theo dõi",
-    trackedAssetsStatDescription: "Đang dùng cho phạm vi không gian làm việc",
-    status: "Trạng thái",
-    statusDescription: "Đang là phạm vi hiện tại",
-    updated: "Cập nhật",
-    lastRecorded: "Lần ghi nhận gần nhất",
     trackedAssetsDescription:
       "Danh sách này được lưu theo không gian làm việc đang hoạt động.",
     watchlistLoadError: "Không thể tải tài sản theo dõi.",
@@ -190,14 +184,27 @@ export const vi = {
     noTrackedAssetsTitle: "Không gian làm việc chưa theo dõi tài sản nào",
     noTrackedAssetsDescription:
       "Thêm các mã tài sản quan trọng để các màn hình phân tích có phạm vi theo dõi rõ ràng hơn.",
-    technicalTitle: "Thông tin kỹ thuật",
-    technicalDescription:
-      "Các trường định danh thấp hơn, dùng cho kiểm tra và đối soát dữ liệu.",
-    workspaceId: "ID không gian",
-    createdAt: "Tạo lúc",
     noData: "Chưa có dữ liệu",
     invalidDate: "Ngày không hợp lệ",
     manageTrackedAssets: "Quản lý tài sản theo dõi",
+    narratives: "Luận điểm nổi bật",
+    narrativesDescription:
+      "Các luận điểm thị trường đáng chú ý trong phạm vi hiện tại.",
+    narrativesLoadError: "Không thể tải luận điểm nổi bật.",
+    narrativesLoadErrorTitle: "Không thể tải luận điểm nổi bật",
+    noNarrativesTitle: "Chưa có luận điểm nổi bật",
+    noNarrativesDescription:
+      "Khi backend trả về luận điểm phù hợp, phần này sẽ hiển thị tại đây.",
+    narrativeUntitled: "Luận điểm chưa có tiêu đề",
+    narrativeSummaryEmpty: "Chưa có mô tả cho luận điểm này.",
+    narrativeConfidence: "Tin cậy {value}",
+    narrativeStatuses: {
+      EMERGING: "Mới hình thành",
+      ACTIVE: "Đang hoạt động",
+      WEAKENING: "Yếu dần",
+      INVALIDATED: "Không còn hợp lệ",
+      ARCHIVED: "Lưu trữ",
+    },
   },
   personalNotes: {
     trigger: "Ghi chú",

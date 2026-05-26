@@ -949,37 +949,10 @@ function ChartSurface({
         ) : null}
 
         {phase === "success" && data && hasCandles ? (
-          <>
-            <MarketChartCanvas
-              ref={chartCanvasRef}
-              activeIndicators={activeIndicators}
-              annotations={data.annotations}
-              assetId={data.asset.id}
-              candles={data.candles}
-              className={isFullscreen ? "h-full min-h-0" : undefined}
-              drawingToolActive={!!drawingState.activeTool}
-              includeAnnotations={annotationLayerEnabled}
-              resetKey={chartResetKey}
-              timeframe={data.timeframe}
-              symbol={displaySymbol}
-              annotationGroups={annotationGroups}
-              selectedAnnotationGroupId={selectedAnnotationGroup?.id}
-              onAnnotationSelect={onAnnotationSelect}
-              onDrawingSelectionChange={(hasSelectedDrawing) =>
-                setDrawingState((current) => ({
-                  ...current,
-                  hasSelectedDrawing,
-                }))
-              }
-              onDrawingToolComplete={() =>
-                setDrawingState((current) => ({
-                  ...current,
-                  activeTool: null,
-                }))
-              }
-              onLoadedDataChange={onLoadedDataChange}
-              onLoadOlderCandles={getMarketChartCandles}
-            />
+          <div
+            data-fullscreen={isFullscreen}
+            className="flex min-h-[520px] min-w-0 data-[fullscreen=true]:h-full data-[fullscreen=true]:min-h-0"
+          >
             <MarketChartDrawingToolbar
               disabled={isBusy}
               state={drawingState}
@@ -988,23 +961,55 @@ function ChartSurface({
               onStateChange={handleDrawingStateChange}
               onToolChange={handleDrawingToolChange}
             />
-          </>
+            <div className="relative min-w-0 flex-1">
+              <MarketChartCanvas
+                ref={chartCanvasRef}
+                activeIndicators={activeIndicators}
+                annotations={data.annotations}
+                assetId={data.asset.id}
+                candles={data.candles}
+                className={isFullscreen ? "h-full min-h-0" : undefined}
+                drawingToolActive={!!drawingState.activeTool}
+                includeAnnotations={annotationLayerEnabled}
+                resetKey={chartResetKey}
+                timeframe={data.timeframe}
+                symbol={displaySymbol}
+                annotationGroups={annotationGroups}
+                selectedAnnotationGroupId={selectedAnnotationGroup?.id}
+                onAnnotationSelect={onAnnotationSelect}
+                onDrawingSelectionChange={(hasSelectedDrawing) =>
+                  setDrawingState((current) => ({
+                    ...current,
+                    hasSelectedDrawing,
+                  }))
+                }
+                onDrawingToolComplete={() =>
+                  setDrawingState((current) => ({
+                    ...current,
+                    activeTool: null,
+                  }))
+                }
+                onLoadedDataChange={onLoadedDataChange}
+                onLoadOlderCandles={getMarketChartCandles}
+              />
+
+              {selectedAnnotationGroup ? (
+                <div
+                  className="absolute z-20 hidden w-[min(22rem,calc(100%-1.5rem))] max-w-[calc(100%-1.5rem)] sm:block"
+                  style={getAnnotationPopupStyle(selectedAnnotationPoint)}
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  <MarketChartAnnotationPopup
+                    group={selectedAnnotationGroup}
+                    onClose={onAnnotationClose}
+                    onEventOpen={onAnnotationEventOpen}
+                  />
+                </div>
+              ) : null}
+            </div>
+          </div>
         ) : null}
       </div>
-
-      {selectedAnnotationGroup ? (
-        <div
-          className="absolute z-20 hidden w-[min(22rem,calc(100%-1.5rem))] max-w-[calc(100%-1.5rem)] sm:block"
-          style={getAnnotationPopupStyle(selectedAnnotationPoint)}
-          onClick={(event) => event.stopPropagation()}
-        >
-          <MarketChartAnnotationPopup
-            group={selectedAnnotationGroup}
-            onClose={onAnnotationClose}
-            onEventOpen={onAnnotationEventOpen}
-          />
-        </div>
-      ) : null}
 
       <MarketChartAnnotationControls
         annotationLayerEnabled={annotationLayerEnabled}

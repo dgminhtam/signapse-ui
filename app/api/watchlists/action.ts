@@ -5,9 +5,9 @@ import { ActionResult, Page, SearchParams } from "@/app/lib/definitions"
 import { getServerDictionary } from "@/app/lib/i18n/server"
 import { queryParamsToString } from "@/app/lib/utils"
 import {
-  AddWorkspaceWatchlistAssetRequest,
+  BulkCreateWorkspaceWatchlistAssetsRequest,
+  BulkCreateWorkspaceWatchlistAssetsResponse,
   WorkspaceWatchlistAssetListItemResponse,
-  WorkspaceWatchlistAssetResponse,
 } from "@/app/lib/watchlists/definitions"
 
 export async function getWorkspaceWatchlistAssets(
@@ -18,16 +18,20 @@ export async function getWorkspaceWatchlistAssets(
   )
 }
 
-export async function addAssetToWorkspaceWatchlist(
-  request: AddWorkspaceWatchlistAssetRequest
-): Promise<ActionResult<WorkspaceWatchlistAssetResponse>> {
+export async function addAssetsToWorkspaceWatchlist(
+  request: BulkCreateWorkspaceWatchlistAssetsRequest
+): Promise<ActionResult<BulkCreateWorkspaceWatchlistAssetsResponse>> {
   try {
-    const watchlistAsset = await fetchAuthenticated<WorkspaceWatchlistAssetResponse>("/watchlists", {
-      method: "POST",
-      body: JSON.stringify(request),
-    })
+    const watchlistAssets =
+      await fetchAuthenticated<BulkCreateWorkspaceWatchlistAssetsResponse>(
+        "/watchlists/assets",
+        {
+          method: "POST",
+          body: JSON.stringify(request),
+        }
+      )
 
-    return { success: true, data: watchlistAsset }
+    return { success: true, data: watchlistAssets }
   } catch (error: unknown) {
     const dictionary = await getServerDictionary()
     const errorMessage =

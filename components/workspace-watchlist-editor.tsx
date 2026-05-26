@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 
 import {
-  addAssetToWorkspaceWatchlist,
+  addAssetsToWorkspaceWatchlist,
   getWorkspaceWatchlistAssets,
   removeAssetFromWorkspaceWatchlist,
 } from "@/app/api/watchlists/action"
@@ -34,6 +34,8 @@ import { Spinner } from "@/components/ui/spinner"
 
 import { AssetMultiSelectCombobox } from "./asset-multi-select-combobox"
 
+const WATCHLIST_BULK_ADD_LIMIT = 100
+
 interface WorkspaceWatchlistEditorProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -55,6 +57,20 @@ function mapWorkspaceWatchlistAssets(
   }))
 }
 
+function chunkAssetIds(assetIds: number[]): number[][] {
+  const chunks: number[][] = []
+
+  for (
+    let index = 0;
+    index < assetIds.length;
+    index += WATCHLIST_BULK_ADD_LIMIT
+  ) {
+    chunks.push(assetIds.slice(index, index + WATCHLIST_BULK_ADD_LIMIT))
+  }
+
+  return chunks
+}
+
 export function WorkspaceWatchlistEditor({
   open,
   onOpenChange,
@@ -66,6 +82,7 @@ export function WorkspaceWatchlistEditor({
 }: WorkspaceWatchlistEditorProps) {
   const router = useRouter()
   const { dictionary, formatMessage, formatNumber } = useLocalization()
+  const watchlistLoadErrorFallback = dictionary.watchlist.loadErrorFallback
   const [isPending, startTransition] = React.useTransition()
   const [isLoading, setIsLoading] = React.useState(false)
   const [loadError, setLoadError] = React.useState<string | null>(null)
@@ -104,14 +121,14 @@ export function WorkspaceWatchlistEditor({
       const errorMessage =
         error instanceof Error
           ? error.message
-          : dictionary.watchlist.loadErrorFallback
+          : watchlistLoadErrorFallback
       setLoadError(errorMessage)
       setInitialAssets([])
       setSelectedAssets([])
     } finally {
       setIsLoading(false)
     }
-  }, [canReadWorkspaceWatchlist, workspace])
+  }, [canReadWorkspaceWatchlist, watchlistLoadErrorFallback, workspace])
 
   React.useEffect(() => {
     if (!open || !canReadWorkspaceWatchlist) {
@@ -155,9 +172,10 @@ export function WorkspaceWatchlistEditor({
           removeAssetFromWorkspaceWatchlist(asset.id)
         )
       )
+      const assetIdsToAdd = assetsToAdd.map((asset) => asset.id)
       const addResults = await Promise.all(
-        assetsToAdd.map((asset) =>
-          addAssetToWorkspaceWatchlist({ assetId: asset.id })
+        chunkAssetIds(assetIdsToAdd).map((assetIds) =>
+          addAssetsToWorkspaceWatchlist({ assetIds })
         )
       )
 

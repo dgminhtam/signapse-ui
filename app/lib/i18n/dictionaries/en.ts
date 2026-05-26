@@ -44,6 +44,7 @@ export const en: Dictionary = {
   },
   navigation: {
     platform: "Platform",
+    overview: "Overview",
     knowledgeGraph: "Knowledge graph",
     marketCharts: "Market charts",
     content: "Content",
@@ -171,16 +172,9 @@ export const en: Dictionary = {
     noActiveTitle: "No active workspace yet",
     noActiveDescription:
       "Create or choose a workspace to start tracking assets, querying markets, and exploring data in the right scope.",
-    active: "Active",
-    currentScope: "Current scope for workspace features",
-    heroDescription:
-      "This workspace controls the tracked asset list and is the main context for Signapse market analysis flows.",
+    description:
+      "The workspace applied across analysis screens. Review the tracked assets below to keep data in the right scope.",
     trackedAssets: "Tracked assets",
-    trackedAssetsStatDescription: "Used for the current workspace scope",
-    status: "Status",
-    statusDescription: "Currently selected scope",
-    updated: "Updated",
-    lastRecorded: "Most recent record",
     trackedAssetsDescription: "This list is saved under the active workspace.",
     watchlistLoadError: "Could not load tracked assets.",
     trackedAssetsDeniedTitle: "No permission to view tracked assets",
@@ -190,14 +184,27 @@ export const en: Dictionary = {
     noTrackedAssetsTitle: "This workspace is not tracking any assets yet",
     noTrackedAssetsDescription:
       "Add important asset symbols so analysis screens have a clearer tracking scope.",
-    technicalTitle: "Technical information",
-    technicalDescription:
-      "Lower-level identifiers used for data checks and reconciliation.",
-    workspaceId: "Workspace ID",
-    createdAt: "Created at",
     noData: "No data",
     invalidDate: "Invalid date",
     manageTrackedAssets: "Manage tracked assets",
+    narratives: "Featured narratives",
+    narrativesDescription:
+      "Notable market narratives in the current scope.",
+    narrativesLoadError: "Could not load featured narratives.",
+    narrativesLoadErrorTitle: "Could not load featured narratives",
+    noNarrativesTitle: "No featured narratives yet",
+    noNarrativesDescription:
+      "When the backend returns relevant narratives, they will appear here.",
+    narrativeUntitled: "Untitled narrative",
+    narrativeSummaryEmpty: "No description for this narrative yet.",
+    narrativeConfidence: "Confidence {value}",
+    narrativeStatuses: {
+      EMERGING: "Emerging",
+      ACTIVE: "Active",
+      WEAKENING: "Weakening",
+      INVALIDATED: "Invalidated",
+      ARCHIVED: "Archived",
+    },
   },
   personalNotes: {
     trigger: "Notes",

@@ -66,14 +66,19 @@ export function AppBreadcrumb() {
   const pathname = usePathname()
   const { dictionary } = useLocalization()
   const segments = stripLocaleFromPathname(pathname).split("/").filter(Boolean)
+  const overviewLabel = dictionary.navigation.overview
 
   return (
     <Breadcrumb className="min-w-0" aria-label={dictionary.navigation.breadcrumb}>
       <BreadcrumbList className="flex-nowrap">
         <BreadcrumbItem className="hidden md:block">
-          <BreadcrumbLink asChild>
-            <Link href="/">{dictionary.common.home}</Link>
-          </BreadcrumbLink>
+          {segments.length === 0 ? (
+            <BreadcrumbPage>{overviewLabel}</BreadcrumbPage>
+          ) : (
+            <BreadcrumbLink asChild>
+              <Link href="/">{overviewLabel}</Link>
+            </BreadcrumbLink>
+          )}
         </BreadcrumbItem>
 
         {segments.map((segment, index) => {

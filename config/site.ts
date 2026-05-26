@@ -63,6 +63,11 @@ export function createSiteConfig(dictionary: Dictionary) {
   },
   navMain: [
     {
+      title: dictionary.navigation.overview,
+      url: "/",
+      icon: LayoutDashboard,
+    },
+    {
       title: dictionary.navigation.knowledgeGraph,
       url: "/graph-view",
       icon: LayoutDashboard,

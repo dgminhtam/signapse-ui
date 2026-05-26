@@ -260,7 +260,32 @@ function getCssTextVariable(name: string, fallback: string) {
   )
 }
 
-function getCandleTimestamp(candle: MarketChartCandleItemResponse) {
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null
+}
+
+function isValidMarketChartCandle(
+  candle: unknown
+): candle is MarketChartCandleItemResponse {
+  return (
+    isRecord(candle) &&
+    toMarketChartEpochMillis(candle.time) !== null &&
+    typeof candle.open === "number" &&
+    Number.isFinite(candle.open) &&
+    typeof candle.high === "number" &&
+    Number.isFinite(candle.high) &&
+    typeof candle.low === "number" &&
+    Number.isFinite(candle.low) &&
+    typeof candle.close === "number" &&
+    Number.isFinite(candle.close)
+  )
+}
+
+function getCandleTimestamp(candle: unknown) {
+  if (!isValidMarketChartCandle(candle)) {
+    return null
+  }
+
   return toMarketChartEpochMillis(candle.time)
 }
 
@@ -269,7 +294,7 @@ function normalizeCandleItems(
 ): MarketChartCandleItemResponse[] {
   const candlesByTime = new Map<number, MarketChartCandleItemResponse>()
 
-  for (const candle of candles) {
+  for (const candle of candles.filter(isValidMarketChartCandle)) {
     const timestamp = getCandleTimestamp(candle)
 
     if (timestamp !== null) {

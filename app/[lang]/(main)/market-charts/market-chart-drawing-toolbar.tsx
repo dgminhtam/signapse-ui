@@ -84,10 +84,11 @@ export function MarketChartDrawingToolbar({
     <TooltipProvider delayDuration={150}>
       <div
         className={cn(
-          "absolute left-3 top-3 flex max-h-[calc(100%-1.5rem)] flex-col overflow-hidden rounded-lg border bg-background/95 shadow-sm backdrop-blur",
+          "flex shrink-0 flex-col items-center overflow-hidden border-r bg-card p-1",
           disabled ? "pointer-events-none opacity-50" : null
         )}
         aria-label={labels.toolbarLabel}
+        onClick={(event) => event.stopPropagation()}
       >
         <DrawingTooltip label={state.isCollapsed ? labels.expand : labels.collapse}>
           <Button
