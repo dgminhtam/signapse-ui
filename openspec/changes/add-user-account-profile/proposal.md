@@ -10,8 +10,8 @@ The profile form also needs backend contract support for date of birth and phone
 - Wire the existing sidebar avatar menu account item to the account route using locale-preserving navigation.
 - Add a tabbed account screen with personal information and billing sections.
 - Add a personal information form for avatar, last name, first name, date of birth, disabled email, phone number, and role classification.
-- Extend the user profile contract with `birthDay`, `phoneNumber`, and `role_name`.
-- Add a profile update request that updates `firstName`, `lastName`, `birthDay`, and `mobilePhone` only.
+- Extend the user profile contract with `birthday`, `phone`, and `role_name`.
+- Add a profile update request that updates `firstName`, `lastName`, `birthday`, and `phone` only.
 - Add an upgrade account button near the role classification while keeping payment/billing implementation out of scope.
 - Add a billing tab placeholder without billing fields, billing APIs, or fake billing data.
 

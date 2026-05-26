@@ -17,8 +17,8 @@ export interface BackendMediaResponse {
 export interface UpdateUserProfileRequest {
   firstName: string
   lastName: string
-  birthDay: string
-  mobilePhone: string
+  birthday: string
+  phone: string
 }
 
 export interface BackendMeResponse {
@@ -26,10 +26,12 @@ export interface BackendMeResponse {
   email: string
   firstName: string | null
   lastName: string | null
-  dateOfBirth: string | null
+  birthday?: string | null
   birthDay?: string | null
-  phoneNumber: string | null
-  mobilePhone?: string | null
+  dateOfBirth?: string | null
+  phone?: string | number | null
+  phoneNumber?: string | number | null
+  mobilePhone?: string | number | null
   role_name: string | null
   currentWorkspace: BackendWorkspaceSummary | null
   mainImage: BackendMediaResponse | null

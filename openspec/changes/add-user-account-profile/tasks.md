@@ -1,7 +1,7 @@
 ## 1. User Profile Contract
 
-- [x] 1.1 Extend `BackendMeResponse` with `birthDay`, `phoneNumber`, and `role_name`.
-- [x] 1.2 Add a profile update request type that includes `firstName`, `lastName`, `birthDay`, and `mobilePhone`, excluding email.
+- [x] 1.1 Extend `BackendMeResponse` with `birthday`, `phone`, and `role_name`.
+- [x] 1.2 Add a profile update request type that includes `firstName`, `lastName`, `birthday`, and `phone`, excluding email.
 - [x] 1.3 Add or update user server actions to submit editable profile fields through `fetchAuthenticated()` and return localized action errors.
 - [x] 1.4 Add role display fallback when `role_name` is empty.
 
@@ -36,4 +36,4 @@
 - [x] 5.3 Run lint.
 - [x] 5.4 Static-review account/profile source for locale-preserving links, no hardcoded UI copy, disabled email submit exclusion, read-only role submit exclusion, shadcn wrapper composition, and `(main)` route placement.
 
-User-owned manual QA note: confirm the backend profile update endpoint persists request fields `birthDay` and `mobilePhone`, and that `/me` returns `role_name`, once backend support is available.
+User-owned manual QA note: confirm the backend profile update endpoint persists request fields `birthday` and `phone`, and that `/me` returns `role_name`, once backend support is available.

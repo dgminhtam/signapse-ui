@@ -60,11 +60,23 @@ function getPrimaryEmail(user: Awaited<ReturnType<typeof currentUser>>) {
   )
 }
 
-function getFirstNonEmptyValue(...values: Array<string | null | undefined>) {
-  return values.find((value) => value?.trim())?.trim() ?? ""
+function getFirstNonEmptyValue(...values: unknown[]) {
+  for (const value of values) {
+    if (value === null || value === undefined) {
+      continue
+    }
+
+    const stringValue = String(value).trim()
+
+    if (stringValue) {
+      return stringValue
+    }
+  }
+
+  return ""
 }
 
-function getDateInputValue(...values: Array<string | null | undefined>) {
+function getDateInputValue(...values: unknown[]) {
   const value = getFirstNonEmptyValue(...values)
 
   if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
@@ -111,9 +123,17 @@ export default async function AccountPage({ searchParams }: PageProps) {
     avatarFallback: getAvatarFallback(displayName, email),
     firstName: nameParts.firstName,
     lastName: nameParts.lastName,
-    dateOfBirth: getDateInputValue(profile.birthDay, profile.dateOfBirth),
+    dateOfBirth: getDateInputValue(
+      profile.birthday,
+      profile.birthDay,
+      profile.dateOfBirth
+    ),
     email,
-    phoneNumber: getFirstNonEmptyValue(profile.phoneNumber, profile.mobilePhone),
+    phoneNumber: getFirstNonEmptyValue(
+      profile.phone,
+      profile.phoneNumber,
+      profile.mobilePhone
+    ),
     roleName: profile.role_name ?? "",
   }
   const activeTab = resolvedSearchParams.tab === "billing" ? "billing" : "personal"

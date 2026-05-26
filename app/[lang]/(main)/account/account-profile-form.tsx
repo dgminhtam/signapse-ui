@@ -57,7 +57,7 @@ function getAccountProfileSchema(t: Dictionary["accountProfile"]) {
       .trim()
       .min(1, t.dateOfBirthRequired)
       .regex(/^\d{4}-\d{2}-\d{2}$/, t.dateOfBirthInvalid),
-    email: z
+    email: z  
       .string()
       .trim()
       .min(1, t.emailRequired)
@@ -144,8 +144,8 @@ export function AccountProfileForm({
     const result = await updateMyProfile({
       firstName: values.firstName.trim(),
       lastName: values.lastName.trim(),
-      birthDay: values.dateOfBirth.trim(),
-      mobilePhone: values.phoneNumber.trim(),
+      birthday: values.dateOfBirth.trim(),
+      phone: values.phoneNumber.trim(),
     })
 
     if (result.success) {

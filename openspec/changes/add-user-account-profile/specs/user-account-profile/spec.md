@@ -34,8 +34,8 @@ The system SHALL load user profile data with date of birth, phone number, and cu
 #### Scenario: Profile data is requested
 - **WHEN** the account page loads the current user profile
 - **THEN** the profile response includes `email`
-- **AND** the profile response includes `birthDay` in `yyyy-MM-dd` format
-- **AND** the profile response includes `phoneNumber`
+- **AND** the profile response includes `birthday` in `yyyy-MM-dd` format
+- **AND** the profile response includes `phone`
 - **AND** the profile response includes `role_name`
 - **AND** the profile response includes the existing profile image data when available
 
@@ -62,7 +62,7 @@ The system SHALL allow users to update first name, last name, date of birth, and
 
 #### Scenario: User edits profile fields
 - **WHEN** the user changes first name, last name, date of birth, or phone number and saves
-- **THEN** the update request sends `firstName`, `lastName`, `birthDay`, and `mobilePhone`
+- **THEN** the app calls `PATCH /me` with `firstName`, `lastName`, `birthday`, and `phone`
 - **AND** the update request does not send email
 - **AND** the update request does not send `role_name`
 - **AND** the user receives localized success or error feedback
