@@ -67,28 +67,36 @@ export function AppBreadcrumb() {
   const { dictionary } = useLocalization()
   const segments = stripLocaleFromPathname(pathname).split("/").filter(Boolean)
   const overviewLabel = dictionary.navigation.overview
+  const showOverviewCrumb = !(
+    segments.length === 1 && segments[0] === "graph-view"
+  )
 
   return (
     <Breadcrumb className="min-w-0" aria-label={dictionary.navigation.breadcrumb}>
       <BreadcrumbList className="flex-nowrap">
-        <BreadcrumbItem className="hidden md:block">
-          {segments.length === 0 ? (
-            <BreadcrumbPage>{overviewLabel}</BreadcrumbPage>
-          ) : (
-            <BreadcrumbLink asChild>
-              <Link href="/">{overviewLabel}</Link>
-            </BreadcrumbLink>
-          )}
-        </BreadcrumbItem>
+        {showOverviewCrumb ? (
+          <BreadcrumbItem className="hidden md:block">
+            {segments.length === 0 ? (
+              <BreadcrumbPage>{overviewLabel}</BreadcrumbPage>
+            ) : (
+              <BreadcrumbLink asChild>
+                <Link href="/">{overviewLabel}</Link>
+              </BreadcrumbLink>
+            )}
+          </BreadcrumbItem>
+        ) : null}
 
         {segments.map((segment, index) => {
           const href = `/${segments.slice(0, index + 1).join("/")}`
           const isLast = index === segments.length - 1
           const title = formatSegment(segment, index, dictionary)
+          const showSeparator = showOverviewCrumb || index > 0
 
           return (
             <React.Fragment key={href}>
-              <BreadcrumbSeparator className="hidden md:block" />
+              {showSeparator ? (
+                <BreadcrumbSeparator className="hidden md:block" />
+              ) : null}
               <BreadcrumbItem className={!isLast ? "hidden md:block" : "min-w-0"}>
                 {isLast ? (
                   <BreadcrumbPage className="max-w-[45vw] truncate md:max-w-[36rem]">

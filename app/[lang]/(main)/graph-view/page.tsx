@@ -56,26 +56,31 @@ async function GraphViewContent() {
 
 function GraphViewSkeleton() {
   return (
-    <div className="relative min-h-[720px] overflow-hidden rounded-[30px] border border-border/80 bg-[radial-gradient(circle_at_top_left,_rgba(15,118,110,0.12),_transparent_28%),radial-gradient(circle_at_82%_18%,_rgba(217,119,6,0.14),_transparent_22%),radial-gradient(circle_at_bottom_right,_rgba(37,99,235,0.14),_transparent_30%),linear-gradient(180deg,rgba(255,255,255,0.72),rgba(248,250,252,0.96))] shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_24px_80px_-50px_rgba(15,23,42,0.45)] lg:min-h-[calc(100svh-8rem)]">
+    <div className="relative h-[calc(100svh-6.5rem)] min-h-[36rem] w-full max-w-full overflow-hidden rounded-[28px] border border-border/70 bg-[radial-gradient(circle_at_top_left,_rgba(15,118,110,0.10),_transparent_28%),radial-gradient(circle_at_82%_18%,_rgba(217,119,6,0.11),_transparent_22%),radial-gradient(circle_at_bottom_right,_rgba(37,99,235,0.12),_transparent_30%),linear-gradient(180deg,rgba(255,255,255,0.70),rgba(248,250,252,0.94))] shadow-[inset_0_1px_0_rgba(255,255,255,0.36),0_18px_56px_-48px_rgba(15,23,42,0.42)] dark:bg-[radial-gradient(circle_at_top_left,_rgba(15,118,110,0.16),_transparent_28%),radial-gradient(circle_at_82%_18%,_rgba(217,119,6,0.14),_transparent_22%),radial-gradient(circle_at_bottom_right,_rgba(37,99,235,0.16),_transparent_30%),linear-gradient(180deg,rgba(15,23,42,0.66),rgba(15,23,42,0.90))]">
       <div className="pointer-events-none absolute inset-x-4 top-4 z-10 flex flex-wrap items-start justify-between gap-3">
         <Skeleton className="h-8 w-36 rounded-full" />
 
-        <div className="flex max-w-[min(100%,28rem)] flex-wrap justify-end gap-2">
+        <div className="flex max-w-[min(100%,28rem)] flex-wrap justify-end gap-1.5">
           <Skeleton className="h-7 w-24 rounded-full" />
           <Skeleton className="h-7 w-24 rounded-full" />
           <Skeleton className="h-7 w-24 rounded-full" />
-          <Skeleton className="size-8 rounded-full" />
         </div>
+      </div>
+
+      <div className="pointer-events-none absolute right-4 top-16 z-10 flex flex-col gap-1.5">
+        <Skeleton className="size-8 rounded-full" />
+        <Skeleton className="size-8 rounded-full" />
+        <Skeleton className="size-8 rounded-full" />
       </div>
 
       <div className="absolute inset-6 rounded-[24px] border border-dashed border-border/60 bg-muted/20" />
 
       <div className="pointer-events-none absolute inset-x-4 bottom-4 z-10 flex flex-wrap items-end justify-between gap-3">
-        <Skeleton className="h-8 w-44 rounded-full" />
-        <div className="flex flex-wrap justify-end gap-2">
-          <Skeleton className="h-8 w-36 rounded-full" />
-          <Skeleton className="h-8 w-36 rounded-full" />
-          <Skeleton className="h-8 w-36 rounded-full" />
+        <Skeleton className="h-7 w-36 rounded-full" />
+        <div className="flex max-w-[min(100%,30rem)] flex-wrap justify-end gap-1.5 opacity-70">
+          <Skeleton className="h-6 w-32 rounded-full" />
+          <Skeleton className="h-6 w-32 rounded-full" />
+          <Skeleton className="h-6 w-32 rounded-full" />
         </div>
       </div>
     </div>
