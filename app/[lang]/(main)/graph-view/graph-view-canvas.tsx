@@ -86,9 +86,11 @@ type GraphCanvasPalette = {
   edgeHighlightOpacity: number
   edgeInactiveOpacity: number
   labelBackground: boolean
-  labelBackgroundFill: string
-  labelBackgroundOpacity: number
   labelFill: string
+  labelHoverFill: string
+  labelHoverMaxWidth: number
+  labelHoverStroke: string
+  labelInactiveOpacity: number
   labelStroke: string
   labelStrokeOpacity: number
   labelStrokeWidth: number
@@ -100,15 +102,6 @@ type GraphCanvasPalette = {
   selectionNodeHaloColor: string
   selectionRelatedNodeOpacity: number
   nodeStroke: string
-  tooltipSurfaceClassName: string
-}
-
-type HoverTooltipState = {
-  kind: GraphViewNodeKind
-  label: string
-  nodeId: string
-  x: number
-  y: number
 }
 
 const MIN_CANVAS_WIDTH = 360
@@ -116,10 +109,6 @@ const MIN_CANVAS_HEIGHT = 640
 const GRAPH_CANVAS_PAN_RANGE = 0.45
 const GRAPH_ANALYSIS_BOUNDS_SCALE = 1.45
 const GRAPH_ANALYSIS_BOUNDS_MIN_PADDING = 144
-const GRAPH_HOVER_TOOLTIP_OFFSET = 14
-const GRAPH_HOVER_TOOLTIP_MIN_MARGIN = 12
-const GRAPH_HOVER_TOOLTIP_MAX_WIDTH = 320
-const GRAPH_HOVER_TOOLTIP_HEIGHT = 84
 const GRAPH_RECENTER_ANIMATION = {
   duration: 520,
   easing: "ease-in-out",
@@ -172,10 +161,12 @@ function createGraphCanvasPalette(mode: GraphThemeMode): GraphCanvasPalette {
       edgeHighlightLineWidthBoost: 0.95,
       edgeHighlightOpacity: 0.84,
       edgeInactiveOpacity: 0.34,
-      labelBackground: true,
-      labelBackgroundFill: "rgba(2, 6, 23, 0.78)",
-      labelBackgroundOpacity: 0.68,
+      labelBackground: false,
       labelFill: "#f8fafc",
+      labelHoverFill: "#ffffff",
+      labelHoverMaxWidth: 300,
+      labelHoverStroke: "rgba(2, 6, 23, 0.96)",
+      labelInactiveOpacity: 0.72,
       labelStroke: "rgba(2, 6, 23, 0.92)",
       labelStrokeOpacity: 0.92,
       labelStrokeWidth: 2.8,
@@ -187,8 +178,6 @@ function createGraphCanvasPalette(mode: GraphThemeMode): GraphCanvasPalette {
       selectionNodeHaloColor: "rgba(248, 250, 252, 0.78)",
       selectionRelatedNodeOpacity: 0.82,
       nodeStroke: "rgba(241, 245, 249, 0.9)",
-      tooltipSurfaceClassName:
-        "border-border/80 bg-popover/95 text-popover-foreground shadow-xl",
     }
   }
 
@@ -197,10 +186,12 @@ function createGraphCanvasPalette(mode: GraphThemeMode): GraphCanvasPalette {
     edgeHighlightLineWidthBoost: 0.8,
     edgeHighlightOpacity: 0.78,
     edgeInactiveOpacity: 0.24,
-    labelBackground: true,
-    labelBackgroundFill: "rgba(248, 250, 252, 0.82)",
-    labelBackgroundOpacity: 0.66,
+    labelBackground: false,
     labelFill: "#172033",
+    labelHoverFill: "#020617",
+    labelHoverMaxWidth: 300,
+    labelHoverStroke: "rgba(255, 255, 255, 0.98)",
+    labelInactiveOpacity: 0.7,
     labelStroke: "rgba(248, 250, 252, 0.96)",
     labelStrokeOpacity: 0.96,
     labelStrokeWidth: 2.3,
@@ -212,8 +203,6 @@ function createGraphCanvasPalette(mode: GraphThemeMode): GraphCanvasPalette {
     selectionNodeHaloColor: "rgba(15, 23, 42, 0.44)",
     selectionRelatedNodeOpacity: 0.72,
     nodeStroke: "rgba(255, 255, 255, 0.88)",
-    tooltipSurfaceClassName:
-      "border-border/80 bg-popover/95 text-popover-foreground shadow-xl",
   }
 }
 
@@ -627,6 +616,20 @@ function createBoundedLabel(label: string, maxLength = 34) {
     .trimEnd()}...`
 }
 
+function getGraphNodeFullLabel(node: NodeData) {
+  const data = node.data as { label?: unknown } | undefined
+
+  if (typeof data?.label === "string") {
+    return data.label.trim()
+  }
+
+  if (typeof node.label === "string") {
+    return node.label.trim()
+  }
+
+  return ""
+}
+
 function getRelationScore(relationType: string, weight?: number | null) {
   const baseScoreByRelation: Record<string, number> = {
     PRIMARY_SUBJECT: 100,
@@ -855,19 +858,19 @@ function createG6GraphData(
       style: {
         fill: visual.color,
         labelBackground: graphPalette.labelBackground,
-        labelBackgroundFill: graphPalette.labelBackgroundFill,
-        labelBackgroundOpacity: graphPalette.labelBackgroundOpacity,
-        labelBackgroundPadding: [2, 4, 2, 4],
         labelFill: graphPalette.labelFill,
         labelFontSize: 11,
         labelFontWeight: 600,
         labelMaxWidth: 220,
+        labelMaxLines: 1,
         labelOffsetX: 9,
         labelPlacement: "right",
         labelStroke: graphPalette.labelStroke,
         labelStrokeOpacity: graphPalette.labelStrokeOpacity,
         labelLineWidth: graphPalette.labelStrokeWidth,
         labelText: showLabel ? createBoundedLabel(node.label) : "",
+        labelTextOverflow: "...",
+        labelWordWrap: false,
         lineWidth: 2,
         opacity: 0.96,
         shadowBlur: node.kind === "asset" || node.kind === "theme" ? 8 : 4,
@@ -1047,36 +1050,57 @@ function createNodeStateStyles(graphPalette: GraphCanvasPalette) {
         ? node.style.stroke
         : graphPalette.nodeStroke,
   })
+  const expandedLabel = (node: NodeData) => ({
+    labelBackground: false,
+    labelFill: graphPalette.labelHoverFill,
+    labelFontSize: 12,
+    labelFontWeight: 700,
+    labelLineWidth: graphPalette.labelStrokeWidth + 0.8,
+    labelMaxLines: 3,
+    labelMaxWidth: graphPalette.labelHoverMaxWidth,
+    labelOpacity: 1,
+    labelStroke: graphPalette.labelHoverStroke,
+    labelStrokeOpacity: 1,
+    labelText: getGraphNodeFullLabel(node),
+    labelTextOverflow: "...",
+    labelWordWrap: true,
+  })
 
   return {
     active: (node: NodeData) => ({
       ...keepBaseStroke(node),
+      ...expandedLabel(node),
       opacity: 1,
       shadowBlur: 22,
       shadowColor: graphPalette.activeNodeHaloColor,
     }),
     highlight: (node: NodeData) => ({
       ...keepBaseStroke(node),
+      labelOpacity: 0.92,
       opacity: graphPalette.nodeHighlightOpacity,
       shadowBlur: 12,
     }),
     inactive: {
+      labelOpacity: graphPalette.labelInactiveOpacity,
       opacity: graphPalette.nodeInactiveOpacity,
       shadowBlur: 0,
     },
     selected: (node: NodeData) => ({
       ...keepBaseStroke(node),
+      ...expandedLabel(node),
       lineWidth: getElementNumberValue(node.style ?? {}, "lineWidth", 2) + 1.4,
       opacity: 1,
       shadowBlur: 26,
       shadowColor: graphPalette.selectionNodeHaloColor,
     }),
     "selected-inactive": {
+      labelOpacity: graphPalette.labelInactiveOpacity,
       opacity: graphPalette.selectionInactiveNodeOpacity,
       shadowBlur: 0,
     },
     "selected-related": (node: NodeData) => ({
       ...keepBaseStroke(node),
+      labelOpacity: 0.88,
       opacity: graphPalette.selectionRelatedNodeOpacity,
       shadowBlur: 10,
     }),
@@ -1103,75 +1127,6 @@ function createEdgeStateStyles(graphPalette: GraphCanvasPalette) {
         graphPalette.edgeHighlightLineWidthBoost,
       opacity: graphPalette.selectionEdgeOpacity,
     }),
-  }
-}
-
-function resolveLocalPointerPosition(
-  graph: Graph,
-  container: HTMLDivElement,
-  event: {
-    clientX?: number
-    clientY?: number
-    target?: { id?: string }
-  }
-) {
-  const bounds = container.getBoundingClientRect()
-  const clientX = event.clientX
-  const clientY = event.clientY
-  const hasClientPoint =
-    typeof clientX === "number" &&
-    Number.isFinite(clientX) &&
-    typeof clientY === "number" &&
-    Number.isFinite(clientY)
-
-  if (hasClientPoint) {
-    return {
-      x: clientX - bounds.left,
-      y: clientY - bounds.top,
-    }
-  }
-
-  const nodeId = event.target?.id
-
-  if (nodeId) {
-    const [canvasX, canvasY] = graph.getCanvasByViewport(
-      graph.getElementPosition(nodeId)
-    )
-
-    return {
-      x: canvasX,
-      y: canvasY,
-    }
-  }
-
-  return {
-    x: bounds.width / 2,
-    y: bounds.height / 2,
-  }
-}
-
-function clampHoverTooltipPosition(container: HTMLDivElement, x: number, y: number) {
-  const rect = container.getBoundingClientRect()
-  const maxX = Math.max(
-    GRAPH_HOVER_TOOLTIP_MIN_MARGIN,
-    rect.width - GRAPH_HOVER_TOOLTIP_MAX_WIDTH - GRAPH_HOVER_TOOLTIP_MIN_MARGIN
-  )
-  const maxY = Math.max(
-    GRAPH_HOVER_TOOLTIP_MIN_MARGIN,
-    rect.height - GRAPH_HOVER_TOOLTIP_HEIGHT - GRAPH_HOVER_TOOLTIP_MIN_MARGIN
-  )
-
-  return {
-    x: clampValue(
-      x + GRAPH_HOVER_TOOLTIP_OFFSET,
-      GRAPH_HOVER_TOOLTIP_MIN_MARGIN,
-      maxX
-    ),
-    y: clampValue(
-      y + GRAPH_HOVER_TOOLTIP_OFFSET,
-      GRAPH_HOVER_TOOLTIP_MIN_MARGIN,
-      maxY
-    ),
   }
 }
 
@@ -1246,7 +1201,6 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
   const graphRenderReadyRef = useRef<Graph | null>(null)
   const hasAppliedSelectionStateRef = useRef(false)
   const lastNodeDragAtRef = useRef(0)
-  const [hoverTooltip, setHoverTooltip] = useState<HoverTooltipState | null>(null)
   const [quickDetailEntity, setQuickDetailEntity] =
     useState<LocalQuickDetailEntity | null>(null)
   const [renderReadyVersion, setRenderReadyVersion] = useState(0)
@@ -1409,41 +1363,7 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
       void graph.setElementState(nodeId, nextState, false)
     }
 
-    const updateHoverTooltip = (
-      nodeId: string,
-      event: {
-        clientX?: number
-        clientY?: number
-        target?: { id?: string }
-      }
-    ) => {
-      const node = graphModel.nodeMap.get(nodeId)
-
-      if (!node || graph.destroyed) {
-        return
-      }
-
-      const localPoint = resolveLocalPointerPosition(graph, container, event)
-      const position = clampHoverTooltipPosition(
-        container,
-        localPoint.x,
-        localPoint.y
-      )
-
-      setHoverTooltip({
-        kind: node.kind,
-        label: node.label,
-        nodeId,
-        x: position.x,
-        y: position.y,
-      })
-    }
-
-    const handleNodePointerEnter = (event: {
-      target?: { id?: string }
-      clientX?: number
-      clientY?: number
-    }) => {
+    const handleNodePointerEnter = (event: { target?: { id?: string } }) => {
       const nodeId = event.target?.id
 
       if (!nodeId || graph.destroyed) {
@@ -1454,32 +1374,15 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
         new Set([...graph.getElementState(nodeId), "active"])
       )
       void graph.setElementState(nodeId, nextState, false)
-      updateHoverTooltip(nodeId, event)
-    }
-
-    const handleNodePointerMove = (event: {
-      target?: { id?: string }
-      clientX?: number
-      clientY?: number
-    }) => {
-      const nodeId = event.target?.id
-
-      if (!nodeId) {
-        return
-      }
-
-      updateHoverTooltip(nodeId, event)
     }
 
     const handleNodePointerLeave = (event: { target?: { id?: string } }) => {
       clearNodeActiveState(event.target?.id)
-      setHoverTooltip(null)
     }
 
     const handleNodeDragStart = (event: { target?: { id?: string } }) => {
       lastNodeDragAtRef.current = performance.now()
       clearNodeActiveState(event.target?.id)
-      setHoverTooltip(null)
     }
 
     const handleNodeDragEnd = () => {
@@ -1497,7 +1400,6 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
         return
       }
 
-      setHoverTooltip(null)
       setSelectedNodeId(nodeId)
     }
 
@@ -1509,12 +1411,10 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
         return
       }
 
-      setHoverTooltip(null)
       setSelectedNodeId(null)
     }
 
     graph.on("node:pointerenter", handleNodePointerEnter as (event: unknown) => void)
-    graph.on("node:pointermove", handleNodePointerMove as (event: unknown) => void)
     graph.on("node:pointerleave", handleNodePointerLeave as (event: unknown) => void)
     graph.on("node:dragstart", handleNodeDragStart as (event: unknown) => void)
     graph.on("node:dragend", handleNodeDragEnd as (event: unknown) => void)
@@ -1592,7 +1492,6 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
       hasAppliedSelectionStateRef.current = false
       resizeObserver.disconnect()
       graph.off("node:pointerenter", handleNodePointerEnter as (event: unknown) => void)
-      graph.off("node:pointermove", handleNodePointerMove as (event: unknown) => void)
       graph.off("node:pointerleave", handleNodePointerLeave as (event: unknown) => void)
       graph.off("node:dragstart", handleNodeDragStart as (event: unknown) => void)
       graph.off("node:dragend", handleNodeDragEnd as (event: unknown) => void)
@@ -1640,26 +1539,6 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
         ref={containerRef}
         className="size-full min-h-[36rem] max-w-full cursor-grab active:cursor-grabbing"
       />
-
-      {hoverTooltip ? (
-        <div
-          className={cn(
-            "pointer-events-none absolute z-20 w-[min(20rem,calc(100%-1.5rem))] rounded-lg border px-3 py-2 backdrop-blur-sm",
-            graphPalette.tooltipSurfaceClassName
-          )}
-          style={{
-            left: `${hoverTooltip.x}px`,
-            top: `${hoverTooltip.y}px`,
-          }}
-        >
-          <p className="line-clamp-3 text-xs font-semibold leading-snug">
-            {hoverTooltip.label}
-          </p>
-          <p className="mt-1 text-[11px] text-muted-foreground">
-            {nodeVisuals[hoverTooltip.kind].label}
-          </p>
-        </div>
-      ) : null}
 
       {selectedNode ? (
         <GraphNodeDetailInspector
