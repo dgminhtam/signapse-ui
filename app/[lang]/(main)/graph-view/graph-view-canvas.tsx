@@ -23,9 +23,9 @@ import {
   ArrowUpRight,
   Calendar,
   ExternalLink,
+  LocateFixed,
   Minus,
   Plus,
-  RotateCcw,
   X,
 } from "lucide-react"
 import { useTheme } from "next-themes"
@@ -43,6 +43,7 @@ import type {
 } from "@/app/lib/graph-view/definitions"
 import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { Button } from "@/components/ui/button"
+import { ButtonGroup } from "@/components/ui/button-group"
 import {
   Tooltip,
   TooltipContent,
@@ -314,7 +315,7 @@ function GraphToolButton({
           aria-label={label}
           type="button"
           size="icon-sm"
-          variant="secondary"
+          variant="outline"
           className="pointer-events-auto"
           onClick={onClick}
         >
@@ -1676,9 +1677,9 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
       />
 
       <div className="pointer-events-none absolute inset-x-3 top-3 z-10 flex flex-wrap items-start justify-between gap-2 sm:inset-x-4 sm:top-4">
-        <div className="rounded-full border border-border/70 bg-background/84 px-3 py-1.5 text-xs font-semibold text-foreground shadow-sm backdrop-blur">
+        <h1 className="max-w-[min(70%,24rem)] truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl">
           {dictionary.graphView.title}
-        </div>
+        </h1>
 
         <div className="flex max-w-[min(100%,32rem)] flex-wrap items-center justify-end gap-1.5 opacity-90">
           {GRAPH_HUD_NODE_KIND_ORDER.filter(
@@ -1695,13 +1696,10 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
       </div>
 
       <TooltipProvider>
-        <div className="pointer-events-auto absolute right-3 top-14 z-10 flex flex-col gap-1.5 rounded-full border border-border/60 bg-background/55 p-1 shadow-sm backdrop-blur sm:right-4 sm:top-16">
-          <GraphToolButton
-            label={dictionary.graphView.controls.zoomIn}
-            onClick={() => handleZoom("in")}
-          >
-            <Plus aria-hidden="true" data-icon="inline-start" />
-          </GraphToolButton>
+        <ButtonGroup
+          orientation="vertical"
+          className="pointer-events-auto absolute right-3 top-14 z-10 sm:right-4 sm:top-16"
+        >
           <GraphToolButton
             label={dictionary.graphView.controls.zoomOut}
             onClick={() => handleZoom("out")}
@@ -1712,9 +1710,15 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
             label={dictionary.graphView.controls.recenter}
             onClick={handleRecenter}
           >
-            <RotateCcw aria-hidden="true" data-icon="inline-start" />
+            <LocateFixed aria-hidden="true" data-icon="inline-start" />
           </GraphToolButton>
-        </div>
+          <GraphToolButton
+            label={dictionary.graphView.controls.zoomIn}
+            onClick={() => handleZoom("in")}
+          >
+            <Plus aria-hidden="true" data-icon="inline-start" />
+          </GraphToolButton>
+        </ButtonGroup>
       </TooltipProvider>
 
       <div className="pointer-events-none absolute inset-x-3 bottom-3 z-10 flex flex-wrap items-end justify-between gap-2 sm:inset-x-4 sm:bottom-4">

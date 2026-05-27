@@ -116,7 +116,7 @@ function GraphViewCanvasFallback() {
   return (
     <div className="relative size-full min-h-[36rem] animate-pulse overflow-hidden">
       <div className="pointer-events-none absolute inset-x-4 top-4 z-10 flex flex-wrap items-start justify-between gap-3">
-        <div className="h-8 w-36 rounded-full border border-border/70 bg-background/85 shadow-sm backdrop-blur" />
+        <div className="h-7 w-44 rounded-md bg-muted" />
 
         <div className="flex max-w-[min(100%,28rem)] flex-wrap justify-end gap-1.5">
           <div className="h-7 w-24 rounded-full border border-border/70 bg-background/85 shadow-sm backdrop-blur" />
@@ -126,12 +126,12 @@ function GraphViewCanvasFallback() {
       </div>
 
       <div className="pointer-events-none absolute right-4 top-16 z-10 flex flex-col gap-1.5">
-        <div className="size-8 rounded-full border border-border/70 bg-background/85 shadow-sm backdrop-blur" />
-        <div className="size-8 rounded-full border border-border/70 bg-background/85 shadow-sm backdrop-blur" />
-        <div className="size-8 rounded-full border border-border/70 bg-background/85 shadow-sm backdrop-blur" />
+        <div className="size-7 rounded-md border border-border bg-background" />
+        <div className="size-7 rounded-md border border-border bg-background" />
+        <div className="size-7 rounded-md border border-border bg-background" />
       </div>
 
-      <div className="absolute inset-6 rounded-[24px] border border-dashed border-border/60 bg-[radial-gradient(circle_at_top_left,_rgba(15,118,110,0.10),_transparent_28%),radial-gradient(circle_at_82%_18%,_rgba(217,119,6,0.12),_transparent_22%),radial-gradient(circle_at_bottom_right,_rgba(37,99,235,0.12),_transparent_30%)]" />
+      <div className="absolute inset-6 rounded-xl border border-dashed border-border/60 bg-muted/20" />
 
       <div className="pointer-events-none absolute inset-x-4 bottom-4 z-10 flex flex-wrap items-end justify-between gap-3">
         <div className="h-7 w-36 rounded-full border border-border/70 bg-background/80 shadow-sm backdrop-blur" />
@@ -155,7 +155,7 @@ export function GraphViewWorkbench({
   const hasGraph = graphModel.nodes.length > 0
 
   return (
-    <section className="relative h-[calc(100svh-6.5rem)] min-h-[36rem] w-full max-w-full overflow-hidden rounded-[28px] border border-border/70 bg-[radial-gradient(circle_at_top_left,_rgba(15,118,110,0.10),_transparent_28%),radial-gradient(circle_at_82%_18%,_rgba(217,119,6,0.11),_transparent_22%),radial-gradient(circle_at_bottom_right,_rgba(37,99,235,0.12),_transparent_30%),linear-gradient(180deg,rgba(255,255,255,0.70),rgba(248,250,252,0.94))] shadow-[inset_0_1px_0_rgba(255,255,255,0.36),0_18px_56px_-48px_rgba(15,23,42,0.42)] dark:bg-[radial-gradient(circle_at_top_left,_rgba(15,118,110,0.16),_transparent_28%),radial-gradient(circle_at_82%_18%,_rgba(217,119,6,0.14),_transparent_22%),radial-gradient(circle_at_bottom_right,_rgba(37,99,235,0.16),_transparent_30%),linear-gradient(180deg,rgba(15,23,42,0.66),rgba(15,23,42,0.90))]">
+    <section className="relative h-[calc(100svh-6.5rem)] min-h-[36rem] w-full max-w-full overflow-hidden rounded-xl border bg-card shadow-sm">
       {hasGraph ? (
         <GraphViewCanvas graphModel={graphModel} />
       ) : (
