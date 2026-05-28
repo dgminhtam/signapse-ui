@@ -2,7 +2,7 @@
 
 Tài liệu này ánh xạ snapshot OpenAPI backend trong `docs/api_mapping.json` tới các điểm tích hợp frontend hiện tại của repo.
 
-Xác minh lần cuối: ngày 26 tháng 5 năm 2026
+Xác minh lần cuối: ngày 28 tháng 5 năm 2026
 
 ## Cấu hình cơ sở
 
@@ -36,7 +36,7 @@ Xác minh lần cuối: ngày 26 tháng 5 năm 2026
 
 ## Tổng quan thay đổi lớn từ snapshot hiện tại
 
-- Snapshot backend hiện tại gồm `105` operation.
+- Snapshot backend hiện tại gồm `106` operation.
 - Backend đã chuyển domain nội dung canon từ `sources` / `source-documents` sang `news-outlets` / `news-articles`.
 - Backend vẫn giữ các surface `events`, `query`, và `graph-view`, nhưng nhiều payload đã đổi naming từ `sourceDocument*` sang `artifact*` hoặc `news-article`.
 - Surface `events` có thêm workflow derive market reactions cho từng event và batch pending events.
@@ -57,6 +57,7 @@ Xác minh lần cuối: ngày 26 tháng 5 năm 2026
 - Snapshot mới thêm domain `narratives`, đồng thời mở rộng `market-query` với `keyNarratives[]` và `graph-view` với node/edge narrative.
 - Snapshot mới bỏ endpoint `POST /news-articles/{id}/crawl-full-content`, mở rộng `system-prompts` với `responseSchema`/`localizedNames`, và thêm `evidenceNote` cho market query evidence.
 - Snapshot mới thêm `POST /watchlists/assets` để bulk create watchlist assets; `responseSchema` của system prompts hiện là JSON object inline, không còn component schema `JsonNode`.
+- Snapshot mới thêm `GET /market-charts/live` cho live chart stream dạng `text/event-stream`, dùng permission `market-chart:read`.
 
 ## Phạm vi endpoint
 
@@ -183,6 +184,7 @@ Ghi chu:
 | Phuong thuc | Endpoint backend         | operationId  | Tich hop frontend                | Trang thai                                | Ghi chu                                                                                                                                                                                                                                              |
 | ----------- | ------------------------ | ------------ | -------------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | GET         | `/market-charts/candles` | `getCandles` | `getMarketChartCandles(request)` | Da dong bo contract assetId va annotation | Endpoint duoc gate backend bang `market-chart:read`; FE gui `assetId`, `timeframe`, `from`, `to`, va `includeAnnotations` theo layer su kien; parse `provider`, optional `symbol`, `asset`, `timeframe`, `from`, `to`, `candles[]`, `annotations[]`. |
+| GET         | `/market-charts/live`    | `streamLive` | `-`                              | Chua trien khai                           | Live stream SSE `text/event-stream`; query `request` tham chieu `MarketChartLiveRequest` gom `assetId`, `timeframe`; permission `market-chart:read`.                                                                                                 |
 
 Frontend lien quan:
 
@@ -200,11 +202,13 @@ Ghi chu:
 
 - Query contract hien duoc khai bao qua object `request` trong query string, tham chieu schema `MarketChartCandleRequest`.
 - `MarketChartCandleRequest` gom `assetId`, `timeframe`, `from`, `to`, va optional `includeAnnotations`; snapshot hien tai khong mo ta enum hay danh sach gia tri hop le cho `timeframe`, trong khi FE data layer hien gioi han `timeframe` theo union `1m`, `5m`, `15m`, `30m`, `1h`, `1d`, `1w`, `1mo`.
+- `MarketChartLiveRequest` gom `assetId` va `timeframe`; response cua `/market-charts/live` la `text/event-stream` voi schema `SseEmitter` gom `timeout`.
 - `MarketChartCandleItemResponse` gom `time`, `open`, `high`, `low`, `close`, `volume`.
 - `MarketChartCandleResponse` co them `asset: MarketChartAssetResponse` va `annotations[]`; annotation gom `eventId`, `assetId`, `time`, `severity`, `direction`, `title`, `summary`, `confidence`, `reaction`, `evidence[]`, va `links.eventDetail`; evidence dung `newsArticleId`.
 - UI khong expose `from` hoac `to` nhu form input. Route state chi gom `assetId` va `timeframe`; FE resolve asset tu `GET /watchlists`, gui `assetId` cho chart action, va de backend so huu provider-symbol resolution.
 - FE mac dinh giu layer su kien tat va gui `includeAnnotations=false`; khi user bat layer su kien tren bieu do, FE gui `includeAnnotations=true`.
 - UI dung KLineChart de render nen OHLCV, render marker notification tu `annotations[]`, group cac annotation cung moc thoi gian, va mo popup detail/evidence/link su kien khi user chon marker hoac moc su kien accessible ben ngoai canvas. Lazy historical loading da duoc trien khai cho huong tai nen cu hon bang chinh endpoint `/market-charts/candles`; trade recommendation van chua trien khai ve UI.
+- Frontend hien chua co action, DTO, EventSource client, reconnect handling, hoac UI state cho live stream `/market-charts/live`.
 
 ### 6. API market query
 
@@ -574,7 +578,7 @@ type ActionResult<T = void> =
 - `events`: backend gate enrich/market reaction operators bang `news-article:analyze`; FE events da gate bang permission canon nay truoc va chi giu `source-document:analyze` nhu alias compatibility tam thoi.
 - `permission scan`: cac literal FE-only `source-document:*` con lai deu la alias compatibility sau permission canon `news-article:*`; cac permission BE chua co FE literal gom `cronjob:stop`, `media:*`, va `narrative:*` vi cac surface/action nay chua duoc tich hop.
 - `system prompts`: frontend đã đồng bộ enum prompt type hiện tại, DTO `name`/`responseSchema`/`localizedNames`, create request bắt buộc `responseSchema`, và form schema editor dạng builder + JSON.
-- `market charts`: frontend da dong bo action/DTO theo request `assetId`, `includeAnnotations` theo layer su kien, response `asset`, optional `symbol`, va `annotations[]`; UI dung KLineChart cho nen OHLCV va render marker notification/popup detail khi layer su kien duoc bat.
+- `market charts`: frontend da dong bo action/DTO theo request `assetId`, `includeAnnotations` theo layer su kien, response `asset`, optional `symbol`, va `annotations[]`; UI dung KLineChart cho nen OHLCV va render marker notification/popup detail khi layer su kien duoc bat. Snapshot moi them `/market-charts/live` SSE, nhung FE chua co EventSource/action/DTO cho live stream.
 - `news outlets`: snapshot moi da bo `slug` khoi create/update/list/detail va bo `description` khoi list item; FE form/DTO da dong bo, list khong render cac field nay, con detail/edit van giu `description` theo response.
 - `workspace`: frontend da bo `slug` khoi create/update/response definitions, workspace switcher payload/UI, va trang tong quan workspace de khop snapshot moi.
 - `watchlists`: FE workspace watchlist editor da chuyen add flow sang bulk endpoint `POST /watchlists/assets` voi request `{ assetIds }`, chunk toi da 100 id moi request; remove flow van dung `DELETE /watchlists/assets/{assetId}`.

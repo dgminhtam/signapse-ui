@@ -18,7 +18,7 @@ function createMarketChartCandleQuery(request: MarketChartCandleRequest) {
   query.set("timeframe", request.timeframe)
   query.set("from", request.from)
   query.set("to", request.to)
-  query.set("includeAnnotations", String(request.includeAnnotations ?? false))
+  query.set("includeAnnotations", String(request.includeAnnotations ?? true))
 
   return query.toString()
 }

@@ -9,11 +9,15 @@ import {
 } from "react"
 import {
   dispose,
+  getSupportedLocales,
   init,
+  registerLocale,
   type Chart,
   type DataLoaderGetBarsParams,
   type DeepPartial,
   type KLineData,
+  type LayoutChild,
+  type Locales,
   type OverlayStyle,
   type Period,
   type Styles,
@@ -80,8 +84,10 @@ interface MarketChartCanvasProps {
   annotations?: MarketChartAnnotationResponse[]
   annotationGroups?: MarketChartAnnotationGroup[]
   includeAnnotations: boolean
+  liveCandle?: MarketChartCandleItemResponse | null
   resetKey: string
   selectedAnnotationGroupId?: string | null
+  showVolumePane: boolean
   activeIndicators?: MarketChartIndicatorName[]
   className?: string
   drawingToolActive?: boolean
@@ -110,6 +116,24 @@ type AnnotationMarkerColorClassNames = {
   foreground: string
   pulse: string
   ring: string
+}
+
+type ChartThemeMode = "light" | "dark"
+
+type MarketChartThemePalette = {
+  axis: string
+  crosshairBackground: string
+  crosshairText: string
+  down: string
+  drawing: string
+  drawingMuted: string
+  drawingSelected: string
+  grid: string
+  noChange: string
+  up: string
+  volumeDown: string
+  volumeNoChange: string
+  volumeUp: string
 }
 
 function getAnnotationMarkerColorClassNames(
@@ -208,45 +232,86 @@ const LAZY_HISTORY_BAR_TARGET: Record<MarketChartTimeframe, number> = {
   "1mo": 60,
 }
 
-const colorCache = new Map<string, string>()
-
-function resolveColor(color: string): string {
-  if (typeof window === "undefined" || !color) return color
-  if (colorCache.has(color)) return colorCache.get(color)!
-
-  try {
-    const canvas = document.createElement("canvas")
-    canvas.width = 1
-    canvas.height = 1
-    const ctx = canvas.getContext("2d", { willReadFrequently: true })
-    if (!ctx) return color
-
-    ctx.fillStyle = color
-    ctx.fillRect(0, 0, 1, 1)
-
-    const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data
-    const result =
-      a === 255
-        ? `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`
-        : `rgba(${r}, ${g}, ${b}, ${a / 255})`
-
-    colorCache.set(color, result)
-    return result
-  } catch {
-    return color
-  }
+const KLINE_CHART_VI_LOCALE: Locales = {
+  change: "Thay đổi: ",
+  close: "Đóng: ",
+  day: "ngày",
+  high: "Cao: ",
+  hour: "giờ",
+  low: "Thấp: ",
+  minute: "phút",
+  month: "tháng",
+  open: "Mở: ",
+  second: "giây",
+  time: "Thời gian: ",
+  turnover: "Giá trị: ",
+  volume: "Khối lượng: ",
+  week: "tuần",
+  year: "năm",
 }
 
-function getCssVariable(name: string, fallback: string) {
-  if (typeof window === "undefined") {
-    return fallback
+let kLineChartLocalesRegistered = false
+
+function ensureKLineChartLocales() {
+  if (kLineChartLocalesRegistered) {
+    return
   }
 
-  const value =
-    getComputedStyle(document.documentElement).getPropertyValue(name).trim() ||
-    fallback
+  registerLocale("vi-VN", KLINE_CHART_VI_LOCALE)
+  registerLocale("vi", KLINE_CHART_VI_LOCALE)
+  kLineChartLocalesRegistered = true
+}
 
-  return resolveColor(value)
+function resolveKLineChartLocale(locale: string) {
+  ensureKLineChartLocales()
+
+  return getSupportedLocales().includes(locale) ? locale : "en-US"
+}
+
+function resolveChartThemeMode(theme: string | undefined): ChartThemeMode {
+  return theme === "dark" ? "dark" : "light"
+}
+
+const MARKET_CHART_THEME_PALETTES: Record<
+  ChartThemeMode,
+  MarketChartThemePalette
+> = {
+  light: {
+    axis: "#737373",
+    crosshairBackground: "#171717",
+    crosshairText: "#ffffff",
+    down: "#dc2626",
+    drawing: "#2563eb",
+    drawingMuted: "rgba(37, 99, 235, 0.55)",
+    drawingSelected: "#1d4ed8",
+    grid: "rgba(115, 115, 115, 0.18)",
+    noChange: "#737373",
+    up: "#14947e",
+    volumeDown: "rgba(220, 38, 38, 0.32)",
+    volumeNoChange: "rgba(115, 115, 115, 0.28)",
+    volumeUp: "rgba(20, 148, 126, 0.35)",
+  },
+  dark: {
+    axis: "#a1a1aa",
+    crosshairBackground: "#fafafa",
+    crosshairText: "#171717",
+    down: "#ef4444",
+    drawing: "#60a5fa",
+    drawingMuted: "rgba(96, 165, 250, 0.6)",
+    drawingSelected: "#93c5fd",
+    grid: "rgba(250, 250, 250, 0.1)",
+    noChange: "#a1a1aa",
+    up: "#14b8a6",
+    volumeDown: "rgba(239, 68, 68, 0.32)",
+    volumeNoChange: "rgba(161, 161, 170, 0.24)",
+    volumeUp: "rgba(20, 184, 166, 0.34)",
+  },
+}
+
+function getMarketChartThemePalette(
+  mode: ChartThemeMode
+): MarketChartThemePalette {
+  return MARKET_CHART_THEME_PALETTES[mode]
 }
 
 function getCssTextVariable(name: string, fallback: string) {
@@ -314,11 +379,43 @@ function mergeCandleItems(
   return normalizeCandleItems([...current, ...incoming])
 }
 
+function getFiniteVolume(candle: MarketChartCandleItemResponse) {
+  return typeof candle.volume === "number" && Number.isFinite(candle.volume)
+    ? candle.volume
+    : null
+}
+
+function mergeLiveCandleItem(
+  current: MarketChartCandleItemResponse[],
+  liveCandle: MarketChartCandleItemResponse | null
+) {
+  if (!liveCandle) {
+    return normalizeCandleItems(current)
+  }
+
+  const liveTimestamp = getCandleTimestamp(liveCandle)
+  const newestTimestamp = Math.max(
+    ...current
+      .map((candle) => getCandleTimestamp(candle))
+      .filter((timestamp): timestamp is number => timestamp !== null)
+  )
+
+  if (
+    liveTimestamp === null ||
+    (Number.isFinite(newestTimestamp) && liveTimestamp < newestTimestamp)
+  ) {
+    return normalizeCandleItems(current)
+  }
+
+  return mergeCandleItems(current, [liveCandle])
+}
+
 function createKLineData(
   candles: MarketChartCandleItemResponse[]
 ): KLineData[] {
   return normalizeCandleItems(candles).flatMap((candle) => {
     const timestamp = getCandleTimestamp(candle)
+    const volume = getFiniteVolume(candle)
 
     if (timestamp === null) {
       return []
@@ -331,7 +428,7 @@ function createKLineData(
         high: candle.high,
         low: candle.low,
         close: candle.close,
-        ...(typeof candle.volume === "number" ? { volume: candle.volume } : {}),
+        ...(volume !== null ? { volume } : {}),
       },
     ]
   })
@@ -417,42 +514,40 @@ function getNewOlderCandles(
   })
 }
 
-function createChartStyles(): DeepPartial<Styles> {
-  const textColor = getCssVariable("--muted-foreground", "#737373")
-  const borderColor = getCssVariable("--muted-foreground", "#737373")
-  const upColor = getCssVariable("--chart-2", "#14947e")
-  const downColor = getCssVariable("--destructive", "#dc2626")
+function createChartStyles(
+  palette: MarketChartThemePalette
+): DeepPartial<Styles> {
   const fontFamily = getCssTextVariable("--font-sans", "Geist, sans-serif")
 
   return {
     grid: {
       horizontal: {
-        color: borderColor,
+        color: palette.grid,
         dashedValue: [4, 4],
         show: true,
-        size: 0.25,
+        size: 1,
         style: "dashed",
       },
       vertical: {
-        color: borderColor,
+        color: palette.grid,
         dashedValue: [4, 4],
         show: true,
-        size: 0.25,
+        size: 1,
         style: "dashed",
       },
     },
     candle: {
       bar: {
         compareRule: "current_open",
-        downBorderColor: downColor,
-        downColor,
-        downWickColor: downColor,
-        noChangeBorderColor: textColor,
-        noChangeColor: textColor,
-        noChangeWickColor: textColor,
-        upBorderColor: upColor,
-        upColor,
-        upWickColor: upColor,
+        downBorderColor: palette.down,
+        downColor: palette.down,
+        downWickColor: palette.down,
+        noChangeBorderColor: palette.noChange,
+        noChangeColor: palette.noChange,
+        noChangeWickColor: palette.noChange,
+        upBorderColor: palette.up,
+        upColor: palette.up,
+        upWickColor: palette.up,
       },
       priceMark: {
         high: {
@@ -484,9 +579,9 @@ function createChartStyles(): DeepPartial<Styles> {
     indicator: {
       ohlc: {
         compareRule: "current_open",
-        downColor: "rgba(220, 38, 38, 0.32)",
-        noChangeColor: "rgba(115, 115, 115, 0.28)",
-        upColor: "rgba(20, 148, 126, 0.35)",
+        downColor: palette.volumeDown,
+        noChangeColor: palette.volumeNoChange,
+        upColor: palette.volumeUp,
       },
       tooltip: {
         legend: {
@@ -496,81 +591,90 @@ function createChartStyles(): DeepPartial<Styles> {
           family: fontFamily,
         },
       },
+      lastValueMark: {
+        text: {
+          family: fontFamily,
+        },
+      },
     },
     xAxis: {
       axisLine: {
-        color: borderColor,
+        color: palette.grid,
         size: 1,
       },
       tickText: {
-        color: textColor,
+        color: palette.axis,
         family: fontFamily,
       },
     },
     yAxis: {
       axisLine: {
-        color: borderColor,
+        color: palette.grid,
         size: 1,
       },
       tickText: {
-        color: textColor,
+        color: palette.axis,
         family: fontFamily,
       },
     },
     crosshair: {
       horizontal: {
         line: {
-          color: textColor,
+          color: palette.axis,
         },
         text: {
-          backgroundColor: getCssVariable("--foreground", "#171717"),
-          color: getCssVariable("--background", "#ffffff"),
+          backgroundColor: palette.crosshairBackground,
+          color: palette.crosshairText,
           family: fontFamily,
         },
       },
       vertical: {
         line: {
-          color: textColor,
+          color: palette.axis,
         },
         text: {
-          backgroundColor: getCssVariable("--foreground", "#171717"),
-          color: getCssVariable("--background", "#ffffff"),
+          backgroundColor: palette.crosshairBackground,
+          color: palette.crosshairText,
           family: fontFamily,
         },
+      },
+    },
+    overlay: {
+      text: {
+        family: fontFamily,
+        size: 12,
       },
     },
   }
 }
 
-function createDrawingOverlayStyles(): DeepPartial<OverlayStyle> {
-  const color = getCssVariable("--foreground", "#171717")
-  const mutedColor = getCssVariable("--muted-foreground", "#737373")
-  const selectedColor = getCssVariable("--primary", "#171717")
-
+function createDrawingOverlayStyles(
+  palette: MarketChartThemePalette
+): DeepPartial<OverlayStyle> {
   return {
     circle: {
-      borderColor: color,
+      borderColor: palette.drawing,
       borderSize: 1,
       color: "transparent",
       style: "stroke",
     },
     line: {
-      color,
+      color: palette.drawing,
       size: 1,
       style: "solid",
     },
     point: {
-      activeBorderColor: selectedColor,
+      activeBorderColor: palette.drawingSelected,
       activeBorderSize: 2,
-      activeColor: selectedColor,
+      activeColor: palette.drawingSelected,
       activeRadius: 4,
-      borderColor: mutedColor,
+      borderColor: palette.drawingMuted,
       borderSize: 1,
-      color,
+      color: palette.drawing,
       radius: 3,
     },
     rect: {
-      borderColor: color,
+      borderColor: palette.drawing,
       borderSize: 1,
       color: "transparent",
       style: "stroke",
@@ -651,6 +755,7 @@ export const MarketChartCanvas = forwardRef<
     className,
     drawingToolActive = false,
     includeAnnotations,
+    liveCandle = null,
     onAnnotationSelect,
     onDrawingSelectionChange,
     onDrawingToolComplete,
@@ -658,6 +763,7 @@ export const MarketChartCanvas = forwardRef<
     onLoadOlderCandles,
     resetKey,
     selectedAnnotationGroupId,
+    showVolumePane,
     symbol = "MARKET",
     timeframe,
   },
@@ -675,7 +781,9 @@ export const MarketChartCanvas = forwardRef<
   const activeResetKeyRef = useRef(resetKey)
   const activeDrawingDraftIdRef = useRef<string | null>(null)
   const activeDrawingToolRef = useRef<MarketChartDrawingTool | null>(null)
+  const annotationsRef = useRef(annotations)
   const annotationGroupsRef = useRef(annotationGroups)
+  const candlesRef = useRef(candles)
   const drawingGroupIdRef = useRef(
     createMarketChartDrawingGroupId({ assetId, timeframe })
   )
@@ -684,6 +792,7 @@ export const MarketChartCanvas = forwardRef<
   const drawingVisibleRef = useRef(true)
   const loadedAnnotationsRef = useRef<MarketChartAnnotationResponse[]>([])
   const loadedCandlesRef = useRef<MarketChartCandleItemResponse[]>([])
+  const liveCandleRef = useRef<MarketChartCandleItemResponse | null>(liveCandle)
   const historyExhaustedRef = useRef(false)
   const onDrawingSelectionChangeRef = useRef(onDrawingSelectionChange)
   const onDrawingToolCompleteRef = useRef(onDrawingToolComplete)
@@ -698,15 +807,31 @@ export const MarketChartCanvas = forwardRef<
   })
   const [markerPositions, setMarkerPositions] = useState<MarkerPosition[]>([])
   const { resolvedTheme } = useTheme()
+  const chartThemeMode = resolveChartThemeMode(resolvedTheme)
+  const chartThemePalette = getMarketChartThemePalette(chartThemeMode)
   const historyState =
     historyFeedback.resetKey === resetKey ? historyFeedback.state : "idle"
   const historyError =
     historyFeedback.resetKey === resetKey ? historyFeedback.error : null
 
   useEffect(() => {
+    annotationsRef.current = annotations
+  }, [annotations])
+
+  useEffect(() => {
+    candlesRef.current = candles
+  }, [candles])
+
+  useEffect(() => {
     annotationGroupsRef.current = annotationGroups
     scheduleMarkerPositionUpdateRef.current()
   }, [annotationGroups])
+
+  useEffect(() => {
+    liveCandleRef.current = liveCandle
+    chartRef.current?.resetData()
+    scheduleMarkerPositionUpdateRef.current()
+  }, [liveCandle])
 
   useEffect(() => {
     onLoadedDataChangeRef.current = onLoadedDataChange
@@ -799,7 +924,7 @@ export const MarketChartCanvas = forwardRef<
           onDrawingSelectionChangeRef.current?.(true)
         },
         paneId: CANDLE_PANE_ID,
-        styles: createDrawingOverlayStyles(),
+        styles: createDrawingOverlayStyles(chartThemePalette),
         tool,
       })
     )
@@ -944,40 +1069,49 @@ export const MarketChartCanvas = forwardRef<
     activeDrawingToolRef.current = null
     clearDrawingSelection()
     historyExhaustedRef.current = false
-    loadedAnnotationsRef.current = includeAnnotations ? annotations : []
-    loadedCandlesRef.current = normalizeCandleItems(candles)
+    loadedAnnotationsRef.current = includeAnnotations
+      ? annotationsRef.current
+      : []
+    loadedCandlesRef.current = normalizeCandleItems(candlesRef.current)
     registerMarketChartDrawingOverlays()
+    const chartLocale = resolveKLineChartLocale(intlLocale)
+
+    const layout: LayoutChild[] = [
+      {
+        type: "candle",
+        options: {
+          axis: {
+            gap: {
+              bottom: 0.22,
+              top: 0.08,
+            },
+          },
+          id: CANDLE_PANE_ID,
+        },
+      },
+      ...(showVolumePane
+        ? [
+            {
+              content: ["VOL"],
+              options: {
+                dragEnabled: false,
+                height: 92,
+                id: VOLUME_PANE_ID,
+                minHeight: 64,
+              },
+              type: "indicator" as const,
+            },
+          ]
+        : []),
+      {
+        type: "xAxis",
+      },
+    ]
 
     const chart = init(container, {
-      layout: [
-        {
-          type: "candle",
-          options: {
-            axis: {
-              gap: {
-                bottom: 0.22,
-                top: 0.08,
-              },
-            },
-            id: CANDLE_PANE_ID,
-          },
-        },
-        {
-          content: ["VOL"],
-          options: {
-            dragEnabled: false,
-            height: 92,
-            id: VOLUME_PANE_ID,
-            minHeight: 64,
-          },
-          type: "indicator",
-        },
-        {
-          type: "xAxis",
-        },
-      ],
-      locale: intlLocale,
-      styles: createChartStyles(),
+      layout,
+      locale: chartLocale,
+      styles: createChartStyles(chartThemePalette),
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       zoomAnchor: "cursor",
     })
@@ -1033,10 +1167,15 @@ export const MarketChartCanvas = forwardRef<
       type,
     }: DataLoaderGetBarsParams) {
       if (type === "init") {
-        callback(createKLineData(loadedCandlesRef.current), {
+        const displayedCandles = mergeLiveCandleItem(
+          loadedCandlesRef.current,
+          liveCandleRef.current
+        )
+
+        callback(createKLineData(displayedCandles), {
           // KLineChart v10 uses `forward` for the left-edge prepend path.
           backward: false,
-          forward: loadedCandlesRef.current.length > 0,
+          forward: displayedCandles.length > 0,
         })
         scheduleMarkerPositionUpdate()
         return
@@ -1203,12 +1342,11 @@ export const MarketChartCanvas = forwardRef<
       dispose(chart)
     }
   }, [
-    annotations,
     assetId,
-    candles,
+    chartThemePalette,
     includeAnnotations,
     resetKey,
-    resolvedTheme,
+    showVolumePane,
     symbol,
     timeframe,
     intlLocale,

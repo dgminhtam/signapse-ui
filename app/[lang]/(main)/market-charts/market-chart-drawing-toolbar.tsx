@@ -1,21 +1,28 @@
 "use client"
 
-import type { ComponentType, ReactElement, SVGProps } from "react"
+import type { ComponentType, SVGProps } from "react"
 import {
   ChartNoAxesCombined,
-  ChevronLeft,
-  ChevronRight,
+  ChartSpline,
   Circle,
+  Eraser,
   Eye,
   EyeOff,
+  GitBranch,
   Lock,
   Magnet,
   Minus,
-  PenLine,
+  MoveHorizontal,
+  MoveVertical,
+  Route,
+  Shapes,
   Slash,
+  Spline,
   Square,
   Trash2,
+  Triangle,
   Unlock,
+  Workflow,
 } from "lucide-react"
 
 import { useLocalization } from "@/app/lib/i18n/provider"
@@ -31,33 +38,70 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
-import { Toggle } from "@/components/ui/toggle"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Separator } from "@/components/ui/separator"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
 
 import {
-  MARKET_CHART_DRAWING_TOOLS,
-  isMarketChartDrawingTool,
+  MARKET_CHART_DRAWING_PALETTES,
+  MARKET_CHART_DRAWING_PALETTE_TOOLS,
+  getMarketChartDrawingToolPalette,
+  type MarketChartDrawingPalette,
   type MarketChartDrawingState,
   type MarketChartDrawingTool,
 } from "./market-chart-drawing"
 
 type DrawingToolIcon = ComponentType<SVGProps<SVGSVGElement>>
+type DrawingStateToggleValue = "magnet" | "locked" | "visible"
 
 const DRAWING_TOOL_ICONS: Record<MarketChartDrawingTool, DrawingToolIcon> = {
-  "horizontal-line": Minus,
+  "horizontal-line": MoveHorizontal,
+  "horizontal-ray": MoveHorizontal,
+  "horizontal-segment": Minus,
+  "vertical-line": MoveVertical,
+  "vertical-ray": MoveVertical,
+  "vertical-segment": MoveVertical,
   "trend-line": Slash,
-  channel: ChartNoAxesCombined,
-  fibonacci: PenLine,
+  ray: Spline,
+  "price-channel-line": ChartNoAxesCombined,
+  "parallel-line": ChartSpline,
   circle: Circle,
   rectangle: Square,
+  parallelogram: Shapes,
+  triangle: Triangle,
+  "xabcd-pattern": Workflow,
+  "abcd-pattern": GitBranch,
+  "three-waves": Route,
+  "five-waves": Route,
+  "eight-waves": Route,
+  "any-waves": Route,
+}
+
+const DRAWING_PALETTE_ICONS: Record<
+  MarketChartDrawingPalette,
+  DrawingToolIcon
+> = {
+  line: Slash,
+  channel: ChartNoAxesCombined,
+  shape: Circle,
+  pattern: Workflow,
+}
+
+function getDrawingStateToggleValues(
+  state: MarketChartDrawingState
+): DrawingStateToggleValue[] {
+  return [
+    state.isMagnetEnabled ? "magnet" : null,
+    state.isLocked ? "locked" : null,
+    state.isVisible ? "visible" : null,
+  ].filter((value): value is DrawingStateToggleValue => value !== null)
 }
 
 interface MarketChartDrawingToolbarProps {
@@ -81,165 +125,148 @@ export function MarketChartDrawingToolbar({
   const labels = dictionary.marketCharts.drawings
 
   return (
-    <TooltipProvider delayDuration={150}>
+    <div
+      className={cn(
+        "flex shrink-0 flex-col items-center gap-1 overflow-hidden border-r bg-card p-1",
+        disabled ? "pointer-events-none opacity-50" : null
+      )}
+      aria-label={labels.toolbarLabel}
+      onClick={(event) => event.stopPropagation()}
+    >
       <div
-        className={cn(
-          "flex shrink-0 flex-col items-center overflow-hidden border-r bg-card p-1",
-          disabled ? "pointer-events-none opacity-50" : null
-        )}
-        aria-label={labels.toolbarLabel}
-        onClick={(event) => event.stopPropagation()}
+        className="flex flex-col items-center gap-1"
+        aria-label={labels.toolsLabel}
       >
-        <DrawingTooltip label={state.isCollapsed ? labels.expand : labels.collapse}>
+        {MARKET_CHART_DRAWING_PALETTES.map((palette) => {
+          const selectedTool = state.selectedTools[palette]
+          const selectedToolIsActive = state.activeTool
+            ? getMarketChartDrawingToolPalette(state.activeTool) === palette
+            : false
+          const TriggerIcon =
+            DRAWING_TOOL_ICONS[selectedTool] ?? DRAWING_PALETTE_ICONS[palette]
+
+          return (
+            <DropdownMenu key={palette}>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  type="button"
+                  variant={selectedToolIsActive ? "secondary" : "ghost"}
+                  size="sm"
+                  disabled={disabled}
+                  aria-label={`${labels.palettes[palette]}: ${labels.tools[selectedTool]}`}
+                  aria-pressed={selectedToolIsActive}
+                >
+                  <TriggerIcon />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent side="right" align="start" className="w-56">
+                <DropdownMenuGroup>
+                  {MARKET_CHART_DRAWING_PALETTE_TOOLS[palette].map((tool) => {
+                    const Icon = DRAWING_TOOL_ICONS[tool]
+
+                    return (
+                      <DropdownMenuItem
+                        key={tool}
+                        onSelect={() => {
+                          onToolChange(tool)
+                        }}
+                      >
+                        <Icon />
+                        {labels.tools[tool]}
+                      </DropdownMenuItem>
+                    )
+                  })}
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )
+        })}
+      </div>
+
+      <Separator />
+      <ToggleGroup
+        type="multiple"
+        orientation="vertical"
+        spacing={1}
+        value={getDrawingStateToggleValues(state)}
+        aria-label={labels.stateControlsLabel}
+        onValueChange={(values) => {
+          const nextValues = new Set(values)
+
+          onStateChange({
+            isLocked: nextValues.has("locked"),
+            isMagnetEnabled: nextValues.has("magnet"),
+            isVisible: nextValues.has("visible"),
+          })
+        }}
+      >
+        <ToggleGroupItem
+          value="magnet"
+          size="sm"
+          disabled={disabled}
+          aria-label={labels.magnet}
+        >
+          <Magnet />
+        </ToggleGroupItem>
+
+        <ToggleGroupItem
+          value="locked"
+          size="sm"
+          disabled={disabled}
+          aria-label={state.isLocked ? labels.unlock : labels.lock}
+        >
+          {state.isLocked ? <Lock /> : <Unlock />}
+        </ToggleGroupItem>
+
+        <ToggleGroupItem
+          value="visible"
+          size="sm"
+          disabled={disabled}
+          aria-label={state.isVisible ? labels.hide : labels.show}
+        >
+          {state.isVisible ? <Eye /> : <EyeOff />}
+        </ToggleGroupItem>
+      </ToggleGroup>
+
+      <Separator />
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        disabled={disabled || !state.hasSelectedDrawing}
+        aria-label={labels.deleteSelected}
+        onClick={onDeleteSelected}
+      >
+        <Eraser />
+      </Button>
+
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
           <Button
             type="button"
             variant="ghost"
-            size="icon-sm"
+            size="sm"
             disabled={disabled}
-            aria-label={state.isCollapsed ? labels.expand : labels.collapse}
-            onClick={() => onStateChange({ isCollapsed: !state.isCollapsed })}
+            aria-label={labels.clearAll}
           >
-            {state.isCollapsed ? <ChevronRight /> : <ChevronLeft />}
+            <Trash2 />
           </Button>
-        </DrawingTooltip>
-
-        {!state.isCollapsed ? (
-          <>
-            <Separator />
-            <ToggleGroup
-              type="single"
-              orientation="vertical"
-              value={state.activeTool ?? ""}
-              aria-label={labels.toolsLabel}
-              onValueChange={(value) => {
-                onToolChange(isMarketChartDrawingTool(value) ? value : null)
-              }}
-            >
-              {MARKET_CHART_DRAWING_TOOLS.map((tool) => {
-                const Icon = DRAWING_TOOL_ICONS[tool]
-
-                return (
-                  <DrawingTooltip key={tool} label={labels.tools[tool]}>
-                    <ToggleGroupItem
-                      value={tool}
-                      size="sm"
-                      disabled={disabled}
-                      aria-label={labels.tools[tool]}
-                    >
-                      <Icon />
-                    </ToggleGroupItem>
-                  </DrawingTooltip>
-                )
-              })}
-            </ToggleGroup>
-
-            <Separator />
-            <DrawingTooltip label={labels.magnet}>
-              <Toggle
-                variant="default"
-                size="sm"
-                pressed={state.isMagnetEnabled}
-                disabled={disabled}
-                aria-label={labels.magnet}
-                onPressedChange={(checked) =>
-                  onStateChange({ isMagnetEnabled: checked })
-                }
-              >
-                <Magnet />
-              </Toggle>
-            </DrawingTooltip>
-
-            <DrawingTooltip label={state.isLocked ? labels.unlock : labels.lock}>
-              <Toggle
-                variant="default"
-                size="sm"
-                pressed={state.isLocked}
-                disabled={disabled}
-                aria-label={state.isLocked ? labels.unlock : labels.lock}
-                onPressedChange={(checked) =>
-                  onStateChange({ isLocked: checked })
-                }
-              >
-                {state.isLocked ? <Lock /> : <Unlock />}
-              </Toggle>
-            </DrawingTooltip>
-
-            <DrawingTooltip label={state.isVisible ? labels.hide : labels.show}>
-              <Toggle
-                variant="default"
-                size="sm"
-                pressed={state.isVisible}
-                disabled={disabled}
-                aria-label={state.isVisible ? labels.hide : labels.show}
-                onPressedChange={(checked) =>
-                  onStateChange({ isVisible: checked })
-                }
-              >
-                {state.isVisible ? <Eye /> : <EyeOff />}
-              </Toggle>
-            </DrawingTooltip>
-
-            <Separator />
-            <DrawingTooltip label={labels.deleteSelected}>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                disabled={disabled || !state.hasSelectedDrawing}
-                aria-label={labels.deleteSelected}
-                onClick={onDeleteSelected}
-              >
-                <Trash2 />
-              </Button>
-            </DrawingTooltip>
-
-            <AlertDialog>
-              <DrawingTooltip label={labels.clearAll}>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-sm"
-                    disabled={disabled}
-                    aria-label={labels.clearAll}
-                  >
-                    <Trash2 />
-                  </Button>
-                </AlertDialogTrigger>
-              </DrawingTooltip>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>{labels.clearAllTitle}</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    {labels.clearAllDescription}
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>{labels.cancel}</AlertDialogCancel>
-                  <AlertDialogAction variant="destructive" onClick={onClearAll}>
-                    {labels.clearAllConfirm}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </>
-        ) : null}
-      </div>
-    </TooltipProvider>
-  )
-}
-
-function DrawingTooltip({
-  children,
-  label,
-}: {
-  children: ReactElement
-  label: string
-}) {
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>{children}</TooltipTrigger>
-      <TooltipContent side="right">{label}</TooltipContent>
-    </Tooltip>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{labels.clearAllTitle}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {labels.clearAllDescription}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{labels.cancel}</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={onClearAll}>
+              {labels.clearAllConfirm}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   )
 }

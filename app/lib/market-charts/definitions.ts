@@ -106,6 +106,75 @@ export interface MarketChartCandleResponse {
   annotations: MarketChartAnnotationResponse[]
 }
 
+export type MarketChartLiveStreamState =
+  | "CONNECTING"
+  | "CONNECTED"
+  | "DISCONNECTED"
+  | "RECONNECTING"
+  | "SUBSCRIBED"
+  | "UNSUBSCRIBED"
+  | "STALE"
+  | "ERROR"
+
+export interface MarketChartLiveRequest {
+  assetId: number
+  timeframe: MarketChartTimeframe
+}
+
+export interface MarketChartLiveStatusResponse {
+  assetId: number
+  symbol: string
+  provider: string
+  state: MarketChartLiveStreamState
+  message?: string | null
+  stale: boolean
+  observedAt: string
+}
+
+export interface MarketChartLiveQuoteResponse {
+  assetId: number
+  symbol: string
+  provider: string
+  price: number
+  volume?: number | null
+  providerTime?: string | null
+  receivedAt: string
+  stale: boolean
+}
+
+export interface MarketChartLiveCandleResponse {
+  assetId: number
+  symbol: string
+  provider: string
+  timeframe: MarketChartTimeframe
+  time: string
+  open: number
+  high: number
+  low: number
+  close: number
+  volume?: number | null
+  updatedAt: string
+  partial: true
+}
+
+export interface MarketChartLiveSnapshotResponse {
+  asset: MarketChartAssetResponse
+  symbol: string
+  provider: string
+  timeframe: MarketChartTimeframe
+  quote?: MarketChartLiveQuoteResponse | null
+  candle?: MarketChartLiveCandleResponse | null
+  status: MarketChartLiveStatusResponse
+}
+
+export interface MarketChartLiveErrorResponse {
+  assetId: number
+  symbol: string
+  provider: string
+  message: string
+  observedAt: string
+}
+
 function isValidDateTime(value: string) {
   return !Number.isNaN(Date.parse(value))
 }
@@ -132,7 +201,7 @@ export function getMarketChartCandleRequestSchema(dictionary: Dictionary) {
         .trim()
         .min(1, dictionary.marketCharts.toRequired)
         .refine(isValidDateTime, dictionary.marketCharts.toInvalid),
-      includeAnnotations: z.boolean().optional(),
+      includeAnnotations: z.boolean().default(true),
     })
     .superRefine((value, context) => {
       const fromTime = Date.parse(value.from)
@@ -213,6 +282,76 @@ export const marketChartCandleResponseSchema = z.object({
   candles: z.array(marketChartCandleItemResponseSchema).default([]),
   annotations: z.array(marketChartAnnotationResponseSchema).default([]),
 }) satisfies z.ZodType<MarketChartCandleResponse>
+
+export const marketChartLiveStreamStateSchema = z.enum([
+  "CONNECTING",
+  "CONNECTED",
+  "DISCONNECTED",
+  "RECONNECTING",
+  "SUBSCRIBED",
+  "UNSUBSCRIBED",
+  "STALE",
+  "ERROR",
+]) satisfies z.ZodType<MarketChartLiveStreamState>
+
+export const marketChartLiveRequestSchema = z.object({
+  assetId: z.number().int().positive(),
+  timeframe: z.enum(MARKET_CHART_TIMEFRAMES),
+}) satisfies z.ZodType<MarketChartLiveRequest>
+
+export const marketChartLiveStatusResponseSchema = z.object({
+  assetId: z.number(),
+  symbol: z.string(),
+  provider: z.string(),
+  state: marketChartLiveStreamStateSchema,
+  message: z.string().nullable().optional(),
+  stale: z.boolean(),
+  observedAt: z.string(),
+}) satisfies z.ZodType<MarketChartLiveStatusResponse>
+
+export const marketChartLiveQuoteResponseSchema = z.object({
+  assetId: z.number(),
+  symbol: z.string(),
+  provider: z.string(),
+  price: z.number(),
+  volume: z.number().nullable().optional(),
+  providerTime: z.string().nullable().optional(),
+  receivedAt: z.string(),
+  stale: z.boolean(),
+}) satisfies z.ZodType<MarketChartLiveQuoteResponse>
+
+export const marketChartLiveCandleResponseSchema = z.object({
+  assetId: z.number(),
+  symbol: z.string(),
+  provider: z.string(),
+  timeframe: z.enum(MARKET_CHART_TIMEFRAMES),
+  time: z.string(),
+  open: z.number(),
+  high: z.number(),
+  low: z.number(),
+  close: z.number(),
+  volume: z.number().nullable().optional(),
+  updatedAt: z.string(),
+  partial: z.literal(true),
+}) satisfies z.ZodType<MarketChartLiveCandleResponse>
+
+export const marketChartLiveSnapshotResponseSchema = z.object({
+  asset: marketChartAssetResponseSchema,
+  symbol: z.string(),
+  provider: z.string(),
+  timeframe: z.enum(MARKET_CHART_TIMEFRAMES),
+  quote: marketChartLiveQuoteResponseSchema.nullable().optional(),
+  candle: marketChartLiveCandleResponseSchema.nullable().optional(),
+  status: marketChartLiveStatusResponseSchema,
+}) satisfies z.ZodType<MarketChartLiveSnapshotResponse>
+
+export const marketChartLiveErrorResponseSchema = z.object({
+  assetId: z.number(),
+  symbol: z.string(),
+  provider: z.string(),
+  message: z.string(),
+  observedAt: z.string(),
+}) satisfies z.ZodType<MarketChartLiveErrorResponse>
 
 export function isMarketChartTimeframe(value: string): value is MarketChartTimeframe {
   return MARKET_CHART_TIMEFRAMES.includes(value as MarketChartTimeframe)
