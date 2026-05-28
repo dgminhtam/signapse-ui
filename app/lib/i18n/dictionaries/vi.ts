@@ -1245,6 +1245,7 @@ export const vi = {
       canonicalKey: "Khóa chuẩn",
       relatedNodes: "Nút liên quan",
       relatedEdges: "Cạnh liên quan",
+      relationSummary: "{nodes} nút liên quan · {edges} cạnh",
     },
     controls: {
       zoomIn: "Phóng to biểu đồ",

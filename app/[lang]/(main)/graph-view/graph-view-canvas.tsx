@@ -346,6 +346,22 @@ function formatInspectorConfidence(
   })
 }
 
+function getInspectorText(value: string | null | undefined) {
+  const trimmedValue = value?.trim()
+
+  return trimmedValue || null
+}
+
+function getMeaningfulInspectorStatus(value: string | null | undefined) {
+  const trimmedValue = getInspectorText(value)
+
+  if (!trimmedValue || /^[A-Z0-9_]+$/.test(trimmedValue)) {
+    return null
+  }
+
+  return trimmedValue
+}
+
 function getNodeQuickDetailAction(
   node: GraphViewNode,
   dictionary: LocalizationContext["dictionary"]
@@ -408,6 +424,119 @@ function GraphNodeInspectorField({
   )
 }
 
+function getGraphNodeInspectorFields({
+  confidence,
+  dictionary,
+  metadata,
+  node,
+  occurredAt,
+  publishedAt,
+}: {
+  confidence: string | null
+  dictionary: LocalizationContext["dictionary"]
+  metadata: GraphViewNode["metadata"]
+  node: GraphViewNode
+  occurredAt: string | null
+  publishedAt: string | null
+}) {
+  const eventStatus = getMeaningfulInspectorStatus(metadata?.status)
+  const narrativeStatus = getInspectorText(metadata?.narrativeStatus)
+  const newsOutletName = getInspectorText(metadata?.newsOutletName)
+  const assetType = getInspectorText(metadata?.assetType)
+  const thesis = getInspectorText(metadata?.thesis)
+  const symbol = getInspectorText(metadata?.symbol)
+  const showSymbol =
+    symbol && symbol.toLowerCase() !== node.label.trim().toLowerCase()
+
+  if (node.kind === "event") {
+    return [
+      {
+        key: "occurred-at",
+        label: dictionary.graphView.inspector.time,
+        value: occurredAt,
+        valueNode: occurredAt ? (
+          <AppTimeMetadata icon={Calendar}>{occurredAt}</AppTimeMetadata>
+        ) : undefined,
+      },
+      {
+        key: "confidence",
+        label: dictionary.graphView.inspector.confidence,
+        value: confidence,
+      },
+      {
+        key: "status",
+        label: dictionary.graphView.inspector.status,
+        value: eventStatus,
+      },
+    ]
+  }
+
+  if (node.kind === "news-article") {
+    return [
+      {
+        key: "news-outlet",
+        label: dictionary.graphView.inspector.newsOutlet,
+        value: newsOutletName,
+      },
+      {
+        key: "published-at",
+        label: dictionary.graphView.inspector.publishedAt,
+        value: publishedAt,
+        valueNode: publishedAt ? (
+          <AppTimeMetadata icon={Calendar}>{publishedAt}</AppTimeMetadata>
+        ) : undefined,
+      },
+      {
+        key: "confidence",
+        label: dictionary.graphView.inspector.confidence,
+        value: confidence,
+      },
+    ]
+  }
+
+  if (node.kind === "asset") {
+    return [
+      {
+        key: "symbol",
+        label: dictionary.graphView.inspector.symbol,
+        value: showSymbol ? symbol : null,
+      },
+      {
+        key: "asset-type",
+        label: dictionary.graphView.inspector.assetType,
+        value: assetType,
+      },
+    ]
+  }
+
+  if (node.kind === "narrative") {
+    return [
+      {
+        key: "thesis",
+        label: dictionary.graphView.inspector.thesis,
+        value: thesis,
+        valueNode: thesis ? (
+          <span className="line-clamp-4 text-xs font-medium text-foreground">
+            {thesis}
+          </span>
+        ) : undefined,
+      },
+      {
+        key: "narrative-status",
+        label: dictionary.graphView.inspector.narrativeStatus,
+        value: narrativeStatus,
+      },
+      {
+        key: "confidence",
+        label: dictionary.graphView.inspector.confidence,
+        value: confidence,
+      },
+    ]
+  }
+
+  return []
+}
+
 function GraphNodeDetailInspector({
   node,
   onClose,
@@ -422,7 +551,7 @@ function GraphNodeDetailInspector({
   relatedNodeCount: number
 }) {
   const localization = useLocalization()
-  const { dictionary, formatNumber } = localization
+  const { dictionary, formatMessage, formatNumber } = localization
   const nodeVisuals = getGraphViewNodeVisuals(dictionary)
   const visual = nodeVisuals[node.kind]
   const metadata = node.metadata ?? {}
@@ -440,6 +569,21 @@ function GraphNodeDetailInspector({
   const occurredAt = formatInspectorDate(metadata.occurredAt, localization)
   const publishedAt = formatInspectorDate(metadata.publishedAt, localization)
   const confidence = formatInspectorConfidence(metadata.confidence, localization)
+  const relationSummary = formatMessage(
+    dictionary.graphView.inspector.relationSummary,
+    {
+      edges: formatNumber(relatedEdgeCount),
+      nodes: formatNumber(Math.max(relatedNodeCount - 1, 0)),
+    }
+  )
+  const inspectorFields = getGraphNodeInspectorFields({
+    confidence,
+    dictionary,
+    metadata,
+    node,
+    occurredAt,
+    publishedAt,
+  })
 
   return (
     <aside className="pointer-events-auto absolute inset-x-3 bottom-14 z-20 max-h-[26rem] overflow-hidden rounded-2xl border border-border/80 bg-popover/95 text-popover-foreground shadow-2xl backdrop-blur-md md:inset-x-auto md:bottom-auto md:right-4 md:top-16 md:max-h-[calc(100%-5rem)] md:w-[22rem]">
@@ -476,73 +620,22 @@ function GraphNodeDetailInspector({
       </div>
 
       <div className="max-h-[20rem] overflow-y-auto p-3.5 md:max-h-[calc(100vh-11rem)]">
-        <dl className="grid grid-cols-2 gap-2">
-          <GraphNodeInspectorField
-            label={dictionary.graphView.inspector.time}
-            value={occurredAt}
-            valueNode={
-              <AppTimeMetadata icon={Calendar}>{occurredAt}</AppTimeMetadata>
-            }
-          />
-          <GraphNodeInspectorField
-            label={dictionary.graphView.inspector.publishedAt}
-            value={publishedAt}
-            valueNode={
-              <AppTimeMetadata icon={Calendar}>{publishedAt}</AppTimeMetadata>
-            }
-          />
-          <GraphNodeInspectorField
-            label={dictionary.graphView.inspector.confidence}
-            value={confidence}
-          />
-          <GraphNodeInspectorField
-            label={dictionary.graphView.inspector.status}
-            value={metadata.status}
-          />
-          <GraphNodeInspectorField
-            label={dictionary.graphView.inspector.narrativeStatus}
-            value={metadata.narrativeStatus}
-          />
-          <GraphNodeInspectorField
-            label={dictionary.graphView.inspector.thesis}
-            value={metadata.thesis}
-            valueNode={
-              metadata.thesis ? (
-                <span className="line-clamp-3 text-xs font-medium text-foreground">
-                  {metadata.thesis}
-                </span>
-              ) : undefined
-            }
-          />
-          <GraphNodeInspectorField
-            label={dictionary.graphView.inspector.newsOutlet}
-            value={metadata.newsOutletName}
-          />
-          <GraphNodeInspectorField
-            label={dictionary.graphView.inspector.symbol}
-            value={metadata.symbol}
-          />
-          <GraphNodeInspectorField
-            label={dictionary.graphView.inspector.assetType}
-            value={metadata.assetType}
-          />
-          <GraphNodeInspectorField
-            label={dictionary.graphView.inspector.slug}
-            value={metadata.slug}
-          />
-          <GraphNodeInspectorField
-            label={dictionary.graphView.inspector.canonicalKey}
-            value={metadata.canonicalKey}
-          />
-          <GraphNodeInspectorField
-            label={dictionary.graphView.inspector.relatedNodes}
-            value={formatNumber(Math.max(relatedNodeCount - 1, 0))}
-          />
-          <GraphNodeInspectorField
-            label={dictionary.graphView.inspector.relatedEdges}
-            value={formatNumber(relatedEdgeCount)}
-          />
-        </dl>
+        {inspectorFields.length > 0 ? (
+          <dl className="flex flex-col gap-2">
+            {inspectorFields.map((field) => (
+              <GraphNodeInspectorField
+                key={field.key}
+                label={field.label}
+                value={field.value}
+                valueNode={field.valueNode}
+              />
+            ))}
+          </dl>
+        ) : null}
+
+        <p className="mt-3 rounded-full border border-border/60 bg-background/45 px-2.5 py-1 text-[11px] text-muted-foreground">
+          {relationSummary}
+        </p>
 
         {quickDetailAction || sourceUrl ? (
           <div className="mt-3 flex flex-wrap gap-2">

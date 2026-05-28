@@ -1259,6 +1259,7 @@ export const en: Dictionary = {
       canonicalKey: "Canonical key",
       relatedNodes: "Related nodes",
       relatedEdges: "Related edges",
+      relationSummary: "{nodes} related nodes · {edges} edges",
     },
     controls: {
       zoomIn: "Zoom in",
