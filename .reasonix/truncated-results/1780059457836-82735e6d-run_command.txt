@@ -1,0 +1,234 @@
+$ pnpm typecheck 2>&1
+[exit 2]
+
+> signapse-ui@0.0.1 typecheck D:\Development\Project\signapse-ui
+> tsc --noEmit
+
+.next/dev/types/validator.ts(53,39): error TS2307: Cannot find module '../../../app/(auth)/sign-in/[[...sign-in]]/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(62,39): error TS2307: Cannot find module '../../../app/(main)/ai-provider-configs/[id]/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(71,39): error TS2307: Cannot find module '../../../app/(main)/ai-provider-configs/create/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(80,39): error TS2307: Cannot find module '../../../app/(main)/ai-provider-configs/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(89,39): error TS2307: Cannot find module '../../../app/(main)/blogs/[id]/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(98,39): error TS2307: Cannot find module '../../../app/(main)/blogs/create/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(107,39): error TS2307: Cannot find module '../../../app/(main)/blogs/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(116,39): error TS2307: Cannot find module '../../../app/(main)/cronjobs/[id]/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(125,39): error TS2307: Cannot find module '../../../app/(main)/cronjobs/create/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(134,39): error TS2307: Cannot find module '../../../app/(main)/cronjobs/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(143,39): error TS2307: Cannot find module '../../../app/(main)/developer-token/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(152,39): error TS2307: Cannot find module '../../../app/(main)/economic-calendar/[id]/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(161,39): error TS2307: Cannot find module '../../../app/(main)/economic-calendar/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(170,39): error TS2307: Cannot find module '../../../app/(main)/events/[id]/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(179,39): error TS2307: Cannot find module '../../../app/(main)/events/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(188,39): error TS2307: Cannot find module '../../../app/(main)/graph-view/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(197,39): error TS2307: Cannot find module '../../../app/(main)/market-query/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(206,39): error TS2307: Cannot find module '../../../app/(main)/news-articles/[id]/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(215,39): error TS2307: Cannot find module '../../../app/(main)/news-articles/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(224,39): error TS2307: Cannot find module '../../../app/(main)/news-outlets/[id]/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(233,39): error TS2307: Cannot find module '../../../app/(main)/news-outlets/create/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(242,39): error TS2307: Cannot find module '../../../app/(main)/news-outlets/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(251,39): error TS2307: Cannot find module '../../../app/(main)/news-sources/[id]/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(260,39): error TS2307: Cannot find module '../../../app/(main)/news-sources/create/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(269,39): error TS2307: Cannot find module '../../../app/(main)/news-sources/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(278,39): error TS2307: Cannot find module '../../../app/(main)/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(287,39): error TS2307: Cannot find module '../../../app/(main)/roles/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(296,39): error TS2307: Cannot find module '../../../app/(main)/source-documents/[id]/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(305,39): error TS2307: Cannot find module '../../../app/(main)/source-documents/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(314,39): error TS2307: Cannot find module '../../../app/(main)/sources/[id]/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(323,39): error TS2307: Cannot find module '../../../app/(main)/sources/create/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(332,39): error TS2307: Cannot find module '../../../app/(main)/sources/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(341,39): error TS2307: Cannot find module '../../../app/(main)/system-prompts/[promptType]/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(350,39): error TS2307: Cannot find module '../../../app/(main)/system-prompts/create/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(359,39): error TS2307: Cannot find module '../../../app/(main)/system-prompts/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(368,39): error TS2307: Cannot find module '../../../app/(main)/topics/[id]/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(377,39): error TS2307: Cannot find module '../../../app/(main)/topics/create/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(386,39): error TS2307: Cannot find module '../../../app/(main)/topics/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(395,39): error TS2307: Cannot find module '../../../app/(main)/watchlists/page.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(417,39): error TS2307: Cannot find module '../../../app/(main)/layout.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(426,39): error TS2307: Cannot find module '../../../app/layout.js' or its corresponding type declarations.
+app/[lang]/(main)/graph-view/graph-view-canvas.tsx(10,8): error TS2307: Cannot find module '@antv/g6' or its corresponding type declarations.
+app/[lang]/(main)/graph-view/graph-view-canvas.tsx(21,8): error TS2307: Cannot find module '@antv/g6' or its corresponding type declarations.
+app/[lang]/(main)/graph-view/graph-view-canvas.tsx(211,17): error TS2339: Property 'context' does not exist on type 'BoundedDragElementForce'.
+app/[lang]/(main)/graph-view/graph-view-canvas.tsx(213,14): error TS7006: Parameter 'layout' implicitly has an 'any' type.
+app/[lang]/(main)/graph-view/graph-view-canvas.tsx(216,28): error TS4112: This member cannot have an 'override' modifier because its containing class 'BoundedDragElementForce' does not extend another class.
+app/[lang]/(main)/graph-view/graph-view-canvas.tsx(217,14): error TS2339: Property 'context' does not exist on type 'BoundedDragElementForce'.
+app/[lang]/(main)/graph-view/graph-view-canvas.tsx(222,26): error TS2339: Property 'options' does not exist on type 'BoundedDragElementForce'.
+app/[lang]/(main)/graph-view/graph-view-canvas.tsx(224,27): error TS2339: Property 'clampByRotation' does not exist on type 'BoundedDragElementForce'.
+app/[lang]/(main)/graph-view/graph-view-canvas.tsx(226,10): error TS2339: Property 'context' does not exist on type 'BoundedDragElementForce'.
+app/[lang]/(main)/graph-view/graph-view-canvas.tsx(226,50): error TS7006: Parameter 'element' implicitly has an 'any' type.
+app/[lang]/(main)/graph-view/graph-view-canvas.tsx(226,59): error TS7006: Parameter 'index' implicitly has an 'any' type.
+app/[lang]/(main)/graph-view/graph-view-canvas.tsx(1086,17): error TS7006: Parameter 'node' implicitly has an 'any' type.
+app/[lang]/(main)/graph-view/graph-view-canvas.tsx(1095,16): error TS7006: Parameter 'node' implicitly has an 'any' type.
+app/[lang]/(main)/graph-view/graph-view-canvas.tsx(1099,18): error TS7006: Parameter 'edge' implicitly has an 'any' type.
+app/[lang]/(main)/graph-view/graph-view-canvas.tsx(1102,18): error TS7006: Parameter 'edge' implicitly has an 'any' type.
+app/[lang]/(main)/graph-view/graph-view-canvas.tsx(1108,18): error TS7006: Parameter 'node' implicitly has an 'any' type.
+app/[lang]/(main)/graph-view/graph-view-canvas.tsx(1356,15): error TS7006: Parameter 'error' implicitly has an 'any' type.
+app/[lang]/(main)/graph-view/graph-view-canvas.tsx(1377,62): error TS7006: Parameter 'error' implicitly has an 'any' type.
+app/[lang]/(main)/graph-view/graph-view-canvas.tsx(1431,17): error TS7006: Parameter 'edge' implicitly has an 'any' type.
+app/[lang]/(main)/graph-view/graph-view-canvas.tsx(1438,17): error TS7006: Parameter 'node' implicitly has an 'any' type.
+app/[lang]/(main)/graph-view/graph-view-canvas.tsx(1455,63): error TS7006: Parameter 'state' implicitly has an 'any' type.
+app/[lang]/(main)/graph-view/graph-view-canvas.tsx(1621,8): error TS7006: Parameter 'error' implicitly has an 'any' type.
+app/[lang]/(main)/local-entity-quick-detail-drawer.tsx(138,40): error TS7006: Parameter 'nextOpen' implicitly has an 'any' type.
+app/[lang]/(main)/market-charts/market-chart-canvas.tsx(20,8): error TS2307: Cannot find module 'klinecharts' or its corresponding type declarations.
+app/[lang]/(main)/market-charts/market-chart-canvas.tsx(67,3): error TS2305: Module '"./market-chart-candle-helpers"' has no exported member 'getOldestLoadedTimestamp'.
+app/[lang]/(main)/market-charts/market-chart-canvas.tsx(404,22): error TS7006: Parameter 'event' implicitly has an 'any' type.
+app/[lang]/(main)/market-charts/market-chart-canvas.tsx(409,19): error TS7006: Parameter 'event' implicitly has an 'any' type.
+app/[lang]/(main)/market-charts/market-chart-canvas.tsx(422,19): error TS7006: Parameter 'event' implicitly has an 'any' type.
+app/[lang]/(main)/market-charts/market-chart-canvas.tsx(431,20): error TS7006: Parameter 'event' implicitly has an 'any' type.
+app/[lang]/(main)/market-charts/market-chart-canvas.tsx(711,28): error TS7031: Binding element 'name' implicitly has an 'any' type.
+app/[lang]/(main)/market-charts/market-chart-canvas.tsx(711,34): error TS7031: Binding element 'points' implicitly has an 'any' type.
+app/[lang]/(main)/market-charts/market-chart-canvas.tsx(711,42): error TS7031: Binding element 'styles' implicitly has an 'any' type.
+app/[lang]/(main)/market-charts/market-chart-canvas.tsx(711,50): error TS7031: Binding element 'lock' implicitly has an 'any' type.
+app/[lang]/(main)/market-charts/market-chart-canvas.tsx(711,56): error TS7031: Binding element 'visible' implicitly has an 'any' type.
+app/[lang]/(main)/market-charts/market-chart-canvas.tsx(711,65): error TS7031: Binding element 'zLevel' implicitly has an 'any' type.
+app/[lang]/(main)/market-charts/market-chart-canvas.tsx(711,73): error TS7031: Binding element 'paneId' implicitly has an 'any' type.
+app/[lang]/(main)/market-charts/market-chart-canvas.tsx(711,81): error TS7031: Binding element 'mode' implicitly has an 'any' type.
+app/[lang]/(main)/market-charts/market-chart-canvas.tsx(711,87): error TS7031: Binding element 'modeSensitivity' implicitly has an 'any' type.
+app/[lang]/(main)/market-charts/market-chart-canvas.tsx(807,15): error TS7006: Parameter 'params' implicitly has an 'any' type.
+app/[lang]/(main)/market-charts/market-chart-canvas.tsx(808,20): error TS7006: Parameter 'params' implicitly has an 'any' type.
+app/[lang]/(main)/market-charts/market-chart-drawing.ts(7,8): error TS2307: Cannot find module 'klinecharts' or its corresponding type declarations.
+app/[lang]/(main)/market-charts/market-chart-drawing.ts(342,28): error TS7031: Binding element 'coordinates' implicitly has an 'any' type.
+app/[lang]/(main)/market-charts/market-chart-drawing.ts(365,28): error TS7031: Binding element 'coordinates' implicitly has an 'any' type.
+app/[lang]/(main)/market-charts/market-chart-drawing.ts(392,28): error TS7031: Binding element 'coordinates' implicitly has an 'any' type.
+app/[lang]/(main)/market-charts/market-chart-drawing.ts(419,28): error TS7031: Binding element 'coordinates' implicitly has an 'any' type.
+app/[lang]/(main)/market-charts/market-chart-drawing.ts(449,28): error TS7031: Binding element 'coordinates' implicitly has an 'any' type.
+app/[lang]/(main)/market-charts/market-chart-drawing.ts(473,28): error TS7031: Binding element 'coordinates' implicitly has an 'any' type.
+app/[lang]/(main)/market-charts/market-chart-drawing.ts(498,28): error TS7031: Binding element 'coordinates' implicitly has an 'any' type.
+app/[lang]/(main)/market-charts/market-chart-drawing.ts(525,28): error TS7031: Binding element 'coordinates' implicitly has an 'any' type.
+app/[lang]/(main)/market-charts/market-chart-drawing.ts(556,28): error TS7031: Binding element 'coordinates' implicitly has an 'any' type.
+app/[lang]/(main)/market-charts/market-chart-drawing.ts(585,28): error TS7031: Binding element 'coordinates' implicitly has an 'any' type.
+app/[lang]/(main)/market-charts/market-chart-drawing.ts(618,28): error TS7031: Binding element 'coordinates' implicitly has an 'any' type.
+app/[lang]/(main)/market-charts/market-chart-drawing.ts(684,28): error TS7031: Binding element 'coordinates' implicitly has an 'any' type.
+app/[lang]/(main)/market-charts/market-chart-drawing.ts(691,29): error TS7006: Parameter 'coordinate' implicitly has an 'any' type.
+app/[lang]/(main)/market-charts/market-chart-drawing.ts(691,41): error TS7006: Parameter 'index' implicitly has an 'any' type.
+app/[lang]/(main)/market-charts/market-chart-period.ts(1,80): error TS2307: Cannot find module 'klinecharts' or its corresponding type declarations.
+app/[lang]/layout.tsx(2,28): error TS2307: Cannot find module '@clerk/localizations' or its corresponding type declarations.
+components/editor-x/alignment-picker-plugin.tsx(1,40): error TS2307: Cannot find module 'lexical' or its corresponding type declarations.
+components/editor-x/auto-complete-plugin.tsx(4,43): error TS2307: Cannot find module '@lexical/react/LexicalComposerContext' or its corresponding type declarations.
+components/editor-x/auto-complete-plugin.tsx(8,8): error TS2307: Cannot find module '@lexical/selection' or its corresponding type declarations.
+components/editor-x/auto-complete-plugin.tsx(9,31): error TS2307: Cannot find module '@lexical/utils' or its corresponding type declarations.
+components/editor-x/auto-complete-plugin.tsx(10,55): error TS2307: Cannot find module 'lexical' or its corresponding type declarations.
+components/editor-x/auto-complete-plugin.tsx(23,8): error TS2307: Cannot find module 'lexical' or its corresponding type declarations.
+components/editor-x/auto-complete-plugin.tsx(152,12): error TS2339: Property 'setFormat' does not exist on type 'AutocompleteNode'.
+components/editor-x/auto-complete-plugin.tsx(162,24): error TS2339: Property 'getKey' does not exist on type 'AutocompleteNode'.
+components/editor-x/auto-embed-plugin.tsx(9,8): error TS2307: Cannot find module '@lexical/react/LexicalAutoEmbedPlugin' or its corresponding type declarations.
+components/editor-x/auto-embed-plugin.tsx(10,43): error TS2307: Cannot find module '@lexical/react/LexicalComposerContext' or its corresponding type declarations.
+components/editor-x/auto-embed-plugin.tsx(11,36): error TS2307: Cannot find module 'lexical' or its corresponding type declarations.
+components/editor-x/auto-embed-plugin.tsx(97,3): error TS2353: Object literal may only specify known properties, and 'insertNode' does not exist in type 'CustomEmbedConfig'.
+components/editor-x/auto-embed-plugin.tsx(133,3): error TS2353: Object literal may only specify known properties, and 'insertNode' does not exist in type 'CustomEmbedConfig'.
+components/editor-x/auto-embed-plugin.tsx(166,23): error TS2339: Property 'type' does not exist on type 'CustomEmbedConfig'.
+components/editor-x/auto-embed-plugin.tsx(203,39): error TS2339: Property 'parseUrl' does not exist on type 'CustomEmbedConfig'.
+components/editor-x/auto-embed-plugin.tsx(217,19): error TS2339: Property 'insertNode' does not exist on type 'CustomEmbedConfig'.
+components/editor-x/auto-embed-plugin.tsx(229,40): error TS2339: Property 'type' does not exist on type 'CustomEmbedConfig'.
+components/editor-x/auto-embed-plugin.tsx(240,42): error TS2339: Property 'type' does not exist on type 'CustomEmbedConfig'.
+components/editor-x/auto-embed-plugin.tsx(295,11): error TS7006: Parameter 'anchorElementRef' implicitly has an 'any' type.
+components/editor-x/auto-embed-plugin.tsx(297,28): error TS7031: Binding element '_selectedIndex' implicitly has an 'any' type.
+components/editor-x/auto-embed-plugin.tsx(298,13): error TS7031: Binding element 'options' implicitly has an 'any' type.
+components/editor-x/auto-embed-plugin.tsx(299,13): error TS7031: Binding element 'selectOptionAndCleanUp' implicitly has an 'any' type.
+components/editor-x/auto-embed-plugin.tsx(300,34): error TS7031: Binding element '_setHighlightedIndex' implicitly has an 'any' type.
+components/editor-x/auto-embed-plugin.tsx(316,41): error TS7006: Parameter 'option' implicitly has an 'any' type.
+components/editor-x/auto-link-extension.tsx(1,29): error TS2307: Cannot find module '@lexical/code' or its corresponding type declarations.
+components/editor-x/auto-link-extension.tsx(5,8): error TS2307: Cannot find module '@lexical/link' or its corresponding type declarations.
+components/editor-x/auto-link-extension.tsx(6,33): error TS2307: Cannot find module 'lexical' or its corresponding type declarations.
+components/editor-x/auto-link-extension.tsx(17,45): error TS7006: Parameter 'text' implicitly has an 'any' type.
+components/editor-x/auto-link-extension.tsx(20,47): error TS7006: Parameter 'text' implicitly has an 'any' type.
+components/editor-x/autocomplete-node.tsx(8,8): error TS2307: Cannot find module 'lexical' or its corresponding type declarations.
+components/editor-x/autocomplete-node.tsx(9,26): error TS2307: Cannot find module 'lexical' or its corresponding type declarations.
+components/editor-x/autocomplete-node.tsx(32,38): error TS2339: Property '__text' does not exist on type 'AutocompleteNode'.
+components/editor-x/autocomplete-node.tsx(32,64): error TS2339: Property '__key' does not exist on type 'AutocompleteNode'.
+components/editor-x/autocomplete-node.tsx(50,7): error TS2339: Property 'updateFromJSON' does not exist on type 'AutocompleteNode'.
+components/editor-x/autocomplete-node.tsx(95,43): error TS2339: Property 'setMode' does not exist on type 'AutocompleteNode'.
+components/editor-x/block-format-toolbar-plugin.tsx(1,39): error TS2307: Cannot find module '@lexical/list' or its corresponding type declarations.
+components/editor-x/block-format-toolbar-plugin.tsx(2,32): error TS2307: Cannot find module '@lexical/rich-text' or its corresponding type declarations.
+components/editor-x/block-format-toolbar-plugin.tsx(3,60): error TS2307: Cannot find module '@lexical/utils' or its corresponding type declarations.
+components/editor-x/block-format-toolbar-plugin.tsx(8,8): error TS2307: Cannot find module 'lexical' or its corresponding type declarations.
+components/editor-x/block-format-toolbar-plugin.tsx(38,46): error TS7006: Parameter 'e' implicitly has an 'any' type.
+components/editor-x/bulleted-list-picker-plugin.tsx(1,47): error TS2307: Cannot find module '@lexical/list' or its corresponding type declarations.
+components/editor-x/check-list-picker-plugin.tsx(1,43): error TS2307: Cannot find module '@lexical/list' or its corresponding type declarations.
+components/editor-x/clear-editor-plugin.tsx(1,43): error TS2307: Cannot find module '@lexical/react/LexicalComposerContext' or its corresponding type declarations.
+components/editor-x/clear-editor-plugin.tsx(2,38): error TS2307: Cannot find module 'lexical' or its corresponding type declarations.
+components/editor-x/clear-formatting-toolbar-plugin.tsx(3,39): error TS2307: Cannot find module '@lexical/react/LexicalDecoratorBlockNode' or its corresponding type declarations.
+components/editor-x/clear-formatting-toolbar-plugin.tsx(4,46): error TS2307: Cannot find module '@lexical/rich-text' or its corresponding type declarations.
+components/editor-x/clear-formatting-toolbar-plugin.tsx(5,35): error TS2307: Cannot find module '@lexical/table' or its corresponding type declarations.
+components/editor-x/clear-formatting-toolbar-plugin.tsx(6,56): error TS2307: Cannot find module '@lexical/utils' or its corresponding type declarations.
+components/editor-x/clear-formatting-toolbar-plugin.tsx(12,8): error TS2307: Cannot find module 'lexical' or its corresponding type declarations.
+components/editor-x/clear-formatting-toolbar-plugin.tsx(37,24): error TS7006: Parameter 'node' implicitly has an 'any' type.
+components/editor-x/clear-formatting-toolbar-plugin.tsx(37,30): error TS7006: Parameter 'idx' implicitly has an 'any' type.
+components/editor-x/code-action-menu-plugin.tsx(5,39): error TS2307: Cannot find module '@lexical/code' or its corresponding type declarations.
+components/editor-x/code-action-menu-plugin.tsx(6,40): error TS2307: Cannot find module '@lexical/code-shiki' or its corresponding type declarations.
+components/editor-x/code-action-menu-plugin.tsx(7,43): error TS2307: Cannot find module '@lexical/react/LexicalComposerContext' or its corresponding type declarations.
+components/editor-x/code-action-menu-plugin.tsx(8,59): error TS2307: Cannot find module 'lexical' or its corresponding type declarations.
+components/editor-x/code-action-menu-plugin.tsx(101,8): error TS7006: Parameter 'mutations' implicitly has an 'any' type.
+components/editor-x/code-action-menu-plugin.tsx(125,7): error TS7031: Binding element 'key' implicitly has an 'any' type.
+components/editor-x/code-action-menu-plugin.tsx(147,25): error TS18047: 'target' is possibly 'null'.
+components/editor-x/code-action-menu-plugin.tsx(147,32): error TS2339: Property 'closest' does not exist on type 'EventTarget'.
+components/editor-x/code-action-menu-plugin.tsx(152,7): error TS18047: 'target' is possibly 'null'.
+components/editor-x/code-action-menu-plugin.tsx(152,14): error TS2339: Property 'closest' does not exist on type 'EventTarget'.
+components/editor-x/code-button.tsx(3,29): error TS2307: Cannot find module '@lexical/code' or its corresponding type declarations.
+components/editor-x/code-button.tsx(9,8): error TS2307: Cannot find module 'lexical' or its corresponding type declarations.
+components/editor-x/code-highlight-plugin.tsx(4,42): error TS2307: Cannot find module '@lexical/code' or its corresponding type declarations.
+components/editor-x/code-highlight-plugin.tsx(5,43): error TS2307: Cannot find module '@lexical/react/LexicalComposerContext' or its corresponding type declarations.
+components/editor-x/code-language-toolbar-plugin.tsx(3,29): error TS2307: Cannot find module '@lexical/code' or its corresponding type declarations.
+components/editor-x/code-language-toolbar-plugin.tsx(8,8): error TS2307: Cannot find module '@lexical/code-prism' or its corresponding type declarations.
+components/editor-x/code-language-toolbar-plugin.tsx(9,29): error TS2307: Cannot find module '@lexical/list' or its corresponding type declarations.
+components/editor-x/code-language-toolbar-plugin.tsx(10,37): error TS2307: Cannot find module '@lexical/utils' or its corresponding type declarations.
+components/editor-x/code-language-toolbar-plugin.tsx(16,8): error TS2307: Cannot find module 'lexical' or its corresponding type declarations.
+components/editor-x/code-language-toolbar-plugin.tsx(35,25): error TS2322: Type 'unknown' is not assignable to type 'string'.
+components/editor-x/code-language-toolbar-plugin.tsx(57,46): error TS7006: Parameter 'e' implicitly has an 'any' type.
+components/editor-x/code-picker-plugin.tsx(1,33): error TS2307: Cannot find module '@lexical/code' or its corresponding type declarations.
+components/editor-x/code-picker-plugin.tsx(2,32): error TS2307: Cannot find module '@lexical/selection' or its corresponding type declarations.
+components/editor-x/code-picker-plugin.tsx(3,50): error TS2307: Cannot find module 'lexical' or its corresponding type declarations.
+components/editor-x/component-picker-menu-plugin.tsx(12,43): error TS2307: Cannot find module '@lexical/react/LexicalComposerContext' or its corresponding type declarations.
+components/editor-x/component-picker-menu-plugin.tsx(13,47): error TS2307: Cannot find module '@lexical/react/LexicalTypeaheadMenuPlugin' or its corresponding type declarations.
+components/editor-x/component-picker-menu-plugin.tsx(14,44): error TS2307: Cannot find module '@lexical/react/LexicalTypeaheadMenuPlugin' or its corresponding type declarations.
+components/editor-x/component-picker-menu-plugin.tsx(15,26): error TS2307: Cannot find module 'lexical' or its corresponding type declarations.
+components/editor-x/component-picker-menu-plugin.tsx(59,21): error TS7006: Parameter 'e' implicitly has an 'any' type.
+components/editor-x/component-picker-menu-plugin.tsx(79,29): error TS2339: Property 'key' does not exist on type 'ComponentPickerOption'.
+components/editor-x/component-picker-menu-plugin.tsx(80,23): error TS7006: Parameter 'el' implicitly has an 'any' type.
+components/editor-x/component-picker-menu-plugin.tsx(163,11): error TS7006: Parameter 'anchorElementRef' implicitly has an 'any' type.
+components/editor-x/component-picker-menu-plugin.tsx(164,13): error TS7031: Binding element 'selectedIndex' implicitly has an 'any' type.
+components/editor-x/component-picker-menu-plugin.tsx(164,28): error TS7031: Binding element 'selectOptionAndCleanUp' implicitly has an 'any' type.
+components/editor-x/component-picker-menu-plugin.tsx(164,52): error TS7031: Binding element 'setHighlightedIndex' implicitly has an 'any' type.
+components/editor-x/component-picker-option.tsx(3,28): error TS2307: Cannot find module '@lexical/react/LexicalTypeaheadMenuPlugin' or its corresponding type declarations.
+components/editor-x/component-picker-option.tsx(4,36): error TS2307: Cannot find module 'lexical' or its corresponding type declarations.
+components/editor-x/content-editable.tsx(3,59): error TS2307: Cannot find module '@lexical/react/LexicalContentEditable' or its corresponding type declarations.
+components/editor-x/context-menu-plugin.tsx(4,50): error TS2307: Cannot find module '@lexical/link' or its corresponding type declarations.
+components/editor-x/context-menu-plugin.tsx(5,43): error TS2307: Cannot find module '@lexical/react/LexicalComposerContext' or its corresponding type declarations.
+components/editor-x/context-menu-plugin.tsx(10,8): error TS2307: Cannot find module '@lexical/react/LexicalNodeContextMenuPlugin' or its corresponding type declarations.
+components/editor-x/context-menu-plugin.tsx(20,8): error TS2307: Cannot find module 'lexical' or its corresponding type declarations.
+components/editor-x/context-menu-plugin.tsx(136,36): error TS7006: Parameter 'node' implicitly has an 'any' type.
+components/editor-x/counter-character-plugin.tsx(3,43): error TS2307: Cannot find module '@lexical/react/LexicalComposerContext' or its corresponding type declarations.
+components/editor-x/counter-character-plugin.tsx(4,34): error TS2307: Cannot find module '@lexical/text' or its corresponding type declarations.
+components/editor-x/date-time-component.tsx(5,43): error TS2307: Cannot find module '@lexical/react/LexicalComposerContext' or its corresponding type declarations.
+components/editor-x/date-time-component.tsx(6,41): error TS2307: Cannot find module '@lexical/react/useLexicalNodeSelection' or its corresponding type declarations.
+components/editor-x/date-time-component.tsx(15,8): error TS2307: Cannot find module 'lexical' or its corresponding type declarations.
+components/editor-x/date-time-extension.tsx(1,57): error TS2307: Cannot find module '@lexical/utils' or its corresponding type declarations.
+components/editor-x/date-time-extension.tsx(11,8): error TS2307: Cannot find module 'lexical' or its corresponding type declarations.
+components/editor-x/date-time-extension.tsx(28,14): error TS7006: Parameter 'editor' implicitly has an 'any' type.
+components/editor-x/date-time-extension.tsx(29,5): error TS2347: Untyped function calls may not accept type arguments.
+components/editor-x/date-time-extension.tsx(31,8): error TS7006: Parameter 'payload' implicitly has an 'any' type.
+components/editor-x/date-time-extension.tsx(37,24): error TS2339: Property 'setFormat' does not exist on type 'DateTimeNode'.
+components/editor-x/date-time-extension.tsx(40,46): error TS2339: Property 'getParent' does not exist on type 'DateTimeNode'.
+components/editor-x/date-time-node.tsx(9,8): error TS2307: Cannot find module '@lexical/extension' or its corresponding type declarations.
+components/editor-x/date-time-node.tsx(22,8): error TS2307: Cannot find module 'lexical' or its corresponding type declarations.
+components/editor-x/date-time-node.tsx(66,15): error TS7006: Parameter 'childLexicalNodes' implicitly has an 'any' type.
+components/editor-x/date-time-node.tsx(70,16): error TS2339: Property 'setFormat' does not exist on type 'DateTimeNode'.
+components/editor-x/date-time-node.tsx(93,11): error TS7006: Parameter 'v' implicitly has an 'any' type.
+components/editor-x/date-time-node.tsx(94,13): error TS7006: Parameter 'v' implicitly has an 'any' type.
+components/editor-x/date-time-node.tsx(99,17): error TS2551: Property 'config' does not exist on type 'DateTimeNode'. Did you mean '$config'?
+components/editor-x/date-time-node.tsx(102,16): error TS7006: Parameter 'domNode' implicitly has an 'any' type.
+components/editor-x/date-time-node.tsx(163,22): error TS2339: Property 'getFormat' does not exist on type 'DateTimeNode'.
+components/editor-x/date-time-node.tsx(164,23): error TS2339: Property '__key' does not exist on type 'DateTimeNode'.
+components/editor-x/divider-picker-plugin.tsx(1,48): error TS2307: Cannot find module '@lexical/react/LexicalHorizontalRuleNode' or its corresponding type declarations.
+components/editor-x/doc-serialization.ts(1,41): error TS2307: Cannot find module '@lexical/file' or its corresponding type declarations.
+components/editor-x/drag-drop-paste-extension.tsx(1,33): error TS2307: Cannot find module '@lexical/rich-text' or its corresponding type declarations.
+components/editor-x/drag-drop-paste-extension.tsx(2,45): error TS2307: Cannot find module '@lexical/utils' or its corresponding type declarations.
+components/editor-x/drag-drop-paste-extension.tsx(3,55): error TS2307: Cannot find module 'lexical' or its corresponding type declarations.
+components/editor-x/drag-drop-paste-extension.tsx(17,14): error TS7006: Parameter 'editor' implicitly has an 'any' type.
+components/editor-x/drag-drop-paste-extension.tsx(20,8): error TS7006: Parameter 'files' implicitly has an 'any' type.
+components/editor-x/draggable-block-plugin.tsx(14,43): error TS2307: Cannot find module '@lexical/react/LexicalComposerContext' or its corresponding type declarations.
+components/editor-x/draggable-block-plugin.tsx(15,51): error TS2307: Cannot find module '@lexical/react/LexicalDraggableBlockPlugin' or its corresponding type declarations.
+components/editor-x/draggable-block-plugin.tsx(24,8): error TS2307: Cannot find module 'lexical' or its corresponding type declarations.
+components/editor-x/draggable-block-plugin.tsx(238,37): error TS2339: Property 'key' does not exist on type 'ComponentPickerOption'.
+components/editor-x/edi
+
+[… truncated 40328 chars …]

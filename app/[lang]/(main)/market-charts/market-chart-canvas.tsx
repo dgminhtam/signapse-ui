@@ -9,18 +9,13 @@ import {
 } from "react"
 import {
   dispose,
-  getSupportedLocales,
   init,
-  registerLocale,
   type Chart,
   type DataLoaderGetBarsParams,
   type DataLoaderSubscribeBarParams,
   type DeepPartial,
   type KLineData,
-  type Locales,
   type OverlayCreate,
-  type OverlayStyle,
-  type Period,
   type Styles,
 } from "klinecharts"
 import { useTheme } from "next-themes"
@@ -43,7 +38,6 @@ import {
   mergeMarketChartAnnotations,
   type MarketChartAnnotationGroup,
   type MarketChartAnnotationMarkerPoint,
-  toMarketChartEpochMillis,
 } from "./market-chart-annotations"
 import {
   createMarketChartDrawingGroupId,
@@ -52,6 +46,38 @@ import {
   registerMarketChartDrawingOverlays,
   type MarketChartDrawingTool,
 } from "./market-chart-drawing"
+import {
+  createChartStyles,
+  createDrawingOverlayStyles,
+  getMarketChartThemePalette,
+  resolveChartThemeMode,
+  type ChartThemeMode,
+  type MarketChartThemePalette,
+} from "./market-chart-theme"
+import {
+  createKLinePeriod,
+  ensureKLineChartLocales,
+  resolveKLineChartLocale,
+  KLINE_CHART_VI_LOCALE,
+} from "./market-chart-period"
+import {
+  createKLineData,
+  getCandleTimestamp,
+  getFiniteVolume,
+  hasUsableVolume,
+  hasUsableVolumeData,
+  isValidMarketChartCandle,
+  mergeCandleItems,
+  mergeLiveCandleItem,
+  normalizeCandleItems,
+} from "./market-chart-candle-helpers"
+import {
+  createOlderHistoryRequest,
+  getNewOlderCandles,
+  getOldestLoadedTimestamp,
+  LAZY_HISTORY_BAR_TARGET,
+  TIMEFRAME_INTERVAL_MS,
+} from "./market-chart-history-helpers"
 
 export interface MarketChartLoadedData {
   annotations: MarketChartAnnotationResponse[]
@@ -113,24 +139,6 @@ interface MarkerPosition {
 
 type LazyHistoryState = "idle" | "loading" | "error"
 
-type ChartThemeMode = "light" | "dark"
-
-type MarketChartThemePalette = {
-  axis: string
-  crosshairBackground: string
-  crosshairText: string
-  down: string
-  drawing: string
-  drawingMuted: string
-  drawingSelected: string
-  grid: string
-  noChange: string
-  up: string
-  volumeDown: string
-  volumeNoChange: string
-  volumeUp: string
-}
-
 interface LazyHistoryFeedback {
   error: string | null
   loadId: number
@@ -152,493 +160,12 @@ const MARKET_CHART_MAIN_PANE_INDICATORS = new Set<MarketChartIndicatorName>([
   "EMA",
   "BOLL",
 ])
-const MINUTE_MS = 60 * 1000
-const HOUR_MS = 60 * MINUTE_MS
-const DAY_MS = 24 * HOUR_MS
 const MARKER_DATE_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
   year: "numeric",
   month: "2-digit",
   day: "2-digit",
   hour: "2-digit",
   minute: "2-digit",
-}
-
-const TIMEFRAME_INTERVAL_MS: Record<MarketChartTimeframe, number> = {
-  "1m": MINUTE_MS,
-  "5m": 5 * MINUTE_MS,
-  "15m": 15 * MINUTE_MS,
-  "30m": 30 * MINUTE_MS,
-  "1h": HOUR_MS,
-  "1d": DAY_MS,
-  "1w": 7 * DAY_MS,
-  "1mo": 30 * DAY_MS,
-}
-
-const LAZY_HISTORY_BAR_TARGET: Record<MarketChartTimeframe, number> = {
-  "1m": 360,
-  "5m": 288,
-  "15m": 288,
-  "30m": 240,
-  "1h": 240,
-  "1d": 180,
-  "1w": 104,
-  "1mo": 60,
-}
-
-const KLINE_CHART_VI_LOCALE: Locales = {
-  change: "Thay đổi: ",
-  close: "Đóng: ",
-  day: "ngày",
-  high: "Cao: ",
-  hour: "giờ",
-  low: "Thấp: ",
-  minute: "phút",
-  month: "tháng",
-  open: "Mở: ",
-  second: "giây",
-  time: "Thời gian: ",
-  turnover: "Giá trị: ",
-  volume: "Khối lượng: ",
-  week: "tuần",
-  year: "năm",
-}
-
-let kLineChartLocalesRegistered = false
-
-function ensureKLineChartLocales() {
-  if (kLineChartLocalesRegistered) {
-    return
-  }
-
-  registerLocale("vi-VN", KLINE_CHART_VI_LOCALE)
-  registerLocale("vi", KLINE_CHART_VI_LOCALE)
-  kLineChartLocalesRegistered = true
-}
-
-function resolveKLineChartLocale(locale: string) {
-  ensureKLineChartLocales()
-
-  return getSupportedLocales().includes(locale) ? locale : "en-US"
-}
-
-function resolveChartThemeMode(theme: string | undefined): ChartThemeMode {
-  return theme === "dark" ? "dark" : "light"
-}
-
-const MARKET_CHART_THEME_PALETTES: Record<
-  ChartThemeMode,
-  MarketChartThemePalette
-> = {
-  light: {
-    axis: "#737373",
-    crosshairBackground: "#171717",
-    crosshairText: "#ffffff",
-    down: "#dc2626",
-    drawing: "#2563eb",
-    drawingMuted: "rgba(37, 99, 235, 0.55)",
-    drawingSelected: "#1d4ed8",
-    grid: "rgba(115, 115, 115, 0.18)",
-    noChange: "#737373",
-    up: "#14947e",
-    volumeDown: "rgba(220, 38, 38, 0.32)",
-    volumeNoChange: "rgba(115, 115, 115, 0.28)",
-    volumeUp: "rgba(20, 148, 126, 0.35)",
-  },
-  dark: {
-    axis: "#a1a1aa",
-    crosshairBackground: "#fafafa",
-    crosshairText: "#171717",
-    down: "#ef4444",
-    drawing: "#60a5fa",
-    drawingMuted: "rgba(96, 165, 250, 0.6)",
-    drawingSelected: "#93c5fd",
-    grid: "rgba(250, 250, 250, 0.1)",
-    noChange: "#a1a1aa",
-    up: "#14b8a6",
-    volumeDown: "rgba(239, 68, 68, 0.32)",
-    volumeNoChange: "rgba(161, 161, 170, 0.24)",
-    volumeUp: "rgba(20, 184, 166, 0.34)",
-  },
-}
-
-function getMarketChartThemePalette(
-  mode: ChartThemeMode
-): MarketChartThemePalette {
-  return MARKET_CHART_THEME_PALETTES[mode]
-}
-
-function getCssTextVariable(name: string, fallback: string) {
-  if (typeof window === "undefined") {
-    return fallback
-  }
-
-  return (
-    getComputedStyle(document.documentElement).getPropertyValue(name).trim() ||
-    fallback
-  )
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null
-}
-
-function isValidMarketChartCandle(
-  candle: unknown
-): candle is MarketChartCandleItemResponse {
-  return (
-    isRecord(candle) &&
-    toMarketChartEpochMillis(candle.time) !== null &&
-    typeof candle.open === "number" &&
-    Number.isFinite(candle.open) &&
-    typeof candle.high === "number" &&
-    Number.isFinite(candle.high) &&
-    typeof candle.low === "number" &&
-    Number.isFinite(candle.low) &&
-    typeof candle.close === "number" &&
-    Number.isFinite(candle.close)
-  )
-}
-
-function getCandleTimestamp(candle: unknown) {
-  if (!isValidMarketChartCandle(candle)) {
-    return null
-  }
-
-  return toMarketChartEpochMillis(candle.time)
-}
-
-function normalizeCandleItems(
-  candles: MarketChartCandleItemResponse[]
-): MarketChartCandleItemResponse[] {
-  const candlesByTime = new Map<number, MarketChartCandleItemResponse>()
-
-  for (const candle of candles.filter(isValidMarketChartCandle)) {
-    const timestamp = getCandleTimestamp(candle)
-
-    if (timestamp !== null) {
-      candlesByTime.set(timestamp, candle)
-    }
-  }
-
-  return [...candlesByTime.entries()]
-    .sort(([left], [right]) => left - right)
-    .map(([, candle]) => candle)
-}
-
-function mergeCandleItems(
-  current: MarketChartCandleItemResponse[],
-  incoming: MarketChartCandleItemResponse[]
-) {
-  return normalizeCandleItems([...current, ...incoming])
-}
-
-function getFiniteVolume(candle: MarketChartCandleItemResponse) {
-  return typeof candle.volume === "number" && Number.isFinite(candle.volume)
-    ? candle.volume
-    : null
-}
-
-function mergeLiveCandleItem(
-  current: MarketChartCandleItemResponse[],
-  liveCandle: MarketChartCandleItemResponse | null
-) {
-  if (!liveCandle) {
-    return normalizeCandleItems(current)
-  }
-
-  const liveTimestamp = getCandleTimestamp(liveCandle)
-  const newestTimestamp = Math.max(
-    ...current
-      .map((candle) => getCandleTimestamp(candle))
-      .filter((timestamp): timestamp is number => timestamp !== null)
-  )
-
-  if (
-    liveTimestamp === null ||
-    (Number.isFinite(newestTimestamp) && liveTimestamp < newestTimestamp)
-  ) {
-    return normalizeCandleItems(current)
-  }
-
-  return mergeCandleItems(current, [liveCandle])
-}
-
-function createKLineData(
-  candles: MarketChartCandleItemResponse[]
-): KLineData[] {
-  return normalizeCandleItems(candles).flatMap((candle) => {
-    const timestamp = getCandleTimestamp(candle)
-    const volume = getFiniteVolume(candle)
-
-    if (timestamp === null) {
-      return []
-    }
-
-    return [
-      {
-        timestamp,
-        open: candle.open,
-        high: candle.high,
-        low: candle.low,
-        close: candle.close,
-        ...(volume !== null ? { volume } : {}),
-      },
-    ]
-  })
-}
-
-function createKLinePeriod(timeframe: MarketChartTimeframe): Period {
-  switch (timeframe) {
-    case "1m":
-      return { type: "minute", span: 1 }
-    case "5m":
-      return { type: "minute", span: 5 }
-    case "15m":
-      return { type: "minute", span: 15 }
-    case "30m":
-      return { type: "minute", span: 30 }
-    case "1h":
-      return { type: "hour", span: 1 }
-    case "1d":
-      return { type: "day", span: 1 }
-    case "1w":
-      return { type: "week", span: 1 }
-    case "1mo":
-      return { type: "month", span: 1 }
-    default:
-      return { type: "hour", span: 1 }
-  }
-}
-
-function createOlderHistoryRequest({
-  assetId,
-  includeAnnotations,
-  oldestTimestamp,
-  timeframe,
-}: {
-  assetId: number
-  includeAnnotations: boolean
-  oldestTimestamp: number
-  timeframe: MarketChartTimeframe
-}): MarketChartCandleRequest | null {
-  const intervalMs = TIMEFRAME_INTERVAL_MS[timeframe]
-  const barTarget = LAZY_HISTORY_BAR_TARGET[timeframe]
-  const toMs = oldestTimestamp - intervalMs
-  const fromMs = toMs - intervalMs * barTarget
-
-  if (!Number.isFinite(fromMs) || !Number.isFinite(toMs) || fromMs >= toMs) {
-    return null
-  }
-
-  return {
-    assetId,
-    timeframe,
-    from: new Date(fromMs).toISOString(),
-    to: new Date(toMs).toISOString(),
-    includeAnnotations,
-  }
-}
-
-function getOldestLoadedTimestamp(candles: MarketChartCandleItemResponse[]) {
-  const [oldestCandle] = normalizeCandleItems(candles)
-
-  return oldestCandle ? getCandleTimestamp(oldestCandle) : null
-}
-
-function getNewOlderCandles(
-  current: MarketChartCandleItemResponse[],
-  incoming: MarketChartCandleItemResponse[],
-  oldestTimestamp: number
-) {
-  const currentTimes = new Set(
-    current
-      .map((candle) => getCandleTimestamp(candle))
-      .filter((timestamp): timestamp is number => timestamp !== null)
-  )
-
-  return normalizeCandleItems(incoming).filter((candle) => {
-    const timestamp = getCandleTimestamp(candle)
-
-    return (
-      timestamp !== null &&
-      timestamp < oldestTimestamp &&
-      !currentTimes.has(timestamp)
-    )
-  })
-}
-
-function createChartStyles(
-  palette: MarketChartThemePalette
-): DeepPartial<Styles> {
-  const fontFamily = getCssTextVariable("--font-sans", "Geist, sans-serif")
-
-  return {
-    grid: {
-      horizontal: {
-        color: palette.grid,
-        dashedValue: [4, 4],
-        show: true,
-        size: 1,
-        style: "dashed",
-      },
-      vertical: {
-        color: palette.grid,
-        dashedValue: [4, 4],
-        show: true,
-        size: 1,
-        style: "dashed",
-      },
-    },
-    candle: {
-      bar: {
-        compareRule: "current_open",
-        downBorderColor: palette.down,
-        downColor: palette.down,
-        downWickColor: palette.down,
-        noChangeBorderColor: palette.noChange,
-        noChangeColor: palette.noChange,
-        noChangeWickColor: palette.noChange,
-        upBorderColor: palette.up,
-        upColor: palette.up,
-        upWickColor: palette.up,
-      },
-      priceMark: {
-        high: {
-          show: false,
-        },
-        low: {
-          show: false,
-        },
-        last: {
-          line: {
-            size: 1,
-          },
-          text: {
-            family: fontFamily,
-            size: 10,
-          },
-        },
-      },
-      tooltip: {
-        legend: {
-          family: fontFamily,
-        },
-        title: {
-          family: fontFamily,
-          show: false,
-        },
-      },
-    },
-    indicator: {
-      ohlc: {
-        compareRule: "current_open",
-        downColor: palette.volumeDown,
-        noChangeColor: palette.volumeNoChange,
-        upColor: palette.volumeUp,
-      },
-      tooltip: {
-        legend: {
-          family: fontFamily,
-        },
-        title: {
-          family: fontFamily,
-        },
-      },
-      lastValueMark: {
-        text: {
-          family: fontFamily,
-        },
-      },
-    },
-    xAxis: {
-      axisLine: {
-        color: palette.grid,
-        size: 1,
-      },
-      tickText: {
-        color: palette.axis,
-        family: fontFamily,
-      },
-    },
-    yAxis: {
-      axisLine: {
-        color: palette.grid,
-        size: 1,
-      },
-      tickText: {
-        color: palette.axis,
-        family: fontFamily,
-      },
-    },
-    crosshair: {
-      horizontal: {
-        line: {
-          color: palette.axis,
-        },
-        text: {
-          backgroundColor: palette.crosshairBackground,
-          color: palette.crosshairText,
-          family: fontFamily,
-        },
-      },
-      vertical: {
-        line: {
-          color: palette.axis,
-        },
-        text: {
-          backgroundColor: palette.crosshairBackground,
-          color: palette.crosshairText,
-          family: fontFamily,
-        },
-      },
-    },
-    overlay: {
-      text: {
-        family: fontFamily,
-        size: 12,
-      },
-    },
-  }
-}
-
-function createDrawingOverlayStyles(
-  palette: MarketChartThemePalette
-): DeepPartial<OverlayStyle> {
-  return {
-    circle: {
-      borderColor: palette.drawing,
-      borderSize: 1,
-      color: palette.drawing + "33",
-      style: "stroke_fill",
-    },
-    line: {
-      color: palette.drawing,
-      size: 1,
-      style: "solid",
-    },
-    point: {
-      activeBorderColor: palette.drawingSelected,
-      activeBorderSize: 2,
-      activeColor: palette.drawingSelected,
-      activeRadius: 4,
-      borderColor: palette.drawingMuted,
-      borderSize: 1,
-      color: palette.drawing,
-      radius: 3,
-    },
-    rect: {
-      borderColor: palette.drawing,
-      borderSize: 1,
-      color: palette.drawing + "33",
-      style: "stroke_fill",
-    },
-    polygon: {
-      style: "stroke_fill",
-      color: palette.drawing + "33",
-      borderColor: palette.drawing,
-      borderSize: 1,
-    },
-  }
 }
 
 function getMarkerCoordinate(
