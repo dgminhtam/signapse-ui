@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI/UX Research"
+  short_description: "Benchmark UI/UX, trends, and design direction"
+  default_prompt: "Use $ui-ux-research to benchmark UI/UX patterns, synthesize recent trends, and recommend a suitable interface direction before implementation."

@@ -5,7 +5,7 @@ The system SHALL render market chart drawing tools as grouped palettes instead o
 
 #### Scenario: Drawing palettes are displayed
 - **WHEN** the market chart drawing toolbar is visible
-- **THEN** drawing tools are grouped into line, channel, shape, and pattern palettes
+- **THEN** drawing tools are grouped into line, channel, shape, fibonacci, and pattern palettes
 - **AND** each palette exposes a compact trigger in the drawing toolbar
 - **AND** drawing state controls and destructive actions remain outside the drawing palettes
 
@@ -24,7 +24,7 @@ The system SHALL provide the full drawing tool set selected for the market chart
 
 #### Scenario: Line palette tools are available
 - **WHEN** the user opens the line palette
-- **THEN** the palette includes horizontal line, horizontal ray, horizontal segment, vertical line, vertical ray, vertical segment, trend line, and ray tools
+- **THEN** the palette includes horizontal line, horizontal ray, horizontal segment, vertical line, vertical ray, vertical segment, trend line, ray, segment, arrow, and price line tools
 
 #### Scenario: Channel palette tools are available
 - **WHEN** the user opens the channel palette
@@ -33,6 +33,10 @@ The system SHALL provide the full drawing tool set selected for the market chart
 #### Scenario: Shape palette tools are available
 - **WHEN** the user opens the shape palette
 - **THEN** the palette includes circle, rectangle, parallelogram, and triangle tools
+
+#### Scenario: Fibonacci palette tools are available
+- **WHEN** the user opens the fibonacci palette
+- **THEN** the palette includes Fibonacci line, Fibonacci segment, Fibonacci circle, Fibonacci spiral, Fibonacci sector, Fibonacci extension, and Gann box tools
 
 #### Scenario: Pattern palette tools are available
 - **WHEN** the user opens the pattern palette

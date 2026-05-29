@@ -82,7 +82,7 @@ function MarketChartStatusRailSkeleton() {
 
 function MarketChartSkeletonContent({ className }: { className?: string }) {
   return (
-    <div className={cn("flex min-h-[500px] flex-col p-3", className)}>
+    <div className={cn("flex h-full min-h-0 flex-col p-3", className)}>
       <div className="flex flex-wrap gap-4 px-1">
         <Skeleton className="h-3 w-36 rounded-full" />
         <Skeleton className="h-3 w-20 rounded-full" />
@@ -97,6 +97,19 @@ function MarketChartSkeletonContent({ className }: { className?: string }) {
   )
 }
 
+function MarketChartLegendSkeleton() {
+  return (
+    <div className="border-t bg-muted/5 px-3 py-2">
+      <div className="flex flex-wrap gap-4">
+        <Skeleton className="h-3 w-20 rounded-full" />
+        <Skeleton className="h-3 w-20 rounded-full" />
+        <Skeleton className="h-3 w-24 rounded-full" />
+        <Skeleton className="h-3 w-20 rounded-full" />
+      </div>
+    </div>
+  )
+}
+
 function MarketChartSurfaceSkeleton({
   className,
   embedded = false,
@@ -107,26 +120,31 @@ function MarketChartSurfaceSkeleton({
   showStatusRail?: boolean
 }) {
   if (embedded) {
-    return <MarketChartSkeletonContent className={className} />
+    return <MarketChartSkeletonContent className={cn("h-full", className)} />
   }
 
   return (
     <section
       className={cn(
-        "overflow-hidden rounded-xl border border-border bg-card",
+        "flex h-[calc(100svh-8.5rem)] max-h-[58rem] min-h-[36rem] flex-col overflow-hidden rounded-xl border border-border bg-card",
         className
       )}
     >
       <MarketChartToolbarSkeleton />
       <div
         className={cn(
-          "min-h-[520px] bg-card p-2",
+          "min-h-0 flex-1 bg-card p-2",
           showStatusRail ? "rounded-t-xl" : "rounded-xl"
         )}
       >
         <MarketChartSkeletonContent />
       </div>
-      {showStatusRail ? <MarketChartStatusRailSkeleton /> : null}
+      {showStatusRail ? (
+        <>
+          <MarketChartLegendSkeleton />
+          <MarketChartStatusRailSkeleton />
+        </>
+      ) : null}
     </section>
   )
 }

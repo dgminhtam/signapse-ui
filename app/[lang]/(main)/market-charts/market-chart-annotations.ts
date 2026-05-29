@@ -20,6 +20,55 @@ export interface MarketChartAnnotationMarkerPoint {
   y: number
 }
 
+export type MarketChartAnnotationColorClassNames = {
+  dot: string
+  foreground: string
+  pulse: string
+  ring: string
+}
+
+export function getMarketChartAnnotationColorClassNames(
+  direction: MarketChartAnnotationDirection | null
+): MarketChartAnnotationColorClassNames {
+  switch (direction) {
+    case "BULLISH":
+      return {
+        dot: "bg-emerald-500",
+        foreground: "text-white",
+        pulse: "bg-emerald-500/20",
+        ring: "ring-emerald-500/30",
+      }
+    case "BEARISH":
+      return {
+        dot: "bg-destructive",
+        foreground: "text-destructive-foreground",
+        pulse: "bg-destructive/20",
+        ring: "ring-destructive/30",
+      }
+    case "NEUTRAL":
+      return {
+        dot: "bg-amber-500",
+        foreground: "text-white",
+        pulse: "bg-amber-500/20",
+        ring: "ring-amber-500/30",
+      }
+    case "MIXED":
+      return {
+        dot: "bg-orange-500",
+        foreground: "text-white",
+        pulse: "bg-orange-500/20",
+        ring: "ring-orange-500/30",
+      }
+    default:
+      return {
+        dot: "bg-muted-foreground",
+        foreground: "text-background",
+        pulse: "bg-muted-foreground/20",
+        ring: "ring-muted-foreground/30",
+      }
+  }
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null
 }

@@ -8,8 +8,8 @@ The current implementation already separates drawing tool activation, drawing gr
 
 **Goals:**
 
-- Replace the flat drawing tool list with four click-open palettes: line, channel, shape, and pattern/wave.
-- Add the full tool set shown in the KLineChart-style reference.
+- Replace the flat drawing tool list with five click-open palettes: line, channel, shape, fibonacci/gann, and pattern/wave.
+- Add the full tool set shown in the KLineChart-style reference, including the extended line tools segment, arrow, and price line.
 - Preserve one active drawing tool at a time.
 - Remember the last selected tool per palette so the palette icon can represent the user's current preferred tool.
 - Keep magnet, lock, visibility, delete selected, and clear all as separate sections.
@@ -28,7 +28,7 @@ The current implementation already separates drawing tool activation, drawing gr
 
 1. Model drawing tools as palette definitions.
 
-   Add a palette model such as `MarketChartDrawingToolPalette` with stable ids for `line`, `channel`, `shape`, and `pattern`. Each palette owns an ordered tool list, a default tool, an icon, and dictionary labels. This keeps toolbar rendering data-driven and prevents scattered switch statements as the tool count grows.
+   Add a palette model such as `MarketChartDrawingToolPalette` with stable ids for `line`, `channel`, `shape`, `fibonacci`, and `pattern`. Each palette owns an ordered tool list, a default tool, an icon, and dictionary labels. This keeps toolbar rendering data-driven and prevents scattered switch statements as the tool count grows.
 
 2. Use KLineChart built-in overlays where available.
 
@@ -40,16 +40,21 @@ The current implementation already separates drawing tool activation, drawing gr
    - `vertical-line` -> `verticalStraightLine`
    - `vertical-ray` -> `verticalRayLine`
    - `vertical-segment` -> `verticalSegment`
-   - `trend-line` -> `segment`
+   - `trend-line` -> `straightLine`
    - `ray` -> `rayLine`
+   - `segment` -> `segment`
+   - `price-line` -> `priceLine`
    - `price-channel-line` -> `priceChannelLine`
    - `parallel-line` -> `parallelStraightLine`
+   - `fibonacci-line` -> `fibonacciLine`
 
    This avoids rewriting geometry that the chart engine already owns.
 
-3. Keep Signapse-owned custom overlays for missing shape and pattern tools.
+3. Keep Signapse-owned custom overlays for missing line, fibonacci/gann, shape, and pattern tools.
 
-   Circle and rectangle already use custom templates. Add custom templates for parallelogram, triangle, XABCD pattern, ABCD pattern, three waves, five waves, eight waves, and any waves. These templates should live beside the existing drawing overlay registration so the migration keeps all Signapse drawing overlays in one place.
+   Arrow, circle, and rectangle use custom templates. Add custom templates for arrow, Fibonacci segment, Fibonacci circle, Fibonacci spiral, Fibonacci sector, Fibonacci extension, Gann box, parallelogram, triangle, XABCD pattern, ABCD pattern, three waves, five waves, eight waves, and any waves. These templates should live beside the existing drawing overlay registration so the migration keeps all Signapse drawing overlays in one place.
+
+   Fibonacci/Gann custom overlays should be pragmatic workstation primitives, not full TradingView parity. Use deterministic geometry from the selected anchor points, reuse the existing drawing styles/selection behavior, and keep labels compact so they do not dominate the chart.
 
 4. Use click-open `DropdownMenu`, not hover-open behavior.
 

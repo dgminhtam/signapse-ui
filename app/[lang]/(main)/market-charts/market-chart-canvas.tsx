@@ -14,10 +14,11 @@ import {
   registerLocale,
   type Chart,
   type DataLoaderGetBarsParams,
+  type DataLoaderSubscribeBarParams,
   type DeepPartial,
   type KLineData,
-  type LayoutChild,
   type Locales,
+  type OverlayCreate,
   type OverlayStyle,
   type Period,
   type Styles,
@@ -33,10 +34,12 @@ import type {
   MarketChartCandleResponse,
   MarketChartTimeframe,
 } from "@/app/lib/market-charts/definitions"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
 
 import {
+  getMarketChartAnnotationColorClassNames,
   mergeMarketChartAnnotations,
   type MarketChartAnnotationGroup,
   type MarketChartAnnotationMarkerPoint,
@@ -79,22 +82,21 @@ export interface MarketChartCanvasHandle {
 interface MarketChartCanvasProps {
   assetId: number
   candles: MarketChartCandleItemResponse[]
+  dataVersion: number
   timeframe: MarketChartTimeframe
   symbol?: string
   annotations?: MarketChartAnnotationResponse[]
   annotationGroups?: MarketChartAnnotationGroup[]
   includeAnnotations: boolean
   liveCandle?: MarketChartCandleItemResponse | null
-  resetKey: string
   selectedAnnotationGroupId?: string | null
   showVolumePane: boolean
   activeIndicators?: MarketChartIndicatorName[]
   className?: string
   drawingToolActive?: boolean
-  onAnnotationSelect?: (
-    groupId: string,
-    point: MarketChartAnnotationMarkerPoint
-  ) => void
+  onAnnotationSelect?: (groupId: string) => void
+  onAnnotationClose?: () => void
+  renderAnnotationPopup?: (group: MarketChartAnnotationGroup) => React.ReactNode
   onDrawingSelectionChange?: (hasSelectedDrawing: boolean) => void
   onDrawingToolComplete?: () => void
   onLoadedDataChange?: (data: MarketChartLoadedData) => void
@@ -110,13 +112,6 @@ interface MarkerPosition {
 }
 
 type LazyHistoryState = "idle" | "loading" | "error"
-
-type AnnotationMarkerColorClassNames = {
-  dot: string
-  foreground: string
-  pulse: string
-  ring: string
-}
 
 type ChartThemeMode = "light" | "dark"
 
@@ -136,51 +131,9 @@ type MarketChartThemePalette = {
   volumeUp: string
 }
 
-function getAnnotationMarkerColorClassNames(
-  direction: MarketChartAnnotationGroup["direction"]
-): AnnotationMarkerColorClassNames {
-  switch (direction) {
-    case "BULLISH":
-      return {
-        dot: "bg-emerald-500",
-        foreground: "text-white",
-        pulse: "bg-emerald-500/20",
-        ring: "ring-emerald-500/30",
-      }
-    case "BEARISH":
-      return {
-        dot: "bg-destructive",
-        foreground: "text-destructive-foreground",
-        pulse: "bg-destructive/20",
-        ring: "ring-destructive/30",
-      }
-    case "NEUTRAL":
-      return {
-        dot: "bg-amber-500",
-        foreground: "text-white",
-        pulse: "bg-amber-500/20",
-        ring: "ring-amber-500/30",
-      }
-    case "MIXED":
-      return {
-        dot: "bg-orange-500",
-        foreground: "text-white",
-        pulse: "bg-orange-500/20",
-        ring: "ring-orange-500/30",
-      }
-    default:
-      return {
-        dot: "bg-muted-foreground",
-        foreground: "text-background",
-        pulse: "bg-muted-foreground/20",
-        ring: "ring-muted-foreground/30",
-      }
-  }
-}
-
 interface LazyHistoryFeedback {
   error: string | null
-  resetKey: string
+  loadId: number
   state: LazyHistoryState
 }
 
@@ -655,8 +608,8 @@ function createDrawingOverlayStyles(
     circle: {
       borderColor: palette.drawing,
       borderSize: 1,
-      color: "transparent",
-      style: "stroke",
+      color: palette.drawing + "33",
+      style: "stroke_fill",
     },
     line: {
       color: palette.drawing,
@@ -676,8 +629,14 @@ function createDrawingOverlayStyles(
     rect: {
       borderColor: palette.drawing,
       borderSize: 1,
-      color: "transparent",
-      style: "stroke",
+      color: palette.drawing + "33",
+      style: "stroke_fill",
+    },
+    polygon: {
+      style: "stroke_fill",
+      color: palette.drawing + "33",
+      borderColor: palette.drawing,
+      borderSize: 1,
     },
   }
 }
@@ -752,16 +711,18 @@ export const MarketChartCanvas = forwardRef<
     assetId,
     activeIndicators = [],
     candles,
+    dataVersion = 0,
     className,
     drawingToolActive = false,
     includeAnnotations,
     liveCandle = null,
+    onAnnotationClose,
     onAnnotationSelect,
     onDrawingSelectionChange,
     onDrawingToolComplete,
     onLoadedDataChange,
     onLoadOlderCandles,
-    resetKey,
+    renderAnnotationPopup,
     selectedAnnotationGroupId,
     showVolumePane,
     symbol = "MARKET",
@@ -778,7 +739,8 @@ export const MarketChartCanvas = forwardRef<
   } = useLocalization()
   const containerRef = useRef<HTMLDivElement | null>(null)
   const chartRef = useRef<Chart | null>(null)
-  const activeResetKeyRef = useRef(resetKey)
+  const [chartLoadId, setChartLoadId] = useState(0)
+  const chartLoadIdRef = useRef(0)
   const activeDrawingDraftIdRef = useRef<string | null>(null)
   const activeDrawingToolRef = useRef<MarketChartDrawingTool | null>(null)
   const annotationsRef = useRef(annotations)
@@ -793,16 +755,21 @@ export const MarketChartCanvas = forwardRef<
   const loadedAnnotationsRef = useRef<MarketChartAnnotationResponse[]>([])
   const loadedCandlesRef = useRef<MarketChartCandleItemResponse[]>([])
   const liveCandleRef = useRef<MarketChartCandleItemResponse | null>(liveCandle)
+  const liveCandleSubscriberRef = useRef<
+    DataLoaderSubscribeBarParams["callback"] | null
+  >(null)
+  const liveCandleSubscriberLoadIdRef = useRef<number | null>(null)
   const historyExhaustedRef = useRef(false)
   const onDrawingSelectionChangeRef = useRef(onDrawingSelectionChange)
   const onDrawingToolCompleteRef = useRef(onDrawingToolComplete)
   const onLoadedDataChangeRef = useRef(onLoadedDataChange)
   const onLoadOlderCandlesRef = useRef(onLoadOlderCandles)
+  const drawingCacheRef = useRef<Map<string, OverlayCreate[]>>(new Map())
   const scheduleMarkerPositionUpdateRef = useRef<() => void>(() => {})
   const selectedDrawingIdRef = useRef<string | null>(null)
   const [historyFeedback, setHistoryFeedback] = useState<LazyHistoryFeedback>({
     error: null,
-    resetKey,
+    loadId: 0,
     state: "idle",
   })
   const [markerPositions, setMarkerPositions] = useState<MarkerPosition[]>([])
@@ -810,17 +777,27 @@ export const MarketChartCanvas = forwardRef<
   const chartThemeMode = resolveChartThemeMode(resolvedTheme)
   const chartThemePalette = getMarketChartThemePalette(chartThemeMode)
   const historyState =
-    historyFeedback.resetKey === resetKey ? historyFeedback.state : "idle"
+    historyFeedback.loadId === chartLoadId ? historyFeedback.state : "idle"
   const historyError =
-    historyFeedback.resetKey === resetKey ? historyFeedback.error : null
+    historyFeedback.loadId === chartLoadId ? historyFeedback.error : null
 
   useEffect(() => {
     annotationsRef.current = annotations
-  }, [annotations])
+    loadedAnnotationsRef.current = includeAnnotations ? annotations : []
+  }, [annotations, includeAnnotations])
 
   useEffect(() => {
     candlesRef.current = candles
   }, [candles])
+
+  useEffect(() => {
+    loadedCandlesRef.current = normalizeCandleItems(candlesRef.current)
+
+    const chart = chartRef.current
+    if (chart && dataVersion > 0) {
+      chart.resetData()
+    }
+  }, [dataVersion])
 
   useEffect(() => {
     annotationGroupsRef.current = annotationGroups
@@ -829,7 +806,17 @@ export const MarketChartCanvas = forwardRef<
 
   useEffect(() => {
     liveCandleRef.current = liveCandle
-    chartRef.current?.resetData()
+    if (
+      liveCandle &&
+      liveCandleSubscriberLoadIdRef.current === chartLoadIdRef.current &&
+      liveCandleSubscriberRef.current
+    ) {
+      const [liveData] = createKLineData([liveCandle])
+
+      if (liveData) {
+        liveCandleSubscriberRef.current(liveData)
+      }
+    }
     scheduleMarkerPositionUpdateRef.current()
   }, [liveCandle])
 
@@ -849,12 +836,7 @@ export const MarketChartCanvas = forwardRef<
     onLoadOlderCandlesRef.current = onLoadOlderCandles
   }, [onLoadOlderCandles])
 
-  useEffect(() => {
-    drawingGroupIdRef.current = createMarketChartDrawingGroupId({
-      assetId,
-      timeframe,
-    })
-  }, [assetId, timeframe])
+
 
   function clearDrawingSelection() {
     selectedDrawingIdRef.current = null
@@ -1056,6 +1038,7 @@ export const MarketChartCanvas = forwardRef<
     })
   )
 
+  // ── Mount effect: init chart once, plus stable subscriptions ──
   useEffect(() => {
     const container = containerRef.current
 
@@ -1063,54 +1046,20 @@ export const MarketChartCanvas = forwardRef<
       return
     }
 
-    let disposed = false
-    activeResetKeyRef.current = resetKey
-    activeDrawingDraftIdRef.current = null
-    activeDrawingToolRef.current = null
-    clearDrawingSelection()
-    historyExhaustedRef.current = false
-    loadedAnnotationsRef.current = includeAnnotations
-      ? annotationsRef.current
-      : []
-    loadedCandlesRef.current = normalizeCandleItems(candlesRef.current)
     registerMarketChartDrawingOverlays()
-    const chartLocale = resolveKLineChartLocale(intlLocale)
-
-    const layout: LayoutChild[] = [
-      {
-        type: "candle",
-        options: {
-          axis: {
-            gap: {
-              bottom: 0.22,
-              top: 0.08,
-            },
-          },
-          id: CANDLE_PANE_ID,
-        },
-      },
-      ...(showVolumePane
-        ? [
-            {
-              content: ["VOL"],
-              options: {
-                dragEnabled: false,
-                height: 92,
-                id: VOLUME_PANE_ID,
-                minHeight: 64,
-              },
-              type: "indicator" as const,
-            },
-          ]
-        : []),
-      {
-        type: "xAxis",
-      },
-    ]
 
     const chart = init(container, {
-      layout,
-      locale: chartLocale,
+      layout: [
+        {
+          type: "candle",
+          options: {
+            axis: { gap: { bottom: 0.22, top: 0.08 } },
+            id: CANDLE_PANE_ID,
+          },
+        },
+        { type: "xAxis" },
+      ],
+      locale: resolveKLineChartLocale(intlLocale),
       styles: createChartStyles(chartThemePalette),
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       zoomAnchor: "cursor",
@@ -1121,8 +1070,9 @@ export const MarketChartCanvas = forwardRef<
     }
 
     chartRef.current = chart
-
-    const period = createKLinePeriod(timeframe)
+    chart.setOffsetRightDistance(24)
+    chart.setLeftMinVisibleBarCount(8)
+    chart.setRightMinVisibleBarCount(8)
 
     const updateMarkerPositions = () => {
       const currentChart = chartRef.current
@@ -1134,24 +1084,15 @@ export const MarketChartCanvas = forwardRef<
 
       const nextPositions = annotationGroupsRef.current.flatMap((group) => {
         const point = getMarkerCoordinate(currentChart, group)
-
-        if (!point) {
-          return []
-        }
-
-        return [
-          {
-            group,
-            x: Math.max(
-              18,
-              Math.min(currentContainer.clientWidth - 18, point.x)
-            ),
-            y: Math.max(
-              24,
-              Math.min(currentContainer.clientHeight - 92, point.y - 18)
-            ),
-          },
-        ]
+        return point
+          ? [
+              {
+                group,
+                x: Math.max(18, Math.min(currentContainer.clientWidth - 18, point.x)),
+                y: Math.max(24, Math.min(currentContainer.clientHeight - 92, point.y - 18)),
+              },
+            ]
+          : []
       })
 
       setMarkerPositions(nextPositions)
@@ -1161,155 +1102,8 @@ export const MarketChartCanvas = forwardRef<
       window.requestAnimationFrame(updateMarkerPositions)
     }
 
-    async function loadBars({
-      callback,
-      timestamp,
-      type,
-    }: DataLoaderGetBarsParams) {
-      if (type === "init") {
-        const displayedCandles = mergeLiveCandleItem(
-          loadedCandlesRef.current,
-          liveCandleRef.current
-        )
-
-        callback(createKLineData(displayedCandles), {
-          // KLineChart v10 uses `forward` for the left-edge prepend path.
-          backward: false,
-          forward: displayedCandles.length > 0,
-        })
-        scheduleMarkerPositionUpdate()
-        return
-      }
-
-      if (type !== "forward") {
-        callback([], {
-          backward: false,
-          forward: !historyExhaustedRef.current,
-        })
-        return
-      }
-
-      if (historyExhaustedRef.current) {
-        callback([], {
-          backward: false,
-          forward: false,
-        })
-        return
-      }
-
-      const oldestTimestamp =
-        timestamp ?? getOldestLoadedTimestamp(loadedCandlesRef.current)
-      const request =
-        oldestTimestamp !== null
-          ? createOlderHistoryRequest({
-              assetId,
-              includeAnnotations,
-              oldestTimestamp,
-              timeframe,
-            })
-          : null
-
-      if (oldestTimestamp === null || !request) {
-        historyExhaustedRef.current = true
-        callback([], {
-          backward: false,
-          forward: false,
-        })
-        return
-      }
-
-      const requestResetKey = activeResetKeyRef.current
-      setHistoryFeedback({
-        error: null,
-        resetKey: requestResetKey,
-        state: "loading",
-      })
-
-      const result = await onLoadOlderCandlesRef.current(request)
-
-      if (disposed || activeResetKeyRef.current !== requestResetKey) {
-        return
-      }
-
-      if (!result.success) {
-        setHistoryFeedback({
-          error: result.error,
-          resetKey: requestResetKey,
-          state: "error",
-        })
-        callback([], {
-          backward: false,
-          forward: true,
-        })
-        return
-      }
-
-      const olderCandles = getNewOlderCandles(
-        loadedCandlesRef.current,
-        result.data.candles,
-        oldestTimestamp
-      )
-      const olderData = createKLineData(olderCandles)
-
-      if (!olderData.length) {
-        historyExhaustedRef.current = true
-        setHistoryFeedback({
-          error: null,
-          resetKey: requestResetKey,
-          state: "idle",
-        })
-        callback([], {
-          backward: false,
-          forward: false,
-        })
-        return
-      }
-
-      loadedCandlesRef.current = mergeCandleItems(
-        loadedCandlesRef.current,
-        olderCandles
-      )
-
-      if (includeAnnotations) {
-        loadedAnnotationsRef.current = mergeMarketChartAnnotations(
-          loadedAnnotationsRef.current,
-          result.data.annotations
-        )
-      }
-
-      onLoadedDataChangeRef.current?.({
-        annotations: loadedAnnotationsRef.current,
-        candles: loadedCandlesRef.current,
-        from: loadedCandlesRef.current[0]?.time ?? result.data.from,
-      })
-      setHistoryFeedback({
-        error: null,
-        resetKey: requestResetKey,
-        state: "idle",
-      })
-      callback(olderData, {
-        backward: false,
-        forward: true,
-      })
-      scheduleMarkerPositionUpdate()
-    }
-
     scheduleMarkerPositionUpdateRef.current = scheduleMarkerPositionUpdate
 
-    chart.setDataLoader({
-      getBars(params) {
-        void loadBars(params)
-      },
-    })
-    chart.setSymbol({
-      ticker: symbol,
-      pricePrecision: 4,
-      volumePrecision: 2,
-    })
-    chart.setPeriod(period)
-    chart.setOffsetRightDistance(24)
-    chart.setLeftMinVisibleBarCount(8)
-    chart.setRightMinVisibleBarCount(8)
     chart.subscribeAction("onVisibleRangeChange", scheduleMarkerPositionUpdate)
     chart.subscribeAction("onScroll", scheduleMarkerPositionUpdate)
     chart.subscribeAction("onZoom", scheduleMarkerPositionUpdate)
@@ -1323,16 +1117,14 @@ export const MarketChartCanvas = forwardRef<
     resizeObserver.observe(container)
 
     return () => {
-      disposed = true
       window.cancelAnimationFrame(frameId)
-      chart.unsubscribeAction(
-        "onVisibleRangeChange",
-        scheduleMarkerPositionUpdate
-      )
+      chart.unsubscribeAction("onVisibleRangeChange", scheduleMarkerPositionUpdate)
       chart.unsubscribeAction("onScroll", scheduleMarkerPositionUpdate)
       chart.unsubscribeAction("onZoom", scheduleMarkerPositionUpdate)
       resizeObserver.disconnect()
       scheduleMarkerPositionUpdateRef.current = () => {}
+      liveCandleSubscriberRef.current = null
+      liveCandleSubscriberLoadIdRef.current = null
       activeDrawingDraftIdRef.current = null
       activeDrawingToolRef.current = null
       selectedDrawingIdRef.current = null
@@ -1341,16 +1133,164 @@ export const MarketChartCanvas = forwardRef<
       setMarkerPositions([])
       dispose(chart)
     }
-  }, [
-    assetId,
-    chartThemePalette,
-    includeAnnotations,
-    resetKey,
-    showVolumePane,
-    symbol,
-    timeframe,
-    intlLocale,
-  ])
+  }, [])
+
+  // ── Sync: theme styles — klinecharts native ──
+  useEffect(() => {
+    chartRef.current?.setStyles(createChartStyles(chartThemePalette))
+  }, [chartThemePalette])
+
+  // ── Sync: locale ──
+  useEffect(() => {
+    chartRef.current?.setLocale(resolveKLineChartLocale(intlLocale))
+  }, [intlLocale])
+
+  // ── Sync: symbol ──
+  useEffect(() => {
+    chartRef.current?.setSymbol({ ticker: symbol, pricePrecision: 4, volumePrecision: 2 })
+  }, [symbol])
+
+  // ── Sync: timeframe ──
+  useEffect(() => {
+    chartRef.current?.setPeriod(createKLinePeriod(timeframe))
+  }, [timeframe])
+
+  // ── Sync: volume pane ──
+  useEffect(() => {
+    const chart = chartRef.current
+    if (!chart) return
+
+    if (showVolumePane) {
+      chart.createIndicator("VOL", false, { id: VOLUME_PANE_ID, height: 92, minHeight: 64, dragEnabled: false })
+    } else {
+      chart.removeIndicator({ paneId: VOLUME_PANE_ID })
+    }
+  }, [showVolumePane])
+
+  // ── Sync effect 2: data source change — reset DataLoader ──
+  useEffect(() => {
+    const chart = chartRef.current
+
+    if (!chart) {
+      return
+    }
+
+    // Save & clear overlays from previous data source
+    const oldKey = drawingGroupIdRef.current
+    const oldOverlays = chart.getOverlays({ groupId: oldKey })
+    if (oldOverlays.length > 0) {
+      drawingCacheRef.current.set(
+        oldKey,
+        oldOverlays.map(({ name, points, styles, lock, visible, zLevel, paneId, mode, modeSensitivity }) => ({
+          name, points, styles, lock, visible, zLevel, paneId, mode, modeSensitivity,
+        }))
+      )
+      chart.removeOverlay({ groupId: oldKey })
+    }
+
+    // Sync data refs and increment load ID (invalidates stale history requests)
+    const loadId = chartLoadIdRef.current + 1
+    chartLoadIdRef.current = loadId
+    setChartLoadId(loadId)
+    historyExhaustedRef.current = false
+    clearDrawingSelection()
+    loadedAnnotationsRef.current = includeAnnotations ? annotationsRef.current : []
+    loadedCandlesRef.current = normalizeCandleItems(candlesRef.current)
+
+    // Update drawing group ID for new data source
+    const newKey = createMarketChartDrawingGroupId({ assetId, timeframe })
+    drawingGroupIdRef.current = newKey
+
+    // Restore overlays for new data source from cache
+    const savedOverlays = drawingCacheRef.current.get(newKey)
+    if (savedOverlays) {
+      savedOverlays.forEach((overlay) => {
+        chart.createOverlay({ ...overlay, groupId: newKey })
+      })
+      drawingCacheRef.current.delete(newKey)
+    }
+
+    async function loadBars({ callback, timestamp, type }: DataLoaderGetBarsParams) {
+      if (type === "init") {
+        const displayed = mergeLiveCandleItem(loadedCandlesRef.current, liveCandleRef.current)
+        callback(createKLineData(displayed), { backward: false, forward: displayed.length > 0 })
+        scheduleMarkerPositionUpdateRef.current()
+        return
+      }
+
+      if (type !== "forward") {
+        callback([], { backward: false, forward: !historyExhaustedRef.current })
+        return
+      }
+
+      if (historyExhaustedRef.current) {
+        callback([], { backward: false, forward: false })
+        return
+      }
+
+      const oldestTimestamp = timestamp ?? getOldestLoadedTimestamp(loadedCandlesRef.current)
+      const request = oldestTimestamp !== null
+        ? createOlderHistoryRequest({ assetId, includeAnnotations, oldestTimestamp, timeframe })
+        : null
+
+      if (oldestTimestamp === null || !request) {
+        historyExhaustedRef.current = true
+        callback([], { backward: false, forward: false })
+        return
+      }
+
+      setHistoryFeedback({ error: null, loadId, state: "loading" })
+      const result = await onLoadOlderCandlesRef.current(request)
+
+      if (chartLoadIdRef.current !== loadId) return
+
+      if (!result.success) {
+        setHistoryFeedback({ error: result.error, loadId, state: "error" })
+        callback([], { backward: false, forward: true })
+        return
+      }
+
+      const olderCandles = getNewOlderCandles(loadedCandlesRef.current, result.data.candles, oldestTimestamp)
+      const olderData = createKLineData(olderCandles)
+
+      if (!olderData.length) {
+        historyExhaustedRef.current = true
+        setHistoryFeedback({ error: null, loadId, state: "idle" })
+        callback([], { backward: false, forward: false })
+        return
+      }
+
+      loadedCandlesRef.current = mergeCandleItems(loadedCandlesRef.current, olderCandles)
+
+      if (includeAnnotations) {
+        loadedAnnotationsRef.current = mergeMarketChartAnnotations(loadedAnnotationsRef.current, result.data.annotations)
+      }
+
+      onLoadedDataChangeRef.current?.({
+        annotations: loadedAnnotationsRef.current,
+        candles: loadedCandlesRef.current,
+        from: loadedCandlesRef.current[0]?.time ?? result.data.from,
+      })
+      setHistoryFeedback({ error: null, loadId, state: "idle" })
+      callback(olderData, { backward: false, forward: true })
+      scheduleMarkerPositionUpdateRef.current()
+    }
+
+    chart.setDataLoader({
+      getBars(params) { void loadBars(params) },
+      subscribeBar(params) {
+        liveCandleSubscriberRef.current = params.callback
+        liveCandleSubscriberLoadIdRef.current = loadId
+        const [liveData] = createKLineData(liveCandleRef.current ? [liveCandleRef.current] : [])
+        if (liveData) params.callback(liveData)
+      },
+      unsubscribeBar() {
+        liveCandleSubscriberRef.current = null
+        liveCandleSubscriberLoadIdRef.current = null
+      },
+    })
+
+  }, [assetId, timeframe])
 
   useEffect(() => {
     const chart = chartRef.current
@@ -1382,7 +1322,7 @@ export const MarketChartCanvas = forwardRef<
   }, [drawingToolActive])
 
   return (
-    <div className={cn("relative h-[520px] min-h-[420px] w-full", className)}>
+    <div className={cn("relative h-full min-h-0 w-full", className)}>
       <div ref={containerRef} className="absolute inset-0" />
       {historyState !== "idle" ? (
         <div
@@ -1409,59 +1349,75 @@ export const MarketChartCanvas = forwardRef<
         const selected = selectedAnnotationGroupId === group.id
         const emphasized = selected || group.priority === "high"
         const count = group.annotations.length
-        const colorClassNames = getAnnotationMarkerColorClassNames(
+        const colorClassNames = getMarketChartAnnotationColorClassNames(
           group.direction
         )
 
         return (
-          <button
+          <Popover
             key={group.id}
-            type="button"
-            aria-label={
-              count > 1
-                ? formatMessage(dictionary.marketCharts.annotations.openMany, {
-                    count: formatNumber(count),
-                    time: formatDateTime(
-                      group.annotations[0]?.time,
-                      MARKER_DATE_TIME_OPTIONS,
-                      dictionary.marketCharts.format.notAvailable
-                    ),
-                  })
-                : formatMessage(dictionary.marketCharts.annotations.openOne, {
-                    title: group.annotations[0]?.title || "",
-                  })
-            }
-            aria-pressed={selected}
-            className={cn(
-              "group absolute z-10 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
-              drawingToolActive ? "pointer-events-none" : null
-            )}
-            style={{ left: x, top: y }}
-            onClick={(event) => {
-              event.stopPropagation()
-              onAnnotationSelect?.(group.id, { x, y })
+            open={selectedAnnotationGroupId === group.id}
+            onOpenChange={(open) => {
+              if (open) {
+                onAnnotationSelect?.(group.id)
+              } else {
+                onAnnotationClose?.()
+              }
             }}
           >
-            <span
-              className={cn(
-                "market-chart-annotation-pulse absolute rounded-full",
-                emphasized ? "size-9" : "size-7",
-                colorClassNames.pulse
-              )}
-            />
-            <span
-              className={cn(
-                count > 1
-                  ? "relative flex size-6 items-center justify-center rounded-full border-2 border-background text-[11px] font-semibold shadow-lg ring-2"
-                  : "relative block size-4 rounded-full border-2 border-background shadow-lg ring-2 group-aria-pressed:ring-4",
-                colorClassNames.dot,
-                colorClassNames.ring,
-                count > 1 ? colorClassNames.foreground : null
-              )}
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                aria-label={
+                  count > 1
+                    ? formatMessage(dictionary.marketCharts.annotations.openMany, {
+                        count: formatNumber(count),
+                        time: formatDateTime(
+                          group.annotations[0]?.time,
+                          MARKER_DATE_TIME_OPTIONS,
+                          dictionary.marketCharts.format.notAvailable
+                        ),
+                      })
+                    : formatMessage(dictionary.marketCharts.annotations.openOne, {
+                        title: group.annotations[0]?.title || "",
+                      })
+                }
+                aria-pressed={selected}
+                className={cn(
+                  "group absolute z-10 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+                  drawingToolActive ? "pointer-events-none" : null
+                )}
+                style={{ left: x, top: y }}
+              >
+                <span
+                  className={cn(
+                    "market-chart-annotation-pulse absolute rounded-full",
+                    emphasized ? "size-9" : "size-7",
+                    colorClassNames.pulse
+                  )}
+                />
+                <span
+                  className={cn(
+                    count > 1
+                      ? "relative flex size-6 items-center justify-center rounded-full border-2 border-background text-[11px] font-semibold shadow-lg ring-2"
+                      : "relative block size-4 rounded-full border-2 border-background shadow-lg ring-2 group-data-[state=open]:ring-4",
+                    colorClassNames.dot,
+                    colorClassNames.ring,
+                    count > 1 ? colorClassNames.foreground : null
+                  )}
+                >
+                  {count > 1 ? formatNumber(count) : null}
+                </span>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent
+              align="start"
+              side="right"
+              className="w-[min(22rem,calc(100vw_-_1.5rem))] p-0 sm:block"
             >
-              {count > 1 ? formatNumber(count) : null}
-            </span>
-          </button>
+              {renderAnnotationPopup?.(group)}
+            </PopoverContent>
+          </Popover>
         )
       })}
       <style>

@@ -4,6 +4,7 @@
 - [x] 1.2 Add a typed drawing palette model with stable palette ids, ordered tool lists, default tools, and palette-to-tool membership helpers.
 - [x] 1.3 Update drawing tool icon and dictionary label mappings so every new tool and palette has typechecked labels in Vietnamese and English.
 - [x] 1.4 Update drawing state to remember the last selected tool per palette while preserving one active drawing tool.
+- [x] 1.5 Add the `fibonacci` palette, default Fibonacci Line selection, and typed tool ids for Fibonacci Line, Fibonacci Segment, Fibonacci Circle, Fibonacci Spiral, Fibonacci Sector, Fibonacci Extension, and Gann Box.
 
 ## 2. Overlay Mapping And Templates
 
@@ -12,6 +13,9 @@
 - [x] 2.3 Add custom overlay templates for parallelogram and triangle.
 - [x] 2.4 Add custom overlay templates for XABCD pattern, ABCD pattern, three waves, five waves, eight waves, and any waves.
 - [x] 2.5 Ensure all Signapse-owned custom overlays register once and share existing drawing styles, lock, visibility, magnet mode, selection, delete, and clear-all behavior.
+- [x] 2.6 Add line palette overlays for segment, arrow, and price line, and remap trend line to the KLineChart straight line overlay.
+- [x] 2.7 Map Fibonacci Line to the KLineChart built-in `fibonacciLine` overlay.
+- [x] 2.8 Add Signapse-owned custom overlay templates for Fibonacci Segment, Fibonacci Circle, Fibonacci Spiral, Fibonacci Sector, Fibonacci Extension, and Gann Box.
 
 ## 3. Drawing Toolbar Palettes
 
@@ -21,6 +25,7 @@
 - [x] 3.4 Keep magnet, lock, and visibility as the existing separated `ToggleGroup type="multiple"` section.
 - [x] 3.5 Keep delete selected and clear all as action buttons outside palette menus, separated with shadcn `Separator`.
 - [x] 3.6 Preserve accessible labels for palette triggers, palette items, state controls, and destructive actions.
+- [x] 3.7 Render the Fibonacci palette as the fifth click-open shadcn `DropdownMenu` palette without hover timers or raw Radix imports.
 
 ## 4. Annotation Default State
 
@@ -36,5 +41,13 @@
 - [x] 5.3 Run `openspec validate expand-market-chart-drawing-tool-palettes --strict`.
 - [x] 5.4 Run `pnpm typecheck`.
 - [x] 5.5 Run `pnpm lint`.
+- [x] 5.6 Re-run static search or deterministic review for line palette overlay, icon, and dictionary coverage after adding segment, arrow, and price line.
+- [x] 5.7 Re-run `openspec validate expand-market-chart-drawing-tool-palettes --strict`.
+- [x] 5.8 Re-run `pnpm typecheck`.
+- [x] 5.9 Re-run `pnpm lint`.
+- [x] 5.10 Re-run static search or deterministic review for Fibonacci palette overlay, icon, and dictionary coverage.
+- [x] 5.11 Re-run `openspec validate expand-market-chart-drawing-tool-palettes --strict`.
+- [x] 5.12 Re-run `pnpm typecheck`.
+- [x] 5.13 Re-run `pnpm lint`.
 
 User-owned manual QA note: after implementation, open `/vi/market-charts`, confirm annotation markers are on by default, each drawing palette opens on click, every listed tool can create or cancel a drawing without leaving the toolbar stuck, and disabling annotations hides markers without changing `assetId` or `timeframe` route state.

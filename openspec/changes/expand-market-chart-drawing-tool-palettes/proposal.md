@@ -6,9 +6,10 @@ The market chart drawing toolbar is currently a flat set of a few tools, while t
 
 - Replace the flat drawing tool list with grouped drawing tool palettes opened by click using shadcn `DropdownMenu`.
 - Add the full tool set represented by the agreed KLineChart-style groups:
-  - Line tools: horizontal line, horizontal ray, horizontal segment, vertical line, vertical ray, vertical segment, trend line, and ray.
+  - Line tools: horizontal line, horizontal ray, horizontal segment, vertical line, vertical ray, vertical segment, trend line, ray, segment, arrow, and price line.
   - Channel tools: price channel line and parallel line.
   - Shape tools: circle, rectangle, parallelogram, and triangle.
+  - Fibonacci tools: Fibonacci line, Fibonacci segment, Fibonacci circle, Fibonacci spiral, Fibonacci sector, Fibonacci extension, and Gann box.
   - Pattern tools: XABCD pattern, ABCD pattern, three waves, five waves, eight waves, and any waves.
 - Keep magnet, lock, visibility, delete selected, and clear all as separate toolbar sections rather than mixing them into drawing tool palettes.
 - Use click-open menus instead of hover-open behavior to avoid custom timer/state complexity and preserve shadcn/Radix accessibility semantics.
