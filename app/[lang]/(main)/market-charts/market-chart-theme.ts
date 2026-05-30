@@ -1,4 +1,4 @@
-import type { LineType } from "klinecharts"
+import type { LineType, PolygonType } from "klinecharts"
 
 export type ChartThemeMode = "light" | "dark"
 
@@ -79,8 +79,8 @@ function getCssTextVariable(name: string, fallback: string) {
 
 export interface CreateChartStylesResult {
   grid: {
-    horizontal: { color: string; dashedValue: number[]; show: boolean; size: number; style: string }
-    vertical: { color: string; dashedValue: number[]; show: boolean; size: number; style: string }
+    horizontal: { color: string; dashedValue: number[]; show: boolean; size: number; style: LineType }
+    vertical: { color: string; dashedValue: number[]; show: boolean; size: number; style: LineType }
   }
   candle: {
     bar: Record<string, string>
@@ -197,7 +197,8 @@ export function createChartStyles(
 }
 
 export interface CreateDrawingOverlayStylesResult {
-  circle: { borderColor: string; borderSize: number; color: string; style: LineType }
+  [key: string]: any
+  circle: { borderColor: string; borderSize: number; color: string; style: PolygonType }
   line: { color: string; size: number; style: LineType }
   point: {
     activeBorderColor: string
@@ -209,8 +210,8 @@ export interface CreateDrawingOverlayStylesResult {
     color: string
     radius: number
   }
-  rect: { borderColor: string; borderSize: number; color: string; style: LineType }
-  polygon: { style: LineType; color: string; borderColor: string; borderSize: number }
+  rect: { borderColor: string; borderSize: number; color: string; style: PolygonType }
+  polygon: { style: PolygonType; color: string; borderColor: string; borderSize: number }
 }
 
 export function createDrawingOverlayStyles(
