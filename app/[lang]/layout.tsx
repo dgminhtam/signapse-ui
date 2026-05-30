@@ -3,6 +3,7 @@ import { enUS, viVN } from "@clerk/localizations"
 import { notFound } from "next/navigation"
 import { Geist, Geist_Mono } from "next/font/google"
 import NextTopLoader from "nextjs-toploader"
+import type { Metadata } from "next"
 
 import "../globals.css"
 
@@ -24,6 +25,14 @@ const fontMono = Geist_Mono({
 const clerkLocalizations: Record<AppLocale, typeof viVN> = {
   en: enUS,
   vi: viVN,
+}
+
+export const metadata: Metadata = {
+  title: "Signapse - Market Intelligence Platform",
+  description: "Real-time market data visualization and analysis",
+  icons: {
+    icon: "/favicon.svg",
+  },
 }
 
 export async function generateStaticParams() {

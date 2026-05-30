@@ -17,6 +17,7 @@ import { usePathname } from "next/navigation"
 import { useLocalization } from "@/app/lib/i18n/provider"
 import { stripLocaleFromPathname } from "@/app/lib/i18n/routing"
 import { NavItem, createSiteConfig, filterNavItemsByPermissions } from "@/config/site"
+import { Logo } from "@/components/logo"
 
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./ui/collapsible"
@@ -95,16 +96,13 @@ export function AppSidebar({
 function SidebarBrand() {
   const { dictionary } = useLocalization()
   const localizedSiteConfig = createSiteConfig(dictionary)
-  const Logo = localizedSiteConfig.brand.logo
 
   return (
     <SidebarMenu>
       <SidebarMenuItem>
         <SidebarMenuButton asChild size="lg" tooltip={localizedSiteConfig.brand.name}>
           <Link href="/">
-            <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-              <Logo className="size-4" />
-            </div>
+            <Logo width={32} height={32} />
             <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
               <span className="truncate font-medium">{localizedSiteConfig.brand.name}</span>
               <span className="truncate text-xs text-muted-foreground">
