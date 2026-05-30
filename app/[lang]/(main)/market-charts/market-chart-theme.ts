@@ -1,3 +1,5 @@
+import type { LineType } from "klinecharts"
+
 export type ChartThemeMode = "light" | "dark"
 
 export type MarketChartThemePalette = {
@@ -195,8 +197,8 @@ export function createChartStyles(
 }
 
 export interface CreateDrawingOverlayStylesResult {
-  circle: { borderColor: string; borderSize: number; color: string; style: string }
-  line: { color: string; size: number; style: string }
+  circle: { borderColor: string; borderSize: number; color: string; style: LineType }
+  line: { color: string; size: number; style: LineType }
   point: {
     activeBorderColor: string
     activeBorderSize: number
@@ -207,8 +209,8 @@ export interface CreateDrawingOverlayStylesResult {
     color: string
     radius: number
   }
-  rect: { borderColor: string; borderSize: number; color: string; style: string }
-  polygon: { style: string; color: string; borderColor: string; borderSize: number }
+  rect: { borderColor: string; borderSize: number; color: string; style: LineType }
+  polygon: { style: LineType; color: string; borderColor: string; borderSize: number }
 }
 
 export function createDrawingOverlayStyles(
