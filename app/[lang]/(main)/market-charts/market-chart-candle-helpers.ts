@@ -102,6 +102,7 @@ export function hasUsableVolumeData(
 }
 
 export interface CreateKLineDataItem {
+  [key: string]: unknown
   timestamp: number
   open: number
   high: number
