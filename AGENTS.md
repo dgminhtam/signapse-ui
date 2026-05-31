@@ -26,7 +26,7 @@ Signapse UI là dashboard quản trị dùng **Next.js 16 App Router** cho hệ 
 
 - **Xác thực:** Clerk; endpoint cần JWT phải đi qua `fetchAuthenticated()`.
 - **UI:** shadcn/ui wrapper trong `@/components/ui/`, Tailwind CSS v4, Lucide icons, Geist font và Geist Mono.
-- **Toast:** chỉ dùng `sonner`; không dùng `alert()`.
+- **Toast:** chỉ dùng `sonner`.
 - **Validation:** Zod v4 cho frontend validation và mapping DTO backend.
 - **Route groups:** `app/(main)/` là protected app, `app/(auth)/` là Clerk auth, `app/api/[feature]/action.ts` là server actions theo feature.
 
@@ -143,16 +143,10 @@ app/(main)/[feature]/
 
 ## Hydration Mismatch
 
-- Với overlay Radix/shadcn như `Dialog`, `Sheet`, `AlertDialog`, `Popover`, phải điều tra root cause trước khi sửa.
-- Kiểm tra các nguồn thường gặp: `typeof window` trong render, `Date.now()`/`Math.random()`, locale formatting trong render, conditional render theo permission/client state, HTML nesting sai và browser extension can thiệp DOM.
-- Nếu mismatch chỉ là id accessibility do Radix sinh như `aria-controls`, ưu tiên cấp deterministic id ở usage app-level; singleton dùng constant id, row/list derive từ stable entity key.
-- Không dùng `dynamic(..., { ssr: false })`, mount-only wrapper hoặc `suppressHydrationWarning` để che lỗi; không patch `components/ui/*` cho issue cục bộ.
 - Khi xử lý trường hợp này, đọc skill `.codex/skills/hydration-mismatch`.
 
 ## Content, Language Và Accessibility
 
-- UI text hướng đến người dùng phải là tiếng Việt chuyên nghiệp, rõ ràng và nhất quán.
-- Không trộn tiếng Anh và tiếng Việt trong label, placeholder, toast, description, metadata hoặc menu; chỉ giữ tiếng Anh cho tên riêng, thuật ngữ kỹ thuật, model name hoặc token mã nguồn khi cần.
 - Mỗi màn hình chỉ hiển thị text giúp user ra quyết định hoặc hoàn thành tác vụ; không thêm mô tả lặp breadcrumb/control/metric.
 - Tránh badge trang trí, page identity body heading, hero copy, `CardDescription`, panel placeholder hoặc implementation-detail copy nếu không tạo giá trị quyết định.
 - Màn hình dữ liệu dày ưu tiên controls và dữ liệu chính; copy dài, roadmap/future feature, legal/vendor note chuyển thành tooltip/help text nhỏ/footer legal/docs riêng.
@@ -181,37 +175,14 @@ app/(main)/[feature]/
 - Với mỗi finding, chỉ ra file/line, rủi ro hành vi hoặc UX, và sửa tối thiểu nên làm.
 - Nếu không có finding, nói rõ không tìm thấy issue và nêu residual risk hoặc checks chưa chạy.
 
-## Biến Môi Trường
-
-Cần khai báo trong `.env`:
-
-```text
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-CLERK_SECRET_KEY
-NEXT_PUBLIC_CLERK_SIGN_IN_URL
-NEXT_PUBLIC_CLERK_SIGN_UP_URL
-NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL
-NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL
-API_BASE_URL
-```
-
-Ví dụ:
-
-```text
-API_BASE_URL=http://localhost:8484
-```
-
 ## Checklist Hoàn Thành Feature
 
 Trước khi đánh dấu một feature là xong:
 
-- [ ] Page dùng cardless workspace, không có main Card shell lặp breadcrumb title.
 - [ ] Suspense/Skeleton mirror bố cục thật đủ gần để tránh layout shift.
 - [ ] Có `error.tsx` khi feature có route/page đáng kể.
 - [ ] Search/list/pagination tuân thủ URL state và composition policy.
 - [ ] Bảng list dùng shared table surface cho shell, header, empty state và width strategy.
 - [ ] Create/update dùng focused form shell với header, body, footer action zone và width phù hợp.
-- [ ] UI text là tiếng Việt chuyên nghiệp, không có copy dư thừa.
 - [ ] Submit/save/delete/cancel có pending, disabled, destructive confirmation và reset/redirect đúng policy.
 - [ ] Agent-owned verification đã chạy hoặc được báo rõ lý do chưa chạy: lint, typecheck, OpenSpec validation, static search hoặc deterministic review.
-- [ ] Smoke/browser/visual/manual/auth/backend-data QA, nếu cần, được ghi nhận là user-owned non-gating note trừ khi người dùng yêu cầu khác.
