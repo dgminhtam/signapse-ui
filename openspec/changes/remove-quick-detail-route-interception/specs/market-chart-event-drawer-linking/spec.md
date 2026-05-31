@@ -1,8 +1,5 @@
-# market-chart-event-drawer-linking Specification
+## MODIFIED Requirements
 
-## Purpose
-TBD - created by archiving change link-market-chart-annotations-to-event-drawer. Update Purpose after archive.
-## Requirements
 ### Requirement: Event title links from market chart annotations
 The system SHALL let users open event detail from market chart annotation titles when a safe event route can be resolved, without relying on global intercepted route navigation.
 
@@ -45,6 +42,6 @@ The system SHALL use a local market chart event quick-detail drawer for event ti
 - **THEN** the local event quick-detail drawer provides an action to open `/events/{eventId}` as the canonical full detail page
 
 #### Scenario: Existing chart marker behavior is preserved
-- **WHEN** a user clicks a red chart annotation marker
+- **WHEN** a user clicks a chart annotation marker
 - **THEN** the chart annotation popup still opens as before
 - **AND** annotation grouping, marker rendering, popup positioning, and lazy history loading remain unchanged

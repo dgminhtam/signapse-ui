@@ -1754,6 +1754,7 @@ export function MarketChartWorkbench({
   }
 
   function handleAnnotationEventOpen(eventId: number) {
+    setSelectedAnnotationGroupId(null)
     setQuickDetailEntity({ id: eventId, kind: "event" })
   }
 

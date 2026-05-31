@@ -1,18 +1,4 @@
-# entity-quick-detail-overlay-documentation Specification
-
-## Purpose
-TBD - created by archiving change document-signapse-quick-detail-overlay-pattern. Update Purpose after archive.
-## Requirements
-### Requirement: Documentation uses Signapse quick detail framing
-The documentation SHALL describe the pattern as a Signapse entity quick detail overlay for analytical workspaces, not as an ecommerce PDP or product quick-view pattern.
-
-#### Scenario: Ecommerce language is removed from the primary pattern
-- **WHEN** the quick detail documentation is updated
-- **THEN** the primary examples use Signapse concepts such as graph nodes, market-chart annotations, events, news articles, source evidence, and full detail pages
-
-#### Scenario: Signapse use cases are explicit
-- **WHEN** a developer reads the updated documentation
-- **THEN** the document identifies Graph View node detail and Market Chart annotation reading as the initial motivating surfaces
+## MODIFIED Requirements
 
 ### Requirement: Documentation defines canonical URL behavior
 The documentation SHALL state that full entity detail pages remain the canonical destination for reload, direct URL entry, copied links, hard navigation, and normal internal detail links.
@@ -41,17 +27,6 @@ The documentation SHALL recommend explicit workspace-owned quick-detail overlays
 - **WHEN** the documentation describes App Router integration
 - **THEN** it states that global intercepted routes are not the default quick-detail approach in this repository
 - **AND** it requires a future proposal before introducing any route-intercepted quick-detail behavior
-
-### Requirement: Documentation separates summary surfaces from reading surfaces
-The documentation SHALL distinguish lightweight local summaries from the richer quick detail reading overlay and from full detail pages.
-
-#### Scenario: Existing graph and chart surfaces keep their purpose
-- **WHEN** the document discusses graph node inspectors or market-chart annotation popups
-- **THEN** it describes them as summary or decision surfaces rather than places to embed full event or article detail
-
-#### Scenario: Quick detail has a clear escalation path
-- **WHEN** the document describes quick detail content
-- **THEN** it requires an obvious way to open the canonical full detail page when users need the complete workspace or actions
 
 ### Requirement: Documentation defines scope boundaries
 The documentation SHALL define supported entity types, non-goals, and validation checks for future local quick-detail implementation proposals.

@@ -1,8 +1,5 @@
-# graph-view-quick-detail-drawer-refinement Specification
+## MODIFIED Requirements
 
-## Purpose
-TBD - created by archiving change refine-graph-view-quick-detail-drawer. Update Purpose after archive.
-## Requirements
 ### Requirement: Graph quick detail uses bottom Drawer
 Graph View quick detail SHALL use a bottom shadcn Drawer as its overlay primitive.
 

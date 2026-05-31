@@ -1,8 +1,5 @@
-# graph-view-quick-detail-overlay Specification
+## MODIFIED Requirements
 
-## Purpose
-TBD - created by archiving change add-graph-view-quick-detail-overlay. Update Purpose after archive.
-## Requirements
 ### Requirement: Graph View supports quick detail for readable entity nodes
 Graph View SHALL allow users to open local quick detail for selected `event` and `news-article` nodes without losing the current graph workspace context.
 
@@ -36,7 +33,7 @@ The system SHALL keep `/events/{id}` and `/news-articles/{id}` as canonical full
 - **THEN** the drawer closes without route navigation
 - **AND** the user remains in the existing Graph View workspace context
 
-### Requirement: Quick detail uses a focused Drawer reading surface
+### Requirement: Quick detail uses a focused Sheet reading surface
 The quick detail overlay SHALL use a local shadcn Drawer reading surface with focused entity detail content rather than rendering the full page shell inside the overlay.
 
 #### Scenario: Event quick detail is focused
