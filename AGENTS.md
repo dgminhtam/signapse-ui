@@ -1,188 +1,202 @@
 # AGENTS.md
 
-Tài liệu này là hướng dẫn repo-wide đang hoạt động cho Codex khi làm việc trong Signapse UI.
+This document is the active repo-wide instruction file for Codex when working in Signapse UI.
 
-## Scope Và Skills
+## Language And Synchronization
 
-- `AGENTS.md` giữ các quy tắc toàn repo: stack, auth/API, UI policy, layout invariant, verification và review categories.
-- `.codex/skills` giữ recipe chi tiết. Khi task đụng các domain dưới đây, phải đọc skill tương ứng trước khi implement hoặc review.
-- `shadcn`: thêm/sửa/compose shadcn component, wrapper, CLI, docs, preset, styling rules.
-- `implementation-guardrails`: apply OpenSpec, refactor, bugfix, cleanup hoặc thay đổi scope-sensitive.
-- `hydration-mismatch`: điều tra hydration mismatch trên Radix/shadcn overlay.
-- `frontend-design`: redesign, polish UI, dashboard/workbench hoặc layout mới cần visual direction.
+- `AGENTS.md` is the English operational instruction file for agents.
+- `AGENTS.vi.md` is the Vietnamese reading copy for the repository owner.
+- The two files must stay synchronized. Whenever any rule is added, removed, or changed in one file, update the corresponding section in the other file in the same change.
+- If synchronization cannot be completed in the same change, explicitly report the mismatch, the affected section, and what remains to be updated.
+
+## CodeGraph
+
+- When the user asks about architecture, execution flow, bugs, refactors, impact review, or where code should be changed, prefer CodeGraph before manually opening files or running `rg`.
+- Use `codegraph_context` as the default entry point for questions like "how does X work", bug investigation, or identifying related entry points.
+- Use `codegraph_trace` when the task needs the path from symbol/interaction A to B, `codegraph_impact` before refactors, `codegraph_search` for fast symbol lookup, and `codegraph_explore` to gather several related symbols/files in one pass.
+- Fall back to `rg`, direct file reads, or other tools only when CodeGraph lacks an index, returns insufficient context, or the task requires content outside symbols such as dictionaries, CSS, Markdown, config, or OpenSpec docs.
+
+## Scope And Skills
+
+- `AGENTS.md` holds repo-wide rules: stack, auth/API, UI policy, layout invariants, verification, and review categories.
+- `.codex/skills` holds detailed recipes. When a task touches one of the domains below, read the corresponding skill before implementation or review.
+- `shadcn`: adding, fixing, composing shadcn components, wrappers, CLI, docs, presets, and styling rules.
+- `implementation-guardrails`: applying OpenSpec, refactoring, bugfixes, cleanup, or scope-sensitive changes.
+- `hydration-mismatch`: investigating hydration mismatch on Radix/shadcn overlays.
+- `frontend-design`: redesign, UI polish, dashboards/workbenches, or new layouts that need visual direction.
 - `accessibility`: keyboard, focus, screen reader, semantic markup, dialog/form accessibility.
-- `api-mapping-sync`: khi `docs/api_mapping.json`, `docs/APIMAPPING.md` hoặc backend contract thay đổi.
-- OpenSpec skills: dùng `openspec-propose`, `openspec-apply-change`, `openspec-archive-change`, `openspec-explore` theo đúng phase.
+- `api-mapping-sync`: when `docs/api_mapping.json`, `docs/APIMAPPING.md`, or backend contracts change.
+- OpenSpec skills: use `openspec-propose`, `openspec-apply-change`, `openspec-archive-change`, and `openspec-explore` in the correct phase.
 
-## Lệnh
+## Commands
 
-- Ưu tiên slash command: `/dev`, `/build`, `/lint`, `/format`, `/typecheck`.
-- Fallback shell tương ứng: `pnpm dev`, `pnpm build`, `pnpm lint`, `pnpm format`, `pnpm typecheck`.
-- Chạy production server bằng `pnpm start`.
+- Prefer slash commands: `/dev`, `/build`, `/lint`, `/format`, `/typecheck`.
+- Shell fallbacks: `pnpm dev`, `pnpm build`, `pnpm lint`, `pnpm format`, `pnpm typecheck`.
+- Run the production server with `pnpm start`.
 
-## Kiến Trúc
+## Architecture
 
-Signapse UI là dashboard quản trị dùng **Next.js 16 App Router** cho hệ thống tín hiệu giao dịch có tích hợp AI.
+Signapse UI is an admin dashboard built with **Next.js 16 App Router** for an AI-integrated trading signal system.
 
-- **Xác thực:** Clerk; endpoint cần JWT phải đi qua `fetchAuthenticated()`.
-- **UI:** shadcn/ui wrapper trong `@/components/ui/`, Tailwind CSS v4, Lucide icons, Geist font và Geist Mono.
-- **Toast:** chỉ dùng `sonner`.
-- **Validation:** Zod v4 cho frontend validation và mapping DTO backend.
-- **Route groups:** `app/(main)/` là protected app, `app/(auth)/` là Clerk auth, `app/api/[feature]/action.ts` là server actions theo feature.
+- **Authentication:** Clerk; endpoints requiring JWT must go through `fetchAuthenticated()`.
+- **UI:** shadcn/ui wrappers in `@/components/ui/`, Tailwind CSS v4, Lucide icons, Geist font, and Geist Mono.
+- **Toast:** use `sonner` only.
+- **Validation:** Zod v4 for frontend validation and backend DTO mapping.
+- **Route groups:** `app/(main)/` is the protected app, `app/(auth)/` is Clerk auth, and `app/api/[feature]/action.ts` contains server actions by feature.
 
-## Cấu Trúc Feature
+## Feature Structure
 
-Mỗi feature nên nằm trọn trong thư mục riêng khi phù hợp:
+Each feature should live in its own folder when appropriate:
 
 ```text
 app/(main)/[feature]/
 ├── page.tsx              # Server Component: cardless workspace + Suspense boundary
-├── [id]/page.tsx         # Detail page: cardless workspace + nút quay lại chuẩn
+├── [id]/page.tsx         # Detail page: cardless workspace + standard back button
 ├── error.tsx             # Local error boundary
-├── [feature]-list.tsx    # Client Component: bảng/danh sách + toolbar
+├── [feature]-list.tsx    # Client Component: table/list + toolbar
 ├── [feature]-create-form.tsx
 ├── [feature]-update-form.tsx
 └── [feature]-search.tsx
 ```
 
-- Dùng relative import như `./component-name` cho component nằm cùng feature.
-- Có `error.tsx` cho local server error khi feature có route/page đáng kể.
-- Create và update không dùng chung một submit-owning form component; chỉ share field primitive/helper không phụ thuộc mode.
+- Use relative imports such as `./component-name` for components inside the same feature.
+- Add `error.tsx` for local server errors when the feature has a meaningful route/page.
+- Create and update must not share one submit-owning form component; share only field primitives/helpers that are not mode-dependent.
 
-## Guardrail Triển Khai
+## Implementation Guardrails
 
-- Trước thay đổi không tầm thường, khóa scope bằng mục tiêu, giả định, non-goals và tiêu chí hoàn thành.
-- Ưu tiên giải pháp đơn giản nhất đủ yêu cầu; không tạo abstraction, config hoặc fallback khi chưa có nhu cầu rõ.
-- Chỉnh sửa phẫu thuật: chỉ sửa file liên quan trực tiếp, bám style hiện có, không dọn code ngoài scope.
-- Khi thay thế thư viện/vendor UI hoặc chart engine, migration phải xóa sạch source cũ không còn dùng: dependency, import/type/helper, adapter, attribution/vendor copy, OpenSpec/docs reference active và dead component tạm thời.
-- Khi sửa Markdown, TS hoặc TSX, giữ UTF-8 và tránh rewrite toàn file bằng command có thể đổi encoding/newline. Ưu tiên `apply_patch`; nếu buộc dùng script/bulk edit thì edit hẹp, encoding-aware và kiểm tra diff/readability sau đó.
-- Kết thúc phần agent-owned bằng kiểm chứng phù hợp như lint, typecheck, OpenSpec validation, static search hoặc deterministic review; nếu chưa chạy được thì nói rõ lý do.
-- Khi tạo/cập nhật OpenSpec `tasks.md`, verification checklist mặc định chỉ gồm checks Codex có thể chạy từ repo. Không thêm smoke/browser/visual/manual/auth/backend-data QA thành checkbox chặn archive trừ khi người dùng yêu cầu rõ; nếu cần ghi nhận, dùng ghi chú không checkbox như `User-owned manual QA`.
+- Before non-trivial changes, lock scope with the goal, assumptions, non-goals, and completion criteria.
+- Prefer the simplest solution that satisfies the requirement; do not add abstractions, config, or fallbacks without a clear need.
+- Make surgical edits: only change directly related files, follow existing style, and do not clean up unrelated code.
+- When replacing a library/vendor UI or chart engine, the migration must remove old unused sources completely: dependency, imports/types/helpers, adapters, attribution/vendor copy, active OpenSpec/docs references, and temporary dead components.
+- When editing Markdown, TS, or TSX, keep UTF-8 and avoid whole-file rewrites through commands that may change encoding/newlines. Prefer `apply_patch`; if a script/bulk edit is unavoidable, keep it narrow, encoding-aware, and check the diff/readability afterwards.
+- Finish agent-owned work with appropriate verification such as lint, typecheck, OpenSpec validation, static search, or deterministic review; if verification cannot run, state why.
+- When creating/updating OpenSpec `tasks.md`, the default verification checklist should include only checks Codex can run from the repo. Do not add smoke/browser/visual/manual/auth/backend-data QA as archive-blocking checkboxes unless the user explicitly asks; when needed, record them as non-checkbox notes such as `User-owned manual QA`.
 
-## API Và Data
+## API And Data
 
-- Luôn dùng `fetchAuthenticated()` cho endpoint cần Clerk JWT.
-- Luôn đọc `response.text()` trước khi `JSON.parse()` để tránh crash khi backend trả rỗng hoặc malformed.
-- Khi backend giản lược contract, frontend phải giản lược hierarchy theo response hiện tại; bỏ field, badge, filter, section hoặc metadata card không còn trong contract.
-- Danh sách ưu tiên tên entity, mô tả ngắn, trạng thái hiện tại, timestamp chính, confidence/impact nếu có và action chính trước field kỹ thuật.
-- Detail page đưa core facts và bằng chứng/hệ quả quan trọng lên trước; `id`, `slug`, `canonicalKey`, `createdDate`, `lastModifiedDate` thuộc vùng thông tin kỹ thuật cấp thấp.
+- Always use `fetchAuthenticated()` for endpoints requiring a Clerk JWT.
+- Always read `response.text()` before `JSON.parse()` to avoid crashes when the backend returns an empty or malformed body.
+- When the backend simplifies a contract, the frontend must simplify hierarchy to match the current response; remove fields, badges, filters, sections, or metadata cards that are no longer in the contract.
+- Lists should prioritize entity name, short description, current status, primary timestamp, confidence/impact when present, and primary action before technical fields.
+- Detail pages should put core facts and important evidence/impact first; `id`, `slug`, `canonicalKey`, `createdDate`, and `lastModifiedDate` belong in lower-priority technical information areas.
 
-## I18n Và Locale Routing
+## I18n And Locale Routing
 
-- App dùng locale route `app/[lang]` với locale khai báo trong `app/lib/i18n/config.ts`; không tạo UI route song song ngoài `[lang]`.
-- User-facing copy phải lấy từ dictionary qua `getDictionary()`, `getServerDictionary()` hoặc `useLocalization()`; không hardcode label, toast, placeholder hoặc menu text trong component mới.
-- Client component dùng `useLocalization()` cho `dictionary`, `formatMessage`, `formatDateTime`, `formatNumber` và `formatCurrency`.
-- Server action/API action cần localized message phải dùng `getRequestLocale()` hoặc `getServerDictionary()` thay vì tự suy đoán locale.
-- Internal app links phải preserve locale bằng `LocalizedLink`, `useLocalizedHref()`, `useLocalizedPath()` hoặc `withLocalePath()`; không hardcode `/vi` hoặc `/en`.
-- Locale-sensitive date, number và currency phải dùng formatter trong i18n provider/helper; tránh gọi `toLocaleString()` trực tiếp trong render để giảm hydration mismatch.
+- The app uses locale route `app/[lang]` with locales declared in `app/lib/i18n/config.ts`; do not create parallel UI routes outside `[lang]`.
+- User-facing copy must come from dictionaries through `getDictionary()`, `getServerDictionary()`, or `useLocalization()`; do not hardcode labels, toasts, placeholders, or menu text in new components.
+- Client components use `useLocalization()` for `dictionary`, `formatMessage`, `formatDateTime`, `formatNumber`, and `formatCurrency`.
+- Server actions/API actions that need localized messages must use `getRequestLocale()` or `getServerDictionary()` instead of guessing locale manually.
+- Internal app links must preserve locale with `LocalizedLink`, `useLocalizedHref()`, `useLocalizedPath()`, or `withLocalePath()`; do not hardcode `/vi` or `/en`.
+- Locale-sensitive dates, numbers, and currency must use formatters from the i18n provider/helper; avoid calling `toLocaleString()` directly during render to reduce hydration mismatch.
 
-## Shadcn Và Theme Policy
+## Shadcn And Theme Policy
 
-- `components.json` và `@/components/ui/` dùng shadcn preset `radix-nova` làm baseline chính thức (`base=radix`, `baseColor=neutral`, `iconLibrary=lucide`).
-- App/feature/shared code chỉ compose qua wrapper trong `@/components/ui/`; không import trực tiếp primitive gốc như `radix-ui`, `vaul` hoặc UI nền khi đã có hoặc có thể bổ sung wrapper shadcn.
-- Chỉ file wrapper trong `components/ui/*` được import primitive gốc.
-- Không tự chỉnh visual chrome trong `@/components/ui/`. Khi cần sync wrapper shadcn, dùng workflow `pnpm dlx shadcn@latest add ... --dry-run` và `--diff`, rồi sync theo preset hoặc proposal wrapper rõ ràng.
-- Feature/shared code phải dùng default chrome của `radix-nova`; `className` trên shadcn primitives chỉ dùng cho layout như width, max-width, flex/grid, gap, alignment, max-height, overflow, truncate hoặc responsive constraints.
-- Không thêm `h-*`, `min-h-*`, `rounded-*`, padding, foreground/background, border, ring, shadow hoặc typography class lên primitive chỉ để đổi height, radius, màu, viền hoặc mật độ mặc định.
-- Khi cần compact control, ưu tiên variant/size có sẵn; chỉ hard-code height/radius khi không có size/variant phù hợp và có lý do sản phẩm rõ ràng.
-- Theme token trong `app/globals.css` và `tailwind.baseColor` trong `components.json` phải theo `radix-nova` neutral default; không silently đổi `--primary`, `--accent`, `--sidebar-*`, chart tokens hoặc wrapper chrome để sửa vấn đề cục bộ.
-- Khi thêm/sửa/debug/style/compose shadcn component, bắt buộc tham khảo skill `.codex/skills/shadcn` và kiểm tra docs shadcn tương ứng trước khi implement.
+- `components.json` and `@/components/ui/` use the shadcn `radix-nova` preset as the official baseline (`base=radix`, `baseColor=neutral`, `iconLibrary=lucide`).
+- App/feature/shared code must compose only through wrappers in `@/components/ui/`; do not import original primitives such as `radix-ui`, `vaul`, or base UI directly when a wrapper exists or can be added.
+- Only wrapper files in `components/ui/*` may import original primitives.
+- Do not custom-edit visual chrome in `@/components/ui/`. When a shadcn wrapper needs syncing, use `pnpm dlx shadcn@latest add ... --dry-run` and `--diff`, then sync according to the preset or a clear wrapper proposal.
+- Feature/shared code must use `radix-nova` default chrome; `className` on shadcn primitives should be used only for layout such as width, max-width, flex/grid, gap, alignment, max-height, overflow, truncate, or responsive constraints.
+- Do not add `h-*`, `min-h-*`, `rounded-*`, padding, foreground/background, border, ring, shadow, or typography classes to primitives only to change default height, radius, color, border, or density.
+- When compact controls are needed, prefer existing variant/size options; hard-code height/radius only when no suitable size/variant exists and there is a clear product reason.
+- Theme tokens in `app/globals.css` and `tailwind.baseColor` in `components.json` must follow the `radix-nova` neutral default; do not silently change `--primary`, `--accent`, `--sidebar-*`, chart tokens, or wrapper chrome to fix a local issue.
+- When adding, fixing, debugging, styling, or composing shadcn components, always consult `.codex/skills/shadcn` and check the corresponding shadcn docs before implementation.
 
 ## UI Composition Invariants
 
-- Ưu tiên `gap-*` trong `flex`/`grid`; không dùng `space-y-*`.
-- Empty state phải dùng `<Empty>`.
-- Icon trong button phải dùng `data-icon="inline-start"` hoặc treatment tương ứng từ shadcn skill.
-- `SelectItem` phải nằm trong `SelectGroup`; `DropdownMenuItem` phải nằm trong `DropdownMenuGroup`.
-- Nút Submit/Lưu phải có `<Spinner>` và disabled trong lúc pending.
-- Action phá hủy dữ liệu phải dùng `<AlertDialog>` với cảnh báo rõ nếu không thể hoàn tác.
-- Form chỉnh sửa phải có nút Hủy `variant="ghost"` và reset về dữ liệu ban đầu hoặc flow an toàn tương đương.
-- Sau submit thành công, dùng `router.push()` về trang danh sách rồi `router.refresh()`.
-- Skeleton/Suspense fallback phải mirror bố cục cuối cùng đủ gần để tránh layout shift.
-- Thanh loading phía trên phải luôn bật cho page transition.
-- Time metadata trên list/detail/drawer/supporting panel dùng treatment phụ: icon inline `size-3`, `text-xs text-muted-foreground tabular-nums`; không dùng badge hoặc value styling mạnh cho timestamp thuần.
+- Prefer `gap-*` in `flex`/`grid`; do not use `space-y-*`.
+- Empty states must use `<Empty>`.
+- Icons inside buttons must use `data-icon="inline-start"` or the corresponding treatment from the shadcn skill.
+- `SelectItem` must be inside `SelectGroup`; `DropdownMenuItem` must be inside `DropdownMenuGroup`.
+- Submit/Save buttons must include `<Spinner>` and be disabled while pending.
+- Destructive actions must use `<AlertDialog>` with a clear warning when the action cannot be undone.
+- Edit forms must include a Cancel button with `variant="ghost"` and reset to initial data or an equivalent safe flow.
+- After a successful submit, use `router.push()` back to the list page, then `router.refresh()`.
+- Skeleton/Suspense fallbacks must mirror the final layout closely enough to avoid layout shift.
+- The top loading bar must always be enabled for page transitions.
+- Time metadata on list/detail/drawer/supporting panels uses secondary treatment: inline icon `size-3`, `text-xs text-muted-foreground tabular-nums`; do not use badges or strong value styling for plain timestamps.
 
-## List, Search Và Pagination
+## List, Search And Pagination
 
-- Giữ filter, search, sort và pagination trên URL.
-- Dùng query params `page` và `size`; URL là 1-indexed, backend là 0-indexed.
-- URL updates dùng `useTransition` với `router.push()` hoặc `router.replace()`.
-- Search list đặt trong `[feature]-search.tsx`, dùng controlled input khởi tạo từ `useSearchParams()` và sync lại khi query param thay đổi.
-- Search dùng `use-debounce` `300ms`, không thêm nút `Tìm kiếm` nếu không có yêu cầu nghiệp vụ riêng.
-- Khi search đổi, trim giá trị, xóa query param nếu rỗng và reset `page` về `1`.
-- Search input có `type="search"`, `id`, `label` dạng `sr-only`.
-- Search compose bằng `InputGroup`, `InputGroupInput`, `InputGroupAddon`; icon idle và `<Spinner>` pending thay thế nhau trong leading addon, không dùng absolute icon/trailing spinner/reserved trailing width.
-- Search wrapper thống nhất `w-full sm:w-80 lg:w-96`; search nằm vùng leading cùng action chính, view controls như filter/sort/page size nằm trailing.
-- Page size selector thuộc trailing controls, dùng options chuẩn `10`, `20`, `50`, `100`, default `10`; không đặt lại trong footer pagination.
-- Sort/page size dùng disable-only pending feedback, không render spinner trong/bên cạnh select trigger.
+- Keep filters, search, sort, and pagination in the URL.
+- Use query params `page` and `size`; the URL is 1-indexed, the backend is 0-indexed.
+- URL updates use `useTransition` with `router.push()` or `router.replace()`.
+- List search belongs in `[feature]-search.tsx`, uses a controlled input initialized from `useSearchParams()`, and syncs when the query param changes.
+- Search uses `use-debounce` at `300ms`; do not add a `Search` button unless there is a specific business requirement.
+- When search changes, trim the value, remove the query param if empty, and reset `page` to `1`.
+- Search input must have `type="search"`, an `id`, and an `sr-only` label.
+- Search composes with `InputGroup`, `InputGroupInput`, and `InputGroupAddon`; the idle icon and pending `<Spinner>` replace each other in the leading addon. Do not use absolute icons, trailing spinners, or reserved trailing width.
+- Search wrapper is consistently `w-full sm:w-80 lg:w-96`; search sits in the leading area with the primary action, while view controls such as filter/sort/page size sit in the trailing area.
+- Page size selector belongs in trailing controls, uses standard options `10`, `20`, `50`, `100`, default `10`; do not duplicate it in footer pagination.
+- Sort/page size controls use disabled-only pending feedback; do not render a spinner inside or beside the select trigger.
 
-## Page, Toolbar, Table Và Form Layout
+## Page, Toolbar, Table And Form Layout
 
-- Trang trong `app/(main)` dùng cardless workspace theo padding layout cha; không bọc toàn page bằng main `<Card>` chỉ để lặp breadcrumb title.
-- Breadcrumb trong app header là page identity chính cho trang đơn giản; nếu label lệch, sửa breadcrumb mapping thay vì thêm heading trùng.
-- Chỉ dùng `<Card>` cho inner surface có ranh giới thật như form section, detail panel, dashboard tile, access-denied/error panel hoặc repeated item.
-- Trang list render trực tiếp shared toolbar, `AppListTable` và pagination surface; không thêm main Card/Header/Title/Description/Separator bao ngoài.
-- `AppListToolbar` không sở hữu margin ngoài phía dưới; khoảng cách toolbar/search tới bảng thuộc về `AppListTable` qua `mt-4`.
-- Toolbar responsive dùng `flex-col sm:flex-row sm:justify-between`; leading là action chính/search, trailing là view controls.
-- Primary toolbar controls dùng size/chrome mặc định shadcn; không tự thêm height/radius/padding hoặc `size="sm"` chỉ để chỉnh density.
-- Table list phải dùng shared table surface cho shell, header và empty state. Nội dung dài không được làm nở ngang desktop; cột text dài phải có strategy rõ như `min-w-0`, `truncate`, `line-clamp-*`, `break-words` hoặc `whitespace-normal`.
-- `TableCell` mặc định `whitespace-nowrap`; cell long-form/multiline override cục bộ bằng `whitespace-normal align-top`, không sửa wrapper table core khi chưa có proposal.
-- Row list/table boolean toggle dùng capsule trạng thái compact có label, switch, `aria-label`, disabled/pending ổn định và skeleton mirror đúng shape.
-- Create/update dùng focused form shell ngoài `components/ui`: `rounded-xl`, border, `bg-card`, header gọn, body fields, footer action zone. Không render form trần, không dùng nested Card chỉ để lấy border/radius.
-- Form body dùng `FieldGroup`, `FieldSet` và `gap-*`. Footer tách khỏi body bằng border/subtle background, chứa primary và secondary action.
-- Width form có chủ đích: đơn giản `max-w-xl`, CRUD phổ biến `max-w-2xl`, form dày/editor/prompt/API key/model picker `max-w-3xl`.
-- Switch trong create/update/detail dùng field compact; rule này không áp cho row list/table capsule, toolbar/workbench toggle, dialog permission matrix hoặc route row switch.
+- Pages in `app/(main)` use the cardless workspace from the parent padding layout; do not wrap the whole page in a main `<Card>` just to repeat breadcrumb title.
+- Breadcrumb in the app header is the primary page identity for simple pages; if the label is wrong, fix breadcrumb mapping instead of adding a duplicate heading.
+- Use `<Card>` only for inner surfaces with real boundaries such as form sections, detail panels, dashboard tiles, access-denied/error panels, or repeated items.
+- List pages render shared toolbar, `AppListTable`, and pagination surface directly; do not add an outer main Card/Header/Title/Description/Separator.
+- `AppListToolbar` does not own bottom margin; toolbar/search-to-table spacing belongs to `AppListTable` via `mt-4`.
+- Toolbar responsiveness uses `flex-col sm:flex-row sm:justify-between`; leading is primary action/search, trailing is view controls.
+- Primary toolbar controls use default shadcn size/chrome; do not add custom height/radius/padding or `size="sm"` only to change density.
+- Table lists must use the shared table surface for shell, header, and empty state. Long content must not widen desktop layouts; long text columns need a clear strategy such as `min-w-0`, `truncate`, `line-clamp-*`, `break-words`, or `whitespace-normal`.
+- `TableCell` defaults to `whitespace-nowrap`; long-form/multiline cells override locally with `whitespace-normal align-top`. Do not change the core table wrapper without a proposal.
+- Boolean toggles in list/table rows use a compact status capsule with label, switch, `aria-label`, stable disabled/pending behavior, and skeletons that mirror the shape.
+- Create/update forms use a focused form shell outside `components/ui`: `rounded-xl`, border, `bg-card`, compact header, body fields, and footer action zone. Do not render bare forms or nested Cards only to get border/radius.
+- Form body uses `FieldGroup`, `FieldSet`, and `gap-*`. Footer is separated from the body by border/subtle background and contains primary and secondary actions.
+- Form width should be intentional: simple forms `max-w-xl`, common CRUD `max-w-2xl`, dense/editor/prompt/API key/model picker forms `max-w-3xl`.
+- Switches in create/update/detail use compact field treatment; this rule does not apply to row list/table capsules, toolbar/workbench toggles, dialog permission matrices, or route row switches.
 
 ## Quick Detail Overlay
 
-- Quick detail trên analytical workspace như Graph View, Market Charts hoặc workbench dữ liệu dày phải là local overlay do workspace sở hữu bằng state cục bộ.
-- Mở/đóng quick detail không được đổi URL hoặc dùng `router.back()`, `router.push()` hay `router.replace()` chỉ để quản lý drawer state.
-- Canonical detail routes như `/events/{id}` và `/news-articles/{id}` vẫn là full detail page mặc định cho normal link, reload, copied URL, direct navigation và list/detail CRUD.
-- Local quick detail drawer phải có loading, error/access-denied state trong overlay, nội dung focused không embed full page shell, và action rõ để mở canonical full detail page.
-- Nếu muốn route interception cho quick detail, cần proposal riêng nêu rõ scope route, affected links, Back/Forward behavior, cách tránh reload workspace phía sau và kế hoạch dọn source; không thêm `@quickDetail` global dưới `(main)` như default pattern.
+- Quick detail on analytical workspaces such as Graph View, Market Charts, or dense data workbenches must be a local overlay owned by the workspace through local state.
+- Opening/closing quick detail must not change the URL or use `router.back()`, `router.push()`, or `router.replace()` just to manage drawer state.
+- Canonical detail routes such as `/events/{id}` and `/news-articles/{id}` remain full detail pages by default for normal links, reloads, copied URLs, direct navigation, and list/detail CRUD.
+- Local quick detail drawers must include loading, error/access-denied states inside the overlay, focused content that does not embed the full page shell, and a clear action to open the canonical full detail page.
+- If route interception is desired for quick detail, it needs a separate proposal covering route scope, affected links, Back/Forward behavior, how to avoid reloading the workspace behind it, and source cleanup plan; do not add global `@quickDetail` under `(main)` as the default pattern.
 
 ## Hydration Mismatch
 
-- Khi xử lý trường hợp này, đọc skill `.codex/skills/hydration-mismatch`.
+- When handling this case, read `.codex/skills/hydration-mismatch`.
 
-## Content, Language Và Accessibility
+## Content, Language And Accessibility
 
-- Mỗi màn hình chỉ hiển thị text giúp user ra quyết định hoặc hoàn thành tác vụ; không thêm mô tả lặp breadcrumb/control/metric.
-- Tránh badge trang trí, page identity body heading, hero copy, `CardDescription`, panel placeholder hoặc implementation-detail copy nếu không tạo giá trị quyết định.
-- Màn hình dữ liệu dày ưu tiên controls và dữ liệu chính; copy dài, roadmap/future feature, legal/vendor note chuyển thành tooltip/help text nhỏ/footer legal/docs riêng.
-- Attribution vendor/license không được xóa im lặng; nếu bỏ khỏi bề mặt chính, thay bằng notice/link ở vị trí user truy cập được.
-- Khi thay đổi UI có keyboard/focus/screen reader risk, đọc skill `.codex/skills/accessibility`.
+- Each screen should show only text that helps users make decisions or complete tasks; do not add copy that repeats breadcrumb/control/metric meaning.
+- Avoid decorative badges, page identity body headings, hero copy, `CardDescription`, panel placeholders, or implementation-detail copy when it does not add decision value.
+- Dense data screens prioritize controls and primary data; long copy, roadmap/future feature notes, and legal/vendor notes should move to tooltips, small help text, footer legal areas, or docs.
+- Vendor/license attribution must not be silently removed; if it leaves the main surface, replace it with a notice/link in a user-accessible location.
+- When a UI change has keyboard/focus/screen reader risk, read `.codex/skills/accessibility`.
 
 ## Sidebar
 
-- Sidebar active item thật dùng `sidebar-primary` và `sidebar-primary-foreground` như neutral selected surface; không mang cảm giác CTA/inverse button.
-- Hover dùng `sidebar-accent`; focus-visible giữ `sidebar-ring`; focus là accessibility state, không trộn với selected/current state.
-- Parent đang mở không dùng background state; expanded chỉ cần chevron rotate.
-- Active item và parent có child active không tự tăng font weight chỉ vì state.
-- Không thêm custom active color token, không dùng global `accent`, không silently đổi `--sidebar-*` để sửa issue cục bộ.
-- Density xử lý ở `AppSidebar`; child list giữ left indent rõ, mở rộng hợp lý và dùng `py-1`.
+- Real active sidebar items use `sidebar-primary` and `sidebar-primary-foreground` as a neutral selected surface; they should not feel like CTA/inverse buttons.
+- Hover uses `sidebar-accent`; focus-visible keeps `sidebar-ring`; focus is an accessibility state and must not be mixed with selected/current state.
+- An open parent does not use background state; expanded state only needs chevron rotation.
+- Active items and parents with active children do not increase font weight solely because of state.
+- Do not add custom active color tokens, use global `accent`, or silently change `--sidebar-*` to fix a local issue.
+- Density is handled in `AppSidebar`; child lists keep clear left indent, expand reasonably, and use `py-1`.
 
-## Validation Và Typing
+## Validation And Typing
 
-- Dùng Zod v4 trở lên cho schema validation.
-- Nếu `zodResolver` có lỗi type tạm thời như `_zod.version`, chỉ dùng `as any` như workaround hẹp ngay tại ranh giới resolver.
-- Đánh dấu `any` là review finding nếu không phải boundary workaround có lý do rõ.
+- Use Zod v4 or later for schema validation.
+- If `zodResolver` has a temporary type issue such as `_zod.version`, use `as any` only as a narrow workaround at the resolver boundary.
+- Flag `any` as a review finding unless it is a justified narrow boundary workaround.
 
-## Kỳ Vọng Khi Review
+## Review Expectations
 
-- Review theo các rule trong file này và skill liên quan.
-- Ưu tiên finding theo drift category: shadcn chrome drift, toolbar/table spacing drift, main-card shell drift, form-shell drift, table surface drift, skeleton mismatch, URL state/search mismatch, API contract hierarchy drift, accessibility regression, UI copy noise, non-Vietnamese UI copy, unsafe destructive action, unchecked `any`.
-- Với mỗi finding, chỉ ra file/line, rủi ro hành vi hoặc UX, và sửa tối thiểu nên làm.
-- Nếu không có finding, nói rõ không tìm thấy issue và nêu residual risk hoặc checks chưa chạy.
+- Review according to the rules in this file and related skills.
+- Prioritize findings by drift category: shadcn chrome drift, toolbar/table spacing drift, main-card shell drift, form-shell drift, table surface drift, skeleton mismatch, URL state/search mismatch, API contract hierarchy drift, accessibility regression, UI copy noise, non-Vietnamese UI copy, unsafe destructive action, unchecked `any`.
+- For each finding, identify file/line, behavioral or UX risk, and the minimal recommended fix.
+- If there are no findings, say that clearly and mention residual risk or checks not run.
 
-## Checklist Hoàn Thành Feature
+## Feature Completion Checklist
 
-Trước khi đánh dấu một feature là xong:
+Before marking a feature done:
 
-- [ ] Suspense/Skeleton mirror bố cục thật đủ gần để tránh layout shift.
-- [ ] Có `error.tsx` khi feature có route/page đáng kể.
-- [ ] Search/list/pagination tuân thủ URL state và composition policy.
-- [ ] Bảng list dùng shared table surface cho shell, header, empty state và width strategy.
-- [ ] Create/update dùng focused form shell với header, body, footer action zone và width phù hợp.
-- [ ] Submit/save/delete/cancel có pending, disabled, destructive confirmation và reset/redirect đúng policy.
-- [ ] Agent-owned verification đã chạy hoặc được báo rõ lý do chưa chạy: lint, typecheck, OpenSpec validation, static search hoặc deterministic review.
+- [ ] Suspense/Skeleton mirrors the real layout closely enough to avoid layout shift.
+- [ ] `error.tsx` exists when the feature has a meaningful route/page.
+- [ ] Search/list/pagination follow URL state and composition policy.
+- [ ] List table uses the shared table surface for shell, header, empty state, and width strategy.
+- [ ] Create/update uses a focused form shell with header, body, footer action zone, and appropriate width.
+- [ ] Submit/save/delete/cancel include pending state, disabled state, destructive confirmation, and correct reset/redirect behavior.
+- [ ] Agent-owned verification has run or the reason it could not run is reported: lint, typecheck, OpenSpec validation, static search, or deterministic review.
