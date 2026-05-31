@@ -66,3 +66,35 @@ The system SHALL document shadcn preset conformance in `AGENTS.md` so future imp
 - **THEN** visual override drift on shadcn primitives is treated as a review finding
 - **AND** layout-only classes remain allowed when they do not change default component chrome
 
+### Requirement: Graph view viewport controls use shadcn grouping
+The system SHALL compose Graph View viewport controls with installed shadcn wrappers instead of custom recreations of grouped button chrome.
+
+#### Scenario: Graph view renders zoom and recenter controls
+- **WHEN** Graph View renders zoom out, recenter, and zoom in controls
+- **THEN** the controls SHALL use `ButtonGroup` from `@/components/ui/button-group`
+- **AND** each action SHALL use `Button` from `@/components/ui/button`
+- **AND** feature code SHALL NOT edit `components/ui/button.tsx` or `components/ui/button-group.tsx` for this local Graph View polish
+
+#### Scenario: Graph view needs local placement
+- **WHEN** the grouped controls need canvas placement
+- **THEN** Graph View MAY use local layout classes around the shadcn group
+- **AND** those classes SHALL place the control group without recreating button radius, separator, border, or background behavior owned by the shadcn wrappers
+
+### Requirement: Graph view local chrome respects the shadcn Nova system
+The system SHALL allow Graph View to use graph-specific local visual treatments while preserving shadcn/radix-nova primitive chrome and global theme token stability.
+
+#### Scenario: Graph view uses a specialized canvas surface
+- **WHEN** Graph View renders its dark analytical canvas
+- **THEN** the canvas MAY use local feature styling for graph atmosphere, node colors, edge colors, and graph-local HUD treatments
+- **AND** the implementation SHALL NOT change global theme tokens, sidebar tokens, chart tokens, or `components/ui/*` wrapper chrome to achieve the Graph View look
+
+#### Scenario: Graph view composes shadcn controls
+- **WHEN** Graph View renders buttons, tooltips, badges, popovers, dialogs, sheets, skeletons, or comparable shadcn-backed UI
+- **THEN** feature code SHALL compose the installed shadcn wrappers from `@/components/ui/`
+- **AND** icon-only controls SHALL use existing shadcn variants or sizes before adding hard-coded height, radius, border, shadow, or color overrides
+
+#### Scenario: Graph-specific color is local and semantic
+- **WHEN** Graph View needs category colors for event, asset, theme, article, narrative, or relationship kinds
+- **THEN** those colors SHALL remain local to Graph View visuals
+- **AND** they SHALL NOT redefine app-wide semantic tokens such as primary, accent, sidebar, border, foreground, or background
+

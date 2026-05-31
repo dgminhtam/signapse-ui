@@ -14,7 +14,8 @@ The graph view SHALL render default node labels through a priority policy so den
 
 #### Scenario: Full label reveal
 - **WHEN** the user hovers, selects, drags, or locally focuses a node
-- **THEN** that node SHALL reveal its full title with visual priority over neighboring default labels
+- **THEN** that node SHALL reveal its full title through its in-canvas label with visual priority over neighboring default labels
+- **AND** the graph SHALL NOT use a separate node tooltip or hover card to reveal that title
 - **AND** unrelated nodes SHALL remain visible enough to preserve graph context
 
 ### Requirement: Graph view applies minimum node spacing after layout

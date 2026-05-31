@@ -51,6 +51,12 @@ The system SHALL prepend older loaded candles without resetting the visible char
 - **THEN** the system does not replace the existing chart with the initial loading skeleton
 - **AND** the system does not rebuild the chart instance solely because older candles were prepended
 
+#### Scenario: Ignore invalid older candle items
+- **WHEN** an older candle response or local lazy-merge collection includes a null, undefined, malformed, or invalid-time candle item
+- **THEN** the system omits that item before timestamp de-duplication or prepend
+- **AND** valid older candles still merge into the active chart data stream
+- **AND** the chart does not crash with a runtime `.time` read error
+
 ### Requirement: Older history exhaustion
 The system SHALL stop requesting older candle windows when no older data remains available from the backend response stream.
 
@@ -71,8 +77,8 @@ The system SHALL stop requesting older candle windows when no older data remains
 The system SHALL keep annotation markers and controls aligned with lazily loaded candle history when the annotation layer is enabled.
 
 #### Scenario: Request annotations for older windows
-- **WHEN** the annotation layer is enabled and the system requests older candles
-- **THEN** the older candle request includes `includeAnnotations=true`
+- **WHEN** the system requests older candles for the active chart
+- **THEN** the older candle request uses the same default `includeAnnotations=true` contract as the latest candle request
 
 #### Scenario: Merge older annotations
 - **WHEN** an older candle response includes `annotations[]`
@@ -80,13 +86,13 @@ The system SHALL keep annotation markers and controls aligned with lazily loaded
 - **AND** duplicate annotations do not render twice
 
 #### Scenario: Recompute marker placement
-- **WHEN** older candles or annotations are merged successfully
+- **WHEN** older candles or annotations are merged successfully and the annotation layer is enabled
 - **THEN** the system recomputes annotation marker placement against the expanded loaded candle range
 
 #### Scenario: Keep annotation layer disabled
-- **WHEN** the annotation layer is disabled and the system requests older candles
-- **THEN** the older candle request includes `includeAnnotations=false`
-- **AND** the system does not show annotation markers, annotation controls, or annotation empty-state copy for disabled annotations
+- **WHEN** the annotation layer is disabled and older candle responses include `annotations[]`
+- **THEN** the system keeps annotation markers, annotation controls, and annotation empty-state copy hidden
+- **AND** the system does not treat hidden marker visibility as a backend payload opt-out
 
 ### Requirement: Lazy loading feedback
 The system SHALL provide non-disruptive feedback for lazy historical loading states.

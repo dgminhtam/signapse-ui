@@ -4,7 +4,12 @@
 TBD - created by archiving change add-market-chart-annotation-markers. Update Purpose after archive.
 ## Requirements
 ### Requirement: Annotation layer control
-The system SHALL let users enable or disable market chart annotation markers from the market chart workbench.
+The system SHALL enable market chart annotation markers by default and let users disable or re-enable them from the market chart workbench.
+
+#### Scenario: Annotation layer defaults to enabled
+- **WHEN** a user opens the market chart workbench for a selected watchlist asset and timeframe
+- **THEN** the annotation layer is enabled by default
+- **AND** the system requests candle data from `GET /market-charts/candles` with `includeAnnotations=true`
 
 #### Scenario: Enable annotation layer
 - **WHEN** a user enables the annotation layer for a selected watchlist asset and timeframe
@@ -35,6 +40,12 @@ The system SHALL render backend `annotations[]` as visual markers on the candles
 - **WHEN** an annotation has an invalid time or cannot be placed in the loaded chart range
 - **THEN** the system does not crash
 - **AND** the system omits that annotation from chart markers
+
+#### Scenario: Ignore malformed annotation items
+- **WHEN** the annotation collection contains a null, undefined, or malformed annotation item
+- **THEN** the system omits that item before reading annotation `time`
+- **AND** valid annotations continue to group and render as chart markers
+- **AND** the market chart does not crash with a runtime `.time` read error
 
 #### Scenario: Avoid long chart labels
 - **WHEN** the system renders annotation markers
@@ -98,4 +109,39 @@ The system SHALL handle annotation loading and empty states without adding redun
 #### Scenario: Annotation layer disabled
 - **WHEN** the annotation layer is disabled
 - **THEN** the system does not show annotation empty-state copy as if data were missing
+
+### Requirement: Annotation color semantics are shared
+The system SHALL use one annotation color mapping for chart markers, popup marker affordances, and marker legends.
+
+#### Scenario: Positive annotation is shown
+- **WHEN** an annotation represents a positive or bullish market reaction
+- **THEN** the chart marker, popup dot or pulse, and legend item use the same positive color treatment
+
+#### Scenario: Negative annotation is shown
+- **WHEN** an annotation represents a negative or bearish market reaction
+- **THEN** the chart marker, popup dot or pulse, and legend item use the same negative color treatment
+
+#### Scenario: Neutral annotation is shown
+- **WHEN** an annotation represents a neutral market reaction
+- **THEN** the chart marker, popup dot or pulse, and legend item use the same neutral color treatment
+
+#### Scenario: Mixed annotation is shown
+- **WHEN** an annotation represents a mixed market reaction
+- **THEN** the chart marker, popup dot or pulse, and legend item use the same mixed color treatment
+
+### Requirement: Annotation legend
+The system SHALL provide a compact legend for annotation marker colors below the chart canvas and above the chart footer when marker colors are visible.
+
+#### Scenario: Annotation layer has visible markers
+- **WHEN** the annotation layer is enabled and the chart has visible annotation markers
+- **THEN** the workbench displays a compact legend explaining positive, negative, neutral, and mixed marker colors
+
+#### Scenario: Annotation layer is disabled
+- **WHEN** the annotation layer is disabled
+- **THEN** the workbench does not display annotation legend copy
+
+#### Scenario: Annotation layer has no events
+- **WHEN** the annotation layer is enabled but no annotations are available in the current loaded range
+- **THEN** the workbench keeps the existing concise empty annotation footer state
+- **AND** the workbench does not display an unnecessary color legend
 

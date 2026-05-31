@@ -1,8 +1,6 @@
 ## Purpose
 Define workspace-scoped watchlist management using the backend-supported tracked-asset API and safe synchronization behavior.
-
 ## Requirements
-
 ### Requirement: Active workspace watchlist management
 The system SHALL let authorized users manage a single tracked-asset watchlist for the active workspace using the existing backend watchlist API.
 
@@ -15,11 +13,21 @@ The system SHALL let authorized users manage a single tracked-asset watchlist fo
 - **THEN** the system shows an empty or blocked state explaining that a workspace must be selected first
 
 ### Requirement: Watchlist editing uses asset-level add and remove operations
-The system SHALL add and remove tracked assets by comparing the current editor selection with the initially loaded watchlist state and calling the existing add and delete watchlist actions per asset.
+The system SHALL add tracked assets through the backend bulk watchlist asset API and remove tracked assets through the existing asset-level delete API by comparing the current editor selection with the initially loaded watchlist state.
 
 #### Scenario: Add tracked assets
 - **WHEN** a user saves the editor after selecting one or more assets that were not previously tracked
-- **THEN** the system calls the existing add-to-watchlist action for each newly selected asset and refreshes the UI after a successful save
+- **THEN** the system MUST call `POST /watchlists/assets` with the newly selected asset ids
+- **AND** the system MUST refresh the UI after a successful save
+
+#### Scenario: Bulk add respects backend batch size
+- **WHEN** a user saves more than 100 newly selected assets
+- **THEN** the system MUST split add requests into batches of at most 100 asset ids
+- **AND** each batch MUST use `POST /watchlists/assets`
+
+#### Scenario: Existing asset ids are idempotent success
+- **WHEN** the bulk add response includes `existingAssetIds`
+- **THEN** the system MUST treat those ids as successfully synchronized rather than as failed operations
 
 #### Scenario: Remove tracked assets
 - **WHEN** a user saves the editor after deselecting one or more assets that were previously tracked
@@ -50,3 +58,4 @@ The system SHALL treat any failed add or remove operation during save as a synch
 #### Scenario: Save pending feedback
 - **WHEN** the user submits watchlist changes
 - **THEN** the save action shows pending feedback and prevents duplicate submission until the synchronization attempt finishes
+
