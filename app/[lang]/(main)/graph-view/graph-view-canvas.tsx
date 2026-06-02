@@ -84,21 +84,16 @@ type GraphCanvasPalette = {
   activeNodeHaloColor: string
   edgeHighlightLineWidthBoost: number
   edgeHighlightOpacity: number
-  edgeInactiveOpacity: number
   labelBackground: boolean
   labelFill: string
   labelHoverFill: string
   labelHoverMaxWidth: number
   labelHoverStroke: string
-  labelInactiveOpacity: number
   labelStroke: string
   labelStrokeOpacity: number
   labelStrokeWidth: number
   nodeHighlightOpacity: number
-  nodeInactiveOpacity: number
   selectionEdgeOpacity: number
-  selectionInactiveEdgeOpacity: number
-  selectionInactiveNodeOpacity: number
   selectionNodeHaloColor: string
   selectionRelatedNodeOpacity: number
   nodeStroke: string
@@ -119,6 +114,9 @@ const GRAPH_ZOOM_ANIMATION = {
 } satisfies ViewportAnimationEffectTiming
 const GRAPH_ZOOM_STEP_RATIO = 1.18
 const GRAPH_ZOOM_RANGE: [number, number] = [0.45, 2.2]
+const GRAPH_DENSE_NODE_THRESHOLD = 80
+const GRAPH_DENSE_EDGE_THRESHOLD = 140
+const GRAPH_DENSE_HIGH_CONNECTIVITY_EDGE_COUNT = 7
 const GRAPH_INSPECTOR_DATE_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
   year: "numeric",
   month: "2-digit",
@@ -147,12 +145,18 @@ const GRAPH_HUD_EDGE_KIND_ORDER = [
 const GRAPH_SELECTION_STATE_NAMES = [
   "selected",
   "selected-related",
-  "selected-inactive",
 ]
 const GRAPH_SELECTION_EDGE_STATE_NAMES = [
   "selected-related",
-  "selected-inactive",
 ]
+const GRAPH_HOVER_NODE_STATE_NAMES = ["active", "highlight"]
+const GRAPH_HOVER_EDGE_STATE_NAMES = ["highlight"]
+
+type GraphFocusStateContext = {
+  edgeIds: Set<string>
+  focusNodeId: string
+  nodeIds: Set<string>
+}
 
 function createGraphCanvasPalette(mode: GraphThemeMode): GraphCanvasPalette {
   if (mode === "dark") {
@@ -160,21 +164,16 @@ function createGraphCanvasPalette(mode: GraphThemeMode): GraphCanvasPalette {
       activeNodeHaloColor: "rgba(248, 250, 252, 0.65)",
       edgeHighlightLineWidthBoost: 0.95,
       edgeHighlightOpacity: 0.84,
-      edgeInactiveOpacity: 0.34,
       labelBackground: false,
       labelFill: "#f8fafc",
       labelHoverFill: "#ffffff",
       labelHoverMaxWidth: 300,
       labelHoverStroke: "rgba(2, 6, 23, 0.96)",
-      labelInactiveOpacity: 0.72,
       labelStroke: "rgba(2, 6, 23, 0.92)",
       labelStrokeOpacity: 0.92,
       labelStrokeWidth: 2.8,
       nodeHighlightOpacity: 1,
-      nodeInactiveOpacity: 0.66,
       selectionEdgeOpacity: 0.9,
-      selectionInactiveEdgeOpacity: 0.2,
-      selectionInactiveNodeOpacity: 0.38,
       selectionNodeHaloColor: "rgba(248, 250, 252, 0.78)",
       selectionRelatedNodeOpacity: 0.82,
       nodeStroke: "rgba(241, 245, 249, 0.9)",
@@ -185,21 +184,16 @@ function createGraphCanvasPalette(mode: GraphThemeMode): GraphCanvasPalette {
     activeNodeHaloColor: "rgba(15, 23, 42, 0.36)",
     edgeHighlightLineWidthBoost: 0.8,
     edgeHighlightOpacity: 0.78,
-    edgeInactiveOpacity: 0.24,
     labelBackground: false,
     labelFill: "#172033",
     labelHoverFill: "#020617",
     labelHoverMaxWidth: 300,
     labelHoverStroke: "rgba(255, 255, 255, 0.98)",
-    labelInactiveOpacity: 0.7,
     labelStroke: "rgba(248, 250, 252, 0.96)",
     labelStrokeOpacity: 0.96,
     labelStrokeWidth: 2.3,
     nodeHighlightOpacity: 1,
-    nodeInactiveOpacity: 0.61,
     selectionEdgeOpacity: 0.82,
-    selectionInactiveEdgeOpacity: 0.16,
-    selectionInactiveNodeOpacity: 0.28,
     selectionNodeHaloColor: "rgba(15, 23, 42, 0.44)",
     selectionRelatedNodeOpacity: 0.72,
     nodeStroke: "rgba(255, 255, 255, 0.88)",
@@ -737,12 +731,64 @@ function getRelationScore(relationType: string, weight?: number | null) {
   return (baseScoreByRelation[relationType] ?? 42) + (weight ?? 0) * 20
 }
 
+function isDenseGraphModel(graphModel: GraphModel) {
+  return (
+    graphModel.nodes.length >= GRAPH_DENSE_NODE_THRESHOLD ||
+    graphModel.edges.length >= GRAPH_DENSE_EDGE_THRESHOLD
+  )
+}
+
+function isPriorityLabelNode({
+  edgeCount,
+  isDenseGraph,
+  nodeKind,
+}: {
+  edgeCount: number
+  isDenseGraph: boolean
+  nodeKind: NodeData["kind"]
+}) {
+  if (nodeKind === "asset" || nodeKind === "theme") {
+    return true
+  }
+
+  if (!isDenseGraph) {
+    return (
+      (nodeKind === "narrative" && edgeCount >= 2) ||
+      (nodeKind === "event" && edgeCount >= 4) ||
+      edgeCount >= 6
+    )
+  }
+
+  return (
+    nodeKind === "narrative" ||
+    edgeCount >= GRAPH_DENSE_HIGH_CONNECTIVITY_EDGE_COUNT
+  )
+}
+
+function createGraphFocusStateContext(
+  graphModel: GraphModel,
+  focusNodeId: string
+): GraphFocusStateContext {
+  return {
+    edgeIds: new Set(graphModel.relatedEdgesByNodeId.get(focusNodeId) ?? []),
+    focusNodeId,
+    nodeIds: new Set(
+      graphModel.relatedNodesByNodeId.get(focusNodeId) ?? [focusNodeId]
+    ),
+  }
+}
+
+function addSetValues(target: Set<string>, source?: Set<string> | null) {
+  source?.forEach((value) => target.add(value))
+}
+
 function inferClusterState(
   graphModel: GraphModel,
   nodeVisuals: LocalizedNodeVisuals
 ): ClusterState {
   const clusterByNodeId = new Map<string, string>()
   const clusterLabelByKey = new Map<string, string>()
+  const edgesByNodeId = new Map<string, typeof graphModel.edges>()
   const eventClusterCandidates = new Map<
     string,
     {
@@ -751,6 +797,15 @@ function inferClusterState(
       score: number
     }
   >()
+
+  graphModel.nodes.forEach((node) => {
+    edgesByNodeId.set(node.id, [])
+  })
+
+  graphModel.edges.forEach((edge) => {
+    edgesByNodeId.get(edge.sourceNodeId)?.push(edge)
+    edgesByNodeId.get(edge.targetNodeId)?.push(edge)
+  })
 
   graphModel.nodes.forEach((node) => {
     if (node.kind !== "asset" && node.kind !== "theme") {
@@ -820,11 +875,7 @@ function inferClusterState(
       return
     }
 
-    const eventEdge = graphModel.edges.find((edge) => {
-      if (edge.sourceNodeId !== node.id && edge.targetNodeId !== node.id) {
-        return false
-      }
-
+    const eventEdge = edgesByNodeId.get(node.id)?.find((edge) => {
       const otherNodeId =
         edge.sourceNodeId === node.id ? edge.targetNodeId : edge.sourceNodeId
 
@@ -848,11 +899,7 @@ function inferClusterState(
       return
     }
 
-    const anchorEdge = graphModel.edges.find((edge) => {
-      if (edge.sourceNodeId !== node.id && edge.targetNodeId !== node.id) {
-        return false
-      }
-
+    const anchorEdge = edgesByNodeId.get(node.id)?.find((edge) => {
       const otherNodeId =
         edge.sourceNodeId === node.id ? edge.targetNodeId : edge.sourceNodeId
       const otherNode = graphModel.nodeMap.get(otherNodeId)
@@ -903,13 +950,11 @@ function shouldShowLabel(
     return true
   }
 
-  return (
-    nodeKind === "asset" ||
-    nodeKind === "theme" ||
-    (nodeKind === "narrative" && edgeCount >= 2) ||
-    (nodeKind === "event" && edgeCount >= 4) ||
-    edgeCount >= 6
-  )
+  return isPriorityLabelNode({
+    edgeCount,
+    isDenseGraph: isDenseGraphModel(graphModel),
+    nodeKind,
+  })
 }
 
 function createG6GraphData(
@@ -919,6 +964,7 @@ function createG6GraphData(
   edgeVisuals: LocalizedEdgeVisuals,
   dictionary: LocalizationContext["dictionary"]
 ): GraphData {
+  const isDenseGraph = isDenseGraphModel(graphModel)
   const clusterState = inferClusterState(graphModel, nodeVisuals)
   const nodes: NodeData[] = graphModel.nodes.map((node, index) => {
     const visual = nodeVisuals[node.kind]
@@ -931,6 +977,16 @@ function createG6GraphData(
       graphModel.nodes.length
     )
     const showLabel = shouldShowLabel(graphModel, node.id, node.kind)
+    const defaultShadowBlur = isDenseGraph
+      ? node.kind === "asset" || node.kind === "theme"
+        ? 2
+        : 0
+      : node.kind === "asset" || node.kind === "theme"
+        ? 8
+        : 4
+    const labelLineWidth = isDenseGraph
+      ? Math.max(graphPalette.labelStrokeWidth - 0.8, 1.2)
+      : graphPalette.labelStrokeWidth
 
     return {
       id: node.id,
@@ -959,14 +1015,16 @@ function createG6GraphData(
         labelOffsetX: 9,
         labelPlacement: "right",
         labelStroke: graphPalette.labelStroke,
-        labelStrokeOpacity: graphPalette.labelStrokeOpacity,
-        labelLineWidth: graphPalette.labelStrokeWidth,
+        labelStrokeOpacity: isDenseGraph
+          ? Math.min(graphPalette.labelStrokeOpacity, 0.72)
+          : graphPalette.labelStrokeOpacity,
+        labelLineWidth,
         labelText: showLabel ? createBoundedLabel(node.label) : "",
         labelTextOverflow: "...",
         labelWordWrap: false,
         lineWidth: 2,
         opacity: 0.96,
-        shadowBlur: node.kind === "asset" || node.kind === "theme" ? 8 : 4,
+        shadowBlur: defaultShadowBlur,
         shadowColor: `${visual.color}40`,
         size,
         stroke: graphPalette.nodeStroke,
@@ -1074,10 +1132,10 @@ function clampPointToAnalysisBounds(
   ]
 }
 
-function createForceLayout(width: number, height: number) {
+function createForceLayout(width: number, height: number, isDenseGraph: boolean) {
   return {
-    alpha: 0.92,
-    alphaDecay: 0.038,
+    alpha: isDenseGraph ? 0.78 : 0.92,
+    alphaDecay: isDenseGraph ? 0.055 : 0.038,
     center: {
       strength: 0.12,
       x: width / 2,
@@ -1091,14 +1149,14 @@ function createForceLayout(width: number, height: number) {
     clusterNodeStrength: -12,
     clustering: true,
     collide: {
-      iterations: 3,
+      iterations: isDenseGraph ? 2 : 3,
       radius: (node) => getElementNumberValue(node, "nodeRadius", 24),
       strength: 0.88,
     },
     link: {
       distance: (edge) =>
         getElementBooleanValue(edge, "sameCluster") ? 96 : 210,
-      iterations: 2,
+      iterations: isDenseGraph ? 1 : 2,
       strength: (edge) =>
         getElementBooleanValue(edge, "sameCluster") ? 0.72 : 0.2,
     },
@@ -1114,7 +1172,7 @@ function createForceLayout(width: number, height: number) {
     },
     preventOverlap: true,
     type: "d3-force",
-    velocityDecay: 0.42,
+    velocityDecay: isDenseGraph ? 0.5 : 0.42,
     x: {
       strength: 0.045,
       x: width / 2,
@@ -1173,11 +1231,6 @@ function createNodeStateStyles(graphPalette: GraphCanvasPalette) {
       opacity: graphPalette.nodeHighlightOpacity,
       shadowBlur: 12,
     }),
-    inactive: {
-      labelOpacity: graphPalette.labelInactiveOpacity,
-      opacity: graphPalette.nodeInactiveOpacity,
-      shadowBlur: 0,
-    },
     selected: (node: NodeData) => ({
       ...keepBaseStroke(node),
       ...expandedLabel(node),
@@ -1186,11 +1239,6 @@ function createNodeStateStyles(graphPalette: GraphCanvasPalette) {
       shadowBlur: 26,
       shadowColor: graphPalette.selectionNodeHaloColor,
     }),
-    "selected-inactive": {
-      labelOpacity: graphPalette.labelInactiveOpacity,
-      opacity: graphPalette.selectionInactiveNodeOpacity,
-      shadowBlur: 0,
-    },
     "selected-related": (node: NodeData) => ({
       ...keepBaseStroke(node),
       labelOpacity: 0.88,
@@ -1208,12 +1256,6 @@ function createEdgeStateStyles(graphPalette: GraphCanvasPalette) {
         graphPalette.edgeHighlightLineWidthBoost,
       opacity: graphPalette.edgeHighlightOpacity,
     }),
-    inactive: {
-      opacity: graphPalette.edgeInactiveOpacity,
-    },
-    "selected-inactive": {
-      opacity: graphPalette.selectionInactiveEdgeOpacity,
-    },
     "selected-related": (edge: EdgeData) => ({
       lineWidth:
         getElementNumberValue(edge.style ?? {}, "lineWidth", 1.3) +
@@ -1227,62 +1269,127 @@ function removeGraphElementStates(states: string[], names: readonly string[]) {
   return states.filter((state) => !names.includes(state))
 }
 
-function applySelectedGraphStates(
+function createElementStateUpdate(
   graph: Graph,
-  graphModel: GraphModel,
-  selectedNodeId: string | null
+  elementId: string,
+  statesToRemove: readonly string[],
+  statesToAdd: readonly string[] = []
+) {
+  const nextState = removeGraphElementStates(
+    graph.getElementState(elementId),
+    statesToRemove
+  )
+
+  statesToAdd.forEach((state) => {
+    if (!nextState.includes(state)) {
+      nextState.push(state)
+    }
+  })
+
+  return nextState
+}
+
+function setGraphElementStates(
+  graph: Graph,
+  stateUpdates: Record<string, string[]>
+) {
+  if (graph.destroyed || Object.keys(stateUpdates).length === 0) {
+    return Promise.resolve()
+  }
+
+  return graph.setElementState(stateUpdates, false)
+}
+
+function applyHoverGraphStates(
+  graph: Graph,
+  previousContext: GraphFocusStateContext | null,
+  nextContext: GraphFocusStateContext | null
 ) {
   if (graph.destroyed) {
     return Promise.resolve()
   }
 
-  const relatedNodeIds = selectedNodeId
-    ? (graphModel.relatedNodesByNodeId.get(selectedNodeId) ?? new Set([selectedNodeId]))
-    : new Set<string>()
-  const relatedEdgeIds = selectedNodeId
-    ? (graphModel.relatedEdgesByNodeId.get(selectedNodeId) ?? new Set<string>())
-    : new Set<string>()
+  const nodeIdsToUpdate = new Set<string>()
+  const edgeIdsToUpdate = new Set<string>()
   const stateUpdates: Record<string, string[]> = {}
 
-  graphModel.nodes.forEach((node) => {
-    const nextState = removeGraphElementStates(
-      graph.getElementState(node.id),
-      GRAPH_SELECTION_STATE_NAMES
+  addSetValues(nodeIdsToUpdate, previousContext?.nodeIds)
+  addSetValues(nodeIdsToUpdate, nextContext?.nodeIds)
+  addSetValues(edgeIdsToUpdate, previousContext?.edgeIds)
+  addSetValues(edgeIdsToUpdate, nextContext?.edgeIds)
+
+  nodeIdsToUpdate.forEach((nodeId) => {
+    const statesToAdd =
+      nextContext?.focusNodeId === nodeId
+        ? ["active"]
+        : nextContext?.nodeIds.has(nodeId)
+          ? ["highlight"]
+          : []
+
+    stateUpdates[nodeId] = createElementStateUpdate(
+      graph,
+      nodeId,
+      GRAPH_HOVER_NODE_STATE_NAMES,
+      statesToAdd
     )
-
-    if (selectedNodeId) {
-      if (node.id === selectedNodeId) {
-        nextState.push("selected")
-      } else if (relatedNodeIds.has(node.id)) {
-        nextState.push("selected-related")
-      } else {
-        nextState.push("selected-inactive")
-      }
-    }
-
-    stateUpdates[node.id] = nextState
   })
 
-  graphModel.edges.forEach((edge) => {
-    const nextState = removeGraphElementStates(
-      graph.getElementState(edge.id),
-      GRAPH_SELECTION_EDGE_STATE_NAMES
+  edgeIdsToUpdate.forEach((edgeId) => {
+    stateUpdates[edgeId] = createElementStateUpdate(
+      graph,
+      edgeId,
+      GRAPH_HOVER_EDGE_STATE_NAMES,
+      nextContext?.edgeIds.has(edgeId) ? ["highlight"] : []
     )
-
-    if (selectedNodeId) {
-      nextState.push(
-        relatedEdgeIds.has(edge.id) ? "selected-related" : "selected-inactive"
-      )
-    }
-
-    stateUpdates[edge.id] = nextState
   })
 
-  if (Object.keys(stateUpdates).length === 0) {
+  return setGraphElementStates(graph, stateUpdates)
+}
+
+function applySelectedGraphStates(
+  graph: Graph,
+  previousContext: GraphFocusStateContext | null,
+  nextContext: GraphFocusStateContext | null
+) {
+  if (graph.destroyed) {
     return Promise.resolve()
   }
 
-  return graph.setElementState(stateUpdates, false)
+  const nodeIdsToUpdate = new Set<string>()
+  const edgeIdsToUpdate = new Set<string>()
+  const stateUpdates: Record<string, string[]> = {}
+
+  addSetValues(nodeIdsToUpdate, previousContext?.nodeIds)
+  addSetValues(nodeIdsToUpdate, nextContext?.nodeIds)
+  addSetValues(edgeIdsToUpdate, previousContext?.edgeIds)
+  addSetValues(edgeIdsToUpdate, nextContext?.edgeIds)
+
+  nodeIdsToUpdate.forEach((nodeId) => {
+    const statesToAdd =
+      nextContext?.focusNodeId === nodeId
+        ? ["selected"]
+        : nextContext?.nodeIds.has(nodeId)
+          ? ["selected-related"]
+          : []
+
+    stateUpdates[nodeId] = createElementStateUpdate(
+      graph,
+      nodeId,
+      GRAPH_SELECTION_STATE_NAMES,
+      statesToAdd
+    )
+  })
+
+  edgeIdsToUpdate.forEach((edgeId) => {
+    stateUpdates[edgeId] = createElementStateUpdate(
+      graph,
+      edgeId,
+      GRAPH_SELECTION_EDGE_STATE_NAMES,
+      nextContext?.edgeIds.has(edgeId) ? ["selected-related"] : []
+    )
+  })
+
+  return setGraphElementStates(graph, stateUpdates)
 }
 
 export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
@@ -1293,6 +1400,8 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
   const graphRef = useRef<Graph | null>(null)
   const graphRenderReadyRef = useRef<Graph | null>(null)
   const hasAppliedSelectionStateRef = useRef(false)
+  const previousHoverContextRef = useRef<GraphFocusStateContext | null>(null)
+  const previousSelectionContextRef = useRef<GraphFocusStateContext | null>(null)
   const lastNodeDragAtRef = useRef(0)
   const [quickDetailEntity, setQuickDetailEntity] =
     useState<LocalQuickDetailEntity | null>(null)
@@ -1304,6 +1413,7 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
     () => createGraphCanvasPalette(graphThemeMode),
     [graphThemeMode]
   )
+  const isDenseGraph = isDenseGraphModel(graphModel)
   const nodeVisuals = useMemo(
     () => getGraphViewNodeVisuals(dictionary),
     [dictionary]
@@ -1391,32 +1501,26 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
     ensureBoundedDragElementForceRegistered()
 
     const { height, width } = getContainerSize(container)
+    const shouldAnimateGraph = !isDenseGraph
     let analysisBounds = createGraphAnalysisBounds(width, height)
     let isDisposed = false
     let renderFrameId: number | null = null
     let renderPromise: Promise<void> | null = null
     const graph = new Graph({
       autoFit: {
-        type: 'center',
-        animation: {
-          duration: 1000,
-          easing: 'ease-in-out',
-        },
+        type: "center",
+        animation: shouldAnimateGraph
+          ? {
+              duration: 1000,
+              easing: "ease-in-out",
+            }
+          : false,
       },
-      animation: true,
+      animation: shouldAnimateGraph,
       behaviors: [
         {
           range: GRAPH_CANVAS_PAN_RANGE,
           type: "drag-canvas",
-        },
-        {
-          animation: false,
-          degree: 1,
-          direction: "both",
-          enable: (event: { targetType?: string }) => event.targetType === "node",
-          inactiveState: "inactive",
-          state: "highlight",
-          type: "hover-activate",
         },
         {
           fixed: true,
@@ -1432,7 +1536,7 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
         type: "line",
       },
       height,
-      layout: createForceLayout(width, height),
+      layout: createForceLayout(width, height, isDenseGraph),
       node: {
         state: createNodeStateStyles(graphPalette),
         style: (node) => node.style ?? {},
@@ -1446,14 +1550,27 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
     graphRef.current = graph
     graphRenderReadyRef.current = null
     hasAppliedSelectionStateRef.current = false
+    previousHoverContextRef.current = null
+    previousSelectionContextRef.current = null
 
-    const clearNodeActiveState = (nodeId?: string) => {
-      if (!nodeId || graph.destroyed) {
+    const applyHoverContext = (nodeId: string | null) => {
+      if (graph.destroyed) {
         return
       }
 
-      const nextState = graph.getElementState(nodeId).filter((state) => state !== "active")
-      void graph.setElementState(nodeId, nextState, false)
+      const previousContext = previousHoverContextRef.current
+      const nextContext = nodeId
+        ? createGraphFocusStateContext(graphModel, nodeId)
+        : null
+
+      previousHoverContextRef.current = nextContext
+      void applyHoverGraphStates(graph, previousContext, nextContext).catch(
+        (error) => {
+          if (!graph.destroyed && graphRenderReadyRef.current === graph) {
+            console.error(error)
+          }
+        }
+      )
     }
 
     const handleNodePointerEnter = (event: { target?: { id?: string } }) => {
@@ -1463,19 +1580,27 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
         return
       }
 
-      const nextState = Array.from(
-        new Set([...graph.getElementState(nodeId), "active"])
-      )
-      void graph.setElementState(nodeId, nextState, false)
+      applyHoverContext(nodeId)
     }
 
     const handleNodePointerLeave = (event: { target?: { id?: string } }) => {
-      clearNodeActiveState(event.target?.id)
+      const nodeId = event.target?.id
+
+      if (
+        nodeId &&
+        previousHoverContextRef.current?.focusNodeId !== nodeId
+      ) {
+        return
+      }
+
+      applyHoverContext(null)
     }
 
     const handleNodeDragStart = (event: { target?: { id?: string } }) => {
       lastNodeDragAtRef.current = performance.now()
-      clearNodeActiveState(event.target?.id)
+      if (previousHoverContextRef.current?.focusNodeId === event.target?.id) {
+        applyHoverContext(null)
+      }
     }
 
     const handleNodeDragEnd = () => {
@@ -1548,6 +1673,8 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
 
       if (isCurrentGraph) {
         hasAppliedSelectionStateRef.current = false
+        previousHoverContextRef.current = null
+        previousSelectionContextRef.current = null
       }
 
       if (!graph.destroyed) {
@@ -1603,7 +1730,7 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
 
       destroyGraph()
     }
-  }, [graphData, graphModel.nodeMap, graphPalette])
+  }, [graphData, graphModel, graphPalette, isDenseGraph])
 
   useEffect(() => {
     const graph = graphRef.current
@@ -1617,13 +1744,21 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
     }
 
     hasAppliedSelectionStateRef.current = true
-    void applySelectedGraphStates(graph, graphModel, selectedGraphNodeId).catch(
-      (error) => {
-        if (!graph.destroyed && graphRenderReadyRef.current === graph) {
-          console.error(error)
-        }
+    const nextSelectionContext = selectedGraphNodeId
+      ? createGraphFocusStateContext(graphModel, selectedGraphNodeId)
+      : null
+    const previousSelectionContext = previousSelectionContextRef.current
+
+    previousSelectionContextRef.current = nextSelectionContext
+    void applySelectedGraphStates(
+      graph,
+      previousSelectionContext,
+      nextSelectionContext
+    ).catch((error) => {
+      if (!graph.destroyed && graphRenderReadyRef.current === graph) {
+        console.error(error)
       }
-    )
+    })
   }, [graphModel, renderReadyVersion, selectedGraphNodeId])
 
   return (

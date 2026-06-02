@@ -1,5 +1,10 @@
 import type { LineType, PolygonType } from "klinecharts"
 
+import {
+  resolveMarketChartDrawingColor,
+  type MarketChartDrawingStyle,
+} from "./market-chart-drawing-style"
+
 export type ChartThemeMode = "light" | "dark"
 
 export type MarketChartThemePalette = {
@@ -197,7 +202,7 @@ export function createChartStyles(
 }
 
 export interface CreateDrawingOverlayStylesResult {
-  [key: string]: any
+  [key: string]: unknown
   circle: { borderColor: string; borderSize: number; color: string; style: PolygonType }
   line: { color: string; size: number; style: LineType }
   point: {
@@ -215,18 +220,30 @@ export interface CreateDrawingOverlayStylesResult {
 }
 
 export function createDrawingOverlayStyles(
-  palette: MarketChartThemePalette
+  palette: MarketChartThemePalette,
+  style?: MarketChartDrawingStyle
 ): CreateDrawingOverlayStylesResult {
+  const drawingColor = style
+    ? resolveMarketChartDrawingColor(style.color)
+    : palette.drawing
+  const drawingFillColor = `${drawingColor}33`
+  const drawingSize = style?.size ?? 1
+
   return {
+    arc: {
+      color: drawingColor,
+      size: drawingSize,
+      style: "solid",
+    },
     circle: {
-      borderColor: palette.drawing,
-      borderSize: 1,
-      color: palette.drawing + "33",
+      borderColor: drawingColor,
+      borderSize: drawingSize,
+      color: drawingFillColor,
       style: "stroke_fill",
     },
     line: {
-      color: palette.drawing,
-      size: 1,
+      color: drawingColor,
+      size: drawingSize,
       style: "solid",
     },
     point: {
@@ -236,20 +253,23 @@ export function createDrawingOverlayStyles(
       activeRadius: 4,
       borderColor: palette.drawingMuted,
       borderSize: 1,
-      color: palette.drawing,
+      color: drawingColor,
       radius: 3,
     },
     rect: {
-      borderColor: palette.drawing,
-      borderSize: 1,
-      color: palette.drawing + "33",
+      borderColor: drawingColor,
+      borderSize: drawingSize,
+      color: drawingFillColor,
       style: "stroke_fill",
     },
     polygon: {
       style: "stroke_fill",
-      color: palette.drawing + "33",
-      borderColor: palette.drawing,
-      borderSize: 1,
+      color: drawingFillColor,
+      borderColor: drawingColor,
+      borderSize: drawingSize,
+    },
+    text: {
+      color: drawingColor,
     },
   }
 }

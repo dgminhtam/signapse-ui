@@ -15,7 +15,9 @@ import {
   type DataLoaderSubscribeBarParams,
   type DeepPartial,
   type KLineData,
+  type Overlay,
   type OverlayCreate,
+  type Point,
   type Styles,
 } from "klinecharts"
 import { useTheme } from "next-themes"
@@ -43,9 +45,19 @@ import {
   createMarketChartDrawingGroupId,
   createMarketChartDrawingMode,
   createMarketChartDrawingOverlay,
+  getMarketChartDrawingMetadataStyle,
+  getMarketChartDrawingMetadataTool,
+  getMarketChartDrawingToolFromOverlayName,
+  mergeMarketChartDrawingMetadata,
   registerMarketChartDrawingOverlays,
+  type MarketChartDrawingMetadata,
   type MarketChartDrawingTool,
 } from "./market-chart-drawing"
+import {
+  DEFAULT_MARKET_CHART_DRAWING_STYLE,
+  mergeMarketChartDrawingStyle,
+  type MarketChartDrawingStyle,
+} from "./market-chart-drawing-style"
 import {
   createChartStyles,
   createDrawingOverlayStyles,
@@ -103,6 +115,15 @@ export interface MarketChartCanvasHandle {
   setDrawingsVisible: (visible: boolean) => boolean
   setDrawingTool: (tool: MarketChartDrawingTool | null) => boolean
   setIndicators: (indicators: MarketChartIndicatorName[]) => boolean
+  updateSelectedDrawingStyle: (
+    patch: Partial<MarketChartDrawingStyle>
+  ) => boolean
+}
+
+export interface MarketChartDrawingSelection {
+  anchor: MarketChartAnnotationMarkerPoint | null
+  id: string
+  style: MarketChartDrawingStyle
 }
 
 interface MarketChartCanvasProps {
@@ -123,7 +144,7 @@ interface MarketChartCanvasProps {
   onAnnotationSelect?: (groupId: string) => void
   onAnnotationClose?: () => void
   renderAnnotationPopup?: (group: MarketChartAnnotationGroup) => React.ReactNode
-  onDrawingSelectionChange?: (hasSelectedDrawing: boolean) => void
+  onDrawingSelectionChange?: (selection: MarketChartDrawingSelection | null) => void
   onDrawingToolComplete?: () => void
   onLoadedDataChange?: (data: MarketChartLoadedData) => void
   onLoadOlderCandles: (
@@ -194,6 +215,90 @@ function getMarkerCoordinate(
   return {
     x: coordinate.x,
     y: coordinate.y,
+  }
+}
+
+function isFiniteCoordinate(
+  coordinate: Partial<MarketChartAnnotationMarkerPoint>
+): coordinate is MarketChartAnnotationMarkerPoint {
+  return (
+    typeof coordinate.x === "number" &&
+    Number.isFinite(coordinate.x) &&
+    typeof coordinate.y === "number" &&
+    Number.isFinite(coordinate.y)
+  )
+}
+
+function hasDrawingPointCoordinate(
+  point: Partial<Point>
+): point is Pick<Point, "timestamp" | "value"> {
+  return (
+    typeof point.timestamp === "number" &&
+    Number.isFinite(point.timestamp) &&
+    typeof point.value === "number" &&
+    Number.isFinite(point.value)
+  )
+}
+
+function getDrawingToolForOverlay(
+  overlay: Overlay<MarketChartDrawingMetadata>
+): MarketChartDrawingTool | null {
+  return getMarketChartDrawingMetadataTool(
+    overlay.extendData,
+    getMarketChartDrawingToolFromOverlayName(overlay.name)
+  )
+}
+
+function getDrawingSelectionAnchor({
+  chart,
+  container,
+  overlay,
+}: {
+  chart: Chart
+  container: HTMLElement
+  overlay: Overlay<MarketChartDrawingMetadata>
+}): MarketChartAnnotationMarkerPoint | null {
+  const overlayPoints = overlay.points.filter(hasDrawingPointCoordinate)
+
+  if (overlayPoints.length === 0) {
+    return null
+  }
+
+  const coordinates = chart.convertToPixel(overlayPoints, {
+    absolute: true,
+    paneId: overlay.paneId || CANDLE_PANE_ID,
+  })
+  const coordinateList = Array.isArray(coordinates) ? coordinates : [coordinates]
+  const finiteCoordinates = coordinateList.filter(isFiniteCoordinate)
+
+  if (finiteCoordinates.length === 0) {
+    return null
+  }
+
+  const xs = finiteCoordinates.map((coordinate) => coordinate.x)
+  const ys = finiteCoordinates.map((coordinate) => coordinate.y)
+  const centerX = (Math.min(...xs) + Math.max(...xs)) / 2
+  const topY = Math.min(...ys)
+
+  return {
+    x: Math.max(96, Math.min(container.clientWidth - 96, centerX)),
+    y: Math.max(44, Math.min(container.clientHeight - 72, topY - 12)),
+  }
+}
+
+function createDrawingSelection({
+  chart,
+  container,
+  overlay,
+}: {
+  chart: Chart
+  container: HTMLElement
+  overlay: Overlay<MarketChartDrawingMetadata>
+}): MarketChartDrawingSelection {
+  return {
+    anchor: getDrawingSelectionAnchor({ chart, container, overlay }),
+    id: overlay.id,
+    style: getMarketChartDrawingMetadataStyle(overlay.extendData),
   }
 }
 
@@ -365,9 +470,48 @@ export const MarketChartCanvas = forwardRef<
 
 
 
+  function getOverlayById(
+    id: string
+  ): Overlay<MarketChartDrawingMetadata> | null {
+    const chart = chartRef.current
+
+    if (!chart) {
+      return null
+    }
+
+    return (
+      (chart.getOverlays({ id })[0] as
+        | Overlay<MarketChartDrawingMetadata>
+        | undefined) ?? null
+    )
+  }
+
+  function emitDrawingSelection(id: string | null) {
+    const chart = chartRef.current
+    const container = containerRef.current
+
+    if (!id || !chart || !container) {
+      selectedDrawingIdRef.current = null
+      onDrawingSelectionChangeRef.current?.(null)
+      return
+    }
+
+    const overlay = getOverlayById(id)
+
+    if (!overlay) {
+      selectedDrawingIdRef.current = null
+      onDrawingSelectionChangeRef.current?.(null)
+      return
+    }
+
+    selectedDrawingIdRef.current = overlay.id
+    onDrawingSelectionChangeRef.current?.(
+      createDrawingSelection({ chart, container, overlay })
+    )
+  }
+
   function clearDrawingSelection() {
-    selectedDrawingIdRef.current = null
-    onDrawingSelectionChangeRef.current?.(false)
+    emitDrawingSelection(null)
   }
 
   function cancelActiveDrawingDraft() {
@@ -409,14 +553,13 @@ export const MarketChartCanvas = forwardRef<
         onDrawEnd(event) {
           activeDrawingDraftIdRef.current = null
           activeDrawingToolRef.current = null
-          selectedDrawingIdRef.current = event.overlay.id
           if (drawingLockedRef.current) {
             event.chart.overrideOverlay({
               id: event.overlay.id,
               lock: true,
             })
           }
-          onDrawingSelectionChangeRef.current?.(true)
+          emitDrawingSelection(event.overlay.id)
           onDrawingToolCompleteRef.current?.()
         },
         onRemoved(event) {
@@ -429,11 +572,14 @@ export const MarketChartCanvas = forwardRef<
           }
         },
         onSelected(event) {
-          selectedDrawingIdRef.current = event.overlay.id
-          onDrawingSelectionChangeRef.current?.(true)
+          emitDrawingSelection(event.overlay.id)
         },
         paneId: CANDLE_PANE_ID,
-        styles: createDrawingOverlayStyles(chartThemePalette),
+        style: DEFAULT_MARKET_CHART_DRAWING_STYLE,
+        styles: createDrawingOverlayStyles(
+          chartThemePalette,
+          DEFAULT_MARKET_CHART_DRAWING_STYLE
+        ),
         tool,
       })
     )
@@ -524,6 +670,38 @@ export const MarketChartCanvas = forwardRef<
     return removed
   }
 
+  function updateSelectedDrawingStyle(patch: Partial<MarketChartDrawingStyle>) {
+    const chart = chartRef.current
+    const selectedDrawingId = selectedDrawingIdRef.current
+
+    if (!chart || !selectedDrawingId) {
+      return false
+    }
+
+    const overlay = getOverlayById(selectedDrawingId)
+    const tool = overlay ? getDrawingToolForOverlay(overlay) : null
+
+    if (!overlay || !tool) {
+      return false
+    }
+
+    const style = mergeMarketChartDrawingStyle(overlay.extendData?.style, patch)
+    const updated = chart.overrideOverlay({
+      extendData: mergeMarketChartDrawingMetadata(overlay.extendData, {
+        style,
+        tool,
+      }),
+      id: overlay.id,
+      styles: createDrawingOverlayStyles(chartThemePalette, style),
+    })
+
+    if (updated) {
+      emitDrawingSelection(overlay.id)
+    }
+
+    return updated
+  }
+
   function clearDrawings() {
     const chart = chartRef.current
 
@@ -562,6 +740,7 @@ export const MarketChartCanvas = forwardRef<
         syncChartIndicators(chart, indicators)
         return true
       },
+      updateSelectedDrawingStyle,
     })
   )
 
@@ -623,6 +802,10 @@ export const MarketChartCanvas = forwardRef<
       })
 
       setMarkerPositions(nextPositions)
+
+      if (selectedDrawingIdRef.current) {
+        emitDrawingSelection(selectedDrawingIdRef.current)
+      }
     }
 
     const scheduleMarkerPositionUpdate = () => {
@@ -656,7 +839,7 @@ export const MarketChartCanvas = forwardRef<
       activeDrawingToolRef.current = null
       selectedDrawingIdRef.current = null
       chartRef.current = null
-      onDrawingSelectionChangeRef.current?.(false)
+      onDrawingSelectionChangeRef.current?.(null)
       setMarkerPositions([])
       dispose(chart)
     }
@@ -664,7 +847,39 @@ export const MarketChartCanvas = forwardRef<
 
   // ── Sync: theme styles — klinecharts native ──
   useEffect(() => {
-    chartRef.current?.setStyles(createChartStyles(chartThemePalette))
+    const chart = chartRef.current
+
+    if (!chart) {
+      return
+    }
+
+    chart.setStyles(createChartStyles(chartThemePalette))
+
+    chart
+      .getOverlays({ groupId: drawingGroupIdRef.current })
+      .forEach((overlay) => {
+        const drawingOverlay = overlay as Overlay<MarketChartDrawingMetadata>
+        const tool = getDrawingToolForOverlay(drawingOverlay)
+
+        if (!tool) {
+          return
+        }
+
+        const style = getMarketChartDrawingMetadataStyle(
+          drawingOverlay.extendData
+        )
+
+        chart.overrideOverlay({
+          extendData: mergeMarketChartDrawingMetadata(
+            drawingOverlay.extendData,
+            { style, tool }
+          ),
+          id: drawingOverlay.id,
+          styles: createDrawingOverlayStyles(chartThemePalette, style),
+        })
+      })
+
+    scheduleMarkerPositionUpdateRef.current()
   }, [chartThemePalette])
 
   // ── Sync: locale ──
@@ -708,9 +923,31 @@ export const MarketChartCanvas = forwardRef<
     if (oldOverlays.length > 0) {
       drawingCacheRef.current.set(
         oldKey,
-        oldOverlays.map(({ name, points, styles, lock, visible, zLevel, paneId, mode, modeSensitivity }) => ({
-          name, points, styles, lock, visible, zLevel, paneId, mode, modeSensitivity,
-        }))
+        oldOverlays.map(
+          ({
+            extendData,
+            lock,
+            mode,
+            modeSensitivity,
+            name,
+            paneId,
+            points,
+            styles,
+            visible,
+            zLevel,
+          }) => ({
+            extendData,
+            lock,
+            mode,
+            modeSensitivity,
+            name,
+            paneId,
+            points,
+            styles,
+            visible,
+            zLevel,
+          })
+        )
       )
       chart.removeOverlay({ groupId: oldKey })
     }
@@ -732,7 +969,23 @@ export const MarketChartCanvas = forwardRef<
     const savedOverlays = drawingCacheRef.current.get(newKey)
     if (savedOverlays) {
       savedOverlays.forEach((overlay) => {
-        chart.createOverlay({ ...overlay, groupId: newKey })
+        const tool = getMarketChartDrawingMetadataTool(
+          overlay.extendData,
+          getMarketChartDrawingToolFromOverlayName(overlay.name ?? "")
+        )
+        const style = getMarketChartDrawingMetadataStyle(overlay.extendData)
+
+        chart.createOverlay({
+          ...overlay,
+          extendData: tool
+            ? mergeMarketChartDrawingMetadata(overlay.extendData, {
+                style,
+                tool,
+              })
+            : overlay.extendData,
+          groupId: newKey,
+          styles: createDrawingOverlayStyles(chartThemePalette, style),
+        })
       })
       drawingCacheRef.current.delete(newKey)
     }

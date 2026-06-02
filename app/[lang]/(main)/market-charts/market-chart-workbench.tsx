@@ -17,6 +17,7 @@ import {
   Minimize2,
   RefreshCw,
   SlidersHorizontal,
+  Trash2,
   TriangleAlert,
   X,
 } from "lucide-react"
@@ -61,6 +62,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
 import { Toggle } from "@/components/ui/toggle"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import {
@@ -84,6 +86,7 @@ import {
 import {
   MarketChartCanvas,
   type MarketChartCanvasHandle,
+  type MarketChartDrawingSelection,
   type MarketChartIndicatorName,
   type MarketChartLoadedData,
 } from "./market-chart-canvas"
@@ -95,6 +98,12 @@ import {
   type MarketChartDrawingState,
   type MarketChartDrawingTool,
 } from "./market-chart-drawing"
+import {
+  MARKET_CHART_DRAWING_COLOR_PRESETS,
+  MARKET_CHART_DRAWING_SIZES,
+  resolveMarketChartDrawingColor,
+  type MarketChartDrawingStyle,
+} from "./market-chart-drawing-style"
 import { openMarketChartLiveStream } from "./market-chart-live-stream"
 import { MarketChartSurfaceSkeleton } from "./market-chart-skeleton"
 
@@ -834,6 +843,8 @@ function ChartSurface({
   const [drawingState, setDrawingState] = useState<MarketChartDrawingState>(
     () => createMarketChartDrawingState()
   )
+  const [selectedDrawing, setSelectedDrawing] =
+    useState<MarketChartDrawingSelection | null>(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
 
 
@@ -925,6 +936,14 @@ function ChartSurface({
   function handleDeleteSelectedDrawing() {
     if (!chartCanvasRef.current?.deleteSelectedDrawing()) {
       toast.error(dictionary.marketCharts.drawings.deleteUnavailable)
+    }
+  }
+
+  function handleSelectedDrawingStyleChange(
+    patch: Partial<MarketChartDrawingStyle>
+  ) {
+    if (!chartCanvasRef.current?.updateSelectedDrawingStyle(patch)) {
+      toast.error(dictionary.marketCharts.drawings.styleUnavailable)
     }
   }
 
@@ -1038,12 +1057,13 @@ function ChartSurface({
                   selectedAnnotationGroupId={selectedAnnotationGroup?.id}
                   onAnnotationSelect={onAnnotationSelect}
                   onAnnotationClose={onAnnotationClose}
-                  onDrawingSelectionChange={(hasSelectedDrawing) =>
+                  onDrawingSelectionChange={(selection) => {
+                    setSelectedDrawing(selection)
                     setDrawingState((current) => ({
                       ...current,
-                      hasSelectedDrawing,
+                      hasSelectedDrawing: !!selection,
                     }))
-                  }
+                  }}
                   onDrawingToolComplete={() =>
                     setDrawingState((current) => ({
                       ...current,
@@ -1053,6 +1073,13 @@ function ChartSurface({
                   onLoadedDataChange={onLoadedDataChange}
                   onLoadOlderCandles={getMarketChartCandles}
                 />
+                {selectedDrawing && !drawingState.activeTool ? (
+                  <MarketChartSelectedDrawingToolbar
+                    selection={selectedDrawing}
+                    onDelete={handleDeleteSelectedDrawing}
+                    onStyleChange={handleSelectedDrawingStyleChange}
+                  />
+                ) : null}
               </div>
             </div>
           </div>
@@ -1187,6 +1214,105 @@ function ChartSurface({
         </div>
       ) : null}
     </section>
+  )
+}
+
+function MarketChartSelectedDrawingToolbar({
+  selection,
+  onDelete,
+  onStyleChange,
+}: {
+  selection: MarketChartDrawingSelection
+  onDelete: () => void
+  onStyleChange: (patch: Partial<MarketChartDrawingStyle>) => void
+}) {
+  const { dictionary, formatMessage } = useLocalization()
+  const labels = dictionary.marketCharts.drawings
+  const anchor = selection.anchor ?? { x: 120, y: 52 }
+
+  return (
+    <div
+      className="absolute z-20 flex max-w-[calc(100%-1rem)] -translate-x-1/2 -translate-y-full flex-wrap items-center gap-1 rounded-lg border bg-popover p-1 text-popover-foreground shadow-md"
+      style={{ left: anchor.x, top: anchor.y }}
+      role="toolbar"
+      aria-label={labels.selectedToolbarLabel}
+    >
+      <span className="sr-only">{labels.colorLabel}</span>
+      <ToggleGroup
+        type="single"
+        variant="outline"
+        size="sm"
+        spacing={1}
+        value={selection.style.color}
+        aria-label={labels.colorLabel}
+        onValueChange={(value) => {
+          if (value) {
+            onStyleChange({
+              color: value as MarketChartDrawingStyle["color"],
+            })
+          }
+        }}
+      >
+        {MARKET_CHART_DRAWING_COLOR_PRESETS.map((preset) => (
+          <ToggleGroupItem
+            key={preset.value}
+            value={preset.value}
+            aria-label={labels.colors[preset.value]}
+          >
+            <span
+              aria-hidden="true"
+              className="size-3 rounded-full"
+              style={{
+                backgroundColor: resolveMarketChartDrawingColor(preset.value),
+              }}
+            />
+          </ToggleGroupItem>
+        ))}
+      </ToggleGroup>
+
+      <Separator orientation="vertical" />
+
+      <span className="sr-only">{labels.sizeLabel}</span>
+      <ToggleGroup
+        type="single"
+        variant="outline"
+        size="sm"
+        spacing={1}
+        value={String(selection.style.size)}
+        aria-label={labels.sizeLabel}
+        onValueChange={(value) => {
+          const nextSize = Number(value) as MarketChartDrawingStyle["size"]
+
+          if (MARKET_CHART_DRAWING_SIZES.includes(nextSize)) {
+            onStyleChange({ size: nextSize })
+          }
+        }}
+      >
+        {MARKET_CHART_DRAWING_SIZES.map((size) => (
+          <ToggleGroupItem
+            key={size}
+            value={String(size)}
+            aria-label={formatMessage(labels.sizeOption, {
+              size: `${size}px`,
+            })}
+          >
+            {size}px
+          </ToggleGroupItem>
+        ))}
+      </ToggleGroup>
+
+      <Separator orientation="vertical" />
+
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
+        onClick={onDelete}
+        aria-label={labels.deleteSelected}
+      >
+        <Trash2 data-icon="inline-start" />
+      </Button>
+    </div>
   )
 }
 

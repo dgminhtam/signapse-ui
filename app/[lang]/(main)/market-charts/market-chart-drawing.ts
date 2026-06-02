@@ -8,6 +8,12 @@ import {
 
 import type { MarketChartTimeframe } from "@/app/lib/market-charts/definitions"
 
+import {
+  DEFAULT_MARKET_CHART_DRAWING_STYLE,
+  normalizeMarketChartDrawingStyle,
+  type MarketChartDrawingStyle,
+} from "./market-chart-drawing-style"
+
 export type MarketChartDrawingTool =
   | "horizontal-line"
   | "horizontal-ray"
@@ -64,7 +70,8 @@ export type MarketChartDrawingState = {
 export type MarketChartDrawingMetadata = {
   source: "signapse-market-chart"
   tool: MarketChartDrawingTool
-}
+  style: MarketChartDrawingStyle
+} & Record<string, unknown>
 
 export const MARKET_CHART_DRAWING_TOOLS: MarketChartDrawingTool[] = [
   "horizontal-line",
@@ -190,6 +197,13 @@ export const MARKET_CHART_DRAWING_TOOL_OVERLAYS: Record<
   "any-waves": "signapseAnyWaves",
 }
 
+const MARKET_CHART_DRAWING_OVERLAY_TOOLS = new Map<string, MarketChartDrawingTool>(
+  Object.entries(MARKET_CHART_DRAWING_TOOL_OVERLAYS).map(([tool, name]) => [
+    name,
+    tool as MarketChartDrawingTool,
+  ])
+)
+
 export function createMarketChartDrawingGroupId({
   assetId,
   timeframe,
@@ -207,6 +221,7 @@ export function createMarketChartDrawingOverlay({
   isVisible,
   paneId,
   styles,
+  style = DEFAULT_MARKET_CHART_DRAWING_STYLE,
   tool,
   onDeselected,
   onDrawEnd,
@@ -219,6 +234,7 @@ export function createMarketChartDrawingOverlay({
   isVisible: boolean
   paneId: string
   styles: OverlayCreate["styles"]
+  style?: MarketChartDrawingStyle
   tool: MarketChartDrawingTool
   onDeselected: NonNullable<OverlayCreate["onDeselected"]>
   onDrawEnd: NonNullable<OverlayCreate["onDrawEnd"]>
@@ -226,10 +242,7 @@ export function createMarketChartDrawingOverlay({
   onSelected: NonNullable<OverlayCreate["onSelected"]>
 }): OverlayCreate {
   return {
-    extendData: {
-      source: "signapse-market-chart",
-      tool,
-    },
+    extendData: mergeMarketChartDrawingMetadata(null, { style, tool }),
     groupId,
     lock: isLocked,
     mode: createMarketChartDrawingMode(isMagnetEnabled),
@@ -241,6 +254,62 @@ export function createMarketChartDrawingOverlay({
     paneId,
     styles,
     visible: isVisible,
+  }
+}
+
+export function getMarketChartDrawingToolFromOverlayName(
+  name: string
+): MarketChartDrawingTool | null {
+  return MARKET_CHART_DRAWING_OVERLAY_TOOLS.get(name) ?? null
+}
+
+export function getMarketChartDrawingMetadataStyle(
+  extendData: unknown
+): MarketChartDrawingStyle {
+  if (!extendData || typeof extendData !== "object") {
+    return DEFAULT_MARKET_CHART_DRAWING_STYLE
+  }
+
+  return normalizeMarketChartDrawingStyle(
+    (extendData as Record<string, unknown>).style
+  )
+}
+
+export function getMarketChartDrawingMetadataTool(
+  extendData: unknown,
+  fallbackTool: MarketChartDrawingTool | null
+): MarketChartDrawingTool | null {
+  if (!extendData || typeof extendData !== "object") {
+    return fallbackTool
+  }
+
+  const tool = (extendData as Record<string, unknown>).tool
+
+  return typeof tool === "string" && isMarketChartDrawingTool(tool)
+    ? tool
+    : fallbackTool
+}
+
+export function mergeMarketChartDrawingMetadata(
+  extendData: unknown,
+  {
+    style,
+    tool,
+  }: {
+    style: MarketChartDrawingStyle
+    tool: MarketChartDrawingTool
+  }
+): MarketChartDrawingMetadata {
+  const existing =
+    extendData && typeof extendData === "object"
+      ? (extendData as Record<string, unknown>)
+      : {}
+
+  return {
+    ...existing,
+    source: "signapse-market-chart",
+    style: normalizeMarketChartDrawingStyle(style),
+    tool,
   }
 }
 
