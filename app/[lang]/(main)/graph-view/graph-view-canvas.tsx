@@ -84,15 +84,18 @@ type GraphCanvasPalette = {
   activeNodeHaloColor: string
   edgeHighlightLineWidthBoost: number
   edgeHighlightOpacity: number
+  edgeInactiveOpacity: number
   labelBackground: boolean
   labelFill: string
   labelHoverFill: string
   labelHoverMaxWidth: number
   labelHoverStroke: string
+  labelInactiveOpacity: number
   labelStroke: string
   labelStrokeOpacity: number
   labelStrokeWidth: number
   nodeHighlightOpacity: number
+  nodeInactiveOpacity: number
   selectionEdgeOpacity: number
   selectionNodeHaloColor: string
   selectionRelatedNodeOpacity: number
@@ -164,15 +167,18 @@ function createGraphCanvasPalette(mode: GraphThemeMode): GraphCanvasPalette {
       activeNodeHaloColor: "rgba(248, 250, 252, 0.65)",
       edgeHighlightLineWidthBoost: 0.95,
       edgeHighlightOpacity: 0.84,
+      edgeInactiveOpacity: 0.34,
       labelBackground: false,
       labelFill: "#f8fafc",
       labelHoverFill: "#ffffff",
       labelHoverMaxWidth: 300,
       labelHoverStroke: "rgba(2, 6, 23, 0.96)",
+      labelInactiveOpacity: 0.72,
       labelStroke: "rgba(2, 6, 23, 0.92)",
       labelStrokeOpacity: 0.92,
       labelStrokeWidth: 2.8,
       nodeHighlightOpacity: 1,
+      nodeInactiveOpacity: 0.66,
       selectionEdgeOpacity: 0.9,
       selectionNodeHaloColor: "rgba(248, 250, 252, 0.78)",
       selectionRelatedNodeOpacity: 0.82,
@@ -184,15 +190,18 @@ function createGraphCanvasPalette(mode: GraphThemeMode): GraphCanvasPalette {
     activeNodeHaloColor: "rgba(15, 23, 42, 0.36)",
     edgeHighlightLineWidthBoost: 0.8,
     edgeHighlightOpacity: 0.78,
+    edgeInactiveOpacity: 0.24,
     labelBackground: false,
     labelFill: "#172033",
     labelHoverFill: "#020617",
     labelHoverMaxWidth: 300,
     labelHoverStroke: "rgba(255, 255, 255, 0.98)",
+    labelInactiveOpacity: 0.7,
     labelStroke: "rgba(248, 250, 252, 0.96)",
     labelStrokeOpacity: 0.96,
     labelStrokeWidth: 2.3,
     nodeHighlightOpacity: 1,
+    nodeInactiveOpacity: 0.61,
     selectionEdgeOpacity: 0.82,
     selectionNodeHaloColor: "rgba(15, 23, 42, 0.44)",
     selectionRelatedNodeOpacity: 0.72,
@@ -760,7 +769,9 @@ function isPriorityLabelNode({
   }
 
   return (
-    nodeKind === "narrative" ||
+    (nodeKind === "narrative" && edgeCount >= 2) ||
+    (nodeKind === "event" && edgeCount >= 4) ||
+    (nodeKind === "news-article" && edgeCount >= 2) ||
     edgeCount >= GRAPH_DENSE_HIGH_CONNECTIVITY_EDGE_COUNT
   )
 }
@@ -1231,6 +1242,11 @@ function createNodeStateStyles(graphPalette: GraphCanvasPalette) {
       opacity: graphPalette.nodeHighlightOpacity,
       shadowBlur: 12,
     }),
+    inactive: {
+      labelOpacity: graphPalette.labelInactiveOpacity,
+      opacity: graphPalette.nodeInactiveOpacity,
+      shadowBlur: 0,
+    },
     selected: (node: NodeData) => ({
       ...keepBaseStroke(node),
       ...expandedLabel(node),
@@ -1256,6 +1272,9 @@ function createEdgeStateStyles(graphPalette: GraphCanvasPalette) {
         graphPalette.edgeHighlightLineWidthBoost,
       opacity: graphPalette.edgeHighlightOpacity,
     }),
+    inactive: {
+      opacity: graphPalette.edgeInactiveOpacity,
+    },
     "selected-related": (edge: EdgeData) => ({
       lineWidth:
         getElementNumberValue(edge.style ?? {}, "lineWidth", 1.3) +
@@ -1522,6 +1541,20 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
           range: GRAPH_CANVAS_PAN_RANGE,
           type: "drag-canvas",
         },
+        ...(!isDenseGraph
+          ? [
+              {
+                animation: false,
+                degree: 1,
+                direction: "both",
+                enable: (event: { targetType?: string }) =>
+                  event.targetType === "node",
+                inactiveState: "inactive",
+                state: "highlight",
+                type: "hover-activate",
+              },
+            ]
+          : []),
         {
           fixed: true,
           getAnalysisBounds: () => analysisBounds,

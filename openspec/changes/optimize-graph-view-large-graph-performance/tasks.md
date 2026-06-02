@@ -29,7 +29,7 @@
 ## 5. Verification
 
 - [x] 5.1 Run `openspec validate optimize-graph-view-large-graph-performance`.
-- [x] 5.2 Run static search or deterministic code review confirming hover/selection no longer intentionally updates every graph element for normal dense graph interactions.
+- [x] 5.2 Run static search or deterministic code review confirming hover/selection no longer intentionally updates every graph element for normal dense graph interactions. Note: `hover-activate` is allowed only for non-dense graphs; dense graphs use bounded hover state updates.
 - [x] 5.3 Run static search confirming no separate node tooltip/hover card was reintroduced for node title reveal.
 - [x] 5.4 Run `pnpm lint`. Note: command ran and failed on unrelated existing errors outside Graph View.
 - [x] 5.5 Run `pnpm typecheck`.
