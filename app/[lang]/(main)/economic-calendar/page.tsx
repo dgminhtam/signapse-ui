@@ -23,6 +23,14 @@ import {
 } from "@/components/ui/table"
 
 import { EconomicCalendarList } from "./economic-calendar-list"
+import {
+  ECONOMIC_CALENDAR_DAY_WINDOW_SIZE,
+  type EconomicCalendarScheduledSort,
+  buildScheduledAtDayFilter,
+  combineEconomicCalendarFilters,
+  getEconomicCalendarDateState,
+  normalizeEconomicCalendarSort,
+} from "./economic-calendar-date"
 
 interface EconomicCalendarPageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
@@ -44,47 +52,54 @@ export default async function EconomicCalendarPage({
   }
 
   const params = await searchParams
-  const page = Number(params.page) || 1
-  const size = Number(params.size) || 10
-  const sort =
-    typeof params.sort === "string" ? params.sort : "scheduledAt_desc"
+  const sort = normalizeEconomicCalendarSort(params.sort)
+  const dateState = getEconomicCalendarDateState(params.date)
 
   return (
     <Suspense fallback={<EconomicCalendarListSkeleton dictionary={dictionary} />}>
       <EconomicCalendarListContent
-        page={page}
-        size={size}
         sort={sort}
         searchParams={params}
+        dateState={dateState}
       />
     </Suspense>
   )
 }
 
 async function EconomicCalendarListContent({
-  page,
-  size,
   sort,
   searchParams,
+  dateState,
 }: {
-  page: number
-  size: number
-  sort: string
+  sort: EconomicCalendarScheduledSort
   searchParams: { [key: string]: string | string[] | undefined }
+  dateState: ReturnType<typeof getEconomicCalendarDateState>
 }) {
   const filterParams = { ...searchParams }
+  delete filterParams.date
   delete filterParams.page
   delete filterParams.size
   delete filterParams.sort
-  const filter = buildFilterQuery(filterParams)
+  delete filterParams.week
+  const searchFilter = buildFilterQuery(filterParams)
+  const filter = combineEconomicCalendarFilters(
+    buildScheduledAtDayFilter(dateState.selectedDate),
+    searchFilter
+  )
   const economicCalendarPage = await getEconomicCalendarEntries({
-    page: page - 1,
-    size,
+    page: 0,
+    size: ECONOMIC_CALENDAR_DAY_WINDOW_SIZE,
     filter,
     sort: buildSortQuery(sort),
   })
 
-  return <EconomicCalendarList economicCalendarPage={economicCalendarPage} />
+  return (
+    <EconomicCalendarList
+      economicCalendarPage={economicCalendarPage}
+      sort={sort}
+      dateState={dateState}
+    />
+  )
 }
 
 function EconomicCalendarListSkeleton({
@@ -101,16 +116,35 @@ function EconomicCalendarListSkeleton({
         </div>
         <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
           <Skeleton className="h-9 w-full sm:w-[200px]" />
-          <Skeleton className="h-9 w-full sm:w-[120px]" />
         </div>
+      </div>
+
+      <div className="mt-4 flex flex-col gap-3 rounded-xl border border-border bg-card p-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center gap-2">
+            <Skeleton className="h-8 w-24" />
+            <Skeleton className="h-7 w-7" />
+            <Skeleton className="h-7 w-7" />
+          </div>
+          <Skeleton className="h-5 w-40" />
+        </div>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
+          {Array.from({ length: 7 }).map((_, index) => (
+            <Skeleton key={index} className="h-8 w-full" />
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-4 flex justify-center">
+        <Skeleton className="h-8 w-40" />
       </div>
 
       <AppListTable>
         <Table>
           <TableHeader>
             <AppListTableHeaderRow>
-              <AppListTableHead className="w-[32%]">
-                {dictionary.economicCalendar.eventColumn}
+              <AppListTableHead className="w-28">
+                {dictionary.economicCalendar.timeColumn}
               </AppListTableHead>
               <AppListTableHead className="w-24">
                 {dictionary.economicCalendar.currencyColumn}
@@ -118,14 +152,20 @@ function EconomicCalendarListSkeleton({
               <AppListTableHead className="w-28">
                 {dictionary.economicCalendar.impactColumn}
               </AppListTableHead>
+              <AppListTableHead className="min-w-72">
+                {dictionary.economicCalendar.eventColumn}
+              </AppListTableHead>
+              <AppListTableHead className="w-28">
+                {dictionary.economicCalendar.actual}
+              </AppListTableHead>
+              <AppListTableHead className="w-28">
+                {dictionary.economicCalendar.forecast}
+              </AppListTableHead>
+              <AppListTableHead className="w-28">
+                {dictionary.economicCalendar.previous}
+              </AppListTableHead>
               <AppListTableHead className="w-32">
                 {dictionary.economicCalendar.statusColumn}
-              </AppListTableHead>
-              <AppListTableHead className="w-44">
-                {dictionary.economicCalendar.timeColumn}
-              </AppListTableHead>
-              <AppListTableHead className="w-40">
-                {dictionary.economicCalendar.valueColumn}
               </AppListTableHead>
               <AppListTableHead className="w-20 text-right">
                 {dictionary.economicCalendar.actionsColumn}
@@ -133,38 +173,72 @@ function EconomicCalendarListSkeleton({
             </AppListTableHeaderRow>
           </TableHeader>
           <TableBody>
-            {Array.from({ length: 5 }).map((_, index) => (
+            <TableRow className="bg-muted/30 hover:bg-muted/30">
+              <TableCell colSpan={9} className="px-3 py-2">
+                <Skeleton className="h-4 w-44" />
+              </TableCell>
+            </TableRow>
+            <TableRow className="hover:bg-transparent">
+              <TableCell rowSpan={3} className="w-28 align-top bg-muted/10">
+                <Skeleton className="h-4 w-16" />
+              </TableCell>
+              <TableCell rowSpan={3} className="w-24 align-top bg-muted/5">
+                <Skeleton className="h-4 w-20" />
+              </TableCell>
+              <TableCell className="w-28 align-top">
+                <Skeleton className="h-6 w-24 rounded-full" />
+              </TableCell>
+              <TableCell className="min-w-72 align-top whitespace-normal">
+                <div className="flex min-w-0 flex-col gap-2">
+                  <Skeleton className="h-4 w-[260px]" />
+                  <Skeleton className="h-3 w-36" />
+                </div>
+              </TableCell>
+              <TableCell className="w-28 align-top">
+                <Skeleton className="h-4 w-20" />
+              </TableCell>
+              <TableCell className="w-28 align-top">
+                <Skeleton className="h-4 w-20" />
+              </TableCell>
+              <TableCell className="w-28 align-top">
+                <Skeleton className="h-4 w-20" />
+              </TableCell>
+              <TableCell className="w-32 align-top">
+                <Skeleton className="h-6 w-24 rounded-full" />
+              </TableCell>
+              <TableCell className="w-20 align-top text-right">
+                <div className="flex justify-end gap-1">
+                  <Skeleton className="h-8 w-8 rounded" />
+                  <Skeleton className="h-8 w-8 rounded" />
+                </div>
+              </TableCell>
+            </TableRow>
+            {Array.from({ length: 2 }).map((_, index) => (
               <TableRow key={index} className="hover:bg-transparent">
-                <TableCell className="align-top whitespace-normal">
+                <TableCell className="w-28 align-top">
+                  <Skeleton className="h-6 w-24 rounded-full" />
+                </TableCell>
+                <TableCell className="min-w-72 align-top whitespace-normal">
                   <div className="flex min-w-0 flex-col gap-2">
                     <Skeleton className="h-4 w-[260px]" />
-                    <Skeleton className="h-3 w-20" />
+                    <Skeleton className="h-3 w-36" />
                   </div>
                 </TableCell>
-                <TableCell className="w-24">
-                  <Skeleton className="h-4 w-16" />
+                <TableCell className="w-28 align-top">
+                  <Skeleton className="h-4 w-20" />
                 </TableCell>
-                <TableCell className="w-28">
+                <TableCell className="w-28 align-top">
+                  <Skeleton className="h-4 w-20" />
+                </TableCell>
+                <TableCell className="w-28 align-top">
+                  <Skeleton className="h-4 w-20" />
+                </TableCell>
+                <TableCell className="w-32 align-top">
                   <Skeleton className="h-6 w-24 rounded-full" />
                 </TableCell>
-                <TableCell className="w-32">
-                  <Skeleton className="h-6 w-24 rounded-full" />
-                </TableCell>
-                <TableCell className="w-44">
-                  <div className="flex flex-col gap-2">
-                    <Skeleton className="h-4 w-36" />
-                    <Skeleton className="h-3 w-32" />
-                  </div>
-                </TableCell>
-                <TableCell className="w-40 max-w-[10rem]">
-                  <div className="flex min-w-0 flex-col gap-2">
-                    <Skeleton className="h-3 w-24" />
-                    <Skeleton className="h-3 w-24" />
-                    <Skeleton className="h-3 w-24" />
-                  </div>
-                </TableCell>
-                <TableCell className="w-20 text-right">
-                  <div className="flex justify-end">
+                <TableCell className="w-20 align-top text-right">
+                  <div className="flex justify-end gap-1">
+                    <Skeleton className="h-8 w-8 rounded" />
                     <Skeleton className="h-8 w-8 rounded" />
                   </div>
                 </TableCell>
@@ -174,7 +248,9 @@ function EconomicCalendarListSkeleton({
         </Table>
       </AppListTable>
 
-      <Skeleton className="mt-4 h-16 w-full rounded-xl" />
+      <div className="mt-4 flex justify-center">
+        <Skeleton className="h-8 w-36" />
+      </div>
     </div>
   )
 }

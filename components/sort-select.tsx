@@ -25,6 +25,8 @@ interface SortSelectProps {
   label?: string
   options: SortOption[]
   placeholder?: string
+  resetParamsOnChange?: string[]
+  resetPageOnChange?: boolean
   showLabel?: boolean
   triggerClassName?: string
 }
@@ -35,6 +37,8 @@ export function SortSelect({
   label,
   options,
   placeholder,
+  resetParamsOnChange,
+  resetPageOnChange = true,
   showLabel = false,
   triggerClassName,
 }: SortSelectProps) {
@@ -46,7 +50,9 @@ export function SortSelect({
   const resolvedLabel = label ?? dictionary.lists.sortLabel
   const resolvedPlaceholder = placeholder ?? dictionary.lists.sortPlaceholder
 
-  const currentSort = searchParams.get("sort") || defaultValue || ""
+  const sortParam = searchParams.get("sort")
+  const hasSortParam = options.some((option) => option.value === sortParam)
+  const currentSort = hasSortParam ? sortParam ?? "" : defaultValue || ""
 
   const onSortChange = (value: string) => {
     const params = new URLSearchParams(searchParams)
@@ -57,7 +63,13 @@ export function SortSelect({
       params.delete("sort")
     }
 
-    params.set("page", "1")
+    if (resetPageOnChange) {
+      params.set("page", "1")
+    } else {
+      for (const key of resetParamsOnChange ?? ["page", "size"]) {
+        params.delete(key)
+      }
+    }
 
     startTransition(() => {
       router.push(`${pathname}?${params.toString()}`)

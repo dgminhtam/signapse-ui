@@ -32,7 +32,9 @@ export function EconomicCalendarSearch() {
   const handleSearch = useDebouncedCallback((term: string) => {
     const trimmedTerm = term.trim()
     const params = new URLSearchParams(searchParams)
-    params.set("page", "1")
+    params.delete("page")
+    params.delete("size")
+    params.delete("week")
 
     if (trimmedTerm) {
       params.set(SEARCH_PARAM_KEY, trimmedTerm)
