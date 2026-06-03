@@ -1,13 +1,19 @@
 export const MARKET_CHART_DRAWING_COLOR_PRESETS = [
+  { value: "sky", color: "#0284c7" },
   { value: "blue", color: "#2563eb" },
-  { value: "emerald", color: "#059669" },
-  { value: "amber", color: "#d97706" },
-  { value: "rose", color: "#e11d48" },
+  { value: "indigo", color: "#4f46e5" },
   { value: "violet", color: "#7c3aed" },
+  { value: "fuchsia", color: "#c026d3" },
+  { value: "rose", color: "#e11d48" },
+  { value: "red", color: "#dc2626" },
+  { value: "orange", color: "#ea580c" },
+  { value: "amber", color: "#d97706" },
+  { value: "lime", color: "#65a30d" },
+  { value: "emerald", color: "#059669" },
   { value: "slate", color: "#64748b" },
 ] as const
 
-export const MARKET_CHART_DRAWING_SIZES = [1, 2, 3] as const
+export const MARKET_CHART_DRAWING_SIZES = [1, 2, 3, 4, 5] as const
 
 export type MarketChartDrawingColor =
   (typeof MARKET_CHART_DRAWING_COLOR_PRESETS)[number]["value"]

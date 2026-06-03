@@ -101,6 +101,8 @@ import {
 import {
   MARKET_CHART_DRAWING_COLOR_PRESETS,
   MARKET_CHART_DRAWING_SIZES,
+  type MarketChartDrawingColor,
+  type MarketChartDrawingSize,
   resolveMarketChartDrawingColor,
   type MarketChartDrawingStyle,
 } from "./market-chart-drawing-style"
@@ -1229,6 +1231,19 @@ function MarketChartSelectedDrawingToolbar({
   const { dictionary, formatMessage } = useLocalization()
   const labels = dictionary.marketCharts.drawings
   const anchor = selection.anchor ?? { x: 120, y: 52 }
+  const selectedColor = resolveMarketChartDrawingColor(selection.style.color)
+  const [colorPopoverOpen, setColorPopoverOpen] = useState(false)
+  const [sizePopoverOpen, setSizePopoverOpen] = useState(false)
+
+  function handleColorChange(color: MarketChartDrawingColor) {
+    onStyleChange({ color })
+    setColorPopoverOpen(false)
+  }
+
+  function handleSizeChange(size: MarketChartDrawingSize) {
+    onStyleChange({ size })
+    setSizePopoverOpen(false)
+  }
 
   return (
     <div
@@ -1237,82 +1252,150 @@ function MarketChartSelectedDrawingToolbar({
       role="toolbar"
       aria-label={labels.selectedToolbarLabel}
     >
-      <span className="sr-only">{labels.colorLabel}</span>
-      <ToggleGroup
-        type="single"
-        variant="outline"
-        size="sm"
-        spacing={1}
-        value={selection.style.color}
-        aria-label={labels.colorLabel}
-        onValueChange={(value) => {
-          if (value) {
-            onStyleChange({
-              color: value as MarketChartDrawingStyle["color"],
-            })
-          }
-        }}
-      >
-        {MARKET_CHART_DRAWING_COLOR_PRESETS.map((preset) => (
-          <ToggleGroupItem
-            key={preset.value}
-            value={preset.value}
-            aria-label={labels.colors[preset.value]}
+      <Popover open={colorPopoverOpen} onOpenChange={setColorPopoverOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            aria-label={labels.openColorPalette}
           >
             <span
               aria-hidden="true"
-              className="size-3 rounded-full"
-              style={{
-                backgroundColor: resolveMarketChartDrawingColor(preset.value),
-              }}
+              className="size-3 rounded-full ring-1 ring-foreground/20"
+              style={{ backgroundColor: selectedColor }}
             />
-          </ToggleGroupItem>
-        ))}
-      </ToggleGroup>
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent align="start" side="top" className="w-auto">
+          <div
+            className="grid grid-cols-4 gap-1"
+            role="group"
+            aria-label={labels.colorLabel}
+          >
+            {MARKET_CHART_DRAWING_COLOR_PRESETS.map((preset) => {
+              const selected = selection.style.color === preset.value
+              const color = resolveMarketChartDrawingColor(preset.value)
+
+              return (
+                <Button
+                  key={preset.value}
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  aria-label={labels.colors[preset.value]}
+                  aria-pressed={selected}
+                  onClick={() => handleColorChange(preset.value)}
+                >
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      "size-3 rounded-full ring-1 ring-foreground/20",
+                      selected ? "ring-2 ring-ring ring-offset-1 ring-offset-popover" : null
+                    )}
+                    style={{ backgroundColor: color }}
+                  />
+                </Button>
+              )
+            })}
+          </div>
+        </PopoverContent>
+      </Popover>
 
       <Separator orientation="vertical" />
 
-      <span className="sr-only">{labels.sizeLabel}</span>
-      <ToggleGroup
-        type="single"
-        variant="outline"
-        size="sm"
-        spacing={1}
-        value={String(selection.style.size)}
-        aria-label={labels.sizeLabel}
-        onValueChange={(value) => {
-          const nextSize = Number(value) as MarketChartDrawingStyle["size"]
-
-          if (MARKET_CHART_DRAWING_SIZES.includes(nextSize)) {
-            onStyleChange({ size: nextSize })
-          }
-        }}
-      >
-        {MARKET_CHART_DRAWING_SIZES.map((size) => (
-          <ToggleGroupItem
-            key={size}
-            value={String(size)}
-            aria-label={formatMessage(labels.sizeOption, {
-              size: `${size}px`,
+      <Popover open={sizePopoverOpen} onOpenChange={setSizePopoverOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            aria-label={formatMessage(labels.selectedSize, {
+              size: `${selection.style.size}px`,
             })}
           >
-            {size}px
-          </ToggleGroupItem>
-        ))}
-      </ToggleGroup>
+            <MarketChartDrawingSizePreview
+              compact
+              color={selectedColor}
+              size={selection.style.size}
+            />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent align="start" side="top" className="w-auto">
+          <div
+            className="flex flex-col gap-1"
+            role="group"
+            aria-label={labels.sizeLabel}
+          >
+            {MARKET_CHART_DRAWING_SIZES.map((size) => {
+              const selected = selection.style.size === size
+
+              return (
+                <Button
+                  key={size}
+                  type="button"
+                  variant="ghost"
+                  size="xs"
+                  aria-label={formatMessage(labels.sizeOption, {
+                    size: `${size}px`,
+                  })}
+                  aria-pressed={selected}
+                  className="justify-start"
+                  onClick={() => handleSizeChange(size)}
+                >
+                  <MarketChartDrawingSizePreview
+                    color={selectedColor}
+                    selected={selected}
+                    size={size}
+                  />
+                  <span className="sr-only">{size}px</span>
+                </Button>
+              )
+            })}
+          </div>
+        </PopoverContent>
+      </Popover>
 
       <Separator orientation="vertical" />
 
       <Button
         type="button"
         variant="ghost"
-        size="icon-sm"
+        size="icon-xs"
         onClick={onDelete}
         aria-label={labels.deleteSelected}
       >
         <Trash2 data-icon="inline-start" />
       </Button>
     </div>
+  )
+}
+
+function MarketChartDrawingSizePreview({
+  compact = false,
+  color,
+  selected = false,
+  size,
+}: {
+  compact?: boolean
+  color: string
+  selected?: boolean
+  size: MarketChartDrawingSize
+}) {
+  return (
+    <span
+      aria-hidden="true"
+      className={cn(
+        "block rounded-full",
+        compact ? "w-4" : "w-8",
+        selected ? "ring-2 ring-ring ring-offset-2 ring-offset-popover" : null
+      )}
+      style={{
+        borderTopColor: color,
+        borderTopStyle: "solid",
+        borderTopWidth: size,
+      }}
+    />
   )
 }
 
