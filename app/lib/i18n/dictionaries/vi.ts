@@ -42,6 +42,7 @@ export const vi = {
   },
   navigation: {
     platform: "Nền tảng",
+    dashboard: "Bảng điều khiển",
     overview: "Tổng quan",
     knowledgeGraph: "Biểu đồ tri thức",
     marketCharts: "Biểu đồ giá",
@@ -204,6 +205,143 @@ export const vi = {
       WEAKENING: "Yếu dần",
       INVALIDATED: "Không còn hợp lệ",
       ARCHIVED: "Lưu trữ",
+    },
+  },
+  landing: {
+    nav: {
+      product: "Sản phẩm",
+      workflow: "Quy trình",
+      trust: "Tin cậy",
+      requestAccess: "Yêu cầu truy cập",
+      signIn: "Đăng nhập",
+      openDashboard: "Mở bảng điều khiển",
+    },
+    hero: {
+      eyebrow: "AI Market Intelligence Workspace",
+      title:
+        "Hiểu điều gì đang di chuyển thị trường, không chỉ đọc thêm một dòng tin tức.",
+      body:
+        "Signapse biến tin tức, lịch kinh tế, phản ứng giá và watchlist cá nhân thành một lớp market intelligence có cấu trúc. Theo dõi tài sản quan tâm, kiểm chứng bằng evidence và dùng AI để diễn giải tác động thị trường trong đúng bối cảnh của bạn.",
+      visualLabel: "Minh họa workspace Signapse",
+      previewLabel: "Xem trước workspace",
+      confidenceLabel: "AI ràng buộc bởi evidence",
+      confidenceValue: "Ưu tiên bối cảnh",
+      eventLabel: "Event",
+      reactionLabel: "Reaction",
+      narrativeLabel: "Narrative",
+    },
+    cta: {
+      requestAccess: "Yêu cầu truy cập",
+      signIn: "Đăng nhập",
+      openDashboard: "Mở bảng điều khiển",
+      learnWorkflow: "Xem quy trình",
+      requestAccessAria: "Yêu cầu truy cập Signapse",
+      signInAria: "Đăng nhập vào Signapse",
+      openDashboardAria: "Mở bảng điều khiển Signapse",
+    },
+    problem: {
+      heading: "Thị trường không thiếu dữ liệu. Vấn đề là bối cảnh bị rời rạc.",
+      body:
+        "Tin tức đến liên tục. Một sự kiện có thể ảnh hưởng nhiều tài sản. Bằng chứng nằm ở nhiều nguồn khác nhau. AI dễ trả lời chung chung nếu không được ràng buộc vào dữ liệu thị trường thật.",
+      questionOne: "Điều gì vừa xảy ra?",
+      questionTwo: "Tài sản nào bị ảnh hưởng?",
+      questionThree: "Bằng chứng nằm ở đâu?",
+      questionFour: "Narrative nào có thể đang định hình phản ứng?",
+    },
+    thesis: {
+      heading: "Từ event đến reaction, rồi đến narrative.",
+      body:
+        "Signapse không chỉ lưu bài viết. Hệ thống chuẩn hóa thông tin thành sự kiện thị trường, liên kết sự kiện với asset, theme và evidence, rồi hỗ trợ diễn giải phản ứng thị trường.",
+      event: "Event",
+      reaction: "Reaction",
+      narrative: "Narrative",
+      eventBody: "Sự kiện thị trường được chuẩn hóa từ tin tức và lịch công bố.",
+      reactionBody:
+        "Bối cảnh tài sản và giá quanh thời điểm thông tin xuất hiện.",
+      narrativeBody:
+        "Lớp diễn giải có liên kết để người dùng kiểm tra và phản biện.",
+    },
+    workflow: {
+      heading: "Một workspace đi theo góc nhìn thị trường của bạn.",
+      body:
+        "Xây một góc nhìn thị trường tập trung, để Signapse kết nối evidence, rồi hỏi AI trong đúng phạm vi.",
+      stepOneTitle: "Tạo workspace thị trường",
+      stepOneBody:
+        "Chọn tài sản từ catalog và xây watchlist cho Macro FX, Gold, Crypto, Equities hoặc thị trường bạn đang theo dõi.",
+      stepTwoTitle: "Gom tín hiệu từ nhiều nguồn",
+      stepTwoBody:
+        "News outlet, RSS, lịch kinh tế, market candles và dữ liệu liên quan tạo thành lớp evidence nền.",
+      stepThreeTitle: "Chuẩn hóa thành market intelligence",
+      stepThreeBody:
+        "Tin tức được nối với event, asset, theme, reaction và evidence để người dùng không phải tự ghép bối cảnh thủ công.",
+      stepFourTitle: "Hỏi AI trong đúng scope",
+      stepFourBody:
+        "AI làm việc từ dữ liệu đã ingest và bối cảnh workspace, giúp câu trả lời tập trung hơn, có bối cảnh hơn và dễ kiểm chứng hơn.",
+    },
+    features: {
+      heading: "Được xây cho người theo dõi thị trường nghiêm túc.",
+      body:
+        "Mỗi bề mặt giữ analyst ở gần evidence thay vì che mọi thứ sau một câu trả lời cuối cùng.",
+      workspaceTitle: "Workspace & watchlist",
+      workspaceBody:
+        "Theo dõi tài sản bạn quan tâm và dùng watchlist như lens cá nhân cho graph, query, chart và notification.",
+      newsTitle: "News & event intelligence",
+      newsBody:
+        "Biến nguồn tin rời rạc thành event có cấu trúc, liên kết với asset, theme và evidence.",
+      calendarTitle: "Lịch kinh tế",
+      calendarBody:
+        "Theo dõi forecast, previous, actual và impact để đặt câu chuyện thị trường vào bối cảnh macro.",
+      graphTitle: "Graph view",
+      graphBody:
+        "Nhìn quan hệ giữa event, asset, theme và news evidence thay vì chỉ đọc một câu trả lời cuối cùng.",
+      chartTitle: "Bối cảnh trên biểu đồ",
+      chartBody:
+        "Đặt event annotation lên chart để kiểm tra phản ứng giá quanh thời điểm thị trường nhận thông tin mới.",
+      queryTitle: "Market query",
+      queryBody:
+        "Hỏi thị trường bằng ngôn ngữ tự nhiên dựa trên dữ liệu đã ingest, liên kết event, evidence và workspace scope.",
+    },
+    differentiation: {
+      heading: "Không phải chatbot. Không phải signal bot. Một workspace để hiểu thị trường.",
+      chatbotTitle: "Không phải chatbot chung chung",
+      chatbotBody:
+        "Signapse xây lớp tri thức thị trường tích lũy theo thời gian.",
+      ragTitle: "Không phải RAG truyền thống",
+      ragBody:
+        "Signapse tổ chức thông tin thành event, reaction và narrative thay vì chỉ retrieve tài liệu.",
+      signalTitle: "Không phải signal bot",
+      signalBody:
+        "Signapse không tự đặt lệnh, không hứa dự báo giá và không thay thế quyết định của người dùng.",
+    },
+    trust: {
+      heading: "Analysis, not prediction.",
+      body:
+        "AI trong Signapse hỗ trợ diễn giải và tổng hợp dựa trên evidence. Kết quả phân tích cần được đọc cùng nguồn dữ liệu, confidence và giới hạn hiện tại. Signapse giúp người dùng hiểu thị trường nhanh hơn và có bối cảnh hơn, nhưng không phải hệ thống giao dịch tự động hay lời khuyên mua bán.",
+    },
+    finalCta: {
+      heading: "Xây workspace thị trường của bạn với Signapse.",
+      body:
+        "Đưa event, reaction, narrative và watchlist vào một workspace lấy evidence làm trung tâm.",
+      requestAccess: "Yêu cầu truy cập",
+      openDashboard: "Mở bảng điều khiển",
+    },
+    visual: {
+      liveContext: "Bối cảnh thị trường",
+      evidenceQueue: "Hàng đợi evidence",
+      assetScope: "Phạm vi watchlist",
+      macroEvent: "Sự kiện macro",
+      policyShift: "Dịch chuyển chính sách",
+      goldReaction: "Phản ứng vàng",
+      fxReaction: "Phản ứng FX",
+      narrative: "Narrative",
+      articleEvidence: "Evidence từ tin tức",
+      calendarEvidence: "Evidence lịch kinh tế",
+      queryPrompt: "Vì sao vàng biến động sau công bố?",
+      queryAnswer:
+        "Evidence nghiêng về tái định giá macro, phản ứng USD và thời điểm sự kiện liên quan.",
+      chartAnnotation: "Event annotation",
+      confidence: "Confidence",
+      checkedSources: "Nguồn đã kiểm tra",
     },
   },
   personalNotes: {

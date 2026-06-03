@@ -25,6 +25,7 @@ function getFriendlySegmentNames(
     "ai-provider-configs": dictionary.navigation.aiProviders,
     blogs: dictionary.navigation.blogs,
     cronjobs: dictionary.navigation.cronjobs,
+    dashboard: dictionary.navigation.dashboard,
     "developer-token": dictionary.navigation.developerToken,
     "economic-calendar": dictionary.navigation.economicCalendar,
     events: dictionary.navigation.events,
@@ -66,29 +67,31 @@ export function AppBreadcrumb() {
   const pathname = usePathname()
   const { dictionary } = useLocalization()
   const segments = stripLocaleFromPathname(pathname).split("/").filter(Boolean)
-  const overviewLabel = dictionary.navigation.overview
+  const overviewLabel = dictionary.navigation.dashboard
+  const isDashboardRoute = segments.length === 1 && segments[0] === "dashboard"
   const showOverviewCrumb = !(
     segments.length === 1 && segments[0] === "graph-view"
   )
+  const visibleSegments = isDashboardRoute ? [] : segments
 
   return (
     <Breadcrumb className="min-w-0" aria-label={dictionary.navigation.breadcrumb}>
       <BreadcrumbList className="flex-nowrap">
         {showOverviewCrumb ? (
           <BreadcrumbItem className="hidden md:block">
-            {segments.length === 0 ? (
+            {segments.length === 0 || isDashboardRoute ? (
               <BreadcrumbPage>{overviewLabel}</BreadcrumbPage>
             ) : (
               <BreadcrumbLink asChild>
-                <Link href="/">{overviewLabel}</Link>
+                <Link href="/dashboard">{overviewLabel}</Link>
               </BreadcrumbLink>
             )}
           </BreadcrumbItem>
         ) : null}
 
-        {segments.map((segment, index) => {
-          const href = `/${segments.slice(0, index + 1).join("/")}`
-          const isLast = index === segments.length - 1
+        {visibleSegments.map((segment, index) => {
+          const href = `/${visibleSegments.slice(0, index + 1).join("/")}`
+          const isLast = index === visibleSegments.length - 1
           const title = formatSegment(segment, index, dictionary)
           const showSeparator = showOverviewCrumb || index > 0
 

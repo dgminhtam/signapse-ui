@@ -101,7 +101,7 @@ function SidebarBrand() {
     <SidebarMenu>
       <SidebarMenuItem>
         <SidebarMenuButton asChild size="lg" tooltip={localizedSiteConfig.brand.name}>
-          <Link href="/">
+          <Link href="/dashboard">
             <Logo width={32} height={32} />
             <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
               <span className="truncate font-medium">{localizedSiteConfig.brand.name}</span>
@@ -122,10 +122,6 @@ export function NavMain({ items }: { items: NavItem[] }) {
   const pathWithoutLocale = stripLocaleFromPathname(pathname)
 
   const matchesPath = (url: string) => {
-    if (url === "/") {
-      return pathWithoutLocale === "/"
-    }
-
     return pathWithoutLocale === url || pathWithoutLocale.startsWith(`${url}/`)
   }
 

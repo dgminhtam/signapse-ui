@@ -41,7 +41,7 @@ import {
 } from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
 
-import { WorkspaceOverviewActions } from "./workspace-overview-actions"
+import { WorkspaceOverviewActions } from "../workspace-overview-actions"
 
 const WORKSPACE_SEARCH = {
   filter: "",

@@ -44,6 +44,7 @@ export const en: Dictionary = {
   },
   navigation: {
     platform: "Platform",
+    dashboard: "Dashboard",
     overview: "Overview",
     knowledgeGraph: "Knowledge graph",
     marketCharts: "Market charts",
@@ -204,6 +205,141 @@ export const en: Dictionary = {
       WEAKENING: "Weakening",
       INVALIDATED: "Invalidated",
       ARCHIVED: "Archived",
+    },
+  },
+  landing: {
+    nav: {
+      product: "Product",
+      workflow: "Workflow",
+      trust: "Trust",
+      requestAccess: "Request access",
+      signIn: "Sign in",
+      openDashboard: "Open dashboard",
+    },
+    hero: {
+      eyebrow: "AI Market Intelligence Workspace",
+      title:
+        "Understand what is moving markets, not just another news headline.",
+      body:
+        "Signapse turns news, economic releases, price reactions, and your watchlist into structured market intelligence. Track the assets that matter, inspect evidence, and use AI to interpret market impact in your context.",
+      visualLabel: "Illustrative Signapse workspace preview",
+      previewLabel: "Workspace preview",
+      confidenceLabel: "Evidence-bound AI",
+      confidenceValue: "Context first",
+      eventLabel: "Event",
+      reactionLabel: "Reaction",
+      narrativeLabel: "Narrative",
+    },
+    cta: {
+      requestAccess: "Request access",
+      signIn: "Sign in",
+      openDashboard: "Open dashboard",
+      learnWorkflow: "See the workflow",
+      requestAccessAria: "Request access to Signapse",
+      signInAria: "Sign in to Signapse",
+      openDashboardAria: "Open the Signapse dashboard",
+    },
+    problem: {
+      heading: "Markets do not lack data. The problem is fragmented context.",
+      body:
+        "News arrives constantly. One event can affect many assets. Evidence sits across different sources. AI becomes generic when it is not grounded in real market data.",
+      questionOne: "What just happened?",
+      questionTwo: "Which assets are affected?",
+      questionThree: "Where is the evidence?",
+      questionFour: "Which narrative may be shaping the reaction?",
+    },
+    thesis: {
+      heading: "From event to reaction, then to narrative.",
+      body:
+        "Signapse does not just store articles. It structures information into market events, links events to assets, themes, and evidence, then helps interpret the market reaction.",
+      event: "Event",
+      reaction: "Reaction",
+      narrative: "Narrative",
+      eventBody: "Normalized market events from news and releases.",
+      reactionBody: "Asset and price context around the moment information lands.",
+      narrativeBody: "A connected explanation users can inspect and challenge.",
+    },
+    workflow: {
+      heading: "A workspace that follows your market lens.",
+      body:
+        "Build a focused market view, let Signapse connect the evidence, then ask AI inside the right scope.",
+      stepOneTitle: "Create your market workspace",
+      stepOneBody:
+        "Choose assets from the catalog and build watchlists for Macro FX, Gold, Crypto, Equities, or the market you follow.",
+      stepTwoTitle: "Ingest signals from many sources",
+      stepTwoBody:
+        "News outlets, RSS, economic calendar data, market candles, and related records form the evidence layer.",
+      stepThreeTitle: "Normalize into market intelligence",
+      stepThreeBody:
+        "News connects to events, assets, themes, reactions, and evidence so users do not stitch context by hand.",
+      stepFourTitle: "Ask AI in the right scope",
+      stepFourBody:
+        "AI works from ingested data and workspace context, making answers more focused, contextual, and checkable.",
+    },
+    features: {
+      heading: "Built for serious market tracking.",
+      body:
+        "Every surface keeps the analyst close to evidence instead of hiding behind a single final answer.",
+      workspaceTitle: "Workspace & watchlist",
+      workspaceBody:
+        "Track the assets you care about and use watchlists as a personalized lens for graph, query, chart, and notifications.",
+      newsTitle: "News & event intelligence",
+      newsBody:
+        "Turn fragmented sources into structured events connected to assets, themes, and evidence.",
+      calendarTitle: "Economic calendar",
+      calendarBody:
+        "Review forecast, previous, actual, and impact values to place market stories in macro context.",
+      graphTitle: "Graph view",
+      graphBody:
+        "See relationships between events, assets, themes, and news evidence instead of only reading a final answer.",
+      chartTitle: "Market chart context",
+      chartBody:
+        "Place event annotations on market charts to inspect price reaction around new information.",
+      queryTitle: "Market query",
+      queryBody:
+        "Ask market questions in natural language using ingested data, event links, evidence, and workspace scope.",
+    },
+    differentiation: {
+      heading: "Not a chatbot. Not a signal bot. A workspace for understanding markets.",
+      chatbotTitle: "Not a generic chatbot",
+      chatbotBody:
+        "Signapse builds a market knowledge layer that accumulates over time.",
+      ragTitle: "Not traditional RAG",
+      ragBody:
+        "Signapse organizes information into events, reactions, and narratives instead of only retrieving documents.",
+      signalTitle: "Not a signal bot",
+      signalBody:
+        "Signapse does not place trades, promise price forecasts, or replace user decisions.",
+    },
+    trust: {
+      heading: "Analysis, not prediction.",
+      body:
+        "AI in Signapse supports interpretation and synthesis based on evidence. Analysis should be read with sources, confidence, and current limitations. Signapse helps users understand markets faster and with more context, but it is not an automated trading system or buy/sell advice.",
+    },
+    finalCta: {
+      heading: "Build your market workspace with Signapse.",
+      body:
+        "Bring events, reactions, narratives, and watchlists into one evidence-centered workspace.",
+      requestAccess: "Request access",
+      openDashboard: "Open dashboard",
+    },
+    visual: {
+      liveContext: "Market context",
+      evidenceQueue: "Evidence queue",
+      assetScope: "Watchlist scope",
+      macroEvent: "Macro event",
+      policyShift: "Policy shift",
+      goldReaction: "Gold reaction",
+      fxReaction: "FX reaction",
+      narrative: "Narrative",
+      articleEvidence: "News evidence",
+      calendarEvidence: "Calendar evidence",
+      queryPrompt: "Why did gold move after the release?",
+      queryAnswer:
+        "Evidence points to macro repricing, USD reaction, and related event timing.",
+      chartAnnotation: "Event annotation",
+      confidence: "Confidence",
+      checkedSources: "Checked sources",
     },
   },
   personalNotes: {

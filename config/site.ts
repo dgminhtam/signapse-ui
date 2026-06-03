@@ -63,8 +63,8 @@ export function createSiteConfig(dictionary: Dictionary) {
   },
   navMain: [
     {
-      title: dictionary.navigation.overview,
-      url: "/",
+      title: dictionary.navigation.dashboard,
+      url: "/dashboard",
       icon: LayoutDashboard,
     },
     {
