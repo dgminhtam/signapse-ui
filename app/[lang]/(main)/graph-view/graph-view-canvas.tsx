@@ -19,7 +19,6 @@ import type {
   Point,
   ViewportAnimationEffectTiming,
 } from "@antv/g6"
-import { Renderer as WebGLRenderer } from "@antv/g-webgl"
 import {
   ArrowUpRight,
   Calendar,
@@ -1493,7 +1492,6 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
         type: "circle",
       },
       padding: 48,
-      renderer: () => new WebGLRenderer(),
       width,
       zoomRange: GRAPH_ZOOM_RANGE,
     })
