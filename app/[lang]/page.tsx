@@ -23,8 +23,8 @@ import { getDictionary, hasLocale } from "@/app/lib/i18n/dictionaries"
 import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
 import { withLocalePath } from "@/app/lib/i18n/routing"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 
 const REQUEST_ACCESS_HREF =
   "mailto:request-access@signapse.ai?subject=Signapse%20access%20request"
@@ -73,10 +73,9 @@ export default async function Page({ params }: LandingPageProps) {
         isAuthenticated={isAuthenticated}
       />
       <ProblemSection dictionary={dictionary} />
-      <ThesisSection dictionary={dictionary} />
-      <WorkflowSection dictionary={dictionary} />
-      <FeatureSection dictionary={dictionary} />
-      <DifferentiationSection dictionary={dictionary} />
+      <PillarsSection dictionary={dictionary} />
+      <PipelineSection dictionary={dictionary} />
+      <PersonalizationSection dictionary={dictionary} />
       <TrustSection dictionary={dictionary} />
       <FinalCtaSection
         dictionary={dictionary}
@@ -113,8 +112,8 @@ function LandingHeader({
           <a href="#product" className="transition-colors hover:text-foreground">
             {dictionary.landing.nav.product}
           </a>
-          <a href="#workflow" className="transition-colors hover:text-foreground">
-            {dictionary.landing.nav.workflow}
+          <a href="#pipeline" className="transition-colors hover:text-foreground">
+            {dictionary.landing.nav.pipeline}
           </a>
           <a href="#trust" className="transition-colors hover:text-foreground">
             {dictionary.landing.nav.trust}
@@ -171,11 +170,11 @@ function HeroSection({
   return (
     <section className="relative overflow-hidden border-b">
       <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-[size:44px_44px] opacity-30" />
-      <div className="relative mx-auto grid min-h-[82svh] w-full max-w-7xl items-center gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[0.92fr_1.08fr] lg:px-8">
+      <div className="relative mx-auto grid min-h-[82svh] w-full max-w-7xl items-center gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[0.86fr_1.14fr] lg:px-8">
         <div className="flex max-w-3xl flex-col gap-7">
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary">{dictionary.landing.hero.eyebrow}</Badge>
-            <Badge variant="outline">{dictionary.landing.hero.confidenceLabel}</Badge>
+            <Badge variant="outline">{dictionary.landing.hero.intelligenceFlow}</Badge>
           </div>
 
           <div className="flex flex-col gap-5">
@@ -192,21 +191,6 @@ function HeroSection({
             locale={locale}
             isAuthenticated={isAuthenticated}
           />
-
-          <div className="grid max-w-2xl gap-3 sm:grid-cols-3">
-            <SignalStep
-              label={dictionary.landing.hero.eventLabel}
-              value={dictionary.landing.thesis.eventBody}
-            />
-            <SignalStep
-              label={dictionary.landing.hero.reactionLabel}
-              value={dictionary.landing.thesis.reactionBody}
-            />
-            <SignalStep
-              label={dictionary.landing.hero.narrativeLabel}
-              value={dictionary.landing.thesis.narrativeBody}
-            />
-          </div>
         </div>
 
         <ProductPreview dictionary={dictionary} />
@@ -237,7 +221,7 @@ function LandingCtas({
           </Link>
         </Button>
         <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
-          <a href="#workflow">{dictionary.landing.cta.learnWorkflow}</a>
+          <a href="#product">{dictionary.landing.cta.exploreProduct}</a>
         </Button>
       </div>
     )
@@ -266,19 +250,9 @@ function LandingCtas({
   )
 }
 
-function SignalStep({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex min-w-0 flex-col gap-2 rounded-xl border bg-card/80 p-3">
-      <div className="text-xs font-medium uppercase text-muted-foreground">
-        {label}
-      </div>
-      <div className="line-clamp-2 text-sm leading-5 text-foreground">{value}</div>
-    </div>
-  )
-}
-
 function ProductPreview({ dictionary }: { dictionary: Dictionary }) {
   const t = dictionary.landing.visual
+  const watchlist = ["XAU/USD", "EUR/USD", "BTC", "NDX"]
 
   return (
     <figure
@@ -296,26 +270,85 @@ function ProductPreview({ dictionary }: { dictionary: Dictionary }) {
         </div>
       </div>
 
-      <div className="grid gap-0 lg:grid-cols-[0.9fr_1.1fr]">
-        <div className="border-b p-4 lg:border-b-0 lg:border-r">
+      <div className="grid gap-0 xl:grid-cols-[9rem_1fr_15rem]">
+        <aside className="border-b p-4 xl:border-b-0 xl:border-r">
           <div className="flex flex-col gap-4">
-            <PreviewPanel icon={TargetIcon} title={t.assetScope}>
-              <div className="flex flex-wrap gap-2">
-                {["XAUUSD", "EURUSD", "BTC", "NDX"].map((asset) => (
-                  <Badge key={asset} variant="outline">
-                    {asset}
-                  </Badge>
-                ))}
+            <div className="flex flex-col gap-1">
+              <div className="text-xs font-medium uppercase text-muted-foreground">
+                {t.workspace}
               </div>
-            </PreviewPanel>
+              <div className="text-sm font-semibold">{t.workspaceName}</div>
+            </div>
+            <div className="flex flex-col gap-2">
+              <div className="text-xs font-medium uppercase text-muted-foreground">
+                {t.watchlist}
+              </div>
+              {watchlist.map((asset) => (
+                <div
+                  key={asset}
+                  className="flex items-center justify-between gap-2 rounded-lg border bg-background px-2.5 py-2 text-xs"
+                >
+                  <span className="truncate font-medium">{asset}</span>
+                  {asset === "XAU/USD" ? (
+                    <span className="size-1.5 rounded-full bg-foreground" />
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </div>
+        </aside>
 
-            <PreviewPanel icon={NewspaperIcon} title={t.evidenceQueue}>
-              <PreviewRow label={t.articleEvidence} value="Reuters / Macro" />
-              <PreviewRow label={t.calendarEvidence} value="CPI actual" />
-              <PreviewRow label={t.checkedSources} value="8" />
-            </PreviewPanel>
+        <div className="border-b p-4 xl:border-b-0 xl:border-r">
+          <div className="flex min-h-[440px] flex-col gap-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <ChartCandlestickIcon className="text-muted-foreground" />
+                <span className="text-sm font-semibold">{t.chartTitle}</span>
+              </div>
+              <Badge variant="outline">{t.eventMarker}</Badge>
+            </div>
 
-            <PreviewPanel icon={BrainCircuitIcon} title={t.liveContext}>
+            <div className="relative flex flex-1 items-end overflow-hidden rounded-xl border bg-background p-4">
+              <div className="absolute inset-x-4 top-4 flex items-center justify-between text-xs text-muted-foreground">
+                <span>{t.candleMove}</span>
+                <span>XAU/USD</span>
+              </div>
+              <div className="grid h-64 w-full grid-cols-12 items-end gap-2 pt-10">
+                {[46, 54, 42, 62, 56, 78, 68, 88, 74, 64, 70, 82].map(
+                  (height, index) => (
+                    <span
+                      key={index}
+                      className="relative w-full rounded-t border bg-muted"
+                      style={{ height: `${height}%` }}
+                    >
+                      {index === 7 ? (
+                        <span className="absolute -top-3 left-1/2 size-3 -translate-x-1/2 rounded-full border bg-foreground" />
+                      ) : null}
+                    </span>
+                  )
+                )}
+              </div>
+              <div className="absolute right-5 top-16 max-w-64 rounded-xl border bg-card p-4 shadow-xl shadow-foreground/10">
+                <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
+                  <CalendarClockIcon className="text-muted-foreground" />
+                  {t.eventPopupTitle}
+                </div>
+                <p className="mb-3 text-xs leading-5 text-muted-foreground">
+                  {t.eventPopupBody}
+                </p>
+                <PreviewRow label={t.reactionDirection} value="XAU / USD" />
+                <PreviewRow label={t.confidence} value="82%" />
+                <PreviewRow label={t.evidence} value="8" />
+              </div>
+            </div>
+
+            <MiniGraph dictionary={dictionary} />
+          </div>
+        </div>
+
+        <aside className="p-4">
+          <div className="flex h-full min-h-80 flex-col gap-4">
+            <PreviewPanel icon={BrainCircuitIcon} title={t.marketQuery}>
               <p className="text-sm leading-6 text-muted-foreground">
                 {t.queryPrompt}
               </p>
@@ -323,56 +356,56 @@ function ProductPreview({ dictionary }: { dictionary: Dictionary }) {
                 {t.queryAnswer}
               </div>
             </PreviewPanel>
-          </div>
-        </div>
 
-        <div className="flex min-h-[420px] flex-col gap-4 p-4">
-          <div className="grid flex-1 place-items-center rounded-xl border bg-background">
-            <div className="grid w-full max-w-md grid-cols-3 items-center gap-3 p-5">
-              <GraphNode label={t.macroEvent} icon={CalendarClockIcon} />
-              <GraphLink />
-              <GraphNode label={t.goldReaction} icon={LineChartIcon} />
-              <GraphLink className="col-start-1 rotate-90" />
-              <GraphNode label={t.policyShift} icon={NetworkIcon} />
-              <GraphLink className="rotate-90" />
-              <GraphNode label={t.articleEvidence} icon={NewspaperIcon} />
-              <GraphLink />
-              <GraphNode label={t.narrative} icon={SparklesIcon} />
-            </div>
-          </div>
+            <PreviewPanel icon={SearchIcon} title={t.keyEvents}>
+              <PreviewRow label="CPI" value={t.actualValue} />
+              <PreviewRow label="USD" value={t.reactionValue} />
+              <PreviewRow label={t.confidence} value="82%" />
+            </PreviewPanel>
 
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-xl border bg-background p-4">
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <span className="text-sm font-medium">{t.chartAnnotation}</span>
-                <ChartCandlestickIcon className="text-muted-foreground" />
-              </div>
-              <div className="flex h-24 items-end gap-1">
-                {[36, 52, 42, 68, 58, 74, 62, 88, 70, 78].map((height, index) => (
-                  <span
-                    key={index}
-                    className="w-full rounded-t bg-foreground/20"
-                    style={{ height: `${height}%` }}
-                  />
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-xl border bg-background p-4">
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <span className="text-sm font-medium">{t.confidence}</span>
-                <ShieldCheckIcon className="text-muted-foreground" />
-              </div>
-              <div className="flex flex-col gap-2">
-                <ConfidenceBar value="82%" />
-                <PreviewRow label={t.fxReaction} value="USD" />
-                <PreviewRow label={t.goldReaction} value="XAU" />
-              </div>
-            </div>
+            <PreviewPanel icon={ShieldCheckIcon} title={t.limitations}>
+              <p className="text-sm leading-6 text-muted-foreground">
+                {t.limitationsBody}
+              </p>
+              <Badge variant="outline">{t.evidenceButton}</Badge>
+            </PreviewPanel>
           </div>
-        </div>
+        </aside>
       </div>
     </figure>
+  )
+}
+
+function MiniGraph({ dictionary }: { dictionary: Dictionary }) {
+  const t = dictionary.landing.visual
+  const nodes = [
+    { label: t.graphEvent, icon: CalendarClockIcon },
+    { label: t.graphAsset, icon: LineChartIcon },
+    { label: t.graphTheme, icon: TargetIcon },
+    { label: t.graphNarrative, icon: SparklesIcon },
+    { label: t.graphEvidence, icon: NewspaperIcon },
+  ]
+
+  return (
+    <div className="rounded-xl border bg-background p-4">
+      <div className="mb-4 flex items-center gap-2 text-sm font-semibold">
+        <NetworkIcon className="text-muted-foreground" />
+        {t.miniGraph}
+      </div>
+      <div className="grid gap-2 sm:grid-cols-5">
+        {nodes.map((node, index) => (
+          <div key={node.label} className="grid gap-2">
+            <div className="flex min-h-20 flex-col items-center justify-center gap-2 rounded-lg border bg-card p-2 text-center">
+              <node.icon className="text-muted-foreground" />
+              <span className="text-xs font-medium">{node.label}</span>
+            </div>
+            {index < nodes.length - 1 ? (
+              <div className="hidden h-px bg-border sm:block" />
+            ) : null}
+          </div>
+        ))}
+      </div>
+    </div>
   )
 }
 
@@ -405,44 +438,9 @@ function PreviewRow({ label, value }: { label: string; value: string }) {
   )
 }
 
-function GraphNode({
-  label,
-  icon: Icon,
-}: {
-  label: string
-  icon: ElementType
-}) {
-  return (
-    <div className="flex min-h-24 min-w-0 flex-col items-center justify-center gap-2 rounded-xl border bg-card p-3 text-center">
-      <Icon className="text-muted-foreground" />
-      <span className="text-xs font-medium leading-4">{label}</span>
-    </div>
-  )
-}
-
-function GraphLink({ className = "" }: { className?: string }) {
-  return <div className={cn("h-px min-w-8 bg-border", className)} />
-}
-
-function ConfidenceBar({ value }: { value: string }) {
-  return (
-    <div className="flex items-center gap-3">
-      <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
-        <div className="h-full w-[82%] rounded-full bg-foreground" />
-      </div>
-      <span className="text-sm font-medium tabular-nums">{value}</span>
-    </div>
-  )
-}
-
 function ProblemSection({ dictionary }: { dictionary: Dictionary }) {
   const t = dictionary.landing.problem
-  const questions = [
-    t.questionOne,
-    t.questionTwo,
-    t.questionThree,
-    t.questionFour,
-  ]
+  const points = [t.pointOne, t.pointTwo, t.pointThree, t.pointFour]
 
   return (
     <section id="product" className="border-b px-4 py-20 sm:px-6 lg:px-8">
@@ -457,10 +455,10 @@ function ProblemSection({ dictionary }: { dictionary: Dictionary }) {
           </p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
-          {questions.map((question) => (
-            <article key={question} className="rounded-xl border bg-card p-5">
+          {points.map((point) => (
+            <article key={point} className="rounded-xl border bg-card p-5">
               <CheckCircle2Icon className="mb-4 text-muted-foreground" />
-              <h3 className="text-lg font-medium">{question}</h3>
+              <h3 className="text-lg font-medium">{point}</h3>
             </article>
           ))}
         </div>
@@ -469,12 +467,30 @@ function ProblemSection({ dictionary }: { dictionary: Dictionary }) {
   )
 }
 
-function ThesisSection({ dictionary }: { dictionary: Dictionary }) {
-  const t = dictionary.landing.thesis
-  const thesisItems = [
-    { title: t.event, body: t.eventBody, icon: CalendarClockIcon },
-    { title: t.reaction, body: t.reactionBody, icon: ChartCandlestickIcon },
-    { title: t.narrative, body: t.narrativeBody, icon: NetworkIcon },
+function PillarsSection({ dictionary }: { dictionary: Dictionary }) {
+  const t = dictionary.landing.pillars
+  const pillars = [
+    {
+      title: t.chartTitle,
+      oneLine: t.chartOneLine,
+      body: t.chartBody,
+      points: [t.chartPointOne, t.chartPointTwo, t.chartPointThree],
+      icon: ChartCandlestickIcon,
+    },
+    {
+      title: t.queryTitle,
+      oneLine: t.queryOneLine,
+      body: t.queryBody,
+      points: [t.queryPointOne, t.queryPointTwo, t.queryPointThree],
+      icon: BrainCircuitIcon,
+    },
+    {
+      title: t.graphTitle,
+      oneLine: t.graphOneLine,
+      body: t.graphBody,
+      points: [t.graphPointOne, t.graphPointTwo, t.graphPointThree],
+      icon: NetworkIcon,
+    },
   ]
 
   return (
@@ -488,19 +504,32 @@ function ThesisSection({ dictionary }: { dictionary: Dictionary }) {
         </div>
 
         <div className="grid gap-4 lg:grid-cols-3">
-          {thesisItems.map((item) => (
+          {pillars.map((pillar) => (
             <article
-              key={item.title}
+              key={pillar.title}
               className="flex min-w-0 flex-col gap-5 rounded-xl border bg-card p-6"
             >
               <div className="flex size-10 items-center justify-center rounded-lg border bg-background">
-                <item.icon className="text-muted-foreground" />
+                <pillar.icon className="text-muted-foreground" />
               </div>
-              <div className="flex flex-col gap-2">
-                <h3 className="text-xl font-semibold">{item.title}</h3>
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-1">
+                  <h3 className="text-xl font-semibold">{pillar.title}</h3>
+                  <p className="text-sm font-medium text-foreground">
+                    {pillar.oneLine}
+                  </p>
+                </div>
                 <p className="text-sm leading-6 text-muted-foreground">
-                  {item.body}
+                  {pillar.body}
                 </p>
+              </div>
+              <div className="mt-auto flex flex-col gap-2">
+                {pillar.points.map((point) => (
+                  <div key={point} className="flex items-center gap-2 text-sm">
+                    <CheckCircle2Icon className="text-muted-foreground" />
+                    <span>{point}</span>
+                  </div>
+                ))}
               </div>
             </article>
           ))}
@@ -510,84 +539,46 @@ function ThesisSection({ dictionary }: { dictionary: Dictionary }) {
   )
 }
 
-function WorkflowSection({ dictionary }: { dictionary: Dictionary }) {
-  const t = dictionary.landing.workflow
-  const steps = [
-    { title: t.stepOneTitle, body: t.stepOneBody },
-    { title: t.stepTwoTitle, body: t.stepTwoBody },
-    { title: t.stepThreeTitle, body: t.stepThreeBody },
-    { title: t.stepFourTitle, body: t.stepFourBody },
+function PipelineSection({ dictionary }: { dictionary: Dictionary }) {
+  const t = dictionary.landing.pipeline
+  const columns = [
+    {
+      title: t.inputsTitle,
+      items: [t.inputOne, t.inputTwo, t.inputThree, t.inputFour],
+      icon: NewspaperIcon,
+    },
+    {
+      title: t.knowledgeTitle,
+      items: [t.knowledgeOne, t.knowledgeTwo, t.knowledgeThree, t.knowledgeFour],
+      icon: NetworkIcon,
+    },
+    {
+      title: t.surfacesTitle,
+      items: [t.surfaceOne, t.surfaceTwo, t.surfaceThree],
+      icon: SparklesIcon,
+    },
   ]
 
   return (
-    <section id="workflow" className="border-b px-4 py-20 sm:px-6 lg:px-8">
-      <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.8fr_1.2fr]">
-        <div className="flex flex-col gap-4">
-          <Badge variant="outline">{dictionary.landing.nav.workflow}</Badge>
-          <h2 className="text-3xl font-semibold tracking-normal sm:text-4xl">
-            {t.heading}
-          </h2>
-          <p className="text-base leading-7 text-muted-foreground">{t.body}</p>
-        </div>
-
-        <div className="grid gap-4">
-          {steps.map((step, index) => (
-            <article
-              key={step.title}
-              className="grid gap-4 rounded-xl border bg-card p-5 sm:grid-cols-[4rem_1fr]"
-            >
-              <div className="flex size-12 items-center justify-center rounded-lg border bg-background text-lg font-semibold tabular-nums">
-                {index + 1}
-              </div>
-              <div className="flex flex-col gap-2">
-                <h3 className="text-xl font-semibold">{step.title}</h3>
-                <p className="text-sm leading-6 text-muted-foreground">
-                  {step.body}
-                </p>
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
-
-function FeatureSection({ dictionary }: { dictionary: Dictionary }) {
-  const t = dictionary.landing.features
-  const features = [
-    { title: t.workspaceTitle, body: t.workspaceBody, icon: TargetIcon },
-    { title: t.newsTitle, body: t.newsBody, icon: NewspaperIcon },
-    { title: t.calendarTitle, body: t.calendarBody, icon: CalendarClockIcon },
-    { title: t.graphTitle, body: t.graphBody, icon: NetworkIcon },
-    { title: t.chartTitle, body: t.chartBody, icon: ChartCandlestickIcon },
-    { title: t.queryTitle, body: t.queryBody, icon: SearchIcon },
-  ]
-
-  return (
-    <section className="border-b px-4 py-20 sm:px-6 lg:px-8">
+    <section id="pipeline" className="border-b px-4 py-20 sm:px-6 lg:px-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-10">
         <div className="flex max-w-3xl flex-col gap-4">
+          <Badge variant="outline">{dictionary.landing.nav.pipeline}</Badge>
           <h2 className="text-3xl font-semibold tracking-normal sm:text-4xl">
             {t.heading}
           </h2>
           <p className="text-base leading-7 text-muted-foreground">{t.body}</p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {features.map((feature) => (
-            <article
-              key={feature.title}
-              className="flex min-w-0 flex-col gap-4 rounded-xl border bg-card p-5"
-            >
-              <feature.icon className="text-muted-foreground" />
-              <div className="flex flex-col gap-2">
-                <h3 className="text-lg font-semibold">{feature.title}</h3>
-                <p className="text-sm leading-6 text-muted-foreground">
-                  {feature.body}
-                </p>
-              </div>
-            </article>
+        <div className="grid gap-4 lg:grid-cols-3">
+          {columns.map((column, index) => (
+            <PipelineColumn
+              key={column.title}
+              title={column.title}
+              items={column.items}
+              icon={column.icon}
+              showConnector={index < columns.length - 1}
+            />
           ))}
         </div>
       </div>
@@ -595,29 +586,72 @@ function FeatureSection({ dictionary }: { dictionary: Dictionary }) {
   )
 }
 
-function DifferentiationSection({ dictionary }: { dictionary: Dictionary }) {
-  const t = dictionary.landing.differentiation
-  const items = [
-    { title: t.chatbotTitle, body: t.chatbotBody },
-    { title: t.ragTitle, body: t.ragBody },
-    { title: t.signalTitle, body: t.signalBody },
-  ]
+function PipelineColumn({
+  title,
+  items,
+  icon: Icon,
+  showConnector,
+}: {
+  title: string
+  items: string[]
+  icon: ElementType
+  showConnector: boolean
+}) {
+  return (
+    <article className="relative rounded-xl border bg-card p-6">
+      {showConnector ? (
+        <div className="absolute right-0 top-1/2 hidden translate-x-1/2 lg:block">
+          <div className="flex size-8 items-center justify-center rounded-full border bg-background">
+            <ArrowRightIcon className="text-muted-foreground" />
+          </div>
+        </div>
+      ) : null}
+      <div className="mb-5 flex items-center gap-3">
+        <div className="flex size-10 items-center justify-center rounded-lg border bg-background">
+          <Icon className="text-muted-foreground" />
+        </div>
+        <h3 className="text-lg font-semibold">{title}</h3>
+      </div>
+      <div className="flex flex-col gap-2">
+        {items.map((item) => (
+          <div key={item} className="rounded-lg border bg-background px-3 py-2 text-sm">
+            {item}
+          </div>
+        ))}
+      </div>
+    </article>
+  )
+}
+
+function PersonalizationSection({ dictionary }: { dictionary: Dictionary }) {
+  const t = dictionary.landing.personalization
 
   return (
     <section className="border-b px-4 py-20 sm:px-6 lg:px-8">
-      <div className="mx-auto flex max-w-7xl flex-col gap-10">
-        <h2 className="max-w-4xl text-3xl font-semibold tracking-normal sm:text-4xl">
-          {t.heading}
-        </h2>
-        <div className="grid gap-4 lg:grid-cols-3">
-          {items.map((item) => (
-            <article key={item.title} className="rounded-xl border bg-card p-6">
-              <h3 className="mb-3 text-xl font-semibold">{item.title}</h3>
-              <p className="text-sm leading-6 text-muted-foreground">
-                {item.body}
-              </p>
-            </article>
-          ))}
+      <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.85fr_1.15fr]">
+        <div className="flex flex-col gap-4">
+          <Badge variant="outline">{t.eyebrow}</Badge>
+          <h2 className="text-3xl font-semibold tracking-normal sm:text-4xl">
+            {t.heading}
+          </h2>
+          <p className="text-base leading-7 text-muted-foreground">{t.body}</p>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <article className="rounded-xl border bg-card p-6">
+            <TargetIcon className="mb-5 text-muted-foreground" />
+            <h3 className="mb-3 text-xl font-semibold">{t.sharedTitle}</h3>
+            <p className="text-sm leading-6 text-muted-foreground">
+              {t.sharedBody}
+            </p>
+          </article>
+          <article className="rounded-xl border bg-card p-6">
+            <SparklesIcon className="mb-5 text-muted-foreground" />
+            <h3 className="mb-3 text-xl font-semibold">{t.personalTitle}</h3>
+            <p className="text-sm leading-6 text-muted-foreground">
+              {t.personalBody}
+            </p>
+          </article>
         </div>
       </div>
     </section>

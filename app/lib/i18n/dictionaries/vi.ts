@@ -210,7 +210,7 @@ export const vi = {
   landing: {
     nav: {
       product: "Sản phẩm",
-      workflow: "Quy trình",
+      pipeline: "Pipeline",
       trust: "Tin cậy",
       requestAccess: "Yêu cầu truy cập",
       signIn: "Đăng nhập",
@@ -218,130 +218,128 @@ export const vi = {
     },
     hero: {
       eyebrow: "AI Market Intelligence Workspace",
-      title:
-        "Hiểu điều gì đang di chuyển thị trường, không chỉ đọc thêm một dòng tin tức.",
+      title: "Hiểu biến động thị trường qua event, reaction và narrative.",
       body:
-        "Signapse biến tin tức, lịch kinh tế, phản ứng giá và watchlist cá nhân thành một lớp market intelligence có cấu trúc. Theo dõi tài sản quan tâm, kiểm chứng bằng evidence và dùng AI để diễn giải tác động thị trường trong đúng bối cảnh của bạn.",
-      visualLabel: "Minh họa workspace Signapse",
-      previewLabel: "Xem trước workspace",
-      confidenceLabel: "AI ràng buộc bởi evidence",
-      confidenceValue: "Ưu tiên bối cảnh",
-      eventLabel: "Event",
-      reactionLabel: "Reaction",
-      narrativeLabel: "Narrative",
+        "Signapse kết nối tin tức, lịch kinh tế, candle thị trường, watchlist tài sản và AI reasoning vào một workspace phân tích thị trường. Bạn có thể nhìn event trực tiếp trên chart, khám phá quan hệ thị trường bằng knowledge graph, và hỏi AI trong đúng phạm vi tài sản mình đang theo dõi.",
+      visualLabel: "Minh họa workspace Signapse với watchlist, chart annotation, market query và knowledge graph",
+      previewLabel: "Xem trước workspace sản phẩm",
+      intelligenceFlow: "Raw market signals -> structured knowledge -> personalized market intelligence",
     },
     cta: {
       requestAccess: "Yêu cầu truy cập",
       signIn: "Đăng nhập",
       openDashboard: "Mở bảng điều khiển",
-      learnWorkflow: "Xem quy trình",
+      exploreProduct: "Khám phá sản phẩm",
       requestAccessAria: "Yêu cầu truy cập Signapse",
       signInAria: "Đăng nhập vào Signapse",
       openDashboardAria: "Mở bảng điều khiển Signapse",
     },
     problem: {
-      heading: "Thị trường không thiếu dữ liệu. Vấn đề là bối cảnh bị rời rạc.",
+      heading: "Dữ liệu thị trường ở khắp nơi. Bối cảnh thị trường lại bị phân mảnh.",
       body:
-        "Tin tức đến liên tục. Một sự kiện có thể ảnh hưởng nhiều tài sản. Bằng chứng nằm ở nhiều nguồn khác nhau. AI dễ trả lời chung chung nếu không được ràng buộc vào dữ liệu thị trường thật.",
-      questionOne: "Điều gì vừa xảy ra?",
-      questionTwo: "Tài sản nào bị ảnh hưởng?",
-      questionThree: "Bằng chứng nằm ở đâu?",
-      questionFour: "Narrative nào có thể đang định hình phản ứng?",
+        "Tin tức đến liên tục. Lịch kinh tế làm thay đổi kỳ vọng. Giá phản ứng trước khi câu chuyện trở nên rõ ràng. Bằng chứng nằm rải rác trong bài viết, dữ liệu calendar, chart và các lớp phân tích. AI chung chung có thể tóm tắt headline, nhưng khó giải thích thị trường đáng tin cậy nếu không được grounding vào event, asset relation và scope của workspace.",
+      pointOne: "Điều gì biến động?",
+      pointTwo: "Event nào quan trọng?",
+      pointThree: "Evidence nằm ở đâu?",
+      pointFour: "Narrative nào đang được định giá?",
     },
-    thesis: {
-      heading: "Từ event đến reaction, rồi đến narrative.",
+    pillars: {
+      heading: "Ba bề mặt để đọc thị trường.",
       body:
-        "Signapse không chỉ lưu bài viết. Hệ thống chuẩn hóa thông tin thành sự kiện thị trường, liên kết sự kiện với asset, theme và evidence, rồi hỗ trợ diễn giải phản ứng thị trường.",
-      event: "Event",
-      reaction: "Reaction",
-      narrative: "Narrative",
-      eventBody: "Sự kiện thị trường được chuẩn hóa từ tin tức và lịch công bố.",
-      reactionBody:
-        "Bối cảnh tài sản và giá quanh thời điểm thông tin xuất hiện.",
-      narrativeBody:
-        "Lớp diễn giải có liên kết để người dùng kiểm tra và phản biện.",
-    },
-    workflow: {
-      heading: "Một workspace đi theo góc nhìn thị trường của bạn.",
-      body:
-        "Xây một góc nhìn thị trường tập trung, để Signapse kết nối evidence, rồi hỏi AI trong đúng phạm vi.",
-      stepOneTitle: "Tạo workspace thị trường",
-      stepOneBody:
-        "Chọn tài sản từ catalog và xây watchlist cho Macro FX, Gold, Crypto, Equities hoặc thị trường bạn đang theo dõi.",
-      stepTwoTitle: "Gom tín hiệu từ nhiều nguồn",
-      stepTwoBody:
-        "News outlet, RSS, lịch kinh tế, market candles và dữ liệu liên quan tạo thành lớp evidence nền.",
-      stepThreeTitle: "Chuẩn hóa thành market intelligence",
-      stepThreeBody:
-        "Tin tức được nối với event, asset, theme, reaction và evidence để người dùng không phải tự ghép bối cảnh thủ công.",
-      stepFourTitle: "Hỏi AI trong đúng scope",
-      stepFourBody:
-        "AI làm việc từ dữ liệu đã ingest và bối cảnh workspace, giúp câu trả lời tập trung hơn, có bối cảnh hơn và dễ kiểm chứng hơn.",
-    },
-    features: {
-      heading: "Được xây cho người theo dõi thị trường nghiêm túc.",
-      body:
-        "Mỗi bề mặt giữ analyst ở gần evidence thay vì che mọi thứ sau một câu trả lời cuối cùng.",
-      workspaceTitle: "Workspace & watchlist",
-      workspaceBody:
-        "Theo dõi tài sản bạn quan tâm và dùng watchlist như lens cá nhân cho graph, query, chart và notification.",
-      newsTitle: "News & event intelligence",
-      newsBody:
-        "Biến nguồn tin rời rạc thành event có cấu trúc, liên kết với asset, theme và evidence.",
-      calendarTitle: "Lịch kinh tế",
-      calendarBody:
-        "Theo dõi forecast, previous, actual và impact để đặt câu chuyện thị trường vào bối cảnh macro.",
-      graphTitle: "Graph view",
-      graphBody:
-        "Nhìn quan hệ giữa event, asset, theme và news evidence thay vì chỉ đọc một câu trả lời cuối cùng.",
-      chartTitle: "Bối cảnh trên biểu đồ",
+        "Signapse giữ chart context, câu trả lời AI theo scope và graph quan hệ gần cùng một lớp evidence.",
+      chartTitle: "Chart Annotation",
+      chartOneLine: "Nhìn nguyên nhân phía sau biến động giá, không chỉ nhìn cây nến.",
       chartBody:
-        "Đặt event annotation lên chart để kiểm tra phản ứng giá quanh thời điểm thị trường nhận thông tin mới.",
-      queryTitle: "Market query",
+        "Signapse đặt event marker trực tiếp lên chart của từng asset. Marker liên kết biến động giá với thời điểm event, tài sản bị ảnh hưởng, reaction direction, confidence, reasoning và evidence hỗ trợ.",
+      chartPointOne: "Event timing trên trục giá",
+      chartPointTwo: "Reaction direction và confidence",
+      chartPointThree: "Evidence và event drill-down",
+      queryTitle: "Market Query",
+      queryOneLine: "Hỏi thị trường trong đúng phạm vi tài sản bạn đang theo dõi.",
       queryBody:
-        "Hỏi thị trường bằng ngôn ngữ tự nhiên dựa trên dữ liệu đã ingest, liên kết event, evidence và workspace scope.",
+        "Market Query dùng current workspace và watchlist làm ranh giới evidence, rồi tổng hợp câu trả lời từ event, evidence, reaction, narrative và limitation.",
+      queryPointOne: "Giới hạn theo asset trong workspace",
+      queryPointTwo: "Reasoning chain với key events",
+      queryPointThree: "Limitation khi evidence còn thưa",
+      graphTitle: "Knowledge Graph",
+      graphOneLine: "Xem thị trường như một mạng quan hệ, không phải một danh sách headline.",
+      graphBody:
+        "Knowledge Graph giúp người dùng browse lớp market intelligence dùng chung qua watchlist của workspace, nối event với asset, theme, narrative và source evidence.",
+      graphPointOne: "Node event, asset, theme, narrative và evidence",
+      graphPointTwo: "Graph slice theo workspace",
+      graphPointThree: "Khám phá quan hệ song hành với chart và query",
     },
-    differentiation: {
-      heading: "Không phải chatbot. Không phải signal bot. Một workspace để hiểu thị trường.",
-      chatbotTitle: "Không phải chatbot chung chung",
-      chatbotBody:
-        "Signapse xây lớp tri thức thị trường tích lũy theo thời gian.",
-      ragTitle: "Không phải RAG truyền thống",
-      ragBody:
-        "Signapse tổ chức thông tin thành event, reaction và narrative thay vì chỉ retrieve tài liệu.",
-      signalTitle: "Không phải signal bot",
-      signalBody:
-        "Signapse không tự đặt lệnh, không hứa dự báo giá và không thay thế quyết định của người dùng.",
+    pipeline: {
+      heading: "Từ tín hiệu rời rạc đến market intelligence có cấu trúc.",
+      body:
+        "Signapse biến các nguồn tín hiệu thị trường thành một lớp intelligence dùng chung, rồi cá nhân hóa bề mặt trải nghiệm bằng workspace và watchlist.",
+      inputsTitle: "Raw market signals",
+      inputOne: "Tin tức / RSS",
+      inputTwo: "Economic calendar",
+      inputThree: "Market candles",
+      inputFour: "Asset catalog",
+      knowledgeTitle: "Structured knowledge",
+      knowledgeOne: "Event intelligence",
+      knowledgeTwo: "Market reactions",
+      knowledgeThree: "Narratives",
+      knowledgeFour: "Evidence",
+      surfacesTitle: "Personalized workspace surfaces",
+      surfaceOne: "Chart annotation",
+      surfaceTwo: "Market query",
+      surfaceThree: "Knowledge graph",
+    },
+    personalization: {
+      eyebrow: "Workspace personalization",
+      heading: "Knowledge là lớp dùng chung. Trải nghiệm là cá nhân.",
+      body:
+        "Signapse giữ market knowledge là lớp dùng chung, nhưng cá nhân hóa trải nghiệm bằng workspace và watchlist. Một workspace Macro FX và một workspace Crypto có thể hỏi câu giống nhau nhưng nhận bối cảnh khác nhau vì evidence boundary khác nhau.",
+      sharedTitle: "Shared knowledge layer",
+      sharedBody:
+        "Event, asset, theme, narrative, evidence, node identity và relation semantics được giữ nhất quán giữa các workspace.",
+      personalTitle: "Personal market lens",
+      personalBody:
+        "Workspace và watchlist quyết định phần nào xuất hiện trước, AI retrieve gì và quan hệ nào quan trọng ở từng thời điểm.",
     },
     trust: {
-      heading: "Analysis, not prediction.",
+      heading: "Analysis, không phải prediction.",
       body:
-        "AI trong Signapse hỗ trợ diễn giải và tổng hợp dựa trên evidence. Kết quả phân tích cần được đọc cùng nguồn dữ liệu, confidence và giới hạn hiện tại. Signapse giúp người dùng hiểu thị trường nhanh hơn và có bối cảnh hơn, nhưng không phải hệ thống giao dịch tự động hay lời khuyên mua bán.",
+        "Signapse giúp giải thích tác động thị trường dựa trên evidence. Sản phẩm không đặt lệnh, không cam kết dự báo giá, và không thay thế việc kiểm chứng nguồn tin.",
     },
     finalCta: {
-      heading: "Xây workspace thị trường của bạn với Signapse.",
+      heading: "Đọc biến động thị trường với evidence trên chart và bối cảnh trong graph.",
       body:
-        "Đưa event, reaction, narrative và watchlist vào một workspace lấy evidence làm trung tâm.",
+        "Yêu cầu truy cập để xây một workspace tập trung cho asset, event và narrative mà team của bạn theo dõi.",
       requestAccess: "Yêu cầu truy cập",
       openDashboard: "Mở bảng điều khiển",
     },
     visual: {
-      liveContext: "Bối cảnh thị trường",
-      evidenceQueue: "Hàng đợi evidence",
-      assetScope: "Phạm vi watchlist",
-      macroEvent: "Sự kiện macro",
-      policyShift: "Dịch chuyển chính sách",
-      goldReaction: "Phản ứng vàng",
-      fxReaction: "Phản ứng FX",
-      narrative: "Narrative",
-      articleEvidence: "Evidence từ tin tức",
-      calendarEvidence: "Evidence lịch kinh tế",
-      queryPrompt: "Vì sao vàng biến động sau công bố?",
-      queryAnswer:
-        "Evidence nghiêng về tái định giá macro, phản ứng USD và thời điểm sự kiện liên quan.",
-      chartAnnotation: "Event annotation",
+      workspace: "Workspace",
+      workspaceName: "Macro FX",
+      watchlist: "Watchlist",
+      chartTitle: "XAU/USD chart",
+      candleMove: "Candle move",
+      eventMarker: "Event marker",
+      eventPopupTitle: "CPI release làm thị trường định giá lại Gold",
+      eventPopupBody: "Reaction: USD mạnh lên, XAU biến động, macro repricing.",
+      reactionDirection: "Reaction direction",
       confidence: "Confidence",
-      checkedSources: "Nguồn đã kiểm tra",
+      evidence: "Evidence",
+      marketQuery: "Market Query",
+      queryPrompt: "Vì sao vàng biến động sau CPI release?",
+      queryAnswer:
+        "Biến động khớp với Fed repricing, phản ứng USD và evidence macro liên quan trong workspace này.",
+      keyEvents: "Key events",
+      actualValue: "Thực tế",
+      reactionValue: "Phản ứng",
+      limitations: "Limitations",
+      limitationsBody: "Câu trả lời giới hạn theo evidence trong watchlist.",
+      evidenceButton: "Xem evidence",
+      miniGraph: "Knowledge graph",
+      graphEvent: "Event",
+      graphAsset: "Asset",
+      graphTheme: "Theme",
+      graphNarrative: "Narrative",
+      graphEvidence: "Evidence",
     },
   },
   personalNotes: {

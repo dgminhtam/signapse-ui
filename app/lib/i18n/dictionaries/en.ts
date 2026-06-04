@@ -210,7 +210,7 @@ export const en: Dictionary = {
   landing: {
     nav: {
       product: "Product",
-      workflow: "Workflow",
+      pipeline: "Pipeline",
       trust: "Trust",
       requestAccess: "Request access",
       signIn: "Sign in",
@@ -218,128 +218,128 @@ export const en: Dictionary = {
     },
     hero: {
       eyebrow: "AI Market Intelligence Workspace",
-      title:
-        "Understand what is moving markets, not just another news headline.",
+      title: "Understand market moves through events, reactions, and narratives.",
       body:
-        "Signapse turns news, economic releases, price reactions, and your watchlist into structured market intelligence. Track the assets that matter, inspect evidence, and use AI to interpret market impact in your context.",
-      visualLabel: "Illustrative Signapse workspace preview",
-      previewLabel: "Workspace preview",
-      confidenceLabel: "Evidence-bound AI",
-      confidenceValue: "Context first",
-      eventLabel: "Event",
-      reactionLabel: "Reaction",
-      narrativeLabel: "Narrative",
+        "Signapse connects news, economic calendar, market candles, asset watchlists, and AI reasoning into one market intelligence workspace. See events on charts, explore relationships through a knowledge graph, and ask scoped questions grounded in evidence from your own workspace.",
+      visualLabel: "Illustrative Signapse workspace with watchlist, chart annotation, market query, and knowledge graph",
+      previewLabel: "Product workspace preview",
+      intelligenceFlow: "Raw market signals -> structured knowledge -> personalized market intelligence",
     },
     cta: {
       requestAccess: "Request access",
       signIn: "Sign in",
       openDashboard: "Open dashboard",
-      learnWorkflow: "See the workflow",
+      exploreProduct: "Explore the product",
       requestAccessAria: "Request access to Signapse",
       signInAria: "Sign in to Signapse",
       openDashboardAria: "Open the Signapse dashboard",
     },
     problem: {
-      heading: "Markets do not lack data. The problem is fragmented context.",
+      heading: "Market data is everywhere. Market context is scattered.",
       body:
-        "News arrives constantly. One event can affect many assets. Evidence sits across different sources. AI becomes generic when it is not grounded in real market data.",
-      questionOne: "What just happened?",
-      questionTwo: "Which assets are affected?",
-      questionThree: "Where is the evidence?",
-      questionFour: "Which narrative may be shaping the reaction?",
+        "News arrives continuously. Economic releases change expectations. Price reacts before the full story is clear. Evidence sits across articles, calendar data, charts, and analyst notes. Generic AI can summarize headlines, but it cannot reliably explain your market unless it is grounded in structured events, asset relationships, and your workspace scope.",
+      pointOne: "What moved?",
+      pointTwo: "Which event mattered?",
+      pointThree: "Where is the evidence?",
+      pointFour: "What narrative is being priced?",
     },
-    thesis: {
-      heading: "From event to reaction, then to narrative.",
+    pillars: {
+      heading: "Three surfaces for reading the market.",
       body:
-        "Signapse does not just store articles. It structures information into market events, links events to assets, themes, and evidence, then helps interpret the market reaction.",
-      event: "Event",
-      reaction: "Reaction",
-      narrative: "Narrative",
-      eventBody: "Normalized market events from news and releases.",
-      reactionBody: "Asset and price context around the moment information lands.",
-      narrativeBody: "A connected explanation users can inspect and challenge.",
-    },
-    workflow: {
-      heading: "A workspace that follows your market lens.",
-      body:
-        "Build a focused market view, let Signapse connect the evidence, then ask AI inside the right scope.",
-      stepOneTitle: "Create your market workspace",
-      stepOneBody:
-        "Choose assets from the catalog and build watchlists for Macro FX, Gold, Crypto, Equities, or the market you follow.",
-      stepTwoTitle: "Ingest signals from many sources",
-      stepTwoBody:
-        "News outlets, RSS, economic calendar data, market candles, and related records form the evidence layer.",
-      stepThreeTitle: "Normalize into market intelligence",
-      stepThreeBody:
-        "News connects to events, assets, themes, reactions, and evidence so users do not stitch context by hand.",
-      stepFourTitle: "Ask AI in the right scope",
-      stepFourBody:
-        "AI works from ingested data and workspace context, making answers more focused, contextual, and checkable.",
-    },
-    features: {
-      heading: "Built for serious market tracking.",
-      body:
-        "Every surface keeps the analyst close to evidence instead of hiding behind a single final answer.",
-      workspaceTitle: "Workspace & watchlist",
-      workspaceBody:
-        "Track the assets you care about and use watchlists as a personalized lens for graph, query, chart, and notifications.",
-      newsTitle: "News & event intelligence",
-      newsBody:
-        "Turn fragmented sources into structured events connected to assets, themes, and evidence.",
-      calendarTitle: "Economic calendar",
-      calendarBody:
-        "Review forecast, previous, actual, and impact values to place market stories in macro context.",
-      graphTitle: "Graph view",
-      graphBody:
-        "See relationships between events, assets, themes, and news evidence instead of only reading a final answer.",
-      chartTitle: "Market chart context",
+        "Signapse keeps chart context, scoped AI answers, and relationship exploration close to the same evidence layer.",
+      chartTitle: "Chart Annotation",
+      chartOneLine: "See why a move happened, not just that it happened.",
       chartBody:
-        "Place event annotations on market charts to inspect price reaction around new information.",
-      queryTitle: "Market query",
+        "Signapse overlays market events directly onto asset charts. A marker links a price move to event timing, affected asset, reaction direction, confidence, reasoning, and supporting evidence.",
+      chartPointOne: "Event timing on the price axis",
+      chartPointTwo: "Reaction direction and confidence",
+      chartPointThree: "Evidence and event drill-down",
+      queryTitle: "Market Query",
+      queryOneLine: "Ask market questions inside your own asset scope.",
       queryBody:
-        "Ask market questions in natural language using ingested data, event links, evidence, and workspace scope.",
+        "Market Query uses the current workspace and watchlist as the evidence boundary, then builds answers from structured events, linked evidence, reactions, narratives, and limitations.",
+      queryPointOne: "Scoped to workspace assets",
+      queryPointTwo: "Reasoning chain with key events",
+      queryPointThree: "Limitations when evidence is sparse",
+      graphTitle: "Knowledge Graph",
+      graphOneLine: "Map the market as relationships, not headlines.",
+      graphBody:
+        "Knowledge Graph helps users browse the shared market intelligence layer through their workspace watchlist, connecting events to assets, themes, narratives, and source evidence.",
+      graphPointOne: "Event, asset, theme, narrative, and evidence nodes",
+      graphPointTwo: "Workspace-focused graph slice",
+      graphPointThree: "Relationship exploration beside chart and query",
     },
-    differentiation: {
-      heading: "Not a chatbot. Not a signal bot. A workspace for understanding markets.",
-      chatbotTitle: "Not a generic chatbot",
-      chatbotBody:
-        "Signapse builds a market knowledge layer that accumulates over time.",
-      ragTitle: "Not traditional RAG",
-      ragBody:
-        "Signapse organizes information into events, reactions, and narratives instead of only retrieving documents.",
-      signalTitle: "Not a signal bot",
-      signalBody:
-        "Signapse does not place trades, promise price forecasts, or replace user decisions.",
+    pipeline: {
+      heading: "From raw signals to structured market intelligence.",
+      body:
+        "Signapse turns market inputs into a shared intelligence layer, then personalizes the surfaces through workspace and watchlist scope.",
+      inputsTitle: "Raw market signals",
+      inputOne: "News / RSS",
+      inputTwo: "Economic calendar",
+      inputThree: "Market candles",
+      inputFour: "Asset catalog",
+      knowledgeTitle: "Structured knowledge",
+      knowledgeOne: "Event intelligence",
+      knowledgeTwo: "Market reactions",
+      knowledgeThree: "Narratives",
+      knowledgeFour: "Evidence",
+      surfacesTitle: "Personalized workspace surfaces",
+      surfaceOne: "Chart annotation",
+      surfaceTwo: "Market query",
+      surfaceThree: "Knowledge graph",
+    },
+    personalization: {
+      eyebrow: "Workspace personalization",
+      heading: "Knowledge is shared. The experience is personal.",
+      body:
+        "Signapse keeps market knowledge shared, but personalizes the experience through your workspace and watchlist. A Macro FX workspace and a Crypto workspace can ask similar questions and receive different context because the evidence boundary is different.",
+      sharedTitle: "Shared knowledge layer",
+      sharedBody:
+        "Events, assets, themes, narratives, evidence, node identity, and relation semantics stay consistent across workspaces.",
+      personalTitle: "Personal market lens",
+      personalBody:
+        "Workspace and watchlist scope decide what appears first, what AI retrieves, and which relationships matter in the moment.",
     },
     trust: {
       heading: "Analysis, not prediction.",
       body:
-        "AI in Signapse supports interpretation and synthesis based on evidence. Analysis should be read with sources, confidence, and current limitations. Signapse helps users understand markets faster and with more context, but it is not an automated trading system or buy/sell advice.",
+        "Signapse helps explain market impact with evidence. It does not place trades, provide guaranteed forecasts, or replace source verification.",
     },
     finalCta: {
-      heading: "Build your market workspace with Signapse.",
+      heading: "Read market moves with evidence on the chart and context in the graph.",
       body:
-        "Bring events, reactions, narratives, and watchlists into one evidence-centered workspace.",
+        "Request access to build a focused workspace for the assets, events, and narratives your team follows.",
       requestAccess: "Request access",
       openDashboard: "Open dashboard",
     },
     visual: {
-      liveContext: "Market context",
-      evidenceQueue: "Evidence queue",
-      assetScope: "Watchlist scope",
-      macroEvent: "Macro event",
-      policyShift: "Policy shift",
-      goldReaction: "Gold reaction",
-      fxReaction: "FX reaction",
-      narrative: "Narrative",
-      articleEvidence: "News evidence",
-      calendarEvidence: "Calendar evidence",
-      queryPrompt: "Why did gold move after the release?",
-      queryAnswer:
-        "Evidence points to macro repricing, USD reaction, and related event timing.",
-      chartAnnotation: "Event annotation",
+      workspace: "Workspace",
+      workspaceName: "Macro FX",
+      watchlist: "Watchlist",
+      chartTitle: "XAU/USD chart",
+      candleMove: "Candle move",
+      eventMarker: "Event marker",
+      eventPopupTitle: "CPI release reprices Gold",
+      eventPopupBody: "Reaction: USD strength, XAU volatility, macro repricing.",
+      reactionDirection: "Reaction direction",
       confidence: "Confidence",
-      checkedSources: "Checked sources",
+      evidence: "Evidence",
+      marketQuery: "Market Query",
+      queryPrompt: "Why did gold move after the CPI release?",
+      queryAnswer:
+        "The move aligns with Fed repricing, USD reaction, and linked macro evidence inside this workspace.",
+      keyEvents: "Key events",
+      actualValue: "Actual",
+      reactionValue: "Reaction",
+      limitations: "Limitations",
+      limitationsBody: "Answer scoped to watchlist evidence.",
+      evidenceButton: "View evidence",
+      miniGraph: "Knowledge graph",
+      graphEvent: "Event",
+      graphAsset: "Asset",
+      graphTheme: "Theme",
+      graphNarrative: "Narrative",
+      graphEvidence: "Evidence",
     },
   },
   personalNotes: {
