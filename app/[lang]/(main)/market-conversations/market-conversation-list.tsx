@@ -117,8 +117,8 @@ export function MarketConversationListPage({
   }
 
   return (
-    <div className="flex w-full flex-col gap-6">
-      <section className="rounded-xl border bg-card">
+    <div className="grid w-full gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(360px,420px)]">
+      <section className="rounded-xl border bg-card xl:order-2 xl:sticky xl:top-20 xl:self-start">
         <form onSubmit={handleSubmit} className="flex flex-col gap-5 p-5">
           <div className="flex flex-col gap-1">
             <h2 className="text-base font-medium">
@@ -151,7 +151,11 @@ export function MarketConversationListPage({
           </FieldGroup>
 
           <div className="flex justify-end">
-            <Button type="submit" disabled={isPending}>
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="w-full sm:w-auto xl:w-full"
+            >
               {isPending ? (
                 <Spinner data-icon="inline-start" />
               ) : (
@@ -165,120 +169,124 @@ export function MarketConversationListPage({
         </form>
       </section>
 
-      <AppListToolbar>
-        <AppListToolbarLeading>
-          <div className="flex items-center gap-2 text-sm font-medium">
-            <MessageSquareText className="size-4 text-muted-foreground" />
-            {dictionary.marketConversations.list.title}
-          </div>
-        </AppListToolbarLeading>
-        <AppListToolbarTrailing>
-          <AppSelectPageSize
-            className="w-full sm:w-auto"
-            defaultSize={conversationPage.size}
-            showLabel={false}
-            triggerClassName="w-full sm:w-[120px]"
-          />
-        </AppListToolbarTrailing>
-      </AppListToolbar>
+      <section className="flex min-w-0 flex-col xl:order-1">
+        <AppListToolbar>
+          <AppListToolbarLeading>
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <MessageSquareText className="size-4 text-muted-foreground" />
+              {dictionary.marketConversations.list.title}
+            </div>
+          </AppListToolbarLeading>
+          <AppListToolbarTrailing>
+            <AppSelectPageSize
+              className="w-full sm:w-auto"
+              defaultSize={conversationPage.size}
+              showLabel={false}
+              triggerClassName="w-full sm:w-[120px]"
+            />
+          </AppListToolbarTrailing>
+        </AppListToolbar>
 
-      <AppListTable>
-        <Table>
-          <TableHeader>
-            <AppListTableHeaderRow>
-              <AppListTableHead className="w-[52%]">
-                {dictionary.marketConversations.list.conversationColumn}
-              </AppListTableHead>
-              <AppListTableHead className="w-44">
-                {dictionary.marketConversations.list.updatedColumn}
-              </AppListTableHead>
-              <AppListTableHead className="w-44">
-                {dictionary.marketConversations.list.createdColumn}
-              </AppListTableHead>
-              <AppListTableHead className="w-28 text-right">
-                {dictionary.common.actions}
-              </AppListTableHead>
-            </AppListTableHeaderRow>
-          </TableHeader>
-          <TableBody>
-            {conversations.length > 0 ? (
-              conversations.map((conversation) => (
-                <TableRow key={conversation.id} className="border-border">
-                  <TableCell className="align-top whitespace-normal">
-                    <div className="flex min-w-0 flex-col gap-1">
-                      <Link
-                        href={`/market-conversations/${conversation.id}`}
-                        className="line-clamp-1 font-medium break-words hover:underline"
-                      >
-                        {conversation.title}
-                      </Link>
-                      <span className="text-xs text-muted-foreground">
-                        {dictionary.marketConversations.list.workspaceScoped}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="w-44">
-                    <AppTimeMetadata icon={Clock3}>
-                      {formatDateTime(
-                        conversation.updatedAt,
-                        {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        },
-                        dictionary.common.notAvailable
-                      )}
-                    </AppTimeMetadata>
-                  </TableCell>
-                  <TableCell className="w-44">
-                    <AppTimeMetadata icon={Clock3}>
-                      {formatDateTime(
-                        conversation.createdAt,
-                        {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        },
-                        dictionary.common.notAvailable
-                      )}
-                    </AppTimeMetadata>
-                  </TableCell>
-                  <TableCell className="w-28 text-right">
-                    <Button asChild variant="ghost" size="icon-sm">
-                      <Link href={`/market-conversations/${conversation.id}`}>
-                        <Plus data-icon="inline-start" />
-                        <span className="sr-only">
-                          {dictionary.marketConversations.list.openConversation}
+        <AppListTable>
+          <Table>
+            <TableHeader>
+              <AppListTableHeaderRow>
+                <AppListTableHead className="w-[52%]">
+                  {dictionary.marketConversations.list.conversationColumn}
+                </AppListTableHead>
+                <AppListTableHead className="w-44">
+                  {dictionary.marketConversations.list.updatedColumn}
+                </AppListTableHead>
+                <AppListTableHead className="w-44">
+                  {dictionary.marketConversations.list.createdColumn}
+                </AppListTableHead>
+                <AppListTableHead className="w-28 text-right">
+                  {dictionary.common.actions}
+                </AppListTableHead>
+              </AppListTableHeaderRow>
+            </TableHeader>
+            <TableBody>
+              {conversations.length > 0 ? (
+                conversations.map((conversation) => (
+                  <TableRow key={conversation.id} className="border-border">
+                    <TableCell className="align-top whitespace-normal">
+                      <div className="flex min-w-0 flex-col gap-1">
+                        <Link
+                          href={`/market-conversations/${conversation.id}`}
+                          className="line-clamp-1 font-medium break-words hover:underline"
+                        >
+                          {conversation.title}
+                        </Link>
+                        <span className="text-xs text-muted-foreground">
+                          {dictionary.marketConversations.list.workspaceScoped}
                         </span>
-                      </Link>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <AppListTableEmptyState colSpan={4}>
-                <EmptyHeader>
-                  <EmptyMedia variant="icon">
-                    <MessageSquareText />
-                  </EmptyMedia>
-                  <EmptyTitle>
-                    {dictionary.marketConversations.list.emptyTitle}
-                  </EmptyTitle>
-                  <EmptyDescription>
-                    {dictionary.marketConversations.list.emptyDescription}
-                  </EmptyDescription>
-                </EmptyHeader>
-              </AppListTableEmptyState>
-            )}
-          </TableBody>
-        </Table>
-      </AppListTable>
+                      </div>
+                    </TableCell>
+                    <TableCell className="w-44">
+                      <AppTimeMetadata icon={Clock3}>
+                        {formatDateTime(
+                          conversation.updatedAt,
+                          {
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          },
+                          dictionary.common.notAvailable
+                        )}
+                      </AppTimeMetadata>
+                    </TableCell>
+                    <TableCell className="w-44">
+                      <AppTimeMetadata icon={Clock3}>
+                        {formatDateTime(
+                          conversation.createdAt,
+                          {
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          },
+                          dictionary.common.notAvailable
+                        )}
+                      </AppTimeMetadata>
+                    </TableCell>
+                    <TableCell className="w-28 text-right">
+                      <Button asChild variant="ghost" size="icon-sm">
+                        <Link href={`/market-conversations/${conversation.id}`}>
+                          <Plus data-icon="inline-start" />
+                          <span className="sr-only">
+                            {dictionary.marketConversations.list.openConversation}
+                          </span>
+                        </Link>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <AppListTableEmptyState colSpan={4}>
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <MessageSquareText />
+                    </EmptyMedia>
+                    <EmptyTitle>
+                      {dictionary.marketConversations.list.emptyTitle}
+                    </EmptyTitle>
+                    <EmptyDescription>
+                      {dictionary.marketConversations.list.emptyDescription}
+                    </EmptyDescription>
+                  </EmptyHeader>
+                </AppListTableEmptyState>
+              )}
+            </TableBody>
+          </Table>
+        </AppListTable>
 
-      <AppPaginationControls page={conversationPage} className="mt-4" />
+        {conversationPage.totalElements > 0 ? (
+          <AppPaginationControls page={conversationPage} className="mt-4" />
+        ) : null}
+      </section>
     </div>
   )
 }
