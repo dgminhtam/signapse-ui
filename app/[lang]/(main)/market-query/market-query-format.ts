@@ -120,5 +120,5 @@ export function formatSourceDocumentFallbackMeta(
 }
 
 export function getSourceDocumentHref(id: number) {
-  return `/source-documents/${id}`
+  return `/news-articles/${id}`
 }

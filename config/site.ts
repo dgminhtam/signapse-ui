@@ -106,7 +106,7 @@ export function createSiteConfig(dictionary: Dictionary) {
         },
         {
           title: dictionary.navigation.marketQuery,
-          url: "/market-query",
+          url: "/market-conversations",
           permission: MARKET_QUERY_NAV_PERMISSIONS,
         },
         {

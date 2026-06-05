@@ -22,7 +22,7 @@ import type { AppLocale } from "@/app/lib/i18n/config"
 import { getDictionary, hasLocale } from "@/app/lib/i18n/dictionaries"
 import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
 import { withLocalePath } from "@/app/lib/i18n/routing"
-import { cn } from "@/lib/utils"
+import { Logo } from "@/components/logo"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 
@@ -102,9 +102,7 @@ function LandingHeader({
           href={withLocalePath("/", locale)}
           className="flex items-center gap-3 font-semibold"
         >
-          <span className="flex size-8 items-center justify-center rounded-lg border bg-card">
-            S
-          </span>
+          <Logo width={32} height={32} />
           <span>{dictionary.common.appName}</span>
         </Link>
 

@@ -47,7 +47,7 @@ export function EvidenceList({
         <div className="divide-y divide-border">
           {evidence.map((item, index) => (
             <EvidenceRow
-              key={`${item.artifactId ?? item.eventId ?? "evidence"}-${index}`}
+              key={`${item.newsArticleId ?? item.eventId ?? "evidence"}-${index}`}
               evidence={item}
               canReadEvents={canReadEvents}
               canReadSourceDocuments={canReadSourceDocuments}
@@ -84,7 +84,7 @@ function EvidenceRow({
   const artifactTypeLabels = getMarketQueryArtifactTypeLabels(dictionary)
   const evidenceRoleLabels = getMarketQueryEvidenceRoleLabels(dictionary)
   const eventTitle = evidence.eventTitle?.trim()
-  const sourceDocumentTitle = evidence.artifactTitle?.trim()
+  const sourceDocumentTitle = evidence.newsArticleTitle?.trim()
   const eventLabel =
     eventTitle ||
     (typeof evidence.eventId === "number"
@@ -92,18 +92,18 @@ function EvidenceRow({
       : dictionary.marketQuery.evidence.eventMissing)
   const sourceDocumentLabel =
     sourceDocumentTitle ||
-    (typeof evidence.artifactId === "number"
+    (typeof evidence.newsArticleId === "number"
       ? dictionary.marketQuery.evidence.sourceDocumentUntitled
       : dictionary.marketQuery.evidence.sourceDocumentMissing)
   const eventMeta = !eventTitle
     ? formatEventFallbackMeta(evidence.eventId, dictionary)
     : null
   const sourceDocumentMeta = !sourceDocumentTitle
-    ? formatSourceDocumentFallbackMeta(evidence.artifactId, dictionary)
+    ? formatSourceDocumentFallbackMeta(evidence.newsArticleId, dictionary)
     : null
   const hasBlockedEvent = typeof evidence.eventId === "number" && !canReadEvents
   const hasBlockedSourceDocument =
-    typeof evidence.artifactId === "number" && !canReadSourceDocuments
+    typeof evidence.newsArticleId === "number" && !canReadSourceDocuments
   const traceabilityHint = formatTraceabilityHint(
     hasBlockedEvent,
     hasBlockedSourceDocument,
@@ -180,18 +180,18 @@ function EvidenceRow({
             </Button>
           ) : null}
 
-          {typeof evidence.artifactId === "number" && canReadSourceDocuments ? (
+          {typeof evidence.newsArticleId === "number" && canReadSourceDocuments ? (
             <Button variant="outline" size="sm" asChild>
-              <Link href={getSourceDocumentHref(evidence.artifactId)}>
+              <Link href={getSourceDocumentHref(evidence.newsArticleId)}>
                 <FileText data-icon="inline-start" />
                 {dictionary.marketQuery.evidence.openSourceDocument}
               </Link>
             </Button>
           ) : null}
 
-          {evidence.artifactUrl ? (
+          {evidence.newsArticleUrl ? (
             <Button variant="outline" size="sm" asChild>
-              <a href={evidence.artifactUrl} target="_blank" rel="noopener noreferrer">
+              <a href={evidence.newsArticleUrl} target="_blank" rel="noopener noreferrer">
                 <ExternalLink data-icon="inline-start" />
                 {dictionary.marketQuery.evidence.openOriginalLink}
               </a>

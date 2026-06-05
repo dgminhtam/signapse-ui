@@ -101,7 +101,7 @@ function KeyEventCard({
         )}
         {fallbackMeta ? <p className="text-xs leading-5 text-muted-foreground">{fallbackMeta}</p> : null}
         <p className="text-sm leading-6 text-muted-foreground">
-          {event.summary?.trim() || dictionary.marketQuery.keyEvents.summaryEmpty}
+          {event.description?.trim() || dictionary.marketQuery.keyEvents.summaryEmpty}
         </p>
       </div>
 
