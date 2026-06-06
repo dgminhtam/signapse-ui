@@ -8,11 +8,80 @@ import { getDictionary } from "@/app/lib/i18n/dictionaries"
 import { getRequestLocale } from "@/app/lib/i18n/server"
 import {
   BackendMeResponse,
+  CreateUserRequest,
+  UpdateManagedUserRequest,
   UpdateUserProfileRequest,
+  UserResponse,
+  UserSearchRequest,
+  UserSearchResponse,
 } from "@/app/lib/users/definitions"
+
+function buildUserSearchQuery(request: UserSearchRequest) {
+  const params = new URLSearchParams()
+  const filter = request.filter?.trim()
+
+  if (filter) {
+    params.set("$filter", filter)
+  }
+
+  const query = params.toString()
+  return query ? `?${query}` : ""
+}
 
 export async function getMe(): Promise<BackendMeResponse> {
   return fetchAuthenticated<BackendMeResponse>("/me")
+}
+
+export async function getUsers(
+  request: UserSearchRequest = {}
+): Promise<UserSearchResponse> {
+  return fetchAuthenticated<UserSearchResponse>(`/user${buildUserSearchQuery(request)}`)
+}
+
+export async function createUser(
+  request: CreateUserRequest
+): Promise<ActionResult<UserResponse>> {
+  try {
+    const user = await fetchAuthenticated<UserResponse>("/user", {
+      method: "POST",
+      body: JSON.stringify(request),
+    })
+
+    revalidatePath("/users")
+
+    return { success: true, data: user }
+  } catch (error: unknown) {
+    const dictionary = await getDictionary(await getRequestLocale())
+    const errorMessage =
+      error instanceof Error ? error.message : dictionary.users.createError
+
+    return { success: false, error: errorMessage }
+  }
+}
+
+export async function updateManagedUser(
+  id: number,
+  request: UpdateManagedUserRequest
+): Promise<ActionResult<UserResponse>> {
+  try {
+    const user = await fetchAuthenticated<UserResponse>(
+      `/user/${encodeURIComponent(id)}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(request),
+      }
+    )
+
+    revalidatePath("/users")
+
+    return { success: true, data: user }
+  } catch (error: unknown) {
+    const dictionary = await getDictionary(await getRequestLocale())
+    const errorMessage =
+      error instanceof Error ? error.message : dictionary.users.updateError
+
+    return { success: false, error: errorMessage }
+  }
 }
 
 export async function updateMyProfile(
