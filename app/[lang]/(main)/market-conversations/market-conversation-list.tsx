@@ -1,7 +1,7 @@
 "use client"
 
-import { FormEvent, useId, useState, useTransition } from "react"
-import { Clock3, MessageSquareText, Plus, SendHorizontal } from "lucide-react"
+import { FormEvent, KeyboardEvent, useId, useState, useTransition } from "react"
+import { SendHorizontal } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 
@@ -16,38 +16,22 @@ import {
   MarketConversationSummaryResponse,
   deriveMarketConversationTitle,
 } from "@/app/lib/market-query/definitions"
-import { AppPaginationControls } from "@/components/app-pagination-controls"
-import { AppSelectPageSize } from "@/components/app-select-page-size"
-import { AppTimeMetadata } from "@/components/app-time-metadata"
-import {
-  AppListTable,
-  AppListTableEmptyState,
-  AppListTableHead,
-  AppListTableHeaderRow,
-} from "@/components/app-list-table"
-import {
-  AppListToolbar,
-  AppListToolbarLeading,
-  AppListToolbarTrailing,
-} from "@/components/app-list-toolbar"
-import { LocalizedLink as Link } from "@/components/localized-link"
-import { Button } from "@/components/ui/button"
-import {
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty"
 import {
   Field,
-  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupTextarea,
+} from "@/components/ui/input-group"
+import { Kbd } from "@/components/ui/kbd"
 import { Spinner } from "@/components/ui/spinner"
-import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table"
-import { Textarea } from "@/components/ui/textarea"
+
+import { MarketConversationHistorySheet } from "./market-conversation-history-sheet"
 
 interface MarketConversationListPageProps {
   conversationPage: Page<MarketConversationSummaryResponse>
@@ -56,8 +40,7 @@ interface MarketConversationListPageProps {
 export function MarketConversationListPage({
   conversationPage,
 }: MarketConversationListPageProps) {
-  const { dictionary, formatDateTime, locale } = useLocalization()
-  const conversations = conversationPage.content ?? []
+  const { dictionary, locale } = useLocalization()
   const [question, setQuestion] = useState("")
   const [questionError, setQuestionError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
@@ -107,185 +90,78 @@ export function MarketConversationListPage({
 
       toast.success(dictionary.marketConversations.startSuccess)
       router.push(
-        withLocalePath(
-          `/market-conversations/${createResult.data.id}`,
-          locale
-        )
+        withLocalePath(`/market-conversations/${createResult.data.id}`, locale)
       )
       router.refresh()
     })
   }
 
-  return (
-    <div className="grid w-full gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(360px,420px)]">
-      <section className="rounded-xl border bg-card xl:order-2 xl:sticky xl:top-20 xl:self-start">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5 p-5">
-          <div className="flex flex-col gap-1">
-            <h2 className="text-base font-medium">
-              {dictionary.marketConversations.start.title}
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              {dictionary.marketConversations.start.description}
-            </p>
-          </div>
+  function handleQuestionKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (
+      event.key === "Enter" &&
+      !event.shiftKey &&
+      !event.nativeEvent.isComposing
+    ) {
+      event.preventDefault()
+      event.currentTarget.form?.requestSubmit()
+    }
+  }
 
+  return (
+    <div className="flex min-h-[calc(100vh-12rem)] w-full flex-col gap-6">
+      <div className="flex justify-end">
+        <MarketConversationHistorySheet conversationPage={conversationPage} />
+      </div>
+
+      <section className="flex flex-1 items-center justify-center py-10">
+        <form
+          onSubmit={handleSubmit}
+          className="flex w-full max-w-3xl flex-col gap-5"
+        >
+          <h1 className="text-center text-2xl font-semibold tracking-normal">
+            {dictionary.marketConversations.start.promptTitle}
+          </h1>
           <FieldGroup>
-            <Field data-invalid={!!questionError}>
-              <FieldLabel htmlFor={questionId}>
+            <Field data-invalid={!!questionError} data-disabled={isPending}>
+              <FieldLabel htmlFor={questionId} className="sr-only">
                 {dictionary.marketConversations.start.questionLabel}
               </FieldLabel>
-              <Textarea
-                id={questionId}
-                value={question}
-                onChange={(event) => handleQuestionChange(event.target.value)}
-                placeholder={dictionary.marketConversations.start.questionPlaceholder}
-                className="min-h-[118px] resize-y"
-                aria-invalid={questionError ? true : undefined}
-                disabled={isPending}
-              />
-              <FieldDescription>
-                {dictionary.marketConversations.start.questionDescription}
-              </FieldDescription>
+              <InputGroup className="min-h-36 rounded-xl bg-card shadow-sm">
+                <InputGroupTextarea
+                  id={questionId}
+                  value={question}
+                  onChange={(event) => handleQuestionChange(event.target.value)}
+                  onKeyDown={handleQuestionKeyDown}
+                  placeholder={
+                    dictionary.marketConversations.start.questionPlaceholder
+                  }
+                  className="min-h-24 px-4 pt-4"
+                  aria-invalid={questionError ? true : undefined}
+                  disabled={isPending}
+                  rows={4}
+                />
+                <InputGroupAddon align="block-end" className="justify-between">
+                  <Kbd>Enter</Kbd>
+                  <InputGroupButton
+                    type="submit"
+                    variant="default"
+                    size="icon-sm"
+                    className="rounded-full"
+                    disabled={isPending}
+                    aria-label={
+                      isPending
+                        ? dictionary.marketConversations.start.starting
+                        : dictionary.marketConversations.start.start
+                    }
+                  >
+                    {isPending ? <Spinner /> : <SendHorizontal />}
+                  </InputGroupButton>
+                </InputGroupAddon>
+              </InputGroup>
               <FieldError>{questionError}</FieldError>
             </Field>
           </FieldGroup>
-
-          <div className="flex justify-end">
-            <Button
-              type="submit"
-              disabled={isPending}
-              className="w-full sm:w-auto xl:w-full"
-            >
-              {isPending ? (
-                <Spinner data-icon="inline-start" />
-              ) : (
-                <SendHorizontal data-icon="inline-start" />
-              )}
-              {isPending
-                ? dictionary.marketConversations.start.starting
-                : dictionary.marketConversations.start.start}
-            </Button>
-          </div>
         </form>
-      </section>
-
-      <section className="flex min-w-0 flex-col xl:order-1">
-        <AppListToolbar>
-          <AppListToolbarLeading>
-            <div className="flex items-center gap-2 text-sm font-medium">
-              <MessageSquareText className="size-4 text-muted-foreground" />
-              {dictionary.marketConversations.list.title}
-            </div>
-          </AppListToolbarLeading>
-          <AppListToolbarTrailing>
-            <AppSelectPageSize
-              className="w-full sm:w-auto"
-              defaultSize={conversationPage.size}
-              showLabel={false}
-              triggerClassName="w-full sm:w-[120px]"
-            />
-          </AppListToolbarTrailing>
-        </AppListToolbar>
-
-        <AppListTable>
-          <Table>
-            <TableHeader>
-              <AppListTableHeaderRow>
-                <AppListTableHead className="w-[52%]">
-                  {dictionary.marketConversations.list.conversationColumn}
-                </AppListTableHead>
-                <AppListTableHead className="w-44">
-                  {dictionary.marketConversations.list.updatedColumn}
-                </AppListTableHead>
-                <AppListTableHead className="w-44">
-                  {dictionary.marketConversations.list.createdColumn}
-                </AppListTableHead>
-                <AppListTableHead className="w-28 text-right">
-                  {dictionary.common.actions}
-                </AppListTableHead>
-              </AppListTableHeaderRow>
-            </TableHeader>
-            <TableBody>
-              {conversations.length > 0 ? (
-                conversations.map((conversation) => (
-                  <TableRow key={conversation.id} className="border-border">
-                    <TableCell className="align-top whitespace-normal">
-                      <div className="flex min-w-0 flex-col gap-1">
-                        <Link
-                          href={`/market-conversations/${conversation.id}`}
-                          className="line-clamp-1 font-medium break-words hover:underline"
-                        >
-                          {conversation.title}
-                        </Link>
-                        <span className="text-xs text-muted-foreground">
-                          {dictionary.marketConversations.list.workspaceScoped}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="w-44">
-                      <AppTimeMetadata icon={Clock3}>
-                        {formatDateTime(
-                          conversation.updatedAt,
-                          {
-                            year: "numeric",
-                            month: "2-digit",
-                            day: "2-digit",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          },
-                          dictionary.common.notAvailable
-                        )}
-                      </AppTimeMetadata>
-                    </TableCell>
-                    <TableCell className="w-44">
-                      <AppTimeMetadata icon={Clock3}>
-                        {formatDateTime(
-                          conversation.createdAt,
-                          {
-                            year: "numeric",
-                            month: "2-digit",
-                            day: "2-digit",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          },
-                          dictionary.common.notAvailable
-                        )}
-                      </AppTimeMetadata>
-                    </TableCell>
-                    <TableCell className="w-28 text-right">
-                      <Button asChild variant="ghost" size="icon-sm">
-                        <Link href={`/market-conversations/${conversation.id}`}>
-                          <Plus data-icon="inline-start" />
-                          <span className="sr-only">
-                            {dictionary.marketConversations.list.openConversation}
-                          </span>
-                        </Link>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <AppListTableEmptyState colSpan={4}>
-                  <EmptyHeader>
-                    <EmptyMedia variant="icon">
-                      <MessageSquareText />
-                    </EmptyMedia>
-                    <EmptyTitle>
-                      {dictionary.marketConversations.list.emptyTitle}
-                    </EmptyTitle>
-                    <EmptyDescription>
-                      {dictionary.marketConversations.list.emptyDescription}
-                    </EmptyDescription>
-                  </EmptyHeader>
-                </AppListTableEmptyState>
-              )}
-            </TableBody>
-          </Table>
-        </AppListTable>
-
-        {conversationPage.totalElements > 0 ? (
-          <AppPaginationControls page={conversationPage} className="mt-4" />
-        ) : null}
       </section>
     </div>
   )

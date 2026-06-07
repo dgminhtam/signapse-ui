@@ -1224,6 +1224,7 @@ export const en: Dictionary = {
     },
     start: {
       title: "Start a market conversation",
+      promptTitle: "What's on your mind today?",
       description:
         "Ask the first question. The system will create the conversation title from it and persist the analysis thread.",
       questionLabel: "First question",
@@ -1236,17 +1237,22 @@ export const en: Dictionary = {
     },
     list: {
       title: "Conversation history",
+      openHistory: "Conversation history",
+      historyDescription:
+        "Open a saved market conversation to continue from its persisted analysis thread.",
       conversationColumn: "Conversation",
       updatedColumn: "Updated",
       createdColumn: "Created",
       workspaceScoped: "Scoped to the current workspace",
       openConversation: "Open conversation",
+      current: "Current",
       emptyTitle: "No conversations yet",
       emptyDescription:
         "Start with a market question to create the first persisted analysis thread.",
     },
     detail: {
       backToList: "Back to conversations",
+      newConversation: "New conversation",
       timelineLabel: "Conversation timeline",
       emptyTitle: "No messages yet",
       emptyDescription:

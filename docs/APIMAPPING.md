@@ -2,7 +2,7 @@
 
 Tài liệu này ánh xạ snapshot OpenAPI backend trong `docs/api_mapping.json` tới các điểm tích hợp frontend hiện tại của repo.
 
-Xác minh lần cuối: ngày 5 tháng 6 năm 2026
+Xác minh lần cuối: ngày 7 tháng 6 năm 2026
 
 ## Cấu hình cơ sở
 
@@ -59,6 +59,7 @@ Xác minh lần cuối: ngày 5 tháng 6 năm 2026
 - Snapshot mới thêm `POST /watchlists/assets` để bulk create watchlist assets; `responseSchema` của system prompts hiện là JSON object inline, không còn component schema `JsonNode`.
 - Snapshot mới thêm `GET /market-charts/live` cho live chart stream dạng `text/event-stream`, dùng permission `market-chart:read`.
 - Snapshot mới thêm workflow market conversations / persisted analyses dưới permission `query:execute`, gồm lưu hội thoại, submit message, xem analysis/evidence, và gửi analysis qua Telegram.
+- Snapshot ngày 7/6 đổi tên OpenAPI schema của market conversations sang nhóm `Conversation*` và đổi timestamp conversation/message sang `createdDate` / `lastModifiedDate`.
 - Snapshot mới mở rộng asset type enum từ `COMMODITY`, `CRYPTO`, `FX`, `INDEX` thành thêm `EQUITY`, `ETF` trên assets, watchlists, events, narratives, graph metadata, và market charts.
 
 ## Phạm vi endpoint
@@ -82,7 +83,7 @@ Frontend liên quan:
 
 Ghi chú:
 
-- Enum `promptType` trong snapshot hiện tại gồm `FIRECRAWL_SOURCE_DOCUMENT_FILTER`, `NEWS_ARTICLE_CONTENT_LOCALIZATION`, `NEWS_PRIMARY_EVENT_DERIVATION`, `EVENT_ASSET_THEME_ENRICHMENT`, `EVENT_MARKET_REACTION_DERIVATION`, `EVENT_NARRATIVE_REFRESH`, `EVENT_GROUNDED_MARKET_QUERY_SYNTHESIS`, `TELEGRAM_CALENDAR_ALERT_ASSESSMENT`, `TELEGRAM_NEWS_ALERT_ASSESSMENT`, và `TELEGRAM_MARKET_ANALYSIS`; nhóm legacy `NEWS_FILTER`, `NEWS_ANALYSIS`, `SIGNAL_GENERATION`, `DECISION_MAKING`, `CONTENT_EXTRACTION`, `SENTIMENT_ANALYSIS`, `TITLE_GENERATION`, `SUMMARY_GENERATION`, `CONTENT_CLEANING` không còn trong snapshot.
+- Enum `promptType` trong snapshot hiện tại gồm `FIRECRAWL_SOURCE_DOCUMENT_FILTER`, `NEWS_ARTICLE_CONTENT_LOCALIZATION`, `NEWS_PRIMARY_EVENT_DERIVATION`, `EVENT_ASSET_THEME_ENRICHMENT`, `EVENT_MARKET_REACTION_DERIVATION`, `EVENT_NARRATIVE_REFRESH`, `EVENT_GROUNDED_MARKET_QUERY_SYNTHESIS`, `MARKET_QUERY_CONVERSATION_ORCHESTRATION`, `TELEGRAM_CALENDAR_ALERT_ASSESSMENT`, `TELEGRAM_NEWS_ALERT_ASSESSMENT`, và `TELEGRAM_MARKET_ANALYSIS`; nhóm legacy `NEWS_FILTER`, `NEWS_ANALYSIS`, `SIGNAL_GENERATION`, `DECISION_MAKING`, `CONTENT_EXTRACTION`, `SENTIMENT_ANALYSIS`, `TITLE_GENERATION`, `SUMMARY_GENERATION`, `CONTENT_CLEANING` không còn trong snapshot.
 - `CreateSystemPromptRequest` hiện yêu cầu `promptType`, `content`, `responseSchema`; `UpdateSystemPromptRequest` có thêm optional `responseSchema` và `localizedNames`.
 - `SystemPromptResponse` hiện có thêm `name`, `responseSchema`, `localizedNames`; `responseSchema` là JSON object inline (`type: object`, `additionalProperties: {}`), frontend model bằng JSON value và cung cấp schema editor dạng builder + JSON.
 - Frontend validate `content` không được rỗng sau khi `trim()` và không vượt quá `10000` ký tự; `responseSchema` phải là JSON parse được trước khi submit.
@@ -217,8 +218,8 @@ Ghi chu:
 | Phuong thuc | Endpoint backend                              | operationId          | Tich hop frontend      | Trang thai                            | Ghi chu                                                                                                                                                                                                                                          |
 | ----------- | --------------------------------------------- | -------------------- | ---------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | POST        | `/query`                                      | `query`              | `queryMarket(request)` | Da trien khai nhung khong con la surface chinh | Route `/market-query` da redirect ve `/market-conversations`; legacy action/DTO con giu de compatibility va da map drift `description`, `newsArticle*`, `evidenceNote`, `keyNarratives[]`. |
-| GET         | `/market-conversations`                       | `getConversations`   | `getMarketConversations(searchParams)` | Da tich hop | List persisted market conversations, response `PageMarketConversationSummaryResponse`; permission `query:execute`. |
-| POST        | `/market-conversations`                       | `createConversation` | `createMarketConversation(request)` | Da tich hop | Tao conversation bang `CreateMarketConversationRequest { title }`; title duoc derive tu cau hoi dau tien, permission `query:execute`. |
+| GET         | `/market-conversations`                       | `getConversations`   | `getMarketConversations(searchParams)` | Da tich hop | List persisted market conversations, response OpenAPI `PageConversationSummaryResponse`; permission `query:execute`. |
+| POST        | `/market-conversations`                       | `createConversation` | `createMarketConversation(request)` | Da tich hop | Tao conversation bang OpenAPI `CreateConversationRequest { title }`; title duoc derive tu cau hoi dau tien, permission `query:execute`. |
 | GET         | `/market-conversations/{id}`                  | `getConversation`    | `getMarketConversationById(id)` | Da tich hop | Doc conversation detail gom messages; permission `query:execute`. |
 | POST        | `/market-conversations/{id}/messages`         | `submitMessage`      | `submitMarketConversationMessage(id, request)` | Da tich hop | Submit message bang `{ message }`; frontend v1 khong gui `asOfTime`, tra `userMessage`, `assistantMessage`, va `analysisId`; permission `query:execute`. |
 | GET         | `/market-analyses/{id}`                       | `getAnalysis`        | `getMarketAnalysisById(id)` | Da tich hop | Doc persisted analysis snapshot gom answer, reasoning, keyEvents, keyNarratives, model info, status; permission `query:execute`. |
@@ -241,7 +242,8 @@ Ghi chu:
 - `MarketQueryKeyEventResponse` da doi `summary` thanh `description`; FE da dong bo DTO va legacy renderer cho field moi.
 - `MarketQueryResponse` co them `keyNarratives[]`; FE da them type/schema cho field nay va persisted analysis UI render key narratives tu `MarketAnalysisResponse`.
 - `MarketQueryEvidenceResponse` hien dung `eventId`, `eventTitle`, `newsArticleId`, `newsArticleTitle`, `newsArticleUrl`, `newsOutletName`, `publishedAt`, `evidenceRole`, `evidenceConfidence`, `evidenceNote`; FE da doi DTO/list legacy sang `newsArticle*` va render note.
-- Snapshot ngay 5/6 them persisted conversation model: `MarketConversationSummaryResponse`, `MarketConversationDetailResponse`, `MarketChatMessageResponse` voi `role` USER/ASSISTANT, `kind` TEXT/ANALYSIS, va `status` PENDING/COMPLETED/FAILED.
+- Snapshot ngay 7/6 doi ten schema OpenAPI persisted conversation tu nhom `MarketConversation*` sang `ConversationSummaryResponse`, `ConversationDetailResponse`, `ChatMessageResponse`, `CreateConversationRequest`, `SubmitConversationMessageRequest`, va `SubmitConversationMessageResponse`.
+- Schema conversation summary/detail hien dung timestamp `createdDate` va `lastModifiedDate`; `ChatMessageResponse` dung `createdDate`. FE `app/lib/market-query/definitions.ts` va UI `/market-conversations*` da parse/render theo field snapshot hien tai, va history sort mac dinh theo `lastModifiedDate`.
 - `MarketAnalysisResponse` luu snapshot cau hoi, answer, reasoning, key events/narratives, asset scope, model provider/name, status, timestamps; `MarketAnalysisEvidenceResponse` co `sourceType` EVENT/NARRATIVE/NEWS_ARTICLE/EVENT_NEWS_ARTICLE_EVIDENCE/ECONOMIC_CALENDAR_ENTRY va evidence snapshot fields.
 - FE primary surface hien la `/market-conversations`; `/market-query` chi con redirect compatibility cho lien ket cu.
 
@@ -591,7 +593,7 @@ type ActionResult<T = void> =
 - `events`: backend gate enrich/market reaction operators bang `news-article:analyze`; FE events da gate bang permission canon nay truoc va chi giu `source-document:analyze` nhu alias compatibility tam thoi.
 - `permission scan`: cac literal FE-only `source-document:*` con lai deu la alias compatibility sau permission canon `news-article:*`; cac permission BE chua co FE literal gom `cronjob:stop`, `media:*`, va `narrative:*` vi cac surface/action nay chua duoc tich hop.
 - `asset type enum`: snapshot moi them `EQUITY` va `ETF` cho asset/watchlist/event/narrative/graph/market-chart payload. FE assets, watchlists, narratives, graph view, market charts dang string-compatible; rieng events van hard-code `EventAssetType` va `dictionary.events.assetTypeLabels` voi 4 gia tri cu, nen co nguy co render label `undefined` cho event assets/reactions moi.
-- `system prompts`: frontend đã đồng bộ enum prompt type hiện tại, DTO `name`/`responseSchema`/`localizedNames`, create request bắt buộc `responseSchema`, và form schema editor dạng builder + JSON.
+- `system prompts`: snapshot mới thêm prompt type `MARKET_QUERY_CONVERSATION_ORCHESTRATION`; frontend hiện còn thiếu enum/dictionary label cho giá trị này trong `app/lib/system-prompts/definitions.ts` và dictionary system prompt, dù DTO `name`/`responseSchema`/`localizedNames`, create request bắt buộc `responseSchema`, và form schema editor dạng builder + JSON đã được đồng bộ.
 - `market charts`: frontend da dong bo action/DTO theo request `assetId`, `includeAnnotations` theo layer su kien, response `asset`, optional `symbol`, va `annotations[]`; UI dung KLineChart cho nen OHLCV va render marker notification/popup detail khi layer su kien duoc bat. Snapshot moi them `/market-charts/live` SSE, nhung FE chua co EventSource/action/DTO cho live stream.
 - `news outlets`: snapshot moi da bo `slug` khoi create/update/list/detail va bo `description` khoi list item; FE form/DTO da dong bo, list khong render cac field nay, con detail/edit van giu `description` theo response.
 - `workspace`: frontend da bo `slug` khoi create/update/response definitions, workspace switcher payload/UI, va trang tong quan workspace de khop snapshot moi.

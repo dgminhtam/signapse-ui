@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation"
 
-import { getMarketConversationById } from "@/app/api/market-conversations/action"
+import {
+  getMarketConversationById,
+  getMarketConversations,
+} from "@/app/api/market-conversations/action"
 import { getTelegramDestinations } from "@/app/api/telegram/action"
 import { canReadEconomicCalendar } from "@/app/lib/economic-calendar/permissions"
 import { canReadEvents } from "@/app/lib/events/permissions"
@@ -15,16 +18,22 @@ import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { TELEGRAM_DESTINATION_READ_PERMISSION } from "@/app/lib/telegram/permissions"
 import { AccessDenied } from "@/components/access-denied"
 
+import { getMarketConversationListRequest } from "../market-conversation-pagination"
 import { MarketConversationDetailPage } from "./market-conversation-detail"
 
 interface MarketConversationDetailRouteProps {
   params: Promise<{ conversationId: string }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
 export default async function MarketConversationDetailRoute({
   params,
+  searchParams,
 }: MarketConversationDetailRouteProps) {
-  const { conversationId } = await params
+  const [{ conversationId }, resolvedSearchParams] = await Promise.all([
+    params,
+    searchParams,
+  ])
   const id = Number(conversationId)
 
   if (!Number.isInteger(id) || id <= 0) {
@@ -48,14 +57,16 @@ export default async function MarketConversationDetailRoute({
   const canReadTelegramDestinations = permissions.includes(
     TELEGRAM_DESTINATION_READ_PERMISSION
   )
-  const [conversation, telegramDestinations] = await Promise.all([
+  const [conversation, conversationPage, telegramDestinations] = await Promise.all([
     getMarketConversationById(id),
+    getMarketConversations(getMarketConversationListRequest(resolvedSearchParams)),
     canReadTelegramDestinations ? getTelegramDestinations() : [],
   ])
 
   return (
     <MarketConversationDetailPage
       conversation={conversation}
+      conversationPage={conversationPage}
       telegramDestinations={telegramDestinations}
       permissions={{
         events: canReadEvents(permissions),

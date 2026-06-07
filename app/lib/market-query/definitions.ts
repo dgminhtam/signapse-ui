@@ -80,8 +80,8 @@ export interface MarketConversationSummaryResponse {
   id: number
   title: string
   workspaceId: number
-  createdAt: string
-  updatedAt: string
+  createdDate: string
+  lastModifiedDate: string
 }
 
 export interface MarketChatMessageResponse {
@@ -92,7 +92,7 @@ export interface MarketChatMessageResponse {
   content: string | null
   analysisId: number | null
   failureReason: string | null
-  createdAt: string
+  createdDate: string
 }
 
 export interface MarketConversationDetailResponse
@@ -130,8 +130,8 @@ export interface MarketAnalysisResponse {
   status: MarketAnalysisStatus
   completedAt: string | null
   failureReason: string | null
-  createdAt: string
-  updatedAt: string
+  createdDate: string
+  lastModifiedDate: string
 }
 
 export interface MarketAnalysisEvidenceResponse {
@@ -251,15 +251,15 @@ export const marketChatMessageResponseSchema = z.object({
   content: nullableStringSchema,
   analysisId: nullableNumberSchema,
   failureReason: nullableStringSchema,
-  createdAt: z.string(),
+  createdDate: z.string(),
 }) satisfies z.ZodType<MarketChatMessageResponse>
 
 export const marketConversationSummaryResponseSchema = z.object({
   id: z.number().int(),
   title: z.string(),
   workspaceId: z.number().int(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  createdDate: z.string(),
+  lastModifiedDate: z.string(),
 }) satisfies z.ZodType<MarketConversationSummaryResponse>
 
 export const marketConversationDetailResponseSchema =
@@ -312,8 +312,8 @@ export const marketAnalysisResponseSchema = z.object({
   status: z.enum(["PENDING", "COMPLETED", "FAILED"]),
   completedAt: nullableStringSchema,
   failureReason: nullableStringSchema,
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  createdDate: z.string(),
+  lastModifiedDate: z.string(),
 }) satisfies z.ZodType<MarketAnalysisResponse>
 
 export const marketAnalysisEvidenceResponseSchema = z.object({

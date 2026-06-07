@@ -1,8 +1,14 @@
 "use client"
 
-import { FormEvent, useId, useMemo, useState, useTransition } from "react"
 import {
-  ArrowLeft,
+  FormEvent,
+  KeyboardEvent,
+  useId,
+  useMemo,
+  useState,
+  useTransition,
+} from "react"
+import {
   Bot,
   CalendarClock,
   Clock3,
@@ -10,6 +16,7 @@ import {
   FileText,
   LinkIcon,
   MessageSquareText,
+  Plus,
   RefreshCcw,
   SendHorizontal,
   Sparkles,
@@ -24,12 +31,14 @@ import {
   getMarketAnalysisEvidence,
   submitMarketConversationMessage,
 } from "@/app/api/market-conversations/action"
+import { Page } from "@/app/lib/definitions"
 import { useLocalization } from "@/app/lib/i18n/provider"
 import {
   MarketAnalysisEvidenceResponse,
   MarketAnalysisResponse,
   MarketChatMessageResponse,
   MarketConversationDetailResponse,
+  MarketConversationSummaryResponse,
 } from "@/app/lib/market-query/definitions"
 import { TelegramDestinationResponse } from "@/app/lib/telegram/definitions"
 import { AppTimeMetadata } from "@/components/app-time-metadata"
@@ -45,11 +54,17 @@ import {
 } from "@/components/ui/empty"
 import {
   Field,
-  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupTextarea,
+} from "@/components/ui/input-group"
+import { Kbd } from "@/components/ui/kbd"
 import {
   Select,
   SelectContent,
@@ -66,11 +81,13 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { Spinner } from "@/components/ui/spinner"
-import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
+
+import { MarketConversationHistorySheet } from "../market-conversation-history-sheet"
 
 interface MarketConversationDetailPageProps {
   conversation: MarketConversationDetailResponse
+  conversationPage: Page<MarketConversationSummaryResponse>
   permissions: {
     economicCalendar: boolean
     events: boolean
@@ -89,7 +106,11 @@ type AnalysisLoadState =
 type EvidenceLoadState =
   | { status: "idle" }
   | { status: "loading"; analysisId: number }
-  | { status: "loaded"; analysisId: number; data: MarketAnalysisEvidenceResponse[] }
+  | {
+      status: "loaded"
+      analysisId: number
+      data: MarketAnalysisEvidenceResponse[]
+    }
   | { status: "error"; analysisId: number; error: string }
 
 interface EntityPermissions {
@@ -101,6 +122,7 @@ interface EntityPermissions {
 
 export function MarketConversationDetailPage({
   conversation,
+  conversationPage,
   permissions,
   telegramDestinations,
 }: MarketConversationDetailPageProps) {
@@ -110,7 +132,9 @@ export function MarketConversationDetailPage({
   const [messageError, setMessageError] = useState<string | null>(null)
   const [pendingDraft, setPendingDraft] = useState<string | null>(null)
   const [isSubmitting, startSubmitTransition] = useTransition()
-  const [analysisCache, setAnalysisCache] = useState<Record<number, AnalysisLoadState>>({})
+  const [analysisCache, setAnalysisCache] = useState<
+    Record<number, AnalysisLoadState>
+  >({})
   const [expandedAnalysisIds, setExpandedAnalysisIds] = useState<Set<number>>(
     () => new Set()
   )
@@ -121,7 +145,10 @@ export function MarketConversationDetailPage({
   const messageId = useId()
   const router = useRouter()
   const activeDestinations = useMemo(
-    () => telegramDestinations.filter((destination) => destination.status === "ACTIVE"),
+    () =>
+      telegramDestinations.filter(
+        (destination) => destination.status === "ACTIVE"
+      ),
     [telegramDestinations]
   )
   const visibleMessages = useMemo(() => {
@@ -139,7 +166,11 @@ export function MarketConversationDetailPage({
         dictionary.marketConversations.detail.pendingAssistant
       ),
     ]
-  }, [dictionary.marketConversations.detail.pendingAssistant, messages, pendingDraft])
+  }, [
+    dictionary.marketConversations.detail.pendingAssistant,
+    messages,
+    pendingDraft,
+  ])
 
   function handleMessageChange(value: string) {
     setMessage(value)
@@ -185,6 +216,17 @@ export function MarketConversationDetailPage({
     })
   }
 
+  function handleMessageKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (
+      event.key === "Enter" &&
+      !event.shiftKey &&
+      !event.nativeEvent.isComposing
+    ) {
+      event.preventDefault()
+      event.currentTarget.form?.requestSubmit()
+    }
+  }
+
   async function loadAnalysis(analysisId: number) {
     const current = analysisCache[analysisId]
 
@@ -218,6 +260,8 @@ export function MarketConversationDetailPage({
   }
 
   function toggleAnalysis(analysisId: number) {
+    const isExpanded = expandedAnalysisIds.has(analysisId)
+
     setExpandedAnalysisIds((current) => {
       const next = new Set(current)
 
@@ -225,11 +269,14 @@ export function MarketConversationDetailPage({
         next.delete(analysisId)
       } else {
         next.add(analysisId)
-        void loadAnalysis(analysisId)
       }
 
       return next
     })
+
+    if (!isExpanded) {
+      void loadAnalysis(analysisId)
+    }
   }
 
   async function openEvidence(analysisId: number) {
@@ -257,8 +304,8 @@ export function MarketConversationDetailPage({
         <div className="flex min-w-0 flex-col gap-2">
           <Button asChild variant="ghost" className="w-fit">
             <Link href="/market-conversations">
-              <ArrowLeft data-icon="inline-start" />
-              {dictionary.marketConversations.detail.backToList}
+              <Plus data-icon="inline-start" />
+              {dictionary.marketConversations.detail.newConversation}
             </Link>
           </Button>
           <div className="flex min-w-0 flex-col gap-1">
@@ -268,7 +315,7 @@ export function MarketConversationDetailPage({
             <div className="flex flex-wrap gap-3">
               <AppTimeMetadata icon={Clock3}>
                 {formatDateTime(
-                  conversation.updatedAt,
+                  conversation.lastModifiedDate,
                   {
                     year: "numeric",
                     month: "2-digit",
@@ -281,7 +328,7 @@ export function MarketConversationDetailPage({
               </AppTimeMetadata>
               <AppTimeMetadata icon={CalendarClock}>
                 {formatDateTime(
-                  conversation.createdAt,
+                  conversation.createdDate,
                   {
                     year: "numeric",
                     month: "2-digit",
@@ -295,6 +342,11 @@ export function MarketConversationDetailPage({
             </div>
           </div>
         </div>
+        <MarketConversationHistorySheet
+          conversationPage={conversationPage}
+          currentConversationId={conversation.id}
+          className="w-full sm:w-auto"
+        />
       </div>
 
       <section
@@ -307,9 +359,15 @@ export function MarketConversationDetailPage({
               key={item.id}
               message={item}
               analysisState={
-                item.analysisId ? analysisCache[item.analysisId] ?? { status: "idle" } : { status: "idle" }
+                item.analysisId
+                  ? (analysisCache[item.analysisId] ?? { status: "idle" })
+                  : { status: "idle" }
               }
-              analysisExpanded={item.analysisId ? expandedAnalysisIds.has(item.analysisId) : false}
+              analysisExpanded={
+                item.analysisId
+                  ? expandedAnalysisIds.has(item.analysisId)
+                  : false
+              }
               activeDestinations={activeDestinations}
               onEvidenceOpen={openEvidence}
               onToggleAnalysis={toggleAnalysis}
@@ -333,40 +391,48 @@ export function MarketConversationDetailPage({
         )}
       </section>
 
-      <section className="rounded-xl border bg-card">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-4">
+      <section>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <FieldGroup>
-            <Field data-invalid={!!messageError}>
-              <FieldLabel htmlFor={messageId}>
+            <Field data-invalid={!!messageError} data-disabled={isSubmitting}>
+              <FieldLabel htmlFor={messageId} className="sr-only">
                 {dictionary.marketConversations.detail.messageLabel}
               </FieldLabel>
-              <Textarea
-                id={messageId}
-                value={message}
-                onChange={(event) => handleMessageChange(event.target.value)}
-                placeholder={dictionary.marketConversations.detail.messagePlaceholder}
-                className="min-h-[104px] resize-y"
-                aria-invalid={messageError ? true : undefined}
-                disabled={isSubmitting}
-              />
-              <FieldDescription>
-                {dictionary.marketConversations.detail.messageDescription}
-              </FieldDescription>
+              <InputGroup className="min-h-36 rounded-xl bg-card shadow-sm">
+                <InputGroupTextarea
+                  id={messageId}
+                  value={message}
+                  onChange={(event) => handleMessageChange(event.target.value)}
+                  onKeyDown={handleMessageKeyDown}
+                  placeholder={
+                    dictionary.marketConversations.detail.messagePlaceholder
+                  }
+                  className="min-h-24 px-4 pt-4"
+                  aria-invalid={messageError ? true : undefined}
+                  disabled={isSubmitting}
+                  rows={4}
+                />
+                <InputGroupAddon align="block-end" className="justify-between">
+                  <Kbd>Enter</Kbd>
+                  <InputGroupButton
+                    type="submit"
+                    variant="default"
+                    size="icon-sm"
+                    className="rounded-full"
+                    disabled={isSubmitting}
+                    aria-label={
+                      isSubmitting
+                        ? dictionary.marketConversations.detail.submitting
+                        : dictionary.marketConversations.detail.submit
+                    }
+                  >
+                    {isSubmitting ? <Spinner /> : <SendHorizontal />}
+                  </InputGroupButton>
+                </InputGroupAddon>
+              </InputGroup>
               <FieldError>{messageError}</FieldError>
             </Field>
           </FieldGroup>
-          <div className="flex justify-end">
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <Spinner data-icon="inline-start" />
-              ) : (
-                <SendHorizontal data-icon="inline-start" />
-              )}
-              {isSubmitting
-                ? dictionary.marketConversations.detail.submitting
-                : dictionary.marketConversations.detail.submit}
-            </Button>
-          </div>
         </form>
       </section>
 
@@ -395,7 +461,7 @@ function createLocalMessage(
     content,
     analysisId: null,
     failureReason: null,
-    createdAt: new Date().toISOString(),
+    createdDate: new Date().toISOString(),
   }
 }
 
@@ -418,15 +484,11 @@ function TimelineMessage({
 }) {
   const { dictionary, formatDateTime } = useLocalization()
   const isUser = message.role === "USER"
-  const isAssistantAnalysis = message.role === "ASSISTANT" && message.kind === "ANALYSIS"
+  const isAssistantAnalysis =
+    message.role === "ASSISTANT" && message.kind === "ANALYSIS"
 
   return (
-    <article
-      className={cn(
-        "flex",
-        isUser ? "justify-end" : "justify-start"
-      )}
-    >
+    <article className={cn("flex", isUser ? "justify-end" : "justify-start")}>
       <div
         className={cn(
           "flex max-w-[min(100%,52rem)] flex-col gap-3 rounded-xl border px-4 py-3",
@@ -441,7 +503,7 @@ function TimelineMessage({
           </Badge>
           <AppTimeMetadata icon={Clock3}>
             {formatDateTime(
-              message.createdAt,
+              message.createdDate,
               {
                 year: "numeric",
                 month: "2-digit",
@@ -469,12 +531,14 @@ function TimelineMessage({
           <div className="flex flex-col gap-2 text-sm text-muted-foreground">
             <div className="flex items-center gap-2 text-destructive">
               <TriangleAlert className="size-4" />
-              {message.failureReason || dictionary.marketConversations.detail.messageFailed}
+              {message.failureReason ||
+                dictionary.marketConversations.detail.messageFailed}
             </div>
           </div>
         ) : (
-          <p className="whitespace-pre-wrap text-sm leading-7">
-            {message.content?.trim() || dictionary.marketConversations.detail.emptyMessage}
+          <p className="text-sm leading-7 whitespace-pre-wrap">
+            {message.content?.trim() ||
+              dictionary.marketConversations.detail.emptyMessage}
           </p>
         )}
 
@@ -584,7 +648,11 @@ function AnalysisDetails({
     return (
       <div className="flex flex-col gap-2 rounded-lg border border-destructive/20 p-3 text-sm">
         <span className="text-destructive">{state.error}</span>
-        <Button type="button" variant="outline" onClick={() => onRetry(analysisId)}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => onRetry(analysisId)}
+        >
           <RefreshCcw data-icon="inline-start" />
           {dictionary.common.retry}
         </Button>
@@ -603,7 +671,8 @@ function AnalysisDetails({
       {analysis.status === "FAILED" ? (
         <div className="flex items-center gap-2 text-sm text-destructive">
           <TriangleAlert className="size-4" />
-          {analysis.failureReason || dictionary.marketConversations.analysis.failed}
+          {analysis.failureReason ||
+            dictionary.marketConversations.analysis.failed}
         </div>
       ) : null}
 
@@ -784,7 +853,9 @@ function TelegramDeliveryControl({
   const [deliveryMessage, setDeliveryMessage] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const singleDestinationId =
-    activeDestinations.length === 1 ? activeDestinations[0]?.id.toString() ?? "" : ""
+    activeDestinations.length === 1
+      ? (activeDestinations[0]?.id.toString() ?? "")
+      : ""
   const selectedDestinationIsActive = activeDestinations.some(
     (destination) => destination.id.toString() === selectedDestinationId
   )
@@ -810,7 +881,9 @@ function TelegramDeliveryControl({
     const destinationId = Number(effectiveSelectedDestinationId)
 
     if (!Number.isInteger(destinationId) || destinationId <= 0) {
-      setDeliveryMessage(dictionary.marketConversations.telegram.destinationRequired)
+      setDeliveryMessage(
+        dictionary.marketConversations.telegram.destinationRequired
+      )
       return
     }
 
@@ -832,7 +905,8 @@ function TelegramDeliveryControl({
         ? dictionary.marketConversations.telegram.duplicate
         : isSuccess
           ? dictionary.marketConversations.telegram.sent
-          : delivery.failureReason || dictionary.marketConversations.telegram.sendError
+          : delivery.failureReason ||
+            dictionary.marketConversations.telegram.sendError
 
       setDeliveryMessage(message)
 
@@ -854,16 +928,23 @@ function TelegramDeliveryControl({
         >
           <SelectTrigger
             className="w-full sm:w-[260px]"
-            aria-label={dictionary.marketConversations.telegram.destinationLabel}
+            aria-label={
+              dictionary.marketConversations.telegram.destinationLabel
+            }
           >
             <SelectValue
-              placeholder={dictionary.marketConversations.telegram.destinationPlaceholder}
+              placeholder={
+                dictionary.marketConversations.telegram.destinationPlaceholder
+              }
             />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
               {activeDestinations.map((destination) => (
-                <SelectItem key={destination.id} value={destination.id.toString()}>
+                <SelectItem
+                  key={destination.id}
+                  value={destination.id.toString()}
+                >
                   {formatTelegramDestinationLabel(destination)}
                 </SelectItem>
               ))}
@@ -893,7 +974,9 @@ function TelegramDeliveryControl({
   )
 }
 
-function formatTelegramDestinationLabel(destination: TelegramDestinationResponse) {
+function formatTelegramDestinationLabel(
+  destination: TelegramDestinationResponse
+) {
   return (
     destination.displayLabel ||
     destination.chatTitle ||
@@ -918,7 +1001,9 @@ function EvidenceSheet({
 }) {
   const { dictionary } = useLocalization()
   const analysisId =
-    state.status === "loading" || state.status === "loaded" || state.status === "error"
+    state.status === "loading" ||
+    state.status === "loaded" ||
+    state.status === "error"
       ? state.analysisId
       : null
 
@@ -926,7 +1011,9 @@ function EvidenceSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
         <SheetHeader>
-          <SheetTitle>{dictionary.marketConversations.evidence.title}</SheetTitle>
+          <SheetTitle>
+            {dictionary.marketConversations.evidence.title}
+          </SheetTitle>
           <SheetDescription>
             {dictionary.marketConversations.evidence.description}
           </SheetDescription>
@@ -942,7 +1029,10 @@ function EvidenceSheet({
           {state.status === "error" ? (
             <Empty className="min-h-[220px] border">
               <EmptyHeader>
-                <EmptyMedia variant="icon" className="bg-destructive/10 text-destructive">
+                <EmptyMedia
+                  variant="icon"
+                  className="bg-destructive/10 text-destructive"
+                >
                   <TriangleAlert />
                 </EmptyMedia>
                 <EmptyTitle>
@@ -952,7 +1042,11 @@ function EvidenceSheet({
               </EmptyHeader>
               {analysisId ? (
                 <div className="mt-3 flex justify-center">
-                  <Button type="button" variant="outline" onClick={() => onRetry(analysisId)}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => onRetry(analysisId)}
+                  >
                     <RefreshCcw data-icon="inline-start" />
                     {dictionary.common.retry}
                   </Button>
@@ -1008,7 +1102,11 @@ function EvidenceItem({
     <article className="flex flex-col gap-3 rounded-lg border bg-card p-3">
       <div className="flex flex-wrap items-center gap-2">
         <Badge variant="secondary">
-          {dictionary.marketConversations.evidence.sourceTypeLabels[evidence.sourceType]}
+          {
+            dictionary.marketConversations.evidence.sourceTypeLabels[
+              evidence.sourceType
+            ]
+          }
         </Badge>
         <Badge variant="outline">
           {dictionary.marketConversations.evidence.roleLabels[evidence.role]}
@@ -1016,10 +1114,12 @@ function EvidenceItem({
       </div>
       <div className="flex flex-col gap-1">
         <h3 className="text-sm font-medium">
-          {evidence.titleSnapshot || dictionary.marketConversations.evidence.untitled}
+          {evidence.titleSnapshot ||
+            dictionary.marketConversations.evidence.untitled}
         </h3>
         <span className="text-sm text-muted-foreground">
-          {evidence.sourceSnapshot || dictionary.marketConversations.evidence.sourceMissing}
+          {evidence.sourceSnapshot ||
+            dictionary.marketConversations.evidence.sourceMissing}
         </span>
       </div>
       {evidence.evidenceNoteSnapshot ? (

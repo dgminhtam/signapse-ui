@@ -1210,6 +1210,7 @@ export const vi = {
     },
     start: {
       title: "Bắt đầu hội thoại thị trường",
+      promptTitle: "Hôm nay bạn muốn hỏi gì?",
       description:
         "Nhập câu hỏi đầu tiên. Hệ thống sẽ tạo tiêu đề hội thoại từ câu hỏi này và lưu lại luồng phân tích.",
       questionLabel: "Câu hỏi đầu tiên",
@@ -1222,17 +1223,22 @@ export const vi = {
     },
     list: {
       title: "Lịch sử hội thoại",
+      openHistory: "Lịch sử hội thoại",
+      historyDescription:
+        "Mở một hội thoại thị trường đã lưu để tiếp tục từ luồng phân tích trước đó.",
       conversationColumn: "Hội thoại",
       updatedColumn: "Cập nhật",
       createdColumn: "Ngày tạo",
       workspaceScoped: "Theo workspace hiện tại",
       openConversation: "Mở hội thoại",
+      current: "Hiện tại",
       emptyTitle: "Chưa có hội thoại",
       emptyDescription:
         "Bắt đầu bằng một câu hỏi thị trường để tạo luồng phân tích được lưu đầu tiên.",
     },
     detail: {
       backToList: "Quay lại hội thoại",
+      newConversation: "Hội thoại mới",
       timelineLabel: "Dòng hội thoại",
       emptyTitle: "Chưa có tin nhắn",
       emptyDescription:
