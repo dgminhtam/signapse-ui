@@ -117,7 +117,7 @@ export interface MarketAnalysisResponse {
   assistantMessageId: number
   workspaceId: number
   questionSnapshot: string
-  assetScopeSnapshot: Record<string, unknown>[]
+  assetScopeSnapshot: Record<string, unknown>[] | null
   answer: string
   reasoningChain: string[]
   keyEvents: Record<string, unknown>[]
@@ -129,7 +129,7 @@ export interface MarketAnalysisResponse {
   modelName: string | null
   status: MarketAnalysisStatus
   completedAt: string | null
-  failureReason: string | null
+  failureReason?: string | null
   createdDate: string
   lastModifiedDate: string
 }
@@ -299,7 +299,7 @@ export const marketAnalysisResponseSchema = z.object({
   assistantMessageId: z.number().int(),
   workspaceId: z.number().int(),
   questionSnapshot: z.string(),
-  assetScopeSnapshot: z.array(jsonObjectSchema),
+  assetScopeSnapshot: z.array(jsonObjectSchema).nullable(),
   answer: z.string(),
   reasoningChain: z.array(z.string()),
   keyEvents: z.array(jsonObjectSchema),
@@ -311,7 +311,7 @@ export const marketAnalysisResponseSchema = z.object({
   modelName: nullableStringSchema,
   status: z.enum(["PENDING", "COMPLETED", "FAILED"]),
   completedAt: nullableStringSchema,
-  failureReason: nullableStringSchema,
+  failureReason: nullableStringSchema.optional(),
   createdDate: z.string(),
   lastModifiedDate: z.string(),
 }) satisfies z.ZodType<MarketAnalysisResponse>

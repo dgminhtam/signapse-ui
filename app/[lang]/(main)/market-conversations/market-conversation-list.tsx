@@ -1,7 +1,7 @@
 "use client"
 
 import { FormEvent, KeyboardEvent, useId, useState, useTransition } from "react"
-import { SendHorizontal } from "lucide-react"
+import { ArrowUp, SendHorizontal } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 
@@ -28,7 +28,6 @@ import {
   InputGroupButton,
   InputGroupTextarea,
 } from "@/components/ui/input-group"
-import { Kbd } from "@/components/ui/kbd"
 import { Spinner } from "@/components/ui/spinner"
 
 import { MarketConversationHistorySheet } from "./market-conversation-history-sheet"
@@ -126,7 +125,7 @@ export function MarketConversationListPage({
               <FieldLabel htmlFor={questionId} className="sr-only">
                 {dictionary.marketConversations.start.questionLabel}
               </FieldLabel>
-              <InputGroup className="min-h-36 rounded-xl bg-card shadow-sm">
+              <InputGroup className="min-h-24 rounded-3xl bg-surface">
                 <InputGroupTextarea
                   id={questionId}
                   value={question}
@@ -135,13 +134,12 @@ export function MarketConversationListPage({
                   placeholder={
                     dictionary.marketConversations.start.questionPlaceholder
                   }
-                  className="min-h-24 px-4 pt-4"
+                  className="min-h-20 px-4 pt-4"
                   aria-invalid={questionError ? true : undefined}
                   disabled={isPending}
                   rows={4}
                 />
                 <InputGroupAddon align="block-end" className="justify-between">
-                  <Kbd>Enter</Kbd>
                   <InputGroupButton
                     type="submit"
                     variant="default"
@@ -154,7 +152,7 @@ export function MarketConversationListPage({
                         : dictionary.marketConversations.start.start
                     }
                   >
-                    {isPending ? <Spinner /> : <SendHorizontal />}
+                    {isPending ? <Spinner /> : <ArrowUp />}
                   </InputGroupButton>
                 </InputGroupAddon>
               </InputGroup>
