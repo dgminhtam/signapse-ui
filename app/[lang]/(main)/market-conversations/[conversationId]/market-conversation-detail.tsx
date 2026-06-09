@@ -2,8 +2,6 @@
 
 import {
   FormEvent,
-  KeyboardEvent,
-  useId,
   useMemo,
   useState,
   useTransition,
@@ -18,7 +16,6 @@ import {
   MessageSquareText,
   Plus,
   RefreshCcw,
-  SendHorizontal,
   Sparkles,
   TriangleAlert,
 } from "lucide-react"
@@ -53,19 +50,6 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field"
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupTextarea,
-} from "@/components/ui/input-group"
-import { Kbd } from "@/components/ui/kbd"
-import {
   Select,
   SelectContent,
   SelectGroup,
@@ -81,8 +65,10 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { Spinner } from "@/components/ui/spinner"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
 
+import { MarketConversationComposer } from "../market-conversation-composer"
 import { MarketConversationHistorySheet } from "../market-conversation-history-sheet"
 
 interface MarketConversationDetailPageProps {
@@ -142,7 +128,6 @@ export function MarketConversationDetailPage({
   const [evidenceState, setEvidenceState] = useState<EvidenceLoadState>({
     status: "idle",
   })
-  const messageId = useId()
   const router = useRouter()
   const activeDestinations = useMemo(
     () =>
@@ -214,17 +199,6 @@ export function MarketConversationDetailPage({
       toast.success(dictionary.marketConversations.detail.submitSuccess)
       router.refresh()
     })
-  }
-
-  function handleMessageKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
-    if (
-      event.key === "Enter" &&
-      !event.shiftKey &&
-      !event.nativeEvent.isComposing
-    ) {
-      event.preventDefault()
-      event.currentTarget.form?.requestSubmit()
-    }
   }
 
   async function loadAnalysis(analysisId: number) {
@@ -299,8 +273,8 @@ export function MarketConversationDetailPage({
   }
 
   return (
-    <div className="flex w-full flex-col gap-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <div className="flex min-h-0 w-full flex-1 flex-col gap-4 overflow-hidden">
+      <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex min-w-0 flex-col gap-2">
           <Button asChild variant="ghost" className="w-fit">
             <Link href="/market-conversations">
@@ -351,89 +325,63 @@ export function MarketConversationDetailPage({
 
       <section
         aria-label={dictionary.marketConversations.detail.timelineLabel}
-        className="flex flex-col gap-4"
+        className="flex min-h-0 flex-1"
       >
-        {visibleMessages.length > 0 ? (
-          visibleMessages.map((item) => (
-            <TimelineMessage
-              key={item.id}
-              message={item}
-              analysisState={
-                item.analysisId
-                  ? (analysisCache[item.analysisId] ?? { status: "idle" })
-                  : { status: "idle" }
-              }
-              analysisExpanded={
-                item.analysisId
-                  ? expandedAnalysisIds.has(item.analysisId)
-                  : false
-              }
-              activeDestinations={activeDestinations}
-              onEvidenceOpen={openEvidence}
-              onToggleAnalysis={toggleAnalysis}
-              onRetryAnalysis={loadAnalysis}
-            />
-          ))
-        ) : (
-          <Empty className="min-h-[260px] border">
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <MessageSquareText />
-              </EmptyMedia>
-              <EmptyTitle>
-                {dictionary.marketConversations.detail.emptyTitle}
-              </EmptyTitle>
-              <EmptyDescription>
-                {dictionary.marketConversations.detail.emptyDescription}
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        )}
+        <ScrollArea className="min-h-0 flex-1">
+          <div className="flex flex-col gap-4 pr-4">
+            {visibleMessages.length > 0 ? (
+              visibleMessages.map((item) => (
+                <TimelineMessage
+                  key={item.id}
+                  message={item}
+                  analysisState={
+                    item.analysisId
+                      ? (analysisCache[item.analysisId] ?? { status: "idle" })
+                      : { status: "idle" }
+                  }
+                  analysisExpanded={
+                    item.analysisId
+                      ? expandedAnalysisIds.has(item.analysisId)
+                      : false
+                  }
+                  activeDestinations={activeDestinations}
+                  onEvidenceOpen={openEvidence}
+                  onToggleAnalysis={toggleAnalysis}
+                  onRetryAnalysis={loadAnalysis}
+                />
+              ))
+            ) : (
+              <Empty className="min-h-[260px] border">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <MessageSquareText />
+                  </EmptyMedia>
+                  <EmptyTitle>
+                    {dictionary.marketConversations.detail.emptyTitle}
+                  </EmptyTitle>
+                  <EmptyDescription>
+                    {dictionary.marketConversations.detail.emptyDescription}
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            )}
+          </div>
+        </ScrollArea>
       </section>
 
-      <section>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <FieldGroup>
-            <Field data-invalid={!!messageError} data-disabled={isSubmitting}>
-              <FieldLabel htmlFor={messageId} className="sr-only">
-                {dictionary.marketConversations.detail.messageLabel}
-              </FieldLabel>
-              <InputGroup className="min-h-36 rounded-xl bg-card shadow-sm">
-                <InputGroupTextarea
-                  id={messageId}
-                  value={message}
-                  onChange={(event) => handleMessageChange(event.target.value)}
-                  onKeyDown={handleMessageKeyDown}
-                  placeholder={
-                    dictionary.marketConversations.detail.messagePlaceholder
-                  }
-                  className="min-h-24 px-4 pt-4"
-                  aria-invalid={messageError ? true : undefined}
-                  disabled={isSubmitting}
-                  rows={4}
-                />
-                <InputGroupAddon align="block-end" className="justify-between">
-                  <Kbd>Enter</Kbd>
-                  <InputGroupButton
-                    type="submit"
-                    variant="default"
-                    size="icon-sm"
-                    className="rounded-full"
-                    disabled={isSubmitting}
-                    aria-label={
-                      isSubmitting
-                        ? dictionary.marketConversations.detail.submitting
-                        : dictionary.marketConversations.detail.submit
-                    }
-                  >
-                    {isSubmitting ? <Spinner /> : <SendHorizontal />}
-                  </InputGroupButton>
-                </InputGroupAddon>
-              </InputGroup>
-              <FieldError>{messageError}</FieldError>
-            </Field>
-          </FieldGroup>
-        </form>
+      <section className="shrink-0">
+        <MarketConversationComposer
+          value={message}
+          error={messageError}
+          isPending={isSubmitting}
+          label={dictionary.marketConversations.detail.messageLabel}
+          placeholder={dictionary.marketConversations.detail.messagePlaceholder}
+          submitLabel={dictionary.marketConversations.detail.submit}
+          submittingLabel={dictionary.marketConversations.detail.submitting}
+          onChange={handleMessageChange}
+          onSubmit={handleSubmit}
+          showEnterHint
+        />
       </section>
 
       <EvidenceSheet

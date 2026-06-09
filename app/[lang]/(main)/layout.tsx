@@ -112,7 +112,9 @@ export default async function Layout({
               </div>
             </div>
           </header>
-          <div className="flex flex-1 flex-col gap-4 p-5">{children}</div>
+          <div className="flex min-h-0 flex-1 flex-col gap-4 p-5">
+            {children}
+          </div>
         </SidebarInset>
       </PermissionProvider>
     </SidebarProvider>
