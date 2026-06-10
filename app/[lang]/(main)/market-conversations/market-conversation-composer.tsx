@@ -63,14 +63,14 @@ export function MarketConversationComposer({
           <FieldLabel htmlFor={messageId} className="sr-only">
             {label}
           </FieldLabel>
-          <InputGroup className="min-h-24 rounded-3xl">
+          <InputGroup className="rounded-3xl">
             <InputGroupTextarea
               id={messageId}
               value={value}
               onChange={(event) => onChange(event.target.value)}
               onKeyDown={handleKeyDown}
               placeholder={placeholder}
-              className="min-h-20 px-4 pt-4"
+              className="min-h-10 p-4"
               aria-invalid={error ? true : undefined}
               disabled={isPending}
               rows={4}

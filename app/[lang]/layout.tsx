@@ -58,9 +58,9 @@ export default async function RootLayout({
     <html
       lang={lang}
       suppressHydrationWarning
-      className={cn("antialiased", fontMono.variable, "font-sans", fontSans.variable)}
+      className={cn("h-screen antialiased", fontMono.variable, "font-sans", fontSans.variable)}
     >
-      <body>
+      <body className="flex h-screen flex-col">
         <NextTopLoader color="var(--primary)" showSpinner={false} height={3} />
         <ClerkProvider localization={clerkLocalizations[lang]}>
           <Providers locale={lang} dictionary={dictionary}>
