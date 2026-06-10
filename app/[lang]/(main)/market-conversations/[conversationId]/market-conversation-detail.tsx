@@ -2,23 +2,18 @@
 
 import {
   FormEvent,
-  KeyboardEvent,
-  useId,
   useMemo,
   useState,
   useTransition,
 } from "react"
 import {
   Bot,
-  CalendarClock,
-  Clock3,
   ExternalLink,
   FileText,
   LinkIcon,
   MessageSquareText,
   Plus,
   RefreshCcw,
-  SendHorizontal,
   Sparkles,
   TriangleAlert,
 } from "lucide-react"
@@ -41,7 +36,6 @@ import {
   MarketConversationSummaryResponse,
 } from "@/app/lib/market-query/definitions"
 import { TelegramDestinationResponse } from "@/app/lib/telegram/definitions"
-import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { LocalizedLink as Link } from "@/components/localized-link"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -52,19 +46,6 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field"
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupTextarea,
-} from "@/components/ui/input-group"
-import { Kbd } from "@/components/ui/kbd"
 import {
   Select,
   SelectContent,
@@ -81,8 +62,11 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { Spinner } from "@/components/ui/spinner"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
+import { MarketConversationComposer } from "../market-conversation-composer"
 import { MarketConversationHistorySheet } from "../market-conversation-history-sheet"
 
 interface MarketConversationDetailPageProps {
@@ -142,7 +126,6 @@ export function MarketConversationDetailPage({
   const [evidenceState, setEvidenceState] = useState<EvidenceLoadState>({
     status: "idle",
   })
-  const messageId = useId()
   const router = useRouter()
   const activeDestinations = useMemo(
     () =>
@@ -216,17 +199,6 @@ export function MarketConversationDetailPage({
     })
   }
 
-  function handleMessageKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
-    if (
-      event.key === "Enter" &&
-      !event.shiftKey &&
-      !event.nativeEvent.isComposing
-    ) {
-      event.preventDefault()
-      event.currentTarget.form?.requestSubmit()
-    }
-  }
-
   async function loadAnalysis(analysisId: number) {
     const current = analysisCache[analysisId]
 
@@ -298,153 +270,97 @@ export function MarketConversationDetailPage({
     }
   }
 
-  return (
-    <div className="flex w-full flex-col gap-6">
+return (
+  <div className="flex flex-1 min-h-0 w-full flex-col overflow-hidden">
+    <div className="shrink-0 bg-background">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <MarketConversationHistorySheet
+          conversationPage={conversationPage}
+          currentConversationId={conversation.id}
+          conversationTitle={conversation.title}
+          className="w-full sm:w-auto"
+        />
+
         <div className="flex min-w-0 flex-col gap-2">
           <Button asChild variant="ghost" className="w-fit">
             <Link href="/market-conversations">
               <Plus data-icon="inline-start" />
-              {dictionary.marketConversations.detail.newConversation}
             </Link>
           </Button>
-          <div className="flex min-w-0 flex-col gap-1">
-            <h1 className="text-xl font-semibold tracking-normal">
-              {conversation.title}
-            </h1>
-            <div className="flex flex-wrap gap-3">
-              <AppTimeMetadata icon={Clock3}>
-                {formatDateTime(
-                  conversation.lastModifiedDate,
-                  {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  },
-                  dictionary.common.notAvailable
-                )}
-              </AppTimeMetadata>
-              <AppTimeMetadata icon={CalendarClock}>
-                {formatDateTime(
-                  conversation.createdDate,
-                  {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  },
-                  dictionary.common.notAvailable
-                )}
-              </AppTimeMetadata>
-            </div>
-          </div>
         </div>
-        <MarketConversationHistorySheet
-          conversationPage={conversationPage}
-          currentConversationId={conversation.id}
-          className="w-full sm:w-auto"
-        />
       </div>
-
-      <section
-        aria-label={dictionary.marketConversations.detail.timelineLabel}
-        className="flex flex-col gap-4"
-      >
-        {visibleMessages.length > 0 ? (
-          visibleMessages.map((item) => (
-            <TimelineMessage
-              key={item.id}
-              message={item}
-              analysisState={
-                item.analysisId
-                  ? (analysisCache[item.analysisId] ?? { status: "idle" })
-                  : { status: "idle" }
-              }
-              analysisExpanded={
-                item.analysisId
-                  ? expandedAnalysisIds.has(item.analysisId)
-                  : false
-              }
-              activeDestinations={activeDestinations}
-              onEvidenceOpen={openEvidence}
-              onToggleAnalysis={toggleAnalysis}
-              onRetryAnalysis={loadAnalysis}
-            />
-          ))
-        ) : (
-          <Empty className="min-h-[260px] border">
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <MessageSquareText />
-              </EmptyMedia>
-              <EmptyTitle>
-                {dictionary.marketConversations.detail.emptyTitle}
-              </EmptyTitle>
-              <EmptyDescription>
-                {dictionary.marketConversations.detail.emptyDescription}
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        )}
-      </section>
-
-      <section>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <FieldGroup>
-            <Field data-invalid={!!messageError} data-disabled={isSubmitting}>
-              <FieldLabel htmlFor={messageId} className="sr-only">
-                {dictionary.marketConversations.detail.messageLabel}
-              </FieldLabel>
-              <InputGroup className="min-h-36 rounded-xl bg-card shadow-sm">
-                <InputGroupTextarea
-                  id={messageId}
-                  value={message}
-                  onChange={(event) => handleMessageChange(event.target.value)}
-                  onKeyDown={handleMessageKeyDown}
-                  placeholder={
-                    dictionary.marketConversations.detail.messagePlaceholder
-                  }
-                  className="min-h-24 px-4 pt-4"
-                  aria-invalid={messageError ? true : undefined}
-                  disabled={isSubmitting}
-                  rows={4}
-                />
-                <InputGroupAddon align="block-end" className="justify-between">
-                  <Kbd>Enter</Kbd>
-                  <InputGroupButton
-                    type="submit"
-                    variant="default"
-                    size="icon-sm"
-                    className="rounded-full"
-                    disabled={isSubmitting}
-                    aria-label={
-                      isSubmitting
-                        ? dictionary.marketConversations.detail.submitting
-                        : dictionary.marketConversations.detail.submit
-                    }
-                  >
-                    {isSubmitting ? <Spinner /> : <SendHorizontal />}
-                  </InputGroupButton>
-                </InputGroupAddon>
-              </InputGroup>
-              <FieldError>{messageError}</FieldError>
-            </Field>
-          </FieldGroup>
-        </form>
-      </section>
-
-      <EvidenceSheet
-        open={evidenceOpen}
-        state={evidenceState}
-        entityPermissions={permissions}
-        onOpenChange={setEvidenceOpen}
-        onRetry={(analysisId) => void openEvidence(analysisId)}
-      />
     </div>
-  )
+
+    <section
+      aria-label={dictionary.marketConversations.detail.timelineLabel}
+      className="min-h-0 flex-1 overflow-hidden mt-4"
+    >
+      <ScrollArea className="h-full">
+        <div className="flex flex-col gap-4 pr-4">
+          {visibleMessages.length > 0 ? (
+            visibleMessages.map((item) => (
+              <TimelineMessage
+                key={item.id}
+                message={item}
+                analysisState={
+                  item.analysisId
+                    ? (analysisCache[item.analysisId] ?? { status: "idle" })
+                    : { status: "idle" }
+                }
+                analysisExpanded={
+                  item.analysisId
+                    ? expandedAnalysisIds.has(item.analysisId)
+                    : false
+                }
+                activeDestinations={activeDestinations}
+                onEvidenceOpen={openEvidence}
+                onToggleAnalysis={toggleAnalysis}
+                onRetryAnalysis={loadAnalysis}
+              />
+            ))
+          ) : (
+            <Empty className="min-h-[260px] border">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <MessageSquareText />
+                </EmptyMedia>
+                <EmptyTitle>
+                  {dictionary.marketConversations.detail.emptyTitle}
+                </EmptyTitle>
+                <EmptyDescription>
+                  {dictionary.marketConversations.detail.emptyDescription}
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          )}
+        </div>
+      </ScrollArea>
+    </section>
+
+    <section className="shrink-0 bg-background mt-4">
+      <MarketConversationComposer
+        value={message}
+        error={messageError}
+        isPending={isSubmitting}
+        label={dictionary.marketConversations.detail.messageLabel}
+        placeholder={dictionary.marketConversations.detail.messagePlaceholder}
+        submitLabel={dictionary.marketConversations.detail.submit}
+        submittingLabel={dictionary.marketConversations.detail.submitting}
+        onChange={handleMessageChange}
+        onSubmit={handleSubmit}
+        showEnterHint
+      />
+    </section>
+
+    <EvidenceSheet
+      open={evidenceOpen}
+      state={evidenceState}
+      entityPermissions={permissions}
+      onOpenChange={setEvidenceOpen}
+      onRetry={(analysisId) => void openEvidence(analysisId)}
+    />
+  </div>
+)
 }
 
 function createLocalMessage(
@@ -487,45 +403,45 @@ function TimelineMessage({
   const isAssistantAnalysis =
     message.role === "ASSISTANT" && message.kind === "ANALYSIS"
 
+  const formattedTime = formatDateTime(
+    message.createdDate,
+    {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    },
+    dictionary.common.notAvailable
+  )
+
   return (
     <article className={cn("flex", isUser ? "justify-end" : "justify-start")}>
-      <div
-        className={cn(
-          "flex max-w-[min(100%,52rem)] flex-col gap-3 rounded-xl border px-4 py-3",
-          isUser ? "bg-muted/30" : "bg-card"
-        )}
-      >
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge variant={isUser ? "secondary" : "outline"}>
-            {isUser
-              ? dictionary.marketConversations.detail.userRole
-              : dictionary.marketConversations.detail.assistantRole}
-          </Badge>
-          <AppTimeMetadata icon={Clock3}>
-            {formatDateTime(
-              message.createdDate,
-              {
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-                hour: "2-digit",
-                minute: "2-digit",
-              },
-              dictionary.common.notAvailable
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div
+            className={cn(
+              "flex max-w-[min(100%,52rem)] flex-col gap-3 rounded-xl border p-3",
+              isUser ? "bg-muted/30" : "bg-card"
             )}
-          </AppTimeMetadata>
-          {message.status === "PENDING" ? (
-            <Badge variant="secondary">
-              <Spinner data-icon="inline-start" />
-              {dictionary.marketConversations.statusLabels.PENDING}
-            </Badge>
-          ) : null}
-          {message.status === "FAILED" ? (
-            <Badge variant="destructive">
-              {dictionary.marketConversations.statusLabels.FAILED}
-            </Badge>
-          ) : null}
-        </div>
+          >
+            
+              {message.status === "PENDING" ? (
+                <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="secondary">
+                  <Spinner data-icon="inline-start" />
+                  {dictionary.marketConversations.statusLabels.PENDING}
+                </Badge>
+                </div>
+              ) : null}
+              {message.status === "FAILED" ? (
+                <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="destructive">
+                  {dictionary.marketConversations.statusLabels.FAILED}
+                </Badge>
+                </div>
+              ) : null}
+            
 
         {message.status === "FAILED" ? (
           <div className="flex flex-col gap-2 text-sm text-muted-foreground">
@@ -542,19 +458,24 @@ function TimelineMessage({
           </p>
         )}
 
-        {isAssistantAnalysis && message.analysisId ? (
-          <AssistantAnalysisActions
-            activeDestinations={activeDestinations}
-            analysisExpanded={analysisExpanded}
-            analysisId={message.analysisId}
-            analysisState={analysisState}
-            messageStatus={message.status}
-            onEvidenceOpen={onEvidenceOpen}
-            onRetryAnalysis={onRetryAnalysis}
-            onToggleAnalysis={onToggleAnalysis}
-          />
-        ) : null}
-      </div>
+            {isAssistantAnalysis && message.analysisId ? (
+              <AssistantAnalysisActions
+                activeDestinations={activeDestinations}
+                analysisExpanded={analysisExpanded}
+                analysisId={message.analysisId}
+                analysisState={analysisState}
+                messageStatus={message.status}
+                onEvidenceOpen={onEvidenceOpen}
+                onRetryAnalysis={onRetryAnalysis}
+                onToggleAnalysis={onToggleAnalysis}
+              />
+            ) : null}
+          </div>
+        </TooltipTrigger>
+        <TooltipContent side="top" className="text-xs">
+          {formattedTime}
+        </TooltipContent>
+      </Tooltip>
     </article>
   )
 }
@@ -1127,23 +1048,6 @@ function EvidenceItem({
           {evidence.evidenceNoteSnapshot}
         </p>
       ) : null}
-      <div className="flex flex-wrap gap-2">
-        {evidence.publishedAtSnapshot ? (
-          <AppTimeMetadata icon={Clock3}>
-            {formatDateTime(
-              evidence.publishedAtSnapshot,
-              {
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-                hour: "2-digit",
-                minute: "2-digit",
-              },
-              dictionary.common.notAvailable
-            )}
-          </AppTimeMetadata>
-        ) : null}
-      </div>
       <div className="flex flex-wrap gap-2">
         {internalHref ? (
           <Button asChild type="button" variant="outline">
