@@ -74,27 +74,33 @@ The system SHALL render user search results in the shared list table pattern.
 - **THEN** the table prevents page-level horizontal overflow
 - **AND** long content is truncated, clamped, or wrapped according to the column's layout strategy
 
-### Requirement: Operators can create users from a dialog
-The system SHALL let authorized operators create users from the user management list without navigating away.
+### Requirement: Operators can create Clerk accounts from a dialog
+The system SHALL let authorized operators create Clerk accounts from the user management list without navigating away.
 
 #### Scenario: Create dialog is opened
 - **WHEN** the operator activates `Tạo người dùng`
-- **THEN** the app opens a dialog for creating a user
-- **AND** the dialog includes fields for email, last name, first name, phone, birthday, and role
-- **AND** the role field loads options from `GET /roles`
+- **THEN** the app opens a dialog for creating a user account
+- **AND** the dialog includes only email, last name, and first name fields
+- **AND** the dialog does not include phone, birthday, or role fields
 
-#### Scenario: User is created
+#### Scenario: Clerk account is created
 - **WHEN** the operator submits valid create values
-- **THEN** the app calls `POST /user`
-- **AND** the request includes `email`, `firstName`, `lastName`, `phone`, `birthday`, and `roleId`
-- **AND** `roleId` is the selected role's `id` value
+- **THEN** the app calls Clerk from server-side code
+- **AND** the Clerk request includes `emailAddress`, `firstName`, and `lastName`
+- **AND** the app does not call `POST /user` from the create flow
 - **AND** the submit button is disabled and shows a spinner while pending
 - **AND** the app shows localized success or error feedback
+- **AND** the success feedback communicates that the application user appears after backend synchronization
 - **AND** the user list refreshes after success
+
+#### Scenario: Backend sync creates the application user
+- **WHEN** Clerk emits `user.created` for the created account
+- **THEN** the backend webhook creates or updates the application user record
+- **AND** the application user can later be found by user management search
 
 #### Scenario: Create is cancelled
 - **WHEN** the operator cancels the create dialog
-- **THEN** no create request is sent
+- **THEN** no Clerk create request is sent
 - **AND** the form state is cleared or reset before the next create attempt
 
 ### Requirement: Operators can update editable user fields from a dialog

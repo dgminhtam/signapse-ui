@@ -48,9 +48,6 @@ export interface CreateUserRequest {
   email: string
   firstName: string
   lastName: string
-  phone?: string
-  birthday?: string
-  roleId: number
 }
 
 export interface UpdateManagedUserRequest {

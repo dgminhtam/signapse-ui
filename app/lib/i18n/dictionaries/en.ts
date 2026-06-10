@@ -759,7 +759,8 @@ export const en: Dictionary = {
     noWorkspace: "No workspace",
     createTitle: "Create user",
     updateTitle: "Update user",
-    createDescription: "Enter account information and role for the new user.",
+    createDescription:
+      "Enter email, first name, and last name to create a Clerk account. The user will appear after system synchronization.",
     updateDescription: "Update the user's personal information and role.",
     emailLabel: "Email address",
     emailPlaceholder: "name@example.com",
@@ -781,9 +782,10 @@ export const en: Dictionary = {
     lastNameRequired: "Please enter a last name.",
     birthdayInvalid: "Date of birth is invalid.",
     roleRequired: "Please choose a role.",
-    createPending: "Creating...",
+    createPending: "Creating account...",
     updatePending: "Updating...",
-    createSuccess: "User created.",
+    createSuccess:
+      "Clerk account created. The user will appear after system synchronization.",
     updateSuccess: "User updated.",
     createError: "Could not create user.",
     updateError: "Could not update user.",

@@ -1,8 +1,14 @@
 ## Context
 
-The protected Signapse app lives under `app/[lang]/(main)` and already provides the authenticated sidebar/header shell, permission context, localized routing, breadcrumbs, and shared list/form building blocks. List screens such as news outlets use `AppListToolbar`, `AppListTable`, URL-backed filters, page size controls, and pagination. Roles are already available through `getRoles()` which calls `GET /roles` and returns `RoleResponse` values with `key` and `name`.
+The protected Signapse app lives under `app/[lang]/(main)` and already provides the authenticated sidebar/header shell, permission context, localized routing, breadcrumbs, Clerk authentication, and shared list/form building blocks. User management should use the existing operational list pattern: toolbar, URL-backed search, shared table, pagination, and local dialogs.
 
-User management should use the same operational list pattern, but create and update should happen in local dialogs rather than separate detail routes. This keeps administrators in the list context while editing short user profile records.
+Create and update have different ownership:
+
+- Create provisions a Clerk account from server-side code.
+- Backend listens to Clerk `user.created` webhook and creates the application user record.
+- Update edits application user fields through the backend after the user exists in the application database.
+
+This keeps Clerk as the account source of truth while keeping application-specific fields such as phone, birthday, and role inside the backend domain.
 
 ## Goals / Non-Goals
 
@@ -13,12 +19,12 @@ User management should use the same operational list pattern, but create and upd
 - Gate the page itself with `user:update`.
 - Let operators search by one keyword that matches email, first name, last name, or phone.
 - Persist search, page, and size in the URL.
-- Omit empty search values from the URL and reset `page` to `1` when search changes.
+- Omit empty search values from the URL and reset `page` to `1` when search is committed.
 - Render user results in the shared list table surface with action controls.
-- Let operators create users through a dialog.
-- Let operators update users through a dialog.
-- Load role options from `GET /roles`.
-- Submit role selection as `roleId`.
+- Let operators create Clerk accounts through a simplified dialog with email, first name, and last name.
+- Let operators update application user fields through a dialog.
+- Load role options from `GET /roles` for update.
+- Submit role selection as `roleId` during update.
 - Keep update email read-only and out of the update payload.
 
 **Non-Goals:**
@@ -29,6 +35,8 @@ User management should use the same operational list pattern, but create and upd
 - Do not add avatar upload or media management for users.
 - Do not change the existing role permission management screen.
 - Do not create UI routes outside `app/[lang]`.
+- Do not create the application user record directly during create; backend webhook sync owns database creation from Clerk events.
+- Do not send phone, birthday, or role during create.
 
 ## Route And Navigation
 
@@ -58,21 +66,21 @@ The item should require `user:update`. `AppBreadcrumb` should map `users` to the
 
 The route should use `getCurrentPermissions()` and `hasPermission(permissions, "user:update")`. If permission is missing, render `AccessDenied` with localized copy and the required permission.
 
-The role dropdown uses `GET /roles`. Because the user management route is authorized by `user:update`, backend access should allow a user with `user:update` to retrieve role options for assignment. If `GET /roles` is restricted to `role:update`, the implementation should surface that as a backend permission contract issue rather than silently hiding role assignment.
+The server-side Clerk create action should also be reachable only from authenticated app code and should be triggered by operators who can access this screen. `CLERK_SECRET_KEY` must never be exposed to client components.
 
-## Backend Contract
+The role dropdown uses `GET /roles` for update. If `GET /roles` is restricted to `role:update`, the implementation should keep the list usable and surface role catalog unavailability in the update dialog rather than letting the page fail.
+
+## Backend And Clerk Contract
 
 ### Search Users
 
-The agreed endpoint is:
+Use:
 
 ```text
 GET /user
 ```
 
-The user management list should follow the cronjob search pattern: search UI owns one URL-backed input, and the page converts remaining filter params through `buildFilterQuery(filterParams)`.
-
-Use one multi-field filter param:
+The user management list uses one multi-field filter param:
 
 ```text
 email[containsIgnoreCase],firstName[containsIgnoreCase],lastName[containsIgnoreCase],phone[containsIgnoreCase]
@@ -81,7 +89,7 @@ email[containsIgnoreCase],firstName[containsIgnoreCase],lastName[containsIgnoreC
 When the operator enters `nguyen`, the URL should contain that single encoded key:
 
 ```text
-/users?email%5BcontainsIgnoreCase%5D%2Cname%5BcontainsIgnoreCase%5D%2Cphone%5BcontainsIgnoreCase%5D=nguyen&page=1&size=10
+/users?email%5BcontainsIgnoreCase%5D%2CfirstName%5BcontainsIgnoreCase%5D%2ClastName%5BcontainsIgnoreCase%5D%2Cphone%5BcontainsIgnoreCase%5D=nguyen&page=1&size=10
 ```
 
 The page should call `buildFilterQuery(filterParams)`, producing:
@@ -90,48 +98,37 @@ The page should call `buildFilterQuery(filterParams)`, producing:
 (containsIgnoreCase(email,'nguyen') or containsIgnoreCase(firstName,'nguyen') or containsIgnoreCase(lastName,'nguyen') or containsIgnoreCase(phone,'nguyen'))
 ```
 
-Then pass that filter to the user search server action for `GET /user`. This avoids `GET` request bodies and aligns user management search with the shared list filtering convention used by cronjobs.
+Then pass that filter to the user search server action for `GET /user`.
 
-The response is a list of users:
+The response is expected to be a paginated page or a list of users. The frontend should normalize either shape into the shared `Page<UserResponse>` view model.
 
-```ts
-type UserResponse = {
-  id: number
-  email: string
-  firstName: string | null
-  lastName: string | null
-  phone: string | null
-  birthday: string | null
-  currentWorkspace: BackendWorkspaceSummary | null
-  preferredLanguage: string | null
-  mainImage: BackendMediaResponse | null
-  role_name: string | null
-  permissions: PermissionResponse[]
-}
-```
+### Create Clerk Account
 
-If the backend later returns a paginated `Page<UserResponse>` instead of a plain list, the frontend should map directly to the actual contract and keep URL `page` and `size` behavior.
+Use a server-side Clerk Backend API/SDK call. Do not call Clerk directly from the client.
 
-### Create User
-
-Use:
-
-```text
-POST /user
-```
-
-Submit:
+Create input:
 
 ```ts
 {
   email: string
   firstName: string
   lastName: string
-  phone?: string
-  birthday?: string
-  roleId: number
 }
 ```
+
+The server-side action should create a Clerk user with:
+
+```ts
+{
+  emailAddress: [email],
+  firstName,
+  lastName
+}
+```
+
+After Clerk creates the account, Clerk emits `user.created`. The backend receives that webhook and creates the application user record from Clerk data such as Clerk user id, email, first name, and last name.
+
+The create action should not call `POST /user`.
 
 ### Update User
 
@@ -163,11 +160,11 @@ Use the existing:
 GET /roles
 ```
 
-Display `role.name`. Use `role.id` as the Select value and submit it as `roleId`.
+Display `role.name`. Use `role.id` as the Select value and submit it as `roleId` during update.
 
 ## Search URL Model
 
-Search should use one controlled client component initialized from `useSearchParams()` and synchronized when URL params change. The input value should be local state while the operator types, and the URL should only be committed when the operator presses Enter. Use a single constant key:
+Search uses one controlled client component initialized from `useSearchParams()` and synchronized when URL params change. The input value is local state while the operator types, and the URL is committed only when the operator presses Enter.
 
 ```ts
 const SEARCH_PARAM_KEY =
@@ -177,11 +174,9 @@ const SEARCH_PARAM_KEY =
 Examples:
 
 ```text
-/users?email%5BcontainsIgnoreCase%5D%2Cname%5BcontainsIgnoreCase%5D%2Cphone%5BcontainsIgnoreCase%5D=nguyen&page=1&size=10
+/users?email%5BcontainsIgnoreCase%5D%2CfirstName%5BcontainsIgnoreCase%5D%2ClastName%5BcontainsIgnoreCase%5D%2Cphone%5BcontainsIgnoreCase%5D=nguyen&page=1&size=10
 /users?page=1&size=10
 ```
-
-An empty keyword should remove the multi-field search param. The implementation should not emit an empty search param.
 
 When the operator presses Enter in the search input:
 
@@ -191,24 +186,11 @@ When the operator presses Enter in the search input:
 - Reset `page` to `1`.
 - Update the URL with `useTransition` and `router.replace()`.
 
-Search should not update the URL on every keystroke. It should follow the shared list input composition with `InputGroup`, `InputGroupInput`, leading `InputGroupAddon`, idle search icon, pending spinner for the Enter-triggered transition, `type="search"`, an `sr-only` label, and a single wrapper `w-full sm:w-80 lg:w-96`.
+Search should not update the URL on every keystroke. It should use `InputGroup`, `InputGroupInput`, leading `InputGroupAddon`, idle search icon, pending spinner for the Enter-triggered transition, `type="search"`, an `sr-only` label, and wrapper `w-full sm:w-80 lg:w-96`.
 
 ## List Layout
 
-The page should remain cardless and render the shared toolbar, shared table, and pagination surface directly.
-
-Suggested desktop layout:
-
-```text
-[Tạo người dùng] [Tìm email, tên hoặc số điện thoại]          [10/trang]
-
-┌────────────────────────────────────────────────────────────────────────┐
-│ Người dùng              Số điện thoại   Vai trò      Workspace  Thao tác │
-├────────────────────────────────────────────────────────────────────────┤
-│ Nguyễn Văn A            090...          Admin       Default    [Sửa]    │
-│ a@example.com                                                           │
-└────────────────────────────────────────────────────────────────────────┘
-```
+The page remains cardless and renders the shared toolbar, shared table, and pagination surface directly.
 
 Suggested columns:
 
@@ -235,11 +217,10 @@ Fields:
 - Email
 - Last name
 - First name
-- Phone
-- Birthday
-- Role
 
-Submit `POST /user` with `email`, `firstName`, `lastName`, `phone`, `birthday`, and `roleId`.
+Submit to the server-side Clerk create action with `email`, `firstName`, and `lastName`.
+
+The success toast should communicate that the account creation request was sent and the application user will appear after backend synchronization. The page can refresh after success, but the newly created user may not appear immediately because webhook processing is asynchronous.
 
 ### Update Dialog
 
@@ -278,23 +259,25 @@ Avoid extra body headings that duplicate breadcrumb identity.
 
 ## Risks / Trade-offs
 
-- `GET /user` with a request body conflicts with `fetch`; query params or a search POST endpoint would be safer.
-- `GET /roles` may be permissioned for role administration rather than user management; backend should allow role catalog access for `user:update` users or expose a dedicated role picker endpoint.
-- Backend response shape is currently described as a list, but frontend list policy expects URL pagination. If backend does not paginate, the implementation can still preserve search params and hide pagination until a paginated contract exists, or adapt once the contract is updated.
-- Create user email flow may require backend/Clerk invitation or verification behavior. This change only captures the admin form and API call, not email verification UX.
+- Create user is eventually consistent: Clerk creation can succeed before the backend webhook creates the application user row.
+- If backend webhook processing fails, Clerk may contain a user that does not yet exist in the application database; backend webhook processing must be idempotent and retry-safe.
+- Clerk create user behavior depends on the project's sign-in/sign-up configuration. If email-only accounts require invitation or password setup, that account activation UX must be handled by Clerk/backend configuration.
+- `GET /roles` may be permissioned for role administration rather than user management; frontend should not let that fail the whole list page.
+- Backend response shape may be a list or paginated page; frontend should map directly to the actual contract.
 
 ## Migration Plan
 
-1. Add user management definitions for user list records and create/update requests.
-2. Add user management server actions for search, create, and update through `fetchAuthenticated()`.
-3. Reuse `getRoles()` for role picker options.
-4. Add sidebar and breadcrumb dictionary entries.
-5. Add `/users` route with access gate, Suspense skeleton, search URL parsing, and initial data load.
-6. Build the single keyword user search control, user list table, create dialog, and update dialog.
-7. Add localized validation and toast copy.
-8. Verify lint, typecheck, static review, and OpenSpec validation when CLI is available.
+1. Add user management definitions for user list records, Clerk create request, and backend update request.
+2. Add user management server actions for search and update through `fetchAuthenticated()`.
+3. Add a server-side Clerk create action for account requests with email, first name, and last name.
+4. Reuse `getRoles()` for update role picker options.
+5. Add sidebar and breadcrumb dictionary entries.
+6. Add `/users` route with access gate, Suspense skeleton, search URL parsing, and initial data load.
+7. Build the single keyword user search control, user list table, simplified create dialog, and update dialog.
+8. Add localized validation and toast copy.
+9. Verify lint, typecheck, static review, and OpenSpec validation when CLI is available.
 
 ## Open Questions
 
-- Will `GET /user` return a plain list or a paginated `Page<UserResponse>`?
-- Is phone and birthday required for create/update, or optional? The current design treats them as editable fields and keeps request fields optional unless backend validation requires otherwise.
+- Should the Clerk account be created as immediately usable email-only user, or should the system send an invitation or password setup flow?
+- What exact success/error copy should the create dialog use for eventual backend synchronization?

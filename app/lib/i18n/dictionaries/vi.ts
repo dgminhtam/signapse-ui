@@ -754,7 +754,8 @@ export const vi = {
     noWorkspace: "Chưa có workspace",
     createTitle: "Tạo người dùng",
     updateTitle: "Cập nhật người dùng",
-    createDescription: "Nhập thông tin tài khoản và vai trò cho người dùng mới.",
+    createDescription:
+      "Nhập email, họ và tên để tạo tài khoản trên Clerk. Người dùng sẽ xuất hiện sau khi hệ thống đồng bộ.",
     updateDescription: "Cập nhật thông tin cá nhân và vai trò của người dùng.",
     emailLabel: "Địa chỉ email",
     emailPlaceholder: "name@example.com",
@@ -776,9 +777,10 @@ export const vi = {
     lastNameRequired: "Vui lòng nhập họ.",
     birthdayInvalid: "Ngày sinh không hợp lệ.",
     roleRequired: "Vui lòng chọn vai trò.",
-    createPending: "Đang tạo...",
+    createPending: "Đang tạo tài khoản...",
     updatePending: "Đang cập nhật...",
-    createSuccess: "Đã tạo người dùng.",
+    createSuccess:
+      "Đã tạo tài khoản trên Clerk. Người dùng sẽ xuất hiện sau khi hệ thống đồng bộ.",
     updateSuccess: "Đã cập nhật người dùng.",
     createError: "Không thể tạo người dùng.",
     updateError: "Không thể cập nhật người dùng.",

@@ -1,7 +1,7 @@
 ## 1. User Management Contract
 
 - [x] 1.1 Add user management response and request types under `app/lib/users/definitions.ts`, including `roleId` for create/update requests.
-- [x] 1.2 Add server actions for searching users through `GET /user`, creating users through `POST /user`, and updating users through `PATCH /user/{id}` with `fetchAuthenticated()`.
+- [x] 1.2 Add server actions for searching users through `GET /user`, the initial backend create flow, and updating users through `PATCH /user/{id}` with `fetchAuthenticated()`; create is superseded by section 8.
 - [x] 1.3 Ensure user search omits empty email, name, and phone values from the backend request.
 - [x] 1.4 Reuse `getRoles()` from `app/api/roles/action.ts` for role dropdown data.
 - [x] 1.5 If backend API mapping changes are available, update `docs/api_mapping.json` and regenerate `docs/APIMAPPING.md` with the api mapping sync workflow. No updated backend mapping was available in this change.
@@ -26,7 +26,7 @@
 - [x] 4.1 Add a `Tạo người dùng` toolbar button that opens a create dialog.
 - [x] 4.2 Add row edit actions that open an update dialog for the selected user.
 - [x] 4.3 Build the shared dialog form field primitives for email, first name, last name, phone, birthday, and role.
-- [x] 4.4 In create mode, submit `email`, `firstName`, `lastName`, `phone`, `birthday`, and `roleId` to `POST /user`.
+- [x] 4.4 Initial create implementation submitted `email`, `firstName`, `lastName`, `phone`, `birthday`, and `roleId` to `POST /user`; superseded by section 8.
 - [x] 4.5 In update mode, render email as disabled/read-only and submit only `firstName`, `lastName`, `phone`, `birthday`, and `roleId` to `PATCH /user/{id}`.
 - [x] 4.6 Add pending submit spinners, disabled submit states, ghost cancel actions, form reset behavior, and localized sonner toast feedback.
 
@@ -54,3 +54,13 @@ User-owned manual QA note: confirm with the backend that `GET /user` accepts sea
 - [x] 7.2 Keep URL synchronization for refresh and Back/Forward navigation by syncing local input state from the current search param.
 - [x] 7.3 Update search placeholder copy and OpenSpec scenarios to communicate Enter-to-search behavior.
 - [x] 7.4 Run typecheck, lint, static review, and OpenSpec validation when the CLI is available.
+
+## 8. Clerk Account Creation Refinement
+
+- [x] 8.1 Add or update user create request typing so create only accepts `email`, `firstName`, and `lastName`.
+- [x] 8.2 Replace the create user server action's backend `POST /user` call with a server-side Clerk account creation call using `email`, `firstName`, and `lastName`; do not expose Clerk secrets to client components.
+- [x] 8.3 Keep backend `PATCH /user/{id}` update behavior for application fields `firstName`, `lastName`, `phone`, `birthday`, and `roleId`.
+- [x] 8.4 Simplify the create dialog to render only email, last name, and first name; keep the update dialog rendering email, names, phone, birthday, and role.
+- [x] 8.5 Update create validation and localized copy so success communicates that the account was created in Clerk and the application user will appear after backend webhook synchronization.
+- [x] 8.6 Static-review that create flow no longer calls `POST /user`, that update still excludes email, and that role selection is update-only.
+- [x] 8.7 Run typecheck, lint, static review, and OpenSpec validation when the CLI is available. Typecheck, lint, and static review passed; OpenSpec CLI is not available in PATH.

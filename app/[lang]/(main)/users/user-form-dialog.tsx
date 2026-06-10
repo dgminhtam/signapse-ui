@@ -178,7 +178,9 @@ export function UserFormDialog({
           .refine((value) => !value || /^\d{4}-\d{2}-\d{2}$/.test(value), {
             message: t.birthdayInvalid,
           }),
-        roleId: z.string().trim().min(1, t.roleRequired),
+        roleId: isUpdate
+          ? z.string().trim().min(1, t.roleRequired)
+          : z.string().trim(),
       }),
     [isUpdate, t]
   )
@@ -196,22 +198,21 @@ export function UserFormDialog({
   }, [form, initialValues, open])
 
   async function onSubmit(values: UserFormValues) {
-    const commonRequest = {
-      birthday: values.birthday.trim(),
+    const names = {
       firstName: values.firstName.trim(),
       lastName: values.lastName.trim(),
-      phone: values.phone.trim(),
-      roleId: Number(values.roleId),
     }
-    const result =
-      isUpdate && user
-        ? await updateManagedUser(user.id, {
-            ...commonRequest,
-          } satisfies UpdateManagedUserRequest)
-        : await createUser({
-            ...commonRequest,
-            email: values.email.trim(),
-          } satisfies CreateUserRequest)
+    const result = isUpdate && user
+      ? await updateManagedUser(user.id, {
+          ...names,
+          birthday: values.birthday.trim(),
+          phone: values.phone.trim(),
+          roleId: Number(values.roleId),
+        } satisfies UpdateManagedUserRequest)
+      : await createUser({
+          ...names,
+          email: values.email.trim(),
+        } satisfies CreateUserRequest)
 
     if (result.success) {
       toast.success(isUpdate ? t.updateSuccess : t.createSuccess)
@@ -319,92 +320,102 @@ export function UserFormDialog({
               />
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Controller
-                name="phone"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="user-phone">{t.phoneLabel}</FieldLabel>
-                    <Input
-                      {...field}
-                      id="user-phone"
-                      type="tel"
-                      placeholder={t.phonePlaceholder}
-                      aria-invalid={fieldState.invalid}
-                      disabled={isSubmitting}
-                    />
-                    {fieldState.invalid ? (
-                      <FieldError errors={[fieldState.error]} />
-                    ) : null}
-                  </Field>
-                )}
-              />
+            {isUpdate ? (
+              <>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Controller
+                    name="phone"
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor="user-phone">
+                          {t.phoneLabel}
+                        </FieldLabel>
+                        <Input
+                          {...field}
+                          id="user-phone"
+                          type="tel"
+                          placeholder={t.phonePlaceholder}
+                          aria-invalid={fieldState.invalid}
+                          disabled={isSubmitting}
+                        />
+                        {fieldState.invalid ? (
+                          <FieldError errors={[fieldState.error]} />
+                        ) : null}
+                      </Field>
+                    )}
+                  />
 
-              <Controller
-                name="birthday"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="user-birthday">
-                      {t.birthdayLabel}
-                    </FieldLabel>
-                    <Input
-                      {...field}
-                      id="user-birthday"
-                      type="date"
-                      aria-invalid={fieldState.invalid}
-                      disabled={isSubmitting}
-                    />
-                    {fieldState.invalid ? (
-                      <FieldError errors={[fieldState.error]} />
-                    ) : null}
-                  </Field>
-                )}
-              />
-            </div>
+                  <Controller
+                    name="birthday"
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor="user-birthday">
+                          {t.birthdayLabel}
+                        </FieldLabel>
+                        <Input
+                          {...field}
+                          id="user-birthday"
+                          type="date"
+                          aria-invalid={fieldState.invalid}
+                          disabled={isSubmitting}
+                        />
+                        {fieldState.invalid ? (
+                          <FieldError errors={[fieldState.error]} />
+                        ) : null}
+                      </Field>
+                    )}
+                  />
+                </div>
 
-            <Controller
-              name="roleId"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="user-role">
-                    {t.roleLabel} <span className="text-destructive">*</span>
-                  </FieldLabel>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    disabled={isSubmitting || !rolesAvailable}
-                  >
-                    <SelectTrigger
-                      id="user-role"
-                      className="w-full"
-                      aria-invalid={fieldState.invalid}
-                    >
-                      <SelectValue placeholder={t.rolePlaceholder} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {roles.map((role) => (
-                          <SelectItem key={role.id} value={role.id.toString()}>
-                            {role.name}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                  {fieldState.invalid ? (
-                    <FieldError errors={[fieldState.error]} />
-                  ) : null}
-                  {!rolesAvailable ? (
-                    <FieldDescription>
-                      {t.roleCatalogUnavailable}
-                    </FieldDescription>
-                  ) : null}
-                </Field>
-              )}
-            />
+                <Controller
+                  name="roleId"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="user-role">
+                        {t.roleLabel}{" "}
+                        <span className="text-destructive">*</span>
+                      </FieldLabel>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        disabled={isSubmitting || !rolesAvailable}
+                      >
+                        <SelectTrigger
+                          id="user-role"
+                          className="w-full"
+                          aria-invalid={fieldState.invalid}
+                        >
+                          <SelectValue placeholder={t.rolePlaceholder} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            {roles.map((role) => (
+                              <SelectItem
+                                key={role.id}
+                                value={role.id.toString()}
+                              >
+                                {role.name}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                      {fieldState.invalid ? (
+                        <FieldError errors={[fieldState.error]} />
+                      ) : null}
+                      {!rolesAvailable ? (
+                        <FieldDescription>
+                          {t.roleCatalogUnavailable}
+                        </FieldDescription>
+                      ) : null}
+                    </Field>
+                  )}
+                />
+              </>
+            ) : null}
           </FieldGroup>
 
           <DialogFooter className="mt-5">
@@ -416,7 +427,10 @@ export function UserFormDialog({
             >
               {dictionary.common.cancel}
             </Button>
-            <Button type="submit" disabled={isSubmitting || !rolesAvailable}>
+            <Button
+              type="submit"
+              disabled={isSubmitting || (isUpdate && !rolesAvailable)}
+            >
               {isSubmitting ? (
                 <>
                   <Spinner data-icon="inline-start" />
