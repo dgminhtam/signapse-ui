@@ -141,6 +141,11 @@ export function createSiteConfig(dictionary: Dictionary) {
           permission: "role:update",
         },
         {
+          title: dictionary.navigation.users,
+          url: "/users",
+          permission: "user:update",
+        },
+        {
           title: dictionary.navigation.developerToken,
           url: "/developer-token",
         },
