@@ -44,6 +44,20 @@ const VOICE_COMMANDS: Readonly<
   },
 };
 
+type SpeechRecognitionEvent = Event & {
+  resultIndex: number;
+  results: SpeechRecognitionResultList;
+};
+
+type SpeechRecognitionInstance = EventTarget & {
+  continuous: boolean;
+  interimResults: boolean;
+  start: () => void;
+  stop: () => void;
+};
+
+type SpeechRecognitionConstructor = new () => SpeechRecognitionInstance;
+
 export const SUPPORT_SPEECH_RECOGNITION: boolean =
   CAN_USE_DOM &&
   ("SpeechRecognition" in window || "webkitSpeechRecognition" in window);
@@ -53,21 +67,25 @@ function SpeechToTextPluginImpl() {
   const [editor] = useLexicalComposerContext();
   const [isEnabled, setIsEnabled] = useState<boolean>(false);
   const [isSpeechToText, setIsSpeechToText] = useState(false);
-  const SpeechRecognition =
-    // @ts-expect-error missing type
-    window.SpeechRecognition || window.webkitSpeechRecognition;
-  const recognition = useRef<typeof SpeechRecognition | null>(null);
+  const SpeechRecognition = (window.SpeechRecognition ||
+    window.webkitSpeechRecognition) as SpeechRecognitionConstructor | undefined;
+  const recognition = useRef<SpeechRecognitionInstance | null>(null);
   const report = useReport();
 
   useEffect(() => {
+    if (!SpeechRecognition) {
+      return;
+    }
+
     if (isEnabled && recognition.current === null) {
       recognition.current = new SpeechRecognition();
       recognition.current.continuous = true;
       recognition.current.interimResults = true;
       recognition.current.addEventListener(
         "result",
-        (event: typeof SpeechRecognition) => {
-          const resultItem = event.results.item(event.resultIndex);
+        (event) => {
+          const speechEvent = event as SpeechRecognitionEvent;
+          const resultItem = speechEvent.results.item(speechEvent.resultIndex);
           const { transcript } = resultItem.item(0);
           report(transcript);
 
