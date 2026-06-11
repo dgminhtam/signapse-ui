@@ -18,7 +18,7 @@ The existing detail client owns message state, optimistic placeholders, analysis
 **Non-Goals:**
 
 - Embedding the complete market conversation detail page in the modal.
-- Moving evidence, Telegram delivery, or full structured analysis controls into the modal.
+- Moving evidence, Telegram delivery, or full structured analysis workbench controls into the modal.
 - Adding streaming, attachments, edit, regenerate, branch, rename, delete, or archive behavior.
 - Configuring Assistant Cloud or storing a second browser-only conversation history.
 - Refactoring unrelated market query API compatibility code.
@@ -81,7 +81,7 @@ The modal shows:
 - the composer;
 - fullscreen control for the assistant surface.
 
-Structured analysis blocks can be represented by concise answer text or a compact summary supported by the existing DTO. Full analysis expansion, evidence, and Telegram controls remain out of scope for the compact modal.
+Structured analysis blocks can be represented by concise answer text or a compact summary supported by the existing DTO. Full analysis workbench expansion, evidence, and Telegram controls remain out of scope for the compact modal.
 
 Embedding the route component was rejected because it would create nested workbench UI, duplicate history controls, and make responsive behavior fragile.
 

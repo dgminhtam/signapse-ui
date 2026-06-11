@@ -6,7 +6,9 @@ import {
   ComposerPrimitive,
   MessagePrimitive,
   ThreadPrimitive,
+  type DataMessagePartProps,
   type MessageState,
+  type TextMessagePartProps,
 } from "@assistant-ui/react"
 import {
   ArrowUpIcon,
@@ -22,6 +24,8 @@ import {
 } from "lucide-react"
 
 import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
+import { MarketAnalysisPart } from "@/components/assistant-ui/market-analysis-part"
+import { isMarketAnalysisPartData } from "@/components/assistant-ui/market-conversation-runtime"
 import { TooltipIconButton } from "@/components/assistant-ui/tooltip-icon-button"
 import type { MarketConversationAssistantController } from "@/components/assistant-ui/use-market-conversation-assistant"
 import { Button } from "@/components/ui/button"
@@ -210,7 +214,11 @@ function AssistantModalPanel({
 
             <ThreadPrimitive.Messages>
               {({ message }) => (
-                <AssistantMessage message={message} labels={labels} />
+                <AssistantMessage
+                  message={message}
+                  labels={labels}
+                  controller={controller}
+                />
               )}
             </ThreadPrimitive.Messages>
 
@@ -421,18 +429,29 @@ function OlderMessagesControl({
 }
 
 function AssistantMessage({
+  controller,
   message,
   labels,
 }: {
+  controller: MarketConversationAssistantController
   message: MessageState
   labels: Dictionary["aiAssistant"]
 }) {
-  const text = message.content
-    .filter((part): part is { type: "text"; text: string } => part.type === "text")
-    .map((part) => part.text)
-    .join("\n")
   const isUser = message.role === "user"
   const isFailed = message.status?.type === "incomplete"
+  const AnalysisPart = ({ data }: DataMessagePartProps) => {
+    if (!isMarketAnalysisPartData(data)) {
+      return null
+    }
+
+    return (
+      <MarketAnalysisPart
+        data={data}
+        labels={labels.analysis}
+        controller={controller}
+      />
+    )
+  }
 
   return (
     <MessagePrimitive.Root
@@ -448,9 +467,22 @@ function AssistantMessage({
           isFailed && "border border-destructive"
         )}
       >
-        <p className="whitespace-pre-wrap break-words">
-          {text || (isFailed ? labels.messageFailed : labels.emptyMessage)}
-        </p>
+        <MessagePrimitive.Parts
+          unstable_showEmptyOnNonTextEnd={false}
+          components={{
+            Text: AssistantTextPart,
+            Empty: () => (
+              <p className="whitespace-pre-wrap break-words">
+                {isFailed ? labels.messageFailed : labels.emptyMessage}
+              </p>
+            ),
+            data: {
+              by_name: {
+                "market-analysis": AnalysisPart,
+              },
+            },
+          }}
+        />
         {isFailed ? (
           <p className="mt-1 text-xs text-muted-foreground">
             {labels.messageFailed}
@@ -459,6 +491,10 @@ function AssistantMessage({
       </div>
     </MessagePrimitive.Root>
   )
+}
+
+function AssistantTextPart({ text }: TextMessagePartProps) {
+  return <p className="whitespace-pre-wrap break-words">{text}</p>
 }
 
 function RetryState({

@@ -29,7 +29,7 @@
 - [x] 4.2 Add accessible new-conversation and recent-history controls using existing shadcn wrappers and the current Assistant Modal composition.
 - [x] 4.3 Add latest-message, older-message, submission, empty, and recoverable failure states while keeping the composer usable inside mobile and desktop modal bounds.
 - [x] 4.4 Remove the full-conversation action so the assistant modal is the only market conversation UI surface.
-- [x] 4.5 Keep full structured analysis, evidence, Telegram delivery, list-page controls, and canonical route chrome out of the compact modal.
+- [x] 4.5 Keep full structured analysis workbench controls, evidence, Telegram delivery, list-page controls, and canonical route chrome out of the compact modal.
 
 ## 5. Protected Shell, Localization, And Accessibility
 

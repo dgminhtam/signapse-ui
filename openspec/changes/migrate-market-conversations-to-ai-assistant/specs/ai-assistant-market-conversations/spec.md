@@ -106,9 +106,9 @@ The assistant SHALL provide the primary market conversation experience inside th
 - **WHEN** the assistant modal renders for a draft or persisted conversation
 - **THEN** it does not render an action to `/market-conversations`, `/market-conversations/{id}`, or `/market-query`
 
-#### Scenario: Domain-specific controls are evaluated
+#### Scenario: Full workbench controls are evaluated
 - **WHEN** the compact modal conversation surface renders
-- **THEN** evidence sheets, Telegram delivery, full structured analysis controls, attachments, edit, regenerate, branch, rename, delete, archive, and Assistant Cloud controls are absent
+- **THEN** evidence sheets, Telegram delivery, full structured analysis workbench controls, attachments, edit, regenerate, branch, rename, delete, archive, and Assistant Cloud controls are absent
 
 ### Requirement: Localized accessible runtime states
 The assistant market conversation workflow SHALL expose dictionary-backed English and Vietnamese labels and accessible interaction states.
