@@ -100,6 +100,12 @@ export interface MarketConversationDetailResponse
   messages: MarketChatMessageResponse[]
 }
 
+export interface MarketConversationMessagePageResponse {
+  content: MarketChatMessageResponse[]
+  hasMore: boolean
+  nextBeforeMessageId?: number | null
+}
+
 export interface SubmitMarketConversationMessageRequest {
   message: string
 }
@@ -267,6 +273,22 @@ export const marketConversationDetailResponseSchema =
     messages: z.array(marketChatMessageResponseSchema),
   }) satisfies z.ZodType<MarketConversationDetailResponse>
 
+export const marketConversationMessagePageResponseSchema = z
+  .object({
+    content: z.array(marketChatMessageResponseSchema),
+    hasMore: z.boolean(),
+    nextBeforeMessageId: nullableNumberSchema.optional(),
+  })
+  .superRefine((page, context) => {
+    if (page.hasMore && page.nextBeforeMessageId == null) {
+      context.addIssue({
+        code: "custom",
+        path: ["nextBeforeMessageId"],
+        message: "A next cursor is required when more messages are available.",
+      })
+    }
+  }) satisfies z.ZodType<MarketConversationMessagePageResponse>
+
 export const submitMarketConversationMessageResponseSchema = z.object({
   userMessage: marketChatMessageResponseSchema,
   assistantMessage: marketChatMessageResponseSchema,
@@ -367,6 +389,27 @@ export function deriveMarketConversationTitle(
   }
 
   return `${normalized.slice(0, Math.max(1, maxLength - 3)).trimEnd()}...`
+}
+
+export function normalizeMarketConversationMessages(
+  messages: readonly MarketChatMessageResponse[]
+): MarketChatMessageResponse[] {
+  return [...messages].sort((left, right) => left.id - right.id)
+}
+
+export function reconcileMarketConversationMessages(
+  current: readonly MarketChatMessageResponse[],
+  incoming: readonly MarketChatMessageResponse[]
+): MarketChatMessageResponse[] {
+  const messagesById = new Map(
+    current.map((message) => [message.id, message] as const)
+  )
+
+  for (const message of incoming) {
+    messagesById.set(message.id, message)
+  }
+
+  return normalizeMarketConversationMessages([...messagesById.values()])
 }
 
 export function getMarketQueryArtifactTypeLabels(

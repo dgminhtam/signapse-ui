@@ -18,6 +18,7 @@ import { LanguageSelector } from "@/components/language-selector"
 import { ModeToggle } from "@/components/mode-toggle"
 import { PermissionProvider } from "@/components/permission-provider"
 import { PersonalNotesQuickSheet } from "@/components/personal-notes-quick-sheet"
+import { ProtectedAiAssistant } from "@/components/protected-ai-assistant"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { WorkspaceSwitcher } from "@/components/workspace-switcher"
 import { Separator } from "@/components/ui/separator"
@@ -116,6 +117,7 @@ export default async function Layout({
             {children}
           </div>
         </SidebarInset>
+        <ProtectedAiAssistant workspaceId={currentWorkspace?.id ?? null} />
       </PermissionProvider>
     </SidebarProvider>
   )

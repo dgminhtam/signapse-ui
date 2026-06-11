@@ -1,7 +1,5 @@
 "use server"
 
-import { revalidatePath } from "next/cache"
-
 import { fetchAuthenticated } from "@/app/api/auth/action"
 import { ActionResult, Page, SearchParams } from "@/app/lib/definitions"
 import { getDictionary } from "@/app/lib/i18n/dictionaries"
@@ -13,6 +11,7 @@ import {
   MarketAnalysisResponse,
   MarketAnalysisTelegramDeliveryResponse,
   MarketConversationDetailResponse,
+  MarketConversationMessagePageResponse,
   MarketConversationSummaryResponse,
   SubmitMarketConversationMessageRequest,
   SubmitMarketConversationMessageResponse,
@@ -23,6 +22,7 @@ import {
   marketAnalysisResponseSchema,
   marketAnalysisTelegramDeliveryResponseSchema,
   marketConversationDetailResponseSchema,
+  marketConversationMessagePageResponseSchema,
   marketConversationSummaryResponseSchema,
   pageMarketConversationSummaryResponseSchema,
   submitMarketConversationMessageResponseSchema,
@@ -93,8 +93,6 @@ export async function createMarketConversation(
       dictionary.marketConversations.responseInvalid
     )
 
-    revalidatePath("/market-conversations")
-
     return { success: true, data: conversation }
   } catch (error: unknown) {
     return {
@@ -114,6 +112,28 @@ export async function getMarketConversationById(
 
   return parseOrThrow(
     marketConversationDetailResponseSchema,
+    response,
+    dictionary.marketConversations.responseInvalid
+  )
+}
+
+export async function getMarketConversationMessages(
+  conversationId: number,
+  beforeMessageId?: number
+): Promise<MarketConversationMessagePageResponse> {
+  const dictionary = await getMarketConversationDictionary()
+  const searchParams = new URLSearchParams({ size: "30" })
+
+  if (typeof beforeMessageId === "number") {
+    searchParams.set("beforeMessageId", String(beforeMessageId))
+  }
+
+  const response = await fetchAuthenticated<unknown>(
+    `/market-conversations/${conversationId}/messages?${searchParams.toString()}`
+  )
+
+  return parseOrThrow(
+    marketConversationMessagePageResponseSchema,
     response,
     dictionary.marketConversations.responseInvalid
   )
@@ -153,9 +173,6 @@ export async function submitMarketConversationMessage(
       response,
       dictionary.marketConversations.responseInvalid
     )
-
-    revalidatePath("/market-conversations")
-    revalidatePath(`/market-conversations/${conversationId}`)
 
     return { success: true, data: messageResult }
   } catch (error: unknown) {

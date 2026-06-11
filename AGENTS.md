@@ -89,6 +89,7 @@ app/(main)/[feature]/
 - Server actions/API actions that need localized messages must use `getRequestLocale()` or `getServerDictionary()` instead of guessing locale manually.
 - Internal app links must preserve locale with `LocalizedLink`, `useLocalizedHref()`, `useLocalizedPath()`, or `withLocalePath()`; do not hardcode `/vi` or `/en`.
 - Locale-sensitive dates, numbers, and currency must use formatters from the i18n provider/helper; avoid calling `toLocaleString()` directly during render to reduce hydration mismatch.
+- When removing or replacing a UI route, remove old redirect compatibility routes in the same change unless the user explicitly asks to keep a legacy redirect.
 
 ## Shadcn And Theme Policy
 

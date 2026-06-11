@@ -20,6 +20,7 @@ function getFriendlySegmentNames(
   dictionary: Dictionary
 ): Record<string, string> {
   return {
+    account: dictionary.accountProfile.title,
     categories: dictionary.navigation.categories,
     create: dictionary.common.create,
     "ai-provider-configs": dictionary.navigation.aiProviders,
@@ -31,13 +32,12 @@ function getFriendlySegmentNames(
     events: dictionary.navigation.events,
     "graph-view": dictionary.navigation.knowledgeGraph,
     "market-charts": dictionary.navigation.marketCharts,
-    "market-conversations": dictionary.navigation.marketQuery,
-    "market-query": dictionary.navigation.marketQuery,
     "news-articles": dictionary.navigation.newsArticles,
     "news-outlets": dictionary.navigation.newsOutlets,
     roles: dictionary.navigation.roles,
     "source-documents": dictionary.navigation.sourceDocuments,
     "system-prompts": dictionary.navigation.systemPrompts,
+    users: dictionary.navigation.users,
   }
 }
 
