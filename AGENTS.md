@@ -19,7 +19,7 @@ This document is the active repo-wide instruction file for Codex when working in
 ## Scope And Skills
 
 - `AGENTS.md` holds repo-wide rules: stack, auth/API, UI policy, layout invariants, verification, and review categories.
-- `.codex/skills` holds detailed recipes. When a task touches one of the domains below, read the corresponding skill before implementation or review.
+- `.agents/skills` holds detailed recipes. When a task touches one of the domains below, read the corresponding skill before implementation or review.
 - `shadcn`: adding, fixing, composing shadcn components, wrappers, CLI, docs, presets, and styling rules.
 - `implementation-guardrails`: applying OpenSpec, refactoring, bugfixes, cleanup, or scope-sensitive changes.
 - `hydration-mismatch`: investigating hydration mismatch on Radix/shadcn overlays.

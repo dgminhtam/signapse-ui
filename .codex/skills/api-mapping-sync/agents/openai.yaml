@@ -1,4 +1,0 @@
-interface:
-  display_name: "API Mapping Sync"
-  short_description: "Update APIMAPPING.md and report API diffs"
-  default_prompt: "Use $api-mapping-sync to update docs/APIMAPPING.md from docs/api_mapping.json, report the confirmed API diffs, and summarize frontend impact."

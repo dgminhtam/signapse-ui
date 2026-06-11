@@ -19,7 +19,7 @@ Tài liệu này là bản tiếng Việt để chủ repo đọc hiểu các h�
 ## Scope Và Skills
 
 - `AGENTS.md` giữ các quy tắc toàn repo: stack, auth/API, UI policy, layout invariant, verification và review categories.
-- `.codex/skills` giữ recipe chi tiết. Khi task đụng các domain dưới đây, phải đọc skill tương ứng trước khi implement hoặc review.
+- `.agents/skills` giữ recipe chi tiết. Khi task đụng các domain dưới đây, phải đọc skill tương ứng trước khi implement hoặc review.
 - `shadcn`: thêm/sửa/compose shadcn component, wrapper, CLI, docs, preset, styling rules.
 - `implementation-guardrails`: apply OpenSpec, refactor, bugfix, cleanup hoặc thay đổi scope-sensitive.
 - `hydration-mismatch`: điều tra hydration mismatch trên Radix/shadcn overlay.
