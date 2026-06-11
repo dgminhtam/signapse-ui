@@ -10,7 +10,6 @@ import { ECONOMIC_CALENDAR_NAV_PERMISSIONS } from "@/app/lib/economic-calendar/p
 import { EVENT_NAV_PERMISSIONS } from "@/app/lib/events/permissions"
 import { GRAPH_VIEW_NAV_PERMISSIONS } from "@/app/lib/graph-view/permissions"
 import { MARKET_CHART_NAV_PERMISSIONS } from "@/app/lib/market-charts/permissions"
-import { MARKET_QUERY_NAV_PERMISSIONS } from "@/app/lib/market-query/permissions"
 import { NEWS_ARTICLE_NAV_PERMISSIONS } from "@/app/lib/news-articles/permissions"
 import { NEWS_OUTLET_NAV_PERMISSIONS } from "@/app/lib/news-outlets/permissions"
 import { SYSTEM_PROMPT_NAV_PERMISSIONS } from "@/app/lib/system-prompts/permissions"
@@ -103,11 +102,6 @@ export function createSiteConfig(dictionary: Dictionary) {
           title: dictionary.navigation.economicCalendar,
           url: "/economic-calendar",
           permission: ECONOMIC_CALENDAR_NAV_PERMISSIONS,
-        },
-        {
-          title: dictionary.navigation.marketQuery,
-          url: "/market-conversations",
-          permission: MARKET_QUERY_NAV_PERMISSIONS,
         },
         {
           title: dictionary.navigation.blogs,

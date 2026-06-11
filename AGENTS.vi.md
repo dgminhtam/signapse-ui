@@ -89,6 +89,7 @@ app/(main)/[feature]/
 - Server action/API action cần localized message phải dùng `getRequestLocale()` hoặc `getServerDictionary()` thay vì tự suy đoán locale.
 - Internal app links phải preserve locale bằng `LocalizedLink`, `useLocalizedHref()`, `useLocalizedPath()` hoặc `withLocalePath()`; không hardcode `/vi` hoặc `/en`.
 - Locale-sensitive date, number và currency phải dùng formatter trong i18n provider/helper; tránh gọi `toLocaleString()` trực tiếp trong render để giảm hydration mismatch.
+- Khi xóa hoặc thay thế một UI route, phải xóa route redirect compatibility cũ trong cùng thay đổi, trừ khi người dùng yêu cầu rõ là giữ legacy redirect.
 
 ## Shadcn Và Theme Policy
 
