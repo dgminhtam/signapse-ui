@@ -110,11 +110,11 @@ export default async function UsersPage({ searchParams }: PageProps) {
     getServerDictionary(),
   ])
 
-  if (!hasPermission(permissions, "user:update")) {
+  if (!hasPermission(permissions, "user:search")) {
     return (
       <AccessDenied
         description={dictionary.users.accessDeniedDescription}
-        permission="user:update"
+        permission="user:search"
       />
     )
   }
