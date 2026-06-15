@@ -39,7 +39,7 @@ export async function getMe(): Promise<BackendMeResponse> {
 export async function getUsers(
   request: UserSearchRequest = {}
 ): Promise<UserSearchResponse> {
-  return fetchAuthenticated<UserSearchResponse>(`/user${buildUserSearchQuery(request)}`)
+  return fetchAuthenticated<UserSearchResponse>(`/users${buildUserSearchQuery(request)}`)
 }
 
 export async function createUser(
@@ -83,7 +83,7 @@ export async function updateManagedUser(
 ): Promise<ActionResult<UserResponse>> {
   try {
     const user = await fetchAuthenticated<UserResponse>(
-      `/user/${encodeURIComponent(id)}`,
+      `/users/${encodeURIComponent(id)}`,
       {
         method: "PATCH",
         body: JSON.stringify(request),

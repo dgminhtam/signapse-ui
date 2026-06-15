@@ -97,7 +97,7 @@ export const vi = {
     emailReadOnlyDescription: "Email đăng nhập không thể chỉnh sửa tại đây.",
     phoneNumber: "Số điện thoại",
     phoneNumberPlaceholder: "Nhập số điện thoại",
-    accountRoles: "Phân loại vai trò",
+    accountPackage: "Gói tài khoản",
     upgradeAccount: "Nâng cấp tài khoản",
     saveChanges: "Lưu thay đổi",
     updatePending: "Đang lưu",
@@ -114,7 +114,7 @@ export const vi = {
     billingEmptyDescription: "Khu vực thanh toán sẽ được bổ sung khi luồng nâng cấp được xác định.",
     errorTitle: "Không thể tải tài khoản",
     errorDescription: "Vui lòng thử lại để tải thông tin tài khoản.",
-    noRoles: "Chưa có vai trò",
+    noPackage: "Chưa đăng kí gói",
   },
   errors: {
     generic: "Đã xảy ra lỗi",
