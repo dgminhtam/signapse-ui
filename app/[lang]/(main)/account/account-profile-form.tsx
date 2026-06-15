@@ -327,11 +327,11 @@ export function AccountProfileForm({
             />
 
             <Field>
-              <FieldTitle>{t.accountRoles}</FieldTitle>
+              <FieldTitle>{t.accountPackage}</FieldTitle>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex flex-wrap gap-2">
                   <Badge variant="secondary">
-                    {initialData.roleName || t.noRoles}
+                    {initialData.roleName || t.noPackage}
                   </Badge>
                 </div>
                 <Button variant="outline" asChild>

@@ -100,7 +100,7 @@ export const en: Dictionary = {
     emailReadOnlyDescription: "The sign-in email cannot be edited here.",
     phoneNumber: "Phone number",
     phoneNumberPlaceholder: "Enter phone number",
-    accountRoles: "Role classification",
+    accountPackage: "Account package",
     upgradeAccount: "Upgrade account",
     saveChanges: "Save changes",
     updatePending: "Saving",
@@ -117,7 +117,7 @@ export const en: Dictionary = {
     billingEmptyDescription: "Billing will be added when the upgrade flow is defined.",
     errorTitle: "Could not load account",
     errorDescription: "Please try again to load account information.",
-    noRoles: "No roles assigned",
+    noPackage: "Not registered for a package",
   },
   errors: {
     generic: "Something went wrong",
