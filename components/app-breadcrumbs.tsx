@@ -32,6 +32,7 @@ function getFriendlySegmentNames(
     "graph-view": dictionary.navigation.knowledgeGraph,
     "market-charts": dictionary.navigation.marketCharts,
     "market-query": dictionary.navigation.marketQuery,
+    "mail-service": dictionary.navigation.mailService,
     "news-articles": dictionary.navigation.newsArticles,
     "news-outlets": dictionary.navigation.newsOutlets,
     roles: dictionary.navigation.roles,

@@ -127,6 +127,11 @@ export function createSiteConfig(dictionary: Dictionary) {
           permission: "ai-provider-config:read",
         },
         {
+          title: dictionary.navigation.mailService,
+          url: "/mail-service",
+          permission: "mail-service:all",
+        },
+        {
           title: dictionary.navigation.systemPrompts,
           url: "/system-prompts",
           permission: SYSTEM_PROMPT_NAV_PERMISSIONS,
