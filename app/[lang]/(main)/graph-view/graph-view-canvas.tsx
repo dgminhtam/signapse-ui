@@ -139,6 +139,7 @@ const GRAPH_HUD_NODE_KIND_ORDER = [
   "theme",
   "news-article",
   "narrative",
+  "warm-episode",
 ] satisfies GraphViewNodeKind[]
 const GRAPH_HUD_EDGE_KIND_ORDER = [
   "event-asset",
@@ -146,6 +147,8 @@ const GRAPH_HUD_EDGE_KIND_ORDER = [
   "news-article-event",
   "narrative-event",
   "narrative-asset",
+  "asset-warm-episode",
+  "warm-episode-event",
 ] satisfies GraphViewEdgeKind[]
 const GRAPH_SELECTION_STATE_NAMES = [
   "selected",
@@ -365,6 +368,20 @@ function getMeaningfulInspectorStatus(value: string | null | undefined) {
   return trimmedValue
 }
 
+function getKnowledgeLayerLabel(
+  value: string | null | undefined,
+  dictionary: LocalizationContext["dictionary"]
+) {
+  const trimmedValue = getInspectorText(value)
+
+  if (!trimmedValue) {
+    return null
+  }
+
+  const labels = dictionary.graphView.knowledgeLayers as Record<string, string>
+  return labels[trimmedValue] || trimmedValue
+}
+
 function getNodeQuickDetailAction(
   node: GraphViewNode,
   dictionary: LocalizationContext["dictionary"]
@@ -433,6 +450,8 @@ function getGraphNodeInspectorFields({
   metadata,
   node,
   occurredAt,
+  periodEnd,
+  periodStart,
   publishedAt,
 }: {
   confidence: string | null
@@ -440,9 +459,15 @@ function getGraphNodeInspectorFields({
   metadata: GraphViewNode["metadata"]
   node: GraphViewNode
   occurredAt: string | null
+  periodEnd: string | null
+  periodStart: string | null
   publishedAt: string | null
 }) {
   const eventStatus = getMeaningfulInspectorStatus(metadata?.status)
+  const knowledgeLayer = getKnowledgeLayerLabel(
+    metadata?.knowledgeLayer,
+    dictionary
+  )
   const narrativeStatus = getInspectorText(metadata?.narrativeStatus)
   const newsOutletName = getInspectorText(metadata?.newsOutletName)
   const assetType = getInspectorText(metadata?.assetType)
@@ -537,6 +562,37 @@ function getGraphNodeInspectorFields({
     ]
   }
 
+  if (node.kind === "warm-episode") {
+    return [
+      {
+        key: "period-start",
+        label: dictionary.graphView.inspector.periodStart,
+        value: periodStart,
+        valueNode: periodStart ? (
+          <AppTimeMetadata icon={Calendar}>{periodStart}</AppTimeMetadata>
+        ) : undefined,
+      },
+      {
+        key: "period-end",
+        label: dictionary.graphView.inspector.periodEnd,
+        value: periodEnd,
+        valueNode: periodEnd ? (
+          <AppTimeMetadata icon={Calendar}>{periodEnd}</AppTimeMetadata>
+        ) : undefined,
+      },
+      {
+        key: "knowledge-layer",
+        label: dictionary.graphView.inspector.knowledgeLayer,
+        value: knowledgeLayer,
+      },
+      {
+        key: "confidence",
+        label: dictionary.graphView.inspector.confidence,
+        value: confidence,
+      },
+    ]
+  }
+
   return []
 }
 
@@ -570,6 +626,8 @@ function GraphNodeDetailInspector({
       ? metadata.url.trim()
       : null
   const occurredAt = formatInspectorDate(metadata.occurredAt, localization)
+  const periodStart = formatInspectorDate(metadata.periodStart, localization)
+  const periodEnd = formatInspectorDate(metadata.periodEnd, localization)
   const publishedAt = formatInspectorDate(metadata.publishedAt, localization)
   const confidence = formatInspectorConfidence(metadata.confidence, localization)
   const relationSummary = formatMessage(
@@ -585,6 +643,8 @@ function GraphNodeDetailInspector({
     metadata,
     node,
     occurredAt,
+    periodEnd,
+    periodStart,
     publishedAt,
   })
 
@@ -763,6 +823,7 @@ function isPriorityLabelNode({
   if (!isDenseGraph) {
     return (
       (nodeKind === "narrative" && edgeCount >= 2) ||
+      (nodeKind === "warm-episode" && edgeCount >= 2) ||
       (nodeKind === "event" && edgeCount >= 4) ||
       edgeCount >= 6
     )
@@ -770,6 +831,7 @@ function isPriorityLabelNode({
 
   return (
     (nodeKind === "narrative" && edgeCount >= 2) ||
+    (nodeKind === "warm-episode" && edgeCount >= 2) ||
     (nodeKind === "event" && edgeCount >= 4) ||
     (nodeKind === "news-article" && edgeCount >= 2) ||
     edgeCount >= GRAPH_DENSE_HIGH_CONNECTIVITY_EDGE_COUNT
@@ -865,7 +927,11 @@ function inferClusterState(
   })
 
   graphModel.nodes.forEach((node) => {
-    if (node.kind !== "news-article" && node.kind !== "narrative") {
+    if (
+      node.kind !== "news-article" &&
+      node.kind !== "narrative" &&
+      node.kind !== "warm-episode"
+    ) {
       return
     }
 
@@ -889,7 +955,7 @@ function inferClusterState(
       }
     }
 
-    if (node.kind !== "narrative") {
+    if (node.kind !== "narrative" && node.kind !== "warm-episode") {
       return
     }
 

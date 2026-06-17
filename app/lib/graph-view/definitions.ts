@@ -8,6 +8,7 @@ export type GraphViewNodeKind =
   | "theme"
   | "news-article"
   | "narrative"
+  | "warm-episode"
 
 export type GraphViewEdgeKind =
   | "event-asset"
@@ -15,6 +16,8 @@ export type GraphViewEdgeKind =
   | "news-article-event"
   | "narrative-event"
   | "narrative-asset"
+  | "asset-warm-episode"
+  | "warm-episode-event"
 
 export interface GraphViewNodeMetadata {
   slug?: string | null
@@ -25,7 +28,10 @@ export interface GraphViewNodeMetadata {
   url?: string | null
   occurredAt?: string | null
   publishedAt?: string | null
+  periodStart?: string | null
+  periodEnd?: string | null
   status?: string | null
+  knowledgeLayer?: string | null
   narrativeStatus?: string | null
   active?: boolean | null
   confidence?: number | null
@@ -67,6 +73,7 @@ const graphViewNodeKindSchema = z.enum([
   "theme",
   "news-article",
   "narrative",
+  "warm-episode",
 ])
 
 const graphViewEdgeKindSchema = z.enum([
@@ -75,6 +82,8 @@ const graphViewEdgeKindSchema = z.enum([
   "news-article-event",
   "narrative-event",
   "narrative-asset",
+  "asset-warm-episode",
+  "warm-episode-event",
 ])
 
 export const graphViewNodeMetadataSchema = z.object({
@@ -86,7 +95,10 @@ export const graphViewNodeMetadataSchema = z.object({
   url: z.string().nullish(),
   occurredAt: z.string().nullish(),
   publishedAt: z.string().nullish(),
+  periodStart: z.string().nullish(),
+  periodEnd: z.string().nullish(),
   status: z.string().nullish(),
+  knowledgeLayer: z.string().nullish(),
   narrativeStatus: z.string().nullish(),
   active: z.boolean().nullish(),
   confidence: z.number().nullish(),
@@ -117,7 +129,8 @@ export const graphViewResponseSchema = z.object({
   edges: z.array(graphViewEdgeSchema),
 }) satisfies z.ZodType<GraphViewResponse>
 
-const graphNodeIdPattern = /^(event|asset|theme|news-article|narrative):(\d+)$/
+const graphNodeIdPattern =
+  /^(event|asset|theme|news-article|narrative|warm-episode):(\d+)$/
 
 export function parseGraphViewNodeId(nodeId: string): GraphViewEntityReference | null {
   const match = graphNodeIdPattern.exec(nodeId)

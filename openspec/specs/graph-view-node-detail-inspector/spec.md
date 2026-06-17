@@ -61,6 +61,12 @@ The graph view SHALL display relevant, kind-specific summary details from the ex
 - **THEN** the inspector shows the narrative title, thesis when present, narrative status when present, confidence when present, and a compact graph relationship summary
 - **AND** the inspector does not show article-only fields, asset-only fields, generic event status, `slug`, or `canonicalKey`
 
+#### Scenario: Warm episode node details are shown
+
+- **WHEN** the selected node kind is `warm-episode`
+- **THEN** the inspector shows the warm episode title, node type, period start when present, period end when present, knowledge layer when present, confidence when present, and a compact graph relationship summary
+- **AND** the inspector does not show article-only fields, asset-only fields, narrative thesis, narrative status, generic event status, `slug`, or `canonicalKey`
+
 ### Requirement: Inspector provides detail navigation actions
 
 The graph view SHALL provide direct navigation actions for selected nodes that map to existing detail routes or external URLs.
@@ -79,6 +85,11 @@ The graph view SHALL provide direct navigation actions for selected nodes that m
 
 - **WHEN** the selected node kind is `news-article` and `metadata.url` is present
 - **THEN** the inspector provides an external action to open the source URL
+
+#### Scenario: Warm episode node remains browse-only
+
+- **WHEN** the selected node kind is `warm-episode`
+- **THEN** the inspector omits route actions for warm episode detail
 
 #### Scenario: Node has no detail route
 
@@ -125,4 +136,3 @@ The graph view SHALL preserve existing hover, drag, zoom, recenter, and dark-mod
 
 - **WHEN** the graph view is displayed in dark mode
 - **THEN** the inspector text, controls, and metadata remain readable
-

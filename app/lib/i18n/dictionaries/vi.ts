@@ -1698,6 +1698,7 @@ export const vi = {
       theme: "Chủ đề",
       "news-article": "Bài viết",
       narrative: "Luận điểm",
+      "warm-episode": "Giai đoạn warm",
     },
     edgeKinds: {
       "event-asset": "Sự kiện - tài sản",
@@ -1705,6 +1706,12 @@ export const vi = {
       "news-article-event": "Bằng chứng - sự kiện",
       "narrative-event": "Luận điểm - sự kiện",
       "narrative-asset": "Luận điểm - tài sản",
+      "asset-warm-episode": "Tài sản - giai đoạn warm",
+      "warm-episode-event": "Giai đoạn warm - sự kiện",
+    },
+    knowledgeLayers: {
+      HOT: "Hot",
+      WARM: "Warm",
     },
     relationTypes: {
       PRIMARY_SUBJECT: "Chủ thể chính",
@@ -1731,6 +1738,9 @@ export const vi = {
       narrativeStatus: "Trạng thái luận điểm",
       thesis: "Luận đề",
       newsOutlet: "Nguồn tin",
+      periodStart: "Bắt đầu giai đoạn",
+      periodEnd: "Kết thúc giai đoạn",
+      knowledgeLayer: "Lớp tri thức",
       symbol: "Mã giao dịch",
       assetType: "Loại tài sản",
       slug: "Slug",

@@ -144,3 +144,29 @@ The system SHALL document the frontend/backend language contract for maintainers
 - **THEN** it MUST describe that frontend backend calls use `Accept-Language` from the active app locale
 - **AND** it MUST note that localized backend errors retain the existing `message` response shape
 
+### Requirement: Landing V2 localized copy parity
+The system SHALL provide English and Vietnamese dictionary copy for every visible or assistive landing V2 string.
+
+#### Scenario: V2 dictionary parity
+- **WHEN** the landing V2 implementation is typechecked
+- **THEN** English and Vietnamese dictionaries expose matching keys for hero, problem, pillars, pipeline, personalization, trust, final CTA, and visual labels
+
+#### Scenario: Landing V2 page uses dictionary copy
+- **WHEN** `app/[lang]/page.tsx` renders visible or assistive landing text
+- **THEN** the text comes from the active locale dictionary except canonical product identifiers, route paths, symbols, and numeric illustrative values
+
+### Requirement: Landing page dictionary copy
+The system SHALL render landing page user-facing copy from Vietnamese and English frontend dictionaries.
+
+#### Scenario: Vietnamese landing copy
+- **WHEN** a user opens `/vi`
+- **THEN** landing page headings, body copy, CTA labels, navigation labels, feature labels, trust copy, and accessibility labels render in Vietnamese from the dictionary
+
+#### Scenario: English landing copy
+- **WHEN** a user opens `/en`
+- **THEN** landing page headings, body copy, CTA labels, navigation labels, feature labels, trust copy, and accessibility labels render in English from the dictionary
+
+#### Scenario: Dictionary parity includes landing keys
+- **WHEN** the frontend dictionaries are typechecked
+- **THEN** Vietnamese and English dictionaries expose matching landing page message keys
+

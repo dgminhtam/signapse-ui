@@ -1712,6 +1712,7 @@ export const en: Dictionary = {
       theme: "Theme",
       "news-article": "Article",
       narrative: "Narrative",
+      "warm-episode": "Warm episode",
     },
     edgeKinds: {
       "event-asset": "Event - asset",
@@ -1719,6 +1720,12 @@ export const en: Dictionary = {
       "news-article-event": "Evidence - event",
       "narrative-event": "Narrative - event",
       "narrative-asset": "Narrative - asset",
+      "asset-warm-episode": "Asset - warm episode",
+      "warm-episode-event": "Warm episode - event",
+    },
+    knowledgeLayers: {
+      HOT: "Hot",
+      WARM: "Warm",
     },
     relationTypes: {
       PRIMARY_SUBJECT: "Primary subject",
@@ -1745,6 +1752,9 @@ export const en: Dictionary = {
       narrativeStatus: "Narrative status",
       thesis: "Thesis",
       newsOutlet: "News outlet",
+      periodStart: "Period start",
+      periodEnd: "Period end",
+      knowledgeLayer: "Knowledge layer",
       symbol: "Ticker",
       assetType: "Asset type",
       slug: "Slug",

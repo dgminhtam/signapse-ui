@@ -35,6 +35,12 @@ export const GRAPH_VIEW_NODE_VISUALS = {
     color: "#7c3aed",
     size: 26,
   },
+  "warm-episode": {
+    chipClassName:
+      "border-cyan-300/60 bg-cyan-50 text-cyan-900 dark:border-cyan-500/30 dark:bg-cyan-500/10 dark:text-cyan-100",
+    color: "#0891b2",
+    size: 25,
+  },
 } satisfies Record<
   GraphViewNodeKind,
   {
@@ -75,6 +81,18 @@ export const GRAPH_VIEW_EDGE_VISUALS = {
     color: "#d946ef",
     size: 1.35,
   },
+  "asset-warm-episode": {
+    chipClassName:
+      "border-cyan-300/60 bg-cyan-50 text-cyan-900 dark:border-cyan-500/30 dark:bg-cyan-500/10 dark:text-cyan-100",
+    color: "#22d3ee",
+    size: 1.35,
+  },
+  "warm-episode-event": {
+    chipClassName:
+      "border-sky-300/60 bg-sky-50 text-sky-900 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-100",
+    color: "#38bdf8",
+    size: 1.45,
+  },
 } satisfies Record<
   GraphViewEdgeKind,
   {
@@ -106,6 +124,10 @@ export function getGraphViewNodeVisuals(dictionary: Dictionary) {
       ...GRAPH_VIEW_NODE_VISUALS.narrative,
       label: dictionary.graphView.nodeKinds.narrative,
     },
+    "warm-episode": {
+      ...GRAPH_VIEW_NODE_VISUALS["warm-episode"],
+      label: dictionary.graphView.nodeKinds["warm-episode"],
+    },
   } satisfies Record<
     GraphViewNodeKind,
     (typeof GRAPH_VIEW_NODE_VISUALS)[GraphViewNodeKind] & { label: string }
@@ -133,6 +155,14 @@ export function getGraphViewEdgeVisuals(dictionary: Dictionary) {
     "narrative-asset": {
       ...GRAPH_VIEW_EDGE_VISUALS["narrative-asset"],
       label: dictionary.graphView.edgeKinds["narrative-asset"],
+    },
+    "asset-warm-episode": {
+      ...GRAPH_VIEW_EDGE_VISUALS["asset-warm-episode"],
+      label: dictionary.graphView.edgeKinds["asset-warm-episode"],
+    },
+    "warm-episode-event": {
+      ...GRAPH_VIEW_EDGE_VISUALS["warm-episode-event"],
+      label: dictionary.graphView.edgeKinds["warm-episode-event"],
     },
   } satisfies Record<
     GraphViewEdgeKind,

@@ -4,7 +4,7 @@
 TBD - created by archiving change replace-graph-view-canvas-with-g6-force-layout. Update Purpose after archive.
 ## Requirements
 ### Requirement: Graph view renders through a G6 force canvas
-The graph view SHALL render the current backend graph payload through a client-only G6 canvas using a force-directed layout.
+The graph view SHALL render the current backend graph payload through a client-only G6 canvas using a force-directed layout and WebGL renderer.
 
 #### Scenario: Render graph payload
 - **WHEN** the backend returns graph nodes and edges for `/graph-view`
@@ -17,8 +17,13 @@ The graph view SHALL render the current backend graph payload through a client-o
 - **THEN** the G6 canvas SHALL remain isolated behind a client-only boundary
 - **AND** browser-only rendering APIs SHALL NOT be evaluated during server module execution
 
+#### Scenario: WebGL renderer initialization
+- **WHEN** Graph View creates the G6 graph instance
+- **THEN** the graph SHALL use the G6 WebGL renderer from `@antv/g-webgl`
+- **AND** existing force layout, drag, hover, selection, zoom, recenter, and quick-detail behavior SHALL remain available
+
 ### Requirement: Graph view uses team clustering force layout
-The graph view SHALL group related graph entities into readable force-directed teams based on graph relationships.
+The graph view SHALL group related graph entities into readable force-directed teams based on graph relationships, and performance optimizations SHALL preserve the previous team-clustering motion and settle behavior.
 
 #### Scenario: Assign cluster anchors
 - **WHEN** the frontend maps graph nodes for the G6 canvas
@@ -30,15 +35,22 @@ The graph view SHALL group related graph entities into readable force-directed t
 - **WHEN** the G6 force layout runs
 - **THEN** nodes in the same inferred cluster SHALL be visually closer than unrelated nodes where practical
 - **AND** cross-cluster edges SHALL remain visible without collapsing all clusters into a single pile
+- **AND** performance optimization SHALL NOT remove the visible force-layout settle behavior solely because the graph is dense
 
 ### Requirement: Graph view supports force-directed drag exploration
-The graph view SHALL allow users to drag graph elements with force behavior so connected nodes react while preserving overall graph readability.
+The graph view SHALL allow users to drag graph elements with force behavior so connected nodes react while preserving overall graph readability, and performance optimizations SHALL NOT disable or materially weaken this behavior based on graph size.
 
 #### Scenario: Drag a node
 - **WHEN** the user drags a graph node
 - **THEN** the dragged node SHALL follow the pointer
 - **AND** connected or clustered nodes SHALL react through the force layout rather than remaining completely static
 - **AND** the graph SHALL avoid sending backend mutations for drag positions
+
+#### Scenario: Dense graph drag preserves force reaction
+- **WHEN** the user drags a node in a dense graph
+- **THEN** the dragged node SHALL still follow the pointer
+- **AND** connected or clustered nodes SHALL still react through the force layout
+- **AND** performance optimization SHALL NOT disable animation or force-layout reaction solely because the graph is dense
 
 #### Scenario: Drop a dragged node
 - **WHEN** the user releases a dragged graph node
@@ -59,4 +71,18 @@ The first G6 canvas implementation SHALL focus on rendering and force exploratio
 - **THEN** hover full-title cards, modal detail inspection, local focus controls, contextual edge-label toggles, and position persistence SHALL NOT be required for completion
 - **AND** the graph route SHALL still provide an empty state when no graph data is available
 - **AND** the graph route SHALL remain buildable and navigable
+
+### Requirement: Graph view bounds force layout work for dense payloads
+The graph view SHALL keep G6 force layout work bounded so large graph payloads settle into a readable state without continuous nonessential animation.
+
+#### Scenario: Dense graph initial layout settles
+- **WHEN** the graph renders a dense backend payload
+- **THEN** the force layout SHALL run only the bounded work needed to reach a readable clustered arrangement
+- **AND** hover or selection SHALL NOT restart the full force layout
+
+#### Scenario: Drag force remains local session behavior
+- **WHEN** the user drags a node after the graph has settled
+- **THEN** connected or clustered nodes MAY react through the force layout
+- **AND** the updated positions remain local to the current client session
+- **AND** no backend mutation is sent
 

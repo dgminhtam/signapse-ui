@@ -2,13 +2,13 @@
 
 Tài liệu này ánh xạ snapshot OpenAPI backend trong `docs/api_mapping.json` tới các điểm tích hợp frontend hiện tại của repo.
 
-Xác minh lần cuối: ngày 11 tháng 6 năm 2026
+Xác minh lần cuối: ngày 17 tháng 6 năm 2026
 
 ## Cấu hình cơ sở
 
 | Mục                  | Giá trị                                               |
 | -------------------- | ----------------------------------------------------- |
-| URL gốc API          | `http://dev-api.signapse.cloud`                       |
+| URL gốc API          | `http://localhost:8484`                               |
 | Nguồn chuẩn          | `docs/api_mapping.json`                               |
 | Hàm auth chính       | `fetchAuthenticated()` trong `app/api/auth/action.ts` |
 | Hàm public           | `fetchPublic()` trong `app/api/auth/action.ts`        |
@@ -36,7 +36,7 @@ Xác minh lần cuối: ngày 11 tháng 6 năm 2026
 
 ## Tổng quan thay đổi lớn từ snapshot hiện tại
 
-- Snapshot backend hiện tại gồm `114` operation.
+- Snapshot backend hiện tại gồm `116` operation.
 - Backend đã chuyển domain nội dung canon từ `sources` / `source-documents` sang `news-outlets` / `news-articles`.
 - Backend vẫn giữ các surface `events`, `query`, và `graph-view`, nhưng nhiều payload đã đổi naming từ `sourceDocument*` sang `artifact*` hoặc `news-article`.
 - Surface `events` có thêm workflow derive market reactions cho từng event và batch pending events.
@@ -62,6 +62,7 @@ Xác minh lần cuối: ngày 11 tháng 6 năm 2026
 - Snapshot ngày 7/6 đổi tên OpenAPI schema của market conversations sang nhóm `Conversation*` và đổi timestamp conversation/message sang `createdDate` / `lastModifiedDate`.
 - Snapshot ngày 11/6 thêm `GET /market-conversations/{conversationId}/messages` để tải lịch sử message theo cursor `beforeMessageId` và `size`.
 - Contract runtime ngày 11/6 cho phép `analysisId = null` trên conversation messages khi assistant turn là non-analysis (`TEXT`), gồm chat, clarification, hoặc refusal; chỉ turn `ANALYSIS` mới có `analysisId` để mở analysis detail.
+- Snapshot ngày 17/6 mở rộng `graph-view` với node kind `warm-episode`, edge kind `asset-warm-episode` / `warm-episode-event`, và metadata `periodStart`, `periodEnd`, `knowledgeLayer` để phân biệt lớp tin tức `HOT` và `WARM`.
 - Snapshot mới mở rộng asset type enum từ `COMMODITY`, `CRYPTO`, `FX`, `INDEX` thành thêm `EQUITY`, `ETF` trên assets, watchlists, events, narratives, graph metadata, và market charts.
 
 ## Phạm vi endpoint
@@ -263,10 +264,11 @@ Ghi chu:
 Ghi chu:
 
 - Response snapshot hien tai la `GraphViewResponse` gom `nodes[]` va `edges[]`.
-- `nodes[].kind` hien tai gom `event`, `asset`, `theme`, `news-article`, `narrative`; `edges[].kind` gom `event-asset`, `event-theme`, `news-article-event`, `narrative-event`, `narrative-asset`.
-- `GraphNodeMetadata` hien da dung `newsOutletName` thay vi `sourceName`, dong thoi doi `active` thanh `status` va them `narrativeStatus`, `thesis`.
-- Frontend `app/lib/graph-view/definitions.ts` va `app/[lang]/(main)/graph-view/*` da model/render `news-article`, `news-article-event`, `narrative`, `narrative-event`, `narrative-asset`, `newsOutletName`, `narrativeStatus`, va `thesis`.
-- `docs/api_mapping.json` hien van stale neu chua duoc refresh tu backend OpenAPI moi; runtime BE source da co narrative graph kinds.
+- `nodes[].kind` hien tai gom `event`, `asset`, `theme`, `news-article`, `narrative`, va `warm-episode`; `edges[].kind` gom `event-asset`, `event-theme`, `news-article-event`, `narrative-event`, `narrative-asset`, `asset-warm-episode`, va `warm-episode-event`.
+- `GraphNodeMetadata` hien da dung `newsOutletName` thay vi `sourceName`, dong thoi doi `active` thanh `status` va them `narrativeStatus`, `thesis`, `periodStart`, `periodEnd`, `knowledgeLayer`.
+- `knowledgeLayer` hien co enum `HOT` va `WARM`; BE dung field nay de phan biet tin tuc/su kien con hot voi warm episode da ha nhiet theo khoang thoi gian `periodStart` / `periodEnd`.
+- Frontend `app/lib/graph-view/definitions.ts` va `app/[lang]/(main)/graph-view/*` da model/render `news-article`, `news-article-event`, `narrative`, `narrative-event`, `narrative-asset`, `warm-episode`, `asset-warm-episode`, `warm-episode-event`, `newsOutletName`, `narrativeStatus`, `thesis`, `periodStart`, `periodEnd`, va `knowledgeLayer`.
+- Warm episode hien la node browse-only trong Graph View; frontend parse/render metadata layer/period trong inspector nhung chua expose route/detail rieng vi backend snapshot chua co endpoint detail tuong ung.
 - Drill-down cho node bai viet da chuyen sang `/news-articles/{id}`.
 
 ### 8. API narratives
@@ -615,7 +617,7 @@ type ActionResult<T = void> =
 - `narratives`: snapshot moi them `/narratives*`, graph narrative node/edge, va market query `keyNarratives[]`; FE chua co module narratives rieng hoac market-query narrative panel, nhung Graph View da model/render narrative node/edge.
 - `market query`: spec van mo ta `asOfTime` la optional `date-time`; frontend conversation v1 chu dong omit field nay de backend tu lay thoi diem hien tai va harden parse cho payload runtime co the tra `null` o `publishedAt` va `occurredAt`. Frontend khong con legacy `/market-query` route hay redirect compatibility; global assistant modal la UI primary surface.
 - `market conversation messages`: snapshot da co cursor endpoint `GET /market-conversations/{conversationId}/messages`; FE da co action, response schema, va lazy history loading trong global assistant modal.
-- `graph view`: `GraphNodeMetadata` da doi `active` thanh `status` va them `narrativeStatus`/`thesis`; FE Graph View da model/render node kind `narrative` va edge kind `narrative-event`/`narrative-asset`.
+- `graph view`: snapshot moi them node kind `warm-episode`, edge kind `asset-warm-episode` / `warm-episode-event`, va metadata `periodStart` / `periodEnd` / `knowledgeLayer`; FE Graph View da model/render cac kind moi va giu warm episode o che do browse-only vi chua co route/detail endpoint rieng.
 - `user profile`: `GET /me` da dong bo `currentWorkspace`, `mainImage` media object, va `permissions[]`, nhung snapshot moi them `preferredLanguage`; runtime hien van chi dung permission loader.
 - `blogs`: create va response dung `visible`, update dung `isVisible`; frontend van can tiep tuc xu ly ky de tranh drift.
 - `ai-provider-configs`: snapshot khong con expose full `apiKey` tren config response; frontend da doc `credentials[]` preview va ho tro provider enum `GROQ`, nhung can doi tiep UI/DTO theo contract khong con `name`/top-level `model`.
