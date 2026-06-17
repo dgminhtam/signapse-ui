@@ -81,7 +81,6 @@ type BoundedDragElementForceOptions = DragElementForceOptions & {
 type GraphThemeMode = "light" | "dark"
 
 type GraphCanvasPalette = {
-  activeNodeHaloColor: string
   edgeHighlightLineWidthBoost: number
   edgeHighlightOpacity: number
   edgeInactiveOpacity: number
@@ -89,19 +88,13 @@ type GraphCanvasPalette = {
   labelFill: string
   labelHoverFill: string
   labelHoverMaxWidth: number
-  labelHoverStroke: string
   labelInactiveOpacity: number
-  labelStroke: string
-  labelStrokeOpacity: number
-  labelStrokeWidth: number
   nodeHighlightOpacity: number
   nodeInactiveOpacity: number
   selectionEdgeOpacity: number
   selectionInactiveEdgeOpacity: number
   selectionInactiveNodeOpacity: number
-  selectionNodeHaloColor: string
   selectionRelatedNodeOpacity: number
-  nodeStroke: string
 }
 
 const MIN_CANVAS_WIDTH = 360
@@ -163,7 +156,6 @@ const GRAPH_SELECTION_EDGE_STATE_NAMES = [
 function createGraphCanvasPalette(mode: GraphThemeMode): GraphCanvasPalette {
   if (mode === "dark") {
     return {
-      activeNodeHaloColor: "rgba(248, 250, 252, 0.65)",
       edgeHighlightLineWidthBoost: 0.95,
       edgeHighlightOpacity: 0.84,
       edgeInactiveOpacity: 0.34,
@@ -171,24 +163,17 @@ function createGraphCanvasPalette(mode: GraphThemeMode): GraphCanvasPalette {
       labelFill: "#f8fafc",
       labelHoverFill: "#ffffff",
       labelHoverMaxWidth: 300,
-      labelHoverStroke: "rgba(2, 6, 23, 0.96)",
       labelInactiveOpacity: 0.72,
-      labelStroke: "rgba(2, 6, 23, 0.92)",
-      labelStrokeOpacity: 0.92,
-      labelStrokeWidth: 2.8,
       nodeHighlightOpacity: 1,
       nodeInactiveOpacity: 0.66,
       selectionEdgeOpacity: 0.9,
       selectionInactiveEdgeOpacity: 0.2,
       selectionInactiveNodeOpacity: 0.38,
-      selectionNodeHaloColor: "rgba(248, 250, 252, 0.78)",
       selectionRelatedNodeOpacity: 0.82,
-      nodeStroke: "rgba(241, 245, 249, 0.9)",
     }
   }
 
   return {
-    activeNodeHaloColor: "rgba(15, 23, 42, 0.36)",
     edgeHighlightLineWidthBoost: 0.8,
     edgeHighlightOpacity: 0.78,
     edgeInactiveOpacity: 0.24,
@@ -196,19 +181,13 @@ function createGraphCanvasPalette(mode: GraphThemeMode): GraphCanvasPalette {
     labelFill: "#172033",
     labelHoverFill: "#020617",
     labelHoverMaxWidth: 300,
-    labelHoverStroke: "rgba(255, 255, 255, 0.98)",
     labelInactiveOpacity: 0.7,
-    labelStroke: "rgba(248, 250, 252, 0.96)",
-    labelStrokeOpacity: 0.96,
-    labelStrokeWidth: 2.3,
     nodeHighlightOpacity: 1,
     nodeInactiveOpacity: 0.61,
     selectionEdgeOpacity: 0.82,
     selectionInactiveEdgeOpacity: 0.16,
     selectionInactiveNodeOpacity: 0.28,
-    selectionNodeHaloColor: "rgba(15, 23, 42, 0.44)",
     selectionRelatedNodeOpacity: 0.72,
-    nodeStroke: "rgba(255, 255, 255, 0.88)",
   }
 }
 
@@ -758,20 +737,6 @@ function createSeedPosition(nodeId: string, index: number, total: number) {
   }
 }
 
-function createBoundedLabel(label: string, maxLength = 34) {
-  const normalizedLabel = label.trim()
-  const characters = Array.from(normalizedLabel)
-
-  if (characters.length <= maxLength) {
-    return normalizedLabel
-  }
-
-  return `${characters
-    .slice(0, Math.max(maxLength - 3, 1))
-    .join("")
-    .trimEnd()}...`
-}
-
 function getGraphNodeFullLabel(node: NodeData) {
   const data = node.data as { label?: unknown } | undefined
 
@@ -1024,7 +989,6 @@ function createG6GraphData(
   edgeVisuals: LocalizedEdgeVisuals,
   dictionary: LocalizationContext["dictionary"]
 ): GraphData {
-  const isDenseGraph = isDenseGraphModel(graphModel)
   const clusterState = inferClusterState(graphModel, nodeVisuals)
   const nodes: NodeData[] = graphModel.nodes.map((node, index) => {
     const visual = nodeVisuals[node.kind]
@@ -1037,17 +1001,6 @@ function createG6GraphData(
       graphModel.nodes.length
     )
     const showLabel = shouldShowLabel(graphModel, node.id, node.kind)
-    const defaultShadowBlur = isDenseGraph
-      ? node.kind === "asset" || node.kind === "theme"
-        ? 2
-        : 0
-      : node.kind === "asset" || node.kind === "theme"
-        ? 8
-        : 4
-    const labelLineWidth = isDenseGraph
-      ? Math.max(graphPalette.labelStrokeWidth - 0.8, 1.2)
-      : graphPalette.labelStrokeWidth
-
     return {
       id: node.id,
       cluster: clusterKey,
@@ -1074,20 +1027,12 @@ function createG6GraphData(
         labelMaxLines: 1,
         labelOffsetX: 9,
         labelPlacement: "right",
-        labelStroke: graphPalette.labelStroke,
-        labelStrokeOpacity: isDenseGraph
-          ? Math.min(graphPalette.labelStrokeOpacity, 0.72)
-          : graphPalette.labelStrokeOpacity,
-        labelLineWidth,
-        labelText: showLabel ? createBoundedLabel(node.label) : "",
-        labelTextOverflow: "...",
-        labelWordWrap: false,
-        lineWidth: 2,
+        labelText: showLabel ? node.label.trim() : "",
+        labelTextOverflow: "ellipsis",
+        labelWordWrap: true,
+        lineWidth: 0,
         opacity: 0.96,
-        shadowBlur: defaultShadowBlur,
-        shadowColor: `${visual.color}40`,
         size,
-        stroke: graphPalette.nodeStroke,
         x: seedPosition.x,
         y: seedPosition.y,
       },
@@ -1128,7 +1073,6 @@ function createG6GraphData(
       style: {
         lineWidth: visual.size,
         opacity: sameCluster ? 0.46 : 0.32,
-        stroke: visual.color,
       },
       type: "line",
     }
@@ -1254,66 +1198,43 @@ function getContainerSize(container: HTMLDivElement) {
 }
 
 function createNodeStateStyles(graphPalette: GraphCanvasPalette) {
-  const keepBaseStroke = (node: NodeData) => ({
-    lineWidth: getElementNumberValue(node.style ?? {}, "lineWidth", 2),
-    stroke:
-      typeof node.style?.stroke === "string"
-        ? node.style.stroke
-        : graphPalette.nodeStroke,
-  })
   const expandedLabel = (node: NodeData) => ({
     labelBackground: false,
     labelFill: graphPalette.labelHoverFill,
     labelFontSize: 12,
     labelFontWeight: 700,
-    labelLineWidth: graphPalette.labelStrokeWidth + 0.8,
     labelMaxLines: 3,
     labelMaxWidth: graphPalette.labelHoverMaxWidth,
     labelOpacity: 1,
-    labelStroke: graphPalette.labelHoverStroke,
-    labelStrokeOpacity: 1,
     labelText: getGraphNodeFullLabel(node),
-    labelTextOverflow: "...",
+    labelTextOverflow: "ellipsis",
     labelWordWrap: true,
   })
 
   return {
     active: (node: NodeData) => ({
-      ...keepBaseStroke(node),
       ...expandedLabel(node),
       opacity: 1,
-      shadowBlur: 22,
-      shadowColor: graphPalette.activeNodeHaloColor,
     }),
     highlight: (node: NodeData) => ({
-      ...keepBaseStroke(node),
       labelOpacity: 0.92,
       opacity: graphPalette.nodeHighlightOpacity,
-      shadowBlur: 12,
     }),
     inactive: {
       labelOpacity: graphPalette.labelInactiveOpacity,
       opacity: graphPalette.nodeInactiveOpacity,
-      shadowBlur: 0,
     },
     selected: (node: NodeData) => ({
-      ...keepBaseStroke(node),
       ...expandedLabel(node),
-      lineWidth: getElementNumberValue(node.style ?? {}, "lineWidth", 2) + 1.4,
       opacity: 1,
-      shadowBlur: 26,
-      shadowColor: graphPalette.selectionNodeHaloColor,
     }),
     "selected-inactive": {
       labelOpacity: graphPalette.labelInactiveOpacity,
       opacity: graphPalette.selectionInactiveNodeOpacity,
-      shadowBlur: 0,
     },
     "selected-related": (node: NodeData) => ({
-      ...keepBaseStroke(node),
       labelOpacity: 0.88,
       opacity: graphPalette.selectionRelatedNodeOpacity,
-      shadowBlur: 10,
     }),
   }
 }
