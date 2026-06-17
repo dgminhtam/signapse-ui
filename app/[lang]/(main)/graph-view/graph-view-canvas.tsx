@@ -1,22 +1,11 @@
 "use client"
 
-import {
-  DragElementForce,
-  ExtensionCategory,
-  Graph,
-  getExtension,
-  invokeLayoutMethod,
-  register,
-} from "@antv/g6"
+import { Graph } from "@antv/g6"
 import type {
-  BaseLayout,
   D3ForceLayoutOptions,
-  DragElementForceOptions,
   EdgeData,
   GraphData,
-  ID,
   NodeData,
-  Point,
   ViewportAnimationEffectTiming,
 } from "@antv/g6"
 import {
@@ -67,17 +56,6 @@ type ClusterState = {
   clusterLabelByKey: Map<string, string>
 }
 
-type GraphAnalysisBounds = {
-  maxX: number
-  maxY: number
-  minX: number
-  minY: number
-}
-
-type BoundedDragElementForceOptions = DragElementForceOptions & {
-  getAnalysisBounds: () => GraphAnalysisBounds
-}
-
 type GraphThemeMode = "light" | "dark"
 
 type GraphCanvasPalette = {
@@ -100,8 +78,6 @@ type GraphCanvasPalette = {
 const MIN_CANVAS_WIDTH = 360
 const MIN_CANVAS_HEIGHT = 640
 const GRAPH_CANVAS_PAN_RANGE = 0.45
-const GRAPH_ANALYSIS_BOUNDS_SCALE = 1.45
-const GRAPH_ANALYSIS_BOUNDS_MIN_PADDING = 144
 const GRAPH_RECENTER_ANIMATION = {
   duration: 520,
   easing: "ease-in-out",
@@ -125,7 +101,6 @@ const GRAPH_INSPECTOR_DATE_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
 type LocalizationContext = ReturnType<typeof useLocalization>
 type LocalizedNodeVisuals = ReturnType<typeof getGraphViewNodeVisuals>
 type LocalizedEdgeVisuals = ReturnType<typeof getGraphViewEdgeVisuals>
-const BOUNDED_DRAG_ELEMENT_FORCE_TYPE = "bounded-drag-element-force"
 const GRAPH_HUD_NODE_KIND_ORDER = [
   "event",
   "asset",
@@ -189,54 +164,6 @@ function createGraphCanvasPalette(mode: GraphThemeMode): GraphCanvasPalette {
     selectionInactiveNodeOpacity: 0.28,
     selectionRelatedNodeOpacity: 0.72,
   }
-}
-
-class BoundedDragElementForce extends DragElementForce {
-  private getBoundedForceLayoutInstance() {
-    return this.context.layout
-      ?.getLayoutInstance()
-      .find((layout) => layout.id === "d3-force" || layout.id === "d3-force-3d")
-  }
-
-  protected override async moveElement(ids: ID[], offset: Point) {
-    if (this.context.graph.destroyed) {
-      return
-    }
-
-    const layout = this.getBoundedForceLayoutInstance()
-    const options = this.options as unknown as Required<BoundedDragElementForceOptions>
-    const bounds = options.getAnalysisBounds()
-    const [dx, dy] = this.clampByRotation(offset)
-
-    this.context.graph.getNodeData(ids).forEach((element, index) => {
-      const style = (element.style ?? {}) as Record<string, unknown>
-      const currentX = getElementNumberValue(style, "x", 0)
-      const currentY = getElementNumberValue(style, "y", 0)
-      const [nextX, nextY] = clampPointToAnalysisBounds(
-        [currentX + dx, currentY + dy],
-        bounds
-      )
-
-      if (layout) {
-        invokeLayoutMethod(layout as BaseLayout, "setFixedPosition", ids[index], [
-          nextX,
-          nextY,
-        ])
-      }
-    })
-  }
-}
-
-function ensureBoundedDragElementForceRegistered() {
-  if (getExtension(ExtensionCategory.BEHAVIOR, BOUNDED_DRAG_ELEMENT_FORCE_TYPE)) {
-    return
-  }
-
-  register(
-    ExtensionCategory.BEHAVIOR,
-    BOUNDED_DRAG_ELEMENT_FORCE_TYPE,
-    BoundedDragElementForce
-  )
 }
 
 function GraphHudCountChip({
@@ -1102,39 +1029,8 @@ function getElementBooleanValue(
   return datum[key] === true
 }
 
-function createGraphAnalysisBounds(
-  width: number,
-  height: number
-): GraphAnalysisBounds {
-  const horizontalPadding = Math.max(
-    (width * (GRAPH_ANALYSIS_BOUNDS_SCALE - 1)) / 2,
-    GRAPH_ANALYSIS_BOUNDS_MIN_PADDING
-  )
-  const verticalPadding = Math.max(
-    (height * (GRAPH_ANALYSIS_BOUNDS_SCALE - 1)) / 2,
-    GRAPH_ANALYSIS_BOUNDS_MIN_PADDING
-  )
-
-  return {
-    maxX: width + horizontalPadding,
-    maxY: height + verticalPadding,
-    minX: -horizontalPadding,
-    minY: -verticalPadding,
-  }
-}
-
 function clampValue(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max)
-}
-
-function clampPointToAnalysisBounds(
-  [x, y]: Point,
-  bounds: GraphAnalysisBounds
-): [number, number] {
-  return [
-    clampValue(x, bounds.minX, bounds.maxX),
-    clampValue(y, bounds.minY, bounds.maxY),
-  ]
 }
 
 function createForceLayout(width: number, height: number) {
@@ -1429,10 +1325,7 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
       return
     }
 
-    ensureBoundedDragElementForceRegistered()
-
     const { height, width } = getContainerSize(container)
-    let analysisBounds = createGraphAnalysisBounds(width, height)
     let isDisposed = false
     let renderFrameId: number | null = null
     let renderPromise: Promise<void> | null = null
@@ -1461,8 +1354,7 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
         },
         {
           fixed: true,
-          getAnalysisBounds: () => analysisBounds,
-          type: BOUNDED_DRAG_ELEMENT_FORCE_TYPE,
+          type: "drag-element-force",
         },
       ],
       container,
@@ -1613,7 +1505,6 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
       }
 
       const nextSize = getContainerSize(container)
-      analysisBounds = createGraphAnalysisBounds(nextSize.width, nextSize.height)
       graph.setSize(nextSize.width, nextSize.height)
     })
 
