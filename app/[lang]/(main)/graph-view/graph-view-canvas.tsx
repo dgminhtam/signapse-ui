@@ -1073,6 +1073,7 @@ function createG6GraphData(
       style: {
         lineWidth: visual.size,
         opacity: sameCluster ? 0.46 : 0.32,
+        stroke: visual.color,
       },
       type: "line",
     }
