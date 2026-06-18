@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@antv/g6':
-        specifier: ^5.1.0
-        version: 5.1.0
+        specifier: ^5.1.1
+        version: 5.1.1
       '@assistant-ui/react':
         specifier: ^0.14.16
         version: 0.14.16(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
@@ -226,8 +226,8 @@ packages:
   '@antv/g-plugin-dragndrop@2.1.1':
     resolution: {integrity: sha512-+aesDUJVQDs6UJ2bOBbDlaGAPCfHmU0MbrMTlQlfpwNplWueqtgVAZ3L57oZ2ZGHRWUHiRwZGPjXMBM3O2LELw==}
 
-  '@antv/g6@5.1.0':
-    resolution: {integrity: sha512-tvoBDKypL/zWEG99pgwGJLWr2CKA+6zVixYxaVzDOp0+TrPY2cxB1jevxFGPjbTOLBIMYt/vKCh1jnmDtfvtpg==}
+  '@antv/g6@5.1.1':
+    resolution: {integrity: sha512-50bXxMUf4mChyOv4ePVeWZLwotih9VunKfp0a++Wofv/wCyY8fb9+CV2wouIBCOZnd5ydBRA4NNaX9yLJzqa2w==}
 
   '@antv/g@6.3.1':
     resolution: {integrity: sha512-WYEKqy86LHB2PzTmrZXrIsIe+3Epeds2f68zceQ+BJtRoGki7Sy4IhlC8LrUMztgfT1t3d/0L745NWZwITroKA==}
@@ -5514,7 +5514,7 @@ snapshots:
       '@babel/runtime': 7.29.2
       tslib: 2.8.1
 
-  '@antv/g6@5.1.0':
+  '@antv/g6@5.1.1':
     dependencies:
       '@antv/algorithm': 0.1.26
       '@antv/component': 2.1.11

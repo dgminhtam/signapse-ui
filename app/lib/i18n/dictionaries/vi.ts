@@ -302,8 +302,8 @@ export const vi = {
       graphTitle: "Knowledge Graph",
       graphOneLine: "Xem thị trường như một mạng quan hệ, không phải một danh sách headline.",
       graphBody:
-        "Knowledge Graph giúp người dùng browse lớp market intelligence dùng chung qua watchlist của workspace, nối event với asset, theme, narrative và source evidence.",
-      graphPointOne: "Node event, asset, theme, narrative và evidence",
+        "Knowledge Graph giúp người dùng browse lớp market intelligence dùng chung qua watchlist của workspace, nối event với asset, narrative, warm episode và source evidence.",
+      graphPointOne: "Node event, asset, narrative, warm episode và evidence",
       graphPointTwo: "Graph slice theo workspace",
       graphPointThree: "Khám phá quan hệ song hành với chart và query",
     },
@@ -333,7 +333,7 @@ export const vi = {
         "Signapse giữ market knowledge là lớp dùng chung, nhưng cá nhân hóa trải nghiệm bằng workspace và watchlist. Một workspace Macro FX và một workspace Crypto có thể hỏi câu giống nhau nhưng nhận bối cảnh khác nhau vì evidence boundary khác nhau.",
       sharedTitle: "Shared knowledge layer",
       sharedBody:
-        "Event, asset, theme, narrative, evidence, node identity và relation semantics được giữ nhất quán giữa các workspace.",
+        "Event, asset, narrative, evidence, theme metadata, node identity và relation semantics được giữ nhất quán giữa các workspace.",
       personalTitle: "Personal market lens",
       personalBody:
         "Workspace và watchlist quyết định phần nào xuất hiện trước, AI retrieve gì và quan hệ nào quan trọng ở từng thời điểm.",
@@ -1683,7 +1683,7 @@ export const vi = {
     workspaceEyebrow: "Không gian tri thức",
     title: "Biểu đồ tri thức",
     description:
-      "Không gian này dùng để theo dõi cách sự kiện, tài sản, chủ đề và tài liệu nguồn kết nối với nhau trên cùng một mặt phẳng khám phá.",
+      "Không gian này dùng để theo dõi cách sự kiện, tài sản, luận điểm, giai đoạn warm và bằng chứng kết nối với nhau trên cùng một mặt phẳng khám phá.",
     readDenied: "Bạn không có quyền truy cập biểu đồ tri thức.",
     responseInvalid:
       "Backend trả về dữ liệu biểu đồ tri thức không đúng định dạng mong đợi.",
@@ -1695,14 +1695,12 @@ export const vi = {
     nodeKinds: {
       event: "Sự kiện",
       asset: "Tài sản",
-      theme: "Chủ đề",
       "news-article": "Bài viết",
       narrative: "Luận điểm",
       "warm-episode": "Giai đoạn warm",
     },
     edgeKinds: {
       "event-asset": "Sự kiện - tài sản",
-      "event-theme": "Sự kiện - chủ đề",
       "news-article-event": "Bằng chứng - sự kiện",
       "narrative-event": "Luận điểm - sự kiện",
       "narrative-asset": "Luận điểm - tài sản",
@@ -1743,6 +1741,7 @@ export const vi = {
       knowledgeLayer: "Lớp tri thức",
       symbol: "Mã giao dịch",
       assetType: "Loại tài sản",
+      themes: "Chủ đề",
       slug: "Slug",
       canonicalKey: "Khóa chuẩn",
       relatedNodes: "Nút liên quan",

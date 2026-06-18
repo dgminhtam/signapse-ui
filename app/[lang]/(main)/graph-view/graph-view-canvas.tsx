@@ -51,11 +51,6 @@ import {
   type LocalQuickDetailEntity,
 } from "../local-entity-quick-detail-drawer"
 
-type ClusterState = {
-  clusterByNodeId: Map<string, string>
-  clusterLabelByKey: Map<string, string>
-}
-
 type GraphThemeMode = "light" | "dark"
 
 type GraphCanvasPalette = {
@@ -104,14 +99,12 @@ type LocalizedEdgeVisuals = ReturnType<typeof getGraphViewEdgeVisuals>
 const GRAPH_HUD_NODE_KIND_ORDER = [
   "event",
   "asset",
-  "theme",
   "news-article",
   "narrative",
   "warm-episode",
 ] satisfies GraphViewNodeKind[]
 const GRAPH_HUD_EDGE_KIND_ORDER = [
   "event-asset",
-  "event-theme",
   "news-article-event",
   "narrative-event",
   "narrative-asset",
@@ -127,6 +120,17 @@ const GRAPH_SELECTION_EDGE_STATE_NAMES = [
   "selected-related",
   "selected-inactive",
 ]
+const GRAPH_FORCE_BRANCH_LINK = { distance: 100, strength: 0.1 }
+const GRAPH_FORCE_LEAF_LINK = { distance: 30, strength: 0.7 }
+const GRAPH_FORCE_BRANCH_MANY_BODY_STRENGTH = -10
+const GRAPH_FORCE_LEAF_MANY_BODY_STRENGTH = -50
+const GRAPH_NODE_HIERARCHY_LEVEL: Record<GraphViewNodeKind, number> = {
+  asset: 0,
+  narrative: 1,
+  "warm-episode": 1,
+  event: 2,
+  "news-article": 3,
+}
 
 function createGraphCanvasPalette(mode: GraphThemeMode): GraphCanvasPalette {
   if (mode === "dark") {
@@ -264,6 +268,72 @@ function getInspectorText(value: string | null | undefined) {
   return trimmedValue || null
 }
 
+function getThemeMetadataItems(
+  metadata: GraphViewNode["metadata"],
+  dictionary: LocalizationContext["dictionary"]
+) {
+  return (
+    metadata?.themes
+      ?.map((theme, index) => {
+        const title = getInspectorText(theme.title)
+
+        if (!title) {
+          return null
+        }
+
+        const relationLabel = theme.relationType
+          ? getGraphViewRelationLabel(theme.relationType, dictionary)
+          : null
+
+        return {
+          key: `${theme.relationType ?? "theme-metadata"}-${title}-${index}`,
+          relationLabel,
+          title,
+        }
+      })
+      .filter(
+        (
+          theme
+        ): theme is { key: string; relationLabel: string | null; title: string } =>
+          theme !== null
+      ) ?? []
+  )
+}
+
+function formatThemeMetadataValue(
+  themes: Array<{ relationLabel: string | null; title: string }>
+) {
+  return themes
+    .map((theme) =>
+      theme.relationLabel ? `${theme.title} (${theme.relationLabel})` : theme.title
+    )
+    .join(", ")
+}
+
+function GraphThemeMetadataList({
+  themes,
+}: {
+  themes: Array<{ key: string; relationLabel: string | null; title: string }>
+}) {
+  return (
+    <div className="flex flex-col gap-1">
+      {themes.map((theme) => (
+        <span
+          key={theme.key}
+          className="min-w-0 text-xs font-medium text-foreground"
+        >
+          <span className="break-words">{theme.title}</span>
+          {theme.relationLabel ? (
+            <span className="ml-1 text-muted-foreground">
+              {theme.relationLabel}
+            </span>
+          ) : null}
+        </span>
+      ))}
+    </div>
+  )
+}
+
 function getMeaningfulInspectorStatus(value: string | null | undefined) {
   const trimmedValue = getInspectorText(value)
 
@@ -319,6 +389,13 @@ function getNodeQuickDetailAction(
   }
 
   return null
+}
+
+type GraphNodeInspectorFieldDefinition = {
+  key: string
+  label: string
+  value?: string | null
+  valueNode?: ReactNode
 }
 
 function GraphNodeInspectorField({
@@ -379,11 +456,22 @@ function getGraphNodeInspectorFields({
   const assetType = getInspectorText(metadata?.assetType)
   const thesis = getInspectorText(metadata?.thesis)
   const symbol = getInspectorText(metadata?.symbol)
+  const themeItems = getThemeMetadataItems(metadata, dictionary)
+  const themeValue = formatThemeMetadataValue(themeItems)
+  const themeField: GraphNodeInspectorFieldDefinition | null =
+    themeItems.length > 0
+      ? {
+          key: "themes",
+          label: dictionary.graphView.inspector.themes,
+          value: themeValue,
+          valueNode: <GraphThemeMetadataList themes={themeItems} />,
+        }
+      : null
   const showSymbol =
     symbol && symbol.toLowerCase() !== node.label.trim().toLowerCase()
 
   if (node.kind === "event") {
-    return [
+    const fields: GraphNodeInspectorFieldDefinition[] = [
       {
         key: "occurred-at",
         label: dictionary.graphView.inspector.time,
@@ -403,6 +491,12 @@ function getGraphNodeInspectorFields({
         value: eventStatus,
       },
     ]
+
+    if (themeField) {
+      fields.push(themeField)
+    }
+
+    return fields
   }
 
   if (node.kind === "news-article") {
@@ -444,7 +538,7 @@ function getGraphNodeInspectorFields({
   }
 
   if (node.kind === "narrative") {
-    return [
+    const fields: GraphNodeInspectorFieldDefinition[] = [
       {
         key: "thesis",
         label: dictionary.graphView.inspector.thesis,
@@ -466,6 +560,12 @@ function getGraphNodeInspectorFields({
         value: confidence,
       },
     ]
+
+    if (themeField) {
+      fields.push(themeField)
+    }
+
+    return fields
   }
 
   if (node.kind === "warm-episode") {
@@ -678,20 +778,6 @@ function getGraphNodeFullLabel(node: NodeData) {
   return ""
 }
 
-function getRelationScore(relationType: string, weight?: number | null) {
-  const baseScoreByRelation: Record<string, number> = {
-    PRIMARY_SUBJECT: 100,
-    PRIMARY_THEME: 94,
-    AFFECTED_ASSET: 76,
-    SECONDARY_THEME: 66,
-    REFERENCE_ASSET: 48,
-    PRIMARY: 82,
-    SUPPORTING: 58,
-  }
-
-  return (baseScoreByRelation[relationType] ?? 42) + (weight ?? 0) * 20
-}
-
 function isDenseGraphModel(graphModel: GraphModel) {
   return (
     graphModel.nodes.length >= GRAPH_DENSE_NODE_THRESHOLD ||
@@ -708,7 +794,7 @@ function isPriorityLabelNode({
   isDenseGraph: boolean
   nodeKind: NodeData["kind"]
 }) {
-  if (nodeKind === "asset" || nodeKind === "theme") {
+  if (nodeKind === "asset") {
     return true
   }
 
@@ -728,167 +814,6 @@ function isPriorityLabelNode({
     (nodeKind === "news-article" && edgeCount >= 2) ||
     edgeCount >= GRAPH_DENSE_HIGH_CONNECTIVITY_EDGE_COUNT
   )
-}
-
-function inferClusterState(
-  graphModel: GraphModel,
-  nodeVisuals: LocalizedNodeVisuals
-): ClusterState {
-  const clusterByNodeId = new Map<string, string>()
-  const clusterLabelByKey = new Map<string, string>()
-  const edgesByNodeId = new Map<string, typeof graphModel.edges>()
-  const eventClusterCandidates = new Map<
-    string,
-    {
-      key: string
-      label: string
-      score: number
-    }
-  >()
-
-  graphModel.nodes.forEach((node) => {
-    edgesByNodeId.set(node.id, [])
-  })
-
-  graphModel.edges.forEach((edge) => {
-    edgesByNodeId.get(edge.sourceNodeId)?.push(edge)
-    edgesByNodeId.get(edge.targetNodeId)?.push(edge)
-  })
-
-  graphModel.nodes.forEach((node) => {
-    if (node.kind !== "asset" && node.kind !== "theme") {
-      return
-    }
-
-    clusterByNodeId.set(node.id, node.id)
-    clusterLabelByKey.set(node.id, node.label)
-  })
-
-  graphModel.edges.forEach((edge) => {
-    const sourceNode = graphModel.nodeMap.get(edge.sourceNodeId)
-    const targetNode = graphModel.nodeMap.get(edge.targetNodeId)
-
-    if (!sourceNode || !targetNode) {
-      return
-    }
-
-    const eventNode =
-      sourceNode.kind === "event"
-        ? sourceNode
-        : targetNode.kind === "event"
-          ? targetNode
-          : null
-    const anchorNode =
-      sourceNode.kind === "asset" || sourceNode.kind === "theme"
-        ? sourceNode
-        : targetNode.kind === "asset" || targetNode.kind === "theme"
-          ? targetNode
-          : null
-
-    if (!eventNode || !anchorNode) {
-      return
-    }
-
-    const score = getRelationScore(edge.relationType, edge.weight)
-    const previousCandidate = eventClusterCandidates.get(eventNode.id)
-
-    if (!previousCandidate || score > previousCandidate.score) {
-      eventClusterCandidates.set(eventNode.id, {
-        key: anchorNode.id,
-        label: anchorNode.label,
-        score,
-      })
-    }
-  })
-
-  graphModel.nodes.forEach((node) => {
-    if (node.kind !== "event") {
-      return
-    }
-
-    const candidate = eventClusterCandidates.get(node.id)
-
-    if (candidate) {
-      clusterByNodeId.set(node.id, candidate.key)
-      clusterLabelByKey.set(candidate.key, candidate.label)
-      return
-    }
-
-    clusterByNodeId.set(node.id, node.id)
-    clusterLabelByKey.set(node.id, node.label)
-  })
-
-  graphModel.nodes.forEach((node) => {
-    if (
-      node.kind !== "news-article" &&
-      node.kind !== "narrative" &&
-      node.kind !== "warm-episode"
-    ) {
-      return
-    }
-
-    const eventEdge = edgesByNodeId.get(node.id)?.find((edge) => {
-      const otherNodeId =
-        edge.sourceNodeId === node.id ? edge.targetNodeId : edge.sourceNodeId
-
-      return graphModel.nodeMap.get(otherNodeId)?.kind === "event"
-    })
-
-    if (eventEdge) {
-      const eventNodeId =
-        eventEdge.sourceNodeId === node.id
-          ? eventEdge.targetNodeId
-          : eventEdge.sourceNodeId
-      const inheritedClusterKey = clusterByNodeId.get(eventNodeId)
-
-      if (inheritedClusterKey) {
-        clusterByNodeId.set(node.id, inheritedClusterKey)
-        return
-      }
-    }
-
-    if (node.kind !== "narrative" && node.kind !== "warm-episode") {
-      return
-    }
-
-    const anchorEdge = edgesByNodeId.get(node.id)?.find((edge) => {
-      const otherNodeId =
-        edge.sourceNodeId === node.id ? edge.targetNodeId : edge.sourceNodeId
-      const otherNode = graphModel.nodeMap.get(otherNodeId)
-
-      return otherNode?.kind === "asset" || otherNode?.kind === "theme"
-    })
-
-    if (!anchorEdge) {
-      return
-    }
-
-    const anchorNodeId =
-      anchorEdge.sourceNodeId === node.id
-        ? anchorEdge.targetNodeId
-        : anchorEdge.sourceNodeId
-    const anchorNode = graphModel.nodeMap.get(anchorNodeId)
-
-    if (anchorNode) {
-      clusterByNodeId.set(node.id, anchorNode.id)
-      clusterLabelByKey.set(anchorNode.id, anchorNode.label)
-    }
-  })
-
-  graphModel.nodes.forEach((node) => {
-    if (clusterByNodeId.has(node.id)) {
-      return
-    }
-
-    const fallbackKey = `${node.kind}:${node.id}`
-    clusterByNodeId.set(node.id, fallbackKey)
-    clusterLabelByKey.set(fallbackKey, nodeVisuals[node.kind].label)
-  })
-
-  return {
-    clusterByNodeId,
-    clusterLabelByKey,
-  }
 }
 
 function shouldShowLabel(
@@ -916,12 +841,30 @@ function createG6GraphData(
   edgeVisuals: LocalizedEdgeVisuals,
   dictionary: LocalizationContext["dictionary"]
 ): GraphData {
-  const clusterState = inferClusterState(graphModel, nodeVisuals)
+  const nodeIdsWithChildren = new Set<string>()
+
+  for (const edge of graphModel.edges) {
+    const sourceNode = graphModel.nodeMap.get(edge.sourceNodeId)
+    const targetNode = graphModel.nodeMap.get(edge.targetNodeId)
+
+    if (!sourceNode || !targetNode) {
+      continue
+    }
+
+    const sourceLevel = GRAPH_NODE_HIERARCHY_LEVEL[sourceNode.kind]
+    const targetLevel = GRAPH_NODE_HIERARCHY_LEVEL[targetNode.kind]
+
+    if (sourceLevel < targetLevel) {
+      nodeIdsWithChildren.add(sourceNode.id)
+    } else if (targetLevel < sourceLevel) {
+      nodeIdsWithChildren.add(targetNode.id)
+    }
+  }
+
   const nodes: NodeData[] = graphModel.nodes.map((node, index) => {
     const visual = nodeVisuals[node.kind]
-    const clusterKey = clusterState.clusterByNodeId.get(node.id) ?? node.id
-    const linkCount = graphModel.relatedEdgesByNodeId.get(node.id)?.size ?? 0
-    const size = visual.size + Math.min(linkCount, 8) * 1.4
+    const size = visual.size
+    const isLeaf = !nodeIdsWithChildren.has(node.id)
     const seedPosition = createSeedPosition(
       node.id,
       index,
@@ -930,15 +873,13 @@ function createG6GraphData(
     const showLabel = shouldShowLabel(graphModel, node.id, node.kind)
     return {
       id: node.id,
-      cluster: clusterKey,
-      clusterLabel: clusterState.clusterLabelByKey.get(clusterKey) ?? clusterKey,
+      isLeaf,
       kind: node.kind,
       label: node.label,
-      linkCount,
-      nodeRadius: size / 2 + 14,
+      nodeRadius: size / 2,
       type: "circle",
       data: {
-        clusterKey,
+        isLeaf,
         kind: node.kind,
         label: node.label,
         metadata: node.metadata ?? null,
@@ -968,27 +909,34 @@ function createG6GraphData(
 
   const edges: EdgeData[] = graphModel.edges.map((edge) => {
     const visual = edgeVisuals[edge.kind]
-    const sourceClusterKey =
-      clusterState.clusterByNodeId.get(edge.sourceNodeId) ?? edge.sourceNodeId
-    const targetClusterKey =
-      clusterState.clusterByNodeId.get(edge.targetNodeId) ?? edge.targetNodeId
-    const sameCluster = sourceClusterKey === targetClusterKey
+    const sourceNode = graphModel.nodeMap.get(edge.sourceNodeId)
+    const targetNode = graphModel.nodeMap.get(edge.targetNodeId)
+    const sourceLevel = sourceNode
+      ? GRAPH_NODE_HIERARCHY_LEVEL[sourceNode.kind]
+      : 0
+    const targetLevel = targetNode
+      ? GRAPH_NODE_HIERARCHY_LEVEL[targetNode.kind]
+      : 0
+    const childNodeId =
+      sourceLevel > targetLevel ? edge.sourceNodeId : edge.targetNodeId
+    const childNode = graphModel.nodeMap.get(childNodeId)
+    const isLeafEdge =
+      childNode?.kind !== "warm-episode" && !nodeIdsWithChildren.has(childNodeId)
 
     return {
       id: edge.id,
       confidence: edge.confidence ?? null,
+      isLeafEdge,
       kind: edge.kind,
       relationType: edge.relationType,
-      sameCluster,
       source: edge.sourceNodeId,
-      sourceClusterKey,
       sourceNodeId: edge.sourceNodeId,
       target: edge.targetNodeId,
-      targetClusterKey,
       targetNodeId: edge.targetNodeId,
       weight: edge.weight ?? null,
       data: {
         confidence: edge.confidence ?? null,
+        isLeafEdge,
         kind: edge.kind,
         note: edge.note ?? null,
         relationLabel: getGraphViewRelationLabel(edge.relationType, dictionary),
@@ -999,7 +947,7 @@ function createG6GraphData(
       },
       style: {
         lineWidth: visual.size,
-        opacity: sameCluster ? 0.46 : 0.32,
+        opacity: 0.46,
         stroke: visual.color,
       },
       type: "line",
@@ -1022,66 +970,53 @@ function getElementNumberValue(
   return typeof value === "number" && Number.isFinite(value) ? value : fallback
 }
 
-function getElementBooleanValue(
-  datum: { [key: string]: unknown },
-  key: string
-) {
-  return datum[key] === true
+function getForceOriginalDatum(datum: { [key: string]: unknown }) {
+  const original = datum._original
+
+  return original && typeof original === "object"
+    ? (original as { [key: string]: unknown })
+    : datum
+}
+
+function getGraphForceLink(edge: { [key: string]: unknown }) {
+  return getForceOriginalDatum(edge).isLeafEdge
+    ? GRAPH_FORCE_LEAF_LINK
+    : GRAPH_FORCE_BRANCH_LINK
+}
+
+function getGraphForceManyBodyStrength(node: { [key: string]: unknown }) {
+  return getForceOriginalDatum(node).isLeaf
+    ? GRAPH_FORCE_LEAF_MANY_BODY_STRENGTH
+    : GRAPH_FORCE_BRANCH_MANY_BODY_STRENGTH
 }
 
 function clampValue(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max)
 }
 
-function createForceLayout(width: number, height: number) {
+function createForceLayout() {
   return {
     alpha: 0.92,
     alphaDecay: 0.038,
-    center: {
-      strength: 0.12,
-      x: width / 2,
-      y: height / 2,
-    },
-    clusterBy: (node) => String(node.cluster ?? node.id),
-    clusterEdgeDistance: 220,
-    clusterEdgeStrength: 0.16,
-    clusterFociStrength: 0.72,
-    clusterNodeSize: 36,
-    clusterNodeStrength: -12,
-    clustering: true,
     collide: {
-      iterations: 3,
-      radius: (node) => getElementNumberValue(node, "nodeRadius", 24),
+      iterations: 1,
+      radius: (node) =>
+        getElementNumberValue(getForceOriginalDatum(node), "nodeRadius", 24),
       strength: 0.88,
     },
     link: {
-      distance: (edge) =>
-        getElementBooleanValue(edge, "sameCluster") ? 96 : 210,
-      iterations: 2,
-      strength: (edge) =>
-        getElementBooleanValue(edge, "sameCluster") ? 0.72 : 0.2,
+      distance: (edge) => getGraphForceLink(edge).distance,
+      iterations: 1,
+      strength: (edge) => getGraphForceLink(edge).strength,
     },
     manyBody: {
       distanceMax: 780,
       distanceMin: 18,
-      strength: (node) => {
-        const radius = getElementNumberValue(node, "nodeRadius", 24)
-
-        return -160 - radius * 7
-      },
+      strength: getGraphForceManyBodyStrength,
       theta: 0.82,
     },
-    preventOverlap: true,
     type: "d3-force",
     velocityDecay: 0.42,
-    x: {
-      strength: 0.045,
-      x: width / 2,
-    },
-    y: {
-      strength: 0.045,
-      y: height / 2,
-    },
   } satisfies D3ForceLayoutOptions & { type: "d3-force" }
 }
 
@@ -1113,10 +1048,10 @@ function createNodeStateStyles(graphPalette: GraphCanvasPalette) {
       ...expandedLabel(node),
       opacity: 1,
     }),
-    highlight: (node: NodeData) => ({
+    highlight: {
       labelOpacity: 0.92,
       opacity: graphPalette.nodeHighlightOpacity,
-    }),
+    },
     inactive: {
       labelOpacity: graphPalette.labelInactiveOpacity,
       opacity: graphPalette.nodeInactiveOpacity,
@@ -1129,10 +1064,10 @@ function createNodeStateStyles(graphPalette: GraphCanvasPalette) {
       labelOpacity: graphPalette.labelInactiveOpacity,
       opacity: graphPalette.selectionInactiveNodeOpacity,
     },
-    "selected-related": (node: NodeData) => ({
+    "selected-related": {
       labelOpacity: 0.88,
       opacity: graphPalette.selectionRelatedNodeOpacity,
-    }),
+    },
   }
 }
 
@@ -1353,8 +1288,7 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
           type: "hover-activate",
         },
         {
-          fixed: true,
-          type: "drag-element-force",
+          type: "drag-element-force"
         },
       ],
       container,
@@ -1365,7 +1299,7 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
         type: "line",
       },
       height,
-      layout: createForceLayout(width, height),
+      layout: createForceLayout(),
       node: {
         state: createNodeStateStyles(graphPalette),
         style: (node) => node.style ?? {},

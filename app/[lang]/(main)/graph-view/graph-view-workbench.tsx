@@ -42,14 +42,12 @@ export interface GraphModel {
 const NODE_KIND_ORDER: GraphViewNodeKind[] = [
   "event",
   "asset",
-  "theme",
   "news-article",
   "narrative",
   "warm-episode",
 ]
 const EDGE_KIND_ORDER: GraphViewEdgeKind[] = [
   "event-asset",
-  "event-theme",
   "news-article-event",
   "narrative-event",
   "narrative-asset",

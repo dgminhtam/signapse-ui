@@ -5,19 +5,22 @@ import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
 export type GraphViewNodeKind =
   | "event"
   | "asset"
-  | "theme"
   | "news-article"
   | "narrative"
   | "warm-episode"
 
 export type GraphViewEdgeKind =
   | "event-asset"
-  | "event-theme"
   | "news-article-event"
   | "narrative-event"
   | "narrative-asset"
   | "asset-warm-episode"
   | "warm-episode-event"
+
+export interface GraphViewNodeThemeMetadata {
+  title?: string | null
+  relationType?: string | null
+}
 
 export interface GraphViewNodeMetadata {
   slug?: string | null
@@ -36,6 +39,7 @@ export interface GraphViewNodeMetadata {
   active?: boolean | null
   confidence?: number | null
   thesis?: string | null
+  themes?: GraphViewNodeThemeMetadata[] | null
 }
 
 export interface GraphViewNode {
@@ -70,7 +74,6 @@ export interface GraphViewEntityReference {
 const graphViewNodeKindSchema = z.enum([
   "event",
   "asset",
-  "theme",
   "news-article",
   "narrative",
   "warm-episode",
@@ -78,13 +81,17 @@ const graphViewNodeKindSchema = z.enum([
 
 const graphViewEdgeKindSchema = z.enum([
   "event-asset",
-  "event-theme",
   "news-article-event",
   "narrative-event",
   "narrative-asset",
   "asset-warm-episode",
   "warm-episode-event",
 ])
+
+export const graphViewNodeThemeMetadataSchema = z.object({
+  title: z.string().nullish(),
+  relationType: z.string().nullish(),
+}) satisfies z.ZodType<GraphViewNodeThemeMetadata>
 
 export const graphViewNodeMetadataSchema = z.object({
   slug: z.string().nullish(),
@@ -103,6 +110,7 @@ export const graphViewNodeMetadataSchema = z.object({
   active: z.boolean().nullish(),
   confidence: z.number().nullish(),
   thesis: z.string().nullish(),
+  themes: z.array(graphViewNodeThemeMetadataSchema).nullish(),
 }) satisfies z.ZodType<GraphViewNodeMetadata>
 
 export const graphViewNodeSchema = z.object({
@@ -130,7 +138,7 @@ export const graphViewResponseSchema = z.object({
 }) satisfies z.ZodType<GraphViewResponse>
 
 const graphNodeIdPattern =
-  /^(event|asset|theme|news-article|narrative|warm-episode):(\d+)$/
+  /^(event|asset|news-article|narrative|warm-episode):(\d+)$/
 
 export function parseGraphViewNodeId(nodeId: string): GraphViewEntityReference | null {
   const match = graphNodeIdPattern.exec(nodeId)

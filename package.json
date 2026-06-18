@@ -12,7 +12,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@antv/g6": "^5.1.0",
+    "@antv/g6": "^5.1.1",
     "@assistant-ui/react": "^0.14.16",
     "@clerk/localizations": "^4.6.6",
     "@clerk/nextjs": "^7.0.11",

@@ -302,8 +302,8 @@ export const en: Dictionary = {
       graphTitle: "Knowledge Graph",
       graphOneLine: "Map the market as relationships, not headlines.",
       graphBody:
-        "Knowledge Graph helps users browse the shared market intelligence layer through their workspace watchlist, connecting events to assets, themes, narratives, and source evidence.",
-      graphPointOne: "Event, asset, theme, narrative, and evidence nodes",
+        "Knowledge Graph helps users browse the shared market intelligence layer through their workspace watchlist, connecting events to assets, narratives, warm episodes, and source evidence.",
+      graphPointOne: "Event, asset, narrative, warm episode, and evidence nodes",
       graphPointTwo: "Workspace-focused graph slice",
       graphPointThree: "Relationship exploration beside chart and query",
     },
@@ -333,7 +333,7 @@ export const en: Dictionary = {
         "Signapse keeps market knowledge shared, but personalizes the experience through your workspace and watchlist. A Macro FX workspace and a Crypto workspace can ask similar questions and receive different context because the evidence boundary is different.",
       sharedTitle: "Shared knowledge layer",
       sharedBody:
-        "Events, assets, themes, narratives, evidence, node identity, and relation semantics stay consistent across workspaces.",
+        "Events, assets, narratives, evidence, theme metadata, node identity, and relation semantics stay consistent across workspaces.",
       personalTitle: "Personal market lens",
       personalBody:
         "Workspace and watchlist scope decide what appears first, what AI retrieves, and which relationships matter in the moment.",
@@ -1696,7 +1696,7 @@ export const en: Dictionary = {
     workspaceEyebrow: "Knowledge space",
     title: "Knowledge graph",
     description:
-      "Use this space to track how events, assets, themes, and source documents connect on one exploration surface.",
+      "Use this space to track how events, assets, narratives, warm episodes, and evidence connect on one exploration surface.",
     readDenied: "You do not have permission to access the knowledge graph.",
     responseInvalid:
       "The backend returned knowledge graph data in an unexpected format.",
@@ -1709,14 +1709,12 @@ export const en: Dictionary = {
     nodeKinds: {
       event: "Event",
       asset: "Asset",
-      theme: "Theme",
       "news-article": "Article",
       narrative: "Narrative",
       "warm-episode": "Warm episode",
     },
     edgeKinds: {
       "event-asset": "Event - asset",
-      "event-theme": "Event - theme",
       "news-article-event": "Evidence - event",
       "narrative-event": "Narrative - event",
       "narrative-asset": "Narrative - asset",
@@ -1757,6 +1755,7 @@ export const en: Dictionary = {
       knowledgeLayer: "Knowledge layer",
       symbol: "Ticker",
       assetType: "Asset type",
+      themes: "Themes",
       slug: "Slug",
       canonicalKey: "Canonical key",
       relatedNodes: "Related nodes",

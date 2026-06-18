@@ -2,7 +2,7 @@
 
 Tài liệu này ánh xạ snapshot OpenAPI backend trong `docs/api_mapping.json` tới các điểm tích hợp frontend hiện tại của repo.
 
-Xác minh lần cuối: ngày 17 tháng 6 năm 2026
+Xác minh lần cuối: ngày 18 tháng 6 năm 2026
 
 ## Cấu hình cơ sở
 
@@ -63,6 +63,7 @@ Xác minh lần cuối: ngày 17 tháng 6 năm 2026
 - Snapshot ngày 11/6 thêm `GET /market-conversations/{conversationId}/messages` để tải lịch sử message theo cursor `beforeMessageId` và `size`.
 - Contract runtime ngày 11/6 cho phép `analysisId = null` trên conversation messages khi assistant turn là non-analysis (`TEXT`), gồm chat, clarification, hoặc refusal; chỉ turn `ANALYSIS` mới có `analysisId` để mở analysis detail.
 - Snapshot ngày 17/6 mở rộng `graph-view` với node kind `warm-episode`, edge kind `asset-warm-episode` / `warm-episode-event`, và metadata `periodStart`, `periodEnd`, `knowledgeLayer` để phân biệt lớp tin tức `HOT` và `WARM`.
+- Snapshot ngay 18/6 cap nhat `graph-view`: bo node kind `theme`, bo edge kind `event-theme`, va them `metadata.themes[]` cho node `event` / `narrative`; event themes lay tu `EventTheme[]` co `relationType`, narrative theme lay tu `Narrative.primaryTheme`.
 - Snapshot mới mở rộng asset type enum từ `COMMODITY`, `CRYPTO`, `FX`, `INDEX` thành thêm `EQUITY`, `ETF` trên assets, watchlists, events, narratives, graph metadata, và market charts.
 
 ## Phạm vi endpoint
@@ -264,10 +265,13 @@ Ghi chu:
 Ghi chu:
 
 - Response snapshot hien tai la `GraphViewResponse` gom `nodes[]` va `edges[]`.
-- `nodes[].kind` hien tai gom `event`, `asset`, `theme`, `news-article`, `narrative`, va `warm-episode`; `edges[].kind` gom `event-asset`, `event-theme`, `news-article-event`, `narrative-event`, `narrative-asset`, `asset-warm-episode`, va `warm-episode-event`.
-- `GraphNodeMetadata` hien da dung `newsOutletName` thay vi `sourceName`, dong thoi doi `active` thanh `status` va them `narrativeStatus`, `thesis`, `periodStart`, `periodEnd`, `knowledgeLayer`.
+- `nodes[].kind` hien tai gom `event`, `asset`, `news-article`, `narrative`, va `warm-episode`; backend da bo `theme` node khoi graph view.
+- `edges[].kind` hien tai gom `event-asset`, `news-article-event`, `narrative-event`, `narrative-asset`, `asset-warm-episode`, va `warm-episode-event`; backend da bo `event-theme` edge khoi graph view.
+- `GraphNodeMetadata` hien da dung `newsOutletName` thay vi `sourceName`, dong thoi doi `active` thanh `status` va them `narrativeStatus`, `thesis`, `periodStart`, `periodEnd`, `knowledgeLayer`, va `themes[]`.
+- `metadata.themes[]` dung `GraphNodeThemeMetadata` gom `title` va `relationType` enum `PRIMARY_THEME` / `SECONDARY_THEME`; field nay chi nam trong metadata cua node `event` va `narrative`.
+- Event node themes lay tu `EventTheme[]` nen co the co nhieu item va giu `relationType`; narrative node theme lay tu `Narrative.primaryTheme`, nen duoc surface nhu theme metadata thay vi node/edge rieng.
 - `knowledgeLayer` hien co enum `HOT` va `WARM`; BE dung field nay de phan biet tin tuc/su kien con hot voi warm episode da ha nhiet theo khoang thoi gian `periodStart` / `periodEnd`.
-- Frontend `app/lib/graph-view/definitions.ts` va `app/[lang]/(main)/graph-view/*` da model/render `news-article`, `news-article-event`, `narrative`, `narrative-event`, `narrative-asset`, `warm-episode`, `asset-warm-episode`, `warm-episode-event`, `newsOutletName`, `narrativeStatus`, `thesis`, `periodStart`, `periodEnd`, va `knowledgeLayer`.
+- Frontend `app/lib/graph-view/definitions.ts` va `app/[lang]/(main)/graph-view/*` da dong bo schema/visuals/model theo snapshot moi: khong con render `theme` / `event-theme` nhu graph topology va da preserve/render `metadata.themes[]` trong inspector cua node `event` va `narrative`.
 - Warm episode hien la node browse-only trong Graph View; frontend parse/render metadata layer/period trong inspector nhung chua expose route/detail rieng vi backend snapshot chua co endpoint detail tuong ung.
 - Drill-down cho node bai viet da chuyen sang `/news-articles/{id}`.
 
@@ -617,7 +621,7 @@ type ActionResult<T = void> =
 - `narratives`: snapshot moi them `/narratives*`, graph narrative node/edge, va market query `keyNarratives[]`; FE chua co module narratives rieng hoac market-query narrative panel, nhung Graph View da model/render narrative node/edge.
 - `market query`: spec van mo ta `asOfTime` la optional `date-time`; frontend conversation v1 chu dong omit field nay de backend tu lay thoi diem hien tai va harden parse cho payload runtime co the tra `null` o `publishedAt` va `occurredAt`. Frontend khong con legacy `/market-query` route hay redirect compatibility; global assistant modal la UI primary surface.
 - `market conversation messages`: snapshot da co cursor endpoint `GET /market-conversations/{conversationId}/messages`; FE da co action, response schema, va lazy history loading trong global assistant modal.
-- `graph view`: snapshot moi them node kind `warm-episode`, edge kind `asset-warm-episode` / `warm-episode-event`, va metadata `periodStart` / `periodEnd` / `knowledgeLayer`; FE Graph View da model/render cac kind moi va giu warm episode o che do browse-only vi chua co route/detail endpoint rieng.
+- `graph view`: snapshot moi bo node kind `theme`, bo edge kind `event-theme`, va them `metadata.themes[]` cho event/narrative node; FE Graph View da dong bo definitions, visuals, model build, inspector, va i18n theo contract moi. Warm episode van la node browse-only vi chua co route/detail endpoint rieng.
 - `user profile`: `GET /me` da dong bo `currentWorkspace`, `mainImage` media object, va `permissions[]`, nhung snapshot moi them `preferredLanguage`; runtime hien van chi dung permission loader.
 - `blogs`: create va response dung `visible`, update dung `isVisible`; frontend van can tiep tuc xu ly ky de tranh drift.
 - `ai-provider-configs`: snapshot khong con expose full `apiKey` tren config response; frontend da doc `credentials[]` preview va ho tro provider enum `GROQ`, nhung can doi tiep UI/DTO theo contract khong con `name`/top-level `model`.
