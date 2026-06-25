@@ -106,6 +106,10 @@ import {
   resolveMarketChartDrawingColor,
   type MarketChartDrawingStyle,
 } from "./market-chart-drawing-style"
+import {
+  deriveLiveCandleItemFromQuote,
+  hasUsableVolumeData,
+} from "./market-chart-candle-helpers"
 import { openMarketChartLiveStream } from "./market-chart-live-stream"
 import { MarketChartSurfaceSkeleton } from "./market-chart-skeleton"
 
@@ -249,19 +253,6 @@ function createLiveCandleItem(
     time: candle.time,
     volume: candle.volume,
   }
-}
-
-function hasUsableVolume(
-  candle: Pick<MarketChartCandleItemResponse, "volume"> | null | undefined
-) {
-  return typeof candle?.volume === "number" && Number.isFinite(candle.volume)
-}
-
-function hasUsableVolumeData(
-  candles: Pick<MarketChartCandleItemResponse, "volume">[] | null | undefined,
-  liveCandle: Pick<MarketChartCandleItemResponse, "volume"> | null | undefined
-) {
-  return Boolean(candles?.some(hasUsableVolume) || hasUsableVolume(liveCandle))
 }
 
 function findWatchlistAsset(
@@ -418,6 +409,7 @@ function getLiveStatusLabel(
     case "RECONNECTING":
       return live.reconnecting
     case "STALE":
+    case "MARKET_CLOSED":
       return live.stale
     case "DISCONNECTED":
     case "UNSUBSCRIBED":
@@ -440,7 +432,11 @@ function getLiveStatusTone(liveState: MarketChartLiveRuntimeState) {
     return "live" as const
   }
 
-  if (state === "STALE" || state === "RECONNECTING") {
+  if (
+    state === "STALE" ||
+    state === "RECONNECTING" ||
+    state === "MARKET_CLOSED"
+  ) {
     return "stale" as const
   }
 
@@ -1629,9 +1625,16 @@ export function MarketChartWorkbench({
   const timeframeLabels = getMarketChartTimeframeLabels(dictionary)
   const freshnessLabel = getFreshnessLabel(data, phase, liveState, localization)
   const chartData = loadedData ?? data
-  const liveCandleItem = liveState.candle
+  const liveCandleBase = liveState.candle
     ? createLiveCandleItem(liveState.candle)
     : null
+  const liveCandleItem =
+    deriveLiveCandleItemFromQuote({
+      current: chartData?.candles,
+      liveCandle: liveCandleBase,
+      quote: liveState.quote,
+      timeframe: selection.timeframe,
+    }) ?? liveCandleBase
   const showVolumePane = hasUsableVolumeData(
     chartData?.candles,
     liveCandleItem

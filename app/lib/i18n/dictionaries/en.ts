@@ -302,8 +302,8 @@ export const en: Dictionary = {
       graphTitle: "Knowledge Graph",
       graphOneLine: "Map the market as relationships, not headlines.",
       graphBody:
-        "Knowledge Graph helps users browse the shared market intelligence layer through their workspace watchlist, connecting events to assets, narratives, warm episodes, and source evidence.",
-      graphPointOne: "Event, asset, narrative, warm episode, and evidence nodes",
+        "Knowledge Graph helps users browse the shared market intelligence layer through their workspace watchlist, connecting events to assets, narratives, and source evidence.",
+      graphPointOne: "Event, asset, narrative, and evidence nodes",
       graphPointTwo: "Workspace-focused graph slice",
       graphPointThree: "Relationship exploration beside chart and query",
     },
@@ -1696,7 +1696,7 @@ export const en: Dictionary = {
     workspaceEyebrow: "Knowledge space",
     title: "Knowledge graph",
     description:
-      "Use this space to track how events, assets, narratives, warm episodes, and evidence connect on one exploration surface.",
+      "Use this space to track how events, assets, narratives, and evidence connect on one exploration surface.",
     readDenied: "You do not have permission to access the knowledge graph.",
     responseInvalid:
       "The backend returned knowledge graph data in an unexpected format.",
@@ -1711,19 +1711,12 @@ export const en: Dictionary = {
       asset: "Asset",
       "news-article": "Article",
       narrative: "Narrative",
-      "warm-episode": "Warm episode",
     },
     edgeKinds: {
       "event-asset": "Event - asset",
       "news-article-event": "Evidence - event",
       "narrative-event": "Narrative - event",
       "narrative-asset": "Narrative - asset",
-      "asset-warm-episode": "Asset - warm episode",
-      "warm-episode-event": "Warm episode - event",
-    },
-    knowledgeLayers: {
-      HOT: "Hot",
-      WARM: "Warm",
     },
     relationTypes: {
       PRIMARY_SUBJECT: "Primary subject",
@@ -1750,9 +1743,6 @@ export const en: Dictionary = {
       narrativeStatus: "Narrative status",
       thesis: "Thesis",
       newsOutlet: "News outlet",
-      periodStart: "Period start",
-      periodEnd: "Period end",
-      knowledgeLayer: "Knowledge layer",
       symbol: "Ticker",
       assetType: "Asset type",
       themes: "Themes",

@@ -7,15 +7,12 @@ export type GraphViewNodeKind =
   | "asset"
   | "news-article"
   | "narrative"
-  | "warm-episode"
 
 export type GraphViewEdgeKind =
   | "event-asset"
   | "news-article-event"
   | "narrative-event"
   | "narrative-asset"
-  | "asset-warm-episode"
-  | "warm-episode-event"
 
 export interface GraphViewNodeThemeMetadata {
   title?: string | null
@@ -76,7 +73,6 @@ const graphViewNodeKindSchema = z.enum([
   "asset",
   "news-article",
   "narrative",
-  "warm-episode",
 ])
 
 const graphViewEdgeKindSchema = z.enum([
@@ -84,8 +80,6 @@ const graphViewEdgeKindSchema = z.enum([
   "news-article-event",
   "narrative-event",
   "narrative-asset",
-  "asset-warm-episode",
-  "warm-episode-event",
 ])
 
 export const graphViewNodeThemeMetadataSchema = z.object({
@@ -138,7 +132,7 @@ export const graphViewResponseSchema = z.object({
 }) satisfies z.ZodType<GraphViewResponse>
 
 const graphNodeIdPattern =
-  /^(event|asset|news-article|narrative|warm-episode):(\d+)$/
+  /^(event|asset|news-article|narrative):(\d+)$/
 
 export function parseGraphViewNodeId(nodeId: string): GraphViewEntityReference | null {
   const match = graphNodeIdPattern.exec(nodeId)

@@ -35,6 +35,7 @@ The system SHALL handle backend market chart SSE events without clearing histori
 #### Scenario: Price event
 - **WHEN** the stream emits a `price` event
 - **THEN** the system updates the live quote state, latest displayed price metadata, and quote timestamp
+- **AND** the system makes the quote eligible to update the displayed live partial candle for the active timeframe
 
 #### Scenario: Candle event
 - **WHEN** the stream emits a `candle` event
@@ -90,8 +91,35 @@ The system SHALL show live stream health as compact chart workspace metadata.
 - **THEN** the market chart workspace keeps historical candles visible
 - **AND** the market chart workspace shows concise Vietnamese status explaining that live data is not current
 
+#### Scenario: Market closed state
+- **WHEN** the stream status is `MARKET_CLOSED`
+- **THEN** the market chart workspace keeps historical candles visible
+- **AND** the market chart workspace shows a concise non-error status indicating that live updates are paused because the market is closed
+
 #### Scenario: Error state
 - **WHEN** the live stream fails or emits an error
 - **THEN** the market chart workspace shows a concise non-blocking error state
 - **AND** the user can continue viewing historical candles, annotations, indicators, and drawings
 
+### Requirement: Quote-derived live partial candle rendering
+The system SHALL derive a display-only live partial candle from live quote events when candle events are unavailable for the active timeframe.
+
+#### Scenario: Quote updates current candle bucket
+- **WHEN** a live quote belongs to the same timeframe bucket as the latest displayed candle
+- **THEN** the system derives a live partial candle that preserves the bucket open value
+- **AND** updates close to the quote price
+- **AND** expands high or low when the quote price exceeds the current bucket range
+
+#### Scenario: Quote creates newer candle bucket
+- **WHEN** a live quote belongs to a timeframe bucket after the latest displayed candle
+- **THEN** the system derives a new live partial candle at the quote bucket time
+- **AND** sets open, high, low, and close to the quote price
+- **AND** leaves volume unavailable unless the quote provides finite volume
+
+#### Scenario: Quote is older than displayed latest bucket
+- **WHEN** a live quote belongs to a timeframe bucket before the latest displayed candle
+- **THEN** the system does not regress the displayed latest candle
+
+#### Scenario: Real candle event supersedes derived candle
+- **WHEN** a live `candle` event arrives for the same bucket as a quote-derived live candle
+- **THEN** the system displays the live candle event values instead of the quote-derived values

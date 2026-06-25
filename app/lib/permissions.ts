@@ -1,5 +1,7 @@
 export type PermissionCollection = readonly string[]
 
+export const DEV_AUTH_PERMISSION = "*"
+
 export function hasPermission(
   permissions: PermissionCollection,
   requiredPermission?: string | null
@@ -8,7 +10,10 @@ export function hasPermission(
     return true
   }
 
-  return permissions.includes(requiredPermission)
+  return (
+    permissions.includes(DEV_AUTH_PERMISSION) ||
+    permissions.includes(requiredPermission)
+  )
 }
 
 export function hasAnyPermission(
@@ -17,4 +22,3 @@ export function hasAnyPermission(
 ): boolean {
   return requiredPermissions.some((permission) => hasPermission(permissions, permission))
 }
-

@@ -1,7 +1,7 @@
 ## MODIFIED Requirements
 
 ### Requirement: Graph View accepts current backend edge kinds
-The system SHALL validate Graph View responses using the current backend graph contract, including `event-asset`, `news-article-event`, `narrative-event`, `narrative-asset`, `asset-warm-episode`, and `warm-episode-event` edges.
+The system SHALL validate Graph View responses using the current backend graph contract, including `event-asset`, `news-article-event`, `narrative-event`, and `narrative-asset` edges.
 
 #### Scenario: Backend returns event asset edges
 - **WHEN** `GET /graph-view` returns an edge whose `kind` is `event-asset`
@@ -23,18 +23,8 @@ The system SHALL validate Graph View responses using the current backend graph c
 - **THEN** frontend response validation succeeds
 - **THEN** the graph is allowed to render with that edge
 
-#### Scenario: Backend returns asset warm episode edges
-- **WHEN** `GET /graph-view` returns an edge whose `kind` is `asset-warm-episode`
-- **THEN** frontend response validation succeeds
-- **THEN** the graph is allowed to render with that edge
-
-#### Scenario: Backend returns warm episode event edges
-- **WHEN** `GET /graph-view` returns an edge whose `kind` is `warm-episode-event`
-- **THEN** frontend response validation succeeds
-- **THEN** the graph is allowed to render with that edge
-
 #### Scenario: Backend returns known graph edge kinds
-- **WHEN** `GET /graph-view` returns edges whose `kind` values are `event-asset`, `news-article-event`, `narrative-event`, `narrative-asset`, `asset-warm-episode`, or `warm-episode-event`
+- **WHEN** `GET /graph-view` returns edges whose `kind` values are `event-asset`, `news-article-event`, `narrative-event`, or `narrative-asset`
 - **THEN** all returned edge kinds are accepted by the frontend schema
 
 #### Scenario: Backend returns removed theme edge kind
@@ -46,14 +36,9 @@ The system SHALL document the Graph View frontend integration using the current 
 
 #### Scenario: API mapping describes graph node and edge kinds
 - **WHEN** the API mapping documentation describes Graph View node and edge kinds
-- **THEN** it lists node kinds `event`, `asset`, `news-article`, `narrative`, and `warm-episode`
-- **THEN** it lists edge kinds `event-asset`, `news-article-event`, `narrative-event`, `narrative-asset`, `asset-warm-episode`, and `warm-episode-event`
+- **THEN** it lists node kinds `event`, `asset`, `news-article`, and `narrative`
+- **THEN** it lists edge kinds `event-asset`, `news-article-event`, `narrative-event`, and `narrative-asset`
 - **THEN** it does not describe `theme`, `event-theme`, or `source-artifact-event` as current Graph View topology
-
-#### Scenario: API mapping describes graph theme metadata
-- **WHEN** the API mapping documentation describes Graph View metadata
-- **THEN** it documents `metadata.themes[]` for event and narrative nodes
-- **THEN** it documents theme metadata items with `title` and `relationType`
 
 ### Requirement: Graph View accepts narrative nodes
 The system SHALL validate and render `narrative` nodes returned by `GET /graph-view`.
@@ -86,44 +71,20 @@ The system SHALL present narrative nodes with localized labels, visual styling, 
 #### Scenario: Canvas renders narrative visual treatment
 - **WHEN** the graph renders a narrative node
 - **THEN** the node uses a distinct narrative color and size treatment
-- **THEN** existing event, asset, news article, and warm episode treatments remain unchanged
+- **THEN** existing event, asset, and news article treatments remain unchanged
 
 #### Scenario: Narrative inspector shows local details
 - **WHEN** the user selects a narrative node
 - **THEN** the node inspector can show the narrative title, secondary label, status, confidence, thesis, theme metadata, and relation counts
 - **THEN** the inspector does not show a quick-detail route action unless a narrative route is implemented separately
 
-### Requirement: Graph View presents warm episodes consistently
-The system SHALL present warm episode nodes and relationships with localized labels, visual styling, count summaries, clustering, and browse-only inspection.
-
-#### Scenario: HUD renders warm episode counts
-- **WHEN** the graph contains warm episode nodes
-- **THEN** the in-canvas node summary includes the warm episode count with a localized label
-
-#### Scenario: Canvas renders warm episode visual treatment
-- **WHEN** the graph renders a warm episode node
-- **THEN** the node uses a distinct warm episode color and size treatment
-- **THEN** existing event, asset, news article, and narrative treatments remain unchanged
-
-#### Scenario: HUD renders warm episode relationship counts
-- **WHEN** the graph contains `asset-warm-episode` or `warm-episode-event` edges
-- **THEN** the in-canvas relationship summary includes those edge counts with localized labels
-
-#### Scenario: Warm episode edges retain visual treatment
-- **WHEN** the graph renders an `asset-warm-episode` or `warm-episode-event` edge
-- **THEN** the edge uses the intended warm episode relationship color and line treatment
-
-#### Scenario: Warm episode nodes participate in clustering
-- **WHEN** a warm episode node is connected to events or assets
-- **THEN** the graph layout clusters the warm episode near related graph entities rather than treating it as unrelated noise
-
 ## ADDED Requirements
 
 ### Requirement: Graph View accepts current backend node kinds
-The system SHALL validate Graph View responses using the current backend graph node contract, including `event`, `asset`, `news-article`, `narrative`, and `warm-episode` nodes.
+The system SHALL validate Graph View responses using the current backend graph node contract, including `event`, `asset`, `news-article`, and `narrative` nodes.
 
 #### Scenario: Backend returns known graph node kinds
-- **WHEN** `GET /graph-view` returns nodes whose `kind` values are `event`, `asset`, `news-article`, `narrative`, or `warm-episode`
+- **WHEN** `GET /graph-view` returns nodes whose `kind` values are `event`, `asset`, `news-article`, or `narrative`
 - **THEN** all returned node kinds are accepted by the frontend schema
 
 #### Scenario: Backend returns removed theme node kind

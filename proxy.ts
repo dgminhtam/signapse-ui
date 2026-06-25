@@ -7,6 +7,7 @@ import {
     negotiateLocale,
     withLocalePath,
 } from '@/app/lib/i18n/routing';
+import { isDevAuthModeEnabled } from '@/app/lib/dev-auth-mode';
 
 const isPublicRoute = createRouteMatcher([
     '/vi/sign-in(.*)',
@@ -30,7 +31,7 @@ export default clerkMiddleware(async (auth, req) => {
         return NextResponse.redirect(url)
     }
 
-    if (!isPublicRoute(req)) {
+    if (!isDevAuthModeEnabled() && !isPublicRoute(req)) {
         await auth.protect(
             isApi
                 ? undefined

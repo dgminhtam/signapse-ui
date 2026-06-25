@@ -56,23 +56,17 @@ type GraphThemeMode = "light" | "dark"
 type GraphCanvasPalette = {
   edgeHighlightLineWidthBoost: number
   edgeHighlightOpacity: number
-  edgeInactiveOpacity: number
+  edgeDimOpacity: number
   labelBackground: boolean
+  labelDimOpacity: number
   labelFill: string
   labelHoverFill: string
   labelHoverMaxWidth: number
-  labelInactiveOpacity: number
-  nodeHighlightOpacity: number
-  nodeInactiveOpacity: number
-  selectionEdgeOpacity: number
-  selectionInactiveEdgeOpacity: number
-  selectionInactiveNodeOpacity: number
-  selectionRelatedNodeOpacity: number
+  nodeDimOpacity: number
 }
 
 const MIN_CANVAS_WIDTH = 360
 const MIN_CANVAS_HEIGHT = 640
-const GRAPH_CANVAS_PAN_RANGE = 0.45
 const GRAPH_RECENTER_ANIMATION = {
   duration: 520,
   easing: "ease-in-out",
@@ -101,33 +95,28 @@ const GRAPH_HUD_NODE_KIND_ORDER = [
   "asset",
   "news-article",
   "narrative",
-  "warm-episode",
 ] satisfies GraphViewNodeKind[]
 const GRAPH_HUD_EDGE_KIND_ORDER = [
   "event-asset",
   "news-article-event",
   "narrative-event",
   "narrative-asset",
-  "asset-warm-episode",
-  "warm-episode-event",
 ] satisfies GraphViewEdgeKind[]
-const GRAPH_SELECTION_STATE_NAMES = [
-  "selected",
-  "selected-related",
-  "selected-inactive",
-]
-const GRAPH_SELECTION_EDGE_STATE_NAMES = [
-  "selected-related",
-  "selected-inactive",
-]
-const GRAPH_FORCE_BRANCH_LINK = { distance: 100, strength: 0.1 }
-const GRAPH_FORCE_LEAF_LINK = { distance: 30, strength: 0.7 }
-const GRAPH_FORCE_BRANCH_MANY_BODY_STRENGTH = -10
-const GRAPH_FORCE_LEAF_MANY_BODY_STRENGTH = -50
+const GRAPH_FORCE_LINK_BY_EDGE_KIND = {
+  "event-asset": { distance: 275, strength: 0.08 },
+  "narrative-asset": { distance: 180, strength: 0.32 },
+  "narrative-event": { distance: 110, strength: 0.36 },
+  "news-article-event": { distance: 45, strength: 0.65 },
+} satisfies Record<GraphViewEdgeKind, { distance: number; strength: number }>
+const GRAPH_FORCE_MANY_BODY_STRENGTH_BY_NODE_KIND = {
+  asset: -200,
+  narrative: -70,
+  event: -90,
+  "news-article": -120,
+} satisfies Record<GraphViewNodeKind, number>
 const GRAPH_NODE_HIERARCHY_LEVEL: Record<GraphViewNodeKind, number> = {
   asset: 0,
   narrative: 1,
-  "warm-episode": 1,
   event: 2,
   "news-article": 3,
 }
@@ -137,36 +126,26 @@ function createGraphCanvasPalette(mode: GraphThemeMode): GraphCanvasPalette {
     return {
       edgeHighlightLineWidthBoost: 0.95,
       edgeHighlightOpacity: 0.84,
-      edgeInactiveOpacity: 0.34,
+      edgeDimOpacity: 0.34,
       labelBackground: false,
+      labelDimOpacity: 0.72,
       labelFill: "#f8fafc",
       labelHoverFill: "#ffffff",
       labelHoverMaxWidth: 300,
-      labelInactiveOpacity: 0.72,
-      nodeHighlightOpacity: 1,
-      nodeInactiveOpacity: 0.66,
-      selectionEdgeOpacity: 0.9,
-      selectionInactiveEdgeOpacity: 0.2,
-      selectionInactiveNodeOpacity: 0.38,
-      selectionRelatedNodeOpacity: 0.82,
+      nodeDimOpacity: 0.66,
     }
   }
 
   return {
     edgeHighlightLineWidthBoost: 0.8,
     edgeHighlightOpacity: 0.78,
-    edgeInactiveOpacity: 0.24,
+    edgeDimOpacity: 0.24,
     labelBackground: false,
+    labelDimOpacity: 0.7,
     labelFill: "#172033",
     labelHoverFill: "#020617",
     labelHoverMaxWidth: 300,
-    labelInactiveOpacity: 0.7,
-    nodeHighlightOpacity: 1,
-    nodeInactiveOpacity: 0.61,
-    selectionEdgeOpacity: 0.82,
-    selectionInactiveEdgeOpacity: 0.16,
-    selectionInactiveNodeOpacity: 0.28,
-    selectionRelatedNodeOpacity: 0.72,
+    nodeDimOpacity: 0.61,
   }
 }
 
@@ -344,20 +323,6 @@ function getMeaningfulInspectorStatus(value: string | null | undefined) {
   return trimmedValue
 }
 
-function getKnowledgeLayerLabel(
-  value: string | null | undefined,
-  dictionary: LocalizationContext["dictionary"]
-) {
-  const trimmedValue = getInspectorText(value)
-
-  if (!trimmedValue) {
-    return null
-  }
-
-  const labels = dictionary.graphView.knowledgeLayers as Record<string, string>
-  return labels[trimmedValue] || trimmedValue
-}
-
 function getNodeQuickDetailAction(
   node: GraphViewNode,
   dictionary: LocalizationContext["dictionary"]
@@ -433,8 +398,6 @@ function getGraphNodeInspectorFields({
   metadata,
   node,
   occurredAt,
-  periodEnd,
-  periodStart,
   publishedAt,
 }: {
   confidence: string | null
@@ -442,15 +405,9 @@ function getGraphNodeInspectorFields({
   metadata: GraphViewNode["metadata"]
   node: GraphViewNode
   occurredAt: string | null
-  periodEnd: string | null
-  periodStart: string | null
   publishedAt: string | null
 }) {
   const eventStatus = getMeaningfulInspectorStatus(metadata?.status)
-  const knowledgeLayer = getKnowledgeLayerLabel(
-    metadata?.knowledgeLayer,
-    dictionary
-  )
   const narrativeStatus = getInspectorText(metadata?.narrativeStatus)
   const newsOutletName = getInspectorText(metadata?.newsOutletName)
   const assetType = getInspectorText(metadata?.assetType)
@@ -568,37 +525,6 @@ function getGraphNodeInspectorFields({
     return fields
   }
 
-  if (node.kind === "warm-episode") {
-    return [
-      {
-        key: "period-start",
-        label: dictionary.graphView.inspector.periodStart,
-        value: periodStart,
-        valueNode: periodStart ? (
-          <AppTimeMetadata icon={Calendar}>{periodStart}</AppTimeMetadata>
-        ) : undefined,
-      },
-      {
-        key: "period-end",
-        label: dictionary.graphView.inspector.periodEnd,
-        value: periodEnd,
-        valueNode: periodEnd ? (
-          <AppTimeMetadata icon={Calendar}>{periodEnd}</AppTimeMetadata>
-        ) : undefined,
-      },
-      {
-        key: "knowledge-layer",
-        label: dictionary.graphView.inspector.knowledgeLayer,
-        value: knowledgeLayer,
-      },
-      {
-        key: "confidence",
-        label: dictionary.graphView.inspector.confidence,
-        value: confidence,
-      },
-    ]
-  }
-
   return []
 }
 
@@ -632,8 +558,6 @@ function GraphNodeDetailInspector({
       ? metadata.url.trim()
       : null
   const occurredAt = formatInspectorDate(metadata.occurredAt, localization)
-  const periodStart = formatInspectorDate(metadata.periodStart, localization)
-  const periodEnd = formatInspectorDate(metadata.periodEnd, localization)
   const publishedAt = formatInspectorDate(metadata.publishedAt, localization)
   const confidence = formatInspectorConfidence(metadata.confidence, localization)
   const relationSummary = formatMessage(
@@ -649,8 +573,6 @@ function GraphNodeDetailInspector({
     metadata,
     node,
     occurredAt,
-    periodEnd,
-    periodStart,
     publishedAt,
   })
 
@@ -742,28 +664,6 @@ function GraphNodeDetailInspector({
   )
 }
 
-function hashText(value: string) {
-  let hash = 0
-
-  for (let index = 0; index < value.length; index += 1) {
-    hash = (hash << 5) - hash + value.charCodeAt(index)
-    hash |= 0
-  }
-
-  return Math.abs(hash)
-}
-
-function createSeedPosition(nodeId: string, index: number, total: number) {
-  const hash = hashText(nodeId)
-  const angle = (index / Math.max(total, 1)) * Math.PI * 2 + (hash % 48) / 48
-  const radius = 180 + (index % 9) * 18 + (hash % 24)
-
-  return {
-    x: Math.cos(angle) * radius,
-    y: Math.sin(angle) * radius,
-  }
-}
-
 function getGraphNodeFullLabel(node: NodeData) {
   const data = node.data as { label?: unknown } | undefined
 
@@ -801,7 +701,6 @@ function isPriorityLabelNode({
   if (!isDenseGraph) {
     return (
       (nodeKind === "narrative" && edgeCount >= 2) ||
-      (nodeKind === "warm-episode" && edgeCount >= 2) ||
       (nodeKind === "event" && edgeCount >= 4) ||
       edgeCount >= 6
     )
@@ -809,7 +708,6 @@ function isPriorityLabelNode({
 
   return (
     (nodeKind === "narrative" && edgeCount >= 2) ||
-    (nodeKind === "warm-episode" && edgeCount >= 2) ||
     (nodeKind === "event" && edgeCount >= 4) ||
     (nodeKind === "news-article" && edgeCount >= 2) ||
     edgeCount >= GRAPH_DENSE_HIGH_CONNECTIVITY_EDGE_COUNT
@@ -854,22 +752,18 @@ function createG6GraphData(
     const sourceLevel = GRAPH_NODE_HIERARCHY_LEVEL[sourceNode.kind]
     const targetLevel = GRAPH_NODE_HIERARCHY_LEVEL[targetNode.kind]
 
-    if (sourceLevel < targetLevel) {
-      nodeIdsWithChildren.add(sourceNode.id)
-    } else if (targetLevel < sourceLevel) {
-      nodeIdsWithChildren.add(targetNode.id)
+    if (sourceLevel === targetLevel) {
+      continue
     }
+
+    const parentNode = sourceLevel < targetLevel ? sourceNode : targetNode
+    nodeIdsWithChildren.add(parentNode.id)
   }
 
-  const nodes: NodeData[] = graphModel.nodes.map((node, index) => {
+  const nodes: NodeData[] = graphModel.nodes.map((node) => {
     const visual = nodeVisuals[node.kind]
     const size = visual.size
     const isLeaf = !nodeIdsWithChildren.has(node.id)
-    const seedPosition = createSeedPosition(
-      node.id,
-      index,
-      graphModel.nodes.length
-    )
     const showLabel = shouldShowLabel(graphModel, node.id, node.kind)
     return {
       id: node.id,
@@ -895,38 +789,22 @@ function createG6GraphData(
         labelMaxLines: 1,
         labelOffsetX: 9,
         labelPlacement: "right",
+        labelPointerEvents: "none",
         labelText: showLabel ? node.label.trim() : "",
         labelTextOverflow: "ellipsis",
         labelWordWrap: true,
         lineWidth: 0,
         opacity: 0.96,
         size,
-        x: seedPosition.x,
-        y: seedPosition.y,
       },
     }
   })
 
   const edges: EdgeData[] = graphModel.edges.map((edge) => {
     const visual = edgeVisuals[edge.kind]
-    const sourceNode = graphModel.nodeMap.get(edge.sourceNodeId)
-    const targetNode = graphModel.nodeMap.get(edge.targetNodeId)
-    const sourceLevel = sourceNode
-      ? GRAPH_NODE_HIERARCHY_LEVEL[sourceNode.kind]
-      : 0
-    const targetLevel = targetNode
-      ? GRAPH_NODE_HIERARCHY_LEVEL[targetNode.kind]
-      : 0
-    const childNodeId =
-      sourceLevel > targetLevel ? edge.sourceNodeId : edge.targetNodeId
-    const childNode = graphModel.nodeMap.get(childNodeId)
-    const isLeafEdge =
-      childNode?.kind !== "warm-episode" && !nodeIdsWithChildren.has(childNodeId)
-
     return {
       id: edge.id,
       confidence: edge.confidence ?? null,
-      isLeafEdge,
       kind: edge.kind,
       relationType: edge.relationType,
       source: edge.sourceNodeId,
@@ -936,7 +814,6 @@ function createG6GraphData(
       weight: edge.weight ?? null,
       data: {
         confidence: edge.confidence ?? null,
-        isLeafEdge,
         kind: edge.kind,
         note: edge.note ?? null,
         relationLabel: getGraphViewRelationLabel(edge.relationType, dictionary),
@@ -979,15 +856,20 @@ function getForceOriginalDatum(datum: { [key: string]: unknown }) {
 }
 
 function getGraphForceLink(edge: { [key: string]: unknown }) {
-  return getForceOriginalDatum(edge).isLeafEdge
-    ? GRAPH_FORCE_LEAF_LINK
-    : GRAPH_FORCE_BRANCH_LINK
+  const kind = getForceOriginalDatum(edge).kind
+
+  return typeof kind === "string" && kind in GRAPH_FORCE_LINK_BY_EDGE_KIND
+    ? GRAPH_FORCE_LINK_BY_EDGE_KIND[kind as GraphViewEdgeKind]
+    : GRAPH_FORCE_LINK_BY_EDGE_KIND["narrative-event"]
 }
 
 function getGraphForceManyBodyStrength(node: { [key: string]: unknown }) {
-  return getForceOriginalDatum(node).isLeaf
-    ? GRAPH_FORCE_LEAF_MANY_BODY_STRENGTH
-    : GRAPH_FORCE_BRANCH_MANY_BODY_STRENGTH
+  const kind = getForceOriginalDatum(node).kind
+
+  return typeof kind === "string" &&
+    kind in GRAPH_FORCE_MANY_BODY_STRENGTH_BY_NODE_KIND
+    ? GRAPH_FORCE_MANY_BODY_STRENGTH_BY_NODE_KIND[kind as GraphViewNodeKind]
+    : GRAPH_FORCE_MANY_BODY_STRENGTH_BY_NODE_KIND.event
 }
 
 function clampValue(value: number, min: number, max: number) {
@@ -1002,7 +884,7 @@ function createForceLayout() {
       iterations: 1,
       radius: (node) =>
         getElementNumberValue(getForceOriginalDatum(node), "nodeRadius", 24),
-      strength: 0.88,
+      strength: 0.75,
     },
     link: {
       distance: (edge) => getGraphForceLink(edge).distance,
@@ -1042,119 +924,59 @@ function createNodeStateStyles(graphPalette: GraphCanvasPalette) {
     labelTextOverflow: "ellipsis",
     labelWordWrap: true,
   })
+  const focused = (node: NodeData) => ({
+    ...expandedLabel(node),
+    halo: false,
+    lineWidth: 0,
+    opacity: 1,
+  })
 
   return {
-    active: (node: NodeData) => ({
-      ...expandedLabel(node),
-      opacity: 1,
-    }),
-    highlight: {
-      labelOpacity: 0.92,
-      opacity: graphPalette.nodeHighlightOpacity,
+    dim: {
+      labelOpacity: graphPalette.labelDimOpacity,
+      opacity: graphPalette.nodeDimOpacity,
     },
-    inactive: {
-      labelOpacity: graphPalette.labelInactiveOpacity,
-      opacity: graphPalette.nodeInactiveOpacity,
-    },
-    selected: (node: NodeData) => ({
-      ...expandedLabel(node),
-      opacity: 1,
-    }),
-    "selected-inactive": {
-      labelOpacity: graphPalette.labelInactiveOpacity,
-      opacity: graphPalette.selectionInactiveNodeOpacity,
-    },
-    "selected-related": {
-      labelOpacity: 0.88,
-      opacity: graphPalette.selectionRelatedNodeOpacity,
-    },
+    highlight: focused,
+    selected: focused,
   }
 }
 
 function createEdgeStateStyles(graphPalette: GraphCanvasPalette) {
+  const focused = (edge: EdgeData) => ({
+    lineWidth:
+      getElementNumberValue(edge.style ?? {}, "lineWidth", 1.3) +
+      graphPalette.edgeHighlightLineWidthBoost,
+    opacity: graphPalette.edgeHighlightOpacity,
+  })
+
   return {
-    highlight: (edge: EdgeData) => ({
-      lineWidth:
-        getElementNumberValue(edge.style ?? {}, "lineWidth", 1.3) +
-        graphPalette.edgeHighlightLineWidthBoost,
-      opacity: graphPalette.edgeHighlightOpacity,
-    }),
-    inactive: {
-      opacity: graphPalette.edgeInactiveOpacity,
+    dim: {
+      opacity: graphPalette.edgeDimOpacity,
     },
-    "selected-inactive": {
-      opacity: graphPalette.selectionInactiveEdgeOpacity,
-    },
-    "selected-related": (edge: EdgeData) => ({
-      lineWidth:
-        getElementNumberValue(edge.style ?? {}, "lineWidth", 1.3) +
-        graphPalette.edgeHighlightLineWidthBoost,
-      opacity: graphPalette.selectionEdgeOpacity,
-    }),
+    highlight: focused,
+    selected: focused,
   }
 }
 
-function removeGraphElementStates(states: string[], names: readonly string[]) {
-  return states.filter((state) => !names.includes(state))
-}
-
-function applySelectedGraphStates(
-  graph: Graph,
-  graphModel: GraphModel,
-  selectedNodeId: string | null
-) {
-  if (graph.destroyed) {
-    return Promise.resolve()
+function clearGraphActiveStates(graph: Graph | null) {
+  if (!graph || graph.destroyed) {
+    return
   }
 
-  const relatedNodeIds = selectedNodeId
-    ? (graphModel.relatedNodesByNodeId.get(selectedNodeId) ??
-      new Set([selectedNodeId]))
-    : new Set<string>()
-  const relatedEdgeIds = selectedNodeId
-    ? (graphModel.relatedEdgesByNodeId.get(selectedNodeId) ?? new Set<string>())
-    : new Set<string>()
   const stateUpdates: Record<string, string[]> = {}
+  const { edges, nodes } = graph.getData()
 
-  graphModel.nodes.forEach((node) => {
-    const nextState = removeGraphElementStates(
-      graph.getElementState(node.id),
-      GRAPH_SELECTION_STATE_NAMES
-    )
-
-    if (selectedNodeId) {
-      if (node.id === selectedNodeId) {
-        nextState.push("selected")
-      } else if (relatedNodeIds.has(node.id)) {
-        nextState.push("selected-related")
-      } else {
-        nextState.push("selected-inactive")
-      }
+  for (const element of [...nodes, ...edges]) {
+    if (!element.id) {
+      continue
     }
 
-    stateUpdates[node.id] = nextState
-  })
-
-  graphModel.edges.forEach((edge) => {
-    const nextState = removeGraphElementStates(
-      graph.getElementState(edge.id),
-      GRAPH_SELECTION_EDGE_STATE_NAMES
-    )
-
-    if (selectedNodeId) {
-      nextState.push(
-        relatedEdgeIds.has(edge.id) ? "selected-related" : "selected-inactive"
-      )
-    }
-
-    stateUpdates[edge.id] = nextState
-  })
-
-  if (Object.keys(stateUpdates).length === 0) {
-    return Promise.resolve()
+    stateUpdates[element.id] = graph
+      .getElementState(element.id)
+      .filter((state) => state !== "selected" && state !== "dim")
   }
 
-  return graph.setElementState(stateUpdates, false)
+  void graph.setElementState(stateUpdates, false)
 }
 
 export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
@@ -1163,12 +985,10 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
   const { resolvedTheme } = useTheme()
   const containerRef = useRef<HTMLDivElement | null>(null)
   const graphRef = useRef<Graph | null>(null)
-  const graphRenderReadyRef = useRef<Graph | null>(null)
-  const hasAppliedSelectionStateRef = useRef(false)
   const lastNodeDragAtRef = useRef(0)
+  const selectedNodeIdRef = useRef<string | null>(null)
   const [quickDetailEntity, setQuickDetailEntity] =
     useState<LocalQuickDetailEntity | null>(null)
-  const [renderReadyVersion, setRenderReadyVersion] = useState(0)
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const graphThemeMode: GraphThemeMode =
     resolvedTheme === "dark" ? "dark" : "light"
@@ -1207,6 +1027,8 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
     : 0
 
   const clearSelectedNode = () => {
+    selectedNodeIdRef.current = null
+    clearGraphActiveStates(graphRef.current)
     setSelectedNodeId(null)
   }
 
@@ -1254,6 +1076,10 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
   }
 
   useEffect(() => {
+    selectedNodeIdRef.current = selectedNodeId
+  }, [selectedNodeId])
+
+  useEffect(() => {
     const container = containerRef.current
 
     if (!container) {
@@ -1275,19 +1101,53 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
       animation: true,
       behaviors: [
         {
-          range: GRAPH_CANVAS_PAN_RANGE,
           type: "drag-canvas",
         },
         {
           animation: false,
           degree: 1,
           direction: "both",
-          enable: (event: { targetType?: string }) => event.targetType === "node",
-          inactiveState: "inactive",
+          enable: (event: { targetType?: string }) =>
+            !selectedNodeIdRef.current && event.targetType === "node",
+          inactiveState: "dim",
           state: "highlight",
           type: "hover-activate",
         },
         {
+          animation: false,
+          degree: 1,
+          enable: (event: { targetType?: string }) =>
+            event.targetType === "node" || event.targetType === "canvas",
+          neighborState: "selected",
+          onClick: (event: {
+            target?: { id?: string }
+            targetType?: string
+          }) => {
+            if (event.targetType === "canvas") {
+              selectedNodeIdRef.current = null
+              clearGraphActiveStates(graph)
+              setSelectedNodeId(null)
+              return
+            }
+
+            const nodeId = event.target?.id
+
+            if (
+              !nodeId ||
+              performance.now() - lastNodeDragAtRef.current < 180
+            ) {
+              return
+            }
+
+            selectedNodeIdRef.current = nodeId
+            setSelectedNodeId(nodeId)
+          },
+          state: "selected",
+          type: "click-select",
+          unselectedState: "dim",
+        },
+        {
+          state: "drag-selected",
           type: "drag-element-force"
         },
       ],
@@ -1311,77 +1171,17 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
     })
 
     graphRef.current = graph
-    graphRenderReadyRef.current = null
-    hasAppliedSelectionStateRef.current = false
 
-    const clearNodeActiveState = (nodeId?: string) => {
-      if (!nodeId || graph.destroyed) {
-        return
-      }
-
-      const nextState = graph
-        .getElementState(nodeId)
-        .filter((state) => state !== "active")
-      void graph.setElementState(nodeId, nextState, false)
-    }
-
-    const handleNodePointerEnter = (event: { target?: { id?: string } }) => {
-      const nodeId = event.target?.id
-
-      if (!nodeId || graph.destroyed) {
-        return
-      }
-
-      const nextState = Array.from(
-        new Set([...graph.getElementState(nodeId), "active"])
-      )
-      void graph.setElementState(nodeId, nextState, false)
-    }
-
-    const handleNodePointerLeave = (event: { target?: { id?: string } }) => {
-      clearNodeActiveState(event.target?.id)
-    }
-
-    const handleNodeDragStart = (event: { target?: { id?: string } }) => {
+    const handleNodeDragStart = () => {
       lastNodeDragAtRef.current = performance.now()
-      clearNodeActiveState(event.target?.id)
     }
 
     const handleNodeDragEnd = () => {
       lastNodeDragAtRef.current = performance.now()
     }
 
-    const handleNodeClick = (event: { target?: { id?: string } }) => {
-      const nodeId = event.target?.id
-
-      if (!nodeId || graph.destroyed) {
-        return
-      }
-
-      if (performance.now() - lastNodeDragAtRef.current < 180) {
-        return
-      }
-
-      setSelectedNodeId(nodeId)
-    }
-
-    const handleCanvasClick = (event: {
-      target?: { id?: string }
-      targetType?: string
-    }) => {
-      if (event.target?.id || event.targetType === "node") {
-        return
-      }
-
-      setSelectedNodeId(null)
-    }
-
-    graph.on("node:pointerenter", handleNodePointerEnter as (event: unknown) => void)
-    graph.on("node:pointerleave", handleNodePointerLeave as (event: unknown) => void)
     graph.on("node:dragstart", handleNodeDragStart as (event: unknown) => void)
     graph.on("node:dragend", handleNodeDragEnd as (event: unknown) => void)
-    graph.on("node:click", handleNodeClick as (event: unknown) => void)
-    graph.on("canvas:click", handleCanvasClick as (event: unknown) => void)
 
     const renderGraph = async () => {
       try {
@@ -1390,9 +1190,6 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
         if (isDisposed || graph.destroyed) {
           return
         }
-
-        graphRenderReadyRef.current = graph
-        setRenderReadyVersion((version) => version + 1)
 
         await graph.fitView({
           direction: "both",
@@ -1408,17 +1205,6 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
     }
 
     const destroyGraph = () => {
-      const isCurrentGraph =
-        graphRef.current === graph || graphRenderReadyRef.current === graph
-
-      if (graphRenderReadyRef.current === graph) {
-        graphRenderReadyRef.current = null
-      }
-
-      if (isCurrentGraph) {
-        hasAppliedSelectionStateRef.current = false
-      }
-
       if (!graph.destroyed) {
         graph.destroy()
       }
@@ -1446,18 +1232,9 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
 
     return () => {
       isDisposed = true
-      if (graphRenderReadyRef.current === graph) {
-        graphRenderReadyRef.current = null
-      }
-
-      hasAppliedSelectionStateRef.current = false
       resizeObserver.disconnect()
-      graph.off("node:pointerenter", handleNodePointerEnter as (event: unknown) => void)
-      graph.off("node:pointerleave", handleNodePointerLeave as (event: unknown) => void)
       graph.off("node:dragstart", handleNodeDragStart as (event: unknown) => void)
       graph.off("node:dragend", handleNodeDragEnd as (event: unknown) => void)
-      graph.off("node:click", handleNodeClick as (event: unknown) => void)
-      graph.off("canvas:click", handleCanvasClick as (event: unknown) => void)
 
       if (renderFrameId !== null) {
         window.cancelAnimationFrame(renderFrameId)
@@ -1471,28 +1248,7 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
 
       destroyGraph()
     }
-  }, [graphData, graphModel, graphPalette])
-
-  useEffect(() => {
-    const graph = graphRef.current
-
-    if (!graph || graph.destroyed || graphRenderReadyRef.current !== graph) {
-      return
-    }
-
-    if (!selectedGraphNodeId && !hasAppliedSelectionStateRef.current) {
-      return
-    }
-
-    hasAppliedSelectionStateRef.current = true
-    void applySelectedGraphStates(graph, graphModel, selectedGraphNodeId).catch(
-      (error) => {
-        if (!graph.destroyed && graphRenderReadyRef.current === graph) {
-          console.error(error)
-        }
-      }
-    )
-  }, [graphModel, renderReadyVersion, selectedGraphNodeId])
+  }, [graphData, graphPalette])
 
   return (
     <div className="relative size-full min-h-[36rem] max-w-full animate-in overflow-hidden duration-500 fade-in">

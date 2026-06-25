@@ -1,4 +1,8 @@
-import { hasAnyPermission, type PermissionCollection } from "@/app/lib/permissions"
+import {
+  hasAnyPermission,
+  hasPermission,
+  type PermissionCollection,
+} from "@/app/lib/permissions"
 
 export const MARKET_CHART_READ_PERMISSIONS = ["market-chart:read"] as const
 export const MARKET_CHART_WATCHLIST_READ_PERMISSION = "watchlist:read"
@@ -17,6 +21,6 @@ export function canAccessMarketChartWorkbench(
   permissions: PermissionCollection
 ): boolean {
   return MARKET_CHART_WORKBENCH_PERMISSIONS.every((permission) =>
-    permissions.includes(permission)
+    hasPermission(permissions, permission)
   )
 }

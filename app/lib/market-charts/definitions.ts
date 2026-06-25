@@ -114,6 +114,7 @@ export type MarketChartLiveStreamState =
   | "SUBSCRIBED"
   | "UNSUBSCRIBED"
   | "STALE"
+  | "MARKET_CLOSED"
   | "ERROR"
 
 export interface MarketChartLiveRequest {
@@ -124,7 +125,6 @@ export interface MarketChartLiveRequest {
 export interface MarketChartLiveStatusResponse {
   assetId: number
   symbol: string
-  provider: string
   state: MarketChartLiveStreamState
   message?: string | null
   stale: boolean
@@ -134,7 +134,6 @@ export interface MarketChartLiveStatusResponse {
 export interface MarketChartLiveQuoteResponse {
   assetId: number
   symbol: string
-  provider: string
   price: number
   volume?: number | null
   providerTime?: string | null
@@ -145,7 +144,6 @@ export interface MarketChartLiveQuoteResponse {
 export interface MarketChartLiveCandleResponse {
   assetId: number
   symbol: string
-  provider: string
   timeframe: MarketChartTimeframe
   time: string
   open: number
@@ -160,7 +158,6 @@ export interface MarketChartLiveCandleResponse {
 export interface MarketChartLiveSnapshotResponse {
   asset: MarketChartAssetResponse
   symbol: string
-  provider: string
   timeframe: MarketChartTimeframe
   quote?: MarketChartLiveQuoteResponse | null
   candle?: MarketChartLiveCandleResponse | null
@@ -170,7 +167,6 @@ export interface MarketChartLiveSnapshotResponse {
 export interface MarketChartLiveErrorResponse {
   assetId: number
   symbol: string
-  provider: string
   message: string
   observedAt: string
 }
@@ -291,6 +287,7 @@ export const marketChartLiveStreamStateSchema = z.enum([
   "SUBSCRIBED",
   "UNSUBSCRIBED",
   "STALE",
+  "MARKET_CLOSED",
   "ERROR",
 ]) satisfies z.ZodType<MarketChartLiveStreamState>
 
@@ -302,7 +299,6 @@ export const marketChartLiveRequestSchema = z.object({
 export const marketChartLiveStatusResponseSchema = z.object({
   assetId: z.number(),
   symbol: z.string(),
-  provider: z.string(),
   state: marketChartLiveStreamStateSchema,
   message: z.string().nullable().optional(),
   stale: z.boolean(),
@@ -312,7 +308,6 @@ export const marketChartLiveStatusResponseSchema = z.object({
 export const marketChartLiveQuoteResponseSchema = z.object({
   assetId: z.number(),
   symbol: z.string(),
-  provider: z.string(),
   price: z.number(),
   volume: z.number().nullable().optional(),
   providerTime: z.string().nullable().optional(),
@@ -323,7 +318,6 @@ export const marketChartLiveQuoteResponseSchema = z.object({
 export const marketChartLiveCandleResponseSchema = z.object({
   assetId: z.number(),
   symbol: z.string(),
-  provider: z.string(),
   timeframe: z.enum(MARKET_CHART_TIMEFRAMES),
   time: z.string(),
   open: z.number(),
@@ -338,7 +332,6 @@ export const marketChartLiveCandleResponseSchema = z.object({
 export const marketChartLiveSnapshotResponseSchema = z.object({
   asset: marketChartAssetResponseSchema,
   symbol: z.string(),
-  provider: z.string(),
   timeframe: z.enum(MARKET_CHART_TIMEFRAMES),
   quote: marketChartLiveQuoteResponseSchema.nullable().optional(),
   candle: marketChartLiveCandleResponseSchema.nullable().optional(),
@@ -348,7 +341,6 @@ export const marketChartLiveSnapshotResponseSchema = z.object({
 export const marketChartLiveErrorResponseSchema = z.object({
   assetId: z.number(),
   symbol: z.string(),
-  provider: z.string(),
   message: z.string(),
   observedAt: z.string(),
 }) satisfies z.ZodType<MarketChartLiveErrorResponse>

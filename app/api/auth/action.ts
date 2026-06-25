@@ -2,6 +2,7 @@
 
 import { auth } from '@clerk/nextjs/server';
 
+import { isDevAuthModeEnabled } from '@/app/lib/dev-auth-mode';
 import { getDictionary } from '@/app/lib/i18n/dictionaries';
 import { getRequestLocale } from '@/app/lib/i18n/server';
 
@@ -110,16 +111,23 @@ export async function getClerkToken(): Promise<string> {
   return token;
 }
 
+export async function getBackendAuthHeaders(): Promise<Record<string, string>> {
+  if (isDevAuthModeEnabled()) {
+    return {};
+  }
+
+  const token = await getClerkToken();
+  return {
+    Authorization: `Bearer ${token}`,
+  };
+}
+
 export async function fetchAuthenticated<T>(
   urlPath: string,
   options: RequestInit = {}
 ): Promise<T> {
 
-  const token = await getClerkToken();
-
-  const authHeaders: Record<string, string> = {
-    Authorization: `Bearer ${token}`,
-  };
+  const authHeaders = await getBackendAuthHeaders();
 
   const finalOptions: RequestInit = {
     ...options,

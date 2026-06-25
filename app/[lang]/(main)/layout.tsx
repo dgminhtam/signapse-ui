@@ -3,12 +3,14 @@ import { cookies } from "next/headers"
 import type { ReactNode } from "react"
 
 import { getMyWorkspaces } from "@/app/api/workspaces/action"
+import { getDevAuthUser, isDevAuthModeEnabled } from "@/app/lib/dev-auth-mode"
 import {
   canCreatePersonalNotes,
   canReadPersonalNotes,
   canUpdatePersonalNotes,
 } from "@/app/lib/personal-notes/permissions"
 import { getServerDictionary } from "@/app/lib/i18n/server"
+import { hasPermission } from "@/app/lib/permissions"
 import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { resolveActiveWorkspace } from "@/app/lib/workspaces/active"
 import { WorkspaceResponse } from "@/app/lib/workspaces/definitions"
@@ -28,15 +30,20 @@ export default async function Layout({
 }: Readonly<{
   children: ReactNode
 }>) {
-  const { isAuthenticated } = await auth()
+  const devAuthMode = isDevAuthModeEnabled()
+  const { isAuthenticated } = devAuthMode
+    ? { isAuthenticated: true }
+    : await auth()
   const dictionary = await getServerDictionary()
 
   if (!isAuthenticated) {
     return <div>{dictionary.auth.signInRequired}</div>
   }
 
-  const user = await currentUser()
-  const simpleUser = user
+  const user = devAuthMode ? null : await currentUser()
+  const simpleUser = devAuthMode
+    ? getDevAuthUser()
+    : user
     ? {
       imageUrl: user.imageUrl,
       fullName: user.fullName,
@@ -47,7 +54,7 @@ export default async function Layout({
   const cookieStore = await cookies()
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "true"
   const permissions = await getCurrentPermissions()
-  const canReadWorkspace = permissions.includes("workspace:read")
+  const canReadWorkspace = hasPermission(permissions, "workspace:read")
   const canReadNotes = canReadPersonalNotes(permissions)
   let workspaces: WorkspaceResponse[] = []
 
@@ -92,13 +99,13 @@ export default async function Layout({
                   <WorkspaceSwitcher
                     workspaces={workspaces}
                     currentWorkspace={currentWorkspace}
-                    canCreateWorkspace={permissions.includes("workspace:create")}
-                    canRenameWorkspace={permissions.includes("workspace:update")}
-                    canSetCurrentWorkspace={permissions.includes("workspace:set-current")}
-                    canReadAsset={permissions.includes("asset:read")}
-                    canReadWatchlist={permissions.includes("watchlist:read")}
-                    canCreateWatchlist={permissions.includes("watchlist:create")}
-                    canDeleteWatchlist={permissions.includes("watchlist:delete")}
+                    canCreateWorkspace={hasPermission(permissions, "workspace:create")}
+                    canRenameWorkspace={hasPermission(permissions, "workspace:update")}
+                    canSetCurrentWorkspace={hasPermission(permissions, "workspace:set-current")}
+                    canReadAsset={hasPermission(permissions, "asset:read")}
+                    canReadWatchlist={hasPermission(permissions, "watchlist:read")}
+                    canCreateWatchlist={hasPermission(permissions, "watchlist:create")}
+                    canDeleteWatchlist={hasPermission(permissions, "watchlist:delete")}
                     className="min-w-0 flex-1 md:flex-none"
                   />
                 ) : null}

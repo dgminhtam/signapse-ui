@@ -8,6 +8,7 @@ import {
 } from "@/app/api/telegram/action"
 import { getWorkspaceWatchlistAssets } from "@/app/api/watchlists/action"
 import { getServerDictionary } from "@/app/lib/i18n/server"
+import { hasPermission } from "@/app/lib/permissions"
 import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import {
   canReadTelegramConfiguration,
@@ -51,7 +52,7 @@ export default async function TelegramPage() {
       <TelegramConfigurationContent
         sectionAccess={sectionAccess}
         manageAccess={manageAccess}
-        canReadWorkspace={permissions.includes("workspace:read")}
+        canReadWorkspace={hasPermission(permissions, "workspace:read")}
       />
     </Suspense>
   )

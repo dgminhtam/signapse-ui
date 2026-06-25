@@ -26,6 +26,7 @@ import type {
   NarrativeSummaryResponse,
 } from "@/app/lib/narratives/definitions"
 import { canReadNarratives } from "@/app/lib/narratives/permissions"
+import { hasPermission } from "@/app/lib/permissions"
 import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { resolveActiveWorkspace } from "@/app/lib/workspaces/active"
 import { WorkspaceResponse } from "@/app/lib/workspaces/definitions"
@@ -89,11 +90,11 @@ async function WorkspaceOverview() {
     getRequestLocale(),
   ])
   const dictionary = await getDictionary(locale)
-  const canReadWorkspace = permissions.includes("workspace:read")
-  const canReadAsset = permissions.includes("asset:read")
-  const canReadWatchlist = permissions.includes("watchlist:read")
-  const canCreateWatchlist = permissions.includes("watchlist:create")
-  const canDeleteWatchlist = permissions.includes("watchlist:delete")
+  const canReadWorkspace = hasPermission(permissions, "workspace:read")
+  const canReadAsset = hasPermission(permissions, "asset:read")
+  const canReadWatchlist = hasPermission(permissions, "watchlist:read")
+  const canCreateWatchlist = hasPermission(permissions, "watchlist:create")
+  const canDeleteWatchlist = hasPermission(permissions, "watchlist:delete")
   const canReadNarrativePreview = canReadNarratives(permissions)
 
   if (!canReadWorkspace) {

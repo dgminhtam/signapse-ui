@@ -19,6 +19,7 @@ import {
 } from "lucide-react"
 
 import type { AppLocale } from "@/app/lib/i18n/config"
+import { isDevAuthModeEnabled } from "@/app/lib/dev-auth-mode"
 import { getDictionary, hasLocale } from "@/app/lib/i18n/dictionaries"
 import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
 import { withLocalePath } from "@/app/lib/i18n/routing"
@@ -58,7 +59,9 @@ export default async function Page({ params }: LandingPageProps) {
   }
 
   const dictionary = await getDictionary(lang)
-  const { isAuthenticated } = await auth()
+  const { isAuthenticated } = isDevAuthModeEnabled()
+    ? { isAuthenticated: true }
+    : await auth()
 
   return (
     <main className="min-h-svh bg-background text-foreground">

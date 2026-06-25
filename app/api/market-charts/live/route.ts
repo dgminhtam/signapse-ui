@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 
-import { getClerkToken } from "@/app/api/auth/action"
+import { getBackendAuthHeaders } from "@/app/api/auth/action"
 import { getDictionary } from "@/app/lib/i18n/dictionaries"
 import { getRequestLocale } from "@/app/lib/i18n/server"
 import {
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const token = await getClerkToken()
+    const authHeaders = await getBackendAuthHeaders()
     const url = new URL("/market-charts/live", apiBaseUrl)
 
     url.searchParams.set("assetId", String(parsedRequest.data.assetId))
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
       cache: "no-store",
       headers: {
         Accept: "text/event-stream",
-        Authorization: `Bearer ${token}`,
+        ...authHeaders,
       },
       signal: request.signal,
     })

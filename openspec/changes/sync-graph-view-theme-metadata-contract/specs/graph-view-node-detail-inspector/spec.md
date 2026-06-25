@@ -39,9 +39,3 @@ The graph view SHALL display relevant, kind-specific summary details from the ex
 - **WHEN** the selected node kind is `narrative` and `metadata.themes[]` contains a primary theme item
 - **THEN** the inspector shows the theme title with a localized relation type label when present
 - **AND** the inspector does not provide a theme detail route action
-
-#### Scenario: Warm episode node details are shown
-
-- **WHEN** the selected node kind is `warm-episode`
-- **THEN** the inspector shows the warm episode title, node type, period start when present, period end when present, knowledge layer when present, confidence when present, and a compact graph relationship summary
-- **AND** the inspector does not show article-only fields, asset-only fields, narrative thesis, narrative status, theme metadata, generic event status, `slug`, or `canonicalKey`

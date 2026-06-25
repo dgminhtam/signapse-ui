@@ -15,7 +15,7 @@ export const GRAPH_VIEW_NODE_VISUALS = {
     chipClassName:
       "border-teal-300/60 bg-teal-50 text-teal-900 dark:border-teal-500/30 dark:bg-teal-500/10 dark:text-teal-100",
     color: "#0f766e",
-    size: 50,
+    size: 64,
   },
   "news-article": {
     chipClassName:
@@ -27,12 +27,6 @@ export const GRAPH_VIEW_NODE_VISUALS = {
     chipClassName:
       "border-violet-300/60 bg-violet-50 text-violet-900 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-100",
     color: "#7c3aed",
-    size: 32,
-  },
-  "warm-episode": {
-    chipClassName:
-      "border-cyan-300/60 bg-cyan-50 text-cyan-900 dark:border-cyan-500/30 dark:bg-cyan-500/10 dark:text-cyan-100",
-    color: "#0891b2",
     size: 42,
   },
 } satisfies Record<
@@ -69,18 +63,6 @@ export const GRAPH_VIEW_EDGE_VISUALS = {
     color: "#d946ef",
     size: 1.35,
   },
-  "asset-warm-episode": {
-    chipClassName:
-      "border-cyan-300/60 bg-cyan-50 text-cyan-900 dark:border-cyan-500/30 dark:bg-cyan-500/10 dark:text-cyan-100",
-    color: "#22d3ee",
-    size: 1.35,
-  },
-  "warm-episode-event": {
-    chipClassName:
-      "border-sky-300/60 bg-sky-50 text-sky-900 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-100",
-    color: "#38bdf8",
-    size: 1.45,
-  },
 } satisfies Record<
   GraphViewEdgeKind,
   {
@@ -108,10 +90,6 @@ export function getGraphViewNodeVisuals(dictionary: Dictionary) {
       ...GRAPH_VIEW_NODE_VISUALS.narrative,
       label: dictionary.graphView.nodeKinds.narrative,
     },
-    "warm-episode": {
-      ...GRAPH_VIEW_NODE_VISUALS["warm-episode"],
-      label: dictionary.graphView.nodeKinds["warm-episode"],
-    },
   } satisfies Record<
     GraphViewNodeKind,
     (typeof GRAPH_VIEW_NODE_VISUALS)[GraphViewNodeKind] & { label: string }
@@ -135,14 +113,6 @@ export function getGraphViewEdgeVisuals(dictionary: Dictionary) {
     "narrative-asset": {
       ...GRAPH_VIEW_EDGE_VISUALS["narrative-asset"],
       label: dictionary.graphView.edgeKinds["narrative-asset"],
-    },
-    "asset-warm-episode": {
-      ...GRAPH_VIEW_EDGE_VISUALS["asset-warm-episode"],
-      label: dictionary.graphView.edgeKinds["asset-warm-episode"],
-    },
-    "warm-episode-event": {
-      ...GRAPH_VIEW_EDGE_VISUALS["warm-episode-event"],
-      label: dictionary.graphView.edgeKinds["warm-episode-event"],
     },
   } satisfies Record<
     GraphViewEdgeKind,

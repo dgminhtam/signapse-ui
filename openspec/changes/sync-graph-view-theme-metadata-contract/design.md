@@ -1,6 +1,6 @@
 ## Context
 
-`GET /graph-view` no longer returns theme as graph topology. The backend contract now exposes node kinds `event`, `asset`, `news-article`, `narrative`, and `warm-episode`; edge kinds `event-asset`, `news-article-event`, `narrative-event`, `narrative-asset`, `asset-warm-episode`, and `warm-episode-event`; and `GraphNodeMetadata.themes[]` for event/narrative theme context.
+`GET /graph-view` no longer returns theme or warm episode as graph topology. The backend contract now exposes node kinds `event`, `asset`, `news-article`, and `narrative`; edge kinds `event-asset`, `news-article-event`, `narrative-event`, and `narrative-asset`; and `GraphNodeMetadata.themes[]` for event/narrative theme context.
 
 The frontend still carries the older topology in its Graph View schema, visuals, count order, force constants, labels, and specs. `buildGraphModel()` currently filters `theme` and `event-theme` after validation, which made sense during transition, but it now hides contract drift instead of representing the backend source of truth.
 

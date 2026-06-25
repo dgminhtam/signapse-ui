@@ -4,6 +4,10 @@
 
 A modern Next.js application with shadcn/ui, featuring real-time market data visualization and analysis tools.
 
+## Local Development
+
+Set `SIGNAPSE_AUTH_MODE=disabled` to open the dashboard without Clerk login while developing against a local backend with auth disabled. This mode is ignored in production and sends backend API requests without Clerk bearer tokens.
+
 ## Using the Logo Component
 
 Import the Logo component to display the Signapse branding:

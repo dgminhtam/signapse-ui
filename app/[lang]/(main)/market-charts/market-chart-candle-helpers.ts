@@ -1,10 +1,35 @@
 import type {
   MarketChartCandleItemResponse,
+  MarketChartLiveQuoteResponse,
+  MarketChartTimeframe,
 } from "@/app/lib/market-charts/definitions"
-import { toMarketChartEpochMillis } from "./market-chart-annotations"
+
+const MINUTE_MS = 60 * 1000
+const HOUR_MS = 60 * MINUTE_MS
+const DAY_MS = 24 * HOUR_MS
+const QUOTE_BUCKET_INTERVAL_MS: Record<MarketChartTimeframe, number> = {
+  "1m": MINUTE_MS,
+  "5m": 5 * MINUTE_MS,
+  "15m": 15 * MINUTE_MS,
+  "30m": 30 * MINUTE_MS,
+  "1h": HOUR_MS,
+  "1d": DAY_MS,
+  "1w": 7 * DAY_MS,
+  "1mo": 30 * DAY_MS,
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null
+}
+
+function toMarketChartEpochMillis(value: unknown) {
+  if (typeof value !== "string") {
+    return null
+  }
+
+  const timestamp = Date.parse(value)
+
+  return Number.isFinite(timestamp) ? timestamp : null
 }
 
 export function isValidMarketChartCandle(
@@ -86,6 +111,65 @@ export function mergeLiveCandleItem(
   }
 
   return mergeCandleItems(current, [liveCandle])
+}
+
+export function deriveLiveCandleItemFromQuote({
+  current,
+  liveCandle,
+  quote,
+  timeframe,
+}: {
+  current: MarketChartCandleItemResponse[] | null | undefined
+  liveCandle?: MarketChartCandleItemResponse | null | undefined
+  quote: MarketChartLiveQuoteResponse | null | undefined
+  timeframe: MarketChartTimeframe
+}): MarketChartCandleItemResponse | null {
+  if (!quote || !Number.isFinite(quote.price)) {
+    return null
+  }
+
+  const quoteTime = Date.parse(quote.providerTime || quote.receivedAt)
+  const intervalMs = QUOTE_BUCKET_INTERVAL_MS[timeframe]
+
+  if (!Number.isFinite(quoteTime) || !Number.isFinite(intervalMs)) {
+    return null
+  }
+
+  const quoteBucketTimestamp = Math.floor(quoteTime / intervalMs) * intervalMs
+  const normalizedCurrent = normalizeCandleItems([
+    ...(current ?? []),
+    ...(liveCandle ? [liveCandle] : []),
+  ])
+  const latestCandle = normalizedCurrent.at(-1) ?? null
+  const latestTimestamp = latestCandle ? getCandleTimestamp(latestCandle) : null
+  const volume =
+    typeof quote.volume === "number" && Number.isFinite(quote.volume)
+      ? quote.volume
+      : null
+
+  if (latestTimestamp !== null && quoteBucketTimestamp < latestTimestamp) {
+    return null
+  }
+
+  if (latestCandle && latestTimestamp === quoteBucketTimestamp) {
+    return {
+      close: quote.price,
+      high: Math.max(latestCandle.high, quote.price),
+      low: Math.min(latestCandle.low, quote.price),
+      open: latestCandle.open,
+      time: latestCandle.time,
+      ...(volume !== null ? { volume } : {}),
+    }
+  }
+
+  return {
+    close: quote.price,
+    high: quote.price,
+    low: quote.price,
+    open: quote.price,
+    time: new Date(quoteBucketTimestamp).toISOString(),
+    ...(volume !== null ? { volume } : {}),
+  }
 }
 
 export function hasUsableVolume(
