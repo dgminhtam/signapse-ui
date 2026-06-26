@@ -34,7 +34,6 @@ import {
   MarketChartCandleRequest,
   MarketChartCandleResponse,
   MarketChartCandleItemResponse,
-  type MarketChartLiveCandleResponse,
   type MarketChartLiveQuoteResponse,
   type MarketChartLiveStatusResponse,
   type MarketChartLiveStreamState,
@@ -125,7 +124,6 @@ type FormErrors = Partial<Record<keyof MarketChartSelectionState, string>> & {
 }
 
 type MarketChartLiveRuntimeState = {
-  candle: MarketChartLiveCandleResponse | null
   error: string | null
   quote: MarketChartLiveQuoteResponse | null
   status: MarketChartLiveStatusResponse | null
@@ -182,7 +180,6 @@ const DEFAULT_MARKET_CHART_DRAWING_STATE: MarketChartDrawingState = {
   selectedTools: DEFAULT_MARKET_CHART_DRAWING_PALETTE_TOOLS,
 }
 const DEFAULT_MARKET_CHART_LIVE_STATE: MarketChartLiveRuntimeState = {
-  candle: null,
   error: null,
   quote: null,
   status: null,
@@ -239,19 +236,6 @@ function createLatestCandleRequest(
     from: from.toISOString(),
     to: to.toISOString(),
     includeAnnotations,
-  }
-}
-
-function createLiveCandleItem(
-  candle: MarketChartLiveCandleResponse
-): MarketChartCandleItemResponse {
-  return {
-    close: candle.close,
-    high: candle.high,
-    low: candle.low,
-    open: candle.open,
-    time: candle.time,
-    volume: candle.volume,
   }
 }
 
@@ -367,7 +351,6 @@ function getFreshnessLabel(
   const timestamp =
     liveState.quote?.receivedAt ||
     liveState.quote?.providerTime ||
-    liveState.candle?.updatedAt ||
     data?.to
 
   if (phase !== "success" || !timestamp) {
@@ -1625,16 +1608,11 @@ export function MarketChartWorkbench({
   const timeframeLabels = getMarketChartTimeframeLabels(dictionary)
   const freshnessLabel = getFreshnessLabel(data, phase, liveState, localization)
   const chartData = loadedData ?? data
-  const liveCandleBase = liveState.candle
-    ? createLiveCandleItem(liveState.candle)
-    : null
-  const liveCandleItem =
-    deriveLiveCandleItemFromQuote({
-      current: chartData?.candles,
-      liveCandle: liveCandleBase,
-      quote: liveState.quote,
-      timeframe: selection.timeframe,
-    }) ?? liveCandleBase
+  const liveCandleItem = deriveLiveCandleItemFromQuote({
+    current: chartData?.candles,
+    quote: liveState.quote,
+    timeframe: selection.timeframe,
+  })
   const showVolumePane = hasUsableVolumeData(
     chartData?.candles,
     liveCandleItem
@@ -1706,14 +1684,13 @@ export function MarketChartWorkbench({
     const stream = openMarketChartLiveStream({
       assetId: selectedAssetId,
       timeframe: selection.timeframe,
-      onCandle(value) {
+      onCandle() {
         if (!active) {
           return
         }
 
         setLiveState((current) => ({
           ...current,
-          candle: value,
           error: null,
         }))
       },
@@ -1768,7 +1745,6 @@ export function MarketChartWorkbench({
 
         setLiveState((current) => ({
           ...current,
-          candle: value.candle ?? current.candle,
           error: null,
           quote: value.quote ?? current.quote,
           status: value.status,

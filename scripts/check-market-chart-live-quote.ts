@@ -16,43 +16,30 @@ const latestCandle = {
 assert.deepEqual(
   deriveLiveCandleItemFromQuote({
     current: [latestCandle],
-    liveCandle: {
-      open: 105,
-      high: 108,
-      low: 101,
-      close: 104,
-      time: "2026-06-25T11:00:00.000Z",
-    },
     quote: {
       price: 112,
-      providerTime: "2026-06-25T11:30:00.000Z",
-      receivedAt: "2026-06-25T11:30:01.000Z",
+      providerTime: "2026-06-25T10:30:00.000Z",
+      receivedAt: "2026-06-25T10:30:01.000Z",
     },
     timeframe: "1h",
   }),
   {
-    open: 105,
-    high: 112,
-    low: 101,
+    open: 100,
+    high: 110,
+    low: 95,
     close: 112,
-    time: "2026-06-25T11:00:00.000Z",
+    time: "2026-06-25T10:00:00.000Z",
+    volume: 1000,
   }
 )
 
 assert.equal(
   deriveLiveCandleItemFromQuote({
     current: [latestCandle],
-    liveCandle: {
-      open: 105,
-      high: 108,
-      low: 101,
-      close: 104,
-      time: "2026-06-25T11:00:00.000Z",
-    },
     quote: {
       price: 99,
-      providerTime: "2026-06-25T10:30:00.000Z",
-      receivedAt: "2026-06-25T10:30:01.000Z",
+      providerTime: "2026-06-25T11:30:00.000Z",
+      receivedAt: "2026-06-25T11:30:01.000Z",
     },
     timeframe: "1h",
   }),
@@ -71,10 +58,11 @@ assert.deepEqual(
   }),
   {
     open: 100,
-    high: 112,
+    high: 110,
     low: 95,
     close: 112,
     time: "2026-06-25T10:00:00.000Z",
+    volume: 1000,
   }
 )
 
@@ -98,18 +86,10 @@ assert.deepEqual(
       price: 120,
       providerTime: "2026-06-25T11:00:00.000Z",
       receivedAt: "2026-06-25T11:00:01.000Z",
-      volume: 25,
     },
     timeframe: "1h",
   }),
-  {
-    open: 120,
-    high: 120,
-    low: 120,
-    close: 120,
-    time: "2026-06-25T11:00:00.000Z",
-    volume: 25,
-  }
+  null
 )
 
 console.log("Market chart live quote checks passed")

@@ -115,12 +115,10 @@ export function mergeLiveCandleItem(
 
 export function deriveLiveCandleItemFromQuote({
   current,
-  liveCandle,
   quote,
   timeframe,
 }: {
   current: MarketChartCandleItemResponse[] | null | undefined
-  liveCandle?: MarketChartCandleItemResponse | null | undefined
   quote: MarketChartLiveQuoteResponse | null | undefined
   timeframe: MarketChartTimeframe
 }): MarketChartCandleItemResponse | null {
@@ -136,39 +134,17 @@ export function deriveLiveCandleItemFromQuote({
   }
 
   const quoteBucketTimestamp = Math.floor(quoteTime / intervalMs) * intervalMs
-  const normalizedCurrent = normalizeCandleItems([
-    ...(current ?? []),
-    ...(liveCandle ? [liveCandle] : []),
-  ])
+  const normalizedCurrent = normalizeCandleItems(current ?? [])
   const latestCandle = normalizedCurrent.at(-1) ?? null
   const latestTimestamp = latestCandle ? getCandleTimestamp(latestCandle) : null
-  const volume =
-    typeof quote.volume === "number" && Number.isFinite(quote.volume)
-      ? quote.volume
-      : null
 
-  if (latestTimestamp !== null && quoteBucketTimestamp < latestTimestamp) {
+  if (!latestCandle || latestTimestamp !== quoteBucketTimestamp) {
     return null
   }
 
-  if (latestCandle && latestTimestamp === quoteBucketTimestamp) {
-    return {
-      close: quote.price,
-      high: Math.max(latestCandle.high, quote.price),
-      low: Math.min(latestCandle.low, quote.price),
-      open: latestCandle.open,
-      time: latestCandle.time,
-      ...(volume !== null ? { volume } : {}),
-    }
-  }
-
   return {
+    ...latestCandle,
     close: quote.price,
-    high: quote.price,
-    low: quote.price,
-    open: quote.price,
-    time: new Date(quoteBucketTimestamp).toISOString(),
-    ...(volume !== null ? { volume } : {}),
   }
 }
 
