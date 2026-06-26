@@ -7,7 +7,7 @@ Graph View already uses G6 built-in `hover-activate` and `click-select` behavior
 **Goals:**
 
 - Keep hover and active selection on G6 built-in behaviors.
-- Make hover map to `highlight` and active selection map to `selected`.
+- Make hover map to `highlight`, active target selection map to `selected`, and active related context map to `highlight`.
 - Keep focused hover and selected effects visually aligned.
 - Change unrelated node and edge `dim` styling to neutral gray color treatment instead of opacity reduction.
 - Keep the change scoped to Graph View canvas state styling.
@@ -22,11 +22,11 @@ Graph View already uses G6 built-in `hover-activate` and `click-select` behavior
 
 1. Keep G6 built-in state assignment.
 
-   `hover-activate` already applies `highlight` and `dim` for hovered first-degree context. `click-select` already applies `selected` and `dim` for active first-degree context. Reusing these behaviors keeps the implementation short and avoids rebuilding the relation state logic in application code.
+   `hover-activate` already applies `highlight` and `dim` for hovered first-degree context. `click-select` can apply `selected` to the active target, `highlight` to first-degree related context, and `dim` to unrelated context. Reusing these behaviors keeps the implementation short and avoids rebuilding the relation state logic in application code.
 
-2. Preserve separate `highlight` and `selected` state names.
+2. Keep `selected` only on the active target.
 
-   Hover and active selection should remain semantically distinct even if their focus styles match. This makes the behavior easier to read and keeps future active-only tweaks possible without changing behavior wiring.
+   G6 toggles selection based on whether the clicked target already has the configured `selected` state. If related nodes also receive `selected`, clicking a related node clears selection instead of transferring it. Related active context should therefore use the existing `highlight` state while the active target keeps `selected`.
 
 3. Replace dim opacity fields with neutral gray fields.
 

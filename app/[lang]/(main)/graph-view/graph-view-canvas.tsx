@@ -56,13 +56,13 @@ type GraphThemeMode = "light" | "dark"
 type GraphCanvasPalette = {
   edgeHighlightLineWidthBoost: number
   edgeHighlightOpacity: number
-  edgeDimOpacity: number
+  edgeDimStroke: string
   labelBackground: boolean
-  labelDimOpacity: number
+  labelDimFill: string
   labelFill: string
   labelHoverFill: string
   labelHoverMaxWidth: number
-  nodeDimOpacity: number
+  nodeDimFill: string
 }
 
 const MIN_CANVAS_WIDTH = 360
@@ -126,26 +126,26 @@ function createGraphCanvasPalette(mode: GraphThemeMode): GraphCanvasPalette {
     return {
       edgeHighlightLineWidthBoost: 0.95,
       edgeHighlightOpacity: 0.84,
-      edgeDimOpacity: 0.34,
+      edgeDimStroke: "#64748b",
       labelBackground: false,
-      labelDimOpacity: 0.72,
+      labelDimFill: "#94a3b8",
       labelFill: "#f8fafc",
       labelHoverFill: "#ffffff",
       labelHoverMaxWidth: 300,
-      nodeDimOpacity: 0.66,
+      nodeDimFill: "#64748b",
     }
   }
 
   return {
     edgeHighlightLineWidthBoost: 0.8,
     edgeHighlightOpacity: 0.78,
-    edgeDimOpacity: 0.24,
+    edgeDimStroke: "#94a3b8",
     labelBackground: false,
-    labelDimOpacity: 0.7,
+    labelDimFill: "#64748b",
     labelFill: "#172033",
     labelHoverFill: "#020617",
     labelHoverMaxWidth: 300,
-    nodeDimOpacity: 0.61,
+    nodeDimFill: "#cbd5e1",
   }
 }
 
@@ -163,14 +163,14 @@ function GraphHudCountChip({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border font-medium backdrop-blur",
+        "inline-flex min-w-0 max-w-full items-center gap-1.5 rounded-full border font-medium backdrop-blur",
         priority === "normal"
           ? "h-7 px-2.5 text-[11px] shadow-sm"
           : "h-6 px-2 text-[10px] opacity-75 shadow-none",
         className
       )}
     >
-      <span>{label}</span>
+      <span className="min-w-0 truncate">{label}</span>
       <span
         className={cn(
           "rounded-full bg-background/60 font-semibold",
@@ -926,15 +926,14 @@ function createNodeStateStyles(graphPalette: GraphCanvasPalette) {
   })
   const focused = (node: NodeData) => ({
     ...expandedLabel(node),
-    halo: false,
     lineWidth: 0,
     opacity: 1,
   })
 
   return {
     dim: {
-      labelOpacity: graphPalette.labelDimOpacity,
-      opacity: graphPalette.nodeDimOpacity,
+      fill: graphPalette.nodeDimFill,
+      labelFill: graphPalette.labelDimFill,
     },
     highlight: focused,
     selected: focused,
@@ -951,7 +950,7 @@ function createEdgeStateStyles(graphPalette: GraphCanvasPalette) {
 
   return {
     dim: {
-      opacity: graphPalette.edgeDimOpacity,
+      stroke: graphPalette.edgeDimStroke,
     },
     highlight: focused,
     selected: focused,
@@ -973,7 +972,10 @@ function clearGraphActiveStates(graph: Graph | null) {
 
     stateUpdates[element.id] = graph
       .getElementState(element.id)
-      .filter((state) => state !== "selected" && state !== "dim")
+      .filter(
+        (state) =>
+          state !== "highlight" && state !== "selected" && state !== "dim"
+      )
   }
 
   void graph.setElementState(stateUpdates, false)
@@ -1118,7 +1120,7 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
           degree: 1,
           enable: (event: { targetType?: string }) =>
             event.targetType === "node" || event.targetType === "canvas",
-          neighborState: "selected",
+          neighborState: "highlight",
           onClick: (event: {
             target?: { id?: string }
             targetType?: string
@@ -1325,7 +1327,7 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
           })}
         </div>
 
-        <div className="flex max-w-[min(100%,32rem)] flex-wrap justify-end gap-1.5">
+        <div className="flex max-w-[min(100%,32rem)] min-w-0 flex-nowrap justify-end gap-1.5 overflow-hidden">
           {GRAPH_HUD_EDGE_KIND_ORDER.filter(
             (kind) => graphModel.edgeCounts[kind] > 0
           ).map((kind) => (
