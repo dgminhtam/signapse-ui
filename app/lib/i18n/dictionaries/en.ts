@@ -1589,6 +1589,7 @@ export const en: Dictionary = {
         ray: "Ray",
         segment: "Segment",
         arrow: "Arrow",
+        "free-draw": "Free draw",
         "price-line": "Price line",
         "price-channel-line": "Price channel line",
         "parallel-line": "Parallel line",

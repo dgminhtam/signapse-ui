@@ -73,48 +73,30 @@ export const GRAPH_VIEW_EDGE_VISUALS = {
 >
 
 export function getGraphViewNodeVisuals(dictionary: Dictionary) {
-  return {
-    event: {
-      ...GRAPH_VIEW_NODE_VISUALS.event,
-      label: dictionary.graphView.nodeKinds.event,
-    },
-    asset: {
-      ...GRAPH_VIEW_NODE_VISUALS.asset,
-      label: dictionary.graphView.nodeKinds.asset,
-    },
-    "news-article": {
-      ...GRAPH_VIEW_NODE_VISUALS["news-article"],
-      label: dictionary.graphView.nodeKinds["news-article"],
-    },
-    narrative: {
-      ...GRAPH_VIEW_NODE_VISUALS.narrative,
-      label: dictionary.graphView.nodeKinds.narrative,
-    },
-  } satisfies Record<
+  return Object.fromEntries(
+    Object.entries(GRAPH_VIEW_NODE_VISUALS).map(([kind, visual]) => [
+      kind,
+      {
+        ...visual,
+        label: dictionary.graphView.nodeKinds[kind as GraphViewNodeKind],
+      },
+    ])
+  ) as Record<
     GraphViewNodeKind,
     (typeof GRAPH_VIEW_NODE_VISUALS)[GraphViewNodeKind] & { label: string }
   >
 }
 
 export function getGraphViewEdgeVisuals(dictionary: Dictionary) {
-  return {
-    "event-asset": {
-      ...GRAPH_VIEW_EDGE_VISUALS["event-asset"],
-      label: dictionary.graphView.edgeKinds["event-asset"],
-    },
-    "news-article-event": {
-      ...GRAPH_VIEW_EDGE_VISUALS["news-article-event"],
-      label: dictionary.graphView.edgeKinds["news-article-event"],
-    },
-    "narrative-event": {
-      ...GRAPH_VIEW_EDGE_VISUALS["narrative-event"],
-      label: dictionary.graphView.edgeKinds["narrative-event"],
-    },
-    "narrative-asset": {
-      ...GRAPH_VIEW_EDGE_VISUALS["narrative-asset"],
-      label: dictionary.graphView.edgeKinds["narrative-asset"],
-    },
-  } satisfies Record<
+  return Object.fromEntries(
+    Object.entries(GRAPH_VIEW_EDGE_VISUALS).map(([kind, visual]) => [
+      kind,
+      {
+        ...visual,
+        label: dictionary.graphView.edgeKinds[kind as GraphViewEdgeKind],
+      },
+    ])
+  ) as Record<
     GraphViewEdgeKind,
     (typeof GRAPH_VIEW_EDGE_VISUALS)[GraphViewEdgeKind] & { label: string }
   >

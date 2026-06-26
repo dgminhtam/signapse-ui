@@ -24,7 +24,6 @@ const GraphViewCanvas = dynamic(
   () => import("./graph-view-canvas").then((module) => module.GraphViewCanvas),
   {
     ssr: false,
-    loading: () => <GraphViewCanvasFallback />,
   }
 )
 
@@ -108,39 +107,6 @@ function buildGraphModel(graphView: GraphViewResponse): GraphModel {
     nodeCounts,
     edgeCounts,
   }
-}
-
-function GraphViewCanvasFallback() {
-  return (
-    <div className="relative size-full min-h-[36rem] animate-pulse overflow-hidden">
-      <div className="pointer-events-none absolute inset-x-4 top-4 z-10 flex flex-wrap items-start justify-between gap-3">
-        <div className="h-7 w-44 rounded-md bg-muted" />
-
-        <div className="flex max-w-[min(100%,28rem)] flex-wrap justify-end gap-1.5">
-          <div className="h-7 w-24 rounded-full border border-border/70 bg-background/85 shadow-sm backdrop-blur" />
-          <div className="h-7 w-24 rounded-full border border-border/70 bg-background/85 shadow-sm backdrop-blur" />
-          <div className="h-7 w-24 rounded-full border border-border/70 bg-background/85 shadow-sm backdrop-blur" />
-        </div>
-      </div>
-
-      <div className="pointer-events-none absolute right-4 top-16 z-10 flex flex-col gap-1.5">
-        <div className="size-7 rounded-md border border-border bg-background" />
-        <div className="size-7 rounded-md border border-border bg-background" />
-        <div className="size-7 rounded-md border border-border bg-background" />
-      </div>
-
-      <div className="absolute inset-6 rounded-xl border border-dashed border-border/60 bg-muted/20" />
-
-      <div className="pointer-events-none absolute inset-x-4 bottom-4 z-10 flex flex-wrap items-end justify-between gap-3">
-        <div className="h-7 w-36 rounded-full border border-border/70 bg-background/80 shadow-sm backdrop-blur" />
-        <div className="flex max-w-[min(100%,30rem)] flex-wrap justify-end gap-1.5 opacity-70">
-          <div className="h-6 w-32 rounded-full border border-border/70 bg-background/80 shadow-sm backdrop-blur" />
-          <div className="h-6 w-32 rounded-full border border-border/70 bg-background/80 shadow-sm backdrop-blur" />
-          <div className="h-6 w-32 rounded-full border border-border/70 bg-background/80 shadow-sm backdrop-blur" />
-        </div>
-      </div>
-    </div>
-  )
 }
 
 export function GraphViewWorkbench({

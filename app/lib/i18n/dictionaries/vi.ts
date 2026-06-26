@@ -1576,6 +1576,7 @@ export const vi = {
         ray: "Tia xu hướng",
         segment: "Đoạn thẳng",
         arrow: "Mũi tên",
+        "free-draw": "Vẽ tự do",
         "price-line": "Đường giá",
         "price-channel-line": "Kênh giá",
         "parallel-line": "Đường song song",

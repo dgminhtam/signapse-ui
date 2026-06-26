@@ -54,14 +54,10 @@ import {
 type GraphThemeMode = "light" | "dark"
 
 type GraphCanvasPalette = {
-  edgeHighlightLineWidthBoost: number
-  edgeHighlightOpacity: number
   edgeDimStroke: string
-  labelBackground: boolean
   labelDimFill: string
   labelFill: string
   labelHoverFill: string
-  labelHoverMaxWidth: number
   nodeDimFill: string
 }
 
@@ -77,9 +73,6 @@ const GRAPH_ZOOM_ANIMATION = {
 } satisfies ViewportAnimationEffectTiming
 const GRAPH_ZOOM_STEP_RATIO = 1.18
 const GRAPH_ZOOM_RANGE: [number, number] = [0.45, 2.2]
-const GRAPH_DENSE_NODE_THRESHOLD = 80
-const GRAPH_DENSE_EDGE_THRESHOLD = 140
-const GRAPH_DENSE_HIGH_CONNECTIVITY_EDGE_COUNT = 7
 const GRAPH_INSPECTOR_DATE_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
   year: "numeric",
   month: "2-digit",
@@ -102,49 +95,22 @@ const GRAPH_HUD_EDGE_KIND_ORDER = [
   "narrative-event",
   "narrative-asset",
 ] satisfies GraphViewEdgeKind[]
-const GRAPH_FORCE_LINK_BY_EDGE_KIND = {
-  "event-asset": { distance: 275, strength: 0.08 },
-  "narrative-asset": { distance: 180, strength: 0.32 },
-  "narrative-event": { distance: 110, strength: 0.36 },
-  "news-article-event": { distance: 45, strength: 0.65 },
-} satisfies Record<GraphViewEdgeKind, { distance: number; strength: number }>
-const GRAPH_FORCE_MANY_BODY_STRENGTH_BY_NODE_KIND = {
-  asset: -200,
-  narrative: -70,
-  event: -90,
-  "news-article": -120,
-} satisfies Record<GraphViewNodeKind, number>
-const GRAPH_NODE_HIERARCHY_LEVEL: Record<GraphViewNodeKind, number> = {
-  asset: 0,
-  narrative: 1,
-  event: 2,
-  "news-article": 3,
-}
-
 function createGraphCanvasPalette(mode: GraphThemeMode): GraphCanvasPalette {
   if (mode === "dark") {
     return {
-      edgeHighlightLineWidthBoost: 0.95,
-      edgeHighlightOpacity: 0.84,
       edgeDimStroke: "#64748b",
-      labelBackground: false,
       labelDimFill: "#94a3b8",
       labelFill: "#f8fafc",
       labelHoverFill: "#ffffff",
-      labelHoverMaxWidth: 300,
       nodeDimFill: "#64748b",
     }
   }
 
   return {
-    edgeHighlightLineWidthBoost: 0.8,
-    edgeHighlightOpacity: 0.78,
     edgeDimStroke: "#94a3b8",
-    labelBackground: false,
     labelDimFill: "#64748b",
     labelFill: "#172033",
     labelHoverFill: "#020617",
-    labelHoverMaxWidth: 300,
     nodeDimFill: "#cbd5e1",
   }
 }
@@ -664,74 +630,6 @@ function GraphNodeDetailInspector({
   )
 }
 
-function getGraphNodeFullLabel(node: NodeData) {
-  const data = node.data as { label?: unknown } | undefined
-
-  if (typeof data?.label === "string") {
-    return data.label.trim()
-  }
-
-  if (typeof node.label === "string") {
-    return node.label.trim()
-  }
-
-  return ""
-}
-
-function isDenseGraphModel(graphModel: GraphModel) {
-  return (
-    graphModel.nodes.length >= GRAPH_DENSE_NODE_THRESHOLD ||
-    graphModel.edges.length >= GRAPH_DENSE_EDGE_THRESHOLD
-  )
-}
-
-function isPriorityLabelNode({
-  edgeCount,
-  isDenseGraph,
-  nodeKind,
-}: {
-  edgeCount: number
-  isDenseGraph: boolean
-  nodeKind: NodeData["kind"]
-}) {
-  if (nodeKind === "asset") {
-    return true
-  }
-
-  if (!isDenseGraph) {
-    return (
-      (nodeKind === "narrative" && edgeCount >= 2) ||
-      (nodeKind === "event" && edgeCount >= 4) ||
-      edgeCount >= 6
-    )
-  }
-
-  return (
-    (nodeKind === "narrative" && edgeCount >= 2) ||
-    (nodeKind === "event" && edgeCount >= 4) ||
-    (nodeKind === "news-article" && edgeCount >= 2) ||
-    edgeCount >= GRAPH_DENSE_HIGH_CONNECTIVITY_EDGE_COUNT
-  )
-}
-
-function shouldShowLabel(
-  graphModel: GraphModel,
-  nodeId: string,
-  nodeKind: NodeData["kind"]
-) {
-  const edgeCount = graphModel.relatedEdgesByNodeId.get(nodeId)?.size ?? 0
-
-  if (graphModel.nodes.length <= 24) {
-    return true
-  }
-
-  return isPriorityLabelNode({
-    edgeCount,
-    isDenseGraph: isDenseGraphModel(graphModel),
-    nodeKind,
-  })
-}
-
 function createG6GraphData(
   graphModel: GraphModel,
   graphPalette: GraphCanvasPalette,
@@ -739,41 +637,15 @@ function createG6GraphData(
   edgeVisuals: LocalizedEdgeVisuals,
   dictionary: LocalizationContext["dictionary"]
 ): GraphData {
-  const nodeIdsWithChildren = new Set<string>()
-
-  for (const edge of graphModel.edges) {
-    const sourceNode = graphModel.nodeMap.get(edge.sourceNodeId)
-    const targetNode = graphModel.nodeMap.get(edge.targetNodeId)
-
-    if (!sourceNode || !targetNode) {
-      continue
-    }
-
-    const sourceLevel = GRAPH_NODE_HIERARCHY_LEVEL[sourceNode.kind]
-    const targetLevel = GRAPH_NODE_HIERARCHY_LEVEL[targetNode.kind]
-
-    if (sourceLevel === targetLevel) {
-      continue
-    }
-
-    const parentNode = sourceLevel < targetLevel ? sourceNode : targetNode
-    nodeIdsWithChildren.add(parentNode.id)
-  }
-
   const nodes: NodeData[] = graphModel.nodes.map((node) => {
     const visual = nodeVisuals[node.kind]
     const size = visual.size
-    const isLeaf = !nodeIdsWithChildren.has(node.id)
-    const showLabel = shouldShowLabel(graphModel, node.id, node.kind)
     return {
       id: node.id,
-      isLeaf,
       kind: node.kind,
       label: node.label,
-      nodeRadius: size / 2,
       type: "circle",
       data: {
-        isLeaf,
         kind: node.kind,
         label: node.label,
         metadata: node.metadata ?? null,
@@ -781,7 +653,8 @@ function createG6GraphData(
       },
       style: {
         fill: visual.color,
-        labelBackground: graphPalette.labelBackground,
+        label: node.kind !== "news-article",
+        labelBackground: false,
         labelFill: graphPalette.labelFill,
         labelFontSize: 11,
         labelFontWeight: 600,
@@ -790,7 +663,7 @@ function createG6GraphData(
         labelOffsetX: 9,
         labelPlacement: "right",
         labelPointerEvents: "none",
-        labelText: showLabel ? node.label.trim() : "",
+        labelText: node.label.trim(),
         labelTextOverflow: "ellipsis",
         labelWordWrap: true,
         lineWidth: 0,
@@ -837,68 +710,20 @@ function createG6GraphData(
   }
 }
 
-function getElementNumberValue(
-  datum: { [key: string]: unknown },
-  key: string,
-  fallback: number
-) {
-  const value = datum[key]
-
-  return typeof value === "number" && Number.isFinite(value) ? value : fallback
-}
-
-function getForceOriginalDatum(datum: { [key: string]: unknown }) {
-  const original = datum._original
-
-  return original && typeof original === "object"
-    ? (original as { [key: string]: unknown })
-    : datum
-}
-
-function getGraphForceLink(edge: { [key: string]: unknown }) {
-  const kind = getForceOriginalDatum(edge).kind
-
-  return typeof kind === "string" && kind in GRAPH_FORCE_LINK_BY_EDGE_KIND
-    ? GRAPH_FORCE_LINK_BY_EDGE_KIND[kind as GraphViewEdgeKind]
-    : GRAPH_FORCE_LINK_BY_EDGE_KIND["narrative-event"]
-}
-
-function getGraphForceManyBodyStrength(node: { [key: string]: unknown }) {
-  const kind = getForceOriginalDatum(node).kind
-
-  return typeof kind === "string" &&
-    kind in GRAPH_FORCE_MANY_BODY_STRENGTH_BY_NODE_KIND
-    ? GRAPH_FORCE_MANY_BODY_STRENGTH_BY_NODE_KIND[kind as GraphViewNodeKind]
-    : GRAPH_FORCE_MANY_BODY_STRENGTH_BY_NODE_KIND.event
-}
-
 function clampValue(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max)
 }
 
 function createForceLayout() {
   return {
-    alpha: 0.92,
-    alphaDecay: 0.038,
     collide: {
-      iterations: 1,
-      radius: (node) =>
-        getElementNumberValue(getForceOriginalDatum(node), "nodeRadius", 24),
-      strength: 0.75,
+      radius: 36,
     },
     link: {
-      distance: (edge) => getGraphForceLink(edge).distance,
-      iterations: 1,
-      strength: (edge) => getGraphForceLink(edge).strength,
+      distance: 120,
     },
-    manyBody: {
-      distanceMax: 780,
-      distanceMin: 18,
-      strength: getGraphForceManyBodyStrength,
-      theta: 0.82,
-    },
+    manyBody: { strength: -120 },
     type: "d3-force",
-    velocityDecay: 0.42,
   } satisfies D3ForceLayoutOptions & { type: "d3-force" }
 }
 
@@ -912,48 +737,37 @@ function getContainerSize(container: HTMLDivElement) {
 }
 
 function createNodeStateStyles(graphPalette: GraphCanvasPalette) {
-  const expandedLabel = (node: NodeData) => ({
-    labelBackground: false,
-    labelFill: graphPalette.labelHoverFill,
-    labelFontSize: 12,
-    labelFontWeight: 700,
-    labelMaxLines: 3,
-    labelMaxWidth: graphPalette.labelHoverMaxWidth,
-    labelOpacity: 1,
-    labelText: getGraphNodeFullLabel(node),
-    labelTextOverflow: "ellipsis",
-    labelWordWrap: true,
-  })
-  const focused = (node: NodeData) => ({
-    ...expandedLabel(node),
-    lineWidth: 0,
-    opacity: 1,
-  })
-
   return {
     dim: {
       fill: graphPalette.nodeDimFill,
       labelFill: graphPalette.labelDimFill,
     },
-    highlight: focused,
-    selected: focused,
+    highlight: {
+      halo: true,
+      label: true,
+      labelFill: graphPalette.labelHoverFill,
+      lineWidth: 0,
+    },
+    selected: {
+      halo: true,
+      label: true,
+      labelFill: graphPalette.labelHoverFill,
+      lineWidth: 0,
+    },
   }
 }
 
 function createEdgeStateStyles(graphPalette: GraphCanvasPalette) {
-  const focused = (edge: EdgeData) => ({
-    lineWidth:
-      getElementNumberValue(edge.style ?? {}, "lineWidth", 1.3) +
-      graphPalette.edgeHighlightLineWidthBoost,
-    opacity: graphPalette.edgeHighlightOpacity,
-  })
-
   return {
     dim: {
       stroke: graphPalette.edgeDimStroke,
     },
-    highlight: focused,
-    selected: focused,
+    highlight: {
+      opacity: 1,
+    },
+    selected: {
+      opacity: 1,
+    },
   }
 }
 
@@ -987,7 +801,6 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
   const { resolvedTheme } = useTheme()
   const containerRef = useRef<HTMLDivElement | null>(null)
   const graphRef = useRef<Graph | null>(null)
-  const lastNodeDragAtRef = useRef(0)
   const selectedNodeIdRef = useRef<string | null>(null)
   const [quickDetailEntity, setQuickDetailEntity] =
     useState<LocalQuickDetailEntity | null>(null)
@@ -1137,10 +950,7 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
 
             const nodeId = event.target?.id
 
-            if (
-              !nodeId ||
-              performance.now() - lastNodeDragAtRef.current < 180
-            ) {
+            if (!nodeId) {
               return
             }
 
@@ -1177,29 +987,9 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
 
     graphRef.current = graph
 
-    const handleNodeDragStart = () => {
-      lastNodeDragAtRef.current = performance.now()
-    }
-
-    const handleNodeDragEnd = () => {
-      lastNodeDragAtRef.current = performance.now()
-    }
-
-    graph.on("node:dragstart", handleNodeDragStart as (event: unknown) => void)
-    graph.on("node:dragend", handleNodeDragEnd as (event: unknown) => void)
-
     const renderGraph = async () => {
       try {
         await graph.render()
-
-        if (isDisposed || graph.destroyed) {
-          return
-        }
-
-        await graph.fitView({
-          direction: "both",
-          when: "always",
-        })
       } catch (error) {
         if (isDisposed || graph.destroyed) {
           return
@@ -1238,8 +1028,6 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
     return () => {
       isDisposed = true
       resizeObserver.disconnect()
-      graph.off("node:dragstart", handleNodeDragStart as (event: unknown) => void)
-      graph.off("node:dragend", handleNodeDragEnd as (event: unknown) => void)
 
       if (renderFrameId !== null) {
         window.cancelAnimationFrame(renderFrameId)

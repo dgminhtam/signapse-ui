@@ -25,6 +25,7 @@ export type MarketChartDrawingTool =
   | "ray"
   | "segment"
   | "arrow"
+  | "free-draw"
   | "price-line"
   | "price-channel-line"
   | "parallel-line"
@@ -84,6 +85,7 @@ export const MARKET_CHART_DRAWING_TOOLS: MarketChartDrawingTool[] = [
   "ray",
   "segment",
   "arrow",
+  "free-draw",
   "price-line",
   "price-channel-line",
   "parallel-line",
@@ -129,6 +131,7 @@ export const MARKET_CHART_DRAWING_PALETTE_TOOLS: Record<
     "ray",
     "segment",
     "arrow",
+    "free-draw",
     "price-line",
   ],
   channel: ["price-channel-line", "parallel-line"],
@@ -175,6 +178,7 @@ export const MARKET_CHART_DRAWING_TOOL_OVERLAYS: Record<
   ray: "rayLine",
   segment: "segment",
   arrow: "signapseArrow",
+  "free-draw": "signapseFreeDraw",
   "price-line": "priceLine",
   "price-channel-line": "priceChannelLine",
   "parallel-line": "parallelStraightLine",
@@ -338,6 +342,8 @@ export function createMarketChartDrawingMode(
 let marketChartDrawingOverlaysRegistered = false
 const FIBONACCI_RATIOS = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1]
 const FIBONACCI_EXTENSION_RATIOS = [0, 0.618, 1, 1.618, 2.618]
+// ponytail: fixed practical cap; add dynamic point capture only if users need longer sketches.
+const FREE_DRAW_MAX_POINTS = 50
 const GANN_BOX_DIVISIONS = 8
 
 export function registerMarketChartDrawingOverlays() {
@@ -346,6 +352,7 @@ export function registerMarketChartDrawingOverlays() {
   }
 
   registerOverlay(createArrowOverlayTemplate())
+  registerOverlay(createFreeDrawOverlayTemplate())
   registerOverlay(createCircleOverlayTemplate())
   registerOverlay(createRectangleOverlayTemplate())
   registerOverlay(createParallelogramOverlayTemplate())
@@ -420,6 +427,23 @@ function createArrowOverlayTemplate(): OverlayTemplate<MarketChartDrawingMetadat
         createLineFigure([start, end]),
         createLineFigure([arrowHead.left, end, arrowHead.right]),
       ]
+    },
+  }
+}
+
+function createFreeDrawOverlayTemplate(): OverlayTemplate<MarketChartDrawingMetadata> {
+  return {
+    name: MARKET_CHART_DRAWING_TOOL_OVERLAYS["free-draw"],
+    needDefaultPointFigure: true,
+    needDefaultXAxisFigure: true,
+    needDefaultYAxisFigure: true,
+    totalStep: FREE_DRAW_MAX_POINTS + 1,
+    createPointFigures: ({ coordinates }) => {
+      if (coordinates.length < 2) {
+        return []
+      }
+
+      return createLineFigure(coordinates)
     },
   }
 }
