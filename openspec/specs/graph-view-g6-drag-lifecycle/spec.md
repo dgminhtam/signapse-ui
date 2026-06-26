@@ -16,6 +16,18 @@ The graph view SHALL keep a user-dragged G6 node fixed at its dropped position f
 - **WHEN** the graph canvas remounts or graph data is refetched
 - **THEN** previously dropped node positions SHALL be allowed to reset from the current graph payload and force layout
 
+### Requirement: Node drag does not trigger active selection
+The graph view SHALL keep drag and click interactions distinct while relying on G6 behavior unless verification proves a minimal local guard is still necessary.
+
+#### Scenario: Drag a node without selecting it
+- **WHEN** the user drags a graph node and releases the pointer without a separate click
+- **THEN** the node remains at the dropped position for the current client-side graph session
+- **AND** the active selected node does not change merely because the drag ended
+
+#### Scenario: Click after drag selects normally
+- **WHEN** the user clicks a graph node after the drag gesture has ended
+- **THEN** the clicked node can become the active selected target through the normal click selection behavior
+
 ### Requirement: Graph view avoids expected G6 destroyed-instance lifecycle errors
 The graph view SHALL avoid surfacing expected G6 destroyed-instance console errors caused by React development mount, cleanup, and remount races.
 
@@ -33,4 +45,3 @@ The graph view SHALL avoid surfacing expected G6 destroyed-instance console erro
 - **WHEN** resize observer callbacks run after the graph canvas has begun cleanup
 - **THEN** the frontend SHALL ignore those callbacks
 - **AND** no resize, fit, or viewport operation SHALL run against a destroyed graph instance
-

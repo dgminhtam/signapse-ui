@@ -35,12 +35,11 @@ The graph view SHALL skip selection state writes when there is no selected node 
 - **THEN** the graph view clears selection-specific states from nodes and edges
 
 ### Requirement: Selection state updates are batched
-The graph view SHALL apply selected-node and selected-relation visual states using a batched or behavior-equivalent G6 state update, and selection optimization SHALL NOT disable existing hover, drag, animation, or force-layout behavior.
+The graph view SHALL apply selected-node and selected-relation visual states using G6 selection behavior or a single batched state update, and selection optimization SHALL NOT disable existing hover, drag, animation, force-layout, or quick-detail behavior.
 
 #### Scenario: User selects a node in a dense graph
 - **WHEN** the user selects a node in a graph with many nodes and edges
-- **THEN** the graph view computes the required node and edge states
-- **AND** the graph view submits them to G6 as a single batched or behavior-equivalent state update
+- **THEN** the graph view applies the required selected, related, and dim states through G6 behavior or one batched state update
 
 #### Scenario: Selection optimization preserves graph behavior
 - **WHEN** selection state update logic is optimized
@@ -63,7 +62,7 @@ The graph view SHALL handle asynchronous G6 state update failures without crashi
 - **AND** the page remains mounted
 
 ### Requirement: Active selection uses selected target and gray dim styling
-The graph view SHALL use the G6 `selected` state for the active target node, SHALL use the G6 `highlight` state for first-degree related graph context, and SHALL use a neutral gray `dim` style for unrelated nodes and edges without opacity-based fading.
+The graph view SHALL use the G6 `selected` state for the active target node, SHALL use the G6 `highlight` state for first-degree related graph context, and SHALL use a neutral gray `dim` style for unrelated nodes and edges without opacity-based fading or callback-based selected styling.
 
 #### Scenario: Active selection applies selected state
 - **WHEN** the user clicks a graph node to make it active
@@ -81,3 +80,7 @@ The graph view SHALL use the G6 `selected` state for the active target node, SHA
 - **THEN** dimmed nodes use neutral gray node and label colors
 - **AND** dimmed edges use a neutral gray stroke
 - **AND** the dim style does not rely on lowering node, label, or edge opacity
+
+#### Scenario: Selected state styles stay static
+- **WHEN** Graph View configures selected state styles
+- **THEN** selected state styles do not compute replacement label text, label dimensions, or edge widths from individual graph elements

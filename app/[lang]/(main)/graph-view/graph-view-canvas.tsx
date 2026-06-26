@@ -743,7 +743,7 @@ function createNodeStateStyles(graphPalette: GraphCanvasPalette) {
       labelFill: graphPalette.labelDimFill,
     },
     highlight: {
-      halo: true,
+      halo: false,
       label: true,
       labelFill: graphPalette.labelHoverFill,
       lineWidth: 0,
@@ -951,6 +951,13 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
             const nodeId = event.target?.id
 
             if (!nodeId) {
+              return
+            }
+
+            if (selectedNodeIdRef.current === nodeId) {
+              selectedNodeIdRef.current = null
+              clearGraphActiveStates(graph)
+              setSelectedNodeId(null)
               return
             }
 

@@ -22,20 +22,18 @@ The graph view SHALL render the current backend graph payload through a client-o
 - **THEN** the graph SHALL use the G6 WebGL renderer from `@antv/g-webgl`
 - **AND** existing force layout, drag, hover, selection, zoom, recenter, and quick-detail behavior SHALL remain available
 
-### Requirement: Graph view uses team clustering force layout
-The graph view SHALL group related graph entities into readable force-directed teams based on graph relationships, and performance optimizations SHALL preserve the previous team-clustering motion and settle behavior.
+### Requirement: Graph view uses a minimal G6 force layout
+The graph view SHALL use G6-supported force layout configuration without custom hierarchy anchors, inferred cluster membership, per-kind many-body strength tables, or per-edge-kind link tuning tables.
 
-#### Scenario: Assign cluster anchors
-- **WHEN** the frontend maps graph nodes for the G6 canvas
-- **THEN** asset and theme nodes SHALL be eligible as cluster anchors
-- **AND** event nodes SHALL prefer connected asset or theme anchors when one is available
-- **AND** source-document or news-article nodes SHALL inherit a connected event cluster when one is available
+#### Scenario: Create force layout
+- **WHEN** Graph View creates the G6 graph instance
+- **THEN** the layout uses a force-directed G6 layout with only the small set of parameters needed for readable rendering
+- **AND** the layout does not derive custom cluster anchors, hierarchy levels, or leaf flags from the graph payload
 
-#### Scenario: Render clustered layout
-- **WHEN** the G6 force layout runs
-- **THEN** nodes in the same inferred cluster SHALL be visually closer than unrelated nodes where practical
-- **AND** cross-cluster edges SHALL remain visible without collapsing all clusters into a single pile
-- **AND** performance optimization SHALL NOT remove the visible force-layout settle behavior solely because the graph is dense
+#### Scenario: Relation edges render without custom layout tuning
+- **WHEN** the backend returns asset, narrative, event, and news-article relationships
+- **THEN** all relationships render through the same G6 layout configuration
+- **AND** relationship type does not select custom link distance, link strength, or many-body strength functions
 
 ### Requirement: Graph view supports force-directed drag exploration
 The graph view SHALL allow users to drag graph elements with force behavior so connected nodes react while preserving overall graph readability, and performance optimizations SHALL NOT disable or materially weaken this behavior based on graph size.
@@ -73,16 +71,15 @@ The first G6 canvas implementation SHALL focus on rendering and force exploratio
 - **AND** the graph route SHALL remain buildable and navigable
 
 ### Requirement: Graph view bounds force layout work for dense payloads
-The graph view SHALL keep G6 force layout work bounded so large graph payloads settle into a readable state without continuous nonessential animation.
+The graph view SHALL keep G6 force layout work bounded so large graph payloads settle into a readable state without continuous nonessential animation or custom dense-graph clustering passes.
 
 #### Scenario: Dense graph initial layout settles
 - **WHEN** the graph renders a dense backend payload
-- **THEN** the force layout SHALL run only the bounded work needed to reach a readable clustered arrangement
+- **THEN** the force layout SHALL run only the bounded work needed to reach a readable arrangement
 - **AND** hover or selection SHALL NOT restart the full force layout
 
 #### Scenario: Drag force remains local session behavior
 - **WHEN** the user drags a node after the graph has settled
-- **THEN** connected or clustered nodes MAY react through the force layout
+- **THEN** connected nodes MAY react through the force layout
 - **AND** the updated positions remain local to the current client session
 - **AND** no backend mutation is sent
-
