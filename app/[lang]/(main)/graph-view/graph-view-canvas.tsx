@@ -1106,6 +1106,9 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
           type: "drag-canvas",
         },
         {
+          type: "zoom-canvas",
+        },
+        {
           animation: false,
           degree: 1,
           direction: "both",
