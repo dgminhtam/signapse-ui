@@ -142,7 +142,16 @@ interface MarketChartWorkbenchProps {
   watchlistError: string | null
 }
 
-const LATEST_WINDOW_DAYS = 7
+const INITIAL_WINDOW_DAYS: Record<MarketChartTimeframe, number> = {
+  "1m": 1,
+  "5m": 1,
+  "15m": 2,
+  "30m": 4,
+  "1h": 7,
+  "1d": 150,
+  "1w": 770,
+  "1mo": 3650,
+}
 const MARKET_CHART_DATE_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
   year: "numeric",
   month: "2-digit",
@@ -228,7 +237,7 @@ function createLatestCandleRequest(
 ): MarketChartCandleRequest {
   const to = new Date()
   const from = new Date(to)
-  from.setDate(to.getDate() - LATEST_WINDOW_DAYS)
+  from.setDate(to.getDate() - INITIAL_WINDOW_DAYS[timeframe])
 
   return {
     assetId: asset.assetId,

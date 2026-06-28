@@ -17,15 +17,15 @@ export const TIMEFRAME_INTERVAL_MS: Record<MarketChartTimeframe, number> = {
   "1mo": 30 * DAY_MS,
 }
 
-export const LAZY_HISTORY_BAR_TARGET: Record<MarketChartTimeframe, number> = {
-  "1m": 360,
-  "5m": 288,
-  "15m": 288,
-  "30m": 240,
-  "1h": 240,
-  "1d": 180,
-  "1w": 104,
-  "1mo": 60,
+export const OLDER_WINDOW_DAYS: Record<MarketChartTimeframe, number> = {
+  "1m": 1,
+  "5m": 1,
+  "15m": 1,
+  "30m": 2,
+  "1h": 4,
+  "1d": 75,
+  "1w": 385,
+  "1mo": 1825,
 }
 
 export function createOlderHistoryRequest({
@@ -39,10 +39,10 @@ export function createOlderHistoryRequest({
   oldestTimestamp: number
   timeframe: MarketChartTimeframe
 }): MarketChartCandleRequest | null {
-  const intervalMs = TIMEFRAME_INTERVAL_MS[timeframe]
-  const barTarget = LAZY_HISTORY_BAR_TARGET[timeframe]
-  const toMs = oldestTimestamp - intervalMs
-  const fromMs = toMs - intervalMs * barTarget
+  const toMs = oldestTimestamp - TIMEFRAME_INTERVAL_MS[timeframe]
+  const from = new Date(toMs)
+  from.setDate(from.getDate() - OLDER_WINDOW_DAYS[timeframe])
+  const fromMs = from.getTime()
 
   if (!Number.isFinite(fromMs) || !Number.isFinite(toMs) || fromMs >= toMs) {
     return null

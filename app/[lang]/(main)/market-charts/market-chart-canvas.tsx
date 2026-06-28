@@ -87,8 +87,6 @@ import {
   createOlderHistoryRequest,
   getNewOlderCandles,
   getOldestLoadedTimestamp,
-  LAZY_HISTORY_BAR_TARGET,
-  TIMEFRAME_INTERVAL_MS,
 } from "./market-chart-history-helpers"
 
 export interface MarketChartLoadedData {
