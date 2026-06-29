@@ -30,12 +30,10 @@ export const OLDER_WINDOW_DAYS: Record<MarketChartTimeframe, number> = {
 
 export function createOlderHistoryRequest({
   assetId,
-  includeAnnotations,
   oldestTimestamp,
   timeframe,
 }: {
   assetId: number
-  includeAnnotations: boolean
   oldestTimestamp: number
   timeframe: MarketChartTimeframe
 }): MarketChartCandleRequest | null {
@@ -53,7 +51,6 @@ export function createOlderHistoryRequest({
     timeframe,
     from: new Date(fromMs).toISOString(),
     to: new Date(toMs).toISOString(),
-    includeAnnotations,
   }
 }
 

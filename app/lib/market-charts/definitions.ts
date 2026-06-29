@@ -30,7 +30,12 @@ export interface MarketChartCandleRequest {
   timeframe: MarketChartTimeframe
   from: string
   to: string
-  includeAnnotations?: boolean
+}
+
+export interface MarketChartAnnotationRequest {
+  assetId: number
+  from: string
+  to: string
 }
 
 export interface MarketChartAssetResponse {
@@ -103,7 +108,6 @@ export interface MarketChartCandleResponse {
   from: string
   to: string
   candles: MarketChartCandleItemResponse[]
-  annotations: MarketChartAnnotationResponse[]
 }
 
 export type MarketChartLiveStreamState =
@@ -197,7 +201,6 @@ export function getMarketChartCandleRequestSchema(dictionary: Dictionary) {
         .trim()
         .min(1, dictionary.marketCharts.toRequired)
         .refine(isValidDateTime, dictionary.marketCharts.toInvalid),
-      includeAnnotations: z.boolean().default(true),
     })
     .superRefine((value, context) => {
       const fromTime = Date.parse(value.from)
@@ -211,6 +214,40 @@ export function getMarketChartCandleRequestSchema(dictionary: Dictionary) {
         })
       }
     }) satisfies z.ZodType<MarketChartCandleRequest>
+}
+
+export function getMarketChartAnnotationRequestSchema(dictionary: Dictionary) {
+  return z
+    .object({
+      assetId: z
+        .number({
+          message: dictionary.marketCharts.invalidAsset,
+        })
+        .int(dictionary.marketCharts.invalidAsset)
+        .positive(dictionary.marketCharts.selectWatchlistAsset),
+      from: z
+        .string()
+        .trim()
+        .min(1, dictionary.marketCharts.fromRequired)
+        .refine(isValidDateTime, dictionary.marketCharts.fromInvalid),
+      to: z
+        .string()
+        .trim()
+        .min(1, dictionary.marketCharts.toRequired)
+        .refine(isValidDateTime, dictionary.marketCharts.toInvalid),
+    })
+    .superRefine((value, context) => {
+      const fromTime = Date.parse(value.from)
+      const toTime = Date.parse(value.to)
+
+      if (!Number.isNaN(fromTime) && !Number.isNaN(toTime) && fromTime >= toTime) {
+        context.addIssue({
+          code: "custom",
+          path: ["to"],
+          message: dictionary.marketCharts.toAfterFrom,
+        })
+      }
+    }) satisfies z.ZodType<MarketChartAnnotationRequest>
 }
 
 export const marketChartAssetResponseSchema = z.object({
@@ -276,7 +313,6 @@ export const marketChartCandleResponseSchema = z.object({
   from: z.string(),
   to: z.string(),
   candles: z.array(marketChartCandleItemResponseSchema).default([]),
-  annotations: z.array(marketChartAnnotationResponseSchema).default([]),
 }) satisfies z.ZodType<MarketChartCandleResponse>
 
 export const marketChartLiveStreamStateSchema = z.enum([

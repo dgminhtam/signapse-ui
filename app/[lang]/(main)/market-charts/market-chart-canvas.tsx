@@ -28,7 +28,6 @@ import type {
   MarketChartAnnotationResponse,
   MarketChartCandleItemResponse,
   MarketChartCandleRequest,
-  MarketChartCandleResponse,
   MarketChartTimeframe,
 } from "@/app/lib/market-charts/definitions"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -132,7 +131,7 @@ interface MarketChartCanvasProps {
   symbol?: string
   annotations?: MarketChartAnnotationResponse[]
   annotationGroups?: MarketChartAnnotationGroup[]
-  includeAnnotations: boolean
+  annotationLayerEnabled: boolean
   liveCandle?: MarketChartCandleItemResponse | null
   selectedAnnotationGroupId?: string | null
   showVolumePane: boolean
@@ -147,7 +146,7 @@ interface MarketChartCanvasProps {
   onLoadedDataChange?: (data: MarketChartLoadedData) => void
   onLoadOlderCandles: (
     request: MarketChartCandleRequest
-  ) => Promise<ActionResult<MarketChartCandleResponse>>
+  ) => Promise<ActionResult<MarketChartLoadedData>>
 }
 
 interface MarkerPosition {
@@ -338,13 +337,13 @@ export const MarketChartCanvas = forwardRef<
   {
     annotations = [],
     annotationGroups = [],
+    annotationLayerEnabled,
     assetId,
     activeIndicators = [],
     candles,
     dataVersion = 0,
     className,
     drawingToolActive = false,
-    includeAnnotations,
     liveCandle = null,
     onAnnotationClose,
     onAnnotationSelect,
@@ -373,6 +372,7 @@ export const MarketChartCanvas = forwardRef<
   const chartLoadIdRef = useRef(0)
   const activeDrawingDraftIdRef = useRef<string | null>(null)
   const activeDrawingToolRef = useRef<MarketChartDrawingTool | null>(null)
+  const annotationLayerEnabledRef = useRef(annotationLayerEnabled)
   const annotationsRef = useRef(annotations)
   const annotationGroupsRef = useRef(annotationGroups)
   const candlesRef = useRef(candles)
@@ -412,9 +412,10 @@ export const MarketChartCanvas = forwardRef<
     historyFeedback.loadId === chartLoadId ? historyFeedback.error : null
 
   useEffect(() => {
+    annotationLayerEnabledRef.current = annotationLayerEnabled
     annotationsRef.current = annotations
-    loadedAnnotationsRef.current = includeAnnotations ? annotations : []
-  }, [annotations, includeAnnotations])
+    loadedAnnotationsRef.current = annotationLayerEnabled ? annotations : []
+  }, [annotations, annotationLayerEnabled])
 
   useEffect(() => {
     candlesRef.current = candles
@@ -956,7 +957,7 @@ export const MarketChartCanvas = forwardRef<
     setChartLoadId(loadId)
     historyExhaustedRef.current = false
     clearDrawingSelection()
-    loadedAnnotationsRef.current = includeAnnotations ? annotationsRef.current : []
+    loadedAnnotationsRef.current = annotationLayerEnabledRef.current ? annotationsRef.current : []
     loadedCandlesRef.current = normalizeCandleItems(candlesRef.current)
 
     // Update drawing group ID for new data source
@@ -1008,7 +1009,7 @@ export const MarketChartCanvas = forwardRef<
 
       const oldestTimestamp = timestamp ?? getOldestLoadedTimestamp(loadedCandlesRef.current)
       const request = oldestTimestamp !== null
-        ? createOlderHistoryRequest({ assetId, includeAnnotations, oldestTimestamp, timeframe })
+        ? createOlderHistoryRequest({ assetId, oldestTimestamp, timeframe })
         : null
 
       if (oldestTimestamp === null || !request) {
@@ -1040,7 +1041,7 @@ export const MarketChartCanvas = forwardRef<
 
       loadedCandlesRef.current = mergeCandleItems(loadedCandlesRef.current, olderCandles)
 
-      if (includeAnnotations) {
+      if (annotationLayerEnabledRef.current) {
         loadedAnnotationsRef.current = mergeMarketChartAnnotations(loadedAnnotationsRef.current, result.data.annotations)
       }
 

@@ -24,7 +24,11 @@ import {
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { toast } from "sonner"
 
-import { getMarketChartCandles } from "@/app/api/market-charts/action"
+import {
+  getMarketChartAnnotations,
+  getMarketChartCandles,
+} from "@/app/api/market-charts/action"
+import type { ActionResult } from "@/app/lib/definitions"
 import { useLocalization } from "@/app/lib/i18n/provider"
 import {
   DEFAULT_MARKET_CHART_TIMEFRAME,
@@ -130,6 +134,10 @@ type MarketChartLiveRuntimeState = {
   transportState: MarketChartLiveStreamState | null
 }
 
+type MarketChartDisplayData = MarketChartCandleResponse & {
+  annotations: MarketChartAnnotationResponse[]
+}
+
 const MARKET_CHART_ANNOTATION_LEGEND_DIRECTIONS = [
   "BULLISH",
   "BEARISH",
@@ -232,8 +240,7 @@ function createQueryString(selection: MarketChartSelectionState) {
 
 function createLatestCandleRequest(
   asset: WorkspaceWatchlistAssetListItemResponse,
-  timeframe: MarketChartTimeframe,
-  includeAnnotations = true
+  timeframe: MarketChartTimeframe
 ): MarketChartCandleRequest {
   const to = new Date()
   const from = new Date(to)
@@ -244,7 +251,6 @@ function createLatestCandleRequest(
     timeframe,
     from: from.toISOString(),
     to: to.toISOString(),
-    includeAnnotations,
   }
 }
 
@@ -266,6 +272,16 @@ function getDisplayAssetSymbol(
     data?.symbol ||
     dictionary.marketCharts.format.selectedFallback
   )
+}
+
+function createMarketChartDisplayData(
+  data: MarketChartCandleResponse,
+  annotations: MarketChartAnnotationResponse[] = []
+): MarketChartDisplayData {
+  return {
+    ...data,
+    annotations,
+  }
 }
 
 function formatMarketChartDateTime(
@@ -738,13 +754,14 @@ function ChartSurface({
   onAnnotationSelect,
   onAssetChange,
   onLoadedDataChange,
+  onLoadOlderCandles,
   onRetry,
   onTimeframeChange,
 }: {
   annotationLayerEnabled: boolean
   annotationGroups: MarketChartAnnotationGroup[]
   dataVersion: number
-  data: MarketChartCandleResponse | null
+  data: MarketChartDisplayData | null
   error: string | null
   errors: FormErrors
   freshnessLabel: string | null
@@ -767,6 +784,9 @@ function ChartSurface({
   onAnnotationSelect: (groupId: string) => void
   onAssetChange: (value: string) => void
   onLoadedDataChange: (data: MarketChartLoadedData) => void
+  onLoadOlderCandles: (
+    request: MarketChartCandleRequest
+  ) => Promise<ActionResult<MarketChartLoadedData>>
   onRetry: () => void
   onTimeframeChange: (value: MarketChartTimeframe) => void
 }) {
@@ -1037,7 +1057,7 @@ function ChartSurface({
                   dataVersion={dataVersion}
                   className="h-full min-h-0"
                   drawingToolActive={!!drawingState.activeTool}
-                  includeAnnotations
+                  annotationLayerEnabled={annotationLayerEnabled}
                   liveCandle={liveCandle}
                   showVolumePane={showVolumePane}
                   timeframe={selection.timeframe}
@@ -1061,7 +1081,7 @@ function ChartSurface({
                     }))
                   }
                   onLoadedDataChange={onLoadedDataChange}
-                  onLoadOlderCandles={getMarketChartCandles}
+                  onLoadOlderCandles={onLoadOlderCandles}
                 />
                 {selectedDrawing && !drawingState.activeTool ? (
                   <MarketChartSelectedDrawingToolbar
@@ -1594,9 +1614,9 @@ export function MarketChartWorkbench({
   )
   const [errors, setErrors] = useState<FormErrors>({})
   const [phase, setPhase] = useState<WorkbenchPhase>("idle")
-  const [data, setData] = useState<MarketChartCandleResponse | null>(null)
+  const [data, setData] = useState<MarketChartDisplayData | null>(null)
   const [loadedData, setLoadedData] =
-    useState<MarketChartCandleResponse | null>(null)
+    useState<MarketChartDisplayData | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [liveState, setLiveState] = useState<MarketChartLiveRuntimeState>(
     DEFAULT_MARKET_CHART_LIVE_STATE
@@ -1604,6 +1624,7 @@ export function MarketChartWorkbench({
   const [lastAssetId, setLastAssetId] = useState<string | null>(null)
   const [dataVersion, setDataVersion] = useState(0)
   const [annotationLayerEnabled, setAnnotationLayerEnabled] = useState(true)
+  const annotationLayerEnabledRef = useRef(annotationLayerEnabled)
   const [selectedAnnotationGroupId, setSelectedAnnotationGroupId] = useState<
     string | null
   >(null)
@@ -1642,17 +1663,34 @@ export function MarketChartWorkbench({
     annotationGroups.find((group) => group.id === selectedAnnotationGroupId) ??
     null
 
+  useEffect(() => {
+    annotationLayerEnabledRef.current = annotationLayerEnabled
+  }, [annotationLayerEnabled])
+
+  const loadAnnotations = useCallback(async function loadAnnotations(
+    request: Pick<MarketChartCandleRequest, "assetId" | "from" | "to">
+  ) {
+    const result = await getMarketChartAnnotations({
+      assetId: request.assetId,
+      from: request.from,
+      to: request.to,
+    })
+
+    if (!result.success) {
+      toast.error(result.error)
+      return []
+    }
+
+    return result.data
+  }, [])
+
   const loadCandles = useCallback(
     async function loadCandles(
       asset: WorkspaceWatchlistAssetListItemResponse,
       timeframe: MarketChartTimeframe,
-      includeAnnotations: boolean
+      loadAnnotationData: boolean
     ) {
-      const request = createLatestCandleRequest(
-        asset,
-        timeframe,
-        includeAnnotations
-      )
+      const request = createLatestCandleRequest(asset, timeframe)
 
       setPhase("loading")
       setLoadError(null)
@@ -1671,8 +1709,11 @@ export function MarketChartWorkbench({
         return
       }
 
-      setData(result.data)
-      setLoadedData(result.data)
+      const annotations = loadAnnotationData ? await loadAnnotations(request) : []
+      const nextData = createMarketChartDisplayData(result.data, annotations)
+
+      setData(nextData)
+      setLoadedData(nextData)
       setLiveState({
         ...DEFAULT_MARKET_CHART_LIVE_STATE,
         transportState: "CONNECTING",
@@ -1680,7 +1721,7 @@ export function MarketChartWorkbench({
       setDataVersion((v) => v + 1)
       setPhase("success")
     },
-    []
+    [loadAnnotations]
   )
 
   useEffect(() => {
@@ -1881,13 +1922,12 @@ export function MarketChartWorkbench({
       }
 
       setErrors({})
-      void loadCandles(asset, timeframe, annotationLayerEnabled)
+      void loadCandles(asset, timeframe, annotationLayerEnabledRef.current)
     }, 0)
 
     return () => window.clearTimeout(timeoutId)
   }, [
     dictionary,
-    annotationLayerEnabled,
     hasWatchlistAssets,
     loadCandles,
     pathname,
@@ -1940,6 +1980,20 @@ export function MarketChartWorkbench({
   function handleAnnotationLayerChange(checked: boolean) {
     setAnnotationLayerEnabled(checked)
     setSelectedAnnotationGroupId(null)
+
+    if (checked && chartData && selectedAsset) {
+      void loadAnnotations({
+        assetId: selectedAsset.assetId,
+        from: chartData.from,
+        to: chartData.to,
+      }).then((annotations) => {
+        setLoadedData((current) => {
+          const baseData = current ?? data
+
+          return baseData ? { ...baseData, annotations } : current
+        })
+      })
+    }
   }
 
   function handleAnnotationSelect(groupId: string) {
@@ -1970,6 +2024,29 @@ export function MarketChartWorkbench({
         from: nextData.from ?? baseData.from,
       }
     })
+  }
+
+  async function handleLoadOlderCandles(
+    request: MarketChartCandleRequest
+  ): Promise<ActionResult<MarketChartLoadedData>> {
+    const result = await getMarketChartCandles(request)
+
+    if (!result.success) {
+      return result
+    }
+
+    const annotations = annotationLayerEnabledRef.current
+      ? await loadAnnotations(request)
+      : []
+
+    return {
+      success: true,
+      data: {
+        annotations,
+        candles: result.data.candles,
+        from: result.data.from,
+      },
+    }
   }
 
   function handleRefresh() {
@@ -2021,6 +2098,7 @@ export function MarketChartWorkbench({
         onAnnotationSelect={handleAnnotationSelect}
         onAssetChange={handleAssetChange}
         onLoadedDataChange={handleLoadedDataChange}
+        onLoadOlderCandles={handleLoadOlderCandles}
         onRetry={handleRefresh}
         onTimeframeChange={handleTimeframeChange}
       />
