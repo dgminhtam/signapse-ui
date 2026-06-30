@@ -155,7 +155,7 @@ const INITIAL_WINDOW_DAYS: Record<MarketChartTimeframe, number> = {
   "5m": 1,
   "15m": 2,
   "30m": 4,
-  "1h": 7,
+  "1h": 30,
   "1d": 150,
   "1w": 770,
   "1mo": 3650,

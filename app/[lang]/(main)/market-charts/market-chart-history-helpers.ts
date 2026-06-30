@@ -22,7 +22,7 @@ export const OLDER_WINDOW_DAYS: Record<MarketChartTimeframe, number> = {
   "5m": 1,
   "15m": 1,
   "30m": 2,
-  "1h": 4,
+  "1h": 14,
   "1d": 75,
   "1w": 385,
   "1mo": 1825,
