@@ -9,6 +9,8 @@ import {
   useTransition,
 } from "react"
 import {
+  ArrowDown,
+  ArrowUp,
   CalendarClock,
   Camera,
   ChartCandlestick,
@@ -34,6 +36,7 @@ import {
   DEFAULT_MARKET_CHART_TIMEFRAME,
   MARKET_CHART_TIMEFRAMES,
   type MarketChartAnnotationDirection,
+  type MarketChartAnnotationReactionResponse,
   type MarketChartAnnotationResponse,
   MarketChartCandleRequest,
   MarketChartCandleResponse,
@@ -66,6 +69,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { Toggle } from "@/components/ui/toggle"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import {
@@ -202,6 +206,20 @@ const DEFAULT_MARKET_CHART_LIVE_STATE: MarketChartLiveRuntimeState = {
   status: null,
   transportState: null,
 }
+const MARKET_CHART_ANNOTATION_BADGE_TONE_CLASS_NAMES = {
+  blue: "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
+  green: "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300",
+  purple: "bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300",
+  red: "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300",
+  sky: "bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-300",
+}
+
+const MARKET_CHART_MOVEMENT_CLASS_NAMES = {
+  down: "text-red-600 dark:text-red-400",
+  up: "text-green-600 dark:text-green-400",
+}
+
+type MarketChartMovementDirection = keyof typeof MARKET_CHART_MOVEMENT_CLASS_NAMES
 
 type LocalizationContext = ReturnType<typeof useLocalization>
 
@@ -314,25 +332,22 @@ function getDirectionLabel(
   return dictionary.marketCharts.directions.NEUTRAL
 }
 
-function getDirectionBadgeVariant(
-  direction?: string | null
-): "default" | "destructive" | "secondary" | "outline" {
-  if (direction === "BEARISH") {
-    return "destructive"
+function getPredictionBadgeClassName(direction: string | null | undefined) {
+  switch (direction) {
+    case "BULLISH":
+      return MARKET_CHART_ANNOTATION_BADGE_TONE_CLASS_NAMES.green
+    case "BEARISH":
+      return MARKET_CHART_ANNOTATION_BADGE_TONE_CLASS_NAMES.red
+    case "MIXED":
+      return MARKET_CHART_ANNOTATION_BADGE_TONE_CLASS_NAMES.purple
+    case "NEUTRAL":
+      return MARKET_CHART_ANNOTATION_BADGE_TONE_CLASS_NAMES.sky
+    default:
+      return MARKET_CHART_ANNOTATION_BADGE_TONE_CLASS_NAMES.blue
   }
-
-  if (direction === "BULLISH") {
-    return "default"
-  }
-
-  if (direction === "MIXED") {
-    return "secondary"
-  }
-
-  return "outline"
 }
 
-function formatConfidence(
+function formatOutcomeReturn(
   value: number | null | undefined,
   localization: LocalizationContext
 ) {
@@ -340,18 +355,66 @@ function formatConfidence(
     return null
   }
 
-  const normalizedValue = value <= 1 ? value : value / 100
+  const normalizedValue = Math.abs(value) <= 1 ? value : value / 100
 
   return localization.formatPercent(normalizedValue, {
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 2,
   })
 }
 
-function formatAnnotationTime(
-  group: MarketChartAnnotationGroup,
+function formatOutcomePrice(
+  value: number | null | undefined,
   localization: LocalizationContext
 ) {
-  return formatMarketChartDateTime(group.annotations[0]?.time, localization)
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return null
+  }
+
+  return localization.formatNumber(value, {
+    maximumFractionDigits: 4,
+  })
+}
+
+function formatOptionalMarketChartDateTime(
+  value: string | null | undefined,
+  localization: LocalizationContext
+) {
+  if (!value) {
+    return null
+  }
+
+  const fallback = localization.dictionary.marketCharts.format.notAvailable
+  const formatted = localization.formatDateTime(
+    value,
+    MARKET_CHART_DATE_TIME_OPTIONS,
+    fallback
+  )
+
+  return formatted === fallback ? null : formatted
+}
+
+function formatMarketChartValueRange(
+  start: string | null,
+  end: string | null
+) {
+  return start && end ? `${start} -> ${end}` : start ?? end
+}
+
+function getMarketChartPriceMovementDirection(
+  anchorPrice: number | null | undefined,
+  evaluationPrice: number | null | undefined
+) {
+  if (
+    typeof anchorPrice !== "number" ||
+    typeof evaluationPrice !== "number" ||
+    !Number.isFinite(anchorPrice) ||
+    !Number.isFinite(evaluationPrice) ||
+    anchorPrice === evaluationPrice
+  ) {
+    return null
+  }
+
+  return evaluationPrice > anchorPrice ? "up" : "down"
 }
 
 function getAnnotationEventId(annotation: MarketChartAnnotationResponse) {
@@ -660,6 +723,7 @@ function MarketChartTopToolbar({
                 {dictionary.marketCharts.controls.indicatorLabel}
               </Button>
             </PopoverTrigger>
+
             <PopoverContent align="end">
               <PopoverHeader>
                 <PopoverTitle>
@@ -798,25 +862,27 @@ function ChartSurface({
     const colorClassNames = getMarketChartAnnotationColorClassNames(
       group.direction
     )
+    const eventCountLabel = formatMessage(
+      dictionary.marketCharts.annotations.eventCount,
+      {
+        count: localization.formatNumber(group.annotations.length),
+      }
+    )
 
     return (
-      <div className="overflow-hidden">
-        <div className="flex items-center justify-between gap-3 border-b px-3 py-2.5">
-          <div className="flex items-center gap-2">
+      <>
+        <PopoverHeader className="flex-row items-center justify-between gap-3">
+          <PopoverTitle className="min-w-0">
             <span
-              className={cn("relative flex size-3 rounded-full", colorClassNames.dot)}
+              className={cn(
+                "rounded-full px-2 py-0.5 text-xs font-semibold",
+                colorClassNames.dot,
+                colorClassNames.foreground
+              )}
             >
-              <span
-                className={cn(
-                  "market-chart-annotation-popup-pulse absolute inset-0 rounded-full",
-                  colorClassNames.pulse
-                )}
-              />
+              {eventCountLabel}
             </span>
-            <span className="text-sm font-semibold">
-              {dictionary.marketCharts.annotations.eventLabel}
-            </span>
-          </div>
+          </PopoverTitle>
           <Button
             type="button"
             variant="ghost"
@@ -826,24 +892,12 @@ function ChartSurface({
           >
             <X />
           </Button>
-        </div>
-        <div className="max-h-[min(24rem,calc(100vh-11rem))] overflow-y-auto p-3">
+        </PopoverHeader>
+        <Separator className="my-1" />
+        <ScrollArea className="max-h-[min(24rem,calc(100vh-11rem))] [&>[data-slot=scroll-area-viewport]]:max-h-[min(24rem,calc(100vh-11rem))]">
           <MarketChartAnnotationDetail group={group} onEventOpen={onAnnotationEventOpen} />
-        </div>
-        <style>{`
-          @media (prefers-reduced-motion: no-preference) {
-            .market-chart-annotation-popup-pulse {
-              animation: market-chart-annotation-popup-pulse 1.8s ease-out infinite;
-            }
-          }
-
-          @keyframes market-chart-annotation-popup-pulse {
-            0% { opacity: 0.7; transform: scale(0.7); }
-            70% { opacity: 0; transform: scale(2.4); }
-            100% { opacity: 0; transform: scale(2.4); }
-          }
-        `}</style>
-      </div>
+        </ScrollArea>
+      </>
     )
   }
   const surfaceRef = useRef<HTMLElement | null>(null)
@@ -1192,19 +1246,16 @@ function ChartSurface({
               <div className="flex items-center gap-2">
                 <span
                   className={cn(
-                    "relative flex size-3 rounded-full",
-                    getMarketChartAnnotationColorClassNames(selectedAnnotationGroup.direction).dot
+                    "rounded-full px-2 py-0.5 text-xs font-semibold",
+                    getMarketChartAnnotationColorClassNames(selectedAnnotationGroup.direction).dot,
+                    getMarketChartAnnotationColorClassNames(selectedAnnotationGroup.direction).foreground
                   )}
                 >
-                  <span
-                    className={cn(
-                      "market-chart-annotation-popup-pulse absolute inset-0 rounded-full",
-                      getMarketChartAnnotationColorClassNames(selectedAnnotationGroup.direction).pulse
-                    )}
-                  />
-                </span>
-                <span className="text-sm font-semibold">
-                  {dictionary.marketCharts.annotations.eventLabel}
+                  {formatMessage(dictionary.marketCharts.annotations.eventCount, {
+                    count: localization.formatNumber(
+                      selectedAnnotationGroup.annotations.length
+                    ),
+                  })}
                 </span>
               </div>
               <Button
@@ -1217,9 +1268,9 @@ function ChartSurface({
                 <X />
               </Button>
             </div>
-            <div className="max-h-[min(24rem,calc(100vh-11rem))] overflow-y-auto p-3">
+            <ScrollArea className="h-[min(24rem,calc(100vh-11rem))] p-3">
               <MarketChartAnnotationDetail group={selectedAnnotationGroup} onEventOpen={onAnnotationEventOpen} />
-            </div>
+            </ScrollArea>
           </div>
         </div>
       ) : null}
@@ -1452,47 +1503,21 @@ function MarketChartAnnotationDetail({
   onEventOpen: (eventId: number) => void
 }) {
   const localization = useLocalization()
-  const { dictionary, formatMessage, formatNumber } = localization
-  const firstAnnotation = group.annotations[0]
-  const confidence = formatConfidence(
-    firstAnnotation?.confidence ?? firstAnnotation?.reaction?.confidence,
-    localization
-  )
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <Badge variant={getDirectionBadgeVariant(group.direction)}>
-          {getDirectionLabel(group.direction, dictionary)}
-        </Badge>
-        {confidence ? (
-          <Badge variant="outline">
-            {formatMessage(
-              dictionary.marketCharts.annotations.confidenceBadge,
-              {
-                value: confidence,
-              }
-            )}
-          </Badge>
-        ) : null}
-        <AppTimeMetadata icon={CalendarClock}>
-          {formatAnnotationTime(group, localization)}
-        </AppTimeMetadata>
-        {group.annotations.length > 1 ? (
-          <Badge variant="secondary">
-            {formatMessage(dictionary.marketCharts.annotations.eventCount, {
-              count: formatNumber(group.annotations.length),
-            })}
-          </Badge>
-        ) : null}
-      </div>
-
       <div className="flex flex-col gap-3">
         {group.annotations.map((annotation) => {
           const eventId = getAnnotationEventId(annotation)
+          const eventTime = formatMarketChartDateTime(
+            annotation.time,
+            localization
+          )
+          const reaction = annotation.topMarketReaction
 
           return (
             <article key={annotation.id} className="flex flex-col gap-1.5">
+              <AppTimeMetadata icon={CalendarClock}>{eventTime}</AppTimeMetadata>
               <h3 className="line-clamp-2 text-sm font-semibold text-foreground">
                 {eventId ? (
                   <button
@@ -1511,11 +1536,133 @@ function MarketChartAnnotationDetail({
                   {annotation.summary}
                 </p>
               ) : null}
+              {reaction ? (
+                <MarketChartAnnotationReactionSection
+                  localization={localization}
+                  reaction={reaction}
+                />
+              ) : null}
             </article>
           )
         })}
       </div>
     </div>
+  )
+}
+
+function MarketChartMovementIcon({
+  direction,
+}: {
+  direction: MarketChartMovementDirection | null
+}) {
+  const Icon =
+    direction === "up" ? ArrowUp : direction === "down" ? ArrowDown : null
+
+  return Icon ? <Icon aria-hidden="true" className="size-3" /> : null
+}
+
+function MarketChartAnnotationReactionSection({
+  localization,
+  reaction,
+}: {
+  localization: LocalizationContext
+  reaction: MarketChartAnnotationReactionResponse
+}) {
+  const { dictionary } = localization
+  const labels = dictionary.marketCharts.annotations
+  const outcome = reaction.outcome
+  const predictedDirection = reaction.direction
+    ? getDirectionLabel(reaction.direction, dictionary)
+    : null
+  const predictedDirectionBadgeClassName = getPredictionBadgeClassName(
+    reaction.direction
+  )
+  const realizedReturn = formatOutcomeReturn(outcome?.realizedReturn, localization)
+  const actualDirection = outcome?.actualDirection
+    ? getDirectionLabel(outcome.actualDirection, dictionary)
+    : null
+  const actualDirectionBadgeClassName = getPredictionBadgeClassName(
+    outcome?.actualDirection
+  )
+  const anchorPrice = formatOutcomePrice(outcome?.anchorPrice, localization)
+  const evaluationPrice = formatOutcomePrice(
+    outcome?.evaluationPrice,
+    localization
+  )
+  const hasPriceChange = !!anchorPrice || !!evaluationPrice
+  const priceMovement = getMarketChartPriceMovementDirection(
+    outcome?.anchorPrice,
+    outcome?.evaluationPrice
+  )
+  const anchorTime = formatOptionalMarketChartDateTime(
+    outcome?.anchorTime,
+    localization
+  )
+  const evaluationTime = formatOptionalMarketChartDateTime(
+    outcome?.evaluationTime,
+    localization
+  )
+  const evaluationWindow = formatMarketChartValueRange(
+    anchorTime,
+    evaluationTime
+  )
+
+  if (
+    !predictedDirection &&
+    !actualDirection &&
+    !hasPriceChange &&
+    !evaluationWindow
+  ) {
+    return null
+  }
+
+  return (
+    <section className="mt-1 flex flex-col gap-1.5 rounded-md border bg-muted/20 p-2">
+      <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+        {predictedDirection ? (
+          <span className="inline-flex items-center gap-2">
+            {labels.predictedReactionTitle}
+            <Badge className={predictedDirectionBadgeClassName}>
+              {predictedDirection}
+            </Badge>
+          </span>
+        ) : null}
+        {actualDirection ? (
+          <span className="inline-flex items-center gap-2">
+            {labels.outcomeTitle}
+            <Badge className={actualDirectionBadgeClassName}>
+              {actualDirection}
+            </Badge>
+          </span>
+        ) : null}
+        {hasPriceChange ? (
+          <span>
+            {labels.priceChange}:{" "}
+            {anchorPrice ? (
+              <span className="font-medium text-foreground">{anchorPrice}</span>
+            ) : null}
+            {anchorPrice && evaluationPrice ? " -> " : null}
+            {evaluationPrice ? (
+              <span
+                className={cn(
+                  "inline-flex items-center gap-1 font-medium text-foreground",
+                  priceMovement
+                    ? MARKET_CHART_MOVEMENT_CLASS_NAMES[priceMovement]
+                    : null
+                )}
+              >
+                {evaluationPrice}
+                {realizedReturn ? ` (${realizedReturn})` : null}
+                <MarketChartMovementIcon direction={priceMovement} />
+              </span>
+            ) : null}
+          </span>
+        ) : null}
+        {evaluationWindow ? (
+          <span>{evaluationWindow}</span>
+        ) : null}
+      </div>
+    </section>
   )
 }
 

@@ -76,6 +76,17 @@ export interface MarketChartAnnotationLinksResponse {
   eventDetail?: string | null
 }
 
+export interface MarketChartAnnotationOutcomeResponse {
+  anchorTime?: string | null
+  anchorPrice?: number | null
+  evaluationTime?: string | null
+  evaluationPrice?: number | null
+  realizedReturn?: number | null
+  actualDirection?: MarketChartAnnotationDirection | null
+  alignment?: string | null
+  evaluatedAt?: string | null
+}
+
 export interface MarketChartAnnotationReactionResponse {
   id?: number | null
   direction?: MarketChartAnnotationDirection | null
@@ -83,6 +94,7 @@ export interface MarketChartAnnotationReactionResponse {
   confidence?: number | null
   reasoning?: string | null
   observedAt?: string | null
+  outcome?: MarketChartAnnotationOutcomeResponse | null
 }
 
 export interface MarketChartAnnotationResponse {
@@ -95,7 +107,8 @@ export interface MarketChartAnnotationResponse {
   title: string
   summary?: string | null
   confidence?: number | null
-  reaction?: MarketChartAnnotationReactionResponse | null
+  topMarketReaction?: MarketChartAnnotationReactionResponse | null
+  marketReactions?: MarketChartAnnotationReactionResponse[]
   evidence: MarketChartAnnotationEvidenceResponse[]
   links?: MarketChartAnnotationLinksResponse | null
 }
@@ -281,6 +294,17 @@ export const marketChartAnnotationLinksResponseSchema = z.object({
   eventDetail: z.string().nullable().optional(),
 }) satisfies z.ZodType<MarketChartAnnotationLinksResponse>
 
+export const marketChartAnnotationOutcomeResponseSchema = z.object({
+  anchorTime: z.string().nullable().optional(),
+  anchorPrice: z.number().nullable().optional(),
+  evaluationTime: z.string().nullable().optional(),
+  evaluationPrice: z.number().nullable().optional(),
+  realizedReturn: z.number().nullable().optional(),
+  actualDirection: z.string().nullable().optional(),
+  alignment: z.string().nullable().optional(),
+  evaluatedAt: z.string().nullable().optional(),
+}) satisfies z.ZodType<MarketChartAnnotationOutcomeResponse>
+
 export const marketChartAnnotationReactionResponseSchema = z.object({
   id: z.number().nullable().optional(),
   direction: z.string().nullable().optional(),
@@ -288,6 +312,7 @@ export const marketChartAnnotationReactionResponseSchema = z.object({
   confidence: z.number().nullable().optional(),
   reasoning: z.string().nullable().optional(),
   observedAt: z.string().nullable().optional(),
+  outcome: marketChartAnnotationOutcomeResponseSchema.nullable().optional(),
 }) satisfies z.ZodType<MarketChartAnnotationReactionResponse>
 
 export const marketChartAnnotationResponseSchema = z.object({
@@ -300,7 +325,8 @@ export const marketChartAnnotationResponseSchema = z.object({
   title: z.string(),
   summary: z.string().nullable().optional(),
   confidence: z.number().nullable().optional(),
-  reaction: marketChartAnnotationReactionResponseSchema.nullable().optional(),
+  topMarketReaction: marketChartAnnotationReactionResponseSchema.nullable().optional(),
+  marketReactions: z.array(marketChartAnnotationReactionResponseSchema).default([]),
   evidence: z.array(marketChartAnnotationEvidenceResponseSchema).default([]),
   links: marketChartAnnotationLinksResponseSchema.nullable().optional(),
 }) satisfies z.ZodType<MarketChartAnnotationResponse>

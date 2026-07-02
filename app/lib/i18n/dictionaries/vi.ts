@@ -1638,6 +1638,18 @@ export const vi = {
       eventCount: "{count} sự kiện",
       openMany: "Mở {count} sự kiện tại {time}",
       openOne: "Mở sự kiện {title}",
+      predictedReactionTitle: "Dự đoán",
+      outcomeTitle: "Thực tế",
+      realizedReturn: "Lợi suất",
+      actualDirection: "Thực tế",
+      evaluationPrice: "Giá đánh giá",
+      priceChange: "Giá thay đổi",
+      evaluationTime: "Đánh giá {time}",
+      alignmentLabels: {
+        CONFIRMED: "Xác nhận",
+        INCONCLUSIVE: "Chưa kết luận",
+        CONTRADICTED: "Trái ngược",
+      },
     },
     history: {
       loading: "Đang tải lịch sử...",

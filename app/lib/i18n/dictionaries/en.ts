@@ -1651,6 +1651,18 @@ export const en: Dictionary = {
       eventCount: "{count} events",
       openMany: "Open {count} events at {time}",
       openOne: "Open event {title}",
+      predictedReactionTitle: "Predicted",
+      outcomeTitle: "Actual",
+      realizedReturn: "Return",
+      actualDirection: "Actual",
+      evaluationPrice: "Evaluation price",
+      priceChange: "Price change",
+      evaluationTime: "Evaluation {time}",
+      alignmentLabels: {
+        CONFIRMED: "Confirmed",
+        INCONCLUSIVE: "Inconclusive",
+        CONTRADICTED: "Contradicted",
+      },
     },
     history: {
       loading: "Loading history...",
