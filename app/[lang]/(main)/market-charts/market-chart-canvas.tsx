@@ -123,6 +123,11 @@ export interface MarketChartDrawingSelection {
   style: MarketChartDrawingStyle
 }
 
+export interface MarketChartOutcomeHoverRange {
+  anchorTime: string
+  evaluationTime: string
+}
+
 interface MarketChartCanvasProps {
   assetId: number
   candles: MarketChartCandleItemResponse[]
@@ -134,6 +139,7 @@ interface MarketChartCanvasProps {
   annotationLayerEnabled: boolean
   liveCandle?: MarketChartCandleItemResponse | null
   selectedAnnotationGroupId?: string | null
+  activeOutcomeHoverRange?: MarketChartOutcomeHoverRange | null
   showVolumePane: boolean
   activeIndicators?: MarketChartIndicatorName[]
   className?: string
@@ -153,6 +159,13 @@ interface MarkerPosition {
   group: MarketChartAnnotationGroup
   x: number
   y: number
+}
+
+interface OutcomeHoverBand {
+  height: number
+  left: number
+  top: number
+  width: number
 }
 
 type LazyHistoryState = "idle" | "loading" | "error"
@@ -224,6 +237,81 @@ function isFiniteCoordinate(
     typeof coordinate.y === "number" &&
     Number.isFinite(coordinate.y)
   )
+}
+
+function getFiniteXCoordinate(coordinate: unknown): number | null {
+  if (!coordinate || Array.isArray(coordinate) || typeof coordinate !== "object") {
+    return null
+  }
+
+  const x = (coordinate as { x?: unknown }).x
+
+  return typeof x === "number" && Number.isFinite(x) ? x : null
+}
+
+function getOutcomeHoverBand({
+  chart,
+  container,
+  range,
+}: {
+  chart: Chart
+  container: HTMLElement
+  range: MarketChartOutcomeHoverRange | null
+}): OutcomeHoverBand | null {
+  if (!range) {
+    return null
+  }
+
+  const anchorTimestamp = Date.parse(range.anchorTime)
+  const evaluationTimestamp = Date.parse(range.evaluationTime)
+
+  if (!Number.isFinite(anchorTimestamp) || !Number.isFinite(evaluationTimestamp)) {
+    return null
+  }
+
+  const anchorCoordinate = chart.convertToPixel(
+    { timestamp: anchorTimestamp },
+    { absolute: true, paneId: CANDLE_PANE_ID }
+  )
+  const evaluationCoordinate = chart.convertToPixel(
+    { timestamp: evaluationTimestamp },
+    { absolute: true, paneId: CANDLE_PANE_ID }
+  )
+  const anchorX = getFiniteXCoordinate(anchorCoordinate)
+  const evaluationX = getFiniteXCoordinate(evaluationCoordinate)
+
+  if (anchorX === null || evaluationX === null) {
+    return null
+  }
+
+  const pane = chart.getDom(CANDLE_PANE_ID, "main")
+
+  if (!(pane instanceof HTMLElement)) {
+    return null
+  }
+
+  const paneRect = pane.getBoundingClientRect()
+  const containerRect = container.getBoundingClientRect()
+  const paneLeft = paneRect.left - containerRect.left
+  const paneRight = paneLeft + paneRect.width
+  const left = Math.max(paneLeft, Math.min(anchorX, evaluationX))
+  const right = Math.min(paneRight, Math.max(anchorX, evaluationX))
+
+  if (
+    !Number.isFinite(left) ||
+    !Number.isFinite(right) ||
+    right <= left ||
+    paneRect.height <= 0
+  ) {
+    return null
+  }
+
+  return {
+    height: paneRect.height,
+    left,
+    top: paneRect.top - containerRect.top,
+    width: right - left,
+  }
 }
 
 function hasDrawingPointCoordinate(
@@ -339,6 +427,7 @@ export const MarketChartCanvas = forwardRef<
     annotationGroups = [],
     annotationLayerEnabled,
     assetId,
+    activeOutcomeHoverRange = null,
     activeIndicators = [],
     candles,
     dataVersion = 0,
@@ -375,6 +464,9 @@ export const MarketChartCanvas = forwardRef<
   const annotationLayerEnabledRef = useRef(annotationLayerEnabled)
   const annotationsRef = useRef(annotations)
   const annotationGroupsRef = useRef(annotationGroups)
+  const activeOutcomeHoverRangeRef = useRef<MarketChartOutcomeHoverRange | null>(
+    activeOutcomeHoverRange
+  )
   const candlesRef = useRef(candles)
   const drawingGroupIdRef = useRef(
     createMarketChartDrawingGroupId({ assetId, timeframe })
@@ -403,6 +495,8 @@ export const MarketChartCanvas = forwardRef<
     state: "idle",
   })
   const [markerPositions, setMarkerPositions] = useState<MarkerPosition[]>([])
+  const [outcomeHoverBand, setOutcomeHoverBand] =
+    useState<OutcomeHoverBand | null>(null)
   const { resolvedTheme } = useTheme()
   const chartThemeMode = resolveChartThemeMode(resolvedTheme)
   const chartThemePalette = getMarketChartThemePalette(chartThemeMode)
@@ -434,6 +528,11 @@ export const MarketChartCanvas = forwardRef<
     annotationGroupsRef.current = annotationGroups
     scheduleMarkerPositionUpdateRef.current()
   }, [annotationGroups])
+
+  useEffect(() => {
+    activeOutcomeHoverRangeRef.current = activeOutcomeHoverRange
+    scheduleMarkerPositionUpdateRef.current()
+  }, [activeOutcomeHoverRange])
 
   useEffect(() => {
     liveCandleRef.current = liveCandle
@@ -801,6 +900,13 @@ export const MarketChartCanvas = forwardRef<
       })
 
       setMarkerPositions(nextPositions)
+      setOutcomeHoverBand(
+        getOutcomeHoverBand({
+          chart: currentChart,
+          container: currentContainer,
+          range: activeOutcomeHoverRangeRef.current,
+        })
+      )
 
       if (selectedDrawingIdRef.current) {
         emitDrawingSelection(selectedDrawingIdRef.current)
@@ -840,6 +946,7 @@ export const MarketChartCanvas = forwardRef<
       chartRef.current = null
       onDrawingSelectionChangeRef.current?.(null)
       setMarkerPositions([])
+      setOutcomeHoverBand(null)
       dispose(chart)
     }
   }, [])
@@ -1103,6 +1210,17 @@ export const MarketChartCanvas = forwardRef<
   return (
     <div className={cn("relative h-full min-h-0 w-full", className)}>
       <div ref={containerRef} className="absolute inset-0" />
+      {outcomeHoverBand ? (
+        <div
+          className="pointer-events-none absolute bg-primary/15 ring-1 ring-primary/30"
+          style={{
+            height: outcomeHoverBand.height,
+            left: outcomeHoverBand.left,
+            top: outcomeHoverBand.top,
+            width: outcomeHoverBand.width,
+          }}
+        />
+      ) : null}
       {historyState !== "idle" ? (
         <div
           className={cn(

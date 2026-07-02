@@ -96,6 +96,7 @@ import {
   type MarketChartDrawingSelection,
   type MarketChartIndicatorName,
   type MarketChartLoadedData,
+  type MarketChartOutcomeHoverRange,
 } from "./market-chart-canvas"
 import { MarketChartDrawingToolbar } from "./market-chart-drawing-toolbar"
 import {
@@ -857,6 +858,21 @@ function ChartSurface({
   const localization = useLocalization()
   const { dictionary, formatMessage } = localization
   const chartCanvasRef = useRef<MarketChartCanvasHandle | null>(null)
+  const [activeOutcomeHoverRange, setActiveOutcomeHoverRange] =
+    useState<MarketChartOutcomeHoverRange | null>(null)
+
+  function handleAnnotationClose() {
+    setActiveOutcomeHoverRange(null)
+    onAnnotationClose()
+  }
+
+  function handleOutcomeRangeHover(range: MarketChartOutcomeHoverRange) {
+    setActiveOutcomeHoverRange(range)
+  }
+
+  function handleOutcomeRangeLeave() {
+    setActiveOutcomeHoverRange(null)
+  }
 
   function renderAnnotationPopup(group: MarketChartAnnotationGroup) {
     const colorClassNames = getMarketChartAnnotationColorClassNames(
@@ -887,7 +903,7 @@ function ChartSurface({
             type="button"
             variant="ghost"
             size="icon-sm"
-            onClick={onAnnotationClose}
+            onClick={handleAnnotationClose}
             aria-label={dictionary.marketCharts.annotations.closeEventDetails}
           >
             <X />
@@ -895,7 +911,12 @@ function ChartSurface({
         </PopoverHeader>
         <Separator className="my-1" />
         <ScrollArea className="max-h-[min(24rem,calc(100vh-11rem))] [&>[data-slot=scroll-area-viewport]]:max-h-[min(24rem,calc(100vh-11rem))]">
-          <MarketChartAnnotationDetail group={group} onEventOpen={onAnnotationEventOpen} />
+          <MarketChartAnnotationDetail
+            group={group}
+            onEventOpen={onAnnotationEventOpen}
+            onOutcomeRangeHover={handleOutcomeRangeHover}
+            onOutcomeRangeLeave={handleOutcomeRangeLeave}
+          />
         </ScrollArea>
       </>
     )
@@ -915,6 +936,10 @@ function ChartSurface({
 
   const hasCandles = (data?.candles.length ?? 0) > 0 || !!liveCandle
   const displaySymbol = getDisplayAssetSymbol(data, selectedAsset, dictionary)
+
+  useEffect(() => {
+    setActiveOutcomeHoverRange(null)
+  }, [selectedAnnotationGroup?.id])
 
   useEffect(() => {
     function handleFullscreenChange() {
@@ -1112,6 +1137,7 @@ function ChartSurface({
                   className="h-full min-h-0"
                   drawingToolActive={!!drawingState.activeTool}
                   annotationLayerEnabled={annotationLayerEnabled}
+                  activeOutcomeHoverRange={activeOutcomeHoverRange}
                   liveCandle={liveCandle}
                   showVolumePane={showVolumePane}
                   timeframe={selection.timeframe}
@@ -1120,7 +1146,7 @@ function ChartSurface({
                   renderAnnotationPopup={renderAnnotationPopup}
                   selectedAnnotationGroupId={selectedAnnotationGroup?.id}
                   onAnnotationSelect={onAnnotationSelect}
-                  onAnnotationClose={onAnnotationClose}
+                  onAnnotationClose={handleAnnotationClose}
                   onDrawingSelectionChange={(selection) => {
                     setSelectedDrawing(selection)
                     setDrawingState((current) => ({
@@ -1262,14 +1288,19 @@ function ChartSurface({
                 type="button"
                 variant="ghost"
                 size="icon-sm"
-                onClick={onAnnotationClose}
+                onClick={handleAnnotationClose}
                 aria-label={dictionary.marketCharts.annotations.closeEventDetails}
               >
                 <X />
               </Button>
             </div>
             <ScrollArea className="h-[min(24rem,calc(100vh-11rem))] p-3">
-              <MarketChartAnnotationDetail group={selectedAnnotationGroup} onEventOpen={onAnnotationEventOpen} />
+              <MarketChartAnnotationDetail
+                group={selectedAnnotationGroup}
+                onEventOpen={onAnnotationEventOpen}
+                onOutcomeRangeHover={handleOutcomeRangeHover}
+                onOutcomeRangeLeave={handleOutcomeRangeLeave}
+              />
             </ScrollArea>
           </div>
         </div>
@@ -1498,9 +1529,13 @@ function MarketChartAnnotationLegend({
 function MarketChartAnnotationDetail({
   group,
   onEventOpen,
+  onOutcomeRangeHover,
+  onOutcomeRangeLeave,
 }: {
   group: MarketChartAnnotationGroup
   onEventOpen: (eventId: number) => void
+  onOutcomeRangeHover: (range: MarketChartOutcomeHoverRange) => void
+  onOutcomeRangeLeave: () => void
 }) {
   const localization = useLocalization()
 
@@ -1539,6 +1574,8 @@ function MarketChartAnnotationDetail({
               {reaction ? (
                 <MarketChartAnnotationReactionSection
                   localization={localization}
+                  onOutcomeRangeHover={onOutcomeRangeHover}
+                  onOutcomeRangeLeave={onOutcomeRangeLeave}
                   reaction={reaction}
                 />
               ) : null}
@@ -1563,9 +1600,13 @@ function MarketChartMovementIcon({
 
 function MarketChartAnnotationReactionSection({
   localization,
+  onOutcomeRangeHover,
+  onOutcomeRangeLeave,
   reaction,
 }: {
   localization: LocalizationContext
+  onOutcomeRangeHover: (range: MarketChartOutcomeHoverRange) => void
+  onOutcomeRangeLeave: () => void
   reaction: MarketChartAnnotationReactionResponse
 }) {
   const { dictionary } = localization
@@ -1606,6 +1647,19 @@ function MarketChartAnnotationReactionSection({
     anchorTime,
     evaluationTime
   )
+  const outcomeRange =
+    outcome?.anchorTime && outcome.evaluationTime
+      ? {
+          anchorTime: outcome.anchorTime,
+          evaluationTime: outcome.evaluationTime,
+        }
+      : null
+
+  function handleOutcomeRangeEnter() {
+    if (outcomeRange) {
+      onOutcomeRangeHover(outcomeRange)
+    }
+  }
 
   if (
     !predictedDirection &&
@@ -1617,7 +1671,14 @@ function MarketChartAnnotationReactionSection({
   }
 
   return (
-    <section className="mt-1 flex flex-col gap-1.5 rounded-md border bg-muted/20 p-2">
+    <section
+      className="mt-1 flex flex-col gap-1.5 rounded-md border bg-muted/20 p-2 outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+      tabIndex={outcomeRange ? 0 : undefined}
+      onBlur={onOutcomeRangeLeave}
+      onFocus={handleOutcomeRangeEnter}
+      onMouseEnter={handleOutcomeRangeEnter}
+      onMouseLeave={onOutcomeRangeLeave}
+    >
       <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
         {predictedDirection ? (
           <span className="inline-flex items-center gap-2">
