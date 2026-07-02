@@ -186,7 +186,7 @@ export const MARKET_CHART_DRAWING_TOOL_OVERLAYS: Record<
   rectangle: "signapseRectangle",
   parallelogram: "signapseParallelogram",
   triangle: "signapseTriangle",
-  "fibonacci-line": "fibonacciLine",
+  "fibonacci-line": "signapseFibonacciLine",
   "fibonacci-segment": "signapseFibonacciSegment",
   "fibonacci-circle": "signapseFibonacciCircle",
   "fibonacci-spiral": "signapseFibonacciSpiral",
@@ -251,6 +251,8 @@ export function createMarketChartDrawingOverlay({
     lock: isLocked,
     mode: createMarketChartDrawingMode(isMagnetEnabled),
     name: MARKET_CHART_DRAWING_TOOL_OVERLAYS[tool],
+    needDefaultXAxisFigure: false,
+    needDefaultYAxisFigure: isPriceLevelDrawingTool(tool),
     onDeselected,
     onDrawEnd,
     onRemoved,
@@ -357,6 +359,7 @@ export function registerMarketChartDrawingOverlays() {
   registerOverlay(createRectangleOverlayTemplate())
   registerOverlay(createParallelogramOverlayTemplate())
   registerOverlay(createTriangleOverlayTemplate())
+  registerOverlay(createFibonacciLineOverlayTemplate())
   registerOverlay(createFibonacciSegmentOverlayTemplate())
   registerOverlay(createFibonacciCircleOverlayTemplate())
   registerOverlay(createFibonacciSpiralOverlayTemplate())
@@ -412,8 +415,8 @@ function createArrowOverlayTemplate(): OverlayTemplate<MarketChartDrawingMetadat
   return {
     name: MARKET_CHART_DRAWING_TOOL_OVERLAYS.arrow,
     needDefaultPointFigure: true,
-    needDefaultXAxisFigure: true,
-    needDefaultYAxisFigure: true,
+    needDefaultXAxisFigure: false,
+    needDefaultYAxisFigure: false,
     totalStep: 3,
     createPointFigures: ({ coordinates }) => {
       if (coordinates.length < 2) {
@@ -435,8 +438,8 @@ function createFreeDrawOverlayTemplate(): OverlayTemplate<MarketChartDrawingMeta
   return {
     name: MARKET_CHART_DRAWING_TOOL_OVERLAYS["free-draw"],
     needDefaultPointFigure: true,
-    needDefaultXAxisFigure: true,
-    needDefaultYAxisFigure: true,
+    needDefaultXAxisFigure: false,
+    needDefaultYAxisFigure: false,
     totalStep: FREE_DRAW_MAX_POINTS + 1,
     createPointFigures: ({ coordinates }) => {
       if (coordinates.length < 2) {
@@ -452,8 +455,8 @@ function createCircleOverlayTemplate(): OverlayTemplate<MarketChartDrawingMetada
   return {
     name: MARKET_CHART_DRAWING_TOOL_OVERLAYS.circle,
     needDefaultPointFigure: true,
-    needDefaultXAxisFigure: true,
-    needDefaultYAxisFigure: true,
+    needDefaultXAxisFigure: false,
+    needDefaultYAxisFigure: false,
     totalStep: 3,
     createPointFigures: ({ coordinates }) => {
       if (coordinates.length < 2) {
@@ -479,8 +482,8 @@ function createRectangleOverlayTemplate(): OverlayTemplate<MarketChartDrawingMet
   return {
     name: MARKET_CHART_DRAWING_TOOL_OVERLAYS.rectangle,
     needDefaultPointFigure: true,
-    needDefaultXAxisFigure: true,
-    needDefaultYAxisFigure: true,
+    needDefaultXAxisFigure: false,
+    needDefaultYAxisFigure: false,
     totalStep: 3,
     createPointFigures: ({ coordinates }) => {
       if (coordinates.length < 2) {
@@ -506,8 +509,8 @@ function createParallelogramOverlayTemplate(): OverlayTemplate<MarketChartDrawin
   return {
     name: MARKET_CHART_DRAWING_TOOL_OVERLAYS.parallelogram,
     needDefaultPointFigure: true,
-    needDefaultXAxisFigure: true,
-    needDefaultYAxisFigure: true,
+    needDefaultXAxisFigure: false,
+    needDefaultYAxisFigure: false,
     totalStep: 4,
     createPointFigures: ({ coordinates }) => {
       if (coordinates.length < 2) {
@@ -536,8 +539,8 @@ function createTriangleOverlayTemplate(): OverlayTemplate<MarketChartDrawingMeta
   return {
     name: MARKET_CHART_DRAWING_TOOL_OVERLAYS.triangle,
     needDefaultPointFigure: true,
-    needDefaultXAxisFigure: true,
-    needDefaultYAxisFigure: true,
+    needDefaultXAxisFigure: false,
+    needDefaultYAxisFigure: false,
     totalStep: 4,
     createPointFigures: ({ coordinates }) => {
       if (coordinates.length < 2) {
@@ -556,12 +559,35 @@ function createTriangleOverlayTemplate(): OverlayTemplate<MarketChartDrawingMeta
   }
 }
 
+function createFibonacciLineOverlayTemplate(): OverlayTemplate<MarketChartDrawingMetadata> {
+  return {
+    name: MARKET_CHART_DRAWING_TOOL_OVERLAYS["fibonacci-line"],
+    needDefaultPointFigure: true,
+    needDefaultXAxisFigure: false,
+    needDefaultYAxisFigure: false,
+    totalStep: 3,
+    createPointFigures: ({ bounding, coordinates }) => {
+      if (coordinates.length < 2) {
+        return []
+      }
+
+      return createFibonacciLevelFigures({
+        endX: bounding.width,
+        from: coordinates[0],
+        ratios: FIBONACCI_RATIOS,
+        startX: 0,
+        to: coordinates[1],
+      })
+    },
+  }
+}
+
 function createFibonacciSegmentOverlayTemplate(): OverlayTemplate<MarketChartDrawingMetadata> {
   return {
     name: MARKET_CHART_DRAWING_TOOL_OVERLAYS["fibonacci-segment"],
     needDefaultPointFigure: true,
-    needDefaultXAxisFigure: true,
-    needDefaultYAxisFigure: true,
+    needDefaultXAxisFigure: false,
+    needDefaultYAxisFigure: false,
     totalStep: 3,
     createPointFigures: ({ coordinates }) => {
       if (coordinates.length < 2) {
@@ -585,8 +611,8 @@ function createFibonacciCircleOverlayTemplate(): OverlayTemplate<MarketChartDraw
   return {
     name: MARKET_CHART_DRAWING_TOOL_OVERLAYS["fibonacci-circle"],
     needDefaultPointFigure: true,
-    needDefaultXAxisFigure: true,
-    needDefaultYAxisFigure: true,
+    needDefaultXAxisFigure: false,
+    needDefaultYAxisFigure: false,
     totalStep: 3,
     createPointFigures: ({ coordinates }) => {
       if (coordinates.length < 2) {
@@ -612,8 +638,8 @@ function createFibonacciSpiralOverlayTemplate(): OverlayTemplate<MarketChartDraw
   return {
     name: MARKET_CHART_DRAWING_TOOL_OVERLAYS["fibonacci-spiral"],
     needDefaultPointFigure: true,
-    needDefaultXAxisFigure: true,
-    needDefaultYAxisFigure: true,
+    needDefaultXAxisFigure: false,
+    needDefaultYAxisFigure: false,
     totalStep: 3,
     createPointFigures: ({ coordinates }) => {
       if (coordinates.length < 2) {
@@ -643,8 +669,8 @@ function createFibonacciSectorOverlayTemplate(): OverlayTemplate<MarketChartDraw
   return {
     name: MARKET_CHART_DRAWING_TOOL_OVERLAYS["fibonacci-sector"],
     needDefaultPointFigure: true,
-    needDefaultXAxisFigure: true,
-    needDefaultYAxisFigure: true,
+    needDefaultXAxisFigure: false,
+    needDefaultYAxisFigure: false,
     totalStep: 3,
     createPointFigures: ({ coordinates }) => {
       if (coordinates.length < 2) {
@@ -672,8 +698,8 @@ function createFibonacciExtensionOverlayTemplate(): OverlayTemplate<MarketChartD
   return {
     name: MARKET_CHART_DRAWING_TOOL_OVERLAYS["fibonacci-extension"],
     needDefaultPointFigure: true,
-    needDefaultXAxisFigure: true,
-    needDefaultYAxisFigure: true,
+    needDefaultXAxisFigure: false,
+    needDefaultYAxisFigure: false,
     totalStep: 4,
     createPointFigures: ({ coordinates }) => {
       if (coordinates.length < 2) {
@@ -705,8 +731,8 @@ function createGannBoxOverlayTemplate(): OverlayTemplate<MarketChartDrawingMetad
   return {
     name: MARKET_CHART_DRAWING_TOOL_OVERLAYS["gann-box"],
     needDefaultPointFigure: true,
-    needDefaultXAxisFigure: true,
-    needDefaultYAxisFigure: true,
+    needDefaultXAxisFigure: false,
+    needDefaultYAxisFigure: false,
     totalStep: 3,
     createPointFigures: ({ coordinates }) => {
       if (coordinates.length < 2) {
@@ -771,8 +797,8 @@ function createPolylineOverlayTemplate({
   return {
     name: MARKET_CHART_DRAWING_TOOL_OVERLAYS[tool],
     needDefaultPointFigure: true,
-    needDefaultXAxisFigure: true,
-    needDefaultYAxisFigure: true,
+    needDefaultXAxisFigure: false,
+    needDefaultYAxisFigure: false,
     totalStep: pointCount + 1,
     createPointFigures: ({ coordinates }) => {
       if (coordinates.length < 2) {
@@ -836,6 +862,15 @@ function createLineFigure(coordinates: Coordinate[]) {
       coordinates,
     },
   }
+}
+
+function isPriceLevelDrawingTool(tool: MarketChartDrawingTool) {
+  return (
+    tool === "price-line" ||
+    tool === "horizontal-line" ||
+    tool === "horizontal-ray" ||
+    tool === "horizontal-segment"
+  )
 }
 
 function interpolate(start: number, end: number, ratio: number) {

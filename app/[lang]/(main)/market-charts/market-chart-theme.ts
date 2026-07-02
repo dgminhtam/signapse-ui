@@ -217,6 +217,7 @@ export interface CreateDrawingOverlayStylesResult {
   }
   rect: { borderColor: string; borderSize: number; color: string; style: PolygonType }
   polygon: { style: PolygonType; color: string; borderColor: string; borderSize: number }
+  text: { color: string }
 }
 
 export function createDrawingOverlayStyles(
@@ -269,7 +270,7 @@ export function createDrawingOverlayStyles(
       borderSize: drawingSize,
     },
     text: {
-      color: drawingColor,
+      color: palette.crosshairText,
     },
   }
 }
