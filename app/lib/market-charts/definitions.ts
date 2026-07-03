@@ -304,6 +304,7 @@ export const marketChartAnnotationOutcomeResponseSchema = z.object({
   actualDirection: z.string().nullable().optional(),
   alignment: z.string().nullable().optional(),
   evaluatedAt: z.string().nullable().optional(),
+  summary: z.string().nullable().optional(),
 }) satisfies z.ZodType<MarketChartAnnotationOutcomeResponse>
 
 export const marketChartAnnotationReactionResponseSchema = z.object({
