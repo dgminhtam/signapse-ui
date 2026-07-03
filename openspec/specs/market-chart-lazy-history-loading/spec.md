@@ -18,7 +18,7 @@ The system SHALL load older market chart candles when users navigate toward the 
 #### Scenario: Compute older range from loaded data
 - **WHEN** the system builds an older candle request
 - **THEN** `to` is before the oldest loaded candle time
-- **AND** `from` is computed from `to` using a timeframe-aware lazy history window
+- **AND** `from` is computed from `to` using this older-history lookback mapping: `1m=1 day`, `5m=1 day`, `15m=1 day`, `30m=2 days`, `1h=4 days`, `1d=75 days`, `1w=385 days`, `1mo=1825 days`
 
 #### Scenario: Preserve route state
 - **WHEN** lazy historical loading occurs
@@ -77,11 +77,11 @@ The system SHALL stop requesting older candle windows when no older data remains
 The system SHALL keep annotation markers and controls aligned with lazily loaded candle history when the annotation layer is enabled.
 
 #### Scenario: Request annotations for older windows
-- **WHEN** the system requests older candles for the active chart
-- **THEN** the older candle request uses the same default `includeAnnotations=true` contract as the latest candle request
+- **WHEN** the system successfully requests an older candle window and the annotation layer is enabled
+- **THEN** the system requests annotations from `GET /market-charts/annotations` for the same `assetId`, `from`, and `to` window
 
 #### Scenario: Merge older annotations
-- **WHEN** an older candle response includes `annotations[]`
+- **WHEN** an older annotation response includes annotation items
 - **THEN** the system merges those annotations into the loaded annotation set
 - **AND** duplicate annotations do not render twice
 
@@ -90,9 +90,9 @@ The system SHALL keep annotation markers and controls aligned with lazily loaded
 - **THEN** the system recomputes annotation marker placement against the expanded loaded candle range
 
 #### Scenario: Keep annotation layer disabled
-- **WHEN** the annotation layer is disabled and older candle responses include `annotations[]`
+- **WHEN** the annotation layer is disabled during lazy older-history loading
 - **THEN** the system keeps annotation markers, annotation controls, and annotation empty-state copy hidden
-- **AND** the system does not treat hidden marker visibility as a backend payload opt-out
+- **AND** the system does not fetch older annotations solely for hidden marker visibility
 
 ### Requirement: Lazy loading feedback
 The system SHALL provide non-disruptive feedback for lazy historical loading states.

@@ -1647,6 +1647,7 @@ function MarketChartAnnotationReactionSection({
     anchorTime,
     evaluationTime
   )
+  const outcomeSummary = outcome?.summary?.trim() || null
   const outcomeRange =
     outcome?.anchorTime && outcome.evaluationTime
       ? {
@@ -1665,7 +1666,8 @@ function MarketChartAnnotationReactionSection({
     !predictedDirection &&
     !actualDirection &&
     !hasPriceChange &&
-    !evaluationWindow
+    !evaluationWindow &&
+    !outcomeSummary
   ) {
     return null
   }
@@ -1723,6 +1725,11 @@ function MarketChartAnnotationReactionSection({
           <span>{evaluationWindow}</span>
         ) : null}
       </div>
+      {outcomeSummary ? (
+        <p className="text-xs leading-relaxed text-muted-foreground">
+          {outcomeSummary}
+        </p>
+      ) : null}
     </section>
   )
 }

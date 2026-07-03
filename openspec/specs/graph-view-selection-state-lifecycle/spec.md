@@ -34,6 +34,20 @@ The graph view SHALL skip selection state writes when there is no selected node 
 - **WHEN** the user clears a selected node after selection states were applied
 - **THEN** the graph view clears selection-specific states from nodes and edges
 
+### Requirement: Active mode mirrors hover emphasis
+The graph view SHALL provide an active node mode whose visual treatment matches the hover highlight and dim treatment.
+
+#### Scenario: User activates a node
+- **WHEN** the user clicks a graph node
+- **THEN** the clicked node and its first-degree related nodes and edges receive the active highlight treatment
+- **AND** unrelated nodes and edges receive the same dim treatment used during hover
+- **AND** the selected node detail inspector opens for the clicked node
+
+#### Scenario: User clears active mode
+- **WHEN** the user clicks the canvas outside graph nodes
+- **THEN** active graph states are cleared
+- **AND** the selected node detail inspector closes
+
 ### Requirement: Selection state updates are batched
 The graph view SHALL apply selected-node and selected-relation visual states using G6 selection behavior or a single batched state update, and selection optimization SHALL NOT disable existing hover, drag, animation, force-layout, or quick-detail behavior.
 

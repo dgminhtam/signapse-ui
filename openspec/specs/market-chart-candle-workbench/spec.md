@@ -66,7 +66,7 @@ The system SHALL define market chart frontend types, validation, and authenticat
 - **THEN** it sends flat query parameters `assetId`, `timeframe`, `from`, `to`, and `includeAnnotations` to `GET /market-charts/candles`
 - **AND** `assetId` is the selected watchlist item's numeric asset id
 - **AND** `to` is computed from the current request time
-- **AND** `from` is computed as seven days before `to`
+- **AND** `from` is computed from `to` using this initial lookback mapping: `1m=1 day`, `5m=1 day`, `15m=2 days`, `30m=4 days`, `1h=7 days`, `1d=150 days`, `1w=770 days`, `1mo=3650 days`
 - **AND** `includeAnnotations` defaults to `true` when the caller does not explicitly provide a value
 - **AND** the default candle request does not derive `includeAnnotations=false` solely because annotation markers are hidden in the UI
 

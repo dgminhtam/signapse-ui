@@ -32,6 +32,11 @@ The graph view SHALL display relevant, kind-specific summary details from the ex
 - **AND** the inspector shows a compact relation summary when relation counts are available
 - **AND** the inspector does not show article-only fields, asset-only fields, `slug`, or `canonicalKey`
 
+#### Scenario: Event node theme metadata is shown
+- **WHEN** the selected node kind is `event` and `metadata.themes[]` contains theme items
+- **THEN** the inspector shows the theme titles with localized relation type labels when present
+- **AND** the inspector does not present those themes as selectable graph nodes or relation-count edges
+
 #### Scenario: News article node details are shown
 - **WHEN** the selected node kind is `news-article`
 - **THEN** the inspector shows the article title, node type, news outlet when present, published time when present, source URL action when present, and confidence when present
@@ -47,6 +52,11 @@ The graph view SHALL display relevant, kind-specific summary details from the ex
 - **WHEN** the selected node kind is `narrative`
 - **THEN** the inspector shows the narrative title, thesis when present, narrative status when present, confidence when present, theme metadata when present, and a compact graph relationship summary
 - **AND** the inspector does not show article-only fields, asset-only fields, generic event status, `slug`, or `canonicalKey`
+
+#### Scenario: Narrative node theme metadata is shown
+- **WHEN** the selected node kind is `narrative` and `metadata.themes[]` contains a primary theme item
+- **THEN** the inspector shows the theme title with a localized relation type label when present
+- **AND** the inspector does not provide a theme detail route action
 
 ### Requirement: Inspector provides detail navigation actions
 The graph view SHALL provide direct navigation actions for selected nodes that map to existing detail routes or external URLs.

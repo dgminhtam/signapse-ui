@@ -16,18 +16,19 @@ Graph View SHALL reduce default canvas text work for dense graph payloads while 
 - **THEN** the canvas keeps the existing readable default label policy
 - **AND** hover and selected nodes still reveal their full title in the canvas
 
-### Requirement: Graph interactions update bounded element sets
-Graph View SHALL avoid full-graph state churn for common hover and selection interactions when the affected element set can be determined from the graph model.
+### Requirement: Graph interactions update through built-in behavior paths
+Graph View SHALL avoid additional custom full-graph state loops for common hover and active interactions when G6 built-in behavior can provide the requested highlight and dim semantics.
 
-#### Scenario: Hover updates only affected context
+#### Scenario: Hover uses built-in relation activation
 - **WHEN** the user hovers a node in a dense graph
-- **THEN** the graph updates the hovered node, its directly related nodes, and its directly related edges
-- **AND** unrelated graph elements are not individually restyled unless required to clear a previous focus state
+- **THEN** G6 hover activation applies first-degree highlight and dim states
+- **AND** Graph View does not add a second custom active-state update on top of the G6 hover behavior
 
-#### Scenario: Selection updates only selection diff
-- **WHEN** the user selects a different node after another node was already selected
-- **THEN** the graph clears the previous selected context and applies the new selected context using the smallest practical affected element set
+#### Scenario: Active mode uses built-in selection activation
+- **WHEN** the user activates a node after another node was already active
+- **THEN** G6 behavior-equivalent selection handling updates the active highlight and dim states
 - **AND** the interaction does not rebuild the G6 graph instance
+- **AND** Graph View does not run a separate custom full-graph selected-state loop
 
 ### Requirement: Dense graph visuals avoid broad expensive effects
 Graph View SHALL keep nonessential expensive visual effects lightweight by default on dense payloads.
@@ -41,4 +42,3 @@ Graph View SHALL keep nonessential expensive visual effects lightweight by defau
 - **WHEN** a user selects a supported event or news article node after performance optimizations are active
 - **THEN** the existing local quick-detail action remains available
 - **AND** no backend contract change is required
-

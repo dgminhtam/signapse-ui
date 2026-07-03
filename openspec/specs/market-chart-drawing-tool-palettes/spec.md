@@ -152,3 +152,60 @@ The system SHALL apply selected drawing color and size to line, shape, fibonacci
 - **WHEN** the user changes color or size on a fibonacci or pattern drawing
 - **THEN** the visible line or border figures for that drawing reflect the selected style consistently
 
+### Requirement: Drawing overlay labels minimize chart clutter
+The system SHALL render drawing overlay labels so selected drawings remain readable without duplicating chart axis and crosshair information.
+
+#### Scenario: Fibonacci line labels omit price values
+- **WHEN** the user creates or selects a Fibonacci line drawing
+- **THEN** each configured Fibonacci level remains labeled with its percentage
+- **AND** the label does not include the corresponding price value
+
+#### Scenario: Fibonacci segment and extension labels keep all percentages
+- **WHEN** the user creates or selects a Fibonacci segment or Fibonacci extension drawing
+- **THEN** each configured Fibonacci level remains labeled with its percentage
+- **AND** no configured percentage label is hidden only to reduce clutter
+
+#### Scenario: Selected drawing anchor dates are hidden
+- **WHEN** a drawing overlay is selected
+- **THEN** the system does not render selected-overlay anchor date labels on the X axis
+- **AND** the system does not render a selected-overlay X-axis range fill behind the chart time axis
+
+#### Scenario: Selected drawing anchor prices are limited to price-level tools
+- **WHEN** a non-price-level drawing overlay is selected
+- **THEN** the system does not render selected-overlay anchor price labels on the Y axis
+- **AND** the system does not render a selected-overlay Y-axis range fill across the chart plot
+
+#### Scenario: Price-level drawings keep useful price feedback
+- **WHEN** a price-line or horizontal price-level drawing overlay is selected
+- **THEN** the system may render the selected price value needed to inspect that price level
+- **AND** the chart remains free of selected-overlay anchor date labels
+
+#### Scenario: Drawing text remains legible
+- **WHEN** drawing overlay text is rendered on the market chart
+- **THEN** the text uses a chart-readable text treatment rather than inheriting only the drawing stroke color
+- **AND** the drawing line, border, fill, and point styles continue to reflect the selected drawing style
+
+### Requirement: Line palette includes free draw
+The system SHALL provide a free draw tool in the market chart line drawing palette for multi-segment line sketches.
+
+#### Scenario: Free draw is listed in the line palette
+- **WHEN** the user opens the market chart line drawing palette
+- **THEN** the palette includes a localized free draw tool option
+- **AND** the free draw option uses the same palette menu and accessible naming behavior as other drawing tools
+
+#### Scenario: User creates a free draw overlay
+- **WHEN** the user selects the free draw tool and places multiple chart points
+- **THEN** the chart renders a connected multi-segment line overlay through those points
+- **AND** the overlay uses the same Signapse drawing group, style metadata, lock state, visibility state, magnet mode, selection, delete, and clear-all behavior as other drawing overlays
+
+#### Scenario: User finishes a free draw overlay
+- **WHEN** the user double-clicks while placing a free draw overlay
+- **THEN** the system completes the drawing
+- **AND** the active drawing tool is cleared
+- **AND** the completed overlay remains selectable and restylable like other line-like drawings
+
+#### Scenario: User cancels a free draw draft
+- **WHEN** the user cancels while a free draw overlay is still being placed
+- **THEN** the draft overlay is removed
+- **AND** no drawing tool remains active
+

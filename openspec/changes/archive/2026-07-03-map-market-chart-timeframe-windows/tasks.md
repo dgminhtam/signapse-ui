@@ -8,4 +8,4 @@
 
 - [x] 2.1 Run `pnpm.cmd typecheck`. (`pnpm.cmd` was blocked by ignored build-script approval; `node_modules\.bin\tsc.cmd --noEmit` passed.)
 - [x] 2.2 Run `openspec.cmd validate map-market-chart-timeframe-windows`.
-- [ ] 2.3 Verify with local backend requests that `1w` and `1mo` return candles when using the new mapped windows. (Blocked: `localhost:8484` is not accepting connections.)
+- [x] 2.3 Verify with local backend requests that `1w` and `1mo` return candles when using the new mapped windows. (Manual check completed.)

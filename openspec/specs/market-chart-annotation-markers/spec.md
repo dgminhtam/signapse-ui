@@ -9,16 +9,16 @@ The system SHALL enable market chart annotation markers by default and let users
 #### Scenario: Annotation layer defaults to enabled
 - **WHEN** a user opens the market chart workbench for a selected watchlist asset and timeframe
 - **THEN** the annotation layer is enabled by default
-- **AND** the system requests candle data from `GET /market-charts/candles` with `includeAnnotations=true`
+- **AND** the system requests annotations from `GET /market-charts/annotations` for the loaded candle window
 
 #### Scenario: Enable annotation layer
 - **WHEN** a user enables the annotation layer for a selected watchlist asset and timeframe
-- **THEN** the system requests candle data from `GET /market-charts/candles` with `includeAnnotations=true`
+- **THEN** the system requests annotations from `GET /market-charts/annotations` for the loaded candle window if annotation data is not already available
 
 #### Scenario: Disable annotation layer
 - **WHEN** a user disables the annotation layer
-- **THEN** the system requests or refreshes candle data with `includeAnnotations=false`
-- **AND** the chart does not render annotation markers
+- **THEN** the chart does not render annotation markers
+- **AND** the system does not send `includeAnnotations=false` to the candle endpoint
 
 #### Scenario: Preserve chart identity
 - **WHEN** the annotation layer is toggled
@@ -26,10 +26,15 @@ The system SHALL enable market chart annotation markers by default and let users
 - **AND** the system does not add manual `from`, `to`, or `symbol` controls
 
 ### Requirement: Annotation marker rendering
-The system SHALL render backend `annotations[]` as visual markers on the candlestick chart when the annotation layer is enabled.
+The system SHALL render backend annotation endpoint results as visual markers on the candlestick chart when the annotation layer is enabled.
+
+#### Scenario: Fetch annotation endpoint data
+- **WHEN** the annotation layer is enabled for a loaded candle window
+- **THEN** the system calls `GET /market-charts/annotations` through an authenticated market chart action
+- **AND** it sends flat query parameters `assetId`, `from`, and `to`
 
 #### Scenario: Render returned annotations
-- **WHEN** the backend returns candles and non-empty `annotations[]`
+- **WHEN** the backend returns non-empty annotation endpoint data
 - **THEN** the system renders markers at the annotation times on the candlestick chart
 
 #### Scenario: Direction-specific marker treatment
@@ -73,11 +78,15 @@ The system SHALL let users inspect annotation details outside the chart canvas.
 
 #### Scenario: Show useful annotation fields
 - **WHEN** annotation details are shown
-- **THEN** the system displays available title, time, direction, severity, confidence, summary, reaction context, evidence, and event detail link
+- **THEN** the system displays available title, time, direction, severity, confidence, summary, primary reaction context from `topMarketReaction`, evidence, and event detail link
 
 #### Scenario: Omit unavailable optional fields
 - **WHEN** optional annotation fields are missing or null
 - **THEN** the system omits those fields without rendering placeholder technical copy
+
+#### Scenario: Omit missing primary reaction
+- **WHEN** an annotation has no `topMarketReaction`
+- **THEN** the system does not display reaction-derived confidence or infer a primary reaction from `marketReactions[]`
 
 #### Scenario: Open event detail link
 - **WHEN** an annotation includes `links.eventDetail`
@@ -98,11 +107,11 @@ The system SHALL provide a keyboard-accessible way to review annotations when th
 The system SHALL handle annotation loading and empty states without adding redundant screen copy.
 
 #### Scenario: Annotation layer loading
-- **WHEN** the annotation layer is enabled and the chart request is pending
+- **WHEN** the annotation layer is enabled and the annotation request is pending
 - **THEN** the system shows pending feedback without changing the final chart layout unexpectedly
 
 #### Scenario: No annotations returned
-- **WHEN** the annotation layer is enabled and the backend returns an empty `annotations[]`
+- **WHEN** the annotation layer is enabled and the backend returns an empty annotation collection
 - **THEN** the system shows a concise empty annotation state
 - **AND** the system does not render fake markers or future-feature placeholder panels
 

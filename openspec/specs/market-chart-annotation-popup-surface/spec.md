@@ -30,7 +30,7 @@ The system SHALL position the desktop annotation popup near the selected marker 
 - **THEN** the popup caps its height and scrolls internally instead of overflowing the chart workspace
 
 ### Requirement: Annotation popup content is a concise preview
-The system SHALL present annotation popup content as a concise event preview rather than a rich evidence/detail reader.
+The system SHALL present annotation popup content as a concise event preview rather than a rich evidence/detail reader, with a compact evaluated outcome summary when the primary reaction outcome is available.
 
 #### Scenario: Popup metadata row
 - **WHEN** an annotation popup opens
@@ -42,11 +42,21 @@ The system SHALL present annotation popup content as a concise event preview rat
 
 #### Scenario: Event body is simplified
 - **WHEN** an annotation popup displays event content
-- **THEN** each event shows only title and summary when available
+- **THEN** each event shows title and summary when available
+
+#### Scenario: Outcome section appears below summary
+- **WHEN** an annotation has `topMarketReaction.outcome`
+- **THEN** the popup renders a compact outcome section below that annotation summary
+- **AND** the section prioritizes realized return, alignment, actual direction, and evaluation price or time when those fields are available
+
+#### Scenario: Outcome section is omitted when unavailable
+- **WHEN** an annotation has no `topMarketReaction` or its `outcome` is null
+- **THEN** the popup does not render an outcome section or placeholder outcome copy for that annotation
 
 #### Scenario: Rich detail content is omitted
-- **WHEN** an annotation includes reaction reasoning, evidence items, or event detail links
+- **WHEN** an annotation includes reaction reasoning, evidence items, event detail links, or non-primary `marketReactions[]`
 - **THEN** the popup does not render those rich detail blocks in this quick preview surface
+- **AND** the compact primary outcome section remains allowed when `topMarketReaction.outcome` is present
 
 ### Requirement: Existing annotation access paths remain intact
 The system SHALL preserve existing annotation opening and fallback behavior while simplifying the popup.
@@ -90,4 +100,38 @@ The system SHALL keep the annotation popup frame visually intact while allowing 
 #### Scenario: Popup header remains usable
 - **WHEN** the popup body scrolls
 - **THEN** the popup title and close action remain visible and usable
+
+### Requirement: Annotation outcome summary is shown in reaction preview
+The system SHALL display a backend-provided annotation outcome summary inside the market chart annotation popup reaction preview.
+
+#### Scenario: Outcome summary is available
+- **WHEN** an annotation reaction outcome includes a non-empty `summary`
+- **THEN** the popup shows that summary inside the existing reaction block after the reaction metrics
+- **AND** the summary remains visually secondary to the event title and event summary
+
+#### Scenario: Outcome summary is missing
+- **WHEN** an annotation reaction outcome has no `summary` or only whitespace
+- **THEN** the popup omits the outcome summary text without rendering an empty placeholder
+
+#### Scenario: Summary is the only reaction display field
+- **WHEN** an annotation reaction outcome has a non-empty `summary` but no displayable direction, price change, or evaluation time range
+- **THEN** the popup still renders the reaction block with the summary
+
+### Requirement: Annotation popup uses shadcn-composed shell
+The system SHALL render the desktop market chart annotation popup shell through shadcn Popover composition while preserving existing annotation behavior.
+
+#### Scenario: Popup header uses Popover composition
+- **WHEN** the user opens an annotation marker popup
+- **THEN** the popup shared header content is rendered through `PopoverHeader`
+- **AND** the popup title/count content is rendered through `PopoverTitle`
+- **AND** the close action remains available in the header
+
+#### Scenario: Popup content uses ScrollArea
+- **WHEN** the selected annotation group contains enough event content to exceed the popup content height
+- **THEN** the popup body scrolls through shadcn `ScrollArea`
+- **AND** the header and close action remain visible while the body scrolls
+
+#### Scenario: Annotation logic is preserved
+- **WHEN** the popup composition is standardized
+- **THEN** annotation grouping, group color, event count, event opening, close behavior, mobile fallback, and outcome rendering continue to behave as before
 

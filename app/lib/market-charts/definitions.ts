@@ -85,6 +85,7 @@ export interface MarketChartAnnotationOutcomeResponse {
   actualDirection?: MarketChartAnnotationDirection | null
   alignment?: string | null
   evaluatedAt?: string | null
+  summary?: string | null
 }
 
 export interface MarketChartAnnotationReactionResponse {

@@ -101,25 +101,27 @@ The system SHALL show live stream health as compact chart workspace metadata.
 - **THEN** the market chart workspace shows a concise non-blocking error state
 - **AND** the user can continue viewing historical candles, annotations, indicators, and drawings
 
-### Requirement: Quote-derived live partial candle rendering
-The system SHALL derive a display-only live partial candle from live quote events when candle events are unavailable for the active timeframe.
+### Requirement: Quote-only latest candle close rendering
+The system SHALL update only the displayed close value of the latest REST-loaded candle from live quote events for the active timeframe.
 
-#### Scenario: Quote updates current candle bucket
+#### Scenario: Quote updates latest REST candle close
 - **WHEN** a live quote belongs to the same timeframe bucket as the latest displayed candle
-- **THEN** the system derives a live partial candle that preserves the bucket open value
-- **AND** updates close to the quote price
-- **AND** expands high or low when the quote price exceeds the current bucket range
+- **THEN** the system displays that candle with close updated to the quote price
+- **AND** preserves the candle open, high, low, time, and volume from REST data
 
-#### Scenario: Quote creates newer candle bucket
+#### Scenario: Quote does not expand candle range
+- **WHEN** a live quote price is above the latest REST candle high or below the latest REST candle low
+- **THEN** the system updates only the displayed close value
+- **AND** does not change the displayed high or low value
+
+#### Scenario: Quote newer than latest REST candle bucket
 - **WHEN** a live quote belongs to a timeframe bucket after the latest displayed candle
-- **THEN** the system derives a new live partial candle at the quote bucket time
-- **AND** sets open, high, low, and close to the quote price
-- **AND** leaves volume unavailable unless the quote provides finite volume
+- **THEN** the system ignores the quote for candle rendering until REST refresh supplies the newer candle bucket
 
-#### Scenario: Quote is older than displayed latest bucket
+#### Scenario: Quote older than latest REST candle bucket
 - **WHEN** a live quote belongs to a timeframe bucket before the latest displayed candle
-- **THEN** the system does not regress the displayed latest candle
+- **THEN** the system does not regress the displayed latest candle close
 
-#### Scenario: Real candle event supersedes derived candle
-- **WHEN** a live `candle` event arrives for the same bucket as a quote-derived live candle
-- **THEN** the system displays the live candle event values instead of the quote-derived values
+#### Scenario: SSE candle payload ignored for rendering
+- **WHEN** a live `candle` event or `snapshot.candle` payload arrives
+- **THEN** the system does not use that payload to create, replace, or update rendered chart candles
