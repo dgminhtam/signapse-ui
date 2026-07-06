@@ -96,6 +96,13 @@ function isValidMarketChartCandle(
   )
 }
 
+function isWarmMarketChartAnnotation(annotation: MarketChartAnnotationResponse) {
+  return (
+    annotation.annotationType === "WARM_EVENT" ||
+    annotation.annotationType === "WARM_EPISODE"
+  )
+}
+
 export function mergeMarketChartAnnotations(
   current: MarketChartAnnotationResponse[],
   incoming: MarketChartAnnotationResponse[]
@@ -207,7 +214,9 @@ export function createMarketChartAnnotationGroups(
   candles: MarketChartCandleItemResponse[]
 ): MarketChartAnnotationGroup[] {
   const validCandles = candles.filter(isValidMarketChartCandle)
-  const validAnnotations = annotations.filter(isValidMarketChartAnnotation)
+  const validAnnotations = annotations
+    .filter(isValidMarketChartAnnotation)
+    .filter((annotation) => !isWarmMarketChartAnnotation(annotation))
   const candleTimes = validCandles
     .map((candle) => toMarketChartEpochMillis(candle.time))
     .filter((time): time is MarketChartEpochMillis => time !== null)
@@ -261,5 +270,53 @@ export function createMarketChartAnnotationGroups(
             ? "high"
             : "normal",
       }
+    })
+}
+
+export function createMarketChartWarmAnnotationGroups(
+  annotations: MarketChartAnnotationResponse[],
+  candles: MarketChartCandleItemResponse[]
+): MarketChartAnnotationGroup[] {
+  const candleTimes = candles
+    .filter(isValidMarketChartCandle)
+    .map((candle) => toMarketChartEpochMillis(candle.time))
+    .filter((time): time is MarketChartEpochMillis => time !== null)
+    .sort((left, right) => Number(left) - Number(right))
+
+  if (!candleTimes.length) {
+    return []
+  }
+
+  const firstTime = Number(candleTimes[0])
+  const lastTime = Number(candleTimes[candleTimes.length - 1])
+
+  return annotations
+    .filter(isValidMarketChartAnnotation)
+    .filter(isWarmMarketChartAnnotation)
+    .flatMap((annotation) => {
+      const periodStart = toMarketChartEpochMillis(annotation.periodStart)
+      const periodEnd = toMarketChartEpochMillis(annotation.periodEnd)
+
+      if (periodStart === null || periodEnd === null) {
+        return []
+      }
+
+      const start = Math.min(Number(periodStart), Number(periodEnd))
+      const end = Math.max(Number(periodStart), Number(periodEnd))
+
+      if (end < firstTime || start > lastTime) {
+        return []
+      }
+
+      return [
+        {
+          id: `annotation-warm-${annotation.id}`,
+          time: periodStart,
+          anchorPrice: 0,
+          direction: annotation.direction ?? null,
+          annotations: [annotation],
+          priority: hasHighPriorityAnnotation([annotation]) ? "high" : "normal",
+        },
+      ]
     })
 }

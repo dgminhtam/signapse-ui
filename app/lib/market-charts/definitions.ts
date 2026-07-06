@@ -61,6 +61,12 @@ export type MarketChartAnnotationDirection =
   | "NEUTRAL"
   | string
 
+export type MarketChartAnnotationType =
+  | "HOT_EVENT"
+  | "WARM_EPISODE"
+  | "WARM_EVENT"
+  | string
+
 export interface MarketChartAnnotationEvidenceResponse {
   newsArticleId?: number | null
   title?: string | null
@@ -100,14 +106,20 @@ export interface MarketChartAnnotationReactionResponse {
 
 export interface MarketChartAnnotationResponse {
   id: string
+  annotationType?: MarketChartAnnotationType | null
   eventId?: number | null
+  warmEpisodeId?: number | null
+  warmEpisodeEventId?: number | null
   assetId?: number | null
   time: string
+  periodStart?: string | null
+  periodEnd?: string | null
   severity?: string | null
   direction?: MarketChartAnnotationDirection | null
-  title: string
+  title?: string | null
   summary?: string | null
   confidence?: number | null
+  outcome?: MarketChartAnnotationOutcomeResponse | null
   topMarketReaction?: MarketChartAnnotationReactionResponse | null
   marketReactions?: MarketChartAnnotationReactionResponse[]
   evidence: MarketChartAnnotationEvidenceResponse[]
@@ -319,14 +331,20 @@ export const marketChartAnnotationReactionResponseSchema = z.object({
 
 export const marketChartAnnotationResponseSchema = z.object({
   id: z.string(),
+  annotationType: z.string().nullable().optional(),
   eventId: z.number().nullable().optional(),
+  warmEpisodeId: z.number().nullable().optional(),
+  warmEpisodeEventId: z.number().nullable().optional(),
   assetId: z.number().nullable().optional(),
   time: z.string(),
+  periodStart: z.string().nullable().optional(),
+  periodEnd: z.string().nullable().optional(),
   severity: z.string().nullable().optional(),
   direction: z.string().nullable().optional(),
-  title: z.string(),
+  title: z.string().nullable().optional(),
   summary: z.string().nullable().optional(),
   confidence: z.number().nullable().optional(),
+  outcome: marketChartAnnotationOutcomeResponseSchema.nullable().optional(),
   topMarketReaction: marketChartAnnotationReactionResponseSchema.nullable().optional(),
   marketReactions: z.array(marketChartAnnotationReactionResponseSchema).default([]),
   evidence: z.array(marketChartAnnotationEvidenceResponseSchema).default([]),

@@ -83,6 +83,7 @@ import { cn } from "@/lib/utils"
 
 import {
   createMarketChartAnnotationGroups,
+  createMarketChartWarmAnnotationGroups,
   getMarketChartAnnotationColorClassNames,
   type MarketChartAnnotationGroup,
 } from "./market-chart-annotations"
@@ -795,6 +796,7 @@ function MarketChartTopToolbar({
 function ChartSurface({
   annotationLayerEnabled,
   annotationGroups,
+  warmAnnotationGroups,
   data,
   error,
   errors,
@@ -825,6 +827,7 @@ function ChartSurface({
 }: {
   annotationLayerEnabled: boolean
   annotationGroups: MarketChartAnnotationGroup[]
+  warmAnnotationGroups: MarketChartAnnotationGroup[]
   dataVersion: number
   data: MarketChartDisplayData | null
   error: string | null
@@ -1143,6 +1146,7 @@ function ChartSurface({
                   timeframe={selection.timeframe}
                   symbol={displaySymbol}
                   annotationGroups={annotationGroups}
+                  warmAnnotationGroups={warmAnnotationGroups}
                   renderAnnotationPopup={renderAnnotationPopup}
                   selectedAnnotationGroupId={selectedAnnotationGroup?.id}
                   onAnnotationSelect={onAnnotationSelect}
@@ -1548,24 +1552,29 @@ function MarketChartAnnotationDetail({
             annotation.time,
             localization
           )
-          const reaction = annotation.topMarketReaction
+          const title = annotation.title || annotation.summary || ""
+          const reaction =
+            annotation.topMarketReaction ??
+            (annotation.outcome ? { outcome: annotation.outcome } : null)
 
           return (
             <article key={annotation.id} className="flex flex-col gap-1.5">
               <AppTimeMetadata icon={CalendarClock}>{eventTime}</AppTimeMetadata>
-              <h3 className="line-clamp-2 text-sm font-semibold text-foreground">
-                {eventId ? (
+              {title ? (
+                <h3 className="line-clamp-2 text-sm font-semibold text-foreground">
+                  {eventId ? (
                   <button
                     type="button"
                     className="text-left rounded-sm underline-offset-4 transition-colors outline-none hover:text-primary hover:underline focus-visible:ring-2 focus-visible:ring-ring/50"
                     onClick={() => onEventOpen(eventId)}
                   >
-                    {annotation.title}
+                    {title}
                   </button>
-                ) : (
-                  annotation.title
-                )}
-              </h3>
+                  ) : (
+                    title
+                  )}
+                </h3>
+              ) : null}
               {annotation.summary ? (
                 <p className="line-clamp-4 text-sm text-muted-foreground">
                   {annotation.summary}
@@ -1874,8 +1883,20 @@ export function MarketChartWorkbench({
       chartData.candles
     )
   }, [annotationLayerEnabled, chartData])
+  const warmAnnotationGroups = useMemo(() => {
+    if (!annotationLayerEnabled || !chartData) {
+      return []
+    }
+
+    return createMarketChartWarmAnnotationGroups(
+      chartData.annotations,
+      chartData.candles
+    )
+  }, [annotationLayerEnabled, chartData])
   const selectedAnnotationGroup =
-    annotationGroups.find((group) => group.id === selectedAnnotationGroupId) ??
+    [...annotationGroups, ...warmAnnotationGroups].find(
+      (group) => group.id === selectedAnnotationGroupId
+    ) ??
     null
 
   useEffect(() => {
@@ -2289,6 +2310,7 @@ export function MarketChartWorkbench({
       <ChartSurface
         annotationLayerEnabled={annotationLayerEnabled}
         annotationGroups={annotationGroups}
+        warmAnnotationGroups={warmAnnotationGroups}
         dataVersion={dataVersion}
         data={chartData}
         error={loadError}
