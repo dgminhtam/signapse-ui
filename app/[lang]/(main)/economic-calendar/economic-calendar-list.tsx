@@ -128,7 +128,7 @@ function updateDateQuery(
   return params
 }
 
-function formatCurrency(value: string | undefined, fallback: string) {
+function formatCurrency(value: string | null | undefined, fallback: string) {
   return value?.trim().toUpperCase() || fallback
 }
 

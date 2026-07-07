@@ -44,7 +44,7 @@ interface PageProps {
 type ApiLikeError = Error & { status?: number }
 
 function formatDateTime(
-  value: string | undefined,
+  value: string | null | undefined,
   locale: AppLocale,
   dictionary: Dictionary
 ) {
@@ -66,7 +66,7 @@ function formatDateTime(
   )
 }
 
-function formatCurrency(value: string | undefined, fallback: string) {
+function formatCurrency(value: string | null | undefined, fallback: string) {
   return value?.trim().toUpperCase() || fallback
 }
 
@@ -190,6 +190,7 @@ async function FetchEconomicCalendarEntryData({
   }
 
   const hasContent = Boolean(entry.contentAvailable && entry.content?.trim())
+  const description = entry.description?.trim()
 
   return (
     <div className="flex flex-col gap-6">
@@ -226,21 +227,25 @@ async function FetchEconomicCalendarEntryData({
               )}
             </h1>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1 text-sm text-muted-foreground">
-              <span className="inline-flex items-center gap-1.5">
-                <Landmark className="h-4 w-4" />
+              <AppTimeMetadata icon={Landmark} className="text-sm">
                 {formatMessage(dictionary.economicCalendar.currency, {
                   value: formatCurrency(
                     entry.currencyCode,
                     dictionary.common.notAvailable
                   ),
                 })}
-              </span>
-              <AppTimeMetadata icon={CalendarClock}>
+              </AppTimeMetadata>
+              <AppTimeMetadata icon={CalendarClock} className="text-sm">
                 {formatMessage(dictionary.economicCalendar.publishedAt, {
                   time: formatDateTime(entry.scheduledAt, locale, dictionary),
                 })}
               </AppTimeMetadata>
             </div>
+            {description ? (
+              <p className="max-w-4xl pt-1 text-sm leading-6 text-muted-foreground">
+                {description}
+              </p>
+            ) : null}
           </div>
         </div>
       </div>

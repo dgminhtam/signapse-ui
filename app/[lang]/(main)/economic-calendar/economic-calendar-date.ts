@@ -74,7 +74,7 @@ export function getUtc7DateKey(date = new Date()) {
   return formatYmdFromUtcDate(new Date(date.getTime() + UTC7_OFFSET_MS))
 }
 
-export function getUtc7DateKeyFromTimestamp(value: string | undefined) {
+export function getUtc7DateKeyFromTimestamp(value: string | null | undefined) {
   if (!value) {
     return null
   }
@@ -136,7 +136,7 @@ export function formatUtc7TimeLabel(date: Date) {
   return `${pad2(shifted.getUTCHours())}:${pad2(shifted.getUTCMinutes())}`
 }
 
-export function getUtc7TimeKeyFromTimestamp(value: string | undefined) {
+export function getUtc7TimeKeyFromTimestamp(value: string | null | undefined) {
   if (!value) {
     return null
   }

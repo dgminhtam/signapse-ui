@@ -1,25 +1,31 @@
 import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
 
-export type EconomicCalendarStatus = "PENDING" | "AVAILABLE" | string
+export type EconomicCalendarStatus = "PENDING" | "AVAILABLE"
 
 export interface EconomicCalendarListResponse {
   id: number
-  title: string
-  currencyCode?: string
-  impact?: string
-  forecastValue?: string
-  previousValue?: string
-  actualValue?: string
-  contentAvailable?: boolean
-  status?: EconomicCalendarStatus
-  scheduledAt?: string
-  syncedAt?: string
-  createdDate?: string
-  lastModifiedDate?: string
+  title: string | null
+  currencyCode: string | null
+  type: string | null
+  impact: string | null
+  forecastValue: string | null
+  previousValue: string | null
+  actualValue: string | null
+  description: string | null
+  revision: string | null
+  newsUrl: string | null
+  actualBetterWorse: string | null
+  revisionBetterWorse: string | null
+  contentAvailable: boolean
+  status: EconomicCalendarStatus
+  scheduledAt: string | null
+  syncedAt: string | null
+  createdDate: string
+  lastModifiedDate: string | null
 }
 
 export interface EconomicCalendarResponse extends EconomicCalendarListResponse {
-  content?: string
+  content: string | null
 }
 
 export interface EconomicCalendarSyncResponse {

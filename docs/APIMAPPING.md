@@ -383,16 +383,19 @@ Ghi chu:
 
 | Phương thức | Endpoint backend          | operationId                   | Tích hợp frontend                          | Trạng thái    | Ghi chú                                                                                                                                  |
 | ----------- | ------------------------- | ----------------------------- | ------------------------------------------ | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| GET         | `/economic-calendar`      | `getEconomicCalendarEntries`  | `getEconomicCalendarEntries(searchParams)` | Đã triển khai | Trả về `Page<EconomicCalendarListResponse>` với schema đã giản lược; frontend dùng `$filter/page/size/sort` qua `queryParamsToString()`. |
-| GET         | `/economic-calendar/{id}` | `getEconomicCalendarEntry`    | `getEconomicCalendarEntryById(id)`         | Đã triển khai | Trả về `EconomicCalendarResponse` cho trang chi tiết read-only, có `content` khi nội dung đã sẵn sàng.                                   |
+| GET         | `/economic-calendar`      | `getEconomicCalendarEntries`  | `getEconomicCalendarEntries(searchParams)` | Đã triển khai | Trả về Spring `Page<EconomicCalendarListResponse>`; frontend đọc `content[]`, pagination metadata, và dùng `$filter/page/size/sort` qua `queryParamsToString()`. |
+| GET         | `/economic-calendar/{id}` | `getEconomicCalendarEntry`    | `getEconomicCalendarEntryById(id)`         | Đã triển khai | Trả về schema giống list item và có thêm `content`; frontend chỉ kỳ vọng `content` ở detail endpoint.                                   |
 | POST        | `/economic-calendar/sync` | `syncEconomicCalendarEntries` | `syncEconomicCalendarEntries()`            | Đã triển khai | Trả về `EconomicCalendarSyncResponse` với `fetchedCount`, `createdCount`, `updatedCount`, `skippedCount`.                                |
 
 Ghi chú:
 
 - Frontend đã có `app/api/economic-calendar/action.ts`, definitions, permissions, navigation và route UI `/economic-calendar`.
-- List/detail response hiện dùng các trường chính: `title`, `currencyCode`, `impact`, `forecastValue`, `previousValue`, `actualValue`, `contentAvailable`, `status`, `scheduledAt`, `syncedAt`, `createdDate`, `lastModifiedDate`.
-- Detail response có thêm `content`; UI chỉ hiển thị nội dung khi `contentAvailable` là true và `content` có dữ liệu.
-- Frontend không còn phụ thuộc vào các field cũ đã bị backend loại bỏ như `description`, `url`, `externalKey`, `provider`, `countryCode`, `importance`, `ingestedAt`, `rawContent`, hoặc `rawMetadata`.
+- `EconomicCalendarListResponse` hiện gồm `id`, `title`, `currencyCode`, `type`, `impact`, `forecastValue`, `previousValue`, `actualValue`, `description`, `revision`, `newsUrl`, `actualBetterWorse`, `revisionBetterWorse`, `contentAvailable`, `status`, `scheduledAt`, `syncedAt`, `createdDate`, và `lastModifiedDate`.
+- `EconomicCalendarResponse` giống list item và có thêm `content`; `contentAvailable = true` nghĩa là detail có content để render, nhưng list endpoint không trả `content`.
+- Các field văn bản domain phần lớn có thể `null`; `status` chỉ gồm `PENDING` hoặc `AVAILABLE`; timestamp là ISO datetime string.
+- `description` đã được backend localized theo current user/request language. `actualBetterWorse` và `revisionBetterWorse` là giá trị từ MDG, frontend không dịch.
+- `newsUrl` là source URL gốc; frontend có thể dùng để mở link ngoài khi cần.
+- Frontend không còn phụ thuộc vào các field cũ đã bị backend loại bỏ như `url`, `externalKey`, `provider`, `countryCode`, `importance`, `ingestedAt`, `rawContent`, hoặc `rawMetadata`.
 
 ### 15. API workspace
 
