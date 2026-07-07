@@ -64,7 +64,6 @@ export type MarketChartAnnotationDirection =
 export type MarketChartAnnotationType =
   | "HOT_EVENT"
   | "WARM_EPISODE"
-  | "WARM_EVENT"
   | string
 
 export interface MarketChartAnnotationEvidenceResponse {
@@ -104,16 +103,8 @@ export interface MarketChartAnnotationReactionResponse {
   outcome?: MarketChartAnnotationOutcomeResponse | null
 }
 
-export interface MarketChartAnnotationResponse {
-  id: string
-  annotationType?: MarketChartAnnotationType | null
+export interface MarketChartHotEventAnnotationResponse {
   eventId?: number | null
-  warmEpisodeId?: number | null
-  warmEpisodeEventId?: number | null
-  assetId?: number | null
-  time: string
-  periodStart?: string | null
-  periodEnd?: string | null
   severity?: string | null
   direction?: MarketChartAnnotationDirection | null
   title?: string | null
@@ -124,6 +115,37 @@ export interface MarketChartAnnotationResponse {
   marketReactions?: MarketChartAnnotationReactionResponse[]
   evidence: MarketChartAnnotationEvidenceResponse[]
   links?: MarketChartAnnotationLinksResponse | null
+}
+
+export interface MarketChartWarmEpisodeEventAnnotationResponse {
+  warmEpisodeEventId: number
+  time: string
+  severity?: string | null
+  direction?: MarketChartAnnotationDirection | null
+  title?: string | null
+  summary?: string | null
+  confidence?: number | null
+  relationType?: string | null
+  reaction?: MarketChartAnnotationReactionResponse | null
+}
+
+export interface MarketChartWarmEpisodeAnnotationResponse {
+  warmEpisodeId: number
+  periodStart: string
+  periodEnd: string
+  direction?: MarketChartAnnotationDirection | null
+  summary?: string | null
+  outcome?: MarketChartAnnotationOutcomeResponse | null
+  events: MarketChartWarmEpisodeEventAnnotationResponse[]
+}
+
+export interface MarketChartAnnotationResponse {
+  id: string
+  annotationType: MarketChartAnnotationType
+  assetId: number
+  time: string
+  hotEvent?: MarketChartHotEventAnnotationResponse | null
+  warmEpisode?: MarketChartWarmEpisodeAnnotationResponse | null
 }
 
 export interface MarketChartCandleResponse {
@@ -329,16 +351,8 @@ export const marketChartAnnotationReactionResponseSchema = z.object({
   outcome: marketChartAnnotationOutcomeResponseSchema.nullable().optional(),
 }) satisfies z.ZodType<MarketChartAnnotationReactionResponse>
 
-export const marketChartAnnotationResponseSchema = z.object({
-  id: z.string(),
-  annotationType: z.string().nullable().optional(),
+export const marketChartHotEventAnnotationResponseSchema = z.object({
   eventId: z.number().nullable().optional(),
-  warmEpisodeId: z.number().nullable().optional(),
-  warmEpisodeEventId: z.number().nullable().optional(),
-  assetId: z.number().nullable().optional(),
-  time: z.string(),
-  periodStart: z.string().nullable().optional(),
-  periodEnd: z.string().nullable().optional(),
   severity: z.string().nullable().optional(),
   direction: z.string().nullable().optional(),
   title: z.string().nullable().optional(),
@@ -349,6 +363,37 @@ export const marketChartAnnotationResponseSchema = z.object({
   marketReactions: z.array(marketChartAnnotationReactionResponseSchema).default([]),
   evidence: z.array(marketChartAnnotationEvidenceResponseSchema).default([]),
   links: marketChartAnnotationLinksResponseSchema.nullable().optional(),
+}) satisfies z.ZodType<MarketChartHotEventAnnotationResponse>
+
+export const marketChartWarmEpisodeEventAnnotationResponseSchema = z.object({
+  warmEpisodeEventId: z.number(),
+  time: z.string(),
+  severity: z.string().nullable().optional(),
+  direction: z.string().nullable().optional(),
+  title: z.string().nullable().optional(),
+  summary: z.string().nullable().optional(),
+  confidence: z.number().nullable().optional(),
+  relationType: z.string().nullable().optional(),
+  reaction: marketChartAnnotationReactionResponseSchema.nullable().optional(),
+}) satisfies z.ZodType<MarketChartWarmEpisodeEventAnnotationResponse>
+
+export const marketChartWarmEpisodeAnnotationResponseSchema = z.object({
+  warmEpisodeId: z.number(),
+  periodStart: z.string(),
+  periodEnd: z.string(),
+  direction: z.string().nullable().optional(),
+  summary: z.string().nullable().optional(),
+  outcome: marketChartAnnotationOutcomeResponseSchema.nullable().optional(),
+  events: z.array(marketChartWarmEpisodeEventAnnotationResponseSchema).default([]),
+}) satisfies z.ZodType<MarketChartWarmEpisodeAnnotationResponse>
+
+export const marketChartAnnotationResponseSchema = z.object({
+  id: z.string(),
+  annotationType: z.string(),
+  assetId: z.number(),
+  time: z.string(),
+  hotEvent: marketChartHotEventAnnotationResponseSchema.nullable().optional(),
+  warmEpisode: marketChartWarmEpisodeAnnotationResponseSchema.nullable().optional(),
 }) satisfies z.ZodType<MarketChartAnnotationResponse>
 
 export const marketChartCandleResponseSchema = z.object({

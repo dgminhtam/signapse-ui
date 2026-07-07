@@ -1649,6 +1649,10 @@ export const en: Dictionary = {
       noEvents: "No events in the current range.",
       confidenceBadge: "Confidence {value}",
       eventCount: "{count} events",
+      warmEpisodeLabel: "Period",
+      warmEpisodeSummaryTitle: "Period summary",
+      warmEpisodeEventsTitle: "Events in period",
+      episodeOutcomeTitle: "Period outcome",
       openMany: "Open {count} events at {time}",
       openOne: "Open event {title}",
       predictedReactionTitle: "Predicted",
@@ -1662,6 +1666,11 @@ export const en: Dictionary = {
         CONFIRMED: "Confirmed",
         INCONCLUSIVE: "Inconclusive",
         CONTRADICTED: "Contradicted",
+      },
+      relationTypeLabels: {
+        PRIMARY_SUBJECT: "Primary subject",
+        AFFECTED_ASSET: "Affected asset",
+        REFERENCE_ASSET: "Reference asset",
       },
     },
     history: {

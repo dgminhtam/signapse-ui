@@ -1636,6 +1636,10 @@ export const vi = {
       noEvents: "Chưa có sự kiện trong khoảng hiện tại.",
       confidenceBadge: "Tin cậy {value}",
       eventCount: "{count} sự kiện",
+      warmEpisodeLabel: "Giai đoạn",
+      warmEpisodeSummaryTitle: "Tóm tắt giai đoạn",
+      warmEpisodeEventsTitle: "Sự kiện trong giai đoạn",
+      episodeOutcomeTitle: "Kết quả giai đoạn",
       openMany: "Mở {count} sự kiện tại {time}",
       openOne: "Mở sự kiện {title}",
       predictedReactionTitle: "Dự đoán",
@@ -1649,6 +1653,11 @@ export const vi = {
         CONFIRMED: "Xác nhận",
         INCONCLUSIVE: "Chưa kết luận",
         CONTRADICTED: "Trái ngược",
+      },
+      relationTypeLabels: {
+        PRIMARY_SUBJECT: "Chủ thể chính",
+        AFFECTED_ASSET: "Tài sản bị ảnh hưởng",
+        REFERENCE_ASSET: "Tài sản tham chiếu",
       },
     },
     history: {

@@ -1,48 +1,63 @@
 ## Context
 
-The market chart annotation layer currently treats every valid annotation as a point event: it validates `id` and `time`, groups annotations by nearest candle time, and renders one marker per group. The updated backend contract adds `annotationType` with `HOT_EVENT`, `WARM_EVENT`, and `WARM_EPISODE`, plus warm period fields `periodStart` and `periodEnd`, optional warm identifiers, and optional top-level `outcome`.
+The market chart annotation endpoint now returns a timeline shell instead of flat annotation objects. Top-level annotations are only:
 
-The existing chart canvas already renders a transient HTML time-range band for outcome hover by converting timestamps to chart pixels and clamping to the candle pane. That is the smallest reusable pattern for warm periods.
+- `HOT_EVENT`: render a point marker at top-level `time`; popup content comes from `annotation.hotEvent`.
+- `WARM_EPISODE`: render a range overlay from `annotation.warmEpisode.periodStart` to `annotation.warmEpisode.periodEnd`; popup content comes from `annotation.warmEpisode`.
+
+The current implementation and earlier artifacts still preserve old flat fields and still mention the legacy top-level warm event type. Warm display also reuses the hot event popup, which makes an episode feel like a single event instead of a market period.
 
 ## Goals / Non-Goals
 
 **Goals:**
-- Preserve new warm annotation API fields in frontend types and Zod response mapping.
-- Render warm annotations as candle-pane time-range bands while keeping hot annotations as existing point markers.
-- Let users open the existing annotation popup/detail preview from a warm band.
-- Keep annotation layer toggle semantics unchanged: disabled means no markers or warm bands.
-- Reuse existing direction color semantics and chart coordinate conversion.
+- Map the annotation DTO/Zod schema to the new timeline shell.
+- Keep hot marker UI and interaction behavior unchanged, with data sourced from `hotEvent`.
+- Render warm episodes as non-persisted chart range bands bounded by the loaded candle high/low inside the episode period.
+- Render warm episode detail as an episode overview with summary, outcome, and compact nested event timeline.
+- Remove legacy top-level warm event and stale flat field handling from market chart annotation code/specs.
+- Keep annotation layer toggle semantics unchanged: disabled means no hot markers or warm bands.
 
 **Non-Goals:**
 - No klinecharts custom overlay for warm bands.
-- No persisted drawing, selectable drawing metadata, or export behavior for warm bands.
-- No new warm-layer toggle separate from the existing annotation layer toggle.
+- No separate warm-layer toggle.
+- No direct warm event marker/tick implementation inside the band.
+- No popup abstraction framework beyond a small hot detail and warm detail split.
 - No backend contract changes.
-- No rich evidence/detail redesign inside the popup.
 
 ## Decisions
 
-1. Render warm periods as HTML absolute price-range bands over the candle pane.
-   - Rationale: the chart already has working HTML range-band positioning for outcome hover, and warm bands need the same viewport, resize, scroll, zoom, and clipping behavior. Warm bands additionally use the loaded candles inside the period to bound the vertical area from highest high to lowest low, so the layer highlights the affected price area instead of the full pane.
-   - Alternative considered: klinecharts custom overlay. Rejected for now because warm bands are API annotations, not user drawings, and HTML avoids extra overlay registration and persistence concerns.
+1. Map annotations by top-level timeline type only.
+   - `HOT_EVENT` requires `hotEvent` and stays on the existing point grouping path.
+   - `WARM_EPISODE` requires `warmEpisode` and becomes a range band.
+   - The legacy top-level warm event type is removed. If an unknown or incomplete annotation arrives, omit it without crashing.
+   - API direction values are `BULLISH`, `BEARISH`, and `NEUTRAL`; keep any existing internal `MIXED` only for aggregate marker color logic.
 
-2. Split annotation rendering by `annotationType`.
-   - `HOT_EVENT` and missing/unknown type continue through the existing marker grouping path.
-   - `WARM_EVENT` and `WARM_EPISODE` with valid `periodStart` and `periodEnd` become bands.
-   - Invalid warm periods are omitted like invalid marker times.
+2. Keep the hot layer behavior as-is.
+   - Marker time remains top-level `annotation.time`.
+   - Popup fields move from flat annotation fields to `annotation.hotEvent`: title, summary, severity, direction, confidence, top reaction, reactions, evidence, and links.
+   - Existing reaction/outcome presentation remains the hot event preview.
 
-3. Reuse the existing popup surface for warm selection.
-   - A warm band selection can be represented as a one-annotation group so the popup rendering path stays shared.
-   - If `topMarketReaction.outcome` is missing but top-level `annotation.outcome` exists, the reaction preview uses the top-level outcome as the fallback.
+3. Render warm episodes with the existing HTML band approach.
+   - Horizontal range maps `warmEpisode.periodStart` to `warmEpisode.periodEnd`.
+   - Vertical range uses the highest candle high and lowest candle low inside the episode period.
+   - Bands remain low-opacity, below point markers, and outside persisted drawing state.
+   - Periods with invalid dates, no chart mapping, or no loaded candle price data are omitted.
 
-4. Keep warm bands visual-only except for selection.
-   - Bands sit below point markers, use low-opacity direction color, and do not create chart drawings.
-   - The band hit target may open the popup, but the band must not block normal chart interactions more than needed.
+4. Give warm episodes their own compact popup layout.
+   - Use a small `WarmEpisodeAnnotationDetail` beside the existing hot detail component.
+   - Header uses an episode label such as `Giai đoạn`; nested event count is secondary copy such as `2 sự kiện`.
+   - Body starts with `warmEpisode.summary`.
+   - Episode outcome appears below the summary and uses `warmEpisode.direction` plus `warmEpisode.outcome`.
+   - `warmEpisode.events[]` renders as a compact timeline: time, `title || summary`, optional summary, relation type, reaction direction, reaction horizon, and confidence.
+   - Event-level `reaction.outcome` is deferred unless it is later needed; avoid nested cards inside the episode popup.
+
+5. Keep i18n explicit.
+   - Add dictionary keys for warm episode labels, nested event timeline title, episode outcome title, and relation type labels.
+   - Do not display backend enum strings directly for user-facing badges.
 
 ## Risks / Trade-offs
 
-- Warm bands could compete visually with candles → use low opacity, place below markers, and keep marker colors unchanged.
-- Large numbers of warm annotations could add DOM nodes → derive only visible/mappable bands and keep rendering simple.
-- Some warm responses may not include complete periods → omit those bands and still allow valid hot markers to render.
-- Some warm periods may have no loaded candles inside the range → omit those bands until candle data is available.
-- Top-level warm `outcome` may not have predicted reaction fields → only render available actual outcome content without placeholders.
+- Warm bands can visually compete with candles -> use low opacity, bound to the price range, and place below markers.
+- Some episodes may span outside loaded candle data -> render only when candle data can produce a valid high/low range.
+- A warm episode with many nested events could make the popup long -> use the existing scroll area surface and compact rows.
+- Deferring warm event ticks means users inspect nested events after clicking the band -> add ticks later only if range density scanning becomes a real need.

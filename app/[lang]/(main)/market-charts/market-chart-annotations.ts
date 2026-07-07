@@ -97,10 +97,11 @@ function isValidMarketChartCandle(
 }
 
 function isWarmMarketChartAnnotation(annotation: MarketChartAnnotationResponse) {
-  return (
-    annotation.annotationType === "WARM_EVENT" ||
-    annotation.annotationType === "WARM_EPISODE"
-  )
+  return annotation.annotationType === "WARM_EPISODE" && !!annotation.warmEpisode
+}
+
+function isHotMarketChartAnnotation(annotation: MarketChartAnnotationResponse) {
+  return annotation.annotationType === "HOT_EVENT" && !!annotation.hotEvent
 }
 
 export function mergeMarketChartAnnotations(
@@ -145,7 +146,11 @@ function getDominantDirection(
   annotations: MarketChartAnnotationResponse[]
 ): MarketChartAnnotationDirection | null {
   const directions = annotations
-    .map((annotation) => annotation.direction)
+    .map((annotation) =>
+      annotation.annotationType === "WARM_EPISODE"
+        ? annotation.warmEpisode?.direction
+        : annotation.hotEvent?.direction
+    )
     .filter((direction): direction is MarketChartAnnotationDirection => !!direction)
 
   if (!directions.length) {
@@ -161,7 +166,11 @@ function getDominantDirection(
 
 function hasHighPriorityAnnotation(annotations: MarketChartAnnotationResponse[]) {
   return annotations.some((annotation) => {
-    const severity = annotation.severity?.toUpperCase()
+    const severity = (
+      annotation.annotationType === "WARM_EPISODE"
+        ? annotation.warmEpisode?.events.find((event) => event.severity)?.severity
+        : annotation.hotEvent?.severity
+    )?.toUpperCase()
 
     return severity
       ? ["HIGH", "CRITICAL", "IMPORTANT", "SEVERE"].some((keyword) =>
@@ -216,7 +225,7 @@ export function createMarketChartAnnotationGroups(
   const validCandles = candles.filter(isValidMarketChartCandle)
   const validAnnotations = annotations
     .filter(isValidMarketChartAnnotation)
-    .filter((annotation) => !isWarmMarketChartAnnotation(annotation))
+    .filter(isHotMarketChartAnnotation)
   const candleTimes = validCandles
     .map((candle) => toMarketChartEpochMillis(candle.time))
     .filter((time): time is MarketChartEpochMillis => time !== null)
@@ -294,10 +303,11 @@ export function createMarketChartWarmAnnotationGroups(
     .filter(isValidMarketChartAnnotation)
     .filter(isWarmMarketChartAnnotation)
     .flatMap((annotation) => {
-      const periodStart = toMarketChartEpochMillis(annotation.periodStart)
-      const periodEnd = toMarketChartEpochMillis(annotation.periodEnd)
+      const warmEpisode = annotation.warmEpisode
+      const periodStart = toMarketChartEpochMillis(warmEpisode?.periodStart)
+      const periodEnd = toMarketChartEpochMillis(warmEpisode?.periodEnd)
 
-      if (periodStart === null || periodEnd === null) {
+      if (!warmEpisode || periodStart === null || periodEnd === null) {
         return []
       }
 
@@ -313,7 +323,7 @@ export function createMarketChartWarmAnnotationGroups(
           id: `annotation-warm-${annotation.id}`,
           time: periodStart,
           anchorPrice: 0,
-          direction: annotation.direction ?? null,
+          direction: warmEpisode.direction ?? null,
           annotations: [annotation],
           priority: hasHighPriorityAnnotation([annotation]) ? "high" : "normal",
         },

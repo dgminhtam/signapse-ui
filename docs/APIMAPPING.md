@@ -2,7 +2,7 @@
 
 Tài liệu này ánh xạ snapshot OpenAPI backend trong `docs/api_mapping.json` tới các điểm tích hợp frontend hiện tại của repo.
 
-Xác minh lần cuối: ngày 2 tháng 7 năm 2026
+Xác minh lần cuối: ngày 7 tháng 7 năm 2026
 
 ## Cấu hình cơ sở
 
@@ -191,7 +191,7 @@ Ghi chu:
 | Phuong thuc | Endpoint backend         | operationId  | Tich hop frontend                | Trang thai                                | Ghi chu                                                                                                                                                                                                                                              |
 | ----------- | ------------------------ | ------------ | -------------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | GET         | `/market-charts/candles` | `getCandles` | `getMarketChartCandles(request)` | Da dong bo contract candles-only | Endpoint duoc gate backend bang `market-chart:read`; FE gui `assetId`, `timeframe`, `from`, `to`; parse optional `symbol`, `asset`, `timeframe`, `from`, `to`, `candles[]`. |
-| GET         | `/market-charts/annotations` | `getAnnotations` | `getMarketChartAnnotations(request)` | Da tich hop nhung con lech reaction outcome | Endpoint duoc gate backend bang `market-chart:read`; FE gui `assetId`, `from`, `to`; parse mang `MarketChartAnnotationResponse[]` de render marker/popup, nhung chua map `topMarketReaction`, `marketReactions[]`, va `outcome`. |
+| GET         | `/market-charts/annotations` | `getAnnotations` | `getMarketChartAnnotations(request)` | Dang lech contract annotation timeline moi | Endpoint duoc gate backend bang `market-chart:read`; FE gui `assetId`, `from`, `to`; range dung `[from, to)` giong candles. Response moi la timeline chi gom top-level `HOT_EVENT` va `WARM_EPISODE`; khong con `WARM_EVENT` top-level. |
 | GET         | `/market-charts/live`    | `streamLive` | `-`                              | Chua trien khai                           | Live stream SSE `text/event-stream`; query `request` tham chieu `MarketChartLiveRequest` gom `assetId`, `timeframe`; permission `market-chart:read`.                                                                                                 |
 
 Frontend lien quan:
@@ -210,14 +210,17 @@ Ghi chu:
 
 - Query contract hien duoc khai bao qua object `request` trong query string, tham chieu schema `MarketChartCandleRequest`.
 - `MarketChartCandleRequest` gom `assetId`, `timeframe`, `from`, `to`; snapshot hien tai khong mo ta enum hay danh sach gia tri hop le cho `timeframe`, trong khi FE data layer hien gioi han `timeframe` theo union `1m`, `5m`, `15m`, `30m`, `1h`, `1d`, `1w`, `1mo`.
-- `MarketChartAnnotationRequest` gom `assetId`, `from`, `to`; response cua `/market-charts/annotations` la mang `MarketChartAnnotationResponse`.
+- `MarketChartAnnotationRequest` gom `assetId`, `from`, `to`; range dung `[from, to)`, `from` inclusive va `to` exclusive; response cua `/market-charts/annotations` la mang `MarketChartAnnotationResponse`.
 - `MarketChartLiveRequest` gom `assetId` va `timeframe`; response cua `/market-charts/live` la `text/event-stream` voi schema `SseEmitter` gom `timeout`.
 - `MarketChartCandleItemResponse` gom `time`, `open`, `high`, `low`, `close`, `volume`.
 - `MarketChartCandleResponse` gom optional `symbol`, `asset: MarketChartAssetResponse`, `timeframe`, `from`, `to`, va `candles[]`; annotation khong con nam trong candle response.
-- Annotation gom `id`, `eventId`, `assetId`, `time`, `severity`, `direction`, `title`, `summary`, `confidence`, `topMarketReaction`, `marketReactions[]`, `evidence[]`, va `links.eventDetail`; evidence dung `newsArticleId`.
-- `MarketChartAnnotationReactionResponse` gom `id`, `direction` (`BULLISH` | `BEARISH` | `MIXED` | `NEUTRAL`), `timeHorizon` (`INTRADAY` | `SHORT_TERM` | `MEDIUM_TERM` | `LONG_TERM`), `confidence`, `reasoning`, `observedAt`, va `outcome`.
-- `MarketChartAnnotationOutcomeResponse` gom `anchorTime`, `anchorPrice`, `evaluationTime`, `evaluationPrice`, `realizedReturn`, `actualDirection`, `alignment`, va `evaluatedAt`.
-- FE DTO/Zod hien van map field cu `reaction` va chua map `topMarketReaction`, `marketReactions[]`, hoac nested `outcome`; Zod se strip cac field moi nen marker van render theo top-level annotation, nhung popup khong hien outcome.
+- `MarketChartAnnotationResponse` moi chi giu top-level shell gom `id`, `annotationType`, `assetId`, `time`, `hotEvent?`, va `warmEpisode?`; `annotationType` chi gom `HOT_EVENT` va `WARM_EPISODE`.
+- `HOT_EVENT` render marker diem tai top-level `time`; noi dung popup lay tu `hotEvent` gom `eventId`, `severity`, `direction`, `title`, `summary`, `confidence`, `topMarketReaction`, `marketReactions[]`, `evidence[]`, va `links.eventDetail`.
+- `WARM_EPISODE` render overlay/range tu `warmEpisode.periodStart` den `warmEpisode.periodEnd`; top-level `time` bang `periodStart`. Noi dung warm gom `warmEpisodeId`, `direction`, `summary`, `outcome`, va `events[]`.
+- Warm event khong con dung top-level annotation rieng; FE neu can marker nho trong overlay thi flatten `warmEpisode.events[]`. Moi warm event gom `warmEpisodeEventId`, `time`, `severity`, `direction`, `title`, `summary`, `confidence`, `relationType`, va `reaction`.
+- `MarketChartAnnotationReactionResponse` gom `id`, `direction` (`BULLISH` | `BEARISH` | `NEUTRAL`), `timeHorizon`, `confidence`, `reasoning`, `observedAt`, va `outcome`; enum `MIXED` khong con nam trong contract annotation reaction moi.
+- `MarketChartAnnotationOutcomeResponse` gom `anchorTime`, `anchorPrice`, `evaluationTime`, `evaluationPrice`, `realizedReturn`, `actualDirection` (`BULLISH` | `BEARISH` | `NEUTRAL`), `alignment`, `evaluatedAt`, va `summary`.
+- FE hien da co mot phan warm overlay cu nhung DTO/Zod/UI van map shape flat cu (`eventId`, `periodStart`, `periodEnd`, `topMarketReaction`, `marketReactions[]`, `outcome` tren annotation top-level) va van chap nhan `WARM_EVENT`; can doi sang nested `hotEvent` / `warmEpisode` de khop contract moi.
 - UI khong expose `from` hoac `to` nhu form input. Route state chi gom `assetId` va `timeframe`; FE resolve asset tu `GET /watchlists`, gui `assetId` cho chart action, va de backend so huu provider-symbol resolution.
 - FE khong con gui `includeAnnotations`; layer su kien chi dieu khien viec fetch/hien thi marker tu endpoint `/market-charts/annotations`.
 - UI dung KLineChart de render nen OHLCV, render marker notification tu annotation endpoint data, group cac annotation cung moc thoi gian, va mo popup detail/evidence/link su kien khi user chon marker hoac moc su kien accessible ben ngoai canvas. Lazy historical loading da duoc trien khai cho huong tai nen cu hon bang endpoint `/market-charts/candles` va fetch annotation rieng cho cung cua so khi layer su kien duoc bat; trade recommendation van chua trien khai ve UI.
@@ -613,7 +616,7 @@ type ActionResult<T = void> =
 - `permission scan`: cac literal FE-only `source-document:*` con lai deu la alias compatibility sau permission canon `news-article:*`; cac permission BE chua co FE literal gom `cronjob:stop`, `media:*`, va `narrative:*` vi cac surface/action nay chua duoc tich hop.
 - `asset type enum`: snapshot moi them `EQUITY` va `ETF` cho asset/watchlist/event/narrative/graph/market-chart payload. FE assets, watchlists, narratives, graph view, market charts dang string-compatible; rieng events van hard-code `EventAssetType` va `dictionary.events.assetTypeLabels` voi 4 gia tri cu, nen co nguy co render label `undefined` cho event assets/reactions moi.
 - `system prompts`: snapshot mới thêm prompt type `MARKET_QUERY_CONVERSATION_ORCHESTRATION`; frontend hiện còn thiếu enum/dictionary label cho giá trị này trong `app/lib/system-prompts/definitions.ts` và dictionary system prompt, dù DTO `name`/`responseSchema`/`localizedNames`, create request bắt buộc `responseSchema`, và form schema editor dạng builder + JSON đã được đồng bộ.
-- `market charts`: frontend da dong bo action/DTO theo candles-only request `assetId`, `timeframe`, `from`, `to`; annotation marker dung endpoint rieng `/market-charts/annotations` voi `assetId`, `from`, `to`. Snapshot annotations moi doi reaction sang `topMarketReaction`/`marketReactions[]` va them nested `outcome`; FE hien chua expose outcome. Snapshot moi them `/market-charts/live` SSE, nhung FE chua co EventSource/action/DTO cho live stream.
+- `market charts`: frontend da dong bo action/DTO theo candles-only request `assetId`, `timeframe`, `from`, `to`; annotation marker dung endpoint rieng `/market-charts/annotations` voi `assetId`, `from`, `to` va range `[from, to)`. Contract annotation runtime ngay 7/7 doi sang timeline shell `HOT_EVENT` / `WARM_EPISODE`, noi dung nam trong `hotEvent` hoac `warmEpisode`, warm events nam trong `warmEpisode.events[]`, va khong con `WARM_EVENT` top-level. FE hien con map shape flat cu va can sync DTO/Zod/render. Snapshot moi them `/market-charts/live` SSE, nhung FE chua co EventSource/action/DTO cho live stream.
 - `news outlets`: snapshot moi da bo `slug` khoi create/update/list/detail va bo `description` khoi list item; FE form/DTO da dong bo, list khong render cac field nay, con detail/edit van giu `description` theo response.
 - `workspace`: frontend da bo `slug` khoi create/update/response definitions, workspace switcher payload/UI, va trang tong quan workspace de khop snapshot moi.
 - `watchlists`: FE workspace watchlist editor da chuyen add flow sang bulk endpoint `POST /watchlists/assets` voi request `{ assetIds }`, chunk toi da 100 id moi request; remove flow van dung `DELETE /watchlists/assets/{assetId}`.

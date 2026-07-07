@@ -1,27 +1,31 @@
 ## 1. Contract Mapping
 
-- [x] 1.1 Extend market chart annotation TypeScript types with `annotationType`, warm identifiers, `periodStart`, `periodEnd`, and top-level `outcome`.
-- [x] 1.2 Extend the annotation Zod schema so the new backend fields are preserved instead of stripped.
+- [x] 1.1 Replace the market chart annotation TypeScript type with the timeline shell: `id`, `annotationType`, `assetId`, `time`, `hotEvent`, and `warmEpisode`.
+- [x] 1.2 Add nested DTO/Zod schemas for `MarketChartHotEventAnnotationResponse`, `MarketChartWarmEpisodeAnnotationResponse`, and `MarketChartWarmEpisodeEventAnnotationResponse`.
+- [x] 1.3 Remove frontend reliance on removed flat annotation fields and legacy top-level warm event handling.
 
-## 2. Warm Band Data
+## 2. Hot Event Layer
 
-- [x] 2.1 Derive warm annotation bands from `WARM_EVENT` and `WARM_EPISODE` annotations with valid `periodStart` and `periodEnd`.
-- [x] 2.2 Keep `HOT_EVENT` and unknown/missing annotation types on the existing point marker grouping path.
-- [x] 2.3 Omit invalid or unmappable warm periods without affecting valid markers and bands.
+- [x] 2.1 Update hot marker grouping to filter `HOT_EVENT` annotations with `hotEvent`.
+- [x] 2.2 Keep hot marker placement at top-level `time` and derive marker direction, priority, title, summary, event id, reactions, evidence, and links from `hotEvent`.
+- [x] 2.3 Preserve the current hot popup layout and interaction behavior.
 
-## 3. Chart Rendering And Selection
+## 3. Warm Episode Layer
 
-- [x] 3.1 Render warm bands as low-opacity HTML overlays clamped to the candle pane and hidden when the annotation layer is disabled.
-- [x] 3.2 Keep warm bands aligned when the chart scrolls, zooms, resizes, loads older candles, or changes visible range.
-- [x] 3.3 Let users select a warm band and open the existing annotation popup or responsive fallback.
-- [x] 3.4 Ensure warm bands are not treated as persisted drawing overlays or drawing selections.
+- [x] 3.1 Update warm band grouping to filter `WARM_EPISODE` annotations with `warmEpisode`.
+- [x] 3.2 Map warm band horizontal range from `warmEpisode.periodStart` to `warmEpisode.periodEnd`.
+- [x] 3.3 Keep warm band vertical bounds based on highest candle high and lowest candle low inside the episode period.
+- [x] 3.4 Omit invalid or unmappable warm episodes without affecting valid hot markers or warm bands.
 
-## 4. Popup Outcome
+## 4. Warm Episode Popup
 
-- [x] 4.1 Use `topMarketReaction.outcome` first and top-level `annotation.outcome` as the fallback for annotation popup outcome preview.
-- [x] 4.2 Omit outcome preview placeholders when neither outcome source exists.
+- [x] 4.1 Split popup detail rendering into small hot event and warm episode paths.
+- [x] 4.2 Render warm episode summary, episode outcome, and nested `warmEpisode.events[]` as compact timeline rows.
+- [x] 4.3 Add market chart dictionary labels for warm episode copy and warm relation type badges.
+- [x] 4.4 Ensure backend enum values are localized before display.
 
 ## 5. Verification
 
-- [x] 5.1 Run `openspec.cmd validate show-market-chart-warm-annotation-layer --strict`.
-- [x] 5.2 Run `pnpm.cmd typecheck`.
+- [x] 5.1 Static search market chart code/specs to confirm legacy top-level warm event handling is removed, except documentation notes that say it no longer exists.
+- [x] 5.2 Run `openspec.cmd validate show-market-chart-warm-annotation-layer --strict`.
+- [x] 5.3 Run `pnpm.cmd typecheck`.

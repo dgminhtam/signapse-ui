@@ -25,6 +25,7 @@ import { useTheme } from "next-themes"
 import type { ActionResult } from "@/app/lib/definitions"
 import { useLocalization } from "@/app/lib/i18n/provider"
 import type {
+  MarketChartAnnotationDirection,
   MarketChartAnnotationResponse,
   MarketChartCandleItemResponse,
   MarketChartCandleRequest,
@@ -417,7 +418,7 @@ function getOutcomeHoverBand({
     : null
 }
 
-function getWarmBandClassName(direction: MarketChartAnnotationResponse["direction"]) {
+function getWarmBandClassName(direction: MarketChartAnnotationDirection | null) {
   switch (direction) {
     case "BULLISH":
       return "bg-emerald-500/10 ring-emerald-500/30 hover:bg-emerald-500/15"
@@ -1029,15 +1030,16 @@ export const MarketChartCanvas = forwardRef<
       const nextWarmBandPositions = warmAnnotationGroupsRef.current.flatMap(
         (group) => {
           const annotation = group.annotations[0]
+          const warmEpisode = annotation?.warmEpisode
 
-          if (!annotation?.periodStart || !annotation.periodEnd) {
+          if (!warmEpisode?.periodStart || !warmEpisode.periodEnd) {
             return []
           }
 
           const priceRange = getWarmBandPriceRange({
             candles: loadedCandlesRef.current,
-            endTime: annotation.periodEnd,
-            startTime: annotation.periodStart,
+            endTime: warmEpisode.periodEnd,
+            startTime: warmEpisode.periodStart,
           })
 
           if (!priceRange) {
@@ -1047,9 +1049,9 @@ export const MarketChartCanvas = forwardRef<
           const band = getTimeRangeBand({
             chart: currentChart,
             container: currentContainer,
-            endTime: annotation.periodEnd,
+            endTime: warmEpisode.periodEnd,
             priceRange,
-            startTime: annotation.periodStart,
+            startTime: warmEpisode.periodStart,
           })
 
           return band ? [{ ...band, group }] : []
@@ -1401,7 +1403,7 @@ export const MarketChartCanvas = forwardRef<
                 type="button"
                 aria-label={formatMessage(
                   dictionary.marketCharts.annotations.openOne,
-                  { title: annotation?.title || annotation?.summary || "" }
+                  { title: annotation?.warmEpisode?.summary || "" }
                 )}
                 aria-pressed={selected}
                 className={cn(
@@ -1479,8 +1481,8 @@ export const MarketChartCanvas = forwardRef<
                       })
                     : formatMessage(dictionary.marketCharts.annotations.openOne, {
                         title:
-                          group.annotations[0]?.title ||
-                          group.annotations[0]?.summary ||
+                          group.annotations[0]?.hotEvent?.title ||
+                          group.annotations[0]?.hotEvent?.summary ||
                           "",
                       })
                 }

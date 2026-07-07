@@ -420,16 +420,23 @@ function getMarketChartPriceMovementDirection(
 }
 
 function getAnnotationEventId(annotation: MarketChartAnnotationResponse) {
-  const eventId = annotation.eventId
+  const hotEvent = annotation.hotEvent
+  const eventId = hotEvent?.eventId
 
   if (typeof eventId === "number" && Number.isInteger(eventId) && eventId > 0) {
     return eventId
   }
 
-  const eventDetail = annotation.links?.eventDetail?.trim()
+  const eventDetail = hotEvent?.links?.eventDetail?.trim()
   const match = eventDetail?.match(/^\/events\/([1-9]\d*)\/?(?:[?#].*)?$/)
 
   return match ? Number(match[1]) : null
+}
+
+function isWarmAnnotationGroup(group: MarketChartAnnotationGroup) {
+  const annotation = group.annotations[0]
+
+  return annotation?.annotationType === "WARM_EPISODE" && !!annotation.warmEpisode
 }
 
 function getFreshnessLabel(
@@ -881,17 +888,19 @@ function ChartSurface({
     const colorClassNames = getMarketChartAnnotationColorClassNames(
       group.direction
     )
-    const eventCountLabel = formatMessage(
-      dictionary.marketCharts.annotations.eventCount,
-      {
-        count: localization.formatNumber(group.annotations.length),
-      }
-    )
+    const warmEpisode = group.annotations[0]?.warmEpisode
+    const eventCountLabel = warmEpisode
+      ? formatMessage(dictionary.marketCharts.annotations.eventCount, {
+          count: localization.formatNumber(warmEpisode.events.length),
+        })
+      : formatMessage(dictionary.marketCharts.annotations.eventCount, {
+          count: localization.formatNumber(group.annotations.length),
+        })
 
     return (
       <>
         <PopoverHeader className="flex-row items-center justify-between gap-3">
-          <PopoverTitle className="min-w-0">
+          <PopoverTitle className="flex min-w-0 items-center gap-2">
             <span
               className={cn(
                 "rounded-full px-2 py-0.5 text-xs font-semibold",
@@ -899,8 +908,15 @@ function ChartSurface({
                 colorClassNames.foreground
               )}
             >
-              {eventCountLabel}
+              {warmEpisode
+                ? dictionary.marketCharts.annotations.warmEpisodeLabel
+                : eventCountLabel}
             </span>
+            {warmEpisode ? (
+              <span className="text-xs font-medium text-muted-foreground">
+                {eventCountLabel}
+              </span>
+            ) : null}
           </PopoverTitle>
           <Button
             type="button"
@@ -1274,6 +1290,20 @@ function ChartSurface({
           <div className="overflow-hidden rounded-xl border bg-popover">
             <div className="flex items-center justify-between gap-3 border-b px-3 py-2.5">
               <div className="flex items-center gap-2">
+                {(() => {
+                  const warmEpisode = selectedAnnotationGroup.annotations[0]?.warmEpisode
+                  const eventCountLabel = formatMessage(
+                    dictionary.marketCharts.annotations.eventCount,
+                    {
+                      count: localization.formatNumber(
+                        warmEpisode?.events.length ??
+                          selectedAnnotationGroup.annotations.length
+                      ),
+                    }
+                  )
+
+                  return (
+                    <>
                 <span
                   className={cn(
                     "rounded-full px-2 py-0.5 text-xs font-semibold",
@@ -1281,12 +1311,18 @@ function ChartSurface({
                     getMarketChartAnnotationColorClassNames(selectedAnnotationGroup.direction).foreground
                   )}
                 >
-                  {formatMessage(dictionary.marketCharts.annotations.eventCount, {
-                    count: localization.formatNumber(
-                      selectedAnnotationGroup.annotations.length
-                    ),
-                  })}
+                  {warmEpisode
+                    ? dictionary.marketCharts.annotations.warmEpisodeLabel
+                    : eventCountLabel}
                 </span>
+                      {warmEpisode ? (
+                        <span className="text-xs font-medium text-muted-foreground">
+                          {eventCountLabel}
+                        </span>
+                      ) : null}
+                    </>
+                  )
+                })()}
               </div>
               <Button
                 type="button"
@@ -1542,20 +1578,59 @@ function MarketChartAnnotationDetail({
   onOutcomeRangeLeave: () => void
 }) {
   const localization = useLocalization()
+  const annotation = group.annotations[0]
 
+  if (annotation?.annotationType === "WARM_EPISODE" && annotation.warmEpisode) {
+    return (
+      <MarketChartWarmEpisodeAnnotationDetail
+        annotation={annotation}
+        onOutcomeRangeHover={onOutcomeRangeHover}
+        onOutcomeRangeLeave={onOutcomeRangeLeave}
+      />
+    )
+  }
+
+  return (
+    <MarketChartHotAnnotationDetail
+      group={group}
+      localization={localization}
+      onEventOpen={onEventOpen}
+      onOutcomeRangeHover={onOutcomeRangeHover}
+      onOutcomeRangeLeave={onOutcomeRangeLeave}
+    />
+  )
+}
+
+function MarketChartHotAnnotationDetail({
+  group,
+  localization,
+  onEventOpen,
+  onOutcomeRangeHover,
+  onOutcomeRangeLeave,
+}: {
+  group: MarketChartAnnotationGroup
+  localization: LocalizationContext
+  onEventOpen: (eventId: number) => void
+  onOutcomeRangeHover: (range: MarketChartOutcomeHoverRange) => void
+  onOutcomeRangeLeave: () => void
+}) {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-3">
         {group.annotations.map((annotation) => {
+          const hotEvent = annotation.hotEvent
+
+          if (!hotEvent) {
+            return null
+          }
+
           const eventId = getAnnotationEventId(annotation)
           const eventTime = formatMarketChartDateTime(
             annotation.time,
             localization
           )
-          const title = annotation.title || annotation.summary || ""
-          const reaction =
-            annotation.topMarketReaction ??
-            (annotation.outcome ? { outcome: annotation.outcome } : null)
+          const title = hotEvent.title || hotEvent.summary || ""
+          const reaction = hotEvent.topMarketReaction
 
           return (
             <article key={annotation.id} className="flex flex-col gap-1.5">
@@ -1575,9 +1650,9 @@ function MarketChartAnnotationDetail({
                   )}
                 </h3>
               ) : null}
-              {annotation.summary ? (
+              {hotEvent.summary ? (
                 <p className="line-clamp-4 text-sm text-muted-foreground">
-                  {annotation.summary}
+                  {hotEvent.summary}
                 </p>
               ) : null}
               {reaction ? (
@@ -1592,6 +1667,121 @@ function MarketChartAnnotationDetail({
           )
         })}
       </div>
+    </div>
+  )
+}
+
+function MarketChartWarmEpisodeAnnotationDetail({
+  annotation,
+  onOutcomeRangeHover,
+  onOutcomeRangeLeave,
+}: {
+  annotation: MarketChartAnnotationResponse
+  onOutcomeRangeHover: (range: MarketChartOutcomeHoverRange) => void
+  onOutcomeRangeLeave: () => void
+}) {
+  const localization = useLocalization()
+  const { dictionary, formatMessage } = localization
+  const labels = dictionary.marketCharts.annotations
+  const relationTypeLabels = labels.relationTypeLabels as Record<string, string>
+  const warmEpisode = annotation.warmEpisode
+
+  if (!warmEpisode) {
+    return null
+  }
+
+  const episodeReaction = warmEpisode.outcome
+    ? { direction: warmEpisode.direction, outcome: warmEpisode.outcome }
+    : null
+
+  return (
+    <div className="flex flex-col gap-3">
+      {warmEpisode.summary ? (
+        <section className="flex flex-col gap-1">
+          <h3 className="text-xs font-medium text-muted-foreground">
+            {labels.warmEpisodeSummaryTitle}
+          </h3>
+          <p className="text-sm leading-relaxed text-foreground">
+            {warmEpisode.summary}
+          </p>
+        </section>
+      ) : null}
+      {episodeReaction ? (
+        <section className="flex flex-col gap-1">
+          <h3 className="text-xs font-medium text-muted-foreground">
+            {labels.episodeOutcomeTitle}
+          </h3>
+          <MarketChartAnnotationReactionSection
+            localization={localization}
+            onOutcomeRangeHover={onOutcomeRangeHover}
+            onOutcomeRangeLeave={onOutcomeRangeLeave}
+            reaction={episodeReaction}
+          />
+        </section>
+      ) : null}
+      {warmEpisode.events.length > 0 ? (
+        <section className="flex flex-col gap-2">
+          <h3 className="text-xs font-medium text-muted-foreground">
+            {labels.warmEpisodeEventsTitle}
+          </h3>
+          <div className="flex flex-col gap-2 border-l pl-3">
+            {warmEpisode.events.map((event) => {
+              const eventTime = formatMarketChartDateTime(
+                event.time,
+                localization
+              )
+              const title = event.title || event.summary || ""
+              const relationLabel = event.relationType
+                ? relationTypeLabels[event.relationType] ?? event.relationType
+                : null
+              const direction = event.reaction?.direction
+                ? getDirectionLabel(event.reaction.direction, dictionary)
+                : null
+              const confidence =
+                typeof event.reaction?.confidence === "number"
+                  ? formatMessage(labels.confidenceBadge, {
+                      value: localization.formatNumber(
+                        event.reaction.confidence,
+                        { maximumFractionDigits: 0, style: "percent" }
+                      ),
+                    })
+                  : null
+
+              return (
+                <article key={event.warmEpisodeEventId} className="flex flex-col gap-1">
+                  {eventTime ? (
+                    <AppTimeMetadata icon={CalendarClock}>{eventTime}</AppTimeMetadata>
+                  ) : null}
+                  {title ? (
+                    <h4 className="text-sm font-semibold text-foreground">
+                      {title}
+                    </h4>
+                  ) : null}
+                  {event.title && event.summary ? (
+                    <p className="line-clamp-3 text-sm text-muted-foreground">
+                      {event.summary}
+                    </p>
+                  ) : null}
+                  {relationLabel || direction || event.reaction?.timeHorizon || confidence ? (
+                    <div className="flex flex-wrap gap-1">
+                      {relationLabel ? <Badge variant="secondary">{relationLabel}</Badge> : null}
+                      {direction ? (
+                        <Badge className={getPredictionBadgeClassName(event.reaction?.direction)}>
+                          {direction}
+                        </Badge>
+                      ) : null}
+                      {event.reaction?.timeHorizon ? (
+                        <Badge variant="outline">{event.reaction.timeHorizon}</Badge>
+                      ) : null}
+                      {confidence ? <Badge variant="outline">{confidence}</Badge> : null}
+                    </div>
+                  ) : null}
+                </article>
+              )
+            })}
+          </div>
+        </section>
+      ) : null}
     </div>
   )
 }
