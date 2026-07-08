@@ -38,6 +38,12 @@ export interface MarketChartAnnotationRequest {
   to: string
 }
 
+export interface MarketChartEconomicCalendarEventRequest {
+  assetId: number
+  from: string
+  to: string
+}
+
 export interface MarketChartAssetResponse {
   id: number
   name: string
@@ -146,6 +152,28 @@ export interface MarketChartAnnotationResponse {
   time: string
   hotEvent?: MarketChartHotEventAnnotationResponse | null
   warmEpisode?: MarketChartWarmEpisodeAnnotationResponse | null
+}
+
+export type MarketChartEconomicCalendarEventStatus = "PENDING" | "AVAILABLE"
+
+export interface MarketChartEconomicCalendarEventResponse {
+  id: number
+  assetId: number
+  time: string
+  title?: string | null
+  currencyCode?: string | null
+  type?: string | null
+  impact?: string | null
+  forecastValue?: string | null
+  previousValue?: string | null
+  actualValue?: string | null
+  revision?: string | null
+  actualBetterWorse?: string | null
+  revisionBetterWorse?: string | null
+  description?: string | null
+  contentAvailable: boolean
+  status: MarketChartEconomicCalendarEventStatus
+  scheduledAt?: string | null
 }
 
 export interface MarketChartCandleResponse {
@@ -298,6 +326,42 @@ export function getMarketChartAnnotationRequestSchema(dictionary: Dictionary) {
     }) satisfies z.ZodType<MarketChartAnnotationRequest>
 }
 
+export function getMarketChartEconomicCalendarEventRequestSchema(
+  dictionary: Dictionary
+) {
+  return z
+    .object({
+      assetId: z
+        .number({
+          message: dictionary.marketCharts.invalidAsset,
+        })
+        .int(dictionary.marketCharts.invalidAsset)
+        .positive(dictionary.marketCharts.selectWatchlistAsset),
+      from: z
+        .string()
+        .trim()
+        .min(1, dictionary.marketCharts.fromRequired)
+        .refine(isValidDateTime, dictionary.marketCharts.fromInvalid),
+      to: z
+        .string()
+        .trim()
+        .min(1, dictionary.marketCharts.toRequired)
+        .refine(isValidDateTime, dictionary.marketCharts.toInvalid),
+    })
+    .superRefine((value, context) => {
+      const fromTime = Date.parse(value.from)
+      const toTime = Date.parse(value.to)
+
+      if (!Number.isNaN(fromTime) && !Number.isNaN(toTime) && fromTime >= toTime) {
+        context.addIssue({
+          code: "custom",
+          path: ["to"],
+          message: dictionary.marketCharts.toAfterFrom,
+        })
+      }
+    }) satisfies z.ZodType<MarketChartEconomicCalendarEventRequest>
+}
+
 export const marketChartAssetResponseSchema = z.object({
   id: z.number(),
   name: z.string(),
@@ -395,6 +459,31 @@ export const marketChartAnnotationResponseSchema = z.object({
   hotEvent: marketChartHotEventAnnotationResponseSchema.nullable().optional(),
   warmEpisode: marketChartWarmEpisodeAnnotationResponseSchema.nullable().optional(),
 }) satisfies z.ZodType<MarketChartAnnotationResponse>
+
+export const marketChartEconomicCalendarEventStatusSchema = z.enum([
+  "PENDING",
+  "AVAILABLE",
+]) satisfies z.ZodType<MarketChartEconomicCalendarEventStatus>
+
+export const marketChartEconomicCalendarEventResponseSchema = z.object({
+  id: z.number(),
+  assetId: z.number(),
+  time: z.string(),
+  title: z.string().nullable().optional(),
+  currencyCode: z.string().nullable().optional(),
+  type: z.string().nullable().optional(),
+  impact: z.string().nullable().optional(),
+  forecastValue: z.string().nullable().optional(),
+  previousValue: z.string().nullable().optional(),
+  actualValue: z.string().nullable().optional(),
+  revision: z.string().nullable().optional(),
+  actualBetterWorse: z.string().nullable().optional(),
+  revisionBetterWorse: z.string().nullable().optional(),
+  description: z.string().nullable().optional(),
+  contentAvailable: z.boolean(),
+  status: marketChartEconomicCalendarEventStatusSchema,
+  scheduledAt: z.string().nullable().optional(),
+}) satisfies z.ZodType<MarketChartEconomicCalendarEventResponse>
 
 export const marketChartCandleResponseSchema = z.object({
   provider: z.string().nullable().optional(),

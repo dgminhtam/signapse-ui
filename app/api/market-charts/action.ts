@@ -11,10 +11,14 @@ import {
   MarketChartAnnotationResponse,
   MarketChartCandleRequest,
   MarketChartCandleResponse,
+  MarketChartEconomicCalendarEventRequest,
+  MarketChartEconomicCalendarEventResponse,
   getMarketChartAnnotationRequestSchema,
   getMarketChartCandleRequestSchema,
+  getMarketChartEconomicCalendarEventRequestSchema,
   marketChartAnnotationResponseSchema,
   marketChartCandleResponseSchema,
+  marketChartEconomicCalendarEventResponseSchema,
 } from "@/app/lib/market-charts/definitions"
 
 function createMarketChartCandleQuery(request: MarketChartCandleRequest) {
@@ -29,6 +33,18 @@ function createMarketChartCandleQuery(request: MarketChartCandleRequest) {
 }
 
 function createMarketChartAnnotationQuery(request: MarketChartAnnotationRequest) {
+  const query = new URLSearchParams()
+
+  query.set("assetId", String(request.assetId))
+  query.set("from", request.from)
+  query.set("to", request.to)
+
+  return query.toString()
+}
+
+function createMarketChartEconomicCalendarEventQuery(
+  request: MarketChartEconomicCalendarEventRequest
+) {
   const query = new URLSearchParams()
 
   query.set("assetId", String(request.assetId))
@@ -122,6 +138,56 @@ export async function getMarketChartAnnotations(
         error instanceof Error
           ? error.message
           : dictionary.marketCharts.loadError,
+    }
+  }
+}
+
+export async function getMarketChartEconomicCalendarEvents(
+  request: MarketChartEconomicCalendarEventRequest
+): Promise<ActionResult<MarketChartEconomicCalendarEventResponse[]>> {
+  const dictionary = await getDictionary(await getRequestLocale())
+  const parsedRequest =
+    getMarketChartEconomicCalendarEventRequestSchema(dictionary).safeParse(request)
+
+  if (!parsedRequest.success) {
+    return {
+      success: false,
+      error:
+        parsedRequest.error.issues[0]?.message ||
+        dictionary.marketCharts.validationInvalid,
+    }
+  }
+
+  try {
+    const response = await fetchAuthenticated<unknown>(
+      `/market-charts/economic-calendar-events?${createMarketChartEconomicCalendarEventQuery(parsedRequest.data)}`
+    )
+    const parsedResponse = z
+      .array(marketChartEconomicCalendarEventResponseSchema)
+      .safeParse(response)
+
+    if (!parsedResponse.success) {
+      console.error(
+        "Market chart economic calendar event response validation failed",
+        parsedResponse.error.issues
+      )
+      return {
+        success: false,
+        error: dictionary.marketCharts.calendar.responseInvalid,
+      }
+    }
+
+    return {
+      success: true,
+      data: parsedResponse.data,
+    }
+  } catch (error: unknown) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : dictionary.marketCharts.calendar.loadError,
     }
   }
 }

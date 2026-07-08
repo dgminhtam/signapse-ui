@@ -57,7 +57,7 @@ Xác minh lần cuối: ngày 7 tháng 7 năm 2026
 - Snapshot mới thêm domain `narratives`, đồng thời mở rộng `market-query` với `keyNarratives[]` và `graph-view` với node/edge narrative.
 - Snapshot mới bỏ endpoint `POST /news-articles/{id}/crawl-full-content`, mở rộng `system-prompts` với `responseSchema`/`localizedNames`, và thêm `evidenceNote` cho market query evidence.
 - Snapshot mới thêm `POST /watchlists/assets` để bulk create watchlist assets; `responseSchema` của system prompts hiện là JSON object inline, không còn component schema `JsonNode`.
-- Snapshot mới thêm `GET /market-charts/live` cho live chart stream dạng `text/event-stream`, dùng permission `market-chart:read`.
+- Snapshot mới thêm `GET /market-charts/live` cho live chart stream dạng `text/event-stream`, và `GET /market-charts/economic-calendar-events` cho event lịch kinh tế trên chart; cả hai dùng permission `market-chart:read`.
 - Snapshot mới thêm workflow market conversations / persisted analyses dưới permission `query:execute`, gồm lưu hội thoại, submit message, xem analysis/evidence, và gửi analysis qua Telegram.
 - Snapshot ngày 7/6 đổi tên OpenAPI schema của market conversations sang nhóm `Conversation*` và đổi timestamp conversation/message sang `createdDate` / `lastModifiedDate`.
 - Snapshot ngày 11/6 thêm `GET /market-conversations/{conversationId}/messages` để tải lịch sử message theo cursor `beforeMessageId` và `size`.
@@ -192,6 +192,7 @@ Ghi chu:
 | ----------- | ------------------------ | ------------ | -------------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | GET         | `/market-charts/candles` | `getCandles` | `getMarketChartCandles(request)` | Da dong bo contract candles-only | Endpoint duoc gate backend bang `market-chart:read`; FE gui `assetId`, `timeframe`, `from`, `to`; parse optional `symbol`, `asset`, `timeframe`, `from`, `to`, `candles[]`. |
 | GET         | `/market-charts/annotations` | `getAnnotations` | `getMarketChartAnnotations(request)` | Dang lech contract annotation timeline moi | Endpoint duoc gate backend bang `market-chart:read`; FE gui `assetId`, `from`, `to`; range dung `[from, to)` giong candles. Response moi la timeline chi gom top-level `HOT_EVENT` va `WARM_EPISODE`; khong con `WARM_EVENT` top-level. |
+| GET         | `/market-charts/economic-calendar-events` | `getEconomicCalendarEvents` | `-` | Chua trien khai | Endpoint duoc gate backend bang `market-chart:read`; query `request` tham chieu `MarketChartEconomicCalendarEventRequest` gom `assetId`, `from`, `to`; response la `MarketChartEconomicCalendarEventResponse[]`. |
 | GET         | `/market-charts/live`    | `streamLive` | `-`                              | Chua trien khai                           | Live stream SSE `text/event-stream`; query `request` tham chieu `MarketChartLiveRequest` gom `assetId`, `timeframe`; permission `market-chart:read`.                                                                                                 |
 
 Frontend lien quan:
@@ -211,6 +212,8 @@ Ghi chu:
 - Query contract hien duoc khai bao qua object `request` trong query string, tham chieu schema `MarketChartCandleRequest`.
 - `MarketChartCandleRequest` gom `assetId`, `timeframe`, `from`, `to`; snapshot hien tai khong mo ta enum hay danh sach gia tri hop le cho `timeframe`, trong khi FE data layer hien gioi han `timeframe` theo union `1m`, `5m`, `15m`, `30m`, `1h`, `1d`, `1w`, `1mo`.
 - `MarketChartAnnotationRequest` gom `assetId`, `from`, `to`; range dung `[from, to)`, `from` inclusive va `to` exclusive; response cua `/market-charts/annotations` la mang `MarketChartAnnotationResponse`.
+- `MarketChartEconomicCalendarEventRequest` gom `assetId`, `from`, `to`; response cua `/market-charts/economic-calendar-events` la mang `MarketChartEconomicCalendarEventResponse`.
+- `MarketChartEconomicCalendarEventResponse` gom `id`, `assetId`, `time`, `title`, `currencyCode`, `type`, `impact`, `forecastValue`, `previousValue`, `actualValue`, `revision`, `actualBetterWorse`, `revisionBetterWorse`, `description`, `contentAvailable`, `status`, va `scheduledAt`.
 - `MarketChartLiveRequest` gom `assetId` va `timeframe`; response cua `/market-charts/live` la `text/event-stream` voi schema `SseEmitter` gom `timeout`.
 - `MarketChartCandleItemResponse` gom `time`, `open`, `high`, `low`, `close`, `volume`.
 - `MarketChartCandleResponse` gom optional `symbol`, `asset: MarketChartAssetResponse`, `timeframe`, `from`, `to`, va `candles[]`; annotation khong con nam trong candle response.
@@ -224,6 +227,7 @@ Ghi chu:
 - UI khong expose `from` hoac `to` nhu form input. Route state chi gom `assetId` va `timeframe`; FE resolve asset tu `GET /watchlists`, gui `assetId` cho chart action, va de backend so huu provider-symbol resolution.
 - FE khong con gui `includeAnnotations`; layer su kien chi dieu khien viec fetch/hien thi marker tu endpoint `/market-charts/annotations`.
 - UI dung KLineChart de render nen OHLCV, render marker notification tu annotation endpoint data, group cac annotation cung moc thoi gian, va mo popup detail/evidence/link su kien khi user chon marker hoac moc su kien accessible ben ngoai canvas. Lazy historical loading da duoc trien khai cho huong tai nen cu hon bang endpoint `/market-charts/candles` va fetch annotation rieng cho cung cua so khi layer su kien duoc bat; trade recommendation van chua trien khai ve UI.
+- Frontend hien chua co action/DTO/render layer cho `/market-charts/economic-calendar-events`; neu tich hop thi nen dung cung `assetId`, `from`, `to` cua candle window va gate UI bang `market-chart:read`.
 - Frontend hien chua co action, DTO, EventSource client, reconnect handling, hoac UI state cho live stream `/market-charts/live`.
 
 ### 6. API market query

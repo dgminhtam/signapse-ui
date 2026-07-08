@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
 } from "react"
+import { CalendarClock } from "lucide-react"
 import {
   dispose,
   init,
@@ -29,8 +30,11 @@ import type {
   MarketChartAnnotationResponse,
   MarketChartCandleItemResponse,
   MarketChartCandleRequest,
+  MarketChartEconomicCalendarEventResponse,
   MarketChartTimeframe,
 } from "@/app/lib/market-charts/definitions"
+import { AppTimeMetadata } from "@/components/app-time-metadata"
+import { LocalizedLink } from "@/components/localized-link"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
@@ -38,8 +42,10 @@ import { cn } from "@/lib/utils"
 import {
   getMarketChartAnnotationColorClassNames,
   mergeMarketChartAnnotations,
+  mergeMarketChartEconomicCalendarEvents,
   type MarketChartAnnotationGroup,
   type MarketChartAnnotationMarkerPoint,
+  type MarketChartEconomicCalendarEventGroup,
 } from "./market-chart-annotations"
 import {
   createMarketChartDrawingGroupId,
@@ -92,6 +98,7 @@ import {
 export interface MarketChartLoadedData {
   annotations: MarketChartAnnotationResponse[]
   candles: MarketChartCandleItemResponse[]
+  economicCalendarEvents: MarketChartEconomicCalendarEventResponse[]
   from: string | null
 }
 
@@ -137,6 +144,9 @@ interface MarketChartCanvasProps {
   symbol?: string
   annotations?: MarketChartAnnotationResponse[]
   annotationGroups?: MarketChartAnnotationGroup[]
+  calendarEventGroups?: MarketChartEconomicCalendarEventGroup[]
+  calendarEvents?: MarketChartEconomicCalendarEventResponse[]
+  calendarLayerEnabled: boolean
   warmAnnotationGroups?: MarketChartAnnotationGroup[]
   annotationLayerEnabled: boolean
   liveCandle?: MarketChartCandleItemResponse | null
@@ -161,6 +171,11 @@ interface MarkerPosition {
   group: MarketChartAnnotationGroup
   x: number
   y: number
+}
+
+interface CalendarMarkerPosition {
+  group: MarketChartEconomicCalendarEventGroup
+  x: number
 }
 
 interface WarmBandPosition extends OutcomeHoverBand {
@@ -207,7 +222,7 @@ const MARKER_DATE_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
 
 function getMarkerCoordinate(
   chart: Chart,
-  group: MarketChartAnnotationGroup
+  group: { anchorPrice: number; time: number }
 ): MarketChartAnnotationMarkerPoint | null {
   const coordinate = chart.convertToPixel(
     {
@@ -544,6 +559,9 @@ export const MarketChartCanvas = forwardRef<
   {
     annotations = [],
     annotationGroups = [],
+    calendarEventGroups = [],
+    calendarEvents = [],
+    calendarLayerEnabled,
     warmAnnotationGroups = [],
     annotationLayerEnabled,
     assetId,
@@ -582,8 +600,11 @@ export const MarketChartCanvas = forwardRef<
   const activeDrawingDraftIdRef = useRef<string | null>(null)
   const activeDrawingToolRef = useRef<MarketChartDrawingTool | null>(null)
   const annotationLayerEnabledRef = useRef(annotationLayerEnabled)
+  const calendarLayerEnabledRef = useRef(calendarLayerEnabled)
   const annotationsRef = useRef(annotations)
   const annotationGroupsRef = useRef(annotationGroups)
+  const calendarEventGroupsRef = useRef(calendarEventGroups)
+  const calendarEventsRef = useRef(calendarEvents)
   const warmAnnotationGroupsRef = useRef(warmAnnotationGroups)
   const activeOutcomeHoverRangeRef = useRef<MarketChartOutcomeHoverRange | null>(
     activeOutcomeHoverRange
@@ -596,6 +617,9 @@ export const MarketChartCanvas = forwardRef<
   const drawingMagnetRef = useRef(false)
   const drawingVisibleRef = useRef(true)
   const loadedAnnotationsRef = useRef<MarketChartAnnotationResponse[]>([])
+  const loadedCalendarEventsRef = useRef<
+    MarketChartEconomicCalendarEventResponse[]
+  >([])
   const loadedCandlesRef = useRef<MarketChartCandleItemResponse[]>([])
   const liveCandleRef = useRef<MarketChartCandleItemResponse | null>(liveCandle)
   const liveCandleSubscriberRef = useRef<
@@ -616,6 +640,12 @@ export const MarketChartCanvas = forwardRef<
     state: "idle",
   })
   const [markerPositions, setMarkerPositions] = useState<MarkerPosition[]>([])
+  const [calendarMarkerPositions, setCalendarMarkerPositions] = useState<
+    CalendarMarkerPosition[]
+  >([])
+  const [activeCalendarGuideX, setActiveCalendarGuideX] = useState<number | null>(
+    null
+  )
   const [warmBandPositions, setWarmBandPositions] = useState<WarmBandPosition[]>(
     []
   )
@@ -636,6 +666,12 @@ export const MarketChartCanvas = forwardRef<
   }, [annotations, annotationLayerEnabled])
 
   useEffect(() => {
+    calendarLayerEnabledRef.current = calendarLayerEnabled
+    calendarEventsRef.current = calendarEvents
+    loadedCalendarEventsRef.current = calendarLayerEnabled ? calendarEvents : []
+  }, [calendarEvents, calendarLayerEnabled])
+
+  useEffect(() => {
     candlesRef.current = candles
   }, [candles])
 
@@ -652,6 +688,11 @@ export const MarketChartCanvas = forwardRef<
     annotationGroupsRef.current = annotationGroups
     scheduleMarkerPositionUpdateRef.current()
   }, [annotationGroups])
+
+  useEffect(() => {
+    calendarEventGroupsRef.current = calendarEventGroups
+    scheduleMarkerPositionUpdateRef.current()
+  }, [calendarEventGroups])
 
   useEffect(() => {
     warmAnnotationGroupsRef.current = warmAnnotationGroups
@@ -1027,6 +1068,20 @@ export const MarketChartCanvas = forwardRef<
             ]
           : []
       })
+      const nextCalendarPositions = calendarEventGroupsRef.current.flatMap(
+        (group) => {
+          const point = getMarkerCoordinate(currentChart, group)
+
+          return point
+            ? [
+                {
+                  group,
+                  x: Math.max(28, Math.min(currentContainer.clientWidth - 28, point.x)),
+                },
+              ]
+            : []
+        }
+      )
       const nextWarmBandPositions = warmAnnotationGroupsRef.current.flatMap(
         (group) => {
           const annotation = group.annotations[0]
@@ -1059,6 +1114,7 @@ export const MarketChartCanvas = forwardRef<
       )
 
       setMarkerPositions(nextPositions)
+      setCalendarMarkerPositions(nextCalendarPositions)
       setWarmBandPositions(nextWarmBandPositions)
       setOutcomeHoverBand(
         getOutcomeHoverBand({
@@ -1106,6 +1162,8 @@ export const MarketChartCanvas = forwardRef<
       chartRef.current = null
       onDrawingSelectionChangeRef.current?.(null)
       setMarkerPositions([])
+      setCalendarMarkerPositions([])
+      setActiveCalendarGuideX(null)
       setWarmBandPositions([])
       setOutcomeHoverBand(null)
       dispose(chart)
@@ -1226,6 +1284,9 @@ export const MarketChartCanvas = forwardRef<
     historyExhaustedRef.current = false
     clearDrawingSelection()
     loadedAnnotationsRef.current = annotationLayerEnabledRef.current ? annotationsRef.current : []
+    loadedCalendarEventsRef.current = calendarLayerEnabledRef.current
+      ? calendarEventsRef.current
+      : []
     loadedCandlesRef.current = normalizeCandleItems(candlesRef.current)
 
     // Update drawing group ID for new data source
@@ -1313,9 +1374,17 @@ export const MarketChartCanvas = forwardRef<
         loadedAnnotationsRef.current = mergeMarketChartAnnotations(loadedAnnotationsRef.current, result.data.annotations)
       }
 
+      if (calendarLayerEnabledRef.current) {
+        loadedCalendarEventsRef.current = mergeMarketChartEconomicCalendarEvents(
+          loadedCalendarEventsRef.current,
+          result.data.economicCalendarEvents
+        )
+      }
+
       onLoadedDataChangeRef.current?.({
         annotations: loadedAnnotationsRef.current,
         candles: loadedCandlesRef.current,
+        economicCalendarEvents: loadedCalendarEventsRef.current,
         from: loadedCandlesRef.current[0]?.time ?? result.data.from,
       })
       setHistoryFeedback({ error: null, loadId, state: "idle" })
@@ -1368,9 +1437,104 @@ export const MarketChartCanvas = forwardRef<
     }
   }, [drawingToolActive])
 
+  function getCalendarEventTitle(
+    event: MarketChartEconomicCalendarEventResponse
+  ) {
+    return (
+      event.title?.trim() ||
+      event.type?.trim() ||
+      dictionary.marketCharts.calendar.eventFallback
+    )
+  }
+
+  function renderCalendarEventList(
+    events: MarketChartEconomicCalendarEventResponse[]
+  ) {
+    return (
+      <div className="flex max-h-80 flex-col gap-3 overflow-y-auto p-1">
+        {events.map((event) => {
+          const values = [
+            event.currencyCode,
+            event.impact,
+            event.forecastValue
+              ? `${dictionary.marketCharts.calendar.forecast}: ${event.forecastValue}`
+              : null,
+            event.previousValue
+              ? `${dictionary.marketCharts.calendar.previous}: ${event.previousValue}`
+              : null,
+            event.actualValue
+              ? `${dictionary.marketCharts.calendar.actual}: ${event.actualValue}`
+              : null,
+            event.revision
+              ? `${dictionary.marketCharts.calendar.revision}: ${event.revision}`
+              : null,
+            event.actualBetterWorse,
+            event.revisionBetterWorse,
+          ].filter((value): value is string => !!value)
+
+          return (
+            <article key={event.id} className="flex flex-col gap-1.5">
+              <div className="flex flex-wrap items-center gap-2">
+                <AppTimeMetadata icon={CalendarClock}>
+                  {formatDateTime(
+                    event.time,
+                    MARKER_DATE_TIME_OPTIONS,
+                    dictionary.marketCharts.format.notAvailable
+                  )}
+                </AppTimeMetadata>
+                <span className="rounded-full bg-sky-500/10 px-2 py-0.5 text-xs font-medium text-sky-700">
+                  {event.status}
+                </span>
+              </div>
+              <LocalizedLink
+                href={`/economic-calendar/${event.id}`}
+                className="line-clamp-2 rounded-sm text-sm font-semibold text-foreground underline-offset-4 outline-none hover:text-primary hover:underline focus-visible:ring-2 focus-visible:ring-ring/50"
+              >
+                {getCalendarEventTitle(event)}
+              </LocalizedLink>
+              {values.length > 0 ? (
+                <div className="flex flex-wrap gap-1 text-xs text-muted-foreground">
+                  {values.map((value) => (
+                    <span key={value} className="rounded-sm bg-muted px-1.5 py-0.5">
+                      {value}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+              {event.description ? (
+                <p className="line-clamp-3 text-xs leading-relaxed text-muted-foreground">
+                  {event.description}
+                </p>
+              ) : null}
+              {event.contentAvailable ? (
+                <span className="text-xs font-medium text-muted-foreground">
+                  {dictionary.marketCharts.calendar.contentAvailable}
+                </span>
+              ) : null}
+            </article>
+          )
+        })}
+      </div>
+    )
+  }
+
+  const showCalendarLane = calendarLayerEnabled && calendarEvents.length > 0
+
   return (
     <div className={cn("relative h-full min-h-0 w-full", className)}>
-      <div ref={containerRef} className="absolute inset-0" />
+      <div
+        ref={containerRef}
+        className={cn("absolute inset-x-0 top-0", showCalendarLane ? "bottom-10" : "bottom-0")}
+      />
+      {activeCalendarGuideX !== null ? (
+        <div
+          className={cn(
+            "pointer-events-none absolute top-0 z-[2] w-px bg-destructive/80",
+            showCalendarLane ? "bottom-10" : "bottom-0"
+          )}
+          style={{ left: activeCalendarGuideX }}
+        />
+      ) : null}
       {outcomeHoverBand ? (
         <div
           className="pointer-events-none absolute z-[2] bg-primary/15 ring-1 ring-primary/30"
@@ -1381,6 +1545,84 @@ export const MarketChartCanvas = forwardRef<
             width: outcomeHoverBand.width,
           }}
         />
+      ) : null}
+      {showCalendarLane ? (
+        <div className="absolute inset-x-0 bottom-0 z-[4] h-10">
+          <div className="absolute inset-x-3 bottom-1 h-8 rounded-md border bg-background/95 shadow-sm backdrop-blur" />
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className="absolute left-4 top-1/2 flex -translate-y-1/2 items-center gap-1 rounded-sm px-2 py-1 text-xs font-medium text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
+              >
+                <span className="size-2 rounded-full bg-sky-500" />
+                {formatMessage(dictionary.marketCharts.calendar.eventMarkers, {
+                  count: formatNumber(calendarEvents.length),
+                })}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent
+              align="start"
+              side="top"
+              className="w-[min(24rem,calc(100vw_-_1.5rem))]"
+            >
+              {renderCalendarEventList(calendarEvents)}
+            </PopoverContent>
+          </Popover>
+          {calendarMarkerPositions.map(({ group, x }) => {
+            const count = group.events.length
+            const emphasized = group.priority === "high"
+
+            return (
+              <Popover key={group.id}>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    aria-label={
+                      count > 1
+                        ? formatMessage(
+                            dictionary.marketCharts.calendar.openMany,
+                            { count: formatNumber(count) }
+                          )
+                        : formatMessage(
+                            dictionary.marketCharts.calendar.openOne,
+                            {
+                              title: group.events[0]
+                                ? getCalendarEventTitle(group.events[0])
+                                : "",
+                            }
+                          )
+                    }
+                    className="absolute top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                    style={{ left: x }}
+                    onBlur={() => setActiveCalendarGuideX(null)}
+                    onFocus={() => setActiveCalendarGuideX(x)}
+                    onMouseEnter={() => setActiveCalendarGuideX(x)}
+                    onMouseLeave={() => setActiveCalendarGuideX(null)}
+                  >
+                    <span
+                      className={cn(
+                        count > 1
+                          ? "relative flex size-6 items-center justify-center rounded-full border-2 border-background bg-sky-500 text-[11px] font-semibold text-white shadow-sm ring-2 ring-sky-500/30"
+                          : "relative block rounded-full border-2 border-background bg-sky-500 shadow-sm ring-2 ring-sky-500/30",
+                        count > 1 ? null : emphasized ? "size-5" : "size-4"
+                      )}
+                    >
+                      {count > 1 ? formatNumber(count) : null}
+                    </span>
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  align="start"
+                  side="top"
+                  className="w-[min(24rem,calc(100vw_-_1.5rem))]"
+                >
+                  {renderCalendarEventList(group.events)}
+                </PopoverContent>
+              </Popover>
+            )
+          })}
+        </div>
       ) : null}
       {warmBandPositions.map(({ group, height, left, top, width }) => {
         const selected = selectedAnnotationGroupId === group.id
@@ -1428,7 +1670,8 @@ export const MarketChartCanvas = forwardRef<
       {historyState !== "idle" ? (
         <div
           className={cn(
-            "pointer-events-none absolute bottom-3 left-3 z-20 flex max-w-[calc(100%-1.5rem)] items-center gap-2 rounded-full border bg-background/95 px-3 py-1.5 text-xs font-medium shadow-sm backdrop-blur",
+            "pointer-events-none absolute left-3 z-20 flex max-w-[calc(100%-1.5rem)] items-center gap-2 rounded-full border bg-background/95 px-3 py-1.5 text-xs font-medium shadow-sm backdrop-blur",
+            showCalendarLane ? "bottom-12" : "bottom-3",
             historyState === "error"
               ? "border-destructive/30 text-destructive"
               : "text-muted-foreground"

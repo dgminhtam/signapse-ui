@@ -2,6 +2,7 @@ import type {
   MarketChartAnnotationDirection,
   MarketChartAnnotationResponse,
   MarketChartCandleItemResponse,
+  MarketChartEconomicCalendarEventResponse,
 } from "@/app/lib/market-charts/definitions"
 
 export type MarketChartEpochMillis = number
@@ -12,6 +13,14 @@ export interface MarketChartAnnotationGroup {
   anchorPrice: number
   direction: MarketChartAnnotationDirection | null
   annotations: MarketChartAnnotationResponse[]
+  priority: "normal" | "high"
+}
+
+export interface MarketChartEconomicCalendarEventGroup {
+  id: string
+  time: MarketChartEpochMillis
+  anchorPrice: number
+  events: MarketChartEconomicCalendarEventResponse[]
   priority: "normal" | "high"
 }
 
@@ -83,6 +92,16 @@ function isValidMarketChartAnnotation(
   )
 }
 
+function isValidMarketChartEconomicCalendarEvent(
+  event: unknown
+): event is MarketChartEconomicCalendarEventResponse {
+  return (
+    isRecord(event) &&
+    typeof event.id === "number" &&
+    toMarketChartEpochMillis(event.time) !== null
+  )
+}
+
 function isValidMarketChartCandle(
   candle: unknown
 ): candle is MarketChartCandleItemResponse {
@@ -119,6 +138,28 @@ export function mergeMarketChartAnnotations(
   }
 
   return [...annotationsById.values()].sort((left, right) => {
+    const leftTime = toMarketChartEpochMillis(left.time) ?? 0
+    const rightTime = toMarketChartEpochMillis(right.time) ?? 0
+
+    return leftTime - rightTime
+  })
+}
+
+export function mergeMarketChartEconomicCalendarEvents(
+  current: MarketChartEconomicCalendarEventResponse[],
+  incoming: MarketChartEconomicCalendarEventResponse[]
+): MarketChartEconomicCalendarEventResponse[] {
+  const eventsById = new Map<number, MarketChartEconomicCalendarEventResponse>()
+
+  for (const event of current.filter(isValidMarketChartEconomicCalendarEvent)) {
+    eventsById.set(event.id, event)
+  }
+
+  for (const event of incoming.filter(isValidMarketChartEconomicCalendarEvent)) {
+    eventsById.set(event.id, event)
+  }
+
+  return [...eventsById.values()].sort((left, right) => {
     const leftTime = toMarketChartEpochMillis(left.time) ?? 0
     const rightTime = toMarketChartEpochMillis(right.time) ?? 0
 
@@ -178,6 +219,12 @@ function hasHighPriorityAnnotation(annotations: MarketChartAnnotationResponse[])
         )
       : false
   })
+}
+
+function hasHighImpactCalendarEvent(
+  events: MarketChartEconomicCalendarEventResponse[]
+) {
+  return events.some((event) => event.impact?.toUpperCase().includes("HIGH"))
 }
 
 function resolveNearestCandleTime(
@@ -276,6 +323,64 @@ export function createMarketChartAnnotationGroups(
         annotations: groupedAnnotations,
         priority:
           groupedAnnotations.length > 1 || hasHighPriorityAnnotation(groupedAnnotations)
+            ? "high"
+            : "normal",
+      }
+    })
+}
+
+export function createMarketChartEconomicCalendarEventGroups(
+  events: MarketChartEconomicCalendarEventResponse[],
+  candles: MarketChartCandleItemResponse[]
+): MarketChartEconomicCalendarEventGroup[] {
+  const validCandles = candles.filter(isValidMarketChartCandle)
+  const candleTimes = validCandles
+    .map((candle) => toMarketChartEpochMillis(candle.time))
+    .filter((time): time is MarketChartEpochMillis => time !== null)
+    .sort((left, right) => Number(left) - Number(right))
+  const candlesByTime = new Map<number, MarketChartCandleItemResponse>()
+  const groupsByTime = new Map<number, MarketChartEconomicCalendarEventResponse[]>()
+
+  for (const candle of validCandles) {
+    const time = toMarketChartEpochMillis(candle.time)
+
+    if (time !== null) {
+      candlesByTime.set(Number(time), candle)
+    }
+  }
+
+  for (const event of events.filter(isValidMarketChartEconomicCalendarEvent)) {
+    const eventTime = toMarketChartEpochMillis(event.time)
+
+    if (eventTime === null) {
+      continue
+    }
+
+    const candleTime = resolveNearestCandleTime(eventTime, candleTimes)
+
+    if (candleTime === null) {
+      continue
+    }
+
+    const key = Number(candleTime)
+    const group = groupsByTime.get(key) ?? []
+
+    group.push(event)
+    groupsByTime.set(key, group)
+  }
+
+  return [...groupsByTime.entries()]
+    .sort(([left], [right]) => left - right)
+    .map(([time, groupedEvents]) => {
+      const candle = candlesByTime.get(time)
+
+      return {
+        id: `economic-calendar-${time}`,
+        time,
+        anchorPrice: candle?.high ?? candle?.close ?? 0,
+        events: groupedEvents,
+        priority:
+          groupedEvents.length > 1 || hasHighImpactCalendarEvent(groupedEvents)
             ? "high"
             : "normal",
       }
