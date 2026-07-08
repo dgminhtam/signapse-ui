@@ -1058,28 +1058,28 @@ export const MarketChartCanvas = forwardRef<
 
       const nextPositions = annotationGroupsRef.current.flatMap((group) => {
         const point = getMarkerCoordinate(currentChart, group)
-        return point
-          ? [
-              {
-                group,
-                x: Math.max(18, Math.min(currentContainer.clientWidth - 18, point.x)),
-                y: Math.max(24, Math.min(currentContainer.clientHeight - 92, point.y - 18)),
-              },
-            ]
-          : []
+
+        if (
+          !point ||
+          point.x < 0 ||
+          point.x > currentContainer.clientWidth ||
+          point.y < 0 ||
+          point.y > currentContainer.clientHeight
+        ) {
+          return []
+        }
+
+        return [{ group, x: point.x, y: point.y - 18 }]
       })
       const nextCalendarPositions = calendarEventGroupsRef.current.flatMap(
         (group) => {
           const point = getMarkerCoordinate(currentChart, group)
 
-          return point
-            ? [
-                {
-                  group,
-                  x: Math.max(28, Math.min(currentContainer.clientWidth - 28, point.x)),
-                },
-              ]
-            : []
+          if (!point || point.x < 0 || point.x > currentContainer.clientWidth) {
+            return []
+          }
+
+          return [{ group, x: point.x }]
         }
       )
       const nextWarmBandPositions = warmAnnotationGroupsRef.current.flatMap(
@@ -1454,23 +1454,35 @@ export const MarketChartCanvas = forwardRef<
       <div className="flex max-h-80 flex-col gap-3 overflow-y-auto p-1">
         {events.map((event) => {
           const values = [
-            event.currencyCode,
-            event.impact,
+            { key: "currencyCode", value: event.currencyCode },
+            { key: "impact", value: event.impact },
             event.forecastValue
-              ? `${dictionary.marketCharts.calendar.forecast}: ${event.forecastValue}`
+              ? {
+                  key: "forecastValue",
+                  value: `${dictionary.marketCharts.calendar.forecast}: ${event.forecastValue}`,
+                }
               : null,
             event.previousValue
-              ? `${dictionary.marketCharts.calendar.previous}: ${event.previousValue}`
+              ? {
+                  key: "previousValue",
+                  value: `${dictionary.marketCharts.calendar.previous}: ${event.previousValue}`,
+                }
               : null,
             event.actualValue
-              ? `${dictionary.marketCharts.calendar.actual}: ${event.actualValue}`
+              ? {
+                  key: "actualValue",
+                  value: `${dictionary.marketCharts.calendar.actual}: ${event.actualValue}`,
+                }
               : null,
             event.revision
-              ? `${dictionary.marketCharts.calendar.revision}: ${event.revision}`
+              ? {
+                  key: "revision",
+                  value: `${dictionary.marketCharts.calendar.revision}: ${event.revision}`,
+                }
               : null,
-            event.actualBetterWorse,
-            event.revisionBetterWorse,
-          ].filter((value): value is string => !!value)
+            { key: "actualBetterWorse", value: event.actualBetterWorse },
+            { key: "revisionBetterWorse", value: event.revisionBetterWorse },
+          ].filter((item): item is { key: string; value: string } => !!item?.value)
 
           return (
             <article key={event.id} className="flex flex-col gap-1.5">
@@ -1494,9 +1506,9 @@ export const MarketChartCanvas = forwardRef<
               </LocalizedLink>
               {values.length > 0 ? (
                 <div className="flex flex-wrap gap-1 text-xs text-muted-foreground">
-                  {values.map((value) => (
-                    <span key={value} className="rounded-sm bg-muted px-1.5 py-0.5">
-                      {value}
+                  {values.map((item) => (
+                    <span key={item.key} className="rounded-sm bg-muted px-1.5 py-0.5">
+                      {item.value}
                     </span>
                   ))}
                 </div>
@@ -1524,13 +1536,13 @@ export const MarketChartCanvas = forwardRef<
     <div className={cn("relative h-full min-h-0 w-full", className)}>
       <div
         ref={containerRef}
-        className={cn("absolute inset-x-0 top-0", showCalendarLane ? "bottom-10" : "bottom-0")}
+        className={cn("absolute inset-x-0 top-0", showCalendarLane ? "bottom-8" : "bottom-0")}
       />
       {activeCalendarGuideX !== null ? (
         <div
           className={cn(
             "pointer-events-none absolute top-0 z-[2] w-px bg-destructive/80",
-            showCalendarLane ? "bottom-10" : "bottom-0"
+            showCalendarLane ? "bottom-8" : "bottom-0"
           )}
           style={{ left: activeCalendarGuideX }}
         />
@@ -1547,28 +1559,7 @@ export const MarketChartCanvas = forwardRef<
         />
       ) : null}
       {showCalendarLane ? (
-        <div className="absolute inset-x-0 bottom-0 z-[4] h-10">
-          <div className="absolute inset-x-3 bottom-1 h-8 rounded-md border bg-background/95 shadow-sm backdrop-blur" />
-          <Popover>
-            <PopoverTrigger asChild>
-              <button
-                type="button"
-                className="absolute left-4 top-1/2 flex -translate-y-1/2 items-center gap-1 rounded-sm px-2 py-1 text-xs font-medium text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
-              >
-                <span className="size-2 rounded-full bg-sky-500" />
-                {formatMessage(dictionary.marketCharts.calendar.eventMarkers, {
-                  count: formatNumber(calendarEvents.length),
-                })}
-              </button>
-            </PopoverTrigger>
-            <PopoverContent
-              align="start"
-              side="top"
-              className="w-[min(24rem,calc(100vw_-_1.5rem))]"
-            >
-              {renderCalendarEventList(calendarEvents)}
-            </PopoverContent>
-          </Popover>
+        <div className="absolute inset-x-0 bottom-0 z-[4] h-8">
           {calendarMarkerPositions.map(({ group, x }) => {
             const count = group.events.length
             const emphasized = group.priority === "high"
@@ -1671,7 +1662,7 @@ export const MarketChartCanvas = forwardRef<
         <div
           className={cn(
             "pointer-events-none absolute left-3 z-20 flex max-w-[calc(100%-1.5rem)] items-center gap-2 rounded-full border bg-background/95 px-3 py-1.5 text-xs font-medium shadow-sm backdrop-blur",
-            showCalendarLane ? "bottom-12" : "bottom-3",
+            showCalendarLane ? "bottom-10" : "bottom-3",
             historyState === "error"
               ? "border-destructive/30 text-destructive"
               : "text-muted-foreground"
