@@ -305,10 +305,10 @@ export default async function EventDetailPage({ params }: PageProps) {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center">
-        <Button asChild variant="ghost" size="sm" className="-ml-2 gap-2">
+        <Button asChild variant="secondary" size="sm" className="gap-2">
           <Link href="/events">
             <ArrowLeft data-icon="inline-start" />
-            {dictionary.events.backToList}
+            {dictionary.common.back}
           </Link>
         </Button>
       </div>

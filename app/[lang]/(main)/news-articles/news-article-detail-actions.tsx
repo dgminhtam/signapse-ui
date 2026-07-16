@@ -1,20 +1,14 @@
 "use client"
 
-import { ExternalLink, MoreHorizontal, RefreshCcw, Trash2 } from "lucide-react"
+import { MoreHorizontal, Trash2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
 import { toast } from "sonner"
 
-import {
-  crawlNewsArticleFullContent,
-  deleteNewsArticle,
-} from "@/app/api/news-articles/action"
+import { deleteNewsArticle } from "@/app/api/news-articles/action"
 import { useLocalization } from "@/app/lib/i18n/provider"
 import { useLocalizedPath } from "@/components/localized-link"
-import {
-  NEWS_ARTICLE_ANALYZE_PERMISSIONS,
-  NEWS_ARTICLE_DELETE_PERMISSIONS,
-} from "@/app/lib/news-articles/permissions"
+import { NEWS_ARTICLE_DELETE_PERMISSIONS } from "@/app/lib/news-articles/permissions"
 import { useHasAnyPermission } from "@/components/permission-provider"
 import {
   AlertDialog,
@@ -32,7 +26,6 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Spinner } from "@/components/ui/spinner"
@@ -45,35 +38,21 @@ import {
 interface NewsArticleDetailActionsProps {
   id: number
   title: string
-  url: string
 }
 
 export function NewsArticleDetailActions({
   id,
   title,
-  url,
 }: NewsArticleDetailActionsProps) {
   const { dictionary, formatMessage } = useLocalization()
   const newsArticlesPath = useLocalizedPath("/news-articles")
-  const canCrawl = useHasAnyPermission(NEWS_ARTICLE_ANALYZE_PERMISSIONS)
   const canDelete = useHasAnyPermission(NEWS_ARTICLE_DELETE_PERMISSIONS)
   const [deleteOpen, setDeleteOpen] = useState(false)
-  const [isCrawlPending, startCrawlTransition] = useTransition()
   const [isDeletePending, startDeleteTransition] = useTransition()
   const router = useRouter()
 
-  const handleCrawl = () => {
-    startCrawlTransition(async () => {
-      const result = await crawlNewsArticleFullContent(id)
-
-      if (result.success) {
-        toast.success(dictionary.newsArticles.reloadContentSuccess)
-        router.refresh()
-        return
-      }
-
-      toast.error(result.error || dictionary.newsArticles.reloadContentError)
-    })
+  if (!canDelete) {
+    return null
   }
 
   const handleDelete = () => {
@@ -111,43 +90,15 @@ export function NewsArticleDetailActions({
         </Tooltip>
         <DropdownMenuContent align="end" className="w-52">
           <DropdownMenuGroup>
-            {canCrawl ? (
-              <DropdownMenuItem
-                disabled={isCrawlPending}
-                onSelect={handleCrawl}
-              >
-                {isCrawlPending ? (
-                  <Spinner data-icon="inline-start" />
-                ) : (
-                  <RefreshCcw />
-                )}
-                {isCrawlPending
-                  ? dictionary.newsArticles.reloadContentPending
-                  : dictionary.newsArticles.reloadContent}
-              </DropdownMenuItem>
-            ) : null}
-            <DropdownMenuItem asChild>
-              <a href={url} target="_blank" rel="noopener noreferrer">
-                <ExternalLink />
-                {dictionary.newsArticles.openOriginalLink}
-              </a>
+            <DropdownMenuItem
+              variant="destructive"
+              disabled={isDeletePending}
+              onSelect={() => setDeleteOpen(true)}
+            >
+              {isDeletePending ? <Spinner /> : <Trash2 />}
+              {dictionary.newsArticles.deleteShort}
             </DropdownMenuItem>
           </DropdownMenuGroup>
-          {canDelete ? (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuGroup>
-                <DropdownMenuItem
-                  variant="destructive"
-                  disabled={isDeletePending}
-                  onSelect={() => setDeleteOpen(true)}
-                >
-                  {isDeletePending ? <Spinner /> : <Trash2 />}
-                  {dictionary.newsArticles.deleteShort}
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-            </>
-          ) : null}
         </DropdownMenuContent>
       </DropdownMenu>
 

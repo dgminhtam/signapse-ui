@@ -1,14 +1,11 @@
 "use client"
 
-import { Calendar, Clock3, Eye, ExternalLink, Newspaper } from "lucide-react"
+import { Calendar, Eye, ExternalLink, Newspaper } from "lucide-react"
 import { LocalizedLink as Link } from "@/components/localized-link"
 
 import { Page } from "@/app/lib/definitions"
 import { useLocalization } from "@/app/lib/i18n/provider"
-import {
-  NewsArticleListResponse,
-  getNewsArticleStatusVariant,
-} from "@/app/lib/news-articles/definitions"
+import { NewsArticleListResponse } from "@/app/lib/news-articles/definitions"
 import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { AppPaginationControls } from "@/components/app-pagination-controls"
 import {
@@ -23,7 +20,6 @@ import {
   AppListTableHeaderRow,
 } from "@/components/app-list-table"
 import { AppSelectPageSize } from "@/components/app-select-page-size"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   EmptyDescription,
@@ -41,7 +37,6 @@ import {
 } from "@/components/ui/table"
 
 import { NewsArticleDeleteButton } from "./news-article-delete-button"
-import { NewsArticleDerivePendingEventsButton } from "./news-article-derive-pending-events-button"
 import { NewsArticleSearch } from "./news-article-search"
 
 interface NewsArticleListProps {
@@ -49,14 +44,13 @@ interface NewsArticleListProps {
 }
 
 export function NewsArticleList({ newsArticlePage }: NewsArticleListProps) {
-  const { dictionary, formatDateTime, formatMessage } = useLocalization()
+  const { dictionary, formatDateTime } = useLocalization()
   const articles = newsArticlePage.content ?? []
 
   return (
     <div className="w-full">
       <AppListToolbar>
         <AppListToolbarLeading>
-          <NewsArticleDerivePendingEventsButton />
           <NewsArticleSearch />
         </AppListToolbarLeading>
         <AppListToolbarTrailing>
@@ -95,9 +89,6 @@ export function NewsArticleList({ newsArticlePage }: NewsArticleListProps) {
               <AppListTableHead className="w-44">
                 {dictionary.newsArticles.timeColumn}
               </AppListTableHead>
-              <AppListTableHead className="w-32">
-                {dictionary.newsArticles.statusColumn}
-              </AppListTableHead>
               <AppListTableHead className="w-28 text-right">
                 {dictionary.newsArticles.actionsColumn}
               </AppListTableHead>
@@ -131,43 +122,19 @@ export function NewsArticleList({ newsArticlePage }: NewsArticleListProps) {
                     </span>
                   </TableCell>
                   <TableCell className="w-44">
-                    <div className="flex flex-col gap-1">
-                      <AppTimeMetadata icon={Calendar}>
-                        {formatDateTime(
-                          article.publishedAt,
-                          {
-                            year: "numeric",
-                            month: "2-digit",
-                            day: "2-digit",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          },
-                          dictionary.common.notAvailable
-                        )}
-                      </AppTimeMetadata>
-                      <AppTimeMetadata icon={Clock3}>
-                        {formatMessage(dictionary.newsArticles.createdAtPrefix, {
-                          time: formatDateTime(
-                            article.createdDate,
-                            {
-                              year: "numeric",
-                              month: "2-digit",
-                              day: "2-digit",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            },
-                            dictionary.common.notAvailable
-                          ),
-                        })}
-                      </AppTimeMetadata>
-                    </div>
-                  </TableCell>
-                  <TableCell className="w-32">
-                    <Badge
-                      variant={getNewsArticleStatusVariant(article.status)}
-                    >
-                      {dictionary.newsArticles.statusLabels[article.status]}
-                    </Badge>
+                    <AppTimeMetadata icon={Calendar}>
+                      {formatDateTime(
+                        article.publishedAt,
+                        {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        },
+                        dictionary.common.notAvailable
+                      )}
+                    </AppTimeMetadata>
                   </TableCell>
                   <TableCell className="w-28 text-right">
                     <div className="flex justify-end gap-1">
@@ -210,7 +177,7 @@ export function NewsArticleList({ newsArticlePage }: NewsArticleListProps) {
                 </TableRow>
               ))
             ) : (
-              <AppListTableEmptyState colSpan={5}>
+              <AppListTableEmptyState colSpan={4}>
                 <EmptyHeader>
                   <EmptyMedia variant="icon">
                     <Newspaper className="text-muted-foreground" />

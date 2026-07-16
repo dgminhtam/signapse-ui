@@ -30,10 +30,10 @@ export default async function CreateAiProviderConfigPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center">
-        <Button asChild variant="ghost" size="sm" className="-ml-2">
+        <Button asChild variant="secondary" size="sm">
           <Link href="/ai-provider-configs">
             <ArrowLeft data-icon="inline-start" />
-            {dictionary.aiProviderConfigs.backToList}
+            {dictionary.common.back}
           </Link>
         </Button>
       </div>

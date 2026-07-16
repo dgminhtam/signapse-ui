@@ -27,10 +27,10 @@ export default async function CreateSystemPromptPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center">
-        <Button asChild variant="ghost" size="sm" className="-ml-2">
+        <Button asChild variant="secondary" size="sm">
           <Link href="/system-prompts">
             <ArrowLeft data-icon="inline-start" />
-            {dictionary.systemPrompts.backToList}
+            {dictionary.common.back}
           </Link>
         </Button>
       </div>

@@ -77,6 +77,8 @@ app/[lang]/(main)/[feature]/
 
 - Feature/shared code must use `radix-nova` default chrome; `className` on shadcn primitives should be used only for layout such as width, max-width, flex/grid, gap, alignment, max-height, overflow, truncate, or responsive constraints.
 - Do not add `h-*`, `min-h-*`, `rounded-*`, padding, foreground/background, border, ring, shadow, or typography classes to primitives only to change default height, radius, color, border, or density.
+- Badge is the explicit color exception to the preceding `className` restrictions. Prefer the built-in `default`, `secondary`, `destructive`, `outline`, or `ghost` variants when they express the intended meaning.
+- When a Badge needs a categorical color not covered by a built-in variant, only these exact palettes are allowed: blue (`bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300`), green (`bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300`), sky (`bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-300`), purple (`bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300`), and red (`bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300`). This exception applies only to `<Badge>` and does not permit raw palette or manual `dark:` color classes on other primitives.
 - When compact controls are needed, prefer existing variant/size options; hard-code height/radius only when no suitable size/variant exists and there is a clear product reason.
 - Theme tokens in `app/globals.css` and `tailwind.baseColor` in `components.json` must follow the `radix-nova` neutral default; do not silently change `--primary`, `--accent`, `--sidebar-*`, chart tokens, or wrapper chrome to fix a local issue.
 

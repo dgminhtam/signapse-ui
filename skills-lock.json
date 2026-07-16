@@ -25,6 +25,12 @@
       "skillPath": "assistant-ui/skills/markdown/SKILL.md",
       "computedHash": "060ef16bb5d7c589ee52278a0487748da17aebf7ef69a07991a2f11587acbef3"
     },
+    "migrate-radix-to-base": {
+      "source": "shadcn/ui",
+      "sourceType": "github",
+      "skillPath": "skills/migrate-radix-to-base/SKILL.md",
+      "computedHash": "4fdc31bf287f674ba6bf91a648120f7b34cd7ef370f998f2cc116fed067789c5"
+    },
     "observability": {
       "source": "assistant-ui/skills",
       "sourceType": "github",
@@ -54,6 +60,12 @@
       "sourceType": "github",
       "skillPath": "assistant-ui/skills/setup/SKILL.md",
       "computedHash": "2cbb72b348fa8ce31a8fbb0b9522f887183bdcd0bd475714bd2f58f432e552fc"
+    },
+    "shadcn": {
+      "source": "shadcn/ui",
+      "sourceType": "github",
+      "skillPath": "skills/shadcn/SKILL.md",
+      "computedHash": "4f78ff7cd3a4f637b6fe30dbbab4a80a19dd63fa62d9352bed461ccfdbcbbf43"
     },
     "streaming": {
       "source": "assistant-ui/skills",

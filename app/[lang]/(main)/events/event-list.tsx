@@ -20,7 +20,6 @@ import {
   AppListTableHeaderRow,
 } from "@/components/app-list-table"
 import { AppSelectPageSize } from "@/components/app-select-page-size"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   EmptyDescription,
@@ -37,13 +36,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-import { EventEnrichPendingButton } from "./event-enrich-pending-button"
-import { EventMarketReactionPendingButton } from "./event-market-reaction-pending-button"
 import { EventSearch } from "./event-search"
-import {
-  getEventStatusLabel,
-  getEventStatusVariant,
-} from "./event-presentation"
 
 interface EventListProps {
   eventPage: Page<EventListResponse>
@@ -57,8 +50,6 @@ export function EventList({ eventPage }: EventListProps) {
     <div className="w-full">
       <AppListToolbar>
         <AppListToolbarLeading>
-          <EventEnrichPendingButton />
-          <EventMarketReactionPendingButton />
           <EventSearch />
         </AppListToolbarLeading>
         <AppListToolbarTrailing>
@@ -97,9 +88,6 @@ export function EventList({ eventPage }: EventListProps) {
               <AppListTableHead className="w-[44%]">
                 {dictionary.events.eventColumn}
               </AppListTableHead>
-              <AppListTableHead className="w-36">
-                {dictionary.events.statusColumn}
-              </AppListTableHead>
               <AppListTableHead className="w-44">
                 {dictionary.events.timeColumn}
               </AppListTableHead>
@@ -135,11 +123,6 @@ export function EventList({ eventPage }: EventListProps) {
                         </span>
                       ) : null}
                     </div>
-                  </TableCell>
-                  <TableCell className="w-36">
-                    <Badge variant={getEventStatusVariant(event.status)}>
-                      {getEventStatusLabel(event.status, dictionary)}
-                    </Badge>
                   </TableCell>
                   <TableCell className="w-44">
                     <AppTimeMetadata icon={Calendar}>
@@ -183,7 +166,7 @@ export function EventList({ eventPage }: EventListProps) {
                 </TableRow>
               ))
             ) : (
-              <AppListTableEmptyState colSpan={5}>
+              <AppListTableEmptyState colSpan={4}>
                 <EmptyHeader>
                   <EmptyMedia variant="icon">
                     <GitBranch className="text-muted-foreground" />
