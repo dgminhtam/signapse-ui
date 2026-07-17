@@ -1,9 +1,5 @@
-import {
-  ArrowLeft,
-  Calendar,
-  ExternalLink,
-  Globe2,
-} from "lucide-react"
+import { ArrowLeft, Calendar, ExternalLink, Globe2 } from "lucide-react"
+import { NewsArticleMarkdown } from "./news-article-markdown"
 import { LocalizedLink as Link } from "@/components/localized-link"
 import { notFound } from "next/navigation"
 import { Suspense } from "react"
@@ -173,7 +169,6 @@ async function FetchNewsArticleData({
       </div>
 
       <div className="flex flex-col gap-4">
-
         {imageUrl ? (
           <Image
             src={imageUrl}
@@ -183,9 +178,9 @@ async function FetchNewsArticleData({
           />
         ) : null}
 
-        <article className="leading-8 whitespace-pre-wrap pb-10 text-foreground">
-          {content || dictionary.newsArticles.contentEmpty}
-        </article>
+        <NewsArticleMarkdown
+          content={content || dictionary.newsArticles.contentEmpty}
+        />
       </div>
     </div>
   )
