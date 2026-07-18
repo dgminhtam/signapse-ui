@@ -38,7 +38,7 @@ export function LineHeightToolbarButton(
         </ToolbarButton>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent className="min-w-0" align="start">
+      <DropdownMenuContent className="min-w-[180px]" align="start">
         <DropdownMenuRadioGroup
           value={value}
           onValueChange={(newValue) => {
@@ -49,11 +49,7 @@ export function LineHeightToolbarButton(
           }}
         >
           {values.map((value) => (
-            <DropdownMenuRadioItem
-              key={value}
-              className="min-w-[180px]"
-              value={value}
-            >
+            <DropdownMenuRadioItem key={value} value={value}>
               {value}
             </DropdownMenuRadioItem>
           ))}

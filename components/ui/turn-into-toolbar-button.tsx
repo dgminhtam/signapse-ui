@@ -167,7 +167,7 @@ export function TurnIntoToolbarButton(
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
-        className="ignore-click-outside/toolbar min-w-0"
+        className="ignore-click-outside/toolbar min-w-[180px]"
         onCloseAutoFocus={(e) => {
           e.preventDefault();
           editor.tf.focus();
@@ -182,11 +182,7 @@ export function TurnIntoToolbarButton(
           label="Turn into"
         >
           {turnIntoItems.map(({ icon, label, value: itemValue }) => (
-            <DropdownMenuRadioItem
-              key={itemValue}
-              className="min-w-[180px]"
-              value={itemValue}
-            >
+            <DropdownMenuRadioItem key={itemValue} value={itemValue}>
               {icon}
               {label}
             </DropdownMenuRadioItem>
