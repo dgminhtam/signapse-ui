@@ -4,7 +4,6 @@ import {
   BaseFilePlugin,
   BaseImagePlugin,
   BaseMediaEmbedPlugin,
-  BasePlaceholderPlugin,
   BaseVideoPlugin,
 } from '@platejs/media';
 import { KEYS } from 'platejs';
@@ -27,5 +26,4 @@ export const BaseMediaKit = [
     },
   }),
   BaseMediaEmbedPlugin,
-  BasePlaceholderPlugin,
 ];

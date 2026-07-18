@@ -188,9 +188,6 @@ importers:
       '@udecode/cn':
         specifier: ^52.3.4
         version: 52.3.4(@types/react@19.2.14)(class-variance-authority@0.7.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(tailwind-merge@3.5.0)
-      '@uploadthing/react':
-        specifier: 7.3.3
-        version: 7.3.3(next@16.1.7(@babel/core@7.29.7)(babel-plugin-macros@3.1.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.51.0))(react@19.2.4)(uploadthing@7.7.4(express@5.2.1)(next@16.1.7(@babel/core@7.29.7)(babel-plugin-macros@3.1.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.51.0))(tailwindcss@4.2.2))
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -308,9 +305,6 @@ importers:
       tw-animate-css:
         specifier: ^1.4.0
         version: 1.4.0
-      uploadthing:
-        specifier: 7.7.4
-        version: 7.7.4(express@5.2.1)(next@16.1.7(@babel/core@7.29.7)(babel-plugin-macros@3.1.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.51.0))(tailwindcss@4.2.2)
       use-debounce:
         specifier: ^10.1.1
         version: 10.1.1(react@19.2.4)
@@ -4071,22 +4065,6 @@ packages:
     resolution: {integrity: sha512-lrW200hZdbfRtztbygyaq/6jP6AKE8qQN2KvPcJ+x7wiD038YtnYtZ82IMNJ69GJibV7bwL3y9FgK+5w/pYt6g==}
     cpu: [x64]
     os: [win32]
-
-  '@uploadthing/mime-types@0.3.6':
-    resolution: {integrity: sha512-t3tTzgwFV9+1D7lNDYc7Lr7kBwotHaX0ZsvoCGe7xGnXKo9z0jG2Sjl/msll12FeoLj77nyhsxevXyGpQDBvLg==}
-
-  '@uploadthing/react@7.3.3':
-    resolution: {integrity: sha512-GhKbK42jL2Qs7OhRd2Z6j0zTLsnJTRJH31nR7RZnUYVoRh2aS/NabMAnHBNqfunIAGXVaA717Pvzq7vtxuPTmQ==}
-    peerDependencies:
-      next: '*'
-      react: ^17.0.2 || ^18.0.0 || ^19.0.0
-      uploadthing: ^7.2.0
-    peerDependenciesMeta:
-      next:
-        optional: true
-
-  '@uploadthing/shared@7.1.10':
-    resolution: {integrity: sha512-R/XSA3SfCVnLIzFpXyGaKPfbwlYlWYSTuGjTFHuJhdAomuBuhopAHLh2Ois5fJibAHzi02uP1QCKbgTAdmArqg==}
 
   '@upsetjs/venn.js@2.0.0':
     resolution: {integrity: sha512-WbBhLrooyePuQ1VZxrJjtLvTc4NVfpOyKx0sKqioq9bX1C1m7Jgykkn8gLrtwumBioXIqam8DLxp88Adbue6Hw==}
@@ -7904,27 +7882,6 @@ packages:
     hasBin: true
     peerDependencies:
       browserslist: '>= 4.21.0'
-
-  uploadthing@7.7.4:
-    resolution: {integrity: sha512-rlK/4JWHW5jP30syzWGBFDDXv3WJDdT8gn9OoxRJmXLoXi94hBmyyjxihGlNrKhBc81czyv8TkzMioe/OuKGfA==}
-    engines: {node: '>=18.13.0'}
-    peerDependencies:
-      express: '*'
-      fastify: '*'
-      h3: '*'
-      next: '*'
-      tailwindcss: ^3.0.0 || ^4.0.0-beta.0
-    peerDependenciesMeta:
-      express:
-        optional: true
-      fastify:
-        optional: true
-      h3:
-        optional: true
-      next:
-        optional: true
-      tailwindcss:
-        optional: true
 
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
@@ -12546,23 +12503,6 @@ snapshots:
 
   '@unrs/resolver-binding-win32-x64-msvc@1.11.1':
     optional: true
-
-  '@uploadthing/mime-types@0.3.6': {}
-
-  '@uploadthing/react@7.3.3(next@16.1.7(@babel/core@7.29.7)(babel-plugin-macros@3.1.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.51.0))(react@19.2.4)(uploadthing@7.7.4(express@5.2.1)(next@16.1.7(@babel/core@7.29.7)(babel-plugin-macros@3.1.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.51.0))(tailwindcss@4.2.2))':
-    dependencies:
-      '@uploadthing/shared': 7.1.10
-      file-selector: 0.6.0
-      react: 19.2.4
-      uploadthing: 7.7.4(express@5.2.1)(next@16.1.7(@babel/core@7.29.7)(babel-plugin-macros@3.1.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.51.0))(tailwindcss@4.2.2)
-    optionalDependencies:
-      next: 16.1.7(@babel/core@7.29.7)(babel-plugin-macros@3.1.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.51.0)
-
-  '@uploadthing/shared@7.1.10':
-    dependencies:
-      '@uploadthing/mime-types': 0.3.6
-      effect: 3.17.7
-      sqids: 0.3.0
 
   '@upsetjs/venn.js@2.0.0':
     optionalDependencies:
@@ -17261,18 +17201,6 @@ snapshots:
       browserslist: 4.28.6
       escalade: 3.2.0
       picocolors: 1.1.1
-
-  uploadthing@7.7.4(express@5.2.1)(next@16.1.7(@babel/core@7.29.7)(babel-plugin-macros@3.1.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.51.0))(tailwindcss@4.2.2):
-    dependencies:
-      '@effect/platform': 0.90.3(effect@3.17.7)
-      '@standard-schema/spec': 1.0.0-beta.4
-      '@uploadthing/mime-types': 0.3.6
-      '@uploadthing/shared': 7.1.10
-      effect: 3.17.7
-    optionalDependencies:
-      express: 5.2.1
-      next: 16.1.7(@babel/core@7.29.7)(babel-plugin-macros@3.1.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.51.0)
-      tailwindcss: 4.2.2
 
   uri-js@4.4.1:
     dependencies:

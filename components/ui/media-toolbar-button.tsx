@@ -2,18 +2,16 @@
 
 import * as React from 'react';
 
-import { PlaceholderPlugin } from '@platejs/media/react';
 import {
   AudioLinesIcon,
   FileUpIcon,
   FilmIcon,
   ImageIcon,
-  LinkIcon,
 } from 'lucide-react';
 import { isUrl, KEYS } from 'platejs';
 import { useEditorRef } from 'platejs/react';
-import { toast } from 'sonner';
-import { useFilePicker } from 'use-file-picker';
+
+import { useLocalization } from '@/app/lib/i18n/provider';
 
 import {
   AlertDialog,
@@ -25,120 +23,55 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 
-import {
-  ToolbarSplitButton,
-  ToolbarSplitButtonPrimary,
-  ToolbarSplitButtonSecondary,
-} from './toolbar';
-
-const MEDIA_CONFIG: Record<
-  string,
-  {
-    accept: string[];
-    icon: React.ReactNode;
-    title: string;
-    tooltip: string;
-  }
-> = {
-  [KEYS.audio]: {
-    accept: ['audio/*'],
-    icon: <AudioLinesIcon className="size-4" />,
-    title: 'Insert Audio',
-    tooltip: 'Audio',
-  },
-  [KEYS.file]: {
-    accept: ['*'],
-    icon: <FileUpIcon className="size-4" />,
-    title: 'Insert File',
-    tooltip: 'File',
-  },
-  [KEYS.img]: {
-    accept: ['image/*'],
-    icon: <ImageIcon className="size-4" />,
-    title: 'Insert Image',
-    tooltip: 'Image',
-  },
-  [KEYS.video]: {
-    accept: ['video/*'],
-    icon: <FilmIcon className="size-4" />,
-    title: 'Insert Video',
-    tooltip: 'Video',
-  },
-};
+import { ToolbarButton } from './toolbar';
 
 export function MediaToolbarButton({
   nodeType,
-  ...props
-}: React.ComponentProps<typeof DropdownMenu> & { nodeType: string }) {
-  const currentConfig = MEDIA_CONFIG[nodeType];
-
-  const editor = useEditorRef();
-  const [open, setOpen] = React.useState(false);
-  const [dialogOpen, setDialogOpen] = React.useState(false);
-
-  const { openFilePicker } = useFilePicker({
-    accept: currentConfig.accept,
-    multiple: true,
-    onFilesSelected: ({ plainFiles: updatedFiles }) => {
-      editor.getTransforms(PlaceholderPlugin).insert.media(updatedFiles);
+}: {
+  nodeType: string;
+}) {
+  const { dictionary } = useLocalization();
+  const media = dictionary.editor.media;
+  const mediaConfig: Record<
+    string,
+    { icon: React.ReactNode; label: string; title: string }
+  > = {
+    [KEYS.audio]: {
+      icon: <AudioLinesIcon className="size-4" />,
+      label: media.audio,
+      title: media.insertAudio,
     },
-  });
+    [KEYS.file]: {
+      icon: <FileUpIcon className="size-4" />,
+      label: media.file,
+      title: media.insertFile,
+    },
+    [KEYS.img]: {
+      icon: <ImageIcon className="size-4" />,
+      label: media.image,
+      title: media.insertImage,
+    },
+    [KEYS.video]: {
+      icon: <FilmIcon className="size-4" />,
+      label: media.video,
+      title: media.insertVideo,
+    },
+  };
+  const currentConfig = mediaConfig[nodeType];
+  const [dialogOpen, setDialogOpen] = React.useState(false);
 
   return (
     <>
-      <ToolbarSplitButton
-        onClick={() => {
-          openFilePicker();
-        }}
-        onKeyDown={(e) => {
-          if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            setOpen(true);
-          }
-        }}
-        pressed={open}
+      <ToolbarButton
+        aria-label={currentConfig.label}
+        onClick={() => setDialogOpen(true)}
+        tooltip={currentConfig.label}
       >
-        <ToolbarSplitButtonPrimary>
-          {currentConfig.icon}
-        </ToolbarSplitButtonPrimary>
-
-        <DropdownMenu
-          open={open}
-          onOpenChange={setOpen}
-          modal={false}
-          {...props}
-        >
-          <DropdownMenuTrigger asChild>
-            <ToolbarSplitButtonSecondary />
-          </DropdownMenuTrigger>
-
-          <DropdownMenuContent
-            onClick={(e) => e.stopPropagation()}
-            align="start"
-            alignOffset={-32}
-          >
-            <DropdownMenuGroup>
-              <DropdownMenuItem onSelect={() => openFilePicker()}>
-                {currentConfig.icon}
-                Upload from computer
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setDialogOpen(true)}>
-                <LinkIcon />
-                Insert via URL
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </ToolbarSplitButton>
+        {currentConfig.icon}
+      </ToolbarButton>
 
       <AlertDialog
         open={dialogOpen}
@@ -148,9 +81,9 @@ export function MediaToolbarButton({
       >
         <AlertDialogContent className="gap-6">
           <MediaUrlDialogContent
-            currentConfig={currentConfig}
             nodeType={nodeType}
             setOpen={setDialogOpen}
+            title={currentConfig.title}
           />
         </AlertDialogContent>
       </AlertDialog>
@@ -159,65 +92,82 @@ export function MediaToolbarButton({
 }
 
 function MediaUrlDialogContent({
-  currentConfig,
   nodeType,
   setOpen,
+  title,
 }: {
-  currentConfig: (typeof MEDIA_CONFIG)[string];
   nodeType: string;
   setOpen: (value: boolean) => void;
+  title: string;
 }) {
+  const { dictionary } = useLocalization();
   const editor = useEditorRef();
   const [url, setUrl] = React.useState('');
+  const [error, setError] = React.useState<string>();
+  const inputId = React.useId();
+  const errorId = `${inputId}-error`;
 
   const embedMedia = React.useCallback(() => {
-    if (!isUrl(url)) return toast.error('Invalid URL');
+    const value = url.trim();
+
+    if (!isUrl(value)) {
+      setError(dictionary.editor.media.invalidUrl);
+      return;
+    }
 
     setOpen(false);
     editor.tf.insertNodes({
       children: [{ text: '' }],
-      name: nodeType === KEYS.file ? url.split('/').pop() : undefined,
+      name: nodeType === KEYS.file ? value.split('/').pop() : undefined,
       type: nodeType,
-      url,
+      url: value,
     });
-  }, [url, editor, nodeType, setOpen]);
+  }, [dictionary.editor.media.invalidUrl, url, editor, nodeType, setOpen]);
 
   return (
     <>
       <AlertDialogHeader>
-        <AlertDialogTitle>{currentConfig.title}</AlertDialogTitle>
+        <AlertDialogTitle>{title}</AlertDialogTitle>
+        <AlertDialogDescription>
+          {dictionary.editor.media.urlDescription}
+        </AlertDialogDescription>
       </AlertDialogHeader>
 
-      <AlertDialogDescription className="group relative w-full">
-        <label
-          className="-translate-y-1/2 absolute top-1/2 block cursor-text px-1 text-muted-foreground/70 text-sm transition-all group-focus-within:pointer-events-none group-focus-within:top-0 group-focus-within:cursor-default group-focus-within:font-medium group-focus-within:text-foreground group-focus-within:text-xs has-[+input:not(:placeholder-shown)]:pointer-events-none has-[+input:not(:placeholder-shown)]:top-0 has-[+input:not(:placeholder-shown)]:cursor-default has-[+input:not(:placeholder-shown)]:font-medium has-[+input:not(:placeholder-shown)]:text-foreground has-[+input:not(:placeholder-shown)]:text-xs"
-          htmlFor="url"
-        >
-          <span className="inline-flex bg-background px-2">URL</span>
-        </label>
+      <Field data-invalid={!!error}>
+        <FieldLabel htmlFor={inputId}>
+          {dictionary.editor.media.urlLabel}
+        </FieldLabel>
         <Input
-          id="url"
-          className="w-full"
+          id={inputId}
+          aria-describedby={error ? errorId : undefined}
+          aria-invalid={!!error}
           value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') embedMedia();
+          onChange={(e) => {
+            setUrl(e.target.value);
+            setError(undefined);
           }}
-          placeholder=""
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              embedMedia();
+            }
+          }}
+          placeholder={dictionary.editor.media.urlPlaceholder}
           type="url"
           autoFocus
         />
-      </AlertDialogDescription>
+        <FieldError id={errorId}>{error}</FieldError>
+      </Field>
 
       <AlertDialogFooter>
-        <AlertDialogCancel>Cancel</AlertDialogCancel>
+        <AlertDialogCancel>{dictionary.common.cancel}</AlertDialogCancel>
         <AlertDialogAction
           onClick={(e) => {
             e.preventDefault();
             embedMedia();
           }}
         >
-          Accept
+          {dictionary.editor.insert.insert}
         </AlertDialogAction>
       </AlertDialogFooter>
     </>
