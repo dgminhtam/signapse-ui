@@ -87,7 +87,7 @@ export function ImportToolbarButton(
         </ToolbarButton>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="start">
+      <DropdownMenuContent className="min-w-[180px]" align="start">
         <DropdownMenuGroup>
           <DropdownMenuItem
             onSelect={() => {

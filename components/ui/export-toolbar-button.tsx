@@ -173,7 +173,7 @@ export function ExportToolbarButton(
         </ToolbarButton>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="start">
+      <DropdownMenuContent className="min-w-[180px]" align="start">
         <DropdownMenuGroup>
           <DropdownMenuItem onSelect={exportToHtml}>
             Export as HTML

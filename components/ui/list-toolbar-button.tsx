@@ -138,7 +138,11 @@ export function NumberedListToolbarButton() {
           <ToolbarSplitButtonSecondary />
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent align="start" alignOffset={-32}>
+        <DropdownMenuContent
+          className="min-w-[180px]"
+          align="start"
+          alignOffset={-32}
+        >
           <DropdownMenuGroup>
             <DropdownMenuItem
               onSelect={() =>
