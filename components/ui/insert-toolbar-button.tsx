@@ -29,6 +29,8 @@ import {
 import { KEYS } from 'platejs';
 import { type PlateEditor, useEditorRef } from 'platejs/react';
 
+import { useLocalization } from '@/app/lib/i18n/provider';
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,6 +42,7 @@ import {
   insertInlineElement,
 } from '@/components/editor/transforms';
 
+import { MediaUrlDialog } from './media-toolbar-button';
 import { ToolbarButton, ToolbarMenuGroup } from './toolbar';
 
 type Group = {
@@ -225,38 +228,60 @@ const groups: Group[] = [
 export function InsertToolbarButton(
   props: React.ComponentProps<typeof DropdownMenu>
 ) {
+  const { dictionary } = useLocalization();
   const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);
+  const [imageDialogOpen, setImageDialogOpen] = React.useState(false);
 
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
-      <DropdownMenuTrigger asChild>
-        <ToolbarButton pressed={open} tooltip="Insert" isDropdown>
-          <PlusIcon />
-        </ToolbarButton>
-      </DropdownMenuTrigger>
-
-      <DropdownMenuContent
-        className="flex max-h-[500px] min-w-[180px] flex-col overflow-y-auto"
-        align="start"
+    <>
+      <DropdownMenu
+        open={open}
+        onOpenChange={setOpen}
+        modal={false}
+        {...props}
       >
-        {groups.map(({ group, items: nestedItems }) => (
-          <ToolbarMenuGroup key={group} label={group}>
-            {nestedItems.map(({ icon, label, value, onSelect }) => (
-              <DropdownMenuItem
-                key={value}
-                onSelect={() => {
-                  onSelect(editor, value);
-                  editor.tf.focus();
-                }}
-              >
-                {icon}
-                {label}
-              </DropdownMenuItem>
-            ))}
-          </ToolbarMenuGroup>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <ToolbarButton pressed={open} tooltip="Insert" isDropdown>
+            <PlusIcon />
+          </ToolbarButton>
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent
+          className="flex max-h-[500px] min-w-[180px] flex-col overflow-y-auto"
+          align="start"
+        >
+          {groups.map(({ group, items: nestedItems }) => (
+            <ToolbarMenuGroup key={group} label={group}>
+              {nestedItems.map(({ icon, label, value, onSelect }) => (
+                <DropdownMenuItem
+                  key={value}
+                  onSelect={() => {
+                    if (value === KEYS.img) {
+                      setOpen(false);
+                      setImageDialogOpen(true);
+                      return;
+                    }
+
+                    onSelect(editor, value);
+                    editor.tf.focus();
+                  }}
+                >
+                  {icon}
+                  {label}
+                </DropdownMenuItem>
+              ))}
+            </ToolbarMenuGroup>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <MediaUrlDialog
+        nodeType={KEYS.img}
+        open={imageDialogOpen}
+        onOpenChange={setImageDialogOpen}
+        title={dictionary.editor.media.insertImage}
+      />
+    </>
   );
 }

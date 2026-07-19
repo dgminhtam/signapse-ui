@@ -73,21 +73,37 @@ export function MediaToolbarButton({
         {currentConfig.icon}
       </ToolbarButton>
 
-      <AlertDialog
+      <MediaUrlDialog
+        nodeType={nodeType}
         open={dialogOpen}
-        onOpenChange={(value) => {
-          setDialogOpen(value);
-        }}
-      >
-        <AlertDialogContent className="gap-6">
-          <MediaUrlDialogContent
-            nodeType={nodeType}
-            setOpen={setDialogOpen}
-            title={currentConfig.title}
-          />
-        </AlertDialogContent>
-      </AlertDialog>
+        onOpenChange={setDialogOpen}
+        title={currentConfig.title}
+      />
     </>
+  );
+}
+
+export function MediaUrlDialog({
+  nodeType,
+  onOpenChange,
+  open,
+  title,
+}: {
+  nodeType: string;
+  onOpenChange: (value: boolean) => void;
+  open: boolean;
+  title: string;
+}) {
+  return (
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent className="gap-6">
+        <MediaUrlDialogContent
+          nodeType={nodeType}
+          setOpen={onOpenChange}
+          title={title}
+        />
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
 

@@ -35,6 +35,9 @@ import {
   usePlateEditor,
   usePluginOption,
 } from 'platejs/react';
+import { toast } from 'sonner';
+
+import { useLocalization } from '@/app/lib/i18n/provider';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -312,13 +315,17 @@ function CommentMoreDropdown(props: {
     onRemoveComment,
   } = props;
 
+  const { dictionary } = useLocalization();
   const editor = useEditorRef();
+  const commentNotReady = dictionary.editor.comment.notReady;
 
   const selectedEditCommentRef = React.useRef<boolean>(false);
 
   const onDeleteComment = React.useCallback(() => {
-    if (!comment.id)
-      return alert('You are operating too quickly, please try again later.');
+    if (!comment.id) {
+      toast.error(commentNotReady);
+      return;
+    }
 
     // Find and update the discussion
     const updatedDiscussions = editor
@@ -347,16 +354,18 @@ function CommentMoreDropdown(props: {
     // Save back to session storage
     editor.setOption(discussionPlugin, 'discussions', updatedDiscussions);
     onRemoveComment?.();
-  }, [comment.discussionId, comment.id, editor, onRemoveComment]);
+  }, [comment.discussionId, comment.id, commentNotReady, editor, onRemoveComment]);
 
   const onEditComment = React.useCallback(() => {
     selectedEditCommentRef.current = true;
 
-    if (!comment.id)
-      return alert('You are operating too quickly, please try again later.');
+    if (!comment.id) {
+      toast.error(commentNotReady);
+      return;
+    }
 
     setEditingId(comment.id);
-  }, [comment.id, setEditingId]);
+  }, [comment.id, commentNotReady, setEditingId]);
 
   return (
     <DropdownMenu
@@ -397,7 +406,7 @@ function CommentMoreDropdown(props: {
 
 const useCommentEditor = (
   options: Omit<CreatePlateEditorOptions, 'plugins'> = {},
-  deps: any[] = []
+  deps: React.DependencyList = []
 ) => {
   const commentEditor = usePlateEditor(
     {
@@ -513,7 +522,7 @@ export function CommentCreateForm({
     if (commentsNodeEntry.length === 0) return;
 
     const documentContent = commentsNodeEntry
-      .map(([node, _path]: NodeEntry<TCommentText>) => node.text)
+      .map(([node]: NodeEntry<TCommentText>) => node.text)
       .join('');
 
     const _discussionId = nanoid();

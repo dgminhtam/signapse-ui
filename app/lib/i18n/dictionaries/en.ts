@@ -1930,6 +1930,9 @@ export const en: Dictionary = {
       urlDescription: "Enter a direct link to the media.",
       invalidUrl: "Enter a valid media URL.",
     },
+    comment: {
+      notReady: "This comment is not ready yet. Please try again.",
+    },
     table: {
       rows: "Rows",
       columns: "Columns",

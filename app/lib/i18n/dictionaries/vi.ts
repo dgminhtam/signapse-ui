@@ -1917,6 +1917,9 @@ export const vi = {
       urlDescription: "Nhập liên kết trực tiếp đến media.",
       invalidUrl: "Hãy nhập URL media hợp lệ.",
     },
+    comment: {
+      notReady: "Bình luận chưa sẵn sàng. Vui lòng thử lại.",
+    },
     table: {
       rows: "Hàng",
       columns: "Cột",
