@@ -5,7 +5,7 @@ Define URL-only media behavior for the Plate editor while keeping document impor
 ## Requirements
 
 ### Requirement: Media insertion is URL-only
-The Plate editor SHALL insert image, video, audio, file, and rich-embed media from valid external URLs without offering local media file upload controls.
+The Plate editor SHALL insert image, video, audio, and file media from valid external URLs without offering local media file upload controls.
 
 #### Scenario: Insert media from a valid URL
 - **WHEN** a user activates an image, video, audio, or file media action and submits a valid URL
@@ -27,15 +27,31 @@ The Plate editor MUST NOT create media nodes from local files selected through a
 - **THEN** the editor does not create an upload placeholder or media node for that file
 
 ### Requirement: URL-backed media editing remains available
-The Plate editor SHALL preserve rendering and editing behavior for URL-backed media, including supported captions, resizing, previews, link editing, and rich-provider embeds.
+The Plate editor SHALL preserve rendering and editing behavior for supported URL-backed image, video, audio, and file media, including applicable captions, resizing, previews, and link editing.
 
 #### Scenario: Edit an existing media URL
-- **WHEN** a user selects a URL-backed media node and changes its link
+- **WHEN** a user selects a supported URL-backed media node and changes its link
 - **THEN** the editor updates the node using the existing media editing controls
 
-#### Scenario: Render existing URL-backed content
-- **WHEN** the editor loads serialized media content containing an external URL
+#### Scenario: Render existing supported URL-backed content
+- **WHEN** the editor loads serialized image, video, audio, or file content containing an external URL
 - **THEN** the corresponding media renderer displays or links to that external resource without requiring UploadThing
+
+### Requirement: Video insertion uses one canonical node type
+The Plate editor SHALL expose the localized Video URL action as the only supported video insertion path and SHALL serialize direct and supported hosted video URLs as `video` nodes.
+
+#### Scenario: Inspect available video insertion actions
+- **WHEN** a user inspects the Plate editor toolbar and Insert menu
+- **THEN** the editor exposes the Video URL action and does not expose a separate Embed action
+
+#### Scenario: Insert a direct or hosted video URL
+- **WHEN** a user submits a valid direct video URL or supported video-provider URL through the Video action
+- **THEN** the editor inserts a `video` node using that URL
+- **AND** it does not create a `media_embed` node
+
+#### Scenario: Inspect media-embed support
+- **WHEN** the editor media plugins and renderers are inspected
+- **THEN** no `media_embed` insertion, rendering, type, or Tweet-specific dependency remains
 
 ### Requirement: Block drag-and-drop remains independent
 The Plate editor SHALL preserve drag-and-drop reordering of editor blocks while disabling file-drop media insertion.

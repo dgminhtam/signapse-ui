@@ -8,7 +8,7 @@ import type { TResizableProps, TVideoElement } from 'platejs';
 import type { PlateElementProps } from 'platejs/react';
 
 import { useDraggable } from '@platejs/dnd';
-import { parseTwitterUrl, parseVideoUrl } from '@platejs/media';
+import { parseVideoUrl } from '@platejs/media';
 import { useMediaState } from '@platejs/media/react';
 import { ResizableProvider, useResizableValue } from '@platejs/resizable';
 import { PlateElement, useEditorMounted, withHOC } from 'platejs/react';
@@ -36,7 +36,7 @@ export const VideoElement = withHOC(
       readOnly,
       unsafeUrl,
     } = useMediaState({
-      urlParsers: [parseTwitterUrl, parseVideoUrl],
+      urlParsers: [parseVideoUrl],
     });
     const width = useResizableValue('width');
 

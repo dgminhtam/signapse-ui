@@ -3,7 +3,6 @@ import {
   BaseAudioPlugin,
   BaseFilePlugin,
   BaseImagePlugin,
-  BaseMediaEmbedPlugin,
   BaseVideoPlugin,
 } from '@platejs/media';
 import { KEYS } from 'platejs';
@@ -21,9 +20,8 @@ export const BaseMediaKit = [
   BaseCaptionPlugin.configure({
     options: {
       query: {
-        allow: [KEYS.img, KEYS.video, KEYS.audio, KEYS.file, KEYS.mediaEmbed],
+        allow: [KEYS.img, KEYS.video, KEYS.audio, KEYS.file],
       },
     },
   }),
-  BaseMediaEmbedPlugin,
 ];

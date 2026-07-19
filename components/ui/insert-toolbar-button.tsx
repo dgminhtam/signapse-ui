@@ -8,7 +8,6 @@ import {
   Code2,
   Columns3Icon,
   FileCodeIcon,
-  FilmIcon,
   Heading1Icon,
   Heading2Icon,
   Heading3Icon,
@@ -144,11 +143,6 @@ const groups: Group[] = [
         icon: <ImageIcon />,
         label: 'Image',
         value: KEYS.img,
-      },
-      {
-        icon: <FilmIcon />,
-        label: 'Embed',
-        value: KEYS.mediaEmbed,
       },
     ].map((item) => ({
       ...item,

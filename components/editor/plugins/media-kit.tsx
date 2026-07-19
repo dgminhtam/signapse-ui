@@ -5,13 +5,11 @@ import {
   AudioPlugin,
   FilePlugin,
   ImagePlugin,
-  MediaEmbedPlugin,
   VideoPlugin,
 } from '@platejs/media/react';
 import { KEYS } from 'platejs';
 
 import { AudioElement } from '@/components/ui/media-audio-node';
-import { MediaEmbedElement } from '@/components/ui/media-embed-node';
 import { FileElement } from '@/components/ui/media-file-node';
 import { ImageElement } from '@/components/ui/media-image-node';
 import { MediaPreviewDialog } from '@/components/ui/media-preview-dialog';
@@ -22,7 +20,6 @@ export const MediaKit = [
     options: { disableUploadInsert: true },
     render: { afterEditable: MediaPreviewDialog, node: ImageElement },
   }),
-  MediaEmbedPlugin.withComponent(MediaEmbedElement),
   VideoPlugin.configure({
     options: { disableUploadInsert: true },
     render: { node: VideoElement },
@@ -38,7 +35,7 @@ export const MediaKit = [
   CaptionPlugin.configure({
     options: {
       query: {
-        allow: [KEYS.img, KEYS.video, KEYS.audio, KEYS.file, KEYS.mediaEmbed],
+        allow: [KEYS.img, KEYS.video, KEYS.audio, KEYS.file],
       },
     },
   }),
