@@ -10,7 +10,7 @@ Define the removal boundary for Plate editor AI features while preserving the ed
 The shared Plate editor SHALL compose its runtime without AI command/chat plugins or inline copilot completion plugins.
 
 #### Scenario: Editor initializes without AI runtime
-- **WHEN** either route renders the shared Plate editor
+- **WHEN** an editor route or the personal-notes Sheet renders the shared Plate editor
 - **THEN** the editor initializes without registering the Plate AI chat, AI mark, or copilot plugins
 
 ### Requirement: Plate editor exposes no AI interaction entry points
@@ -53,8 +53,8 @@ The Plate editor's initial document SHALL NOT claim that AI editing is available
 - **THEN** the document contains no AI-powered editing section, AI shortcut instructions, or AI feature comparison row
 
 ### Requirement: Unrelated AI product areas remain outside the removal
-The Plate editor AI removal SHALL preserve AI provider configuration, system-prompt management, assistant-ui, and the separate Lexical editor.
+The Plate editor AI removal SHALL preserve AI provider configuration, system-prompt management, and assistant-ui.
 
 #### Scenario: Removal scope is reviewed
 - **WHEN** the implementation diff is inspected
-- **THEN** no file owned exclusively by those unrelated product areas is removed or modified for this change
+- **THEN** no file owned exclusively by those remaining unrelated product areas is removed or modified for this change

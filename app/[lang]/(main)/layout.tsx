@@ -4,11 +4,6 @@ import type { ReactNode } from "react"
 
 import { getMyWorkspaces } from "@/app/api/workspaces/action"
 import { getDevAuthUser, isDevAuthModeEnabled } from "@/app/lib/dev-auth-mode"
-import {
-  canCreatePersonalNotes,
-  canReadPersonalNotes,
-  canUpdatePersonalNotes,
-} from "@/app/lib/personal-notes/permissions"
 import { getServerDictionary } from "@/app/lib/i18n/server"
 import { hasPermission } from "@/app/lib/permissions"
 import { getCurrentPermissions } from "@/app/lib/permissions-server"
@@ -55,7 +50,7 @@ export default async function Layout({
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "true"
   const permissions = await getCurrentPermissions()
   const canReadWorkspace = hasPermission(permissions, "workspace:read")
-  const canReadNotes = canReadPersonalNotes(permissions)
+  const canReadNotes = hasPermission(permissions, "personal-note:read")
   let workspaces: WorkspaceResponse[] = []
 
   if (canReadWorkspace) {
@@ -109,12 +104,7 @@ export default async function Layout({
                     className="min-w-0 flex-1 md:flex-none"
                   />
                 ) : null}
-                {canReadNotes ? (
-                  <PersonalNotesQuickSheet
-                    canCreate={canCreatePersonalNotes(permissions)}
-                    canUpdate={canUpdatePersonalNotes(permissions)}
-                  />
-                ) : null}
+                {canReadNotes ? <PersonalNotesQuickSheet /> : null}
                 <LanguageSelector />
                 <ModeToggle />
               </div>
