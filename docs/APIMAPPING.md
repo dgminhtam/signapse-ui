@@ -432,19 +432,19 @@ Ghi chu:
 
 | Phuong thuc | Endpoint backend | operationId          | Tich hop frontend | Trang thai     | Ghi chu |
 | ----------- | ---------------- | -------------------- | ----------------- | -------------- | ------- |
-| GET         | `/me/notes`      | `getPersonalNotes`   | -                 | Chua tich hop  | Tra `PagePersonalNoteSummaryResponse`; permission `personal-note:read`. |
-| POST        | `/me/notes`      | `createPersonalNote` | -                 | Chua tich hop  | Request bat buoc `content` va `contentSchemaVersion`; response `201 PersonalNoteResponse`; permission `personal-note:create`. |
-| GET         | `/me/notes/{id}` | `getPersonalNote`    | -                 | Chua tich hop  | Tra `PersonalNoteResponse`; permission `personal-note:read`. |
-| PUT         | `/me/notes/{id}` | `updatePersonalNote` | -                 | Chua tich hop  | Request bat buoc `content` va `contentSchemaVersion`; tra `PersonalNoteResponse`; permission `personal-note:update`. |
+| GET         | `/me/notes`      | `getPersonalNotes`   | `getPersonalNotes(searchParams)` | Da tich hop | Sheet trong header dung `Page<PersonalNoteSummaryResponse>`; permission `personal-note:read`. |
+| POST        | `/me/notes`      | `createPersonalNote` | `createPersonalNote(request)` | Da tich hop | Sheet autosave ban nhap dau tien voi `contentSchemaVersion: 1`; response `201 PersonalNoteResponse`; permission `personal-note:create`. |
+| GET         | `/me/notes/{id}` | `getPersonalNote`    | `getPersonalNote(id)` | Da tich hop | Sheet tai Plate JSON cho ghi chu duoc chon; permission `personal-note:read`. |
+| PUT         | `/me/notes/{id}` | `updatePersonalNote` | `updatePersonalNote(id, request)` | Da tich hop | Sheet autosave noi dung Plate JSON version 1; response `PersonalNoteResponse`; permission `personal-note:update`. |
 | DELETE      | `/me/notes/{id}` | `deletePersonalNote` | -                 | Chua tich hop  | Response `200` khong co payload; permission `personal-note:delete`. |
 
 Ghi chu:
 
 - `CreatePersonalNoteRequest` va `UpdatePersonalNoteRequest` bat buoc `content: JsonNode` va `contentSchemaVersion: int32`; `JsonNode` hien la schema rong trong snapshot OpenAPI.
-- Snapshot khong khai bao enum, default, hoac minimum cho `contentSchemaVersion`; frontend can chot gia tri ghi va chinh sach tuong thich voi backend truoc khi tich hop.
+- Snapshot khong khai bao enum, default, hoac minimum cho `contentSchemaVersion`; Sheet hien ghi version `1` va khong cho sua version khac.
 - `PersonalNoteResponse` gom `id`, `content`, `contentSchemaVersion`, `createdDate`, `lastModifiedDate`.
 - `PersonalNoteSummaryResponse` khong co `content`; list chi tra `id`, `contentSchemaVersion`, `createdDate`, `lastModifiedDate` trong `PagePersonalNoteSummaryResponse`.
-- Frontend hien chi con Sheet trong header duoc gate bang `personal-note:read` va render shared `PlateEditor` voi du lieu demo noi bo; khong co action, DTO, route `/notes`, hoac CRUD personal note.
+- Frontend so huu list/detail/create/update trong Sheet header, permission constants, va coordinator autosave Plate JSON version 1; khong co route `/notes` hoac delete flow.
 
 ### 19. API wiki
 
@@ -606,7 +606,7 @@ type ActionResult<T = void> =
 | Economic calendar                         | `app/api/economic-calendar/action.ts`, `app/lib/economic-calendar/definitions.ts`, `app/lib/economic-calendar/permissions.ts`, `app/(main)/economic-calendar/*` |
 | User profile                              | `app/api/user/action.ts`, `app/lib/users/definitions.ts`                                                                                                        |
 | Languages                                 | `components/language-selector.tsx`, `app/lib/i18n/*` (route-locale only; no backend language action yet)                                                        |
-| Personal notes                            | `components/personal-notes-quick-sheet.tsx`, `app/[lang]/(main)/layout.tsx` (UI tam thoi, chua goi API) |
+| Personal notes                            | `app/api/personal-notes/action.ts`, `app/lib/personal-notes/{definitions,permissions}.ts`, `components/personal-notes-quick-sheet.tsx`, `components/personal-note-autosave.ts`, `app/[lang]/(main)/layout.tsx` |
 | Workspace                                 | `app/api/workspaces/action.ts`, `app/lib/workspaces/definitions.ts`                                                                                             |
 | Watchlists                                | `app/api/watchlists/action.ts`, `app/lib/watchlists/definitions.ts`, `components/workspace-watchlist-editor.tsx`, `components/asset-multi-select-combobox.tsx`  |
 | Telegram                                  | `app/api/telegram/action.ts`, `app/lib/telegram/definitions.ts`, `app/lib/telegram/permissions.ts`, `app/[lang]/(main)/telegram/*`                              |
@@ -634,7 +634,7 @@ type ActionResult<T = void> =
 - `telegram`: frontend da co route/action/type/permission/navigation cho surface Telegram, nhung snapshot moi them `outputLanguageIsoCode` request va `outputLanguage` response cho feature setting/schedule ma FE chua expose.
 - `ai-provider credentials`: snapshot moi doi credential `label` thanh `model` va bo top-level config `name`/`model`; FE hien van giu `name`, top-level `model`, va credential `label` trong definitions, form, list, detail, va credential panel.
 - `cronjobs`: FE da bo create/delete flow va doi update schedule sang inline list chi gui `expression`; endpoint `stop` duoc ghi nhan nhung khong tich hop co chu dich.
-- `personal notes`: contract moi luu JSON `content` kem `contentSchemaVersion`; list chi tra summary khong co noi dung. FE hien chi render shared Plate editor trong Sheet, chua co action/DTO/CRUD va chua noi editor value vao contract moi.
+- `personal notes`: FE da tich hop list summary, detail, create va update trong Sheet; Plate editor autosave JSON version 1 sau 1000 ms va flush truoc khi doi/dong ghi chu. Delete chua tich hop; route `/editor` van la playground khong persist.
 - `languages`: frontend da co URL locale va `Accept-Language`, nhung chua co backend action cho `GET /languages` va `PATCH /me/preferred-language`; `LanguageSelector` hien chi doi route locale.
 - `narratives`: snapshot moi them `/narratives*`, graph narrative node/edge, va market query `keyNarratives[]`; FE chua co module narratives rieng hoac market-query narrative panel, nhung Graph View da model/render narrative node/edge.
 - `market query`: spec van mo ta `asOfTime` la optional `date-time`; frontend conversation v1 chu dong omit field nay de backend tu lay thoi diem hien tai va harden parse cho payload runtime co the tra `null` o `publishedAt` va `occurredAt`. Frontend khong con legacy `/market-query` route hay redirect compatibility; global assistant modal la UI primary surface.

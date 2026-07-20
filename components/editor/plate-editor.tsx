@@ -2,20 +2,36 @@
 
 import * as React from 'react';
 
-import { normalizeStaticValue } from 'platejs';
+import { normalizeStaticValue, type Value } from 'platejs';
 import { Plate, usePlateEditor } from 'platejs/react';
 
 import { EditorKit } from '@/components/editor/editor-kit';
 import { Editor, EditorContainer } from '@/components/ui/editor';
 
-export function PlateEditor() {
+interface PlateEditorProps {
+  initialValue?: Value;
+  onValueChange?: (value: Value) => void;
+  readOnly?: boolean;
+}
+
+export function PlateEditor({
+  initialValue = demoValue,
+  onValueChange,
+  readOnly = false,
+}: PlateEditorProps = {}) {
   const editor = usePlateEditor({
     plugins: EditorKit,
-    value,
+    value: initialValue,
   });
 
   return (
-    <Plate editor={editor}>
+    <Plate
+      editor={editor}
+      onValueChange={
+        onValueChange ? ({ value }) => onValueChange(value) : undefined
+      }
+      readOnly={readOnly}
+    >
       <EditorContainer>
         <Editor variant="demo" />
       </EditorContainer>
@@ -23,7 +39,7 @@ export function PlateEditor() {
   );
 }
 
-const value = normalizeStaticValue([
+const demoValue = normalizeStaticValue([
   {
     children: [{ text: 'Welcome to the Plate Playground!' }],
     type: 'h1',

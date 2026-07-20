@@ -1,9 +1,4 @@
-# personal-notes-workspace Specification
-
-## Purpose
-Define frontend ownership, permissions, and Sheet-only interaction for the current personal-note API.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Frontend MUST integrate the personal note API contract
 The system SHALL provide frontend DTOs and authenticated actions for the current-user personal-note API, and create/update payloads MUST use versioned JSON fields `content` and `contentSchemaVersion`.
@@ -90,3 +85,25 @@ The system SHALL provide loading, empty, unsupported-version, read-only, and err
 - **WHEN** a personal note uses a schema version the frontend does not support
 - **THEN** the Sheet MUST show localized unsupported-version feedback
 - **AND** it MUST NOT autosave over that note
+
+## REMOVED Requirements
+
+### Requirement: Saving MUST be explicit and rehydrate from sanitized HTML
+**Reason**: The backend contract now stores versioned JSON, and the approved interaction uses Plate `onValueChange` autosave without a Save button.
+**Migration**: Use the `personal-notes-autosave` capability and `{ content, contentSchemaVersion: 1 }` create/update payloads.
+
+### Requirement: Full notes workspace MUST support large-screen editing and note selection
+**Reason**: Personal Notes is intentionally a header Sheet-only utility in the current product scope.
+**Migration**: Keep note selection and editing inside the existing Personal Notes Sheet; no `/notes` route is created.
+
+### Requirement: Note identity MUST be derived from saved HTML in V1
+**Reason**: List responses expose no content, and persisted note content is versioned JSON rather than HTML.
+**Migration**: Continue labeling summaries from backend-supported id and timestamps until a title or preview contract exists.
+
+### Requirement: Presentation mode MUST support screen-share teaching
+**Reason**: Presentation mode depends on the removed full notes workspace and is outside the Sheet-only product scope.
+**Migration**: No replacement is provided in this change.
+
+### Requirement: Personal note deletion MUST be guarded
+**Reason**: Delete integration is outside the autosave scope and the current Sheet exposes no delete workflow.
+**Migration**: Keep `DELETE /me/notes/{id}` unintegrated until a separately approved deletion experience exists.
