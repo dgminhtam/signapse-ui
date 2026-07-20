@@ -1792,6 +1792,7 @@ export const vi = {
     expiresAt: "Hết hạn lúc",
   },
   editor: {
+    moreFormatting: "Định dạng khác",
     insert: {
       insert: "Chèn",
     },

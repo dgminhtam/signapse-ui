@@ -1804,6 +1804,7 @@ export const en: Dictionary = {
     expiresAt: "Expires at",
   },
   editor: {
+    moreFormatting: "More formatting",
     insert: {
       insert: "Insert",
     },

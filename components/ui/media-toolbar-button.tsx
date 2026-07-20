@@ -2,12 +2,6 @@
 
 import * as React from 'react';
 
-import {
-  AudioLinesIcon,
-  FileUpIcon,
-  FilmIcon,
-  ImageIcon,
-} from 'lucide-react';
 import { isUrl, KEYS } from 'platejs';
 import { useEditorRef } from 'platejs/react';
 
@@ -25,63 +19,6 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-
-import { ToolbarButton } from './toolbar';
-
-export function MediaToolbarButton({
-  nodeType,
-}: {
-  nodeType: string;
-}) {
-  const { dictionary } = useLocalization();
-  const media = dictionary.editor.media;
-  const mediaConfig: Record<
-    string,
-    { icon: React.ReactNode; label: string; title: string }
-  > = {
-    [KEYS.audio]: {
-      icon: <AudioLinesIcon className="size-4" />,
-      label: media.audio,
-      title: media.insertAudio,
-    },
-    [KEYS.file]: {
-      icon: <FileUpIcon className="size-4" />,
-      label: media.file,
-      title: media.insertFile,
-    },
-    [KEYS.img]: {
-      icon: <ImageIcon className="size-4" />,
-      label: media.image,
-      title: media.insertImage,
-    },
-    [KEYS.video]: {
-      icon: <FilmIcon className="size-4" />,
-      label: media.video,
-      title: media.insertVideo,
-    },
-  };
-  const currentConfig = mediaConfig[nodeType];
-  const [dialogOpen, setDialogOpen] = React.useState(false);
-
-  return (
-    <>
-      <ToolbarButton
-        aria-label={currentConfig.label}
-        onClick={() => setDialogOpen(true)}
-        tooltip={currentConfig.label}
-      >
-        {currentConfig.icon}
-      </ToolbarButton>
-
-      <MediaUrlDialog
-        nodeType={nodeType}
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        title={currentConfig.title}
-      />
-    </>
-  );
-}
 
 export function MediaUrlDialog({
   nodeType,

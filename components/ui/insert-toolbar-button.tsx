@@ -3,11 +3,14 @@
 import * as React from 'react';
 
 import {
+  AudioLinesIcon,
   CalendarIcon,
   ChevronRightIcon,
   Code2,
   Columns3Icon,
   FileCodeIcon,
+  FileUpIcon,
+  FilmIcon,
   Heading1Icon,
   Heading2Icon,
   Heading3Icon,
@@ -57,6 +60,12 @@ type Item = {
   focusEditor?: boolean;
   label?: string;
 };
+
+type MediaNodeType =
+  | typeof KEYS.audio
+  | typeof KEYS.file
+  | typeof KEYS.img
+  | typeof KEYS.video;
 
 const groups: Group[] = [
   {
@@ -144,8 +153,19 @@ const groups: Group[] = [
     items: [
       {
         icon: <ImageIcon />,
-        label: 'Image',
         value: KEYS.img,
+      },
+      {
+        icon: <FilmIcon />,
+        value: KEYS.video,
+      },
+      {
+        icon: <AudioLinesIcon />,
+        value: KEYS.audio,
+      },
+      {
+        icon: <FileUpIcon />,
+        value: KEYS.file,
       },
     ].map((item) => ({
       ...item,
@@ -230,8 +250,20 @@ export function InsertToolbarButton(
 ) {
   const { dictionary } = useLocalization();
   const editor = useEditorRef();
+  const media = dictionary.editor.media;
+  const mediaConfig: Record<
+    MediaNodeType,
+    { label: string; title: string }
+  > = {
+    [KEYS.audio]: { label: media.audio, title: media.insertAudio },
+    [KEYS.file]: { label: media.file, title: media.insertFile },
+    [KEYS.img]: { label: media.image, title: media.insertImage },
+    [KEYS.video]: { label: media.video, title: media.insertVideo },
+  };
   const [open, setOpen] = React.useState(false);
-  const [imageDialogOpen, setImageDialogOpen] = React.useState(false);
+  const [mediaDialogOpen, setMediaDialogOpen] = React.useState(false);
+  const [mediaNodeType, setMediaNodeType] =
+    React.useState<MediaNodeType>(KEYS.img);
 
   return (
     <>
@@ -242,7 +274,12 @@ export function InsertToolbarButton(
         {...props}
       >
         <DropdownMenuTrigger asChild>
-          <ToolbarButton pressed={open} tooltip="Insert" isDropdown>
+          <ToolbarButton
+            aria-label={dictionary.editor.insert.insert}
+            pressed={open}
+            tooltip={dictionary.editor.insert.insert}
+            isDropdown
+          >
             <PlusIcon />
           </ToolbarButton>
         </DropdownMenuTrigger>
@@ -257,9 +294,10 @@ export function InsertToolbarButton(
                 <DropdownMenuItem
                   key={value}
                   onSelect={() => {
-                    if (value === KEYS.img) {
+                    if (Object.hasOwn(mediaConfig, value)) {
                       setOpen(false);
-                      setImageDialogOpen(true);
+                      setMediaNodeType(value as MediaNodeType);
+                      setMediaDialogOpen(true);
                       return;
                     }
 
@@ -268,7 +306,7 @@ export function InsertToolbarButton(
                   }}
                 >
                   {icon}
-                  {label}
+                  {mediaConfig[value as MediaNodeType]?.label ?? label}
                 </DropdownMenuItem>
               ))}
             </ToolbarMenuGroup>
@@ -277,10 +315,10 @@ export function InsertToolbarButton(
       </DropdownMenu>
 
       <MediaUrlDialog
-        nodeType={KEYS.img}
-        open={imageDialogOpen}
-        onOpenChange={setImageDialogOpen}
-        title={dictionary.editor.media.insertImage}
+        nodeType={mediaNodeType}
+        open={mediaDialogOpen}
+        onOpenChange={setMediaDialogOpen}
+        title={mediaConfig[mediaNodeType].title}
       />
     </>
   );

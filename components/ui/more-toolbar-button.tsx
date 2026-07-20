@@ -11,6 +11,7 @@ import {
 import { KEYS } from 'platejs';
 import { useEditorRef } from 'platejs/react';
 
+import { useLocalization } from '@/app/lib/i18n/provider';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,13 +25,18 @@ import { ToolbarButton } from './toolbar';
 export function MoreToolbarButton(
   props: React.ComponentProps<typeof DropdownMenu>
 ) {
+  const { dictionary } = useLocalization();
   const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
       <DropdownMenuTrigger asChild>
-        <ToolbarButton pressed={open} tooltip="Insert">
+        <ToolbarButton
+          aria-label={dictionary.editor.moreFormatting}
+          pressed={open}
+          tooltip={dictionary.editor.moreFormatting}
+        >
           <MoreHorizontalIcon />
         </ToolbarButton>
       </DropdownMenuTrigger>
