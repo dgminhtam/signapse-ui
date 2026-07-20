@@ -43,7 +43,6 @@ import { Item, ItemContent, ItemGroup } from "@/components/ui/item"
 import {
   Sheet,
   SheetContent,
-  SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
@@ -51,6 +50,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
 
 const PERSONAL_NOTES_PAGE_SIZE = 20
+const PERSONAL_NOTES_SHEET_CONTENT_ID = "personal-notes-quick-sheet-content"
 const EMPTY_PERSONAL_NOTE: Value = [{ children: [{ text: "" }], type: "p" }]
 
 type DetailStatus = "idle" | "loading" | "ready" | "error" | "unsupported"
@@ -248,42 +248,47 @@ function PersonalNotesQuickSheet() {
     debouncedAutosave()
   }
 
+  const autosaveStatus =
+    saveStatus === "saving" ? (
+      <span
+        className="flex items-center gap-1 text-xs text-muted-foreground"
+        role="status"
+        aria-live="polite"
+      >
+        <Spinner aria-hidden="true" />
+        {personalNotes.saving}
+      </span>
+    ) : saveStatus === "saved" ? (
+      <span
+        className="text-xs text-muted-foreground"
+        role="status"
+        aria-live="polite"
+      >
+        {personalNotes.saved}
+      </span>
+    ) : saveStatus === "error" ? (
+      <span className="line-clamp-2 text-xs text-destructive" role="alert">
+        {personalNotes.saveError}
+      </span>
+    ) : null
+
+  const hasProvisionalNote =
+    selectedNoteId === null && detailStatus === "ready" && !editorReadOnly
+
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetTrigger asChild>
+      <SheetTrigger asChild aria-controls={PERSONAL_NOTES_SHEET_CONTENT_ID}>
         <Button type="button" variant="outline">
           <StickyNoteIcon data-icon="inline-start" />
           {personalNotes.trigger}
         </Button>
       </SheetTrigger>
-      <SheetContent className="gap-0 overflow-hidden data-[side=right]:w-full data-[side=right]:sm:max-w-4xl">
-        <SheetHeader>
-          <div className="flex items-center justify-between gap-4 pr-8">
-            <SheetTitle>{personalNotes.trigger}</SheetTitle>
-            {saveStatus === "saving" ? (
-              <span
-                className="flex items-center gap-1 text-xs text-muted-foreground"
-                role="status"
-                aria-live="polite"
-              >
-                <Spinner aria-hidden="true" />
-                {personalNotes.saving}
-              </span>
-            ) : saveStatus === "saved" ? (
-              <span
-                className="text-xs text-muted-foreground"
-                role="status"
-                aria-live="polite"
-              >
-                {personalNotes.saved}
-              </span>
-            ) : saveStatus === "error" ? (
-              <span className="text-xs text-destructive" role="alert">
-                {personalNotes.saveError}
-              </span>
-            ) : null}
-          </div>
-        </SheetHeader>
+      <SheetContent
+        id={PERSONAL_NOTES_SHEET_CONTENT_ID}
+        showCloseButton={false}
+        className="gap-0 overflow-hidden data-[side=right]:w-full data-[side=right]:sm:max-w-4xl"
+      >
+        <SheetTitle className="sr-only">{personalNotes.trigger}</SheetTitle>
         <div className="flex min-h-0 flex-1 flex-col md:flex-row">
           <aside
             aria-busy={isPending}
@@ -326,6 +331,22 @@ function PersonalNotesQuickSheet() {
                     </Button>
                   </EmptyContent>
                 </Empty>
+              ) : hasProvisionalNote ? (
+                <ItemGroup>
+                  <Item
+                    role="listitem"
+                    aria-current="true"
+                    size="sm"
+                    variant="muted"
+                  >
+                    <ItemContent>
+                      <span className="line-clamp-1 text-sm leading-snug font-medium">
+                        {personalNotes.draftLabel}
+                      </span>
+                      {autosaveStatus}
+                    </ItemContent>
+                  </Item>
+                </ItemGroup>
               ) : notesPage?.content.length ? (
                 <div className="flex flex-col gap-4">
                   <ItemGroup>
@@ -357,6 +378,7 @@ function PersonalNotesQuickSheet() {
                                     time: formatDateTime(timestamp),
                                   })}
                                 </AppTimeMetadata>
+                                {isSelected ? autosaveStatus : null}
                               </span>
                             </button>
                           </Item>

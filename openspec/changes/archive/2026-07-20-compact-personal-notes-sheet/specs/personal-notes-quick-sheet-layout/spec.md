@@ -1,8 +1,4 @@
-# personal-notes-quick-sheet-layout Specification
-
-## Purpose
-TBD - created by archiving change refine-personal-notes-quick-sheet-width. Update Purpose after archive.
-## Requirements
+## ADDED Requirements
 
 ### Requirement: Personal notes quick Sheet MUST use a compact headerless composition
 The system SHALL let the summary rail and editor occupy the Personal Notes Sheet without a visible title header or default close button, while retaining an accessible dialog title outside the visual layout.
@@ -18,6 +14,8 @@ The system SHALL let the summary rail and editor occupy the Personal Notes Sheet
 - **THEN** the request MUST pass through the controlled Sheet close flow
 - **AND** focus MUST return safely after the Sheet actually closes
 
+## MODIFIED Requirements
+
 ### Requirement: Personal notes quick Sheet MUST provide a wider desktop editing surface
 The system SHALL render the personal notes quick Sheet as a wider right-side overlay on desktop, targeting approximately 60% of the viewport while keeping the underlying app page visible.
 
@@ -30,20 +28,3 @@ The system SHALL render the personal notes quick Sheet as a wider right-side ove
 - **WHEN** the viewport is narrow or the browser is zoomed
 - **THEN** the quick Sheet MUST avoid overflowing the viewport horizontally
 - **AND** its summary rail, editor, and supported dismissal paths MUST remain usable
-
-### Requirement: Personal notes quick Sheet layout MUST keep the editor usable
-The system SHALL arrange the recent-note selection and editor so the editor toolbar and writing area remain usable inside the quick Sheet.
-
-#### Scenario: Two-column layout has enough editor space
-- **WHEN** the quick Sheet has enough horizontal room for a note rail and editor
-- **THEN** the Sheet MAY render the recent notes rail beside the editor
-- **AND** the editor toolbar MUST remain scannable instead of collapsing into a narrow vertical column
-
-#### Scenario: Narrow quick Sheet falls back gracefully
-- **WHEN** the quick Sheet does not have enough horizontal room for both the rail and editor
-- **THEN** the recent notes area MUST move above the editor or become compact
-- **AND** the editor MUST keep the primary writing area as the dominant surface
-
-#### Scenario: Full workspace remains available
-- **WHEN** a user needs larger editing, presentation, pagination, or deletion workflows
-- **THEN** the quick Sheet MUST continue to expose the `Mở rộng` action to the full `/notes` workspace

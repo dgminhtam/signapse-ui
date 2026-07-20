@@ -384,6 +384,7 @@ export const en: Dictionary = {
     trigger: "Notes",
     listLabel: "Note list",
     noteLabel: "Note #{id}",
+    draftLabel: "New note",
     lastUpdated: "Updated {time}",
     loading: "Loading notes",
     detailLoading: "Loading note",

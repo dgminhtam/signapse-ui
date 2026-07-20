@@ -384,6 +384,7 @@ export const vi = {
     trigger: "Ghi chú",
     listLabel: "Danh sách ghi chú",
     noteLabel: "Ghi chú #{id}",
+    draftLabel: "Ghi chú mới",
     lastUpdated: "Cập nhật {time}",
     loading: "Đang tải ghi chú",
     detailLoading: "Đang tải nội dung ghi chú",
