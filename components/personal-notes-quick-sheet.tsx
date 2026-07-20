@@ -1,7 +1,12 @@
 "use client"
 
 import { useRef, useState, useTransition } from "react"
-import { CircleAlertIcon, Clock3Icon, StickyNoteIcon } from "lucide-react"
+import {
+  CircleAlertIcon,
+  Clock3Icon,
+  SquarePenIcon,
+  StickyNoteIcon,
+} from "lucide-react"
 import type { Value } from "platejs"
 import { useDebouncedCallback } from "use-debounce"
 
@@ -248,6 +253,15 @@ function PersonalNotesQuickSheet() {
     debouncedAutosave()
   }
 
+  async function handleNewNote() {
+    if (!canCreate || !notesPage || hasError) return
+    if (!(await flushCurrentEditor())) return
+
+    detailRequestRef.current += 1
+    setSelectedNoteId(null)
+    initializeEditor(null, EMPTY_PERSONAL_NOTE, true)
+  }
+
   const autosaveStatus =
     saveStatus === "saving" ? (
       <span
@@ -295,6 +309,19 @@ function PersonalNotesQuickSheet() {
             aria-label={personalNotes.listLabel}
             className="flex max-h-64 shrink-0 flex-col border-b md:max-h-none md:w-72 md:border-r md:border-b-0"
           >
+            {canCreate && notesPage && !hasError ? (
+              <div className="shrink-0 p-4 pb-0">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => void handleNewNote()}
+                >
+                  <SquarePenIcon data-icon="inline-start" />
+                  {personalNotes.draftLabel}
+                </Button>
+              </div>
+            ) : null}
             <div className="min-h-0 flex-1 overflow-y-auto p-4">
               {isPending && !notesPage ? (
                 <div role="status">
@@ -331,26 +358,25 @@ function PersonalNotesQuickSheet() {
                     </Button>
                   </EmptyContent>
                 </Empty>
-              ) : hasProvisionalNote ? (
-                <ItemGroup>
-                  <Item
-                    role="listitem"
-                    aria-current="true"
-                    size="sm"
-                    variant="muted"
-                  >
-                    <ItemContent>
-                      <span className="line-clamp-1 text-sm leading-snug font-medium">
-                        {personalNotes.draftLabel}
-                      </span>
-                      {autosaveStatus}
-                    </ItemContent>
-                  </Item>
-                </ItemGroup>
-              ) : notesPage?.content.length ? (
+              ) : hasProvisionalNote || notesPage?.content.length ? (
                 <div className="flex flex-col gap-4">
                   <ItemGroup>
-                    {notesPage.content.map((note) => {
+                    {hasProvisionalNote ? (
+                      <Item
+                        role="listitem"
+                        aria-current="true"
+                        size="sm"
+                        variant="muted"
+                      >
+                        <ItemContent>
+                          <span className="line-clamp-1 text-sm leading-snug font-medium">
+                            {personalNotes.draftLabel}
+                          </span>
+                          {autosaveStatus}
+                        </ItemContent>
+                      </Item>
+                    ) : null}
+                    {notesPage?.content.map((note) => {
                       const timestamp =
                         note.lastModifiedDate || note.createdDate
                       const isSelected = selectedNoteId === note.id
@@ -386,7 +412,7 @@ function PersonalNotesQuickSheet() {
                       )
                     })}
                   </ItemGroup>
-                  {!notesPage.last && (
+                  {notesPage && !notesPage.last && (
                     <Button
                       type="button"
                       variant="outline"
