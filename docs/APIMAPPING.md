@@ -2,7 +2,7 @@
 
 Tài liệu này ánh xạ snapshot OpenAPI backend trong `docs/api_mapping.json` tới các điểm tích hợp frontend hiện tại của repo.
 
-Xác minh lần cuối: ngày 20 tháng 7 năm 2026
+Xác minh lần cuối: ngày 21 tháng 7 năm 2026
 
 ## Cấu hình cơ sở
 
@@ -36,7 +36,7 @@ Xác minh lần cuối: ngày 20 tháng 7 năm 2026
 
 ## Tổng quan thay đổi lớn từ snapshot hiện tại
 
-- Snapshot backend hiện tại gồm `116` operation.
+- Snapshot backend hiện tại gồm `119` operation.
 - Backend đã chuyển domain nội dung canon từ `sources` / `source-documents` sang `news-outlets` / `news-articles`.
 - Backend vẫn giữ các surface `events`, `query`, và `graph-view`, nhưng nhiều payload đã đổi naming từ `sourceDocument*` sang `artifact*` hoặc `news-article`.
 - Surface `events` có thêm workflow derive market reactions cho từng event và batch pending events.
@@ -52,7 +52,7 @@ Xác minh lần cuối: ngày 20 tháng 7 năm 2026
 - Snapshot mới thêm credential sub-resource cho `ai-provider-configs` để quản lý nhiều API key theo từng provider config mà không expose full key.
 - Snapshot mới tiếp tục giản lược `ai-provider-configs`: config request/response không còn `name` và top-level `model`; credential dùng field `model` thay cho `label`.
 - Snapshot mới giản lược `cronjobs`: không còn endpoint create/delete cronjob; update schedule chỉ nhận `expression`.
-- Snapshot mới đổi personal notes dưới `/me/notes` sang nội dung JSON có version; list chỉ trả summary, còn detail/create/update dùng `content` và `contentSchemaVersion`.
+- Snapshot mới đổi personal notes dưới `/me/notes` sang nội dung JSON có version; list chỉ trả summary có `title`, còn detail/create/update dùng `content` dạng mảng, `contentSchemaVersion`, và response có `title`.
 - Snapshot mới thêm API `languages`, persisted preferred language trên `/me/preferred-language`, và field `preferredLanguage` trong `UserResponse`.
 - Snapshot mới thêm domain `narratives`, đồng thời mở rộng `market-query` với `keyNarratives[]` và `graph-view` với node/edge narrative.
 - Snapshot mới bỏ endpoint `POST /news-articles/{id}/crawl-full-content`, mở rộng `system-prompts` với `responseSchema`/`localizedNames`, và thêm `evidenceNote` cho market query evidence.
@@ -432,19 +432,20 @@ Ghi chu:
 
 | Phuong thuc | Endpoint backend | operationId          | Tich hop frontend | Trang thai     | Ghi chu |
 | ----------- | ---------------- | -------------------- | ----------------- | -------------- | ------- |
-| GET         | `/me/notes`      | `getPersonalNotes`   | `getPersonalNotes(searchParams)` | Da tich hop | Sheet trong header dung `Page<PersonalNoteSummaryResponse>`; permission `personal-note:read`. |
-| POST        | `/me/notes`      | `createPersonalNote` | `createPersonalNote(request)` | Da tich hop | Sheet autosave ban nhap dau tien voi `contentSchemaVersion: 1`; response `201 PersonalNoteResponse`; permission `personal-note:create`. |
-| GET         | `/me/notes/{id}` | `getPersonalNote`    | `getPersonalNote(id)` | Da tich hop | Sheet tai Plate JSON cho ghi chu duoc chon; permission `personal-note:read`. |
-| PUT         | `/me/notes/{id}` | `updatePersonalNote` | `updatePersonalNote(id, request)` | Da tich hop | Sheet autosave noi dung Plate JSON version 1; response `PersonalNoteResponse`; permission `personal-note:update`. |
+| GET         | `/me/notes`      | `getPersonalNotes`   | `getPersonalNotes(searchParams)` | Da tich hop | Sheet khai bao va render `title` tu `PersonalNoteSummaryResponse`, voi fallback da localize khi thieu/rong; permission `personal-note:read`. |
+| POST        | `/me/notes`      | `createPersonalNote` | `createPersonalNote(request)` | Da tich hop | Request gui freeform `content` va `contentSchemaVersion` khi Save hoac safety flush; backend suy title snapshot tu text co y nghia dau tien, Sheet dong bo response `201 PersonalNoteResponse`; permission `personal-note:create`. |
+| GET         | `/me/notes/{id}` | `getPersonalNote`    | `getPersonalNote(id)` | Da tich hop | `PersonalNoteResponse.title` duoc giu trong local summary trong khi Sheet tai Plate JSON cua ghi chu duoc chon; permission `personal-note:read`. |
+| PUT         | `/me/notes/{id}` | `updatePersonalNote` | `updatePersonalNote(id, request)` | Da tich hop | Request khong co field `title`; content update giu va tra lai stored title snapshot, summary local copy title/timestamp tu response; permission `personal-note:update`. |
 | DELETE      | `/me/notes/{id}` | `deletePersonalNote` | -                 | Chua tich hop  | Response `200` khong co payload; permission `personal-note:delete`. |
 
 Ghi chu:
 
-- `CreatePersonalNoteRequest` va `UpdatePersonalNoteRequest` bat buoc `content: JsonNode` va `contentSchemaVersion: int32`; `JsonNode` hien la schema rong trong snapshot OpenAPI.
+- `CreatePersonalNoteRequest` va `UpdatePersonalNoteRequest` bat buoc `content` la mang object va `contentSchemaVersion: int32`; snapshot da bo component schema `JsonNode`.
 - Snapshot khong khai bao enum, default, hoac minimum cho `contentSchemaVersion`; Sheet hien ghi version `1` va khong cho sua version khac.
-- `PersonalNoteResponse` gom `id`, `content`, `contentSchemaVersion`, `createdDate`, `lastModifiedDate`.
-- `PersonalNoteSummaryResponse` khong co `content`; list chi tra `id`, `contentSchemaVersion`, `createdDate`, `lastModifiedDate` trong `PagePersonalNoteSummaryResponse`.
-- Frontend so huu list/detail/create/update trong Sheet header, permission constants, va coordinator autosave Plate JSON version 1; khong co route `/notes` hoac delete flow.
+- `PersonalNoteResponse` gom `id`, `title`, `content`, `contentSchemaVersion`, `createdDate`, `lastModifiedDate`; `PersonalNoteSummaryResponse` co cung metadata va `title` nhung khong co `content`.
+- OpenAPI hien mo ta `title` la `string` nhung khong danh dau required hoac nullable; behavior reference mong doi backend tra `string | null`, nen can xac nhan/fix nullability trong snapshot truoc khi coi contract da kin.
+- OpenAPI chi mo ta payload shape, khong encode lifecycle cua title; behavior reference mong doi create derive title tu freeform content va update content khong recompute title.
+- Frontend so huu list/detail/create/update trong Sheet header, freeform Plate JSON version 1, fallback da localize, permission constants, va coordinator Save + safety flush. Draft moi bat dau bang paragraph; frontend khong normalize H1 hoac parse content de suy title. Khong co route `/notes` hoac delete flow.
 
 ### 19. API wiki
 
@@ -634,7 +635,7 @@ type ActionResult<T = void> =
 - `telegram`: frontend da co route/action/type/permission/navigation cho surface Telegram, nhung snapshot moi them `outputLanguageIsoCode` request va `outputLanguage` response cho feature setting/schedule ma FE chua expose.
 - `ai-provider credentials`: snapshot moi doi credential `label` thanh `model` va bo top-level config `name`/`model`; FE hien van giu `name`, top-level `model`, va credential `label` trong definitions, form, list, detail, va credential panel.
 - `cronjobs`: FE da bo create/delete flow va doi update schedule sang inline list chi gui `expression`; endpoint `stop` duoc ghi nhan nhung khong tich hop co chu dich.
-- `personal notes`: FE da tich hop list summary, detail, create va update trong Sheet; Plate editor autosave JSON version 1 sau 1000 ms va flush truoc khi doi/dong ghi chu. Delete chua tich hop; route `/editor` van la playground khong persist.
+- `personal notes`: FE render/copy response `title` voi fallback da localize, nhung editor va draft da freeform, khong ep H1 dau hay title placeholder. Create title la backend snapshot tu content; content update giu stored title. OpenAPI van chua encode required/nullable hoac lifecycle cua `title`; delete va explicit rename chua tich hop.
 - `languages`: frontend da co URL locale va `Accept-Language`, nhung chua co backend action cho `GET /languages` va `PATCH /me/preferred-language`; `LanguageSelector` hien chi doi route locale.
 - `narratives`: snapshot moi them `/narratives*`, graph narrative node/edge, va market query `keyNarratives[]`; FE chua co module narratives rieng hoac market-query narrative panel, nhung Graph View da model/render narrative node/edge.
 - `market query`: spec van mo ta `asOfTime` la optional `date-time`; frontend conversation v1 chu dong omit field nay de backend tu lay thoi diem hien tai va harden parse cho payload runtime co the tra `null` o `publishedAt` va `occurredAt`. Frontend khong con legacy `/market-query` route hay redirect compatibility; global assistant modal la UI primary surface.

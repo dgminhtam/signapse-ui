@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState, useTransition } from "react"
+import { type KeyboardEvent, useRef, useState, useTransition } from "react"
 import {
   CircleAlertIcon,
   Clock3Icon,
@@ -8,7 +8,6 @@ import {
   StickyNoteIcon,
 } from "lucide-react"
 import type { Value } from "platejs"
-import { useDebouncedCallback } from "use-debounce"
 
 import {
   createPersonalNote,
@@ -84,19 +83,17 @@ function PersonalNotesQuickSheet() {
   const detailRequestRef = useRef(0)
   const editorKeyRef = useRef(0)
 
-  const debouncedAutosave = useDebouncedCallback(() => {
-    void autosaveRef.current?.flush()
-  }, 1000)
-
   function updateLocalSummary(note: PersonalNoteResponse) {
     const summary: PersonalNoteSummaryResponse = {
       id: note.id,
+      title: note.title,
       contentSchemaVersion: note.contentSchemaVersion,
       createdDate: note.createdDate,
       lastModifiedDate: note.lastModifiedDate,
     }
 
     setSelectedNoteId(note.id)
+    setEditorInitialValue(note.content)
     setNotesPage((currentPage) => {
       if (!currentPage) return currentPage
 
@@ -125,7 +122,6 @@ function PersonalNotesQuickSheet() {
     content: Value,
     editable: boolean
   ) {
-    debouncedAutosave.cancel()
     setEditorInitialValue(content)
     setEditorReadOnly(!editable)
     setSaveStatus("idle")
@@ -153,7 +149,6 @@ function PersonalNotesQuickSheet() {
   }
 
   async function flushCurrentEditor() {
-    debouncedAutosave.cancel()
     return autosaveRef.current?.flush() ?? true
   }
 
@@ -250,7 +245,26 @@ function PersonalNotesQuickSheet() {
 
   function handleEditorChange(value: Value) {
     autosaveRef.current?.change(value)
-    debouncedAutosave()
+  }
+
+  function handleSave() {
+    if (saveStatus !== "dirty" && saveStatus !== "error") return
+    void flushCurrentEditor()
+  }
+
+  function handleSheetKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (
+      detailStatus !== "ready" ||
+      !editorInitialValue ||
+      editorReadOnly ||
+      (!event.ctrlKey && !event.metaKey) ||
+      event.key.toLowerCase() !== "s"
+    ) {
+      return
+    }
+
+    event.preventDefault()
+    handleSave()
   }
 
   async function handleNewNote() {
@@ -262,7 +276,7 @@ function PersonalNotesQuickSheet() {
     initializeEditor(null, EMPTY_PERSONAL_NOTE, true)
   }
 
-  const autosaveStatus =
+  const saveStatusFeedback =
     saveStatus === "saving" ? (
       <span
         className="flex items-center gap-1 text-xs text-muted-foreground"
@@ -300,7 +314,8 @@ function PersonalNotesQuickSheet() {
       <SheetContent
         id={PERSONAL_NOTES_SHEET_CONTENT_ID}
         showCloseButton={false}
-        className="gap-0 overflow-hidden data-[side=right]:w-full data-[side=right]:sm:max-w-4xl"
+        className="gap-0 overflow-hidden data-[side=right]:w-full data-[side=right]:sm:max-w-6xl"
+        onKeyDownCapture={handleSheetKeyDown}
       >
         <SheetTitle className="sr-only">{personalNotes.trigger}</SheetTitle>
         <div className="flex min-h-0 flex-1 flex-col md:flex-row">
@@ -372,7 +387,6 @@ function PersonalNotesQuickSheet() {
                           <span className="line-clamp-1 text-sm leading-snug font-medium">
                             {personalNotes.draftLabel}
                           </span>
-                          {autosaveStatus}
                         </ItemContent>
                       </Item>
                     ) : null}
@@ -395,16 +409,13 @@ function PersonalNotesQuickSheet() {
                             >
                               <span className="flex min-w-0 flex-1 flex-col gap-1 text-left">
                                 <span className="line-clamp-1 text-sm leading-snug font-medium">
-                                  {formatMessage(personalNotes.noteLabel, {
-                                    id: note.id,
-                                  })}
+                                  {note.title?.trim() || personalNotes.untitled}
                                 </span>
                                 <AppTimeMetadata icon={Clock3Icon}>
                                   {formatMessage(personalNotes.lastUpdated, {
                                     time: formatDateTime(timestamp),
                                   })}
                                 </AppTimeMetadata>
-                                {isSelected ? autosaveStatus : null}
                               </span>
                             </button>
                           </Item>
@@ -445,75 +456,96 @@ function PersonalNotesQuickSheet() {
             </div>
           </aside>
           <div
-            className="min-h-0 min-w-0 flex-1 overflow-auto"
+            className="flex min-h-0 min-w-0 flex-1 flex-col"
             aria-busy={detailStatus === "loading"}
           >
-            {detailStatus === "loading" ? (
-              <div className="p-6" role="status">
-                <span className="sr-only">{personalNotes.detailLoading}</span>
-                <div className="flex flex-col gap-3" aria-hidden="true">
-                  <Skeleton className="h-5 w-2/3" />
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-5/6" />
-                </div>
+            {detailStatus === "ready" &&
+            editorInitialValue &&
+            !editorReadOnly ? (
+              <div className="flex shrink-0 items-center justify-between gap-4 border-b px-4 py-2">
+                <div className="min-w-0 flex-1">{saveStatusFeedback}</div>
+                <Button
+                  type="button"
+                  aria-keyshortcuts="Control+S Meta+S"
+                  disabled={saveStatus !== "dirty" && saveStatus !== "error"}
+                  onClick={handleSave}
+                >
+                  {saveStatus === "saving" ? (
+                    <Spinner data-icon="inline-start" aria-hidden="true" />
+                  ) : null}
+                  {dictionary.common.save}
+                </Button>
               </div>
-            ) : detailStatus === "error" ? (
-              <Empty role="alert">
-                <EmptyHeader>
-                  <EmptyMedia variant="icon">
-                    <CircleAlertIcon />
-                  </EmptyMedia>
-                  <EmptyTitle>{personalNotes.detailErrorTitle}</EmptyTitle>
-                  <EmptyDescription>
-                    {personalNotes.detailErrorDescription}
-                  </EmptyDescription>
-                </EmptyHeader>
-                <EmptyContent>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      if (selectedNoteId !== null) {
-                        void loadNoteDetail(selectedNoteId)
-                      }
-                    }}
-                  >
-                    {personalNotes.retry}
-                  </Button>
-                </EmptyContent>
-              </Empty>
-            ) : detailStatus === "unsupported" ? (
-              <Empty>
-                <EmptyHeader>
-                  <EmptyMedia variant="icon">
-                    <CircleAlertIcon />
-                  </EmptyMedia>
-                  <EmptyTitle>{personalNotes.unsupportedTitle}</EmptyTitle>
-                  <EmptyDescription>
-                    {personalNotes.unsupportedDescription}
-                  </EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            ) : detailStatus === "ready" && editorInitialValue ? (
-              <PlateEditor
-                key={editorKey}
-                initialValue={editorInitialValue}
-                onValueChange={editorReadOnly ? undefined : handleEditorChange}
-                readOnly={editorReadOnly}
-              />
-            ) : (
-              <Empty>
-                <EmptyHeader>
-                  <EmptyMedia variant="icon">
-                    <StickyNoteIcon />
-                  </EmptyMedia>
-                  <EmptyTitle>{personalNotes.emptyTitle}</EmptyTitle>
-                  <EmptyDescription>
-                    {personalNotes.emptyDescription}
-                  </EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            )}
+            ) : null}
+            <div className="min-h-0 flex-1 overflow-auto">
+              {detailStatus === "loading" ? (
+                <div className="p-6" role="status">
+                  <span className="sr-only">{personalNotes.detailLoading}</span>
+                  <div className="flex flex-col gap-3" aria-hidden="true">
+                    <Skeleton className="h-5 w-2/3" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-5/6" />
+                  </div>
+                </div>
+              ) : detailStatus === "error" ? (
+                <Empty role="alert">
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <CircleAlertIcon />
+                    </EmptyMedia>
+                    <EmptyTitle>{personalNotes.detailErrorTitle}</EmptyTitle>
+                    <EmptyDescription>
+                      {personalNotes.detailErrorDescription}
+                    </EmptyDescription>
+                  </EmptyHeader>
+                  <EmptyContent>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        if (selectedNoteId !== null) {
+                          void loadNoteDetail(selectedNoteId)
+                        }
+                      }}
+                    >
+                      {personalNotes.retry}
+                    </Button>
+                  </EmptyContent>
+                </Empty>
+              ) : detailStatus === "unsupported" ? (
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <CircleAlertIcon />
+                    </EmptyMedia>
+                    <EmptyTitle>{personalNotes.unsupportedTitle}</EmptyTitle>
+                    <EmptyDescription>
+                      {personalNotes.unsupportedDescription}
+                    </EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
+              ) : detailStatus === "ready" && editorInitialValue ? (
+                <PlateEditor
+                  bodyPlaceholder={personalNotes.bodyPlaceholder}
+                  key={editorKey}
+                  initialValue={editorInitialValue}
+                  onValueChange={editorReadOnly ? undefined : handleEditorChange}
+                  readOnly={editorReadOnly}
+                />
+              ) : (
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <StickyNoteIcon />
+                    </EmptyMedia>
+                    <EmptyTitle>{personalNotes.emptyTitle}</EmptyTitle>
+                    <EmptyDescription>
+                      {personalNotes.emptyDescription}
+                    </EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
+              )}
+            </div>
           </div>
         </div>
       </SheetContent>

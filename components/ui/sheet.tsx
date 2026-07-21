@@ -2,9 +2,11 @@
 
 import * as React from "react"
 import { Dialog as SheetPrimitive } from "radix-ui"
+import { useComposedRefs } from "radix-ui/internal"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { OverlayPortalContainerProvider } from "@/components/ui/overlay-portal-container"
 import { XIcon } from "lucide-react"
 
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
@@ -48,6 +50,7 @@ function SheetOverlay({
 function SheetContent({
   className,
   children,
+  ref,
   side = "right",
   showCloseButton = true,
   ...props
@@ -55,10 +58,15 @@ function SheetContent({
   side?: "top" | "right" | "bottom" | "left"
   showCloseButton?: boolean
 }) {
+  const [portalContainer, setPortalContainer] =
+    React.useState<HTMLDivElement | null>(null)
+  const composedRefs = useComposedRefs(ref, setPortalContainer)
+
   return (
     <SheetPortal>
       <SheetOverlay />
       <SheetPrimitive.Content
+        ref={composedRefs}
         data-slot="sheet-content"
         data-side={side}
         className={cn(
@@ -67,20 +75,22 @@ function SheetContent({
         )}
         {...props}
       >
-        {children}
-        {showCloseButton && (
-          <SheetPrimitive.Close data-slot="sheet-close" asChild>
-            <Button
-              variant="ghost"
-              className="absolute top-3 right-3"
-              size="icon-sm"
-            >
-              <XIcon
-              />
-              <span className="sr-only">Close</span>
-            </Button>
-          </SheetPrimitive.Close>
-        )}
+        <OverlayPortalContainerProvider value={portalContainer}>
+          {children}
+          {showCloseButton && (
+            <SheetPrimitive.Close data-slot="sheet-close" asChild>
+              <Button
+                variant="ghost"
+                className="absolute top-3 right-3"
+                size="icon-sm"
+              >
+                <XIcon
+                />
+                <span className="sr-only">Close</span>
+              </Button>
+            </SheetPrimitive.Close>
+          )}
+        </OverlayPortalContainerProvider>
       </SheetPrimitive.Content>
     </SheetPortal>
   )

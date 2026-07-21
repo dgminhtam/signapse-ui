@@ -383,7 +383,8 @@ export const vi = {
   personalNotes: {
     trigger: "Ghi chú",
     listLabel: "Danh sách ghi chú",
-    noteLabel: "Ghi chú #{id}",
+    bodyPlaceholder: "Nhập nội dung hoặc gõ / để dùng lệnh…",
+    untitled: "Ghi chú chưa có tiêu đề",
     draftLabel: "Ghi chú mới",
     lastUpdated: "Cập nhật {time}",
     loading: "Đang tải ghi chú",
@@ -1832,9 +1833,6 @@ export const vi = {
       urlPlaceholder: "https://example.com/media",
       urlDescription: "Nhập liên kết trực tiếp đến media.",
       invalidUrl: "Hãy nhập URL media hợp lệ.",
-    },
-    comment: {
-      notReady: "Bình luận chưa sẵn sàng. Vui lòng thử lại.",
     },
   },
   telegram: {

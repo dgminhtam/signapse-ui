@@ -39,11 +39,11 @@ The repository SHALL contain no Plate AI-only components, hooks, plugins, prompt
 - **THEN** no Plate AI implementation reference or listed direct dependency remains
 
 ### Requirement: Non-AI Plate editor behavior remains composed
-The removal SHALL preserve the shared editor's non-AI toolbars, Markdown support, block and cursor selection, tables, comments, suggestions, and other existing editing plugins.
+The removal SHALL preserve the shared editor's remaining non-AI toolbars, Markdown support, block and cursor selection, tables, and other supported editing plugins, without requiring removed comment, discussion, or suggestion behavior.
 
 #### Scenario: Editor kit is composed after removal
-- **WHEN** the shared editor initializes after the AI files are deleted
-- **THEN** its remaining non-AI plugin kits and controls still resolve without an AI replacement or compatibility shim
+- **WHEN** the shared editor initializes after collaboration files are deleted
+- **THEN** its remaining non-AI plugin kits and controls still resolve without an AI or collaboration replacement or compatibility shim
 
 ### Requirement: Editor demo content does not advertise removed AI behavior
 The Plate editor's initial document SHALL NOT claim that AI editing is available or include AI-specific usage instructions or comparison rows.

@@ -18,8 +18,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
-import { inlineSuggestionVariants } from '@/lib/suggestion';
 
 export function DateElement(props: PlateElementProps<TDateElement>) {
   const { editor, element } = props;
@@ -27,10 +25,7 @@ export function DateElement(props: PlateElementProps<TDateElement>) {
 
   const trigger = (
     <span
-      className={cn(
-        'w-fit cursor-pointer rounded-sm bg-muted px-1 text-muted-foreground',
-        inlineSuggestionVariants()
-      )}
+      className="w-fit cursor-pointer rounded-sm bg-muted px-1 text-muted-foreground"
       contentEditable={false}
       draggable
     >

@@ -24,6 +24,7 @@ export type PersonalNoteMutationRequest = z.infer<
 
 export interface PersonalNoteSummaryResponse {
   id: number
+  title?: string | null
   contentSchemaVersion: number
   createdDate: string
   lastModifiedDate: string

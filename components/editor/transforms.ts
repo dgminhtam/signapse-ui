@@ -11,7 +11,6 @@ import { insertFootnote } from '@platejs/footnote';
 import { insertColumnGroup, toggleColumnGroup } from '@platejs/layout';
 import { triggerFloatingLink } from '@platejs/link/react';
 import { insertEquation, insertInlineEquation } from '@platejs/math';
-import { SuggestionPlugin } from '@platejs/suggestion/react';
 import { TablePlugin } from '@platejs/table/react';
 import { insertToc } from '@platejs/toc';
 import {
@@ -111,9 +110,7 @@ export const insertBlock = (
       editor.tf.insertNodes(createBlockquote(editor), { at: insertPath });
 
       if (!isSameBlockType && isCurrentBlockEmpty) {
-        editor.getApi(SuggestionPlugin).suggestion.withoutSuggestions(() => {
-          editor.tf.removeNodes({ at: path });
-        });
+        editor.tf.removeNodes({ at: path });
       }
 
       selectBlockquoteStart(
@@ -133,9 +130,7 @@ export const insertBlock = (
     }
 
     if (!isSameBlockType) {
-      editor.getApi(SuggestionPlugin).suggestion.withoutSuggestions(() => {
-        editor.tf.removeNodes({ previousEmptyBlock: true });
-      });
+      editor.tf.removeNodes({ previousEmptyBlock: true });
     }
   });
 };

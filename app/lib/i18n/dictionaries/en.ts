@@ -383,7 +383,8 @@ export const en: Dictionary = {
   personalNotes: {
     trigger: "Notes",
     listLabel: "Note list",
-    noteLabel: "Note #{id}",
+    bodyPlaceholder: "Write or type / for commands…",
+    untitled: "Untitled note",
     draftLabel: "New note",
     lastUpdated: "Updated {time}",
     loading: "Loading notes",
@@ -1844,9 +1845,6 @@ export const en: Dictionary = {
       urlPlaceholder: "https://example.com/media",
       urlDescription: "Enter a direct link to the media.",
       invalidUrl: "Enter a valid media URL.",
-    },
-    comment: {
-      notReady: "This comment is not ready yet. Please try again.",
     },
   },
   telegram: {

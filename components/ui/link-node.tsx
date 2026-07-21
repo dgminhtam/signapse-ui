@@ -8,18 +8,12 @@ import type { PlateElementProps } from 'platejs/react';
 import { getLinkAttributes } from '@platejs/link';
 import { PlateElement } from 'platejs/react';
 
-import { cn } from '@/lib/utils';
-import { inlineSuggestionVariants } from '@/lib/suggestion';
-
 export function LinkElement(props: PlateElementProps<TLinkElement>) {
   return (
     <PlateElement
       {...props}
       as="a"
-      className={cn(
-        'font-medium text-primary underline decoration-primary underline-offset-4',
-        inlineSuggestionVariants()
-      )}
+      className="font-medium text-primary underline decoration-primary underline-offset-4"
       attributes={{
         ...props.attributes,
         ...getLinkAttributes(props.editor, props.element),
