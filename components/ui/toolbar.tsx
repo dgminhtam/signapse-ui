@@ -11,7 +11,6 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
-import { Separator } from '@/components/ui/separator';
 import {
   Tooltip,
   TooltipContent,
@@ -278,10 +277,6 @@ export function ToolbarGroup({
       )}
     >
       <div className="flex items-center">{children}</div>
-
-      <div className="group-last/toolbar-group:hidden! mx-1.5 flex py-0.5">
-        <Separator orientation="vertical" />
-      </div>
     </div>
   );
 }

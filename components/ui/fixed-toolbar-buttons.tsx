@@ -126,8 +126,6 @@ export function FixedToolbarButtons() {
         </>
       )}
 
-      <div className="grow" />
-
       <ToolbarGroup>
         <MarkToolbarButton nodeType={KEYS.highlight} tooltip="Highlight">
           <HighlighterIcon />

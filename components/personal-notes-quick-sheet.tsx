@@ -1,16 +1,26 @@
 "use client"
 
-import { type KeyboardEvent, useRef, useState, useTransition } from "react"
+import {
+  type FormEvent,
+  type KeyboardEvent,
+  useRef,
+  useState,
+  useTransition,
+} from "react"
 import {
   CircleAlertIcon,
-  Clock3Icon,
+  EllipsisIcon,
+  PencilIcon,
   SquarePenIcon,
   StickyNoteIcon,
+  Trash2Icon,
 } from "lucide-react"
 import type { Value } from "platejs"
+import { toast } from "sonner"
 
 import {
   createPersonalNote,
+  deletePersonalNote,
   getPersonalNote,
   getPersonalNotes,
   updatePersonalNote,
@@ -25,16 +35,42 @@ import {
 } from "@/app/lib/personal-notes/definitions"
 import {
   PERSONAL_NOTE_CREATE_PERMISSION,
+  PERSONAL_NOTE_DELETE_PERMISSION,
   PERSONAL_NOTE_UPDATE_PERMISSION,
 } from "@/app/lib/personal-notes/permissions"
-import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { PlateEditor } from "@/components/editor/plate-editor"
+import { reconcileDeletedPersonalNote } from "@/components/personal-note-list-state"
 import {
   createPersonalNoteAutosave,
   type PersonalNoteSaveStatus,
 } from "@/components/personal-note-autosave"
 import { useHasPermission } from "@/components/permission-provider"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import {
   Empty,
   EmptyContent,
@@ -43,7 +79,14 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
-import { Item, ItemContent, ItemGroup } from "@/components/ui/item"
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
+import { Item, ItemActions, ItemContent, ItemGroup } from "@/components/ui/item"
 import {
   Sheet,
   SheetContent,
@@ -60,10 +103,11 @@ const EMPTY_PERSONAL_NOTE: Value = [{ children: [{ text: "" }], type: "p" }]
 type DetailStatus = "idle" | "loading" | "ready" | "error" | "unsupported"
 
 function PersonalNotesQuickSheet() {
-  const { dictionary, formatDateTime, formatMessage } = useLocalization()
+  const { dictionary, formatMessage } = useLocalization()
   const personalNotes = dictionary.personalNotes
   const canCreate = useHasPermission(PERSONAL_NOTE_CREATE_PERMISSION)
   const canUpdate = useHasPermission(PERSONAL_NOTE_UPDATE_PERMISSION)
+  const canDelete = useHasPermission(PERSONAL_NOTE_DELETE_PERMISSION)
   const [open, setOpen] = useState(false)
   const [notesPage, setNotesPage] =
     useState<Page<PersonalNoteSummaryResponse> | null>(null)
@@ -76,14 +120,28 @@ function PersonalNotesQuickSheet() {
   const [editorReadOnly, setEditorReadOnly] = useState(true)
   const [editorKey, setEditorKey] = useState(0)
   const [saveStatus, setSaveStatus] = useState<PersonalNoteSaveStatus>("idle")
+  const [renameOpen, setRenameOpen] = useState(false)
+  const [renameTarget, setRenameTarget] = useState<PersonalNoteResponse | null>(
+    null
+  )
+  const [renameValue, setRenameValue] = useState("")
+  const [renameError, setRenameError] = useState<string | null>(null)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [deleteTarget, setDeleteTarget] =
+    useState<PersonalNoteSummaryResponse | null>(null)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  const [isRenamePending, startRenameTransition] = useTransition()
+  const [isDeletePending, startDeleteTransition] = useTransition()
   const autosaveRef = useRef<ReturnType<
     typeof createPersonalNoteAutosave
   > | null>(null)
   const detailRequestRef = useRef(0)
   const editorKeyRef = useRef(0)
+  const activeNoteRef = useRef<PersonalNoteResponse | null>(null)
+  const lastActionTriggerRef = useRef<HTMLButtonElement | null>(null)
 
-  function updateLocalSummary(note: PersonalNoteResponse) {
+  function reconcileSummary(note: PersonalNoteResponse) {
     const summary: PersonalNoteSummaryResponse = {
       id: note.id,
       title: note.title,
@@ -92,8 +150,6 @@ function PersonalNotesQuickSheet() {
       lastModifiedDate: note.lastModifiedDate,
     }
 
-    setSelectedNoteId(note.id)
-    setEditorInitialValue(note.content)
     setNotesPage((currentPage) => {
       if (!currentPage) return currentPage
 
@@ -117,11 +173,19 @@ function PersonalNotesQuickSheet() {
     })
   }
 
+  function syncActiveNote(note: PersonalNoteResponse) {
+    activeNoteRef.current = note
+    setSelectedNoteId(note.id)
+    setEditorInitialValue(note.content)
+    reconcileSummary(note)
+  }
+
   function initializeEditor(
-    noteId: number | null,
-    content: Value,
+    note: PersonalNoteResponse | null,
     editable: boolean
   ) {
+    const content = note?.content ?? EMPTY_PERSONAL_NOTE
+    activeNoteRef.current = note
     setEditorInitialValue(content)
     setEditorReadOnly(!editable)
     setSaveStatus("idle")
@@ -130,11 +194,12 @@ function PersonalNotesQuickSheet() {
 
     autosaveRef.current = editable
       ? createPersonalNoteAutosave({
-          noteId,
-          onSaved: updateLocalSummary,
+          noteId: note?.id ?? null,
+          onSaved: syncActiveNote,
           onStatusChange: setSaveStatus,
           persist: (currentNoteId, currentContent) => {
             const request: PersonalNoteMutationRequest = {
+              title: activeNoteRef.current?.title ?? null,
               content: currentContent,
               contentSchemaVersion: PERSONAL_NOTE_CONTENT_SCHEMA_VERSION,
             }
@@ -153,12 +218,8 @@ function PersonalNotesQuickSheet() {
   }
 
   async function loadNoteDetail(noteId: number) {
-    if (
-      noteId === selectedNoteId &&
-      detailStatus !== "error" &&
-      detailStatus !== "unsupported"
-    ) {
-      return true
+    if (noteId === selectedNoteId && detailStatus === "ready") {
+      return activeNoteRef.current
     }
 
     if (!(await flushCurrentEditor())) return false
@@ -175,12 +236,13 @@ function PersonalNotesQuickSheet() {
       if (requestId !== detailRequestRef.current) return false
 
       if (note.contentSchemaVersion !== PERSONAL_NOTE_CONTENT_SCHEMA_VERSION) {
+        activeNoteRef.current = note
         setDetailStatus("unsupported")
-        return true
+        return null
       }
 
-      initializeEditor(note.id, note.content, canUpdate)
-      return true
+      initializeEditor(note, canUpdate)
+      return note
     } catch {
       if (requestId === detailRequestRef.current) {
         setDetailStatus("error")
@@ -216,7 +278,7 @@ function PersonalNotesQuickSheet() {
           if (firstNote) {
             void loadNoteDetail(firstNote.id)
           } else if (canCreate) {
-            initializeEditor(null, EMPTY_PERSONAL_NOTE, true)
+            initializeEditor(null, true)
           } else {
             setDetailStatus("idle")
           }
@@ -273,7 +335,112 @@ function PersonalNotesQuickSheet() {
 
     detailRequestRef.current += 1
     setSelectedNoteId(null)
-    initializeEditor(null, EMPTY_PERSONAL_NOTE, true)
+    initializeEditor(null, true)
+  }
+
+  async function handleRenameSelect(note: PersonalNoteSummaryResponse) {
+    if (!canUpdate || isRenamePending || isDeletePending) return
+    if (!(await flushCurrentEditor())) return
+
+    try {
+      const detail =
+        activeNoteRef.current?.id === note.id
+          ? activeNoteRef.current
+          : await getPersonalNote(note.id)
+
+      if (
+        detail.contentSchemaVersion !== PERSONAL_NOTE_CONTENT_SCHEMA_VERSION
+      ) {
+        toast.error(personalNotes.renameError)
+        return
+      }
+
+      setRenameTarget(detail)
+      setRenameValue(detail.title ?? "")
+      setRenameError(null)
+      setRenameOpen(true)
+    } catch {
+      toast.error(personalNotes.renameError)
+    }
+  }
+
+  function handleRenameSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!renameTarget || isRenamePending) return
+
+    const target = renameTarget
+    const trimmedTitle = renameValue.trim()
+    setRenameError(null)
+    startRenameTransition(async () => {
+      const result = await updatePersonalNote(target.id, {
+        title: trimmedTitle || null,
+        content: target.content,
+        contentSchemaVersion: PERSONAL_NOTE_CONTENT_SCHEMA_VERSION,
+      })
+
+      if (!result.success) {
+        setRenameError(result.error || personalNotes.renameError)
+        return
+      }
+
+      reconcileSummary(result.data)
+      if (activeNoteRef.current?.id === result.data.id) {
+        activeNoteRef.current = result.data
+      }
+      setRenameOpen(false)
+      setRenameTarget(null)
+      toast.success(personalNotes.renameSuccess)
+    })
+  }
+
+  function handleDeleteSelect(note: PersonalNoteSummaryResponse) {
+    if (!canDelete || isRenamePending || isDeletePending) return
+    setDeleteTarget(note)
+    setDeleteError(null)
+    setDeleteOpen(true)
+  }
+
+  function handleDelete() {
+    if (!deleteTarget || !notesPage || isDeletePending) return
+
+    const target = deleteTarget
+    const reconciled = reconcileDeletedPersonalNote(
+      notesPage,
+      target.id,
+      selectedNoteId
+    )
+    setDeleteError(null)
+    startDeleteTransition(async () => {
+      const result = await deletePersonalNote(target.id)
+      if (!result.success) {
+        setDeleteError(result.error || personalNotes.deleteError)
+        return
+      }
+
+      setNotesPage(reconciled.page)
+      setDeleteOpen(false)
+      setDeleteTarget(null)
+      toast.success(personalNotes.deleteSuccess)
+
+      if (!reconciled.deletedSelected) return
+
+      detailRequestRef.current += 1
+      autosaveRef.current = null
+      activeNoteRef.current = null
+      setSelectedNoteId(null)
+      setEditorInitialValue(null)
+      setSaveStatus("idle")
+
+      if (reconciled.nextSelectedId !== null) {
+        void loadNoteDetail(reconciled.nextSelectedId)
+      } else if (reconciled.page.totalElements > 0) {
+        loadNotes(0, false)
+      } else if (canCreate) {
+        initializeEditor(null, true)
+      } else {
+        setDetailStatus("idle")
+      }
+    })
   }
 
   const saveStatusFeedback =
@@ -346,7 +513,6 @@ function PersonalNotesQuickSheet() {
                       <Item key={index} size="sm" variant="outline">
                         <ItemContent>
                           <Skeleton className="h-4 w-24" />
-                          <Skeleton className="h-3 w-36" />
                         </ItemContent>
                       </Item>
                     ))}
@@ -391,35 +557,85 @@ function PersonalNotesQuickSheet() {
                       </Item>
                     ) : null}
                     {notesPage?.content.map((note) => {
-                      const timestamp =
-                        note.lastModifiedDate || note.createdDate
                       const isSelected = selectedNoteId === note.id
+                      const displayTitle =
+                        note.title?.trim() || personalNotes.untitled
+                      const actionsDisabled =
+                        isRenamePending ||
+                        isDeletePending ||
+                        saveStatus === "saving"
 
                       return (
-                        <div key={note.id} role="listitem">
-                          <Item
-                            asChild
-                            size="sm"
-                            variant={isSelected ? "muted" : "outline"}
-                          >
+                        <Item
+                          key={note.id}
+                          role="listitem"
+                          size="sm"
+                          variant={isSelected ? "muted" : "outline"}
+                        >
+                          <ItemContent>
                             <button
                               type="button"
+                              className="min-w-0 text-left"
                               aria-current={isSelected ? "true" : undefined}
                               onClick={() => void loadNoteDetail(note.id)}
                             >
-                              <span className="flex min-w-0 flex-1 flex-col gap-1 text-left">
-                                <span className="line-clamp-1 text-sm leading-snug font-medium">
-                                  {note.title?.trim() || personalNotes.untitled}
-                                </span>
-                                <AppTimeMetadata icon={Clock3Icon}>
-                                  {formatMessage(personalNotes.lastUpdated, {
-                                    time: formatDateTime(timestamp),
-                                  })}
-                                </AppTimeMetadata>
+                              <span className="line-clamp-1 text-sm leading-snug font-medium">
+                                {displayTitle}
                               </span>
                             </button>
-                          </Item>
-                        </div>
+                          </ItemContent>
+                          {canUpdate || canDelete ? (
+                            <ItemActions>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon-sm"
+                                    disabled={actionsDisabled}
+                                    aria-label={formatMessage(
+                                      personalNotes.actionsLabel,
+                                      { title: displayTitle }
+                                    )}
+                                    onFocus={(event) => {
+                                      lastActionTriggerRef.current =
+                                        event.currentTarget
+                                    }}
+                                  >
+                                    <EllipsisIcon />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuGroup>
+                                    {canUpdate ? (
+                                      <DropdownMenuItem
+                                        disabled={actionsDisabled}
+                                        onSelect={() =>
+                                          void handleRenameSelect(note)
+                                        }
+                                      >
+                                        <PencilIcon />
+                                        {personalNotes.rename}
+                                      </DropdownMenuItem>
+                                    ) : null}
+                                    {canDelete ? (
+                                      <DropdownMenuItem
+                                        variant="destructive"
+                                        disabled={actionsDisabled}
+                                        onSelect={() =>
+                                          handleDeleteSelect(note)
+                                        }
+                                      >
+                                        <Trash2Icon />
+                                        {personalNotes.delete}
+                                      </DropdownMenuItem>
+                                    ) : null}
+                                  </DropdownMenuGroup>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </ItemActions>
+                          ) : null}
+                        </Item>
                       )
                     })}
                   </ItemGroup>
@@ -529,7 +745,9 @@ function PersonalNotesQuickSheet() {
                   bodyPlaceholder={personalNotes.bodyPlaceholder}
                   key={editorKey}
                   initialValue={editorInitialValue}
-                  onValueChange={editorReadOnly ? undefined : handleEditorChange}
+                  onValueChange={
+                    editorReadOnly ? undefined : handleEditorChange
+                  }
                   readOnly={editorReadOnly}
                 />
               ) : (
@@ -549,6 +767,119 @@ function PersonalNotesQuickSheet() {
           </div>
         </div>
       </SheetContent>
+
+      <Dialog
+        open={renameOpen}
+        onOpenChange={(nextOpen) => {
+          if (isRenamePending) return
+          setRenameOpen(nextOpen)
+          if (!nextOpen) setRenameError(null)
+        }}
+      >
+        <DialogContent
+          showCloseButton={!isRenamePending}
+          onCloseAutoFocus={(event) => {
+            if (lastActionTriggerRef.current?.isConnected) {
+              event.preventDefault()
+              lastActionTriggerRef.current.focus()
+            }
+          }}
+        >
+          <form className="contents" onSubmit={handleRenameSubmit}>
+            <DialogHeader>
+              <DialogTitle>{personalNotes.renameTitle}</DialogTitle>
+              <DialogDescription>
+                {personalNotes.renameDescription}
+              </DialogDescription>
+            </DialogHeader>
+            <FieldGroup>
+              <Field data-invalid={Boolean(renameError)}>
+                <FieldLabel htmlFor="personal-note-title">
+                  {personalNotes.titleLabel}
+                </FieldLabel>
+                <Input
+                  id="personal-note-title"
+                  value={renameValue}
+                  maxLength={255}
+                  disabled={isRenamePending}
+                  aria-invalid={Boolean(renameError)}
+                  onChange={(event) => setRenameValue(event.target.value)}
+                />
+                <FieldError>{renameError}</FieldError>
+              </Field>
+            </FieldGroup>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="ghost"
+                disabled={isRenamePending}
+                onClick={() => setRenameOpen(false)}
+              >
+                {dictionary.common.cancel}
+              </Button>
+              <Button type="submit" disabled={isRenamePending}>
+                {isRenamePending ? (
+                  <Spinner data-icon="inline-start" aria-hidden="true" />
+                ) : null}
+                {isRenamePending
+                  ? personalNotes.renamePending
+                  : dictionary.common.save}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog
+        open={deleteOpen}
+        onOpenChange={(nextOpen) => {
+          if (isDeletePending) return
+          setDeleteOpen(nextOpen)
+          if (!nextOpen) setDeleteError(null)
+        }}
+      >
+        <AlertDialogContent
+          onCloseAutoFocus={(event) => {
+            if (lastActionTriggerRef.current?.isConnected) {
+              event.preventDefault()
+              lastActionTriggerRef.current.focus()
+            }
+          }}
+        >
+          <AlertDialogHeader>
+            <AlertDialogTitle>{personalNotes.deleteTitle}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteTarget?.id === selectedNoteId &&
+              (saveStatus === "dirty" || saveStatus === "error")
+                ? personalNotes.deleteDirtyDescription
+                : personalNotes.deleteDescription}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <FieldError>{deleteError}</FieldError>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeletePending}>
+              {dictionary.common.cancel}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={isDeletePending}
+              onClick={(event) => {
+                event.preventDefault()
+                handleDelete()
+              }}
+            >
+              {isDeletePending ? (
+                <Spinner data-icon="inline-start" aria-hidden="true" />
+              ) : (
+                <Trash2Icon data-icon="inline-start" />
+              )}
+              {isDeletePending
+                ? personalNotes.deletePending
+                : personalNotes.delete}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Sheet>
   )
 }

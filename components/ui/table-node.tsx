@@ -1124,7 +1124,7 @@ function ColorDropdownMenu({
         <ToolbarButton tooltip={tooltip}>{children}</ToolbarButton>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="start">
+      <DropdownMenuContent className="min-w-80" align="start">
         <ToolbarMenuGroup label="Colors">
           <ColorDropdownMenuItems
             className="px-2"

@@ -433,19 +433,18 @@ Ghi chu:
 | Phuong thuc | Endpoint backend | operationId          | Tich hop frontend | Trang thai     | Ghi chu |
 | ----------- | ---------------- | -------------------- | ----------------- | -------------- | ------- |
 | GET         | `/me/notes`      | `getPersonalNotes`   | `getPersonalNotes(searchParams)` | Da tich hop | Sheet khai bao va render `title` tu `PersonalNoteSummaryResponse`, voi fallback da localize khi thieu/rong; permission `personal-note:read`. |
-| POST        | `/me/notes`      | `createPersonalNote` | `createPersonalNote(request)` | Da tich hop | Request gui freeform `content` va `contentSchemaVersion` khi Save hoac safety flush; backend suy title snapshot tu text co y nghia dau tien, Sheet dong bo response `201 PersonalNoteResponse`; permission `personal-note:create`. |
+| POST        | `/me/notes`      | `createPersonalNote` | `createPersonalNote(request)` | Da tich hop | Frontend luon gui `{ title, content, contentSchemaVersion }`; draft moi gui `title: null` va Sheet dong bo `PersonalNoteResponse`; permission `personal-note:create`. |
 | GET         | `/me/notes/{id}` | `getPersonalNote`    | `getPersonalNote(id)` | Da tich hop | `PersonalNoteResponse.title` duoc giu trong local summary trong khi Sheet tai Plate JSON cua ghi chu duoc chon; permission `personal-note:read`. |
-| PUT         | `/me/notes/{id}` | `updatePersonalNote` | `updatePersonalNote(id, request)` | Da tich hop | Request khong co field `title`; content update giu va tra lai stored title snapshot, summary local copy title/timestamp tu response; permission `personal-note:update`. |
-| DELETE      | `/me/notes/{id}` | `deletePersonalNote` | -                 | Chua tich hop  | Response `200` khong co payload; permission `personal-note:delete`. |
+| PUT         | `/me/notes/{id}` | `updatePersonalNote` | `updatePersonalNote(id, request)` | Da tich hop | Content save gui latest backend-confirmed nullable `title`; rename gui title da trim hoac `null` cung Plate content hien tai; permission `personal-note:update`. |
+| DELETE      | `/me/notes/{id}` | `deletePersonalNote` | `deletePersonalNote(id)` | Da tich hop | Sheet xac nhan destructive action, reconcile list/selection sau response thanh cong; permission `personal-note:delete`. |
 
 Ghi chu:
 
-- `CreatePersonalNoteRequest` va `UpdatePersonalNoteRequest` bat buoc `content` la mang object va `contentSchemaVersion: int32`; snapshot da bo component schema `JsonNode`.
+- `CreatePersonalNoteRequest` va `UpdatePersonalNoteRequest` co them `title: string` (toi da `255` ky tu) ben canh `content` va `contentSchemaVersion`; frontend contract luon gui field nay va cho phep gia tri `null` theo backend behavior da xac nhan.
 - Snapshot khong khai bao enum, default, hoac minimum cho `contentSchemaVersion`; Sheet hien ghi version `1` va khong cho sua version khac.
 - `PersonalNoteResponse` gom `id`, `title`, `content`, `contentSchemaVersion`, `createdDate`, `lastModifiedDate`; `PersonalNoteSummaryResponse` co cung metadata va `title` nhung khong co `content`.
-- OpenAPI hien mo ta `title` la `string` nhung khong danh dau required hoac nullable; behavior reference mong doi backend tra `string | null`, nen can xac nhan/fix nullability trong snapshot truoc khi coi contract da kin.
-- OpenAPI chi mo ta payload shape, khong encode lifecycle cua title; behavior reference mong doi create derive title tu freeform content va update content khong recompute title.
-- Frontend so huu list/detail/create/update trong Sheet header, freeform Plate JSON version 1, fallback da localize, permission constants, va coordinator Save + safety flush. Draft moi bat dau bang paragraph; frontend khong normalize H1 hoac parse content de suy title. Khong co route `/notes` hoac delete flow.
+- OpenAPI generator hien bieu dien mutation `title` la property string khong required va khong ghi union `null`; frontend chu dong giu contract payload `title: string | null` theo contract backend da xac nhan.
+- Frontend so huu list/detail/create/update/delete trong Sheet header, freeform Plate JSON version 1, rename/delete theo permission, fallback da localize, va coordinator Save + safety flush. Summary rail chi hien title; frontend khong normalize H1 hoac parse content de suy title. Khong co route `/notes`.
 
 ### 19. API wiki
 

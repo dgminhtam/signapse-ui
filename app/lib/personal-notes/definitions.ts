@@ -4,6 +4,7 @@ import { z } from "zod"
 export const PERSONAL_NOTE_CONTENT_SCHEMA_VERSION = 1
 
 export const personalNoteMutationSchema = z.object({
+  title: z.string().nullable(),
   content: z.custom<Value>(
     (value) =>
       Array.isArray(value) &&
@@ -24,7 +25,7 @@ export type PersonalNoteMutationRequest = z.infer<
 
 export interface PersonalNoteSummaryResponse {
   id: number
-  title?: string | null
+  title: string | null
   contentSchemaVersion: number
   createdDate: string
   lastModifiedDate: string

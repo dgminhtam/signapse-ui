@@ -2,13 +2,13 @@
 
 - Loại tài liệu: Frontend behavior reference
 - Phạm vi: Personal Notes editor và summary rail
-- Trạng thái: Frontend freeform đã triển khai; cần xác nhận backend title snapshot và OpenAPI required/nullable cho `title`
+- Trạng thái: Đã tích hợp nullable title mutation, rename/delete và summary rail chỉ hiển thị title
 
 ## Quyết định
 
 Plate document là freeform: frontend không dành path `[0]` cho title và không ép block đầu tiên thành H1.
 
-Khi tạo note, backend suy ra title snapshot từ nội dung text có ý nghĩa đầu tiên mà không phụ thuộc block type hoặc path, rồi trả `title: string | null` trong `PersonalNoteSummaryResponse` và `PersonalNoteResponse`. Các lần update content giữ nguyên title snapshot. Frontend không gửi một field `title` riêng trong create/update request.
+Title là dữ liệu mutation độc lập với Plate content. Frontend luôn gửi `title: string | null` trong POST/PUT, khởi tạo draft với `null`, và dùng title mới nhất backend trả về cho các lần content save tiếp theo. Rename trim khoảng trắng; input rỗng được gửi thành `null`.
 
 ## Contract FE mong đợi
 
@@ -24,18 +24,24 @@ interface PersonalNoteSummaryResponse {
 interface PersonalNoteResponse extends PersonalNoteSummaryResponse {
   content: Value
 }
+
+interface PersonalNoteMutationRequest {
+  title: string | null
+  content: Value
+  contentSchemaVersion: 1
+}
 ```
 
-Backend trả `null` khi content tại thời điểm create không có text có ý nghĩa sau khi trim và chuẩn hóa khoảng trắng. Backend không trả chuỗi rỗng và không lưu fallback trình bày như `Untitled`, `New page` hoặc `Ghi chú chưa có tiêu đề`.
+Snapshot OpenAPI khai báo mutation `title` là string tối đa 255 ký tự nhưng không biểu diễn nullable/required tường minh. Frontend giữ contract đã xác nhận là field luôn có mặt và nhận `string | null`; fallback như `Untitled note` hoặc `Ghi chú chưa có tiêu đề` chỉ là presentation state.
 
 ## Behavior hiển thị
 
-| Trạng thái | Editor | Summary rail |
-| --- | --- | --- |
-| Draft chưa lưu | Hiển thị document freeform và body hint khi paragraph rỗng đang active | Hiển thị nhãn draft hiện có |
-| `title` có giá trị | Hiển thị document freeform | Hiển thị `title` từ response |
-| `title` là `null` | Hiển thị document freeform | Hiển thị fallback đã localize |
-| Response legacy trả `""` | Xử lý như không có title | Hiển thị fallback đã localize |
+| Trạng thái               | Editor                                                                 | Summary rail                  |
+| ------------------------ | ---------------------------------------------------------------------- | ----------------------------- |
+| Draft chưa lưu           | Hiển thị document freeform và body hint khi paragraph rỗng đang active | Hiển thị nhãn draft hiện có   |
+| `title` có giá trị       | Hiển thị document freeform                                             | Hiển thị `title` từ response  |
+| `title` là `null`        | Hiển thị document freeform                                             | Hiển thị fallback đã localize |
+| Response legacy trả `""` | Xử lý như không có title                                               | Hiển thị fallback đã localize |
 
 Fallback đề xuất:
 
@@ -48,7 +54,7 @@ Body hint trong editor và fallback trong danh sách là presentation state, kh�
 const displayTitle = note.title?.trim() || personalNotes.untitled
 ```
 
-Create response thiết lập title snapshot trong summary rail; update response trả lại title đã lưu cùng timestamp mới. Frontend không tự parse Plate content để tạo hoặc thay title trong lúc đang gõ.
+Mọi create/update response làm mới title đã lưu trong summary rail. Frontend không tự parse Plate content để tạo hoặc thay title trong lúc đang gõ, và content save không được khôi phục title cũ sau rename.
 
 ## Save behavior
 
@@ -58,6 +64,13 @@ Create response thiết lập title snapshot trong summary rail; update response
 - Khi chọn note khác, tạo note mới hoặc đóng Sheet, frontend vẫn flush một lần nếu có thay đổi chưa lưu.
 - Nếu safety flush thất bại, thao tác chuyển note, tạo note mới hoặc đóng Sheet bị hủy để người dùng có thể thử Save lại.
 - Note read-only hoặc có schema chưa được hỗ trợ không hiển thị action row.
+
+## Record actions
+
+- Persisted note có một overflow menu; Rename cần `personal-note:update`, Delete cần `personal-note:delete`.
+- Rename dùng full PUT với Plate content hiện tại và title đã trim; lỗi mutation giữ dialog mở.
+- Delete yêu cầu xác nhận destructive action. Nếu xóa note đang chọn, frontend tải note kề bên; nếu xóa record cuối, creator nhận draft rỗng còn read-only user nhận empty state.
+- Draft chưa có backend id không hiển thị record actions.
 
 ## Editor behavior
 
@@ -71,7 +84,7 @@ Create response thiết lập title snapshot trong summary rail; update response
 ## Presentation rules
 
 - Title trong summary rail dùng một dòng và truncate hoặc line-clamp.
-- Timestamp tiếp tục dùng secondary metadata treatment hiện có.
+- Summary rail không hiển thị created/last-modified timestamp.
 - Fallback phải là text thật trong accessibility tree, không chỉ là placeholder trực quan.
 - Nếu sau này có sort theo title, các note có `title: null` được xếp cuối.
 
@@ -79,7 +92,4 @@ Create response thiết lập title snapshot trong summary rail; update response
 
 - Search theo title.
 - Sort theo title.
-- Giới hạn độ dài title.
-- Chỉnh sửa title trực tiếp từ summary rail.
 - Suy title trong frontend hoặc tự thay title khi update content.
-- Mutation đổi title thủ công.

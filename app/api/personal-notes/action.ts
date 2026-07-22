@@ -82,3 +82,22 @@ export async function updatePersonalNote(
     }
   }
 }
+
+export async function deletePersonalNote(
+  id: number
+): Promise<ActionResult<void>> {
+  const dictionary = await getServerDictionary()
+
+  try {
+    await fetchAuthenticated<void>(`/me/notes/${id}`, { method: "DELETE" })
+    return { success: true, data: undefined }
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : dictionary.personalNotes.deleteError,
+    }
+  }
+}
