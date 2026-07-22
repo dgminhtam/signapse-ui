@@ -26,7 +26,6 @@ import {
   EconomicCalendarListResponse,
   formatEconomicCalendarValue,
   getEconomicCalendarImpactLabel,
-  getEconomicCalendarStatusLabel,
 } from "@/app/lib/economic-calendar/definitions"
 import { AppTimeMetadata } from "@/components/app-time-metadata"
 import {
@@ -335,50 +334,35 @@ function getValueSignalClassName(value: string | null | undefined) {
     : "font-medium text-destructive"
 }
 
-function getImpactSignalVariant(
-  impact: string | null | undefined
-): "default" | "secondary" | "destructive" | "outline" {
+function getImpactSignalBadgeProps(impact: string | null | undefined) {
   const normalizedImpact = impact?.trim().toUpperCase()
 
   if (!normalizedImpact) {
-    return "outline"
+    return { variant: "outline" as const }
   }
 
   if (normalizedImpact.includes("HIGH")) {
-    return "destructive"
+    return {
+      className:
+        "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300",
+    }
   }
 
   if (normalizedImpact.includes("MEDIUM")) {
-    return "default"
+    return {
+      className:
+        "bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300",
+    }
   }
 
   if (normalizedImpact.includes("LOW")) {
-    return "secondary"
+    return {
+      className:
+        "bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-300",
+    }
   }
 
-  return "outline"
-}
-
-function getStatusSignalVariant(
-  status: string | null | undefined,
-  contentAvailable: boolean | undefined
-): "default" | "secondary" | "outline" {
-  switch (status?.toUpperCase()) {
-    case "AVAILABLE":
-      return "default"
-    case "PENDING":
-      return "secondary"
-    default:
-      if (contentAvailable === true) {
-        return "default"
-      }
-
-      if (contentAvailable === false) {
-        return "secondary"
-      }
-
-      return "outline"
-  }
+  return { variant: "outline" as const }
 }
 
 function CurrentTimeLine({
@@ -390,7 +374,7 @@ function CurrentTimeLine({
 
   return (
     <TableRow className="hover:bg-transparent">
-      <TableCell colSpan={9} className="px-3 py-2">
+      <TableCell colSpan={8} className="px-3 py-2">
         <div className="flex items-center gap-3 text-xs font-medium text-destructive">
           <span className="h-px flex-1 bg-destructive" />
           <span className="tabular-nums">
@@ -670,9 +654,6 @@ export function EconomicCalendarList({
               <AppListTableHead className="w-28">
                 {dictionary.economicCalendar.previous}
               </AppListTableHead>
-              <AppListTableHead className="w-32">
-                {dictionary.economicCalendar.statusColumn}
-              </AppListTableHead>
               <AppListTableHead className="w-20 text-right">
                 {dictionary.economicCalendar.actionsColumn}
               </AppListTableHead>
@@ -693,7 +674,7 @@ export function EconomicCalendarList({
                 <Fragment key={group.key}>
                   <TableRow className="bg-muted/30 hover:bg-muted/30">
                     <TableCell
-                      colSpan={9}
+                      colSpan={8}
                       className="px-3 py-2 text-xs font-medium text-muted-foreground"
                     >
                       {group.label}
@@ -704,7 +685,7 @@ export function EconomicCalendarList({
                       {isTodayGroup ? renderNowLine() : null}
                       <TableRow className="hover:bg-transparent">
                         <TableCell
-                          colSpan={9}
+                          colSpan={8}
                           className="px-3 py-3 text-sm text-muted-foreground"
                         >
                           {dictionary.economicCalendar.emptyDay}
@@ -778,9 +759,7 @@ export function EconomicCalendarList({
                                       ) : null}
                                       <TableCell className="w-28 align-top">
                                         <Badge
-                                          variant={getImpactSignalVariant(
-                                            entry.impact
-                                          )}
+                                          {...getImpactSignalBadgeProps(entry.impact)}
                                         >
                                           {getEconomicCalendarImpactLabel(
                                             entry.impact,
@@ -843,20 +822,6 @@ export function EconomicCalendarList({
                                           )}
                                         </span>
                                       </TableCell>
-                                      <TableCell className="w-32 align-top">
-                                        <Badge
-                                          variant={getStatusSignalVariant(
-                                            entry.status,
-                                            entry.contentAvailable
-                                          )}
-                                        >
-                                          {getEconomicCalendarStatusLabel(
-                                            entry.status,
-                                            entry.contentAvailable,
-                                            dictionary
-                                          )}
-                                        </Badge>
-                                      </TableCell>
                                       <TableCell className="w-20 align-top text-right">
                                         <div className="flex justify-end gap-1">
                                           {canExpand ? (
@@ -913,7 +878,7 @@ export function EconomicCalendarList({
                                         className="hover:bg-transparent"
                                       >
                                         <TableCell
-                                          colSpan={7}
+                                          colSpan={6}
                                           className="whitespace-normal px-3 py-3"
                                         >
                                           <div

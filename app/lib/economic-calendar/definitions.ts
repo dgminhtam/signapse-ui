@@ -47,7 +47,25 @@ export function getEconomicCalendarImpactLabel(
   impact: string | null | undefined,
   dictionary: Dictionary
 ) {
-  return formatEconomicCalendarValue(impact, dictionary.economicCalendar.noImpact)
+  const normalizedImpact = impact?.trim().toUpperCase()
+
+  if (!normalizedImpact) {
+    return dictionary.economicCalendar.noImpact
+  }
+
+  if (normalizedImpact.includes("HIGH")) {
+    return dictionary.economicCalendar.impactLabels.HIGH
+  }
+
+  if (normalizedImpact.includes("MEDIUM")) {
+    return dictionary.economicCalendar.impactLabels.MEDIUM
+  }
+
+  if (normalizedImpact.includes("LOW")) {
+    return dictionary.economicCalendar.impactLabels.LOW
+  }
+
+  return dictionary.economicCalendar.impactLabels.UNKNOWN
 }
 
 export function getEconomicCalendarImpactVariant(

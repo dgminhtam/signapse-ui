@@ -164,9 +164,6 @@ function EconomicCalendarListSkeleton({
               <AppListTableHead className="w-28">
                 {dictionary.economicCalendar.previous}
               </AppListTableHead>
-              <AppListTableHead className="w-32">
-                {dictionary.economicCalendar.statusColumn}
-              </AppListTableHead>
               <AppListTableHead className="w-20 text-right">
                 {dictionary.economicCalendar.actionsColumn}
               </AppListTableHead>
@@ -174,7 +171,7 @@ function EconomicCalendarListSkeleton({
           </TableHeader>
           <TableBody>
             <TableRow className="bg-muted/30 hover:bg-muted/30">
-              <TableCell colSpan={9} className="px-3 py-2">
+              <TableCell colSpan={8} className="px-3 py-2">
                 <Skeleton className="h-4 w-44" />
               </TableCell>
             </TableRow>
@@ -203,9 +200,6 @@ function EconomicCalendarListSkeleton({
               <TableCell className="w-28 align-top">
                 <Skeleton className="h-4 w-20" />
               </TableCell>
-              <TableCell className="w-32 align-top">
-                <Skeleton className="h-6 w-24 rounded-full" />
-              </TableCell>
               <TableCell className="w-20 align-top text-right">
                 <div className="flex justify-end gap-1">
                   <Skeleton className="h-8 w-8 rounded" />
@@ -232,9 +226,6 @@ function EconomicCalendarListSkeleton({
                 </TableCell>
                 <TableCell className="w-28 align-top">
                   <Skeleton className="h-4 w-20" />
-                </TableCell>
-                <TableCell className="w-32 align-top">
-                  <Skeleton className="h-6 w-24 rounded-full" />
                 </TableCell>
                 <TableCell className="w-20 align-top text-right">
                   <div className="flex justify-end gap-1">

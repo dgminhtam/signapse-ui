@@ -4,38 +4,42 @@
 TBD - created by archiving change scope-economic-calendar-to-selected-day. Update Purpose after archive.
 ## Requirements
 ### Requirement: Impact signal colors
-The economic calendar list SHALL render impact badges with distinct visual treatments that help users scan event importance.
+The economic calendar list SHALL render impact badges with distinct approved visual treatments that help users scan event importance.
 
 #### Scenario: High impact event renders
 - **WHEN** an event has high impact
-- **THEN** its impact badge uses the strongest danger or warm signal treatment among impact levels
+- **THEN** its impact badge uses the approved red categorical Badge palette
 
 #### Scenario: Medium impact event renders
 - **WHEN** an event has medium impact
-- **THEN** its impact badge uses a warning signal treatment distinct from high and low impact
+- **THEN** its impact badge uses the approved purple categorical Badge palette
 
 #### Scenario: Low impact event renders
 - **WHEN** an event has low impact
-- **THEN** its impact badge uses a subtle cool or secondary signal treatment distinct from medium and high impact
+- **THEN** its impact badge uses the approved sky categorical Badge palette
 
 #### Scenario: Unknown impact event renders
 - **WHEN** an event has missing or unknown impact
-- **THEN** its impact badge uses a neutral treatment
+- **THEN** its impact badge uses the neutral outline treatment
 
-### Requirement: Status signal colors
-The economic calendar list SHALL render status badges with distinct visual treatments that communicate availability.
+### Requirement: Localized uppercase impact labels
+The economic calendar SHALL map recognized impact values to localized uppercase labels and SHALL NOT display recognized raw backend impact text directly.
 
-#### Scenario: Available status renders
-- **WHEN** an event's content/status is available
-- **THEN** its status badge uses a positive or success signal treatment
+#### Scenario: Recognized impact renders in Vietnamese
+- **WHEN** the active locale is Vietnamese and an event impact is high, medium, or low regardless of source casing
+- **THEN** its label is rendered as the corresponding uppercase Vietnamese translation
 
-#### Scenario: Pending status renders
-- **WHEN** an event's content/status is pending
-- **THEN** its status badge uses a warning signal treatment
+#### Scenario: Recognized impact renders in English
+- **WHEN** the active locale is English and an event impact is high, medium, or low regardless of source casing
+- **THEN** its label is rendered as the corresponding uppercase English translation
 
-#### Scenario: Unknown status renders
-- **WHEN** an event's content/status is unknown or unavailable
-- **THEN** its status badge uses a neutral treatment
+#### Scenario: Missing impact renders
+- **WHEN** an event impact is empty or missing
+- **THEN** its badge uses the localized uppercase no-impact label
+
+#### Scenario: Unknown impact renders
+- **WHEN** an event impact is present but does not match high, medium, or low
+- **THEN** its badge uses the localized uppercase unknown-impact label instead of raw backend text
 
 ### Requirement: Numeric value colors
 The economic calendar list SHALL render actual, forecast, and previous numeric values with restrained text-level signal colors.
@@ -56,8 +60,8 @@ The economic calendar list SHALL render actual, forecast, and previous numeric v
 The economic calendar signal color treatment SHALL remain compatible with the app theme and shadcn composition policy.
 
 #### Scenario: Signal colors are implemented
-- **WHEN** impact, status, or numeric value signal colors are added
-- **THEN** the implementation uses existing variants, semantic tokens, or narrowly scoped feature-local styling instead of broad global theme token changes
+- **WHEN** impact or numeric value signal colors are added
+- **THEN** the implementation uses existing variants, semantic tokens, or the exact repository-approved Badge palettes instead of broad global theme token changes
 
 #### Scenario: Dense table renders
 - **WHEN** the selected-day table renders with signal colors
@@ -69,4 +73,3 @@ The economic calendar signal color treatment SHALL use only existing economic ca
 #### Scenario: Currency row renders with signal colors
 - **WHEN** an event row renders signal colors
 - **THEN** the row does not infer country names, country flags, or unsupported categories from currencyCode or title text
-
