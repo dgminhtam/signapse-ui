@@ -1,4 +1,4 @@
-'use client';
+"use client"
 
 import {
   ArrowUpToLineIcon,
@@ -10,127 +10,129 @@ import {
   PaintBucketIcon,
   StrikethroughIcon,
   UnderlineIcon,
-} from 'lucide-react';
-import { KEYS } from 'platejs';
-import { useEditorReadOnly } from 'platejs/react';
+} from "lucide-react"
+import { KEYS } from "platejs"
+import { useEditorReadOnly } from "platejs/react"
 
-import { AlignToolbarButton } from './align-toolbar-button';
-import { EmojiToolbarButton } from './emoji-toolbar-button';
-import { ExportToolbarButton } from './export-toolbar-button';
-import { FontColorToolbarButton } from './font-color-toolbar-button';
-import { FontSizeToolbarButton } from './font-size-toolbar-button';
-import { RedoToolbarButton, UndoToolbarButton } from './history-toolbar-button';
-import { ImportToolbarButton } from './import-toolbar-button';
+import { AlignToolbarButton } from "./align-toolbar-button"
+import { EmojiToolbarButton } from "./emoji-toolbar-button"
+import { ExportToolbarButton } from "./export-toolbar-button"
+import { FontColorToolbarButton } from "./font-color-toolbar-button"
+import { FontSizeToolbarButton } from "./font-size-toolbar-button"
+import { RedoToolbarButton, UndoToolbarButton } from "./history-toolbar-button"
+import { ImportToolbarButton } from "./import-toolbar-button"
 import {
   IndentToolbarButton,
   OutdentToolbarButton,
-} from './indent-toolbar-button';
-import { InsertToolbarButton } from './insert-toolbar-button';
-import { LineHeightToolbarButton } from './line-height-toolbar-button';
+} from "./indent-toolbar-button"
+import { InsertToolbarButton } from "./insert-toolbar-button"
+import { LineHeightToolbarButton } from "./line-height-toolbar-button"
 import {
   BulletedListToolbarButton,
   NumberedListToolbarButton,
-} from './list-toolbar-button';
-import { MarkToolbarButton } from './mark-toolbar-button';
-import { MoreToolbarButton } from './more-toolbar-button';
-import { TableToolbarButton } from './table-toolbar-button';
-import { ToolbarGroup } from './toolbar';
-import { TurnIntoToolbarButton } from './turn-into-toolbar-button';
+} from "./list-toolbar-button"
+import { MarkToolbarButton } from "./mark-toolbar-button"
+import { MoreToolbarButton } from "./more-toolbar-button"
+import { TableToolbarButton } from "./table-toolbar-button"
+import { ToolbarGroup } from "./toolbar"
+import { TurnIntoToolbarButton } from "./turn-into-toolbar-button"
 
 export function FixedToolbarButtons() {
-  const readOnly = useEditorReadOnly();
+  const readOnly = useEditorReadOnly()
+
+  if (readOnly) return null
 
   return (
-    <div className="flex w-full">
-      {!readOnly && (
-        <>
-          <ToolbarGroup>
-            <UndoToolbarButton />
-            <RedoToolbarButton />
-          </ToolbarGroup>
+    <div className="flex w-full flex-col">
+      <div className="flex flex-wrap">
+        <ToolbarGroup>
+          <UndoToolbarButton />
+          <RedoToolbarButton />
+        </ToolbarGroup>
 
-          <ToolbarGroup>
-            <ExportToolbarButton>
-              <ArrowUpToLineIcon />
-            </ExportToolbarButton>
+        <ToolbarGroup>
+          <ExportToolbarButton>
+            <ArrowUpToLineIcon />
+          </ExportToolbarButton>
 
-            <ImportToolbarButton />
-          </ToolbarGroup>
+          <ImportToolbarButton />
+        </ToolbarGroup>
 
-          <ToolbarGroup>
-            <InsertToolbarButton />
-            <TurnIntoToolbarButton />
-            <FontSizeToolbarButton />
-          </ToolbarGroup>
+        <ToolbarGroup>
+          <InsertToolbarButton />
+          <TurnIntoToolbarButton />
+          <FontSizeToolbarButton />
+        </ToolbarGroup>
 
-          <ToolbarGroup>
-            <MarkToolbarButton nodeType={KEYS.bold} tooltip="Bold (⌘+B)">
-              <BoldIcon />
-            </MarkToolbarButton>
+        <ToolbarGroup>
+          <MarkToolbarButton nodeType={KEYS.bold} tooltip="Bold (⌘+B)">
+            <BoldIcon />
+          </MarkToolbarButton>
 
-            <MarkToolbarButton nodeType={KEYS.italic} tooltip="Italic (⌘+I)">
-              <ItalicIcon />
-            </MarkToolbarButton>
+          <MarkToolbarButton nodeType={KEYS.italic} tooltip="Italic (⌘+I)">
+            <ItalicIcon />
+          </MarkToolbarButton>
 
-            <MarkToolbarButton
-              nodeType={KEYS.underline}
-              tooltip="Underline (⌘+U)"
-            >
-              <UnderlineIcon />
-            </MarkToolbarButton>
+          <MarkToolbarButton
+            nodeType={KEYS.underline}
+            tooltip="Underline (⌘+U)"
+          >
+            <UnderlineIcon />
+          </MarkToolbarButton>
 
-            <MarkToolbarButton
-              nodeType={KEYS.strikethrough}
-              tooltip="Strikethrough (⌘+⇧+M)"
-            >
-              <StrikethroughIcon />
-            </MarkToolbarButton>
+          <MarkToolbarButton
+            nodeType={KEYS.strikethrough}
+            tooltip="Strikethrough (⌘+⇧+M)"
+          >
+            <StrikethroughIcon />
+          </MarkToolbarButton>
 
-            <MarkToolbarButton nodeType={KEYS.code} tooltip="Code (⌘+E)">
-              <Code2Icon />
-            </MarkToolbarButton>
+          <MarkToolbarButton nodeType={KEYS.code} tooltip="Code (⌘+E)">
+            <Code2Icon />
+          </MarkToolbarButton>
 
-            <FontColorToolbarButton nodeType={KEYS.color} tooltip="Text color">
-              <BaselineIcon />
-            </FontColorToolbarButton>
+          <FontColorToolbarButton nodeType={KEYS.color} tooltip="Text color">
+            <BaselineIcon />
+          </FontColorToolbarButton>
 
-            <FontColorToolbarButton
-              nodeType={KEYS.backgroundColor}
-              tooltip="Background color"
-            >
-              <PaintBucketIcon />
-            </FontColorToolbarButton>
-          </ToolbarGroup>
+          <FontColorToolbarButton
+            nodeType={KEYS.backgroundColor}
+            tooltip="Background color"
+          >
+            <PaintBucketIcon />
+          </FontColorToolbarButton>
+        </ToolbarGroup>
+      </div>
 
-          <ToolbarGroup>
-            <AlignToolbarButton />
-            <LineHeightToolbarButton />
+      <div className="flex flex-wrap">
+        <ToolbarGroup>
+          <AlignToolbarButton />
+          <LineHeightToolbarButton />
 
-            <NumberedListToolbarButton />
-            <BulletedListToolbarButton />
-          </ToolbarGroup>
+          <NumberedListToolbarButton />
+          <BulletedListToolbarButton />
+        </ToolbarGroup>
 
-          <ToolbarGroup>
-            <TableToolbarButton />
-            <EmojiToolbarButton />
-          </ToolbarGroup>
+        <ToolbarGroup>
+          <TableToolbarButton />
+          <EmojiToolbarButton />
+        </ToolbarGroup>
 
-          <ToolbarGroup>
-            <OutdentToolbarButton />
-            <IndentToolbarButton />
-          </ToolbarGroup>
+        <ToolbarGroup>
+          <OutdentToolbarButton />
+          <IndentToolbarButton />
+        </ToolbarGroup>
 
-          <ToolbarGroup>
-            <MoreToolbarButton />
-          </ToolbarGroup>
-        </>
-      )}
+        <ToolbarGroup>
+          <MoreToolbarButton />
+        </ToolbarGroup>
 
-      <ToolbarGroup>
-        <MarkToolbarButton nodeType={KEYS.highlight} tooltip="Highlight">
-          <HighlighterIcon />
-        </MarkToolbarButton>
-      </ToolbarGroup>
+        <ToolbarGroup>
+          <MarkToolbarButton nodeType={KEYS.highlight} tooltip="Highlight">
+            <HighlighterIcon />
+          </MarkToolbarButton>
+        </ToolbarGroup>
+      </div>
     </div>
-  );
+  )
 }
