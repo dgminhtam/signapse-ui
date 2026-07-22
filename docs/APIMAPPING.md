@@ -2,7 +2,7 @@
 
 Tài liệu này ánh xạ snapshot OpenAPI backend trong `docs/api_mapping.json` tới các điểm tích hợp frontend hiện tại của repo.
 
-Xác minh lần cuối: ngày 21 tháng 7 năm 2026
+Xác minh lần cuối: ngày 22 tháng 7 năm 2026
 
 ## Cấu hình cơ sở
 
@@ -361,7 +361,7 @@ Ghi chu:
 - `CreateAiProviderConfigRequest` bat buoc `credentials[]`; moi credential bat buoc `apiKey` va `model`. Config create khong con `name` hay top-level `model`.
 - `UpdateAiProviderConfigRequest` chi con `providerType`, `description`, `baseUrl`, `defaultProvider`; credential add/update/delete nam trong sub-resource rieng.
 - `SpecificationAiProviderConfig` trong snapshot hien la `{}`, nen UI tam thoi khong render search/filter theo `name` va chi giu sort `id_asc/id_desc` cho den khi BE xac nhan runtime filter moi.
-- Enum provider hien gom `GEMINI`, `GROQ`, `OPENAI`, `ZAI`; FE da dong bo type, validation, select option, va model catalog request.
+- Enum provider hien gom `DEEPSEEK`, `GEMINI`, `GROQ`, `OPENAI`, `ZAI`; FE da dong bo type, validation, select option, va model catalog request.
 
 ### 12. API assets
 

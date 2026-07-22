@@ -1,4 +1,10 @@
-export const AI_PROVIDER_TYPES = ["GEMINI", "GROQ", "OPENAI", "ZAI"] as const
+export const AI_PROVIDER_TYPES = [
+  "DEEPSEEK",
+  "GEMINI",
+  "GROQ",
+  "OPENAI",
+  "ZAI",
+] as const
 
 export type AiProviderType = (typeof AI_PROVIDER_TYPES)[number]
 

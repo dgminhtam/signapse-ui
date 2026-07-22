@@ -5,6 +5,7 @@ import {
 import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
 
 export const providerOptions: { value: AiProviderType; label: string }[] = [
+  { value: "DEEPSEEK", label: "DeepSeek" },
   { value: "GEMINI", label: "Gemini" },
   { value: "GROQ", label: "Groq" },
   { value: "OPENAI", label: "OpenAI" },
