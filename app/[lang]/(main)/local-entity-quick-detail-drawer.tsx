@@ -136,7 +136,13 @@ export function LocalEntityQuickDetailDrawer({
 
   return (
     <Drawer open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
-      <DrawerContent className="h-[min(76svh,760px)] max-h-[min(76svh,760px)] gap-0 overflow-hidden">
+      <DrawerContent
+        className="gap-0 overflow-hidden"
+        style={{
+          height: "min(90svh, 960px)",
+          maxHeight: "min(90svh, 960px)",
+        }}
+      >
         <DrawerHeader className="border-b px-5 py-4 text-left">
           <div className="mx-auto flex w-full max-w-5xl flex-col gap-1.5">
             <DrawerTitle className="line-clamp-2 leading-snug">
@@ -185,7 +191,6 @@ export function LocalEntityQuickDetailDrawer({
             ) : currentState.phase === "news-article" ? (
               <NewsArticleQuickDetailContent
                 article={currentState.article}
-                canReadEvents={canReadEvents}
                 dictionary={dictionary}
                 locale={locale}
               />

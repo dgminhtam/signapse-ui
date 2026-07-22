@@ -2,8 +2,10 @@ import Markdown, { type Components } from "react-markdown"
 import remarkGfm from "remark-gfm"
 
 import { Separator } from "@/components/ui/separator"
+import { cn } from "@/lib/utils"
 
 interface NewsArticleMarkdownProps {
+  className?: string
   content: string
 }
 
@@ -26,9 +28,17 @@ const markdownComponents: Components = {
   ),
 }
 
-export function NewsArticleMarkdown({ content }: NewsArticleMarkdownProps) {
+export function NewsArticleMarkdown({
+  className,
+  content,
+}: NewsArticleMarkdownProps) {
   return (
-    <article className="typeset typeset-article w-full max-w-[72ch] pb-10">
+    <article
+      className={cn(
+        "typeset typeset-article w-full max-w-[72ch] pb-10",
+        className
+      )}
+    >
       <Markdown
         remarkPlugins={[remarkGfm]}
         skipHtml

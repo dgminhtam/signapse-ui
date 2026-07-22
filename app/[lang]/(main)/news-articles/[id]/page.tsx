@@ -1,5 +1,5 @@
 import { ArrowLeft, Calendar, ExternalLink, Globe2 } from "lucide-react"
-import { NewsArticleMarkdown } from "./news-article-markdown"
+import { NewsArticleMarkdown } from "../news-article-markdown"
 import { LocalizedLink as Link } from "@/components/localized-link"
 import { notFound } from "next/navigation"
 import { Suspense } from "react"

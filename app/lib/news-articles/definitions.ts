@@ -79,21 +79,3 @@ export interface PendingNewsEventDerivationBatchResult {
   failedCount?: number
   results?: NewsPrimaryEventDerivationResult[]
 }
-
-export function getNewsArticleStatusVariant(
-  status?: NewsArticleStatus
-): "outline" | "secondary" | "destructive" {
-  if (!status) {
-    return "outline"
-  }
-
-  if (status === "EVENT_RESOLVED") {
-    return "secondary"
-  }
-
-  if (status === "CONTENT_FAILED" || status === "DERIVATION_FAILED") {
-    return "destructive"
-  }
-
-  return "outline"
-}
