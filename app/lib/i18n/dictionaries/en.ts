@@ -86,7 +86,8 @@ export const en: Dictionary = {
     personalTab: "Personal information",
     billingTab: "Billing",
     formTitle: "Personal information",
-    formDescription: "Update the profile information used for your Signapse account.",
+    formDescription:
+      "Update the profile information used for your Signapse account.",
     avatarLabel: "Avatar",
     avatarDescription: "Current avatar for this account.",
     uploadAvatar: "Upload avatar",
@@ -114,7 +115,8 @@ export const en: Dictionary = {
     emailInvalid: "Email is invalid.",
     phoneNumberRequired: "Please enter a phone number.",
     billingEmptyTitle: "No billing content yet",
-    billingEmptyDescription: "Billing will be added when the upgrade flow is defined.",
+    billingEmptyDescription:
+      "Billing will be added when the upgrade flow is defined.",
     errorTitle: "Could not load account",
     errorDescription: "Please try again to load account information.",
     noPackage: "Not registered for a package",
@@ -227,8 +229,7 @@ export const en: Dictionary = {
     invalidDate: "Invalid date",
     manageTrackedAssets: "Manage tracked assets",
     narratives: "Featured narratives",
-    narrativesDescription:
-      "Notable market narratives in the current scope.",
+    narrativesDescription: "Notable market narratives in the current scope.",
     narrativesLoadError: "Could not load featured narratives.",
     narrativesLoadErrorTitle: "Could not load featured narratives",
     noNarrativesTitle: "No featured narratives yet",
@@ -256,12 +257,14 @@ export const en: Dictionary = {
     },
     hero: {
       eyebrow: "AI Market Intelligence Workspace",
-      title: "Understand market moves through events, reactions, and narratives.",
-      body:
-        "Signapse connects news, economic calendar, market candles, asset watchlists, and AI reasoning into one market intelligence workspace. See events on charts, explore relationships through a knowledge graph, and ask scoped questions grounded in evidence from your own workspace.",
-      visualLabel: "Illustrative Signapse workspace with watchlist, chart annotation, market query, and knowledge graph",
+      title:
+        "Understand market moves through events, reactions, and narratives.",
+      body: "Signapse connects news, economic calendar, market candles, asset watchlists, and AI reasoning into one market intelligence workspace. See events on charts, explore relationships through a knowledge graph, and ask scoped questions grounded in evidence from your own workspace.",
+      visualLabel:
+        "Illustrative Signapse workspace with watchlist, chart annotation, market query, and knowledge graph",
       previewLabel: "Product workspace preview",
-      intelligenceFlow: "Raw market signals -> structured knowledge -> personalized market intelligence",
+      intelligenceFlow:
+        "Raw market signals -> structured knowledge -> personalized market intelligence",
     },
     cta: {
       requestAccess: "Request access",
@@ -274,8 +277,7 @@ export const en: Dictionary = {
     },
     problem: {
       heading: "Market data is everywhere. Market context is scattered.",
-      body:
-        "News arrives continuously. Economic releases change expectations. Price reacts before the full story is clear. Evidence sits across articles, calendar data, charts, and analyst notes. Generic AI can summarize headlines, but it cannot reliably explain your market unless it is grounded in structured events, asset relationships, and your workspace scope.",
+      body: "News arrives continuously. Economic releases change expectations. Price reacts before the full story is clear. Evidence sits across articles, calendar data, charts, and analyst notes. Generic AI can summarize headlines, but it cannot reliably explain your market unless it is grounded in structured events, asset relationships, and your workspace scope.",
       pointOne: "What moved?",
       pointTwo: "Which event mattered?",
       pointThree: "Where is the evidence?",
@@ -283,8 +285,7 @@ export const en: Dictionary = {
     },
     pillars: {
       heading: "Three surfaces for reading the market.",
-      body:
-        "Signapse keeps chart context, scoped AI answers, and relationship exploration close to the same evidence layer.",
+      body: "Signapse keeps chart context, scoped AI answers, and relationship exploration close to the same evidence layer.",
       chartTitle: "Chart Annotation",
       chartOneLine: "See why a move happened, not just that it happened.",
       chartBody:
@@ -309,8 +310,7 @@ export const en: Dictionary = {
     },
     pipeline: {
       heading: "From raw signals to structured market intelligence.",
-      body:
-        "Signapse turns market inputs into a shared intelligence layer, then personalizes the surfaces through workspace and watchlist scope.",
+      body: "Signapse turns market inputs into a shared intelligence layer, then personalizes the surfaces through workspace and watchlist scope.",
       inputsTitle: "Raw market signals",
       inputOne: "News / RSS",
       inputTwo: "Economic calendar",
@@ -329,8 +329,7 @@ export const en: Dictionary = {
     personalization: {
       eyebrow: "Workspace personalization",
       heading: "Knowledge is shared. The experience is personal.",
-      body:
-        "Signapse keeps market knowledge shared, but personalizes the experience through your workspace and watchlist. A Macro FX workspace and a Crypto workspace can ask similar questions and receive different context because the evidence boundary is different.",
+      body: "Signapse keeps market knowledge shared, but personalizes the experience through your workspace and watchlist. A Macro FX workspace and a Crypto workspace can ask similar questions and receive different context because the evidence boundary is different.",
       sharedTitle: "Shared knowledge layer",
       sharedBody:
         "Events, assets, narratives, evidence, theme metadata, node identity, and relation semantics stay consistent across workspaces.",
@@ -340,13 +339,12 @@ export const en: Dictionary = {
     },
     trust: {
       heading: "Analysis, not prediction.",
-      body:
-        "Signapse helps explain market impact with evidence. It does not place trades, provide guaranteed forecasts, or replace source verification.",
+      body: "Signapse helps explain market impact with evidence. It does not place trades, provide guaranteed forecasts, or replace source verification.",
     },
     finalCta: {
-      heading: "Read market moves with evidence on the chart and context in the graph.",
-      body:
-        "Request access to build a focused workspace for the assets, events, and narratives your team follows.",
+      heading:
+        "Read market moves with evidence on the chart and context in the graph.",
+      body: "Request access to build a focused workspace for the assets, events, and narratives your team follows.",
       requestAccess: "Request access",
       openDashboard: "Open dashboard",
     },
@@ -358,7 +356,8 @@ export const en: Dictionary = {
       candleMove: "Candle move",
       eventMarker: "Event marker",
       eventPopupTitle: "CPI release reprices Gold",
-      eventPopupBody: "Reaction: USD strength, XAU volatility, macro repricing.",
+      eventPopupBody:
+        "Reaction: USD strength, XAU volatility, macro repricing.",
       reactionDirection: "Reaction direction",
       confidence: "Confidence",
       evidence: "Evidence",
@@ -386,6 +385,10 @@ export const en: Dictionary = {
     bodyPlaceholder: "Write or type / for commands…",
     untitled: "Untitled note",
     draftLabel: "New note",
+    enterFullscreen: "Enter full screen",
+    exitFullscreen: "Exit full screen",
+    fullscreenUnavailable: "This browser does not support full screen.",
+    fullscreenFailed: "Could not switch full screen mode.",
     loading: "Loading notes",
     detailLoading: "Loading note",
     emptyTitle: "No notes yet",
@@ -399,7 +402,8 @@ export const en: Dictionary = {
       "This note was created with a content version that this editor cannot open safely.",
     saving: "Saving…",
     saved: "Saved",
-    saveError: "Could not save your latest changes. Try again before leaving this note.",
+    saveError:
+      "Could not save your latest changes. Try again before leaving this note.",
     invalidContent: "The note content is invalid.",
     createError: "Could not create the note.",
     updateError: "Could not update the note.",
@@ -914,10 +918,12 @@ export const en: Dictionary = {
     },
   },
   users: {
-    accessDeniedDescription: "The current account does not have permission to manage users.",
+    accessDeniedDescription:
+      "The current account does not have permission to manage users.",
     createAction: "Create user",
     searchLabel: "Search users",
-    searchPlaceholder: "Enter email, name, or phone number, then press Enter...",
+    searchPlaceholder:
+      "Enter email, name, or phone number, then press Enter...",
     searchPending: "Searching",
     userColumn: "User",
     phoneColumn: "Phone number",
@@ -940,7 +946,8 @@ export const en: Dictionary = {
     updateDescription: "Update the user's personal information and role.",
     emailLabel: "Email address",
     emailPlaceholder: "name@example.com",
-    emailReadOnlyDescription: "Email identifies the account and cannot be edited here.",
+    emailReadOnlyDescription:
+      "Email identifies the account and cannot be edited here.",
     lastNameLabel: "Last name",
     lastNamePlaceholder: "Enter last name",
     firstNameLabel: "First name",
@@ -1348,7 +1355,8 @@ export const en: Dictionary = {
       available: "Market analysis",
       showDetails: "Show analysis details",
       hideDetails: "Hide analysis details",
-      preparing: "Analysis details will be available when processing completes.",
+      preparing:
+        "Analysis details will be available when processing completes.",
       unavailable: "Analysis details are unavailable.",
       loading: "Loading analysis details...",
       loadError: "Could not load analysis details.",

@@ -112,7 +112,8 @@ export const vi = {
     emailInvalid: "Email không hợp lệ.",
     phoneNumberRequired: "Vui lòng nhập số điện thoại.",
     billingEmptyTitle: "Chưa có nội dung thanh toán",
-    billingEmptyDescription: "Khu vực thanh toán sẽ được bổ sung khi luồng nâng cấp được xác định.",
+    billingEmptyDescription:
+      "Khu vực thanh toán sẽ được bổ sung khi luồng nâng cấp được xác định.",
     errorTitle: "Không thể tải tài khoản",
     errorDescription: "Vui lòng thử lại để tải thông tin tài khoản.",
     noPackage: "Chưa đăng kí gói",
@@ -257,11 +258,12 @@ export const vi = {
     hero: {
       eyebrow: "AI Market Intelligence Workspace",
       title: "Hiểu biến động thị trường qua event, reaction và narrative.",
-      body:
-        "Signapse kết nối tin tức, lịch kinh tế, candle thị trường, watchlist tài sản và AI reasoning vào một workspace phân tích thị trường. Bạn có thể nhìn event trực tiếp trên chart, khám phá quan hệ thị trường bằng knowledge graph, và hỏi AI trong đúng phạm vi tài sản mình đang theo dõi.",
-      visualLabel: "Minh họa workspace Signapse với watchlist, chart annotation, market query và knowledge graph",
+      body: "Signapse kết nối tin tức, lịch kinh tế, candle thị trường, watchlist tài sản và AI reasoning vào một workspace phân tích thị trường. Bạn có thể nhìn event trực tiếp trên chart, khám phá quan hệ thị trường bằng knowledge graph, và hỏi AI trong đúng phạm vi tài sản mình đang theo dõi.",
+      visualLabel:
+        "Minh họa workspace Signapse với watchlist, chart annotation, market query và knowledge graph",
       previewLabel: "Xem trước workspace sản phẩm",
-      intelligenceFlow: "Raw market signals -> structured knowledge -> personalized market intelligence",
+      intelligenceFlow:
+        "Raw market signals -> structured knowledge -> personalized market intelligence",
     },
     cta: {
       requestAccess: "Yêu cầu truy cập",
@@ -273,9 +275,9 @@ export const vi = {
       openDashboardAria: "Mở bảng điều khiển Signapse",
     },
     problem: {
-      heading: "Dữ liệu thị trường ở khắp nơi. Bối cảnh thị trường lại bị phân mảnh.",
-      body:
-        "Tin tức đến liên tục. Lịch kinh tế làm thay đổi kỳ vọng. Giá phản ứng trước khi câu chuyện trở nên rõ ràng. Bằng chứng nằm rải rác trong bài viết, dữ liệu calendar, chart và các lớp phân tích. AI chung chung có thể tóm tắt headline, nhưng khó giải thích thị trường đáng tin cậy nếu không được grounding vào event, asset relation và scope của workspace.",
+      heading:
+        "Dữ liệu thị trường ở khắp nơi. Bối cảnh thị trường lại bị phân mảnh.",
+      body: "Tin tức đến liên tục. Lịch kinh tế làm thay đổi kỳ vọng. Giá phản ứng trước khi câu chuyện trở nên rõ ràng. Bằng chứng nằm rải rác trong bài viết, dữ liệu calendar, chart và các lớp phân tích. AI chung chung có thể tóm tắt headline, nhưng khó giải thích thị trường đáng tin cậy nếu không được grounding vào event, asset relation và scope của workspace.",
       pointOne: "Điều gì biến động?",
       pointTwo: "Event nào quan trọng?",
       pointThree: "Evidence nằm ở đâu?",
@@ -283,24 +285,26 @@ export const vi = {
     },
     pillars: {
       heading: "Ba bề mặt để đọc thị trường.",
-      body:
-        "Signapse giữ chart context, câu trả lời AI theo scope và graph quan hệ gần cùng một lớp evidence.",
+      body: "Signapse giữ chart context, câu trả lời AI theo scope và graph quan hệ gần cùng một lớp evidence.",
       chartTitle: "Chart Annotation",
-      chartOneLine: "Nhìn nguyên nhân phía sau biến động giá, không chỉ nhìn cây nến.",
+      chartOneLine:
+        "Nhìn nguyên nhân phía sau biến động giá, không chỉ nhìn cây nến.",
       chartBody:
         "Signapse đặt event marker trực tiếp lên chart của từng asset. Marker liên kết biến động giá với thời điểm event, tài sản bị ảnh hưởng, reaction direction, confidence, reasoning và evidence hỗ trợ.",
       chartPointOne: "Event timing trên trục giá",
       chartPointTwo: "Reaction direction và confidence",
       chartPointThree: "Evidence và event drill-down",
       queryTitle: "Market Query",
-      queryOneLine: "Hỏi thị trường trong đúng phạm vi tài sản bạn đang theo dõi.",
+      queryOneLine:
+        "Hỏi thị trường trong đúng phạm vi tài sản bạn đang theo dõi.",
       queryBody:
         "Market Query dùng current workspace và watchlist làm ranh giới evidence, rồi tổng hợp câu trả lời từ event, evidence, reaction, narrative và limitation.",
       queryPointOne: "Giới hạn theo asset trong workspace",
       queryPointTwo: "Reasoning chain với key events",
       queryPointThree: "Limitation khi evidence còn thưa",
       graphTitle: "Knowledge Graph",
-      graphOneLine: "Xem thị trường như một mạng quan hệ, không phải một danh sách headline.",
+      graphOneLine:
+        "Xem thị trường như một mạng quan hệ, không phải một danh sách headline.",
       graphBody:
         "Knowledge Graph giúp người dùng browse lớp market intelligence dùng chung qua watchlist của workspace, nối event với asset, narrative và source evidence.",
       graphPointOne: "Node event, asset, narrative và evidence",
@@ -309,8 +313,7 @@ export const vi = {
     },
     pipeline: {
       heading: "Từ tín hiệu rời rạc đến market intelligence có cấu trúc.",
-      body:
-        "Signapse biến các nguồn tín hiệu thị trường thành một lớp intelligence dùng chung, rồi cá nhân hóa bề mặt trải nghiệm bằng workspace và watchlist.",
+      body: "Signapse biến các nguồn tín hiệu thị trường thành một lớp intelligence dùng chung, rồi cá nhân hóa bề mặt trải nghiệm bằng workspace và watchlist.",
       inputsTitle: "Raw market signals",
       inputOne: "Tin tức / RSS",
       inputTwo: "Economic calendar",
@@ -329,8 +332,7 @@ export const vi = {
     personalization: {
       eyebrow: "Workspace personalization",
       heading: "Knowledge là lớp dùng chung. Trải nghiệm là cá nhân.",
-      body:
-        "Signapse giữ market knowledge là lớp dùng chung, nhưng cá nhân hóa trải nghiệm bằng workspace và watchlist. Một workspace Macro FX và một workspace Crypto có thể hỏi câu giống nhau nhưng nhận bối cảnh khác nhau vì evidence boundary khác nhau.",
+      body: "Signapse giữ market knowledge là lớp dùng chung, nhưng cá nhân hóa trải nghiệm bằng workspace và watchlist. Một workspace Macro FX và một workspace Crypto có thể hỏi câu giống nhau nhưng nhận bối cảnh khác nhau vì evidence boundary khác nhau.",
       sharedTitle: "Shared knowledge layer",
       sharedBody:
         "Event, asset, narrative, evidence, theme metadata, node identity và relation semantics được giữ nhất quán giữa các workspace.",
@@ -340,13 +342,12 @@ export const vi = {
     },
     trust: {
       heading: "Analysis, không phải prediction.",
-      body:
-        "Signapse giúp giải thích tác động thị trường dựa trên evidence. Sản phẩm không đặt lệnh, không cam kết dự báo giá, và không thay thế việc kiểm chứng nguồn tin.",
+      body: "Signapse giúp giải thích tác động thị trường dựa trên evidence. Sản phẩm không đặt lệnh, không cam kết dự báo giá, và không thay thế việc kiểm chứng nguồn tin.",
     },
     finalCta: {
-      heading: "Đọc biến động thị trường với evidence trên chart và bối cảnh trong graph.",
-      body:
-        "Yêu cầu truy cập để xây một workspace tập trung cho asset, event và narrative mà team của bạn theo dõi.",
+      heading:
+        "Đọc biến động thị trường với evidence trên chart và bối cảnh trong graph.",
+      body: "Yêu cầu truy cập để xây một workspace tập trung cho asset, event và narrative mà team của bạn theo dõi.",
       requestAccess: "Yêu cầu truy cập",
       openDashboard: "Mở bảng điều khiển",
     },
@@ -386,6 +387,10 @@ export const vi = {
     bodyPlaceholder: "Nhập nội dung hoặc gõ / để dùng lệnh…",
     untitled: "Ghi chú chưa có tiêu đề",
     draftLabel: "Ghi chú mới",
+    enterFullscreen: "Mở toàn màn hình",
+    exitFullscreen: "Thoát toàn màn hình",
+    fullscreenUnavailable: "Trình duyệt chưa hỗ trợ toàn màn hình.",
+    fullscreenFailed: "Chưa thể chuyển chế độ toàn màn hình.",
     loading: "Đang tải ghi chú",
     detailLoading: "Đang tải nội dung ghi chú",
     emptyTitle: "Chưa có ghi chú",
@@ -399,7 +404,8 @@ export const vi = {
       "Ghi chú này dùng phiên bản nội dung mà trình soạn thảo chưa thể mở an toàn.",
     saving: "Đang lưu…",
     saved: "Đã lưu",
-    saveError: "Không thể lưu thay đổi mới nhất. Hãy thử lại trước khi rời ghi chú này.",
+    saveError:
+      "Không thể lưu thay đổi mới nhất. Hãy thử lại trước khi rời ghi chú này.",
     invalidContent: "Nội dung ghi chú không hợp lệ.",
     createError: "Không thể tạo ghi chú.",
     updateError: "Không thể cập nhật ghi chú.",
@@ -910,7 +916,8 @@ export const vi = {
     },
   },
   users: {
-    accessDeniedDescription: "Tài khoản hiện tại chưa có quyền quản lý người dùng.",
+    accessDeniedDescription:
+      "Tài khoản hiện tại chưa có quyền quản lý người dùng.",
     createAction: "Tạo người dùng",
     searchLabel: "Tìm người dùng",
     searchPlaceholder: "Nhập email, tên hoặc số điện thoại rồi nhấn Enter...",
@@ -936,7 +943,8 @@ export const vi = {
     updateDescription: "Cập nhật thông tin cá nhân và vai trò của người dùng.",
     emailLabel: "Địa chỉ email",
     emailPlaceholder: "name@example.com",
-    emailReadOnlyDescription: "Email là thông tin định danh và không thể chỉnh sửa tại đây.",
+    emailReadOnlyDescription:
+      "Email là thông tin định danh và không thể chỉnh sửa tại đây.",
     lastNameLabel: "Họ",
     lastNamePlaceholder: "Nhập họ",
     firstNameLabel: "Tên",
@@ -1447,8 +1455,7 @@ export const vi = {
       loadError: "Không thể tải bằng chứng.",
       errorTitle: "Không thể tải bằng chứng",
       emptyTitle: "Chưa lưu bằng chứng",
-      emptyDescription:
-        "Phân tích này chưa có snapshot bằng chứng được lưu.",
+      emptyDescription: "Phân tích này chưa có snapshot bằng chứng được lưu.",
       untitled: "Bằng chứng chưa có tiêu đề",
       sourceMissing: "Chưa có nguồn",
       openInternal: "Mở chi tiết",
@@ -1471,8 +1478,7 @@ export const vi = {
       destinationLabel: "Đích Telegram",
       destinationPlaceholder: "Chọn đích gửi",
       destinationRequired: "Vui lòng chọn đích Telegram.",
-      noDestinations:
-        "Chưa có đích Telegram đang hoạt động để gửi thủ công.",
+      noDestinations: "Chưa có đích Telegram đang hoạt động để gửi thủ công.",
       setup: "Mở cấu hình Telegram",
       send: "Gửi Telegram",
       sending: "Đang gửi...",

@@ -3,6 +3,7 @@
 import {
   type FormEvent,
   type KeyboardEvent,
+  useEffect,
   useRef,
   useState,
   useTransition,
@@ -10,6 +11,9 @@ import {
 import {
   CircleAlertIcon,
   EllipsisIcon,
+  ExpandIcon,
+  Minimize2Icon,
+  NotebookPenIcon,
   PencilIcon,
   SaveIcon,
   SquarePenIcon,
@@ -97,6 +101,7 @@ import {
 } from "@/components/ui/sheet"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
+import { cn } from "@/lib/utils"
 
 const PERSONAL_NOTES_PAGE_SIZE = 20
 const PERSONAL_NOTES_SHEET_CONTENT_ID = "personal-notes-quick-sheet-content"
@@ -135,13 +140,25 @@ function PersonalNotesQuickSheet() {
   const [isPending, startTransition] = useTransition()
   const [isRenamePending, startRenameTransition] = useTransition()
   const [isDeletePending, startDeleteTransition] = useTransition()
+  const [isFullscreen, setIsFullscreen] = useState(false)
   const autosaveRef = useRef<ReturnType<
     typeof createPersonalNoteAutosave
   > | null>(null)
+  const sheetContentRef = useRef<HTMLDivElement | null>(null)
   const detailRequestRef = useRef(0)
   const editorKeyRef = useRef(0)
   const activeNoteRef = useRef<PersonalNoteResponse | null>(null)
   const lastActionTriggerRef = useRef<HTMLButtonElement | null>(null)
+
+  useEffect(() => {
+    function handleFullscreenChange() {
+      setIsFullscreen(document.fullscreenElement === sheetContentRef.current)
+    }
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange)
+    return () =>
+      document.removeEventListener("fullscreenchange", handleFullscreenChange)
+  }, [])
 
   function reconcileSummary(note: PersonalNoteResponse) {
     const summary: PersonalNoteSummaryResponse = {
@@ -331,6 +348,24 @@ function PersonalNotesQuickSheet() {
     handleSave()
   }
 
+  async function handleFullscreenToggle() {
+    const sheetContent = sheetContentRef.current
+    if (!sheetContent || !document.fullscreenEnabled) {
+      toast.error(personalNotes.fullscreenUnavailable)
+      return
+    }
+
+    try {
+      if (document.fullscreenElement === sheetContent) {
+        await document.exitFullscreen()
+      } else {
+        await sheetContent.requestFullscreen()
+      }
+    } catch {
+      toast.error(personalNotes.fullscreenFailed)
+    }
+  }
+
   async function handleNewNote() {
     if (!canCreate || !notesPage || hasError) return
     if (!(await flushCurrentEditor())) return
@@ -452,14 +487,21 @@ function PersonalNotesQuickSheet() {
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetTrigger asChild aria-controls={PERSONAL_NOTES_SHEET_CONTENT_ID}>
         <Button type="button" variant="outline">
-          <StickyNoteIcon data-icon="inline-start" />
+          <NotebookPenIcon data-icon="inline-start" />
           {personalNotes.trigger}
         </Button>
       </SheetTrigger>
       <SheetContent
+        ref={sheetContentRef}
         id={PERSONAL_NOTES_SHEET_CONTENT_ID}
         showCloseButton={false}
-        className="gap-0 overflow-hidden data-[side=right]:w-full data-[side=right]:sm:max-w-6xl"
+        className={cn(
+          "gap-0 overflow-hidden data-[side=right]:w-full",
+          isFullscreen
+            ? "shadow-none data-[side=right]:border-0 data-[side=right]:sm:max-w-none"
+            : "data-[side=right]:sm:max-w-6xl"
+        )}
+        data-fullscreen={isFullscreen}
         onKeyDownCapture={handleSheetKeyDown}
       >
         <SheetTitle className="sr-only">{personalNotes.trigger}</SheetTitle>
@@ -469,19 +511,33 @@ function PersonalNotesQuickSheet() {
             aria-label={personalNotes.listLabel}
             className="flex max-h-64 shrink-0 flex-col border-b md:max-h-none md:w-72 md:border-r md:border-b-0"
           >
-            {canCreate && notesPage && !hasError ? (
-              <div className="shrink-0 p-4 pb-0">
+            <div className="flex shrink-0 items-center gap-2 p-4 pb-0">
+              {canCreate && notesPage && !hasError ? (
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full"
+                  size="icon"
+                  aria-label={personalNotes.draftLabel}
                   onClick={() => void handleNewNote()}
                 >
-                  <SquarePenIcon data-icon="inline-start" />
-                  {personalNotes.draftLabel}
+                  <SquarePenIcon />
                 </Button>
-              </div>
-            ) : null}
+              ) : null}
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                aria-label={
+                  isFullscreen
+                    ? personalNotes.exitFullscreen
+                    : personalNotes.enterFullscreen
+                }
+                aria-pressed={isFullscreen}
+                onClick={() => void handleFullscreenToggle()}
+              >
+                {isFullscreen ? <Minimize2Icon /> : <ExpandIcon />}
+              </Button>
+            </div>
             <ScrollArea className="min-h-0 flex-1 p-4">
               {isPending && !notesPage ? (
                 <div role="status">

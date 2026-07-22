@@ -136,7 +136,7 @@ The system SHALL permit personal-note creation and editing only when the current
 #### Scenario: Existing note is read-only without update permission
 - **WHEN** a user has `personal-note:read` but lacks `personal-note:update`
 - **THEN** the selected note MUST render read-only
-- **AND** the Sheet MUST NOT render the Save action row or invoke an update through the save shortcut
+- **AND** the Sheet MUST NOT render the floating Save control or invoke an update through the save shortcut
 
 #### Scenario: Empty collection is editable with create permission
 - **WHEN** no notes exist and the user has `personal-note:create`

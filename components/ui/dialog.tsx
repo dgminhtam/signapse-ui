@@ -5,6 +5,7 @@ import { Dialog as DialogPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { useOverlayPortalContainer } from "@/components/ui/overlay-portal-container"
 import { XIcon } from "lucide-react"
 
 function Dialog({
@@ -22,7 +23,15 @@ function DialogTrigger({
 function DialogPortal({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Portal>) {
-  return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />
+  const portalContainer = useOverlayPortalContainer()
+
+  return (
+    <DialogPrimitive.Portal
+      container={portalContainer ?? undefined}
+      data-slot="dialog-portal"
+      {...props}
+    />
+  )
 }
 
 function DialogClose({
@@ -74,8 +83,7 @@ function DialogContent({
               className="absolute top-2 right-2"
               size="icon-sm"
             >
-              <XIcon
-              />
+              <XIcon />
               <span className="sr-only">Close</span>
             </Button>
           </DialogPrimitive.Close>
@@ -129,10 +137,7 @@ function DialogTitle({
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn(
-        "text-base leading-none font-medium",
-        className
-      )}
+      className={cn("text-base leading-none font-medium", className)}
       {...props}
     />
   )

@@ -5,6 +5,7 @@ import { AlertDialog as AlertDialogPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { useOverlayPortalContainer } from "@/components/ui/overlay-portal-container"
 
 function AlertDialog({
   ...props
@@ -23,8 +24,14 @@ function AlertDialogTrigger({
 function AlertDialogPortal({
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Portal>) {
+  const portalContainer = useOverlayPortalContainer()
+
   return (
-    <AlertDialogPrimitive.Portal data-slot="alert-dialog-portal" {...props} />
+    <AlertDialogPrimitive.Portal
+      container={portalContainer ?? undefined}
+      data-slot="alert-dialog-portal"
+      {...props}
+    />
   )
 }
 
