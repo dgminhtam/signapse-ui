@@ -10,6 +10,7 @@ import { Editor, EditorContainer } from '@/components/ui/editor';
 
 interface PlateEditorProps {
   bodyPlaceholder?: string;
+  containerClassName?: string;
   initialValue?: Value;
   onValueChange?: (value: Value) => void;
   readOnly?: boolean;
@@ -17,6 +18,7 @@ interface PlateEditorProps {
 
 export function PlateEditor({
   bodyPlaceholder,
+  containerClassName,
   initialValue = demoValue,
   onValueChange,
   readOnly = false,
@@ -50,7 +52,7 @@ export function PlateEditor({
       }
       readOnly={readOnly}
     >
-      <EditorContainer>
+      <EditorContainer className={containerClassName}>
         <Editor
           placeholder={readOnly ? undefined : bodyPlaceholder}
           variant="demo"

@@ -76,13 +76,14 @@ The system SHALL keep document mutations local until an explicit Save or safety 
 - **THEN** the system MUST NOT send another create request
 - **AND** subsequent persistence MUST use the id returned by the first create response
 
-### Requirement: Personal-note save state MUST be visible with an explicit control
-The Personal Notes Sheet SHALL present localized save state beside a visible Save button for an editable supported note and SHALL NOT use a routine save-success toast.
+### Requirement: Personal-note save state MUST use a compact explicit control
+The Personal Notes Sheet SHALL present a large icon-only floating Save button within the editor for an editable supported note, SHALL keep routine save state within that control, and SHALL NOT use a separate action row, status badge, or save-success toast.
 
 #### Scenario: Save control reflects a clean editor
 - **WHEN** an editable note is idle or its latest revision is saved
 - **THEN** the Save button MUST be disabled
-- **AND** the Sheet MAY show the localized saved state without a success toast
+- **AND** it MUST expose a localized accessible name despite having no visible text label
+- **AND** the Sheet MUST NOT show a routine saved badge
 
 #### Scenario: Save control reflects dirty or failed content
 - **WHEN** the current note is dirty or its latest save failed
@@ -92,17 +93,18 @@ The Personal Notes Sheet SHALL present localized save state beside a visible Sav
 #### Scenario: Save is pending
 - **WHEN** a create or update mutation is in flight
 - **THEN** the Save button MUST be disabled and include a spinner
-- **AND** the action row MUST expose the localized saving state
+- **AND** the button MUST expose the localized saving state
+- **AND** the Sheet MUST NOT show a separate loading badge
 
 #### Scenario: Save fails
 - **WHEN** a create or update mutation fails
 - **THEN** the Sheet MUST preserve the current editor value
-- **AND** the action row MUST show a localized inline error
+- **AND** the floating save control MUST show a localized inline error
 - **AND** the value MUST remain dirty for a later retry
 
 #### Scenario: Save feedback is announced once
 - **WHEN** the active save state changes to saving, saved, or error
-- **THEN** one action-row feedback region MUST expose the state to assistive technology with appropriate status or alert semantics
+- **THEN** one feedback region MUST expose the state to assistive technology with appropriate status or alert semantics
 - **AND** the selected or provisional summary item MUST NOT duplicate that live save feedback
 
 #### Scenario: Keyboard shortcut invokes the same save path

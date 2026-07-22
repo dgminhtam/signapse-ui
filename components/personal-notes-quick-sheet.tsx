@@ -11,6 +11,7 @@ import {
   CircleAlertIcon,
   EllipsisIcon,
   PencilIcon,
+  SaveIcon,
   SquarePenIcon,
   StickyNoteIcon,
   Trash2Icon,
@@ -87,6 +88,7 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Item, ItemActions, ItemContent, ItemGroup } from "@/components/ui/item"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   Sheet,
   SheetContent,
@@ -443,30 +445,6 @@ function PersonalNotesQuickSheet() {
     })
   }
 
-  const saveStatusFeedback =
-    saveStatus === "saving" ? (
-      <span
-        className="flex items-center gap-1 text-xs text-muted-foreground"
-        role="status"
-        aria-live="polite"
-      >
-        <Spinner aria-hidden="true" />
-        {personalNotes.saving}
-      </span>
-    ) : saveStatus === "saved" ? (
-      <span
-        className="text-xs text-muted-foreground"
-        role="status"
-        aria-live="polite"
-      >
-        {personalNotes.saved}
-      </span>
-    ) : saveStatus === "error" ? (
-      <span className="line-clamp-2 text-xs text-destructive" role="alert">
-        {personalNotes.saveError}
-      </span>
-    ) : null
-
   const hasProvisionalNote =
     selectedNoteId === null && detailStatus === "ready" && !editorReadOnly
 
@@ -504,7 +482,7 @@ function PersonalNotesQuickSheet() {
                 </Button>
               </div>
             ) : null}
-            <div className="min-h-0 flex-1 overflow-y-auto p-4">
+            <ScrollArea className="min-h-0 flex-1 p-4">
               {isPending && !notesPage ? (
                 <div role="status">
                   <span className="sr-only">{personalNotes.loading}</span>
@@ -669,31 +647,13 @@ function PersonalNotesQuickSheet() {
                   </EmptyHeader>
                 </Empty>
               )}
-            </div>
+            </ScrollArea>
           </aside>
           <div
             className="flex min-h-0 min-w-0 flex-1 flex-col"
             aria-busy={detailStatus === "loading"}
           >
-            {detailStatus === "ready" &&
-            editorInitialValue &&
-            !editorReadOnly ? (
-              <div className="flex shrink-0 items-center justify-between gap-4 border-b px-4 py-2">
-                <div className="min-w-0 flex-1">{saveStatusFeedback}</div>
-                <Button
-                  type="button"
-                  aria-keyshortcuts="Control+S Meta+S"
-                  disabled={saveStatus !== "dirty" && saveStatus !== "error"}
-                  onClick={handleSave}
-                >
-                  {saveStatus === "saving" ? (
-                    <Spinner data-icon="inline-start" aria-hidden="true" />
-                  ) : null}
-                  {dictionary.common.save}
-                </Button>
-              </div>
-            ) : null}
-            <div className="min-h-0 flex-1 overflow-auto">
+            <div className="relative min-h-0 flex-1 overflow-auto">
               {detailStatus === "loading" ? (
                 <div className="p-6" role="status">
                   <span className="sr-only">{personalNotes.detailLoading}</span>
@@ -741,15 +701,65 @@ function PersonalNotesQuickSheet() {
                   </EmptyHeader>
                 </Empty>
               ) : detailStatus === "ready" && editorInitialValue ? (
-                <PlateEditor
-                  bodyPlaceholder={personalNotes.bodyPlaceholder}
-                  key={editorKey}
-                  initialValue={editorInitialValue}
-                  onValueChange={
-                    editorReadOnly ? undefined : handleEditorChange
-                  }
-                  readOnly={editorReadOnly}
-                />
+                <>
+                  <PlateEditor
+                    bodyPlaceholder={personalNotes.bodyPlaceholder}
+                    containerClassName="h-full"
+                    key={editorKey}
+                    initialValue={editorInitialValue}
+                    onValueChange={
+                      editorReadOnly ? undefined : handleEditorChange
+                    }
+                    readOnly={editorReadOnly}
+                  />
+                  {!editorReadOnly ? (
+                    <div className="pointer-events-none absolute right-4 bottom-4 z-10 flex max-w-[calc(100%-2rem)] flex-col items-end gap-2">
+                      {saveStatus === "error" ? (
+                        <span
+                          className="line-clamp-2 max-w-sm text-right text-xs text-destructive"
+                          role="alert"
+                        >
+                          {personalNotes.saveError}
+                        </span>
+                      ) : null}
+                      <span
+                        className="sr-only"
+                        role="status"
+                        aria-live="polite"
+                      >
+                        {saveStatus === "saving"
+                          ? personalNotes.saving
+                          : saveStatus === "saved"
+                            ? personalNotes.saved
+                            : null}
+                      </span>
+                      <Button
+                        type="button"
+                        size="icon-lg"
+                        className="pointer-events-auto"
+                        aria-label={
+                          saveStatus === "saving"
+                            ? personalNotes.saving
+                            : dictionary.common.save
+                        }
+                        aria-keyshortcuts="Control+S Meta+S"
+                        disabled={
+                          saveStatus !== "dirty" && saveStatus !== "error"
+                        }
+                        onClick={handleSave}
+                      >
+                        {saveStatus === "saving" ? (
+                          <Spinner
+                            data-icon="inline-start"
+                            aria-hidden="true"
+                          />
+                        ) : (
+                          <SaveIcon data-icon="inline-start" />
+                        )}
+                      </Button>
+                    </div>
+                  ) : null}
+                </>
               ) : (
                 <Empty>
                   <EmptyHeader>
