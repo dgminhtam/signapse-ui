@@ -356,13 +356,7 @@ export function createMarketChartEconomicCalendarEventGroups(
       continue
     }
 
-    const candleTime = resolveNearestCandleTime(eventTime, candleTimes)
-
-    if (candleTime === null) {
-      continue
-    }
-
-    const key = Number(candleTime)
+    const key = Number(resolveNearestCandleTime(eventTime, candleTimes) ?? eventTime)
     const group = groupsByTime.get(key) ?? []
 
     group.push(event)
