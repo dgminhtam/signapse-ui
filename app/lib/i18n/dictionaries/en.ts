@@ -1544,6 +1544,9 @@ export const en: Dictionary = {
         MACD: "MACD",
         RSI: "RSI",
         KDJ: "KDJ",
+        ATR: "ATR",
+        DMI: "DMI",
+        ICHIMOKU: "Ichimoku",
       },
     },
     drawings: {

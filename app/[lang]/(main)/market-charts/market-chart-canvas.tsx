@@ -94,6 +94,11 @@ import {
   getNewOlderCandles,
   getOldestLoadedTimestamp,
 } from "./market-chart-history-helpers"
+import { registerMarketChartAtr } from "./market-chart-atr"
+import {
+  ICHIMOKU_DISPLACEMENT,
+  registerMarketChartIchimoku,
+} from "./market-chart-ichimoku"
 
 export interface MarketChartLoadedData {
   annotations: MarketChartAnnotationResponse[]
@@ -102,13 +107,20 @@ export interface MarketChartLoadedData {
   from: string | null
 }
 
-export type MarketChartIndicatorName =
-  | "MA"
-  | "EMA"
-  | "BOLL"
-  | "MACD"
-  | "RSI"
-  | "KDJ"
+export const MARKET_CHART_INDICATORS = [
+  "MA",
+  "EMA",
+  "BOLL",
+  "MACD",
+  "RSI",
+  "KDJ",
+  "ATR",
+  "DMI",
+  "ICHIMOKU",
+  "VOL",
+] as const
+
+export type MarketChartIndicatorName = (typeof MARKET_CHART_INDICATORS)[number]
 
 export interface MarketChartCanvasHandle {
   clearDrawings: () => boolean
@@ -152,7 +164,6 @@ interface MarketChartCanvasProps {
   liveCandle?: MarketChartCandleItemResponse | null
   selectedAnnotationGroupId?: string | null
   activeOutcomeHoverRange?: MarketChartOutcomeHoverRange | null
-  showVolumePane: boolean
   activeIndicators?: MarketChartIndicatorName[]
   className?: string
   drawingToolActive?: boolean
@@ -199,18 +210,12 @@ interface LazyHistoryFeedback {
 
 const CANDLE_PANE_ID = "candle_pane"
 const VOLUME_PANE_ID = "market-chart-volume"
-const MARKET_CHART_INDICATORS: MarketChartIndicatorName[] = [
-  "MA",
-  "EMA",
-  "BOLL",
-  "MACD",
-  "RSI",
-  "KDJ",
-]
+const DEFAULT_MARKET_CHART_RIGHT_OFFSET = 24
 const MARKET_CHART_MAIN_PANE_INDICATORS = new Set<MarketChartIndicatorName>([
   "MA",
   "EMA",
   "BOLL",
+  "ICHIMOKU",
 ])
 const MARKER_DATE_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
   year: "numeric",
@@ -526,6 +531,7 @@ function syncChartIndicators(
   activeIndicators: MarketChartIndicatorName[]
 ) {
   const enabledIndicators = new Set(activeIndicators)
+  const hadIchimoku = chart.getIndicators({ name: "ICHIMOKU" }).length > 0
 
   for (const indicator of MARKET_CHART_INDICATORS) {
     const existingIndicators = chart.getIndicators({ name: indicator })
@@ -534,21 +540,45 @@ function syncChartIndicators(
     if (enabled && existingIndicators.length === 0) {
       const isMainPaneIndicator =
         MARKET_CHART_MAIN_PANE_INDICATORS.has(indicator)
-      const paneOptions = isMainPaneIndicator
-        ? { id: CANDLE_PANE_ID }
-        : {
-            height: 96,
-            id: `market-chart-indicator-${indicator.toLowerCase()}`,
-            minHeight: 64,
-          }
+      const paneOptions =
+        indicator === "VOL"
+          ? {
+              dragEnabled: false,
+              height: 92,
+              id: VOLUME_PANE_ID,
+              minHeight: 64,
+            }
+          : isMainPaneIndicator
+            ? { id: CANDLE_PANE_ID }
+            : {
+                height: 96,
+                id: `market-chart-indicator-${indicator.toLowerCase()}`,
+                minHeight: 64,
+              }
 
-      chart.createIndicator(indicator, isMainPaneIndicator, paneOptions)
+      const indicatorId = chart.createIndicator(
+        { name: indicator, paneId: paneOptions.id },
+        isMainPaneIndicator
+      )
+
+      if (indicatorId && !isMainPaneIndicator) {
+        chart.setPaneOptions(paneOptions)
+      }
       continue
     }
 
     if (!enabled && existingIndicators.length > 0) {
       chart.removeIndicator({ name: indicator })
     }
+  }
+
+  const hasIchimoku = chart.getIndicators({ name: "ICHIMOKU" }).length > 0
+  if (hasIchimoku !== hadIchimoku) {
+    chart.setOffsetRightDistance(
+      hasIchimoku
+        ? chart.getBarSpace().bar * ICHIMOKU_DISPLACEMENT
+        : DEFAULT_MARKET_CHART_RIGHT_OFFSET
+    )
   }
 }
 
@@ -580,7 +610,6 @@ export const MarketChartCanvas = forwardRef<
     onLoadOlderCandles,
     renderAnnotationPopup,
     selectedAnnotationGroupId,
-    showVolumePane,
     symbol = "MARKET",
     timeframe,
   },
@@ -1021,18 +1050,15 @@ export const MarketChartCanvas = forwardRef<
     }
 
     registerMarketChartDrawingOverlays()
+    registerMarketChartAtr()
+    registerMarketChartIchimoku()
 
     const chart = init(container, {
-      layout: [
-        {
-          type: "candle",
-          options: {
-            axis: { gap: { bottom: 0.22, top: 0.08 } },
-            id: CANDLE_PANE_ID,
-          },
+      layout: {
+        yAxis: {
+          gap: { bottom: 0.22, top: 0.08 },
         },
-        { type: "xAxis" },
-      ],
+      },
       locale: resolveKLineChartLocale(intlLocale),
       styles: createChartStyles(chartThemePalette),
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -1044,7 +1070,7 @@ export const MarketChartCanvas = forwardRef<
     }
 
     chartRef.current = chart
-    chart.setOffsetRightDistance(24)
+    chart.setOffsetRightDistance(DEFAULT_MARKET_CHART_RIGHT_OFFSET)
     chart.setLeftMinVisibleBarCount(8)
     chart.setRightMinVisibleBarCount(8)
 
@@ -1221,18 +1247,6 @@ export const MarketChartCanvas = forwardRef<
   useEffect(() => {
     chartRef.current?.setPeriod(createKLinePeriod(timeframe))
   }, [timeframe])
-
-  // ── Sync: volume pane ──
-  useEffect(() => {
-    const chart = chartRef.current
-    if (!chart) return
-
-    if (showVolumePane) {
-      chart.createIndicator("VOL", false, { id: VOLUME_PANE_ID, height: 92, minHeight: 64, dragEnabled: false })
-    } else {
-      chart.removeIndicator({ paneId: VOLUME_PANE_ID })
-    }
-  }, [showVolumePane])
 
   // ── Sync effect 2: data source change — reset DataLoader ──
   useEffect(() => {

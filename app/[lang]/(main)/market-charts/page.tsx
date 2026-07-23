@@ -11,7 +11,7 @@ import { WorkspaceWatchlistAssetListItemResponse } from "@/app/lib/watchlists/de
 import { AccessDenied } from "@/components/access-denied"
 
 import { MarketChartSurfaceSkeleton } from "./market-chart-skeleton"
-import { MarketChartWorkbench } from "./market-chart-workbench"
+import { MarketChartWorkbenchClient } from "./market-chart-workbench-client"
 
 const WATCHLIST_CHART_ASSET_SEARCH = {
   filter: "",
@@ -59,7 +59,7 @@ async function MarketChartsContent() {
   }
 
   return (
-    <MarketChartWorkbench
+    <MarketChartWorkbenchClient
       watchlistAssets={watchlistAssets}
       watchlistError={watchlistError}
     />

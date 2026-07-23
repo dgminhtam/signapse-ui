@@ -118,3 +118,60 @@ The system SHALL render the annotation/event visibility toggle with an inline-st
 - **THEN** it includes an inline-start icon without explicit icon sizing classes
 - **AND** its pressed, focus-visible, and disabled states remain controlled by the shadcn toggle primitive
 
+### Requirement: Indicator controls expose data-aware Volume selection
+The system SHALL expose Volume as a default-off option in the Signapse-owned market chart indicator control surface and SHALL prevent users from activating it when the active chart has no usable numeric volume.
+
+#### Scenario: Volume data is available
+- **WHEN** the active chart contains at least one candle with finite numeric volume
+- **THEN** the indicator control lists an enabled Volume option
+- **AND** Volume remains unselected until the user explicitly enables it
+
+#### Scenario: User enables Volume
+- **WHEN** the user selects Volume while usable volume data is available
+- **THEN** Volume is included in the active indicator selection
+- **AND** the indicator command count includes Volume
+
+#### Scenario: Volume data is unavailable
+- **WHEN** a successfully loaded active chart contains no finite numeric volume
+- **THEN** the Volume option is disabled
+- **AND** Volume is not retained as an active indicator
+
+#### Scenario: Assistive technology reads the Volume option
+- **WHEN** a screen reader user navigates the indicator control surface
+- **THEN** the Volume option exposes the locale-neutral technical name `Volume` and its disabled or selected state
+
+### Requirement: Market chart indicator controls expose ATR and DMI
+The system SHALL expose ATR and DMI as independently selectable, default-off options in the Signapse-owned market chart indicator control surface.
+
+#### Scenario: User opens indicator controls
+- **WHEN** the user opens the market chart indicator control surface
+- **THEN** ATR and DMI are listed with the existing curated indicators
+- **AND** neither indicator is selected unless the user has explicitly enabled it
+
+#### Scenario: User selects ATR or DMI
+- **WHEN** the user selects ATR or DMI
+- **THEN** the selected technical name is included in the active indicator selection
+- **AND** the indicator command count includes the selection
+
+#### Scenario: Assistive technology reads ATR and DMI
+- **WHEN** a screen reader user navigates the ATR and DMI options
+- **THEN** the options expose the locale-neutral technical names `ATR` and `DMI`
+- **AND** each option exposes its selected state
+
+### Requirement: Market chart indicator controls expose Ichimoku
+The system SHALL expose the complete classic Ichimoku indicator through the existing market chart indicator control.
+
+#### Scenario: Indicator selector is available
+- **WHEN** the market chart has usable candle data
+- **THEN** the indicator selector includes an option labeled `Ichimoku`
+- **AND** the option participates in the existing multiple-selection control
+
+#### Scenario: User enables Ichimoku
+- **WHEN** the user selects Ichimoku
+- **THEN** Ichimoku is included in the active indicator selection
+- **AND** the indicator control's active count includes Ichimoku
+
+#### Scenario: User disables Ichimoku
+- **WHEN** the user deselects an active Ichimoku indicator
+- **THEN** Ichimoku is removed from the active indicator selection
+- **AND** other active indicators remain selected

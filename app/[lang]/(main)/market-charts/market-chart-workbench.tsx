@@ -77,6 +77,11 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Toggle } from "@/components/ui/toggle"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import {
   Popover,
   PopoverContent,
   PopoverHeader,
@@ -98,6 +103,7 @@ import {
   type LocalQuickDetailEntity,
 } from "../local-entity-quick-detail-drawer"
 import {
+  MARKET_CHART_INDICATORS,
   MarketChartCanvas,
   type MarketChartCanvasHandle,
   type MarketChartDrawingSelection,
@@ -158,7 +164,7 @@ const MARKET_CHART_ANNOTATION_LEGEND_DIRECTIONS = [
   "MIXED",
 ] as const satisfies readonly MarketChartAnnotationDirection[]
 
-interface MarketChartWorkbenchProps {
+export interface MarketChartWorkbenchProps {
   watchlistAssets: WorkspaceWatchlistAssetListItemResponse[]
   watchlistError: string | null
 }
@@ -197,14 +203,6 @@ const MARKET_CHART_TIMEFRAME_SHORT_LABELS: Record<
   "1w": "1W",
   "1mo": "1M",
 }
-const MARKET_CHART_INDICATOR_OPTIONS: MarketChartIndicatorName[] = [
-  "MA",
-  "EMA",
-  "BOLL",
-  "MACD",
-  "RSI",
-  "KDJ",
-]
 const DEFAULT_MARKET_CHART_DRAWING_STATE: MarketChartDrawingState = {
   activeTool: null,
   hasSelectedDrawing: false,
@@ -642,6 +640,7 @@ function MarketChartTopToolbar({
   isBusy,
   isFullscreen,
   phase,
+  volumeAvailable,
   selection,
   selectedAsset,
   timeframeLabels,
@@ -664,6 +663,7 @@ function MarketChartTopToolbar({
   isBusy: boolean
   isFullscreen: boolean
   phase: WorkbenchPhase
+  volumeAvailable: boolean
   selection: MarketChartSelectionState
   selectedAsset: WorkspaceWatchlistAssetListItemResponse | null
   timeframeLabels: Record<MarketChartTimeframe, string>
@@ -823,50 +823,61 @@ function MarketChartTopToolbar({
                   onIndicatorChange(value as MarketChartIndicatorName[])
                 }}
               >
-                {MARKET_CHART_INDICATOR_OPTIONS.map((indicator) => (
+                {MARKET_CHART_INDICATORS.map((indicator) => (
                   <ToggleGroupItem
                     key={indicator}
                     value={indicator}
                     className="justify-start"
+                    disabled={indicator === "VOL" && !volumeAvailable}
                   >
-                    {dictionary.marketCharts.indicators.options[indicator]}
+                    {indicator === "VOL"
+                      ? "Volume"
+                      : dictionary.marketCharts.indicators.options[indicator]}
                   </ToggleGroupItem>
                 ))}
               </ToggleGroup>
             </PopoverContent>
           </Popover>
 
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={chartCommandsDisabled}
-            onClick={onScreenshot}
-            aria-label={dictionary.marketCharts.controls.screenshotAria}
-          >
-            <Camera data-icon="inline-start" />
-            {dictionary.marketCharts.controls.screenshotLabel}
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon-sm"
+                disabled={chartCommandsDisabled}
+                onClick={onScreenshot}
+                aria-label={dictionary.marketCharts.controls.screenshotAria}
+              >
+                <Camera />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {dictionary.marketCharts.controls.screenshotLabel}
+            </TooltipContent>
+          </Tooltip>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onFullscreenToggle}
-            disabled={!!watchlistError}
-            aria-label={
-              isFullscreen
-                ? dictionary.marketCharts.controls.exitFullscreenAria
-                : dictionary.marketCharts.controls.fullscreenAria
-            }
-          >
-            {isFullscreen ? (
-              <Minimize2 data-icon="inline-start" />
-            ) : (
-              <Expand data-icon="inline-start" />
-            )}
-            {isFullscreen
-              ? dictionary.marketCharts.controls.exitFullscreenLabel
-              : dictionary.marketCharts.controls.fullscreenLabel}
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon-sm"
+                onClick={onFullscreenToggle}
+                disabled={!!watchlistError}
+                aria-label={
+                  isFullscreen
+                    ? dictionary.marketCharts.controls.exitFullscreenAria
+                    : dictionary.marketCharts.controls.fullscreenAria
+                }
+              >
+                {isFullscreen ? <Minimize2 /> : <Expand />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {isFullscreen
+                ? dictionary.marketCharts.controls.exitFullscreenLabel
+                : dictionary.marketCharts.controls.fullscreenLabel}
+            </TooltipContent>
+          </Tooltip>
         </div>
       </div>
     </div>
@@ -895,7 +906,6 @@ function ChartSurface({
   selectedAsset,
   onAnnotationEventOpen,
   selectedAnnotationGroup,
-  showVolumePane,
   timeframeLabels,
   watchlistAssets,
   watchlistError,
@@ -931,7 +941,6 @@ function ChartSurface({
   selectedAsset: WorkspaceWatchlistAssetListItemResponse | null
   onAnnotationEventOpen: (eventId: number) => void
   selectedAnnotationGroup: MarketChartAnnotationGroup | null
-  showVolumePane: boolean
   timeframeLabels: Record<MarketChartTimeframe, string>
   watchlistAssets: WorkspaceWatchlistAssetListItemResponse[]
   watchlistError: string | null
@@ -1042,6 +1051,10 @@ function ChartSurface({
 
 
   const hasCandles = (data?.candles.length ?? 0) > 0 || !!liveCandle
+  const volumeAvailable = hasUsableVolumeData(data?.candles, liveCandle)
+  const availableActiveIndicators = volumeAvailable
+    ? activeIndicators
+    : activeIndicators.filter((indicator) => indicator !== "VOL")
   const displaySymbol = getDisplayAssetSymbol(data, selectedAsset, dictionary)
 
   useEffect(() => {
@@ -1064,11 +1077,26 @@ function ChartSurface({
 
 
   function handleIndicatorChange(indicators: MarketChartIndicatorName[]) {
-    setActiveIndicators(indicators)
+    const availableIndicators = volumeAvailable
+      ? indicators
+      : indicators.filter((indicator) => indicator !== "VOL")
 
-    if (!chartCanvasRef.current?.setIndicators(indicators) && hasCandles) {
+    setActiveIndicators(availableIndicators)
+
+    if (
+      !chartCanvasRef.current?.setIndicators(availableIndicators) &&
+      hasCandles
+    ) {
       toast.error(dictionary.marketCharts.controls.indicatorUnavailable)
     }
+  }
+
+  function resetVolumeIndicator() {
+    setActiveIndicators((current) =>
+      current.includes("VOL")
+        ? current.filter((indicator) => indicator !== "VOL")
+        : current
+    )
   }
 
   function handleDrawingToolChange(tool: MarketChartDrawingTool | null) {
@@ -1189,7 +1217,7 @@ function ChartSurface({
       className="flex h-[calc(100svh-8.5rem)] max-h-[58rem] min-h-[36rem] flex-col overflow-hidden rounded-xl border border-border bg-card data-[fullscreen=true]:mt-0 data-[fullscreen=true]:h-screen data-[fullscreen=true]:max-h-none data-[fullscreen=true]:min-h-0 data-[fullscreen=true]:rounded-none data-[fullscreen=true]:border-0"
     >
       <MarketChartTopToolbar
-        activeIndicators={activeIndicators}
+        activeIndicators={availableActiveIndicators}
         annotationLayerEnabled={annotationLayerEnabled}
         calendarLayerEnabled={calendarLayerEnabled}
         errors={errors}
@@ -1198,6 +1226,7 @@ function ChartSurface({
         isBusy={isBusy}
         isFullscreen={isFullscreen}
         phase={phase}
+        volumeAvailable={volumeAvailable}
         selection={selection}
         selectedAsset={selectedAsset}
         timeframeLabels={timeframeLabels}
@@ -1205,11 +1234,17 @@ function ChartSurface({
         watchlistError={watchlistError}
         onAnnotationLayerChange={onAnnotationLayerChange}
         onCalendarLayerChange={onCalendarLayerChange}
-        onAssetChange={onAssetChange}
+        onAssetChange={(value) => {
+          resetVolumeIndicator()
+          onAssetChange(value)
+        }}
         onFullscreenToggle={handleFullscreenToggle}
         onIndicatorChange={handleIndicatorChange}
         onScreenshot={handleScreenshot}
-        onTimeframeChange={onTimeframeChange}
+        onTimeframeChange={(value) => {
+          resetVolumeIndicator()
+          onTimeframeChange(value)
+        }}
       />
       <div
         data-fullscreen={isFullscreen}
@@ -1234,7 +1269,7 @@ function ChartSurface({
               <div className={cn("relative min-h-0", phase === "success" && hasCandles ? "flex-1" : "flex-1 invisible")}>
                 <MarketChartCanvas
                   ref={chartCanvasRef}
-                  activeIndicators={activeIndicators}
+                  activeIndicators={availableActiveIndicators}
                   annotations={data?.annotations ?? []}
                   assetId={selectedAsset.assetId}
                   candles={data?.candles ?? []}
@@ -1244,7 +1279,6 @@ function ChartSurface({
                   annotationLayerEnabled={annotationLayerEnabled}
                   activeOutcomeHoverRange={activeOutcomeHoverRange}
                   liveCandle={liveCandle}
-                  showVolumePane={showVolumePane}
                   timeframe={selection.timeframe}
                   symbol={displaySymbol}
                   annotationGroups={annotationGroups}
@@ -1325,7 +1359,14 @@ function ChartSurface({
                   <EmptyDescription>{error || dictionary.marketCharts.empty.loadErrorDescription}</EmptyDescription>
                 </EmptyHeader>
                 {selectedAsset ? (
-                  <Button type="button" variant="outline" onClick={onRetry}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      resetVolumeIndicator()
+                      onRetry()
+                    }}
+                  >
                     <RefreshCw data-icon="inline-start" />
                     {dictionary.marketCharts.controls.refreshLatestData}
                   </Button>
@@ -2203,10 +2244,6 @@ export function MarketChartWorkbench({
     quote: liveState.quote,
     timeframe: selection.timeframe,
   })
-  const showVolumePane = hasUsableVolumeData(
-    chartData?.candles,
-    liveCandleItem
-  )
   const liveStatusLabel = getLiveStatusLabel(liveState, localization)
   const liveStatusTone = getLiveStatusTone(liveState)
   const annotationGroups = useMemo(() => {
@@ -2755,7 +2792,6 @@ export function MarketChartWorkbench({
         selection={selection}
         selectedAsset={selectedAsset}
         selectedAnnotationGroup={selectedAnnotationGroup}
-        showVolumePane={showVolumePane}
         timeframeLabels={timeframeLabels}
         watchlistAssets={watchlistAssets}
         watchlistError={watchlistError}
