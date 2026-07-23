@@ -99,7 +99,7 @@ The system SHALL render candle-mapped economic calendar events in a dedicated ch
 - **AND** visual lane padding does not shift marker placement away from the chart coordinate system
 
 ### Requirement: Calendar marker styling and legend
-The system SHALL distinguish calendar markers from existing event annotation markers with compact styling and legend text.
+The system SHALL distinguish calendar markers from existing event annotation markers with compact styling and legend text, while calendar quick lists SHALL use the canonical economic calendar impact badges.
 
 #### Scenario: Calendar legend point
 - **WHEN** the Calendar layer is enabled and calendar events are available
@@ -107,9 +107,15 @@ The system SHALL distinguish calendar markers from existing event annotation mar
 - **AND** the legend point uses a calendar-specific color distinct from bullish, bearish, neutral, and mixed annotation colors
 
 #### Scenario: Impact styling
-- **WHEN** a calendar event includes an `impact` value
-- **THEN** the marker and quick list use impact as supporting style context
+- **WHEN** a calendar quick-list event includes an `impact` value
+- **THEN** the quick list renders the impact as the canonical localized uppercase economic calendar Badge
+- **AND** recognized high, medium, and low values use the approved red, purple, and sky treatments respectively
+- **AND** unrecognized values use the neutral outline treatment
 - **AND** the system does not translate raw `actualBetterWorse` or `revisionBetterWorse` values
+
+#### Scenario: Calendar marker impact behavior remains stable
+- **WHEN** a calendar event includes an `impact` value
+- **THEN** existing marker grouping, priority, and calendar-specific marker color behavior remain unchanged
 
 #### Scenario: Calendar layer disabled hides legend
 - **WHEN** the Calendar layer is disabled
@@ -145,18 +151,61 @@ The system SHALL show a red vertical guide line over the chart when users hover 
 - **AND** the guide line does not render through the calendar lane itself
 
 ### Requirement: Calendar quick list and detail navigation
-The system SHALL provide an accessible quick list for loaded calendar events and route users to the existing economic calendar detail page for full content.
+The system SHALL provide an accessible, decision-focused quick list for loaded calendar events and route users to the existing economic calendar detail page for full content.
 
-#### Scenario: Show quick list fields
+#### Scenario: Show quick-list hierarchy
 - **WHEN** a user opens a calendar marker or grouped calendar marker
-- **THEN** the quick list displays available `time`, title, currency code, type, impact, forecast value, previous value, actual value, revision, better/worse fields, description, status, and content availability without placeholder copy for missing optional fields
+- **THEN** each event displays its available time and canonical localized impact Badge on the first metadata row
+- **AND** its title is displayed as the event identity
+- **AND** its available currency code and localized publication-status Badge are displayed together on the following metadata row
+- **AND** the quick list does not display event type
+- **AND** missing optional fields do not produce placeholder copy
+
+#### Scenario: Show release comparison
+- **WHEN** a quick-list event includes any of actual, forecast, or previous values
+- **THEN** the available values are displayed in a compact comparison with actual first, forecast second, and previous third
+- **AND** actual has stronger visual emphasis than forecast and previous
+- **AND** an available revision is displayed as secondary supporting data rather than as a peer of the three primary values
+
+#### Scenario: Omit better-or-worse metadata
+- **WHEN** a quick-list event includes `actualBetterWorse` or `revisionBetterWorse`
+- **THEN** the quick list does not render either field
+
+#### Scenario: Localize publication status
+- **WHEN** a quick-list event has status `AVAILABLE`
+- **THEN** its status Badge displays `Published` in English and `Đã công bố` in Vietnamese
+- **AND** the Badge is positioned beside the currency code rather than beside the time
+
+#### Scenario: Pending publication status
+- **WHEN** a quick-list event has status `PENDING`
+- **THEN** its status Badge displays the localized pending label beside the currency code
+
+#### Scenario: Missing quick-list impact
+- **WHEN** a calendar quick-list event has no impact value
+- **THEN** the quick list does not render an impact placeholder or no-impact badge
+
+#### Scenario: Show supporting description
+- **WHEN** a quick-list event includes a description
+- **THEN** the description is displayed as clamped secondary text after the release values
+
+#### Scenario: Separate multiple events
+- **WHEN** a quick list contains more than one calendar event
+- **THEN** a decorative Separator is displayed between adjacent event articles
+- **AND** no Separator is displayed after the final event
+
+#### Scenario: Scroll overflowing events
+- **WHEN** quick-list content exceeds the bounded popover height
+- **THEN** the events scroll inside the shared ScrollArea
+- **AND** the scrollbar does not cover event content or prevent keyboard access to detail actions
 
 #### Scenario: Open full calendar detail
-- **WHEN** a user activates a calendar event detail action
-- **THEN** the system navigates to the locale-preserving `/economic-calendar/{id}` detail route
+- **WHEN** a calendar event is displayed in the quick list
+- **THEN** the event provides one detail action labeled `Details` in English and `Chi tiết` in Vietnamese
+- **AND** activating the action navigates to the locale-preserving `/economic-calendar/{id}` detail route
 - **AND** it relies on the existing `GET /economic-calendar/{id}` detail endpoint for content
+- **AND** the quick list does not render a separate content-availability sentence
 
 #### Scenario: Keyboard calendar review
 - **WHEN** calendar events are loaded
-- **THEN** users can focus calendar lane markers or quick list entries by keyboard
-- **AND** they can open the event detail action without requiring pointer-only chart interaction
+- **THEN** users can focus calendar lane markers and each quick-list detail action by keyboard
+- **AND** every detail action has visible focus and can be activated without pointer-only chart interaction

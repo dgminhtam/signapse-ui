@@ -25,6 +25,7 @@ import { useLocalization } from "@/app/lib/i18n/provider"
 import {
   EconomicCalendarListResponse,
   formatEconomicCalendarValue,
+  getEconomicCalendarImpactBadgeProps,
   getEconomicCalendarImpactLabel,
 } from "@/app/lib/economic-calendar/definitions"
 import { AppTimeMetadata } from "@/components/app-time-metadata"
@@ -332,37 +333,6 @@ function getValueSignalClassName(value: string | null | undefined) {
   return numeric > 0
     ? "font-medium text-primary"
     : "font-medium text-destructive"
-}
-
-function getImpactSignalBadgeProps(impact: string | null | undefined) {
-  const normalizedImpact = impact?.trim().toUpperCase()
-
-  if (!normalizedImpact) {
-    return { variant: "outline" as const }
-  }
-
-  if (normalizedImpact.includes("HIGH")) {
-    return {
-      className:
-        "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300",
-    }
-  }
-
-  if (normalizedImpact.includes("MEDIUM")) {
-    return {
-      className:
-        "bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300",
-    }
-  }
-
-  if (normalizedImpact.includes("LOW")) {
-    return {
-      className:
-        "bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-300",
-    }
-  }
-
-  return { variant: "outline" as const }
 }
 
 function CurrentTimeLine({
@@ -759,7 +729,9 @@ export function EconomicCalendarList({
                                       ) : null}
                                       <TableCell className="w-28 align-top">
                                         <Badge
-                                          {...getImpactSignalBadgeProps(entry.impact)}
+                                          {...getEconomicCalendarImpactBadgeProps(
+                                            entry.impact
+                                          )}
                                         >
                                           {getEconomicCalendarImpactLabel(
                                             entry.impact,

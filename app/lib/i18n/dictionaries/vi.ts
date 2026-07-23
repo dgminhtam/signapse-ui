@@ -886,7 +886,6 @@ export const vi = {
     syncSummaryWithTime:
       "Đã đồng bộ lịch kinh tế: đã lấy {fetched}, tạo mới {created}, cập nhật {updated}, bỏ qua {skipped}. Thời điểm đồng bộ: {time}.",
     currency: "Tiền tệ {value}",
-    impactPrefix: "Tác động: {value}",
     contentTitle: "Nội dung chi tiết",
     contentUnavailableTitle: "Nội dung chi tiết chưa sẵn sàng",
     contentUnavailableDescription:
@@ -1503,6 +1502,16 @@ export const vi = {
       annotationsAria: "Hiển thị sự kiện trên biểu đồ",
       calendarLabel: "Lịch kinh tế",
       calendarAria: "Hiển thị lịch kinh tế trên biểu đồ",
+      eventSettingsTitle: "Tùy chỉnh sự kiện",
+      eventSettingsAria: "Mở tùy chỉnh sự kiện",
+      eventSettingsDescription:
+        "Chọn loại sự kiện và mức tác động được hiển thị trên biểu đồ.",
+      impactFilterLabel: "Mức tác động hiển thị",
+      impactOptionLabels: {
+        HIGH: "Cao",
+        MEDIUM: "Trung bình",
+        LOW: "Thấp",
+      },
       refreshLabel: "Tải lại biểu đồ",
       refresh: "Tải lại",
       refreshing: "Đang tải...",
@@ -1522,7 +1531,8 @@ export const vi = {
       fullscreenFailed: "Chưa thể chuyển chế độ toàn màn hình.",
     },
     indicators: {
-      title: "Chỉ báo",
+      title: "Tùy chỉnh chỉ báo",
+      description: "Bật hoặc tắt các chỉ báo kỹ thuật hiển thị trên biểu đồ.",
       options: {
         MA: "MA",
         EMA: "EMA",
@@ -1693,6 +1703,10 @@ export const vi = {
       responseInvalid:
         "Backend trả về sự kiện lịch kinh tế không đúng định dạng mong đợi.",
       revision: "Điều chỉnh",
+      statusLabels: {
+        AVAILABLE: "Đã công bố",
+        PENDING: "Đang chờ",
+      },
     },
     history: {
       loading: "Đang tải lịch sử...",
@@ -1730,6 +1744,7 @@ export const vi = {
       "15m": "15 phút",
       "30m": "30 phút",
       "1h": "1 giờ",
+      "4h": "4 giờ",
       "1d": "1 ngày",
       "1w": "1 tuần",
       "1mo": "1 tháng",

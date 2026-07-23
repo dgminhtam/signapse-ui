@@ -54,6 +54,8 @@ export function createKLinePeriod(timeframe: MarketChartTimeframe): Period {
       return { type: "minute", span: 30 }
     case "1h":
       return { type: "hour", span: 1 }
+    case "4h":
+      return { type: "hour", span: 4 }
     case "1d":
       return { type: "day", span: 1 }
     case "1w":

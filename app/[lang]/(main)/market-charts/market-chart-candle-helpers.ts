@@ -13,6 +13,7 @@ const QUOTE_BUCKET_INTERVAL_MS: Record<MarketChartTimeframe, number> = {
   "15m": 15 * MINUTE_MS,
   "30m": 30 * MINUTE_MS,
   "1h": HOUR_MS,
+  "4h": 4 * HOUR_MS,
   "1d": DAY_MS,
   "1w": 7 * DAY_MS,
   "1mo": 30 * DAY_MS,

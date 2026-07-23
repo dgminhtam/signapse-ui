@@ -888,7 +888,6 @@ export const en: Dictionary = {
     syncSummaryWithTime:
       "Synced economic calendar: fetched {fetched}, created {created}, updated {updated}, skipped {skipped}. Sync time: {time}.",
     currency: "Currency {value}",
-    impactPrefix: "Impact: {value}",
     contentTitle: "Detailed content",
     contentUnavailableTitle: "Detailed content is not ready",
     contentUnavailableDescription:
@@ -1517,6 +1516,16 @@ export const en: Dictionary = {
       annotationsAria: "Show events on the chart",
       calendarLabel: "Calendar",
       calendarAria: "Show economic calendar on the chart",
+      eventSettingsTitle: "Event settings",
+      eventSettingsAria: "Open event settings",
+      eventSettingsDescription:
+        "Choose which event types and impact levels appear on the chart.",
+      impactFilterLabel: "Displayed impact levels",
+      impactOptionLabels: {
+        HIGH: "High",
+        MEDIUM: "Medium",
+        LOW: "Low",
+      },
       refreshLabel: "Refresh chart",
       refresh: "Refresh",
       refreshing: "Loading...",
@@ -1536,7 +1545,8 @@ export const en: Dictionary = {
       fullscreenFailed: "Could not switch full screen mode.",
     },
     indicators: {
-      title: "Indicators",
+      title: "Indicator settings",
+      description: "Choose which technical indicators appear on the chart.",
       options: {
         MA: "MA",
         EMA: "EMA",
@@ -1707,6 +1717,10 @@ export const en: Dictionary = {
       responseInvalid:
         "The backend returned economic calendar events in an unexpected format.",
       revision: "Revision",
+      statusLabels: {
+        AVAILABLE: "Published",
+        PENDING: "Pending",
+      },
     },
     history: {
       loading: "Loading history...",
@@ -1744,6 +1758,7 @@ export const en: Dictionary = {
       "15m": "15 minutes",
       "30m": "30 minutes",
       "1h": "1 hour",
+      "4h": "4 hours",
       "1d": "1 day",
       "1w": "1 week",
       "1mo": "1 month",

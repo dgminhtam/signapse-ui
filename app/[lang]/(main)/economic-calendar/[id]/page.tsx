@@ -18,8 +18,8 @@ import { getEconomicCalendarEntryById } from "@/app/api/economic-calendar/action
 import {
   EconomicCalendarResponse,
   formatEconomicCalendarValue,
+  getEconomicCalendarImpactBadgeProps,
   getEconomicCalendarImpactLabel,
-  getEconomicCalendarImpactVariant,
   getEconomicCalendarStatusLabel,
   getEconomicCalendarStatusVariant,
 } from "@/app/lib/economic-calendar/definitions"
@@ -197,13 +197,8 @@ async function FetchEconomicCalendarEntryData({
       <div>
         <div className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant={getEconomicCalendarImpactVariant(entry.impact)}>
-              {formatMessage(dictionary.economicCalendar.impactPrefix, {
-                value: getEconomicCalendarImpactLabel(
-                  entry.impact,
-                  dictionary
-                ),
-              })}
+            <Badge {...getEconomicCalendarImpactBadgeProps(entry.impact)}>
+              {getEconomicCalendarImpactLabel(entry.impact, dictionary)}
             </Badge>
             <Badge
               variant={getEconomicCalendarStatusVariant(

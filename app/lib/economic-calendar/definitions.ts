@@ -2,6 +2,15 @@ import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
 
 export type EconomicCalendarStatus = "PENDING" | "AVAILABLE"
 
+export const ECONOMIC_CALENDAR_IMPACT_LEVELS = [
+  "HIGH",
+  "MEDIUM",
+  "LOW",
+] as const
+
+export type EconomicCalendarImpactLevel =
+  (typeof ECONOMIC_CALENDAR_IMPACT_LEVELS)[number]
+
 export interface EconomicCalendarListResponse {
   id: number
   title: string | null
@@ -47,31 +56,60 @@ export function getEconomicCalendarImpactLabel(
   impact: string | null | undefined,
   dictionary: Dictionary
 ) {
-  const normalizedImpact = impact?.trim().toUpperCase()
-
-  if (!normalizedImpact) {
+  if (!impact?.trim()) {
     return dictionary.economicCalendar.noImpact
   }
 
-  if (normalizedImpact.includes("HIGH")) {
-    return dictionary.economicCalendar.impactLabels.HIGH
-  }
+  const impactLevel = getEconomicCalendarImpactLevel(impact)
 
-  if (normalizedImpact.includes("MEDIUM")) {
-    return dictionary.economicCalendar.impactLabels.MEDIUM
-  }
-
-  if (normalizedImpact.includes("LOW")) {
-    return dictionary.economicCalendar.impactLabels.LOW
-  }
-
-  return dictionary.economicCalendar.impactLabels.UNKNOWN
+  return impactLevel
+    ? dictionary.economicCalendar.impactLabels[impactLevel]
+    : dictionary.economicCalendar.impactLabels.UNKNOWN
 }
 
-export function getEconomicCalendarImpactVariant(
-  impact?: string | null
-): "secondary" | "outline" {
-  return impact?.trim() ? "secondary" : "outline"
+export function getEconomicCalendarImpactLevel(
+  impact: string | null | undefined
+): EconomicCalendarImpactLevel | null {
+  const normalizedImpact = impact?.trim().toUpperCase()
+
+  return (
+    ECONOMIC_CALENDAR_IMPACT_LEVELS.find((level) =>
+      normalizedImpact?.includes(level)
+    ) ?? null
+  )
+}
+
+export function isEconomicCalendarImpactSelected(
+  impact: string | null | undefined,
+  selectedImpacts: readonly EconomicCalendarImpactLevel[]
+) {
+  const impactLevel = getEconomicCalendarImpactLevel(impact)
+
+  return impactLevel !== null && selectedImpacts.includes(impactLevel)
+}
+
+export function getEconomicCalendarImpactBadgeProps(
+  impact: string | null | undefined
+) {
+  switch (getEconomicCalendarImpactLevel(impact)) {
+    case "HIGH":
+    return {
+      className:
+        "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300",
+    }
+    case "MEDIUM":
+    return {
+      className:
+        "bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300",
+    }
+    case "LOW":
+    return {
+      className:
+        "bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-300",
+    }
+    default:
+      return { variant: "outline" as const }
+  }
 }
 
 export function getEconomicCalendarStatusLabel(

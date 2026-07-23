@@ -12,7 +12,7 @@ import {
   ArrowDown,
   ArrowUp,
   CalendarClock,
-  CalendarDays,
+  CalendarCog,
   Camera,
   ChartCandlestick,
   DatabaseZap,
@@ -33,6 +33,11 @@ import {
   getMarketChartEconomicCalendarEvents,
 } from "@/app/api/market-charts/action"
 import type { ActionResult } from "@/app/lib/definitions"
+import {
+  ECONOMIC_CALENDAR_IMPACT_LEVELS,
+  isEconomicCalendarImpactSelected,
+  type EconomicCalendarImpactLevel,
+} from "@/app/lib/economic-calendar/definitions"
 import { useLocalization } from "@/app/lib/i18n/provider"
 import {
   DEFAULT_MARKET_CHART_TIMEFRAME,
@@ -56,6 +61,7 @@ import { WorkspaceWatchlistAssetListItemResponse } from "@/app/lib/watchlists/de
 import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Empty,
   EmptyDescription,
@@ -63,7 +69,16 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
-import { Field, FieldError, FieldLabel } from "@/components/ui/field"
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSet,
+} from "@/components/ui/field"
+import { Item } from "@/components/ui/item"
 import {
   Select,
   SelectContent,
@@ -74,7 +89,7 @@ import {
 } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Toggle } from "@/components/ui/toggle"
+import { Switch } from "@/components/ui/switch"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import {
   Tooltip,
@@ -84,6 +99,7 @@ import {
 import {
   Popover,
   PopoverContent,
+  PopoverDescription,
   PopoverHeader,
   PopoverTitle,
   PopoverTrigger,
@@ -176,6 +192,7 @@ const INITIAL_WINDOW_DAYS: Record<MarketChartTimeframe, number> = {
   "15m": 2,
   "30m": 4,
   "1h": 30,
+  "4h": 30,
   "1d": 150,
   "1w": 770,
   "1mo": 3650,
@@ -200,6 +217,7 @@ const MARKET_CHART_TIMEFRAME_SHORT_LABELS: Record<
   "15m": "15m",
   "30m": "30m",
   "1h": "1H",
+  "4h": "4H",
   "1d": "1D",
   "1w": "1W",
   "1mo": "1M",
@@ -635,6 +653,7 @@ function MarketChartTopToolbar({
   activeIndicators,
   annotationLayerEnabled,
   calendarLayerEnabled,
+  selectedCalendarImpacts,
   errors,
   hasCandles,
   hasWatchlistAssets,
@@ -649,6 +668,7 @@ function MarketChartTopToolbar({
   watchlistError,
   onAnnotationLayerChange,
   onCalendarLayerChange,
+  onCalendarImpactChange,
   onAssetChange,
   onFullscreenToggle,
   onIndicatorChange,
@@ -658,6 +678,7 @@ function MarketChartTopToolbar({
   activeIndicators: MarketChartIndicatorName[]
   annotationLayerEnabled: boolean
   calendarLayerEnabled: boolean
+  selectedCalendarImpacts: EconomicCalendarImpactLevel[]
   errors: FormErrors
   hasCandles: boolean
   hasWatchlistAssets: boolean
@@ -672,6 +693,10 @@ function MarketChartTopToolbar({
   watchlistError: string | null
   onAnnotationLayerChange: (checked: boolean) => void
   onCalendarLayerChange: (checked: boolean) => void
+  onCalendarImpactChange: (
+    impact: EconomicCalendarImpactLevel,
+    checked: boolean
+  ) => void
   onAssetChange: (value: string) => void
   onFullscreenToggle: () => void
   onIndicatorChange: (indicators: MarketChartIndicatorName[]) => void
@@ -683,51 +708,59 @@ function MarketChartTopToolbar({
   const controlsDisabled = isBusy || !!watchlistError || !hasWatchlistAssets
   const chartCommandsDisabled = isBusy || !!watchlistError || !hasChartData
 
+  function handleIndicatorToggle(
+    indicator: MarketChartIndicatorName,
+    checked: boolean
+  ) {
+    onIndicatorChange(
+      MARKET_CHART_INDICATORS.filter((candidate) =>
+        candidate === indicator ? checked : activeIndicators.includes(candidate)
+      )
+    )
+  }
+
   return (
     <div className="border-b bg-card p-2">
-      <div className="flex flex-col gap-1 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex min-w-0 flex-1 flex-col gap-1 sm:flex-row sm:items-center">
-          <Field
-            className="w-full shrink-0 gap-1 sm:w-80 lg:w-96"
-            data-invalid={!!errors.assetId}
+      <div className="flex flex-col gap-1 lg:flex-row lg:items-center">
+        <Field
+          className="w-full shrink-0 gap-1 sm:w-72 lg:w-80"
+          data-invalid={!!errors.assetId}
+        >
+          <FieldLabel htmlFor="market-chart-asset" className="sr-only">
+            {dictionary.marketCharts.controls.assetLabel}
+          </FieldLabel>
+          <Select
+            value={selection.assetId}
+            onValueChange={onAssetChange}
+            disabled={controlsDisabled}
           >
-            <FieldLabel htmlFor="market-chart-asset" className="sr-only">
-              {dictionary.marketCharts.controls.assetLabel}
-            </FieldLabel>
-            <Select
-              value={selection.assetId}
-              onValueChange={onAssetChange}
-              disabled={controlsDisabled}
+            <SelectTrigger
+              id="market-chart-asset"
+              aria-invalid={errors.assetId ? true : undefined}
+              className="w-full"
+              size="sm"
             >
-              <SelectTrigger
-                id="market-chart-asset"
-                aria-invalid={errors.assetId ? true : undefined}
-                className="w-full"
-                size="sm"
-              >
-                <SelectValue
-                  placeholder={
-                    dictionary.marketCharts.controls.assetPlaceholder
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {watchlistAssets.map((asset) => (
-                    <SelectItem
-                      key={asset.assetId}
-                      value={String(asset.assetId)}
-                    >
-                      {asset.assetSymbol} - {asset.assetName}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-            <FieldError>{errors.assetId}</FieldError>
-          </Field>
+              <SelectValue
+                placeholder={dictionary.marketCharts.controls.assetPlaceholder}
+              />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {watchlistAssets.map((asset) => (
+                  <SelectItem key={asset.assetId} value={String(asset.assetId)}>
+                    {asset.assetSymbol} - {asset.assetName}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          <FieldError>{errors.assetId}</FieldError>
+        </Field>
 
-          <Field className="min-w-0 gap-1" data-invalid={!!errors.timeframe}>
+        <Separator orientation="vertical" className="hidden lg:block" />
+
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
+          <Field className="w-fit min-w-0 gap-1" data-invalid={!!errors.timeframe}>
             <FieldLabel id="market-chart-timeframe-label" className="sr-only">
               {dictionary.marketCharts.controls.timeframeLabel}
             </FieldLabel>
@@ -735,6 +768,7 @@ function MarketChartTopToolbar({
               type="single"
               variant="outline"
               size="sm"
+              spacing={1}
               value={selection.timeframe}
               aria-labelledby="market-chart-timeframe-label"
               onValueChange={(value) => {
@@ -756,129 +790,240 @@ function MarketChartTopToolbar({
             </ToggleGroup>
             <FieldError>{errors.timeframe}</FieldError>
           </Field>
-        </div>
 
-        <div className="flex flex-wrap items-center gap-1 lg:justify-end">
-          <Toggle
-            variant="outline"
-            size="sm"
-            pressed={annotationLayerEnabled}
-            onPressedChange={onAnnotationLayerChange}
-            disabled={isBusy || !!watchlistError || !selectedAsset}
-            aria-label={dictionary.marketCharts.controls.annotationsAria}
-          >
-            <CalendarClock data-icon="inline-start" />
-            {dictionary.marketCharts.controls.annotationsLabel}
-          </Toggle>
+          <Separator orientation="vertical" className="hidden lg:block" />
 
-          <Toggle
-            variant="outline"
-            size="sm"
-            pressed={calendarLayerEnabled}
-            onPressedChange={onCalendarLayerChange}
-            disabled={isBusy || !!watchlistError || !selectedAsset}
-            aria-label={dictionary.marketCharts.controls.calendarAria}
-          >
-            <CalendarDays data-icon="inline-start" />
-            {dictionary.marketCharts.controls.calendarLabel}
-          </Toggle>
-
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={chartCommandsDisabled}
+          <div className="flex flex-wrap items-center gap-1">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={isBusy || !!watchlistError || !selectedAsset}
+                  aria-label={dictionary.marketCharts.controls.eventSettingsAria}
+                >
+                  <CalendarCog data-icon="inline-start" />
+                  {dictionary.marketCharts.controls.annotationsLabel}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                align="start"
+                className="w-[min(18rem,calc(100vw_-_1.5rem))]"
               >
-                {activeIndicators.length > 0 ? (
-                  <span
-                    data-icon="inline-start"
-                    className="inline-flex size-3.5 items-center justify-center tabular-nums"
-                  >
-                    {activeIndicators.length > 9
-                      ? "9+"
-                      : activeIndicators.length}
-                  </span>
-                ) : (
-                  <SlidersHorizontal data-icon="inline-start" />
-                )}
-                {dictionary.marketCharts.controls.indicatorLabel}
-              </Button>
-            </PopoverTrigger>
+                <PopoverHeader>
+                  <PopoverTitle>
+                    {dictionary.marketCharts.controls.eventSettingsTitle}
+                  </PopoverTitle>
+                  <PopoverDescription>
+                    {
+                      dictionary.marketCharts.controls
+                        .eventSettingsDescription
+                    }
+                  </PopoverDescription>
+                </PopoverHeader>
 
-            <PopoverContent align="end">
-              <PopoverHeader>
-                <PopoverTitle>
-                  {dictionary.marketCharts.indicators.title}
-                </PopoverTitle>
-              </PopoverHeader>
-              <ToggleGroup
-                type="multiple"
-                variant="outline"
-                spacing={1}
-                value={activeIndicators}
-                orientation="vertical"
-                className="w-full items-stretch"
-                onValueChange={(value) => {
-                  onIndicatorChange(value as MarketChartIndicatorName[])
-                }}
-              >
-                {MARKET_CHART_INDICATORS.map((indicator) => (
-                  <ToggleGroupItem
-                    key={indicator}
-                    value={indicator}
-                    className="justify-start"
-                    disabled={indicator === "VOL" && !volumeAvailable}
-                  >
-                    {indicator === "VOL"
-                      ? "Volume"
-                      : dictionary.marketCharts.indicators.options[indicator]}
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
-            </PopoverContent>
-          </Popover>
+                <Item variant="muted" size="sm">
+                  <FieldSet className="w-full">
+                    <FieldLegend variant="label" className="sr-only">
+                      {dictionary.marketCharts.controls.annotationsLabel}
+                    </FieldLegend>
+                    <Field orientation="horizontal">
+                      <FieldLabel htmlFor="market-chart-event-settings-annotations">
+                        {dictionary.marketCharts.controls.annotationsLabel}
+                      </FieldLabel>
+                      <Switch
+                        id="market-chart-event-settings-annotations"
+                        checked={annotationLayerEnabled}
+                        onCheckedChange={onAnnotationLayerChange}
+                      />
+                    </Field>
+                  </FieldSet>
+                </Item>
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon-sm"
-                disabled={chartCommandsDisabled}
-                onClick={onScreenshot}
-                aria-label={dictionary.marketCharts.controls.screenshotAria}
-              >
-                <Camera />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              {dictionary.marketCharts.controls.screenshotLabel}
-            </TooltipContent>
-          </Tooltip>
+                <Item variant="muted" size="sm">
+                  <FieldSet className="w-full gap-4">
+                    <FieldLegend variant="label" className="sr-only">
+                      {dictionary.marketCharts.controls.calendarLabel}
+                    </FieldLegend>
+                    <Field orientation="horizontal">
+                      <FieldLabel htmlFor="market-chart-event-settings-calendar">
+                        {dictionary.marketCharts.controls.calendarLabel}
+                      </FieldLabel>
+                      <Switch
+                        id="market-chart-event-settings-calendar"
+                        checked={calendarLayerEnabled}
+                        onCheckedChange={onCalendarLayerChange}
+                      />
+                    </Field>
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon-sm"
-                onClick={onFullscreenToggle}
-                disabled={!!watchlistError}
-                aria-label={
-                  isFullscreen
-                    ? dictionary.marketCharts.controls.exitFullscreenAria
-                    : dictionary.marketCharts.controls.fullscreenAria
-                }
+                    <div
+                      hidden={!calendarLayerEnabled}
+                      className={!calendarLayerEnabled ? "hidden" : undefined}
+                    >
+                      <div className="border-l pl-3">
+                        <FieldSet className="gap-3">
+                          <FieldLegend className="sr-only">
+                            {dictionary.marketCharts.controls.impactFilterLabel}
+                          </FieldLegend>
+                          <FieldDescription>
+                            {dictionary.marketCharts.controls.impactFilterLabel}
+                          </FieldDescription>
+                          <FieldGroup data-slot="checkbox-group">
+                            {ECONOMIC_CALENDAR_IMPACT_LEVELS.map((impact) => {
+                              const id = `market-chart-event-settings-impact-${impact.toLowerCase()}`
+
+                              return (
+                                <Field
+                                  key={impact}
+                                  orientation="horizontal"
+                                  className="w-fit"
+                                >
+                                  <Checkbox
+                                    id={id}
+                                    checked={selectedCalendarImpacts.includes(
+                                      impact
+                                    )}
+                                    onCheckedChange={(checked) =>
+                                      onCalendarImpactChange(
+                                        impact,
+                                        checked === true
+                                      )
+                                    }
+                                  />
+                                  <FieldLabel htmlFor={id}>
+                                    {
+                                      dictionary.marketCharts.controls
+                                        .impactOptionLabels[impact]
+                                    }
+                                  </FieldLabel>
+                                </Field>
+                              )
+                            })}
+                          </FieldGroup>
+                        </FieldSet>
+                      </div>
+                    </div>
+                  </FieldSet>
+                </Item>
+              </PopoverContent>
+            </Popover>
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={chartCommandsDisabled}
+                >
+                  {activeIndicators.length > 0 ? (
+                    <span
+                      data-icon="inline-start"
+                      className="inline-flex size-3.5 items-center justify-center tabular-nums"
+                    >
+                      {activeIndicators.length > 9
+                        ? "9+"
+                        : activeIndicators.length}
+                    </span>
+                  ) : (
+                    <SlidersHorizontal data-icon="inline-start" />
+                  )}
+                  {dictionary.marketCharts.controls.indicatorLabel}
+                </Button>
+              </PopoverTrigger>
+
+              <PopoverContent
+                align="end"
+                className="max-h-[var(--radix-popover-content-available-height)] w-[min(18rem,calc(100vw_-_1.5rem))] overflow-y-auto"
               >
-                {isFullscreen ? <Minimize2 /> : <Expand />}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              {isFullscreen
-                ? dictionary.marketCharts.controls.exitFullscreenLabel
-                : dictionary.marketCharts.controls.fullscreenLabel}
-            </TooltipContent>
-          </Tooltip>
+                <PopoverHeader>
+                  <PopoverTitle>
+                    {dictionary.marketCharts.indicators.title}
+                  </PopoverTitle>
+                  <PopoverDescription>
+                    {dictionary.marketCharts.indicators.description}
+                  </PopoverDescription>
+                </PopoverHeader>
+                <FieldSet className="gap-2">
+                  <FieldLegend variant="label" className="sr-only">
+                    {dictionary.marketCharts.indicators.title}
+                  </FieldLegend>
+                  <FieldGroup className="gap-2">
+                    {MARKET_CHART_INDICATORS.map((indicator) => {
+                      const id = `market-chart-indicator-${indicator.toLowerCase()}`
+                      const disabled = indicator === "VOL" && !volumeAvailable
+
+                      return (
+                        <Item key={indicator} variant="muted" size="sm">
+                          <Field
+                            orientation="horizontal"
+                            data-disabled={disabled || undefined}
+                          >
+                            <FieldLabel htmlFor={id}>
+                              {indicator === "VOL"
+                                ? "Volume"
+                                : dictionary.marketCharts.indicators.options[
+                                    indicator
+                                  ]}
+                            </FieldLabel>
+                            <Switch
+                              id={id}
+                              checked={activeIndicators.includes(indicator)}
+                              disabled={disabled}
+                              onCheckedChange={(checked) =>
+                                handleIndicatorToggle(indicator, checked)
+                              }
+                            />
+                          </Field>
+                        </Item>
+                      )
+                    })}
+                  </FieldGroup>
+                </FieldSet>
+              </PopoverContent>
+            </Popover>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  disabled={chartCommandsDisabled}
+                  onClick={onScreenshot}
+                  aria-label={dictionary.marketCharts.controls.screenshotAria}
+                >
+                  <Camera />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {dictionary.marketCharts.controls.screenshotLabel}
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  onClick={onFullscreenToggle}
+                  disabled={!!watchlistError}
+                  aria-label={
+                    isFullscreen
+                      ? dictionary.marketCharts.controls.exitFullscreenAria
+                      : dictionary.marketCharts.controls.fullscreenAria
+                  }
+                >
+                  {isFullscreen ? <Minimize2 /> : <Expand />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {isFullscreen
+                  ? dictionary.marketCharts.controls.exitFullscreenLabel
+                  : dictionary.marketCharts.controls.fullscreenLabel}
+              </TooltipContent>
+            </Tooltip>
+          </div>
         </div>
       </div>
     </div>
@@ -891,6 +1036,7 @@ function ChartSurface({
   calendarEventGroups,
   calendarEvents,
   calendarLayerEnabled,
+  selectedCalendarImpacts,
   calendarLoadError,
   warmAnnotationGroups,
   data,
@@ -915,6 +1061,7 @@ function ChartSurface({
   onAnnotationLayerChange,
   onAnnotationSelect,
   onCalendarLayerChange,
+  onCalendarImpactChange,
   onAssetChange,
   onLoadedDataChange,
   onLoadOlderCandles,
@@ -926,6 +1073,7 @@ function ChartSurface({
   calendarEventGroups: MarketChartEconomicCalendarEventGroup[]
   calendarEvents: MarketChartEconomicCalendarEventResponse[]
   calendarLayerEnabled: boolean
+  selectedCalendarImpacts: EconomicCalendarImpactLevel[]
   calendarLoadError: string | null
   warmAnnotationGroups: MarketChartAnnotationGroup[]
   dataVersion: number
@@ -950,6 +1098,10 @@ function ChartSurface({
   onAnnotationLayerChange: (checked: boolean) => void
   onAnnotationSelect: (groupId: string) => void
   onCalendarLayerChange: (checked: boolean) => void
+  onCalendarImpactChange: (
+    impact: EconomicCalendarImpactLevel,
+    checked: boolean
+  ) => void
   onAssetChange: (value: string) => void
   onLoadedDataChange: (data: MarketChartLoadedData) => void
   onLoadOlderCandles: (
@@ -1221,6 +1373,7 @@ function ChartSurface({
         activeIndicators={availableActiveIndicators}
         annotationLayerEnabled={annotationLayerEnabled}
         calendarLayerEnabled={calendarLayerEnabled}
+        selectedCalendarImpacts={selectedCalendarImpacts}
         errors={errors}
         hasCandles={hasCandles}
         hasWatchlistAssets={hasWatchlistAssets}
@@ -1235,6 +1388,7 @@ function ChartSurface({
         watchlistError={watchlistError}
         onAnnotationLayerChange={onAnnotationLayerChange}
         onCalendarLayerChange={onCalendarLayerChange}
+        onCalendarImpactChange={onCalendarImpactChange}
         onAssetChange={(value) => {
           resetVolumeIndicator()
           onAssetChange(value)
@@ -1284,7 +1438,7 @@ function ChartSurface({
                   symbol={displaySymbol}
                   annotationGroups={annotationGroups}
                   calendarEventGroups={calendarEventGroups}
-                  calendarEvents={calendarEvents}
+                  calendarEvents={data?.economicCalendarEvents ?? []}
                   calendarLayerEnabled={calendarLayerEnabled}
                   warmAnnotationGroups={warmAnnotationGroups}
                   renderAnnotationPopup={renderAnnotationPopup}
@@ -2253,6 +2407,9 @@ export function MarketChartWorkbench({
   const [dataVersion, setDataVersion] = useState(0)
   const [annotationLayerEnabled, setAnnotationLayerEnabled] = useState(true)
   const [calendarLayerEnabled, setCalendarLayerEnabled] = useState(true)
+  const [selectedCalendarImpacts, setSelectedCalendarImpacts] = useState<
+    EconomicCalendarImpactLevel[]
+  >(() => [...ECONOMIC_CALENDAR_IMPACT_LEVELS])
   const [calendarLoadError, setCalendarLoadError] = useState<string | null>(null)
   const annotationLayerEnabledRef = useRef(annotationLayerEnabled)
   const calendarLayerEnabledRef = useRef(calendarLayerEnabled)
@@ -2286,16 +2443,25 @@ export function MarketChartWorkbench({
       chartData.candles
     )
   }, [annotationLayerEnabled, chartData])
+  const visibleCalendarEvents = useMemo(() => {
+    if (!calendarLayerEnabled || !chartData) {
+      return []
+    }
+
+    return chartData.economicCalendarEvents.filter((event) =>
+      isEconomicCalendarImpactSelected(event.impact, selectedCalendarImpacts)
+    )
+  }, [calendarLayerEnabled, chartData, selectedCalendarImpacts])
   const calendarEventGroups = useMemo(() => {
     if (!calendarLayerEnabled || !chartData) {
       return []
     }
 
     return createMarketChartEconomicCalendarEventGroups(
-      chartData.economicCalendarEvents,
+      visibleCalendarEvents,
       chartData.candles
     )
-  }, [calendarLayerEnabled, chartData])
+  }, [calendarLayerEnabled, chartData, visibleCalendarEvents])
   const warmAnnotationGroups = useMemo(() => {
     if (!annotationLayerEnabled || !chartData) {
       return []
@@ -2719,6 +2885,19 @@ export function MarketChartWorkbench({
     }
   }
 
+  function handleCalendarImpactChange(
+    impact: EconomicCalendarImpactLevel,
+    checked: boolean
+  ) {
+    setSelectedCalendarImpacts((current) =>
+      checked
+        ? ECONOMIC_CALENDAR_IMPACT_LEVELS.filter(
+            (level) => level === impact || current.includes(level)
+          )
+        : current.filter((level) => level !== impact)
+    )
+  }
+
   function handleAnnotationSelect(groupId: string) {
     setSelectedAnnotationGroupId(groupId)
   }
@@ -2803,10 +2982,9 @@ export function MarketChartWorkbench({
         annotationLayerEnabled={annotationLayerEnabled}
         annotationGroups={annotationGroups}
         calendarEventGroups={calendarEventGroups}
-        calendarEvents={
-          calendarLayerEnabled ? chartData?.economicCalendarEvents ?? [] : []
-        }
+        calendarEvents={visibleCalendarEvents}
         calendarLayerEnabled={calendarLayerEnabled}
+        selectedCalendarImpacts={selectedCalendarImpacts}
         calendarLoadError={calendarLoadError}
         warmAnnotationGroups={warmAnnotationGroups}
         dataVersion={dataVersion}
@@ -2831,6 +3009,7 @@ export function MarketChartWorkbench({
         onAnnotationLayerChange={handleAnnotationLayerChange}
         onAnnotationSelect={handleAnnotationSelect}
         onCalendarLayerChange={handleCalendarLayerChange}
+        onCalendarImpactChange={handleCalendarImpactChange}
         onAssetChange={handleAssetChange}
         onLoadedDataChange={handleLoadedDataChange}
         onLoadOlderCandles={handleLoadOlderCandles}
