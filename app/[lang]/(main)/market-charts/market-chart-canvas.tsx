@@ -189,6 +189,101 @@ interface CalendarMarkerPosition {
   x: number
 }
 
+export function MarketChartCalendarEventList({
+  events,
+}: {
+  events: MarketChartEconomicCalendarEventResponse[]
+}) {
+  const { dictionary, formatDateTime } = useLocalization()
+
+  function getEventTitle(event: MarketChartEconomicCalendarEventResponse) {
+    return (
+      event.title?.trim() ||
+      event.type?.trim() ||
+      dictionary.marketCharts.calendar.eventFallback
+    )
+  }
+
+  return (
+    <div className="flex max-h-80 flex-col gap-3 overflow-y-auto p-1">
+      {events.map((event) => {
+        const values = [
+          { key: "currencyCode", value: event.currencyCode },
+          { key: "impact", value: event.impact },
+          event.forecastValue
+            ? {
+                key: "forecastValue",
+                value: `${dictionary.marketCharts.calendar.forecast}: ${event.forecastValue}`,
+              }
+            : null,
+          event.previousValue
+            ? {
+                key: "previousValue",
+                value: `${dictionary.marketCharts.calendar.previous}: ${event.previousValue}`,
+              }
+            : null,
+          event.actualValue
+            ? {
+                key: "actualValue",
+                value: `${dictionary.marketCharts.calendar.actual}: ${event.actualValue}`,
+              }
+            : null,
+          event.revision
+            ? {
+                key: "revision",
+                value: `${dictionary.marketCharts.calendar.revision}: ${event.revision}`,
+              }
+            : null,
+          { key: "actualBetterWorse", value: event.actualBetterWorse },
+          { key: "revisionBetterWorse", value: event.revisionBetterWorse },
+        ].filter((item): item is { key: string; value: string } => !!item?.value)
+
+        return (
+          <article key={event.id} className="flex flex-col gap-1.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <AppTimeMetadata icon={CalendarClock}>
+                {formatDateTime(
+                  event.time,
+                  MARKER_DATE_TIME_OPTIONS,
+                  dictionary.marketCharts.format.notAvailable
+                )}
+              </AppTimeMetadata>
+              <span className="rounded-full bg-sky-500/10 px-2 py-0.5 text-xs font-medium text-sky-700">
+                {event.status}
+              </span>
+            </div>
+            <LocalizedLink
+              href={`/economic-calendar/${event.id}`}
+              className="line-clamp-2 rounded-sm text-sm font-semibold text-foreground underline-offset-4 outline-none hover:text-primary hover:underline focus-visible:ring-2 focus-visible:ring-ring/50"
+            >
+              {getEventTitle(event)}
+            </LocalizedLink>
+            {values.length > 0 ? (
+              <div className="flex flex-wrap gap-1 text-xs text-muted-foreground">
+                {values.map((item) => (
+                  <span key={item.key} className="rounded-sm bg-muted px-1.5 py-0.5">
+                    {item.value}
+                  </span>
+                ))}
+              </div>
+            ) : null}
+            {event.description ? (
+              <p className="line-clamp-3 text-xs leading-relaxed text-muted-foreground">
+                {event.description}
+              </p>
+            ) : null}
+            {event.contentAvailable ? (
+              <span className="text-xs font-medium text-muted-foreground">
+                {dictionary.marketCharts.calendar.contentAvailable}
+              </span>
+            ) : null}
+          </article>
+        )
+      })}
+    </div>
+  )
+}
+
 interface WarmBandPosition extends OutcomeHoverBand {
   group: MarketChartAnnotationGroup
 }
@@ -1461,89 +1556,6 @@ export const MarketChartCanvas = forwardRef<
     )
   }
 
-  function renderCalendarEventList(
-    events: MarketChartEconomicCalendarEventResponse[]
-  ) {
-    return (
-      <div className="flex max-h-80 flex-col gap-3 overflow-y-auto p-1">
-        {events.map((event) => {
-          const values = [
-            { key: "currencyCode", value: event.currencyCode },
-            { key: "impact", value: event.impact },
-            event.forecastValue
-              ? {
-                  key: "forecastValue",
-                  value: `${dictionary.marketCharts.calendar.forecast}: ${event.forecastValue}`,
-                }
-              : null,
-            event.previousValue
-              ? {
-                  key: "previousValue",
-                  value: `${dictionary.marketCharts.calendar.previous}: ${event.previousValue}`,
-                }
-              : null,
-            event.actualValue
-              ? {
-                  key: "actualValue",
-                  value: `${dictionary.marketCharts.calendar.actual}: ${event.actualValue}`,
-                }
-              : null,
-            event.revision
-              ? {
-                  key: "revision",
-                  value: `${dictionary.marketCharts.calendar.revision}: ${event.revision}`,
-                }
-              : null,
-            { key: "actualBetterWorse", value: event.actualBetterWorse },
-            { key: "revisionBetterWorse", value: event.revisionBetterWorse },
-          ].filter((item): item is { key: string; value: string } => !!item?.value)
-
-          return (
-            <article key={event.id} className="flex flex-col gap-1.5">
-              <div className="flex flex-wrap items-center gap-2">
-                <AppTimeMetadata icon={CalendarClock}>
-                  {formatDateTime(
-                    event.time,
-                    MARKER_DATE_TIME_OPTIONS,
-                    dictionary.marketCharts.format.notAvailable
-                  )}
-                </AppTimeMetadata>
-                <span className="rounded-full bg-sky-500/10 px-2 py-0.5 text-xs font-medium text-sky-700">
-                  {event.status}
-                </span>
-              </div>
-              <LocalizedLink
-                href={`/economic-calendar/${event.id}`}
-                className="line-clamp-2 rounded-sm text-sm font-semibold text-foreground underline-offset-4 outline-none hover:text-primary hover:underline focus-visible:ring-2 focus-visible:ring-ring/50"
-              >
-                {getCalendarEventTitle(event)}
-              </LocalizedLink>
-              {values.length > 0 ? (
-                <div className="flex flex-wrap gap-1 text-xs text-muted-foreground">
-                  {values.map((item) => (
-                    <span key={item.key} className="rounded-sm bg-muted px-1.5 py-0.5">
-                      {item.value}
-                    </span>
-                  ))}
-                </div>
-              ) : null}
-              {event.description ? (
-                <p className="line-clamp-3 text-xs leading-relaxed text-muted-foreground">
-                  {event.description}
-                </p>
-              ) : null}
-              {event.contentAvailable ? (
-                <span className="text-xs font-medium text-muted-foreground">
-                  {dictionary.marketCharts.calendar.contentAvailable}
-                </span>
-              ) : null}
-            </article>
-          )
-        })}
-      </div>
-    )
-  }
-
   const showCalendarLane = calendarLayerEnabled && calendarEvents.length > 0
 
   return (
@@ -1622,7 +1634,7 @@ export const MarketChartCanvas = forwardRef<
                   side="top"
                   className="w-[min(24rem,calc(100vw_-_1.5rem))]"
                 >
-                  {renderCalendarEventList(group.events)}
+                  <MarketChartCalendarEventList events={group.events} />
                 </PopoverContent>
               </Popover>
             )

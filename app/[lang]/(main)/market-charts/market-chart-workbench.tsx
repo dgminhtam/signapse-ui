@@ -104,6 +104,7 @@ import {
 } from "../local-entity-quick-detail-drawer"
 import {
   MARKET_CHART_INDICATORS,
+  MarketChartCalendarEventList,
   MarketChartCanvas,
   type MarketChartCanvasHandle,
   type MarketChartDrawingSelection,
@@ -1410,7 +1411,7 @@ function ChartSurface({
 
       <MarketChartAnnotationControls
         annotationLayerEnabled={annotationLayerEnabled}
-        calendarEventCount={calendarEvents.length}
+        calendarEvents={calendarEvents}
         calendarLayerEnabled={calendarLayerEnabled}
         calendarLoadError={calendarLoadError}
         freshnessLabel={freshnessLabel}
@@ -2086,7 +2087,7 @@ function MarketChartAnnotationReactionSection({
 
 function MarketChartAnnotationControls({
   annotationLayerEnabled,
-  calendarEventCount,
+  calendarEvents,
   calendarLayerEnabled,
   calendarLoadError,
   freshnessLabel,
@@ -2096,7 +2097,7 @@ function MarketChartAnnotationControls({
   liveStatusTone,
 }: {
   annotationLayerEnabled: boolean
-  calendarEventCount: number
+  calendarEvents: MarketChartEconomicCalendarEventResponse[]
   calendarLayerEnabled: boolean
   calendarLoadError: string | null
   freshnessLabel: string | null
@@ -2106,6 +2107,7 @@ function MarketChartAnnotationControls({
   liveStatusTone: "error" | "live" | "pending" | "stale"
 }) {
   const { dictionary, formatMessage, formatNumber } = useLocalization()
+  const calendarEventCount = calendarEvents.length
   const label = annotationLayerEnabled
     ? isLoading
       ? dictionary.marketCharts.annotations.loadingEvents
@@ -2148,9 +2150,37 @@ function MarketChartAnnotationControls({
                 {label}
               </span>
             ) : null}
-            {calendarLabel ? (
+            {calendarLabel && calendarEventCount > 0 ? (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button type="button" variant="ghost" size="xs">
+                    <span
+                      aria-hidden="true"
+                      className={cn(
+                        "size-2 rounded-full",
+                        calendarLoadError ? "bg-destructive" : "bg-sky-500"
+                      )}
+                    />
+                    {calendarLabel}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  align="start"
+                  side="top"
+                  className="w-[min(24rem,calc(100vw_-_1.5rem))]"
+                >
+                  <PopoverHeader>
+                    <PopoverTitle>
+                      {dictionary.marketCharts.calendar.legendLabel}
+                    </PopoverTitle>
+                  </PopoverHeader>
+                  <MarketChartCalendarEventList events={calendarEvents} />
+                </PopoverContent>
+              </Popover>
+            ) : calendarLabel ? (
               <span className="flex items-center gap-2">
                 <span
+                  aria-hidden="true"
                   className={cn(
                     "size-2 rounded-full",
                     calendarLoadError

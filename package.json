@@ -49,7 +49,6 @@
     "@platejs/table": "^53.0.9",
     "@platejs/toc": "^53.0.0",
     "@platejs/toggle": "^53.0.0",
-    "@radix-ui/react-popover": "^1.1.19",
     "@radix-ui/react-toolbar": "^1.1.15",
     "@react-sigma/core": "^5.0.6",
     "@udecode/cn": "^52.3.4",

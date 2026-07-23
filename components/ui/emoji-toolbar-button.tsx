@@ -16,7 +16,6 @@ import {
   type UseEmojiPickerType,
   useEmojiDropdownMenuState,
 } from '@platejs/emoji/react';
-import * as Popover from '@radix-ui/react-popover';
 import {
   AppleIcon,
   ClockIcon,
@@ -32,6 +31,11 @@ import {
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import {
   Tooltip,
   TooltipContent,
@@ -82,13 +86,11 @@ export function EmojiPopover({
   setIsOpen: (open: boolean) => void;
 }) {
   return (
-    <Popover.Root open={isOpen} onOpenChange={setIsOpen}>
-      <Popover.Trigger asChild>{control}</Popover.Trigger>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>{control}</PopoverTrigger>
 
-      <Popover.Portal>
-        <Popover.Content className="z-100">{children}</Popover.Content>
-      </Popover.Portal>
-    </Popover.Root>
+      <PopoverContent className="w-auto">{children}</PopoverContent>
+    </Popover>
   );
 }
 
@@ -117,12 +119,7 @@ export function EmojiPicker({
   icons?: EmojiIconList<React.ReactElement>;
 }) {
   return (
-    <div
-      className={cn(
-        'flex flex-col rounded-xl bg-popover text-popover-foreground',
-        'h-[23rem] w-80 border shadow-md'
-      )}
-    >
+    <div className="flex h-[23rem] w-80 flex-col">
       <EmojiPickerNavigation
         onClick={handleCategoryClick}
         emojiLibrary={emojiLibrary}
@@ -253,7 +250,7 @@ function EmojiPickerContent({
   const getRowWidth = settings.perLine.value * settings.buttonSize.value;
 
   const isCategoryVisible = React.useCallback(
-    (categoryId: any) =>
+    (categoryId: EmojiCategoryList) =>
       visibleCategories.has(categoryId)
         ? visibleCategories.get(categoryId)
         : false,
