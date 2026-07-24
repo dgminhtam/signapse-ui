@@ -104,7 +104,7 @@ export async function getClerkToken(): Promise<string> {
   if (!userId) {
     throw new Error(dictionary.errors.unauthenticated);
   }
-  const token = await getToken({ template: 'aflower' });
+  const token = await getToken({ template: 'signapse' });
   if (!token) {
     throw new Error(dictionary.errors.missingToken);
   }
