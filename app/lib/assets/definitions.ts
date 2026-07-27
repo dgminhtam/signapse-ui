@@ -5,6 +5,7 @@ export interface AssetListResponse {
   name: string
   symbol: string
   type: AssetType
+  pricePrecision?: number | null
 }
 
 export interface AssetResponse extends AssetListResponse {

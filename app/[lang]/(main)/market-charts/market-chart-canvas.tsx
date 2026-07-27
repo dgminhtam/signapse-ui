@@ -167,6 +167,7 @@ interface MarketChartCanvasProps {
   dataVersion: number
   timeframe: MarketChartTimeframe
   symbol?: string
+  pricePrecision?: number | null
   annotations?: MarketChartAnnotationResponse[]
   annotationGroups?: MarketChartAnnotationGroup[]
   calendarEventGroups?: MarketChartEconomicCalendarEventGroup[]
@@ -747,6 +748,7 @@ export const MarketChartCanvas = forwardRef<
     renderAnnotationPopup,
     selectedAnnotationGroupId,
     symbol = "MARKET",
+    pricePrecision,
     timeframe,
   },
   ref
@@ -1376,8 +1378,12 @@ export const MarketChartCanvas = forwardRef<
 
   // ── Sync: symbol ──
   useEffect(() => {
-    chartRef.current?.setSymbol({ ticker: symbol, pricePrecision: 4, volumePrecision: 2 })
-  }, [symbol])
+    chartRef.current?.setSymbol({
+      ticker: symbol,
+      pricePrecision: pricePrecision ?? 4,
+      volumePrecision: 2,
+    })
+  }, [pricePrecision, symbol])
 
   // ── Sync: timeframe ──
   useEffect(() => {

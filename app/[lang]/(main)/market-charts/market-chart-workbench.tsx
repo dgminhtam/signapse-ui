@@ -1434,6 +1434,7 @@ function ChartSurface({
                   annotationLayerEnabled={annotationLayerEnabled}
                   activeOutcomeHoverRange={activeOutcomeHoverRange}
                   liveCandle={liveCandle}
+                  pricePrecision={data?.asset.pricePrecision}
                   timeframe={selection.timeframe}
                   symbol={displaySymbol}
                   annotationGroups={annotationGroups}

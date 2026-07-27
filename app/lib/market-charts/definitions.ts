@@ -50,6 +50,7 @@ export interface MarketChartAssetResponse {
   name: string
   symbol: string
   type: MarketChartAssetType
+  pricePrecision?: number | null
 }
 
 export interface MarketChartCandleItemResponse {
@@ -368,6 +369,7 @@ export const marketChartAssetResponseSchema = z.object({
   name: z.string(),
   symbol: z.string(),
   type: z.string(),
+  pricePrecision: z.number().int().nonnegative().nullable().optional(),
 }) satisfies z.ZodType<MarketChartAssetResponse>
 
 export const marketChartCandleItemResponseSchema = z.object({
