@@ -213,15 +213,15 @@ const MARKET_CHART_TIMEFRAME_SHORT_LABELS: Record<
   MarketChartTimeframe,
   string
 > = {
-  "1m": "1m",
-  "5m": "5m",
-  "15m": "15m",
-  "30m": "30m",
+  "1m": "1M",
+  "5m": "5M",
+  "15m": "15M",
+  "30m": "30M",
   "1h": "1H",
   "4h": "4H",
   "1d": "1D",
   "1w": "1W",
-  "1mo": "1M",
+  "1mo": "1MO",
 }
 const DEFAULT_MARKET_CHART_DRAWING_STATE: MarketChartDrawingState = {
   activeTool: null,
