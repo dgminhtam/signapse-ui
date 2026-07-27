@@ -40,7 +40,7 @@ assert.deepEqual(
   { ...latestCandle, close: 108 }
 )
 
-assert.equal(
+assert.deepEqual(
   deriveLiveCandleItemFromQuote({
     current: [latestCandle],
     quote: {
@@ -50,7 +50,13 @@ assert.equal(
     },
     timeframe: "4h",
   }),
-  null
+  {
+    open: 108,
+    high: 108,
+    low: 108,
+    close: 108,
+    time: "2026-07-23T12:00:00.000Z",
+  }
 )
 
 const historySource = await readFile(

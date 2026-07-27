@@ -139,12 +139,28 @@ export function deriveLiveCandleItemFromQuote({
   const latestCandle = normalizedCurrent.at(-1) ?? null
   const latestTimestamp = latestCandle ? getCandleTimestamp(latestCandle) : null
 
-  if (!latestCandle || latestTimestamp !== quoteBucketTimestamp) {
+  if (
+    !latestCandle ||
+    latestTimestamp === null ||
+    quoteBucketTimestamp < latestTimestamp
+  ) {
     return null
+  }
+
+  if (quoteBucketTimestamp > latestTimestamp) {
+    return {
+      time: new Date(quoteBucketTimestamp).toISOString(),
+      open: quote.price,
+      high: quote.price,
+      low: quote.price,
+      close: quote.price,
+    }
   }
 
   return {
     ...latestCandle,
+    high: Math.max(latestCandle.high, quote.price),
+    low: Math.min(latestCandle.low, quote.price),
     close: quote.price,
   }
 }
