@@ -1,5 +1,9 @@
 import { z } from "zod"
 
+import {
+  ECONOMIC_CALENDAR_IMPACT_LEVELS,
+  type EconomicCalendarImpactLevel,
+} from "@/app/lib/economic-calendar/definitions"
 import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
 
 export const MARKET_CHART_TIMEFRAMES = [
@@ -43,6 +47,7 @@ export interface MarketChartEconomicCalendarEventRequest {
   assetId: number
   from: string
   to: string
+  impact: EconomicCalendarImpactLevel[]
 }
 
 export interface MarketChartAssetResponse {
@@ -349,6 +354,13 @@ export function getMarketChartEconomicCalendarEventRequestSchema(
         .trim()
         .min(1, dictionary.marketCharts.toRequired)
         .refine(isValidDateTime, dictionary.marketCharts.toInvalid),
+      impact: z
+        .array(
+          z.enum(ECONOMIC_CALENDAR_IMPACT_LEVELS, {
+            message: dictionary.marketCharts.validationInvalid,
+          })
+        )
+        .min(1, dictionary.marketCharts.validationInvalid),
     })
     .superRefine((value, context) => {
       const fromTime = Date.parse(value.from)

@@ -50,6 +50,7 @@ function createMarketChartEconomicCalendarEventQuery(
   query.set("assetId", String(request.assetId))
   query.set("from", request.from)
   query.set("to", request.to)
+  request.impact.forEach((impact) => query.append("impact", impact))
 
   return query.toString()
 }

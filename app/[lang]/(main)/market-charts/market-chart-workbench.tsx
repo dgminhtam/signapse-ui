@@ -111,6 +111,7 @@ import {
   createMarketChartEconomicCalendarEventGroups,
   createMarketChartWarmAnnotationGroups,
   getMarketChartAnnotationColorClassNames,
+  mergeMarketChartEconomicCalendarEvents,
   type MarketChartAnnotationGroup,
   type MarketChartEconomicCalendarEventGroup,
 } from "./market-chart-annotations"
@@ -338,13 +339,18 @@ function createMarketChartDisplayData(
 
 function createMarketChartEconomicCalendarEventRequests(
   request: Pick<MarketChartCandleRequest, "assetId" | "from" | "to">,
-  includeUpcoming: boolean
+  includeUpcoming: boolean,
+  impacts: readonly EconomicCalendarImpactLevel[]
 ): MarketChartEconomicCalendarEventRequest[] {
   const now = Date.now()
   const requestFrom = Date.parse(request.from)
   const requestTo = Date.parse(request.to)
 
-  if (!Number.isFinite(requestFrom) || !Number.isFinite(requestTo)) {
+  if (
+    !impacts.length ||
+    !Number.isFinite(requestFrom) ||
+    !Number.isFinite(requestTo)
+  ) {
     return []
   }
 
@@ -373,6 +379,7 @@ function createMarketChartEconomicCalendarEventRequests(
         assetId: request.assetId,
         from: new Date(start).toISOString(),
         to: new Date(end).toISOString(),
+        impact: [...impacts],
       })
     }
   }
@@ -2412,10 +2419,11 @@ export function MarketChartWorkbench({
   const [calendarLayerEnabled, setCalendarLayerEnabled] = useState(true)
   const [selectedCalendarImpacts, setSelectedCalendarImpacts] = useState<
     EconomicCalendarImpactLevel[]
-  >(() => [...ECONOMIC_CALENDAR_IMPACT_LEVELS])
+  >(() => ["HIGH"])
   const [calendarLoadError, setCalendarLoadError] = useState<string | null>(null)
   const annotationLayerEnabledRef = useRef(annotationLayerEnabled)
   const calendarLayerEnabledRef = useRef(calendarLayerEnabled)
+  const selectedCalendarImpactsRef = useRef(selectedCalendarImpacts)
   const [selectedAnnotationGroupId, setSelectedAnnotationGroupId] = useState<
     string | null
   >(null)
@@ -2490,6 +2498,10 @@ export function MarketChartWorkbench({
     calendarLayerEnabledRef.current = calendarLayerEnabled
   }, [calendarLayerEnabled])
 
+  useEffect(() => {
+    selectedCalendarImpactsRef.current = selectedCalendarImpacts
+  }, [selectedCalendarImpacts])
+
   const loadAnnotations = useCallback(async function loadAnnotations(
     request: Pick<MarketChartCandleRequest, "assetId" | "from" | "to">
   ) {
@@ -2510,11 +2522,13 @@ export function MarketChartWorkbench({
   const loadEconomicCalendarEvents = useCallback(
     async function loadEconomicCalendarEvents(
       request: Pick<MarketChartCandleRequest, "assetId" | "from" | "to">,
-      includeUpcoming: boolean
+      includeUpcoming: boolean,
+      impacts: readonly EconomicCalendarImpactLevel[]
     ) {
       const requests = createMarketChartEconomicCalendarEventRequests(
         request,
-        includeUpcoming
+        includeUpcoming,
+        impacts
       )
 
       if (!requests.length) {
@@ -2569,7 +2583,11 @@ export function MarketChartWorkbench({
       const [annotations, economicCalendarEvents] = await Promise.all([
         loadAnnotationData ? loadAnnotations(request) : Promise.resolve([]),
         calendarLayerEnabledRef.current
-          ? loadEconomicCalendarEvents(request, true)
+          ? loadEconomicCalendarEvents(
+              request,
+              true,
+              selectedCalendarImpactsRef.current
+            )
           : Promise.resolve([]),
       ])
       const nextData = createMarketChartDisplayData(
@@ -2904,18 +2922,29 @@ export function MarketChartWorkbench({
     setCalendarLoadError(null)
 
     if (checked && chartData && selectedAsset) {
+      const assetId = selectedAsset.assetId
+
       void loadEconomicCalendarEvents(
         {
-          assetId: selectedAsset.assetId,
+          assetId,
           from: chartData.from,
           to: chartData.to,
         },
-        true
+        true,
+        selectedCalendarImpacts
       ).then((economicCalendarEvents) => {
         setLoadedData((current) => {
           const baseData = current ?? data
 
-          return baseData ? { ...baseData, economicCalendarEvents } : current
+          return baseData?.asset.id === assetId
+            ? {
+                ...baseData,
+                economicCalendarEvents: mergeMarketChartEconomicCalendarEvents(
+                  baseData.economicCalendarEvents,
+                  economicCalendarEvents
+                ),
+              }
+            : current
         })
       })
     }
@@ -2932,6 +2961,42 @@ export function MarketChartWorkbench({
           )
         : current.filter((level) => level !== impact)
     )
+
+    if (
+      !checked ||
+      selectedCalendarImpacts.includes(impact) ||
+      !calendarLayerEnabled ||
+      !chartData ||
+      !selectedAsset
+    ) {
+      return
+    }
+
+    const assetId = selectedAsset.assetId
+
+    void loadEconomicCalendarEvents(
+      {
+        assetId,
+        from: chartData.from,
+        to: chartData.to,
+      },
+      true,
+      [impact]
+    ).then((economicCalendarEvents) => {
+      setLoadedData((current) => {
+        const baseData = current ?? data
+
+        return baseData?.asset.id === assetId
+          ? {
+              ...baseData,
+              economicCalendarEvents: mergeMarketChartEconomicCalendarEvents(
+                baseData.economicCalendarEvents,
+                economicCalendarEvents
+              ),
+            }
+          : current
+      })
+    })
   }
 
   function handleAnnotationSelect(groupId: string) {
@@ -2978,7 +3043,11 @@ export function MarketChartWorkbench({
       ? await loadAnnotations(request)
       : []
     const economicCalendarEvents = calendarLayerEnabledRef.current
-      ? await loadEconomicCalendarEvents(request, false)
+      ? await loadEconomicCalendarEvents(
+          request,
+          false,
+          selectedCalendarImpactsRef.current
+        )
       : []
 
     return {
