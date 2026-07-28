@@ -55,6 +55,7 @@
     "@shadcn/helpers": "^0.1.0",
     "@shadcn/react": "^0.2.1",
     "@udecode/cn": "^52.3.4",
+    "@vercel/speed-insights": "^2.0.0",
     "ai": "^7.0.40",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

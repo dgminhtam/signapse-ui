@@ -11,6 +11,7 @@ import { getDictionary, hasLocale } from "@/app/lib/i18n/dictionaries"
 import { AppLocale, SUPPORTED_APP_LOCALES } from "@/app/lib/i18n/config"
 import { cn } from "@/lib/utils"
 import { Providers } from "@/components/providers"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const fontSans = Geist({
   subsets: ["latin", "latin-ext"],
@@ -67,6 +68,7 @@ export default async function RootLayout({
             {children}
           </Providers>
         </ClerkProvider>
+        <SpeedInsights />
       </body>
     </html>
   )
