@@ -55,6 +55,7 @@ export const vi = {
     settings: "Cài đặt",
     telegram: "Telegram",
     aiProviders: "Nhà cung cấp AI",
+    demoConversation: "Demo hội thoại",
     systemPrompts: "Prompt hệ thống",
     cronjobs: "Tác vụ định kỳ",
     roles: "Vai trò",
@@ -1344,6 +1345,54 @@ export const vi = {
       keyNarratives: "Luận điểm trọng yếu",
       notAvailable: "Chưa có",
       itemLabel: "Mục",
+    },
+  },
+  demoConversation: {
+    title: "Cuộc trò chuyện mới",
+    newConversation: "Hội thoại mới",
+    historyTitle: "Lịch sử hội thoại",
+    historySearchLabel: "Tìm kiếm lịch sử hội thoại",
+    historySearchPlaceholder: "Tìm kiếm hội thoại...",
+    historyEmpty: "Không tìm thấy hội thoại.",
+    close: "Đóng demo",
+    emptyTitle: "Chào buổi sáng, shadcn!",
+    emptyDescription:
+      "Hôm nay chúng ta sẽ làm gì? Nhấn Gửi để bắt đầu cuộc trò chuyện mới",
+    messagesLabel: "Tin nhắn",
+    composerLabel: "Câu hỏi dựng sẵn tiếp theo",
+    composerHint: "Nội dung chỉ đọc và được gửi theo đúng thứ tự của demo.",
+    send: "Gửi",
+    sending: "Đang gửi",
+    thinking: "Đang suy nghĩ...",
+    trackingLabel: "Vị trí hội thoại",
+    jumpToTurn: "Đi tới lượt",
+    exhausted: "Không còn tin nhắn chờ gửi. Hãy bắt đầu hội thoại mới.",
+    scrollToLatest: "Cuộn tới tin nhắn mới nhất",
+    userRole: "Bạn",
+    assistantRole: "Trợ lý",
+    addFiles: "Thêm tệp",
+    addPhotosAndFiles: "Thêm ảnh và tệp",
+    createImage: "Tạo hình ảnh",
+    deepResearch: "Nghiên cứu chuyên sâu",
+    webSearch: "Tìm kiếm web",
+    readOnlyNotice: "Demo chỉ đọc. Nhấn Gửi để gửi tin nhắn.",
+    script: {
+      scrollQuestion:
+        "Tôi đang xây dựng tính năng chat cho ứng dụng và hành vi cuộn làm tôi phát điên. Mỗi khi AI truyền phản hồi, toàn bộ cuộc trò chuyện lại nhảy lung tung.",
+      scrollAnswer:
+        "Đó là vấn đề cuộn kinh điển khi truyền phản hồi. Hãy bọc danh sách tin nhắn trong `MessageScroller` và bật `autoScroll` — khung nhìn sẽ bám vào cuối khi từng token xuất hiện, nên người dùng luôn thấy nội dung mới nhất hiện đúng vị trí.\n\nĐiểm quan trọng là tính năng chỉ tự cuộn khi người đọc đang ở cuối. Ngay khi họ cuộn lên để đọc nội dung trước đó, tự cuộn sẽ dừng và giữ nguyên vị trí. Bạn có luồng phản hồi mượt mà mà không đi ngược ý định của người dùng.",
+      anchorQuestion:
+        "Được rồi, nhưng khi ai đó gửi tin nhắn mới, khung nhìn vẫn khá giật — giống như toàn bộ cuộc trò chuyện tải lại từ đầu.",
+      anchorAnswer:
+        "`MessageScrollerItem` giải quyết việc đó bằng cách neo lượt hội thoại. Đặt `scrollAnchor` trên lượt cần ổn định gần phía trên thay vì mù quáng nhảy xuống cuối tài liệu.\n\nNó cũng để lộ một phần nhỏ của lượt trao đổi trước phía trên điểm neo, nên ngữ cảnh không bị mất. Phản hồi bắt đầu ngay trong khung nhìn mà không gây cú nhảy mất phương hướng như một vùng overflow thông thường.",
+      readerQuestion:
+        "Nếu họ đã cuộn lên để đọc lại câu trả lời cũ thì sao? Tôi không muốn kéo họ trở lại cuối.",
+      readerAnswer:
+        "Không. Tự cuộn chỉ chạy khi khung nhìn đang bám ở cuối, vì vậy cuộn lên là một hành động chủ động từ chối — vị trí trong cuộc trò chuyện vẫn được giữ ngay cả khi token mới tiếp tục xuất hiện bên dưới.\n\nKhi có nội dung họ chưa xem, `MessageScrollerButton` xuất hiện ở cuối khung nhìn. Một lần nhấn sẽ đưa họ về tin nhắn mới nhất và bật lại tự cuộn. Đây là cùng một mẫu tương tác như Slack hoặc iMessage: yên lặng khi đã theo kịp, hữu ích khi chưa theo kịp.",
+      accessibilityQuestion:
+        "Câu cuối — tính năng này có hoạt động với công nghệ hỗ trợ không?",
+      accessibilityAnswer:
+        '`MessageScrollerContent` mặc định đặt `role="log"` và `aria-relevant="additions"`, vì vậy trình đọc màn hình thông báo các tin nhắn mới khi chúng được truyền vào.\n\nNút cuộn là một phần tử `<button>` thực với nhãn chỉ dành cho trình đọc màn hình, và được loại khỏi thứ tự tab khi bạn đã ở cuối — không có điểm focus vô hình.',
     },
   },
   marketConversations: {

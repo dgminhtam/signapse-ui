@@ -85,6 +85,11 @@
       "skillPath": "assistant-ui/skills/tools/SKILL.md",
       "computedHash": "4aabb67e0f8b01a9d3a1973baed589e1aaf6ad862a0c5cb316e9bb0d756a0498"
     },
+    "ui-ux-pro-max": {
+      "source": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "sourceType": "github",
+      "computedHash": "ce0af583006d2fd4731663adc50c0a5df1121f0d49a5bb9c308eca4ee295c60a"
+    },
     "update": {
       "source": "assistant-ui/skills",
       "sourceType": "github",

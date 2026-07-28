@@ -24,6 +24,7 @@ function getFriendlySegmentNames(
     categories: dictionary.navigation.categories,
     create: dictionary.common.create,
     "ai-provider-configs": dictionary.navigation.aiProviders,
+    "demo-conversation": dictionary.navigation.demoConversation,
     blogs: dictionary.navigation.blogs,
     cronjobs: dictionary.navigation.cronjobs,
     dashboard: dictionary.navigation.dashboard,

@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ai-sdk/react": "^4.0.43",
     "@antv/g6": "^5.1.1",
     "@ariakit/react": "^0.4.34",
     "@assistant-ui/react": "^0.14.16",
@@ -51,7 +52,10 @@
     "@platejs/toggle": "^53.0.0",
     "@radix-ui/react-toolbar": "^1.1.15",
     "@react-sigma/core": "^5.0.6",
+    "@shadcn/helpers": "^0.1.0",
+    "@shadcn/react": "^0.2.1",
     "@udecode/cn": "^52.3.4",
+    "ai": "^7.0.40",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",

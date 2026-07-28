@@ -57,6 +57,7 @@ export const en: Dictionary = {
     settings: "Settings",
     telegram: "Telegram",
     aiProviders: "AI providers",
+    demoConversation: "Conversation demo",
     systemPrompts: "System prompts",
     cronjobs: "Cronjobs",
     roles: "Roles",
@@ -1357,6 +1358,54 @@ export const en: Dictionary = {
       keyNarratives: "Key narratives",
       notAvailable: "Not available",
       itemLabel: "Item",
+    },
+  },
+  demoConversation: {
+    title: "New Chat",
+    newConversation: "New chat",
+    historyTitle: "Conversation history",
+    historySearchLabel: "Search conversation history",
+    historySearchPlaceholder: "Search conversations...",
+    historyEmpty: "No conversations found.",
+    close: "Close demo",
+    emptyTitle: "Morning, shadcn!",
+    emptyDescription:
+      "What are we working on today? Press send to start a new conversation",
+    messagesLabel: "Messages",
+    composerLabel: "Next predefined prompt",
+    composerHint: "This content is read-only and sends in the demo's fixed order.",
+    send: "Send",
+    sending: "Sending",
+    thinking: "Thinking...",
+    trackingLabel: "Conversation position",
+    jumpToTurn: "Go to turn",
+    exhausted: "No messages queued. Start a new chat.",
+    scrollToLatest: "Scroll to the latest message",
+    userRole: "You",
+    assistantRole: "Assistant",
+    addFiles: "Add files",
+    addPhotosAndFiles: "Add Photos & Files",
+    createImage: "Create Image",
+    deepResearch: "Deep Research",
+    webSearch: "Web Search",
+    readOnlyNotice: "Demo is read only. Press send to send messages.",
+    script: {
+      scrollQuestion:
+        "I'm building a chat for our app and the scroll behavior is driving me nuts. Every time the AI streams a reply, the whole thread jumps around.",
+      scrollAnswer:
+        "That's the classic streaming scroll problem. Wrap your message list in `MessageScroller` and turn on `autoScroll` — the viewport pins to the bottom as tokens arrive, so users always see the latest text land in place.\n\nThe important part: it only auto-scrolls while the reader is already at the bottom. The moment they scroll up to read something earlier, auto-scroll backs off and their position is preserved. You get smooth streaming without fighting the user's intent.",
+      anchorQuestion:
+        "Okay, but when someone sends a new message the view still feels jarring — like the whole conversation reloads from the top.",
+      anchorAnswer:
+        "MessageScrollerItem fixes that with turn anchoring. Set `scrollAnchor` on the turn that should settle near the top instead of blindly snapping to the document bottom.\n\nIt also leaves a small peek of the previous exchange visible above the anchor, so context isn't lost. The reply starts in view without that disorienting jump you get from a plain overflow container.",
+      readerQuestion:
+        "And if they've scrolled up to re-read an older answer? I don't want to yank them back down.",
+      readerAnswer:
+        "You won't. Auto-scroll only runs when the viewport is already pinned to the bottom, so scrolling up is a deliberate opt-out — their place in the thread stays put even as new tokens keep arriving below.\n\nWhen there is content they haven't seen yet, `MessageScrollerButton` appears at the bottom of the viewport. One tap jumps them back to the newest message and re-engages auto-scroll. Same pattern as Slack or iMessage: quiet when you're caught up, helpful when you're not.",
+      accessibilityQuestion:
+        "Last one — does this work with assistive tech?",
+      accessibilityAnswer:
+        '`MessageScrollerContent` sets `role="log"` and `aria-relevant="additions"` by default, so screen readers announce new messages as they stream in.\n\nThe scroll button is a real `<button>` with an sr-only label, and it\'s removed from the tab order when you\'re already at the bottom — no ghost focus stops.',
     },
   },
   marketConversations: {
