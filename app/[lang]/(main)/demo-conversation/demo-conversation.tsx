@@ -208,7 +208,7 @@ export function DemoConversation() {
                   </PopoverTrigger>
                   <PopoverContent
                     align="start"
-                    className="w-80 max-w-[calc(100vw-2rem)]"
+                    className="p-0 w-80 max-w-[calc(100vw-2rem)]"
                   >
                     <Command shouldFilter={false}>
                       <CommandInput
