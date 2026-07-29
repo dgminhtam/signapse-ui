@@ -14,7 +14,7 @@ This document is the active repo-wide instruction file for Codex when working in
 - `AGENTS.md` holds only repo-wide architecture, workflow, verification, and review policy.
 - Before implementing or reviewing `app/api/**`, read `app/api/AGENTS.override.md`.
 - Before implementing or reviewing `app/lib/**`, read `app/lib/AGENTS.override.md`.
-- Before UI work under `app/[lang]/**` or `components/**`, read `components/AGENTS.override.md`.
+- Before implementing or reviewing any user-visible UI or interaction under `app/[lang]/**` or `components/**`, read both `components/AGENTS.override.md` and `docs/design/DESIGN.md`; DESIGN is the source of truth for UI/UX conventions.
 - When a task spans multiple domains, read every applicable scoped instruction file.
 - Scoped instructions extend this file; the more specific instruction wins when guidance conflicts.
 - `.agents/skills` holds detailed recipes. When a task touches one of the domains below, read the corresponding skill before implementation or review.
@@ -44,8 +44,8 @@ Each feature should live in its own folder when appropriate:
 
 ```text
 app/[lang]/(main)/[feature]/
-├── page.tsx              # Server Component: cardless workspace + Suspense boundary
-├── [id]/page.tsx         # Detail page: cardless workspace + standard back button
+├── page.tsx              # Server Component + Suspense boundary
+├── [id]/page.tsx         # Detail page
 ├── error.tsx             # Local error boundary
 ├── [feature]-list.tsx    # Client Component: table/list + toolbar
 ├── [feature]-create-form.tsx
@@ -73,68 +73,11 @@ app/[lang]/(main)/[feature]/
 - User-facing copy must come from dictionaries through `getDictionary()`, `getServerDictionary()`, or `useLocalization()`; do not hardcode labels, toasts, placeholders, or menu text in new components.
 - When removing or replacing a UI route, remove old redirect compatibility routes in the same change unless the user explicitly asks to keep a legacy redirect.
 
-## Shadcn And Theme Policy
+## UI Change Guardrails
 
-- Feature/shared code must use `radix-nova` default chrome; `className` on shadcn primitives should be used only for layout such as width, max-width, flex/grid, gap, alignment, max-height, overflow, truncate, or responsive constraints.
-- Do not add `h-*`, `min-h-*`, `rounded-*`, padding, foreground/background, border, ring, shadow, or typography classes to primitives only to change default height, radius, color, border, or density.
-- Badge is the explicit color exception to the preceding `className` restrictions. Prefer the built-in `default`, `secondary`, `destructive`, `outline`, or `ghost` variants when they express the intended meaning.
-- When a Badge needs a categorical color not covered by a built-in variant, only these exact palettes are allowed: blue (`bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300`), green (`bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300`), sky (`bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-300`), purple (`bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300`), and red (`bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300`). This exception applies only to `<Badge>` and does not permit raw palette or manual `dark:` color classes on other primitives.
-- When compact controls are needed, prefer existing variant/size options; hard-code height/radius only when no suitable size/variant exists and there is a clear product reason.
-- Theme tokens in `app/globals.css` and `tailwind.baseColor` in `components.json` must follow the `radix-nova` neutral default; do not silently change `--primary`, `--accent`, `--sidebar-*`, chart tokens, or wrapper chrome to fix a local issue.
-
-## UI Composition Invariants
-
-- After a successful submit, use `router.push()` back to the list page, then `router.refresh()`.
-- The top loading bar must always be enabled for page transitions.
-- Time metadata on list/detail/drawer/supporting panels uses secondary treatment: inline icon `size-3`, `text-xs text-muted-foreground tabular-nums`; do not use badges or strong value styling for plain timestamps.
-
-## List, Search And Pagination
-
-- List search belongs in `[feature]-search.tsx`, uses a controlled input initialized from `useSearchParams()`, and syncs when the query param changes.
-- Search uses `use-debounce` at `300ms`; do not add a `Search` button unless there is a specific business requirement.
-- When search changes, trim the value, remove the query param if empty, and reset `page` to `1`.
-- Search input must have `type="search"`, an `id`, and an `sr-only` label.
-- Search composes with `InputGroup`, `InputGroupInput`, and `InputGroupAddon`; the idle icon and pending `<Spinner>` replace each other in the leading addon. Do not use absolute icons, trailing spinners, or reserved trailing width.
-- Search wrapper is consistently `w-full sm:w-80 lg:w-96`; search sits in the leading area with the primary action, while view controls such as filter/sort/page size sit in the trailing area.
-- Page size selector belongs in trailing controls, uses standard options `10`, `20`, `50`, `100`, default `10`; do not duplicate it in footer pagination.
-- Sort/page size controls use disabled-only pending feedback; do not render a spinner inside or beside the select trigger.
-
-## Page, Toolbar, Table And Form Layout
-
-- Pages in `app/[lang]/(main)` use the cardless workspace from the parent padding layout; do not wrap the whole page in a main `<Card>` just to repeat breadcrumb title.
-- Breadcrumb in the app header is the primary page identity for simple pages; if the label is wrong, fix breadcrumb mapping instead of adding a duplicate heading.
-- Use `<Card>` only for inner surfaces with real boundaries such as form sections, detail panels, dashboard tiles, access-denied/error panels, or repeated items.
-- List pages render shared toolbar, `AppListTable`, and pagination surface directly; do not add an outer main Card/Header/Title/Description/Separator.
-- Toolbar responsiveness uses `flex-col sm:flex-row sm:justify-between`; leading is primary action/search, trailing is view controls.
-- Primary toolbar controls use default shadcn size/chrome; do not add custom height/radius/padding or `size="sm"` only to change density.
-- Boolean toggles in list/table rows use a compact status capsule with label, switch, `aria-label`, stable disabled/pending behavior, and skeletons that mirror the shape.
-- Form body uses `FieldGroup`, `FieldSet`, and `gap-*`. Footer is separated from the body by border/subtle background and contains primary and secondary actions.
-- Switches in create/update/detail use compact field treatment; this rule does not apply to row list/table capsules, toolbar/workbench toggles, dialog permission matrices, or route row switches.
-
-## Quick Detail Overlay
-
-- Quick detail on analytical workspaces such as Graph View, Market Charts, or dense data workbenches must be a local overlay owned by the workspace through local state.
-- Opening/closing quick detail must not change the URL or use `router.back()`, `router.push()`, or `router.replace()` just to manage drawer state.
-- Canonical detail routes such as `/events/{id}` and `/news-articles/{id}` remain full detail pages by default for normal links, reloads, copied URLs, direct navigation, and list/detail CRUD.
-- Local quick detail drawers must include loading, error/access-denied states inside the overlay, focused content that does not embed the full page shell, and a clear action to open the canonical full detail page.
-- If route interception is desired for quick detail, it needs a separate proposal covering route scope, affected links, Back/Forward behavior, how to avoid reloading the workspace behind it, and source cleanup plan; do not add global `@quickDetail` under `(main)` as the default pattern.
-
-## Content, Language And Accessibility
-
-- Each screen should show only text that helps users make decisions or complete tasks; do not add copy that repeats breadcrumb/control/metric meaning.
-- Avoid decorative badges, page identity body headings, hero copy, `CardDescription`, panel placeholders, or implementation-detail copy when it does not add decision value.
-- Dense data screens prioritize controls and primary data; long copy, roadmap/future feature notes, and legal/vendor notes should move to tooltips, small help text, footer legal areas, or docs.
+- If route interception is desired for quick detail, create a separate proposal covering route scope, affected links, Back/Forward behavior, how to avoid reloading the workspace behind it, and source cleanup; do not add global `@quickDetail` under `(main)` as the default pattern.
 - Vendor/license attribution must not be silently removed; if it leaves the main surface, replace it with a notice/link in a user-accessible location.
-- When a UI change has keyboard/focus/screen reader risk, read `.codex/skills/accessibility`.
-
-## Sidebar
-
-- Real active sidebar items use `sidebar-primary` and `sidebar-primary-foreground` as a neutral selected surface; they should not feel like CTA/inverse buttons.
-- Hover uses `sidebar-accent`; focus-visible keeps `sidebar-ring`; focus is an accessibility state and must not be mixed with selected/current state.
-- An open parent does not use background state; expanded state only needs chevron rotation.
-- Active items and parents with active children do not increase font weight solely because of state.
-- Do not add custom active color tokens, use global `accent`, or silently change `--sidebar-*` to fix a local issue.
-- Density is handled in `AppSidebar`; child lists keep clear left indent, expand reasonably, and use `py-1`.
+- When a UI change involves focus, keyboard navigation, dialogs, forms, or screen-reader behavior, read the `accessibility` skill.
 
 ## Validation And Typing
 
@@ -144,7 +87,7 @@ app/[lang]/(main)/[feature]/
 
 ## Review Expectations
 
-- Review according to the rules in this file and related skills.
-- Prioritize findings by drift category: shadcn chrome drift, toolbar/table spacing drift, main-card shell drift, form-shell drift, table surface drift, skeleton mismatch, URL state/search mismatch, API contract hierarchy drift, accessibility regression, UI copy noise, non-Vietnamese UI copy, unsafe destructive action, unchecked `any`.
+- Review according to this file, every applicable scoped instruction, `docs/design/DESIGN.md` for UI work, and related skills.
+- For UI reviews, use the detailed drift categories in DESIGN; also prioritize API contract hierarchy drift, unsafe destructive actions, and unchecked `any` where applicable.
 - For each finding, identify file/line, behavioral or UX risk, and the minimal recommended fix.
 - If there are no findings, say that clearly and mention residual risk or checks not run.

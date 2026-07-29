@@ -4,8 +4,8 @@ import * as React from "react"
 import { useDebouncedCallback } from "use-debounce"
 import {
   ArrowUpIcon,
+  BotMessageSquareIcon,
   ChevronDownIcon,
-  MessageSquareTextIcon,
   PenLineIcon,
   TriangleAlertIcon,
   XIcon,
@@ -181,10 +181,6 @@ export function MarketConversationAssistant({
       : isRevealing
         ? labels.revealingResponse
         : null
-  const composerState =
-    workspaceId == null
-      ? labels.noWorkspaceDescription
-      : (composerError ?? pendingLabel)
   const revealMessageId = responseReveal?.messageId
   const revealSegments = responseReveal?.segments
 
@@ -549,11 +545,11 @@ export function MarketConversationAssistant({
       <PopoverTrigger asChild>
         <Button
           type="button"
-          size="icon-lg"
+          size="icon-xl"
           className="fixed end-4 bottom-4"
           aria-label={dictionary.aiAssistant.open}
         >
-          <MessageSquareTextIcon />
+          <BotMessageSquareIcon data-icon="inline-start" />
         </Button>
       </PopoverTrigger>
       <PopoverContent
@@ -561,7 +557,7 @@ export function MarketConversationAssistant({
         align="end"
         sideOffset={12}
         aria-label={currentTitle}
-        className="max-h-[var(--radix-popover-content-available-height)] w-[calc(100vw-2rem)] max-w-xl gap-0 overflow-hidden sm:max-w-xl"
+        className="max-h-[var(--radix-popover-content-available-height)] w-[calc(100vw-2rem)] max-w-xl gap-0 overflow-hidden rounded-2xl sm:max-w-xl"
       >
         <MessageScrollerProvider autoScroll>
           <div className="relative flex h-[min(36rem,calc(var(--radix-popover-content-available-height)-1.25rem))] min-h-0 flex-col">
@@ -789,7 +785,7 @@ export function MarketConversationAssistant({
                       >
                         <MessageScrollerContent
                           aria-busy={isBusy || isOlderMessagesLoading}
-                          className="gap-0 p-3 sm:pr-14"
+                          className="gap-0 p-3 sm:pr-10"
                         >
                           {olderMessagesError ? (
                             <div className="mb-6">
@@ -891,7 +887,7 @@ export function MarketConversationAssistant({
                     messages={renderableMessages}
                   />
                 </div>
-                <footer className="flex flex-col gap-2 pt-2.5">
+                <footer className="pt-2.5">
                   <form
                     aria-label={labels.persistedComposerLabel}
                     aria-busy={isBusy}
@@ -901,17 +897,12 @@ export function MarketConversationAssistant({
                     }}
                     className="w-full"
                   >
-                    <InputGroup className="rounded-2xl border-0">
+                    <InputGroup className="rounded-xl border-0">
                       <InputGroupTextarea
                         value={draft}
                         rows={2}
                         placeholder={labels.persistedComposerPlaceholder}
                         aria-label={labels.persistedComposerLabel}
-                        aria-describedby={
-                          composerState
-                            ? "market-conversation-assistant-composer-state"
-                            : undefined
-                        }
                         aria-invalid={Boolean(composerError)}
                         disabled={composerDisabled}
                         onChange={(event) => {
@@ -938,7 +929,7 @@ export function MarketConversationAssistant({
                           disabled={
                             composerDisabled || draft.trim().length === 0
                           }
-                          className="ml-auto rounded-full"
+                          className="ml-auto"
                           aria-label={pendingLabel ?? labels.send}
                         >
                           {isBusy ? <Spinner /> : <ArrowUpIcon />}
@@ -949,16 +940,6 @@ export function MarketConversationAssistant({
                       </InputGroupAddon>
                     </InputGroup>
                   </form>
-                  {composerState ? (
-                    <div
-                      id="market-conversation-assistant-composer-state"
-                      className="px-0.5 text-center text-xs text-muted-foreground"
-                      role={composerError ? "alert" : "status"}
-                      aria-live="polite"
-                    >
-                      {composerState}
-                    </div>
-                  ) : null}
                 </footer>
               </div>
             </div>
@@ -1073,7 +1054,7 @@ function MessageTrackingRail({
   return (
     <nav
       aria-label={labels.trackingLabel}
-      className="absolute inset-y-2 right-2 hidden w-10 overflow-hidden sm:block"
+      className="absolute inset-y-2 right-1 hidden w-8 overflow-hidden sm:block"
     >
       <div
         ref={railRef}
@@ -1109,7 +1090,7 @@ function MessageTrackingRail({
                     data-message-id={messageId}
                     aria-label={`${labels.jumpToTurn} ${index + 1}`}
                     aria-current={isActive ? "step" : undefined}
-                    className="flex h-2.5 w-8 shrink-0 items-center justify-center rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="flex h-2.5 w-8 shrink-0 items-center justify-end rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     onPointerEnter={() => setHoveredIndex(index)}
                     onPointerLeave={() => setHoveredIndex(null)}
                     onClick={() => {

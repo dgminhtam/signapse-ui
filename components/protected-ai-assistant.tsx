@@ -60,11 +60,11 @@ function AssistantLoadingTrigger() {
       <Button
         type="button"
         variant="default"
-        size="icon-lg"
+        size="icon-xl"
         disabled
         aria-label={dictionary.aiAssistant.loading}
       >
-        <Spinner />
+        <Spinner data-icon="inline-start" />
       </Button>
     </div>
   )
@@ -73,9 +73,14 @@ function AssistantLoadingTrigger() {
 function AssistantLoadError({ label }: { label: string }) {
   return (
     <div className="fixed end-4 bottom-4" role="alert">
-      <Button type="button" variant="destructive" disabled>
+      <Button
+        type="button"
+        variant="destructive"
+        size="icon-xl"
+        disabled
+        aria-label={label}
+      >
         <TriangleAlertIcon data-icon="inline-start" />
-        {label}
       </Button>
     </div>
   )

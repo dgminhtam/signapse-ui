@@ -1,7 +1,4 @@
-## Purpose
-Maintain the authoritative source for durable Signapse UI and UX conventions, including the Financial Command Surface visual direction.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Persistent Design Direction Document
 
@@ -26,3 +23,4 @@ The system SHALL maintain `docs/design/DESIGN.md` as the authoritative source fo
 
 - **WHEN** the design source is maintained after this change
 - **THEN** pilot routes, rollout order, deferred rollout targets, first-pass restrictions, and rollback history are not required sections of the persistent UI convention source
+
