@@ -181,6 +181,10 @@ export function MarketConversationAssistant({
       : isRevealing
         ? labels.revealingResponse
         : null
+  const composerState =
+    workspaceId == null
+      ? labels.noWorkspaceDescription
+      : (composerError ?? pendingLabel)
   const revealMessageId = responseReveal?.messageId
   const revealSegments = responseReveal?.segments
 
@@ -718,7 +722,7 @@ export function MarketConversationAssistant({
                     </Button>
                   </div>
                 </PopoverHeader>
-                <Separator />
+                <Separator className="mt-2.5" />
                 <div className="relative min-h-0 flex-1 overflow-hidden">
                   {workspaceId == null ? (
                     <Empty className="h-full">
@@ -903,7 +907,11 @@ export function MarketConversationAssistant({
                         rows={2}
                         placeholder={labels.persistedComposerPlaceholder}
                         aria-label={labels.persistedComposerLabel}
-                        aria-describedby="market-conversation-assistant-composer-state"
+                        aria-describedby={
+                          composerState
+                            ? "market-conversation-assistant-composer-state"
+                            : undefined
+                        }
                         aria-invalid={Boolean(composerError)}
                         disabled={composerDisabled}
                         onChange={(event) => {
@@ -941,18 +949,16 @@ export function MarketConversationAssistant({
                       </InputGroupAddon>
                     </InputGroup>
                   </form>
-                  <div
-                    id="market-conversation-assistant-composer-state"
-                    className="px-0.5 text-center text-xs text-muted-foreground"
-                    role={composerError ? "alert" : "status"}
-                    aria-live="polite"
-                  >
-                    {workspaceId == null
-                      ? labels.noWorkspaceDescription
-                      : (composerError ??
-                        pendingLabel ??
-                        labels.persistedComposerHint)}
-                  </div>
+                  {composerState ? (
+                    <div
+                      id="market-conversation-assistant-composer-state"
+                      className="px-0.5 text-center text-xs text-muted-foreground"
+                      role={composerError ? "alert" : "status"}
+                      aria-live="polite"
+                    >
+                      {composerState}
+                    </div>
+                  ) : null}
                 </footer>
               </div>
             </div>

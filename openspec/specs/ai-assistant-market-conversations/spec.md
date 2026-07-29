@@ -65,7 +65,7 @@ The assistant SHALL load persisted conversation messages from the backend messag
 
 #### Scenario: Persisted conversation is selected
 - **WHEN** the user selects a persisted conversation
-- **THEN** the system loads the latest message page with a bounded size of 30, normalizes messages into chronological order, and maps them into Assistant UI message state
+- **THEN** the system loads the latest message page with a bounded size of 30, normalizes messages into chronological order, and maps them into the active conversation timeline state
 
 #### Scenario: Older messages are available
 - **WHEN** the user requests older messages and the current page reports more history

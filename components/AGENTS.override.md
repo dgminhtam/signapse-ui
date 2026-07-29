@@ -18,7 +18,6 @@ These instructions apply to `components/**`. The root guidance may also route UI
 - Before adding, syncing, or modifying a shadcn wrapper, read the `shadcn` skill and inspect the corresponding shadcn documentation and CLI diff.
 - Feature and shared components may customize layout, width, alignment, overflow, and responsive behavior, but must preserve wrapper chrome.
 - Use Lucide icons and `sonner`; do not introduce a second icon or toast system.
-- For `components/assistant-ui/**`, read the focused assistant-ui skill matching the task before changing runtime, primitives, tools, streaming, or markdown behavior.
 
 ## Localization And Navigation
 

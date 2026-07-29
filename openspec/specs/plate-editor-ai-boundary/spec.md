@@ -53,8 +53,8 @@ The Plate editor's initial document SHALL NOT claim that AI editing is available
 - **THEN** the document contains no AI-powered editing section, AI shortcut instructions, or AI feature comparison row
 
 ### Requirement: Unrelated AI product areas remain outside the removal
-The Plate editor AI removal SHALL preserve AI provider configuration, system-prompt management, and assistant-ui.
+The Plate editor AI removal SHALL preserve AI provider configuration, system-prompt management, and the active market-conversation assistant.
 
 #### Scenario: Removal scope is reviewed
 - **WHEN** the implementation diff is inspected
-- **THEN** no file owned exclusively by those remaining unrelated product areas is removed or modified for this change
+- **THEN** no file owned exclusively by those remaining unrelated product areas is removed or modified for the Plate editor AI change
