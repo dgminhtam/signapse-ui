@@ -5,9 +5,10 @@
 
 ## 2. Add the Global Overlay Interaction
 
-- [x] 2.1 Add the localized floating trigger and shared accessible Dialog while keeping conversation state mounted outside overlay visibility.
+- [x] 2.1 Add the localized floating trigger and shared accessible non-modal Popover while keeping conversation state mounted outside overlay visibility.
 - [x] 2.2 Change Close, Escape, and supported dismissal to close locally, restore trigger focus, preserve the current route and session, and keep the promoted Card usable within narrow viewport bounds.
 - [x] 2.3 Update English and Vietnamese visible copy that still identifies the active surface as a demo, without consolidating the old and new dictionary namespaces.
+- [x] 2.4 Verify that the Popover leaves outside page controls operable while preserving local close, Escape, outside dismissal, focus return, and conversation session behavior.
 
 ## 3. Switch the Protected Entry Point
 

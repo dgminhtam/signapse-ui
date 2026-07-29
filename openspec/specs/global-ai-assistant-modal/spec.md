@@ -15,30 +15,34 @@ The system SHALL expose a floating AI assistant entry point from the protected l
 - **THEN** the system does not render the assistant trigger or initialize its runtime
 
 ### Requirement: Local modal interaction
-The assistant SHALL use the Assistant UI `AssistantModal` interaction pattern and SHALL keep open and close state local to the protected app shell without changing the current URL or navigation history.
+The assistant SHALL use the promoted persisted conversation surface in a local accessible non-modal Popover and SHALL keep open and close state in the protected application shell without changing the current URL or navigation history.
 
 #### Scenario: User opens the assistant
 - **WHEN** an authorized user activates the assistant trigger
-- **THEN** the system opens a conversation surface anchored to the trigger while preserving the current route and workspace behind it
+- **THEN** the system opens the promoted conversation surface while preserving the current route and workspace behind it
+- **AND** focus moves into the conversation overlay predictably
+- **AND** controls outside the assistant remain operable
 
 #### Scenario: User closes the assistant
-- **WHEN** the user activates the close control, presses Escape, or dismisses the modal through supported focus behavior
+- **WHEN** the user activates the close control, presses Escape, or interacts outside the assistant
 - **THEN** the system closes the assistant without navigating away from the current screen
+- **AND** the current workspace conversation session remains available for reopening
 
 #### Scenario: Mobile viewport
 - **WHEN** the user opens the assistant on a narrow viewport
 - **THEN** the assistant remains fully usable without overflowing the viewport or obscuring its own composer and close control
 
 ### Requirement: Accessible localized placeholder experience
-The initial assistant surface SHALL provide dictionary-backed English and Vietnamese copy for its trigger, accessible title, welcome state, composer state, loading state, error state, and full-conversation action.
+The active assistant surface SHALL provide dictionary-backed English and Vietnamese copy for its trigger, accessible title, empty state, composer state, loading state, error state, History, transcript, and close behavior.
 
-#### Scenario: Placeholder opens before backend conversation wiring
-- **WHEN** an authorized user opens the initial placeholder assistant
-- **THEN** the system presents a clear localized placeholder conversation state and does not imply that an unsent or unsupported action has been persisted
+#### Scenario: New conversation opens
+- **WHEN** an authorized user opens the assistant without a selected persisted conversation
+- **THEN** the system presents the localized promoted conversation empty state
+- **AND** it does not imply that unsent content has been persisted
 
 #### Scenario: Keyboard-only operation
 - **WHEN** a keyboard user opens and interacts with the assistant
-- **THEN** focus moves through the trigger, modal content, composer state, full-conversation action, and close behavior in a predictable order with accessible names
+- **THEN** focus moves through the trigger, History, transcript controls, composer, and close behavior in a predictable order with accessible names
 
 ### Requirement: Persisted conversation integration boundary
 The assistant runtime boundary SHALL be compatible with the existing authenticated market conversation actions and SHALL treat backend-persisted conversations as the source of truth when message submission is enabled.
@@ -55,25 +59,14 @@ The assistant runtime boundary SHALL be compatible with the existing authenticat
 - **WHEN** a conversation load or message submission request fails
 - **THEN** the assistant preserves the user's recoverable input and renders a localized failure state without reporting the message as persisted
 
-### Requirement: Canonical full conversation route
-The floating assistant SHALL remain a secondary workspace surface and SHALL preserve `/market-conversations` and `/market-conversations/{id}` as the canonical routes for persisted history and full analysis detail.
-
-#### Scenario: User requests the full conversation experience
-- **WHEN** the user activates the full-conversation action from the modal
-- **THEN** the system navigates through locale-aware routing to the relevant canonical market conversation route
-
-#### Scenario: Modal is opened from a canonical conversation page
-- **WHEN** the assistant is available while the user is already on `/market-conversations` or a conversation detail route
-- **THEN** the modal does not replace, intercept, or duplicate canonical route navigation state
-
 ### Requirement: Supported assistant actions match backend capability
 The assistant SHALL expose only actions supported by the current Signapse backend contract.
 
-#### Scenario: Initial assistant controls render
-- **WHEN** the placeholder or backend-enabled assistant thread renders
-- **THEN** attachment upload, message edit, regeneration, branching, conversation rename, conversation delete, conversation archive, and Assistant Cloud controls are absent
+#### Scenario: Assistant controls render
+- **WHEN** the promoted assistant renders
+- **THEN** attachment upload, message edit, regeneration, branching, fullscreen, conversation rename, conversation delete, conversation archive, and Assistant Cloud controls are absent
 
-#### Scenario: Streaming is unavailable
+#### Scenario: Synchronous response is progressively presented
 - **WHEN** a message is submitted through the current synchronous market conversation contract
-- **THEN** the assistant renders a stable pending state and does not claim token-streaming behavior
-
+- **THEN** the assistant shows stable pending feedback until the complete response returns
+- **AND** it MAY progressively reveal the validated complete response without claiming backend token streaming or calling a streaming endpoint

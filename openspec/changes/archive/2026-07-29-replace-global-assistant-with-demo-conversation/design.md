@@ -40,9 +40,9 @@ The old runtime graph remains untouched and unreachable. Reusing `useMarketConve
 
 ### Keep session state above local overlay visibility
 
-`MarketConversationAssistant` owns its conversation hooks and a local `open` state for a shared accessible Dialog. Closing the Dialog removes only the visible overlay; it does not reset the component's conversation state. The floating trigger remains mounted in the protected shell, and Close, Escape, and supported dismissal update `open` without navigation.
+`MarketConversationAssistant` owns its conversation hooks and a local `open` state for a shared accessible non-modal Popover. Closing the Popover removes only the visible overlay; it does not reset the component's conversation state. The floating trigger remains mounted in the protected shell, and Close, Escape, or outside interaction update `open` without navigation.
 
-The Dialog uses the promoted Card as the single conversation composition and preserves the existing compact dimensions within viewport bounds. Fullscreen is not carried forward because it is absent from the selected target design.
+The Popover keeps the promoted Card as the single conversation composition, preserves the existing compact dimensions within viewport bounds, and leaves the page outside the panel operable. Fullscreen is not carried forward because it is absent from the selected target design.
 
 ### Remount on workspace identity
 
@@ -71,14 +71,14 @@ The backend continues returning complete user and assistant messages synchronous
 - [Inactive old assistant code remains in the bundle graph or drifts] → Ensure the protected entry point no longer imports it, run a static reference check, and remove it in the follow-up cleanup change.
 - [Closing the overlay loses draft or selected conversation] → Keep conversation state in the always-mounted global component and make close change only local visibility.
 - [Workspace switch exposes stale state] → Key the active component by workspace identifier and retain existing request identity guards.
-- [Nested History Popover or tracking Hover Card has focus/portal regressions inside Dialog] → Use existing shared overlay wrappers and verify keyboard focus, Escape, selection, and close behavior.
+- [Nested History Popover or tracking Hover Card has focus/portal regressions inside the parent Popover] → Use existing shared overlay wrappers and verify keyboard focus, Escape, selection, and close behavior.
 - [Compact fixed sizing overflows narrow viewports] → Bound width and height by the viewport while preserving the existing Card proportions.
 - [Progressive reveal is mistaken for backend streaming] → Keep synchronous pending/reveal labels and never expose a streaming status or endpoint.
 
 ## Migration Plan
 
 1. Promote and rename the demo implementation and update deterministic check paths.
-2. Add the floating trigger and accessible local Dialog around the always-mounted conversation state.
+2. Add the floating trigger and accessible non-modal Popover around the always-mounted conversation state.
 3. Switch `ProtectedAiAssistant` and the protected layout props to the new entry point.
 4. Remove the standalone demo route and breadcrumb identity.
 5. Validate permission, workspace, close/reopen, request, and localization behavior.

@@ -99,15 +99,16 @@ The assistant SHALL submit follow-up messages through the existing authenticated
 - **THEN** the system preserves recoverable input, removes any false persisted state, and renders a localized failure state
 
 ### Requirement: Compact modal conversation surface
-The assistant SHALL provide the primary market conversation experience inside the global modal without linking users to removed full-page market conversation routes.
+The assistant SHALL provide the primary market conversation experience inside the promoted global overlay without linking users to removed full-page market conversation routes.
 
 #### Scenario: Assistant conversation renders
 - **WHEN** a draft or persisted conversation is active
-- **THEN** the modal presents compact messages, history access, a new-conversation action, composer state, and fullscreen control without embedding or linking to a removed canonical page shell
+- **THEN** the overlay presents messages, searchable History access, a new-conversation action, composer state, tracking rail, and close control
+- **AND** it does not expose a fullscreen control
 
 #### Scenario: Removed route actions stay absent
-- **WHEN** the assistant modal renders for a draft or persisted conversation
-- **THEN** it does not render an action to `/market-conversations`, `/market-conversations/{id}`, or `/market-query`
+- **WHEN** the global assistant renders for a draft or persisted conversation
+- **THEN** it does not render an action to `/market-conversations`, `/market-conversations/{id}`, `/market-query`, or `/demo-conversation`
 
 #### Scenario: Full workbench controls are evaluated
 - **WHEN** the compact modal conversation surface renders
@@ -117,10 +118,9 @@ The assistant SHALL provide the primary market conversation experience inside th
 The assistant market conversation workflow SHALL expose dictionary-backed English and Vietnamese labels and accessible interaction states.
 
 #### Scenario: Runtime state changes
-- **WHEN** history, messages, submission, pagination, empty state, or an error state is rendered
+- **WHEN** History, messages, submission, pagination, empty state, or an error state is rendered
 - **THEN** all user-facing copy and accessible names come from the active locale dictionary
 
-#### Scenario: Keyboard user changes threads
-- **WHEN** a keyboard user opens history, selects a conversation, starts a new conversation, submits a message, or opens the canonical route
+#### Scenario: Keyboard user operates conversations
+- **WHEN** a keyboard user opens History, selects a conversation, starts a new conversation, submits a message, jumps through the transcript, or closes the assistant
 - **THEN** each action has a predictable focus order, an accessible name, and visible focus treatment
-

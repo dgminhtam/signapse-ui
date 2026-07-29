@@ -77,5 +77,7 @@ assert.match(source, /let conversation = selectedConversation/)
 assert.match(source, /deriveMarketConversationTitle\(message\)/)
 assert.match(source, /reconcileMarketConversationMessages\(current,/)
 assert.match(source, /if \(!submissionSucceeded\) \{\s+setDraft\(message\)/)
+assert.match(source, /<Popover modal=\{false\} open=\{open\}/)
+assert.doesNotMatch(source, /<Dialog/)
 
 console.log("Demo conversation checks passed")

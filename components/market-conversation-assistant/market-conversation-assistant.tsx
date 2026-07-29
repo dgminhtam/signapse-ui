@@ -45,14 +45,6 @@ import {
   CommandList,
 } from "@/components/ui/command"
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import {
   Empty,
   EmptyDescription,
   EmptyHeader,
@@ -554,8 +546,8 @@ export function MarketConversationAssistant({
   }
 
   return (
-    <Dialog open={open} onOpenChange={setAssistantOpen}>
-      <DialogTrigger asChild>
+    <Popover modal={false} open={open} onOpenChange={setAssistantOpen}>
+      <PopoverTrigger asChild>
         <Button
           type="button"
           size="icon-lg"
@@ -564,19 +556,16 @@ export function MarketConversationAssistant({
         >
           <MessageSquareTextIcon />
         </Button>
-      </DialogTrigger>
-      <DialogContent
-        showCloseButton={false}
-        className="top-auto right-4 bottom-4 left-auto max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-xl translate-x-0 translate-y-0 gap-0 overflow-hidden sm:max-w-xl"
+      </PopoverTrigger>
+      <PopoverContent
+        side="top"
+        align="end"
+        sideOffset={12}
+        aria-label={currentTitle}
+        className="max-h-[var(--radix-popover-content-available-height)] w-[calc(100vw-2rem)] max-w-xl gap-0 overflow-hidden sm:max-w-xl"
       >
-        <DialogTitle className="sr-only">
-          {selectedConversation?.title ?? labels.title}
-        </DialogTitle>
-        <DialogDescription className="sr-only">
-          {labels.emptyDescription}
-        </DialogDescription>
         <MessageScrollerProvider autoScroll>
-          <div className="relative flex h-[min(36rem,calc(100dvh-4rem))] min-h-0 flex-col gap-2">
+          <div className="relative flex h-[min(36rem,calc(var(--radix-popover-content-available-height)-1.25rem))] min-h-0 flex-col gap-2">
             <div className="mx-auto flex min-h-0 w-full max-w-xl flex-1">
               <Card size="sm" className="h-full min-h-0 w-full gap-0">
                 <CardHeader className="gap-0 border-b">
@@ -723,16 +712,15 @@ export function MarketConversationAssistant({
                     >
                       <PenLineIcon />
                     </Button>
-                    <DialogClose asChild>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        aria-label={labels.close}
-                      >
-                        <XIcon />
-                      </Button>
-                    </DialogClose>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label={labels.close}
+                      onClick={() => setAssistantOpen(false)}
+                    >
+                      <XIcon />
+                    </Button>
                   </CardAction>
                 </CardHeader>
                 <CardContent className="relative flex-1 overflow-hidden p-0">
@@ -974,8 +962,8 @@ export function MarketConversationAssistant({
             </div>
           </div>
         </MessageScrollerProvider>
-      </DialogContent>
-    </Dialog>
+      </PopoverContent>
+    </Popover>
   )
 }
 

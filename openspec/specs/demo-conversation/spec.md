@@ -6,35 +6,36 @@ Define the localized, permission-gated persisted conversation surface, transcrip
 
 ## Requirements
 
-### Requirement: Locale-aware protected demo route
+### Requirement: Protected global conversation surface
 
-The system SHALL expose the conversation demo at `/demo-conversation` within the locale-aware protected main application shell only to users who can execute market queries.
+The system SHALL expose the promoted conversation surface from the locale-aware protected application shell to authenticated users who can execute market queries.
 
-#### Scenario: Open an authorized localized demo
+#### Scenario: Authorized user opens a protected screen
 
-- **WHEN** an authenticated user with `query:execute` navigates to `/vi/demo-conversation` or `/en/demo-conversation`
-- **THEN** the system renders the demo inside the protected main shell using the selected locale for visible and accessible labels
+- **WHEN** an authenticated user with `query:execute` opens a protected localized route
+- **THEN** the system renders a localized floating conversation trigger
+- **AND** activating the trigger opens the promoted conversation surface without changing the current route
 
-#### Scenario: Open the demo without permission
+#### Scenario: Unauthorized user opens a protected screen
 
-- **WHEN** an authenticated user without `query:execute` navigates to the demo route
-- **THEN** the system renders the localized access-denied state
+- **WHEN** an authenticated user without `query:execute` opens a protected localized route
+- **THEN** the system does not render the conversation trigger
 - **AND** no conversation History, detail, create, or submit request is made
 
-### Requirement: Independent conversation presentation
+### Requirement: Global conversation session ownership
 
-The demo SHALL own its route-local presentation and request state and SHALL NOT read or mutate the global assistant's runtime state or navigation.
+The promoted conversation SHALL own one in-memory session for the active workspace and SHALL NOT read or mutate the inactive legacy assistant runtime.
 
-#### Scenario: Load the demo directly
+#### Scenario: Close and reopen the conversation
 
-- **WHEN** a user opens the route without first opening the global assistant
-- **THEN** the demo initializes independently
+- **WHEN** a user closes and reopens the conversation without changing workspace
+- **THEN** the selected conversation, loaded messages, draft, pagination, and recoverable errors remain available
 
-#### Scenario: Use persisted conversation actions
+#### Scenario: Active workspace identity changes
 
-- **WHEN** an authorized user opens or submits a persisted conversation
-- **THEN** the demo may call the existing market-conversation actions
-- **AND** persisted request behavior conforms to the `demo-conversation-history-api` capability
+- **WHEN** the protected shell resolves a different active workspace
+- **THEN** the promoted conversation starts with a fresh workspace-scoped state tree
+- **AND** responses owned by the previous instance cannot update the new workspace
 
 ### Requirement: Conversation scrolling behavior
 
@@ -88,12 +89,12 @@ The demo SHALL provide a bounded right-side rail for loaded user turns without c
 
 ### Requirement: Localized conversation actions and composer
 
-The demo SHALL provide localized New chat, History, Close, and Send controls with one controlled persisted-message draft while preventing invalid or concurrent submissions.
+The promoted conversation SHALL provide localized New chat, History, Close, and Send controls with one controlled persisted-message draft while preventing invalid or concurrent submissions.
 
 #### Scenario: Start a new draft
 
 - **WHEN** the user activates New chat outside an active create or submit operation
-- **THEN** the demo clears the selected conversation, loaded messages, cursors, draft, and operation errors
+- **THEN** the conversation clears the selected conversation, loaded messages, cursors, draft, and operation errors
 - **AND** the empty persisted-conversation state is ready for a first message
 
 #### Scenario: Busy controls
@@ -113,7 +114,7 @@ The demo SHALL provide localized New chat, History, Close, and Send controls wit
 
 - **WHEN** a synchronous submit succeeds with a completed non-empty assistant response
 - **THEN** the validated response becomes transcript truth immediately
-- **AND** the demo progressively reveals its assistant content over a bounded duration
+- **AND** the conversation progressively reveals its assistant content over a bounded duration
 - **AND** the tracking preview does not expose content beyond the portion already revealed
 
 #### Scenario: Respect reduced motion
@@ -143,10 +144,11 @@ The demo SHALL provide localized New chat, History, Close, and Send controls wit
 - **WHEN** Enter is pressed while an input method editor composition is active
 - **THEN** the composer does not submit the draft
 
-#### Scenario: Close the demo
+#### Scenario: Close the global conversation
 
-- **WHEN** the user activates Close
-- **THEN** the system navigates to the localized dashboard
+- **WHEN** the user activates Close, presses Escape, or uses supported overlay dismissal
+- **THEN** the conversation closes without changing the current URL or navigation history
+- **AND** focus returns safely to the floating trigger
 
 ### Requirement: Accessible localized conversation surface
 
