@@ -30,14 +30,6 @@ import { Logo } from "@/components/logo"
 import { Bubble, BubbleContent } from "@/components/ui/bubble"
 import { Button } from "@/components/ui/button"
 import {
-  Card,
-  CardAction,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
   Command,
   CommandGroup,
   CommandInput,
@@ -77,8 +69,11 @@ import {
 import {
   Popover,
   PopoverContent,
+  PopoverHeader,
+  PopoverTitle,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { Separator } from "@/components/ui/separator"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
 
@@ -565,11 +560,11 @@ export function MarketConversationAssistant({
         className="max-h-[var(--radix-popover-content-available-height)] w-[calc(100vw-2rem)] max-w-xl gap-0 overflow-hidden sm:max-w-xl"
       >
         <MessageScrollerProvider autoScroll>
-          <div className="relative flex h-[min(36rem,calc(var(--radix-popover-content-available-height)-1.25rem))] min-h-0 flex-col gap-2">
+          <div className="relative flex h-[min(36rem,calc(var(--radix-popover-content-available-height)-1.25rem))] min-h-0 flex-col">
             <div className="mx-auto flex min-h-0 w-full max-w-xl flex-1">
-              <Card size="sm" className="h-full min-h-0 w-full gap-0">
-                <CardHeader className="gap-0 border-b">
-                  <CardTitle className="min-w-0">
+              <div className="flex h-full min-h-0 w-full flex-col">
+                <PopoverHeader className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-0">
+                  <PopoverTitle className="min-w-0">
                     {workspaceId != null ? (
                       <Popover
                         open={historyOpen}
@@ -698,8 +693,8 @@ export function MarketConversationAssistant({
                     ) : (
                       <span className="block truncate">{currentTitle}</span>
                     )}
-                  </CardTitle>
-                  <CardAction className="flex items-center gap-1">
+                  </PopoverTitle>
+                  <div className="flex items-center gap-1">
                     <Button
                       type="button"
                       variant="ghost"
@@ -721,9 +716,10 @@ export function MarketConversationAssistant({
                     >
                       <XIcon />
                     </Button>
-                  </CardAction>
-                </CardHeader>
-                <CardContent className="relative flex-1 overflow-hidden p-0">
+                  </div>
+                </PopoverHeader>
+                <Separator />
+                <div className="relative min-h-0 flex-1 overflow-hidden">
                   {workspaceId == null ? (
                     <Empty className="h-full">
                       <EmptyHeader>
@@ -789,7 +785,7 @@ export function MarketConversationAssistant({
                       >
                         <MessageScrollerContent
                           aria-busy={isBusy || isOlderMessagesLoading}
-                          className="gap-0 p-(--card-spacing) sm:pr-14"
+                          className="gap-0 p-3 sm:pr-14"
                         >
                           {olderMessagesError ? (
                             <div className="mb-6">
@@ -890,8 +886,8 @@ export function MarketConversationAssistant({
                     labels={labels}
                     messages={renderableMessages}
                   />
-                </CardContent>
-                <CardFooter className="flex-col gap-2 border-t-0 bg-card">
+                </div>
+                <footer className="flex flex-col gap-2 pt-2.5">
                   <form
                     aria-label={labels.persistedComposerLabel}
                     aria-busy={isBusy}
@@ -945,20 +941,20 @@ export function MarketConversationAssistant({
                       </InputGroupAddon>
                     </InputGroup>
                   </form>
-                </CardFooter>
-              </Card>
-            </div>
-            <div
-              id="market-conversation-assistant-composer-state"
-              className="px-0.5 text-center text-xs text-muted-foreground"
-              role={composerError ? "alert" : "status"}
-              aria-live="polite"
-            >
-              {workspaceId == null
-                ? labels.noWorkspaceDescription
-                : (composerError ??
-                  pendingLabel ??
-                  labels.persistedComposerHint)}
+                  <div
+                    id="market-conversation-assistant-composer-state"
+                    className="px-0.5 text-center text-xs text-muted-foreground"
+                    role={composerError ? "alert" : "status"}
+                    aria-live="polite"
+                  >
+                    {workspaceId == null
+                      ? labels.noWorkspaceDescription
+                      : (composerError ??
+                        pendingLabel ??
+                        labels.persistedComposerHint)}
+                  </div>
+                </footer>
+              </div>
             </div>
           </div>
         </MessageScrollerProvider>
