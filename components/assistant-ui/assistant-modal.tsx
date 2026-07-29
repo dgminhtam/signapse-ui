@@ -6,7 +6,6 @@ import {
   ComposerPrimitive,
   MessagePrimitive,
   ThreadPrimitive,
-  type DataMessagePartProps,
   type MessageState,
   type TextMessagePartProps,
 } from "@assistant-ui/react"
@@ -24,8 +23,6 @@ import {
 } from "lucide-react"
 
 import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
-import { MarketAnalysisPart } from "@/components/assistant-ui/market-analysis-part"
-import { isMarketAnalysisPartData } from "@/components/assistant-ui/market-conversation-runtime"
 import { TooltipIconButton } from "@/components/assistant-ui/tooltip-icon-button"
 import type { MarketConversationAssistantController } from "@/components/assistant-ui/use-market-conversation-assistant"
 import { Button } from "@/components/ui/button"
@@ -214,11 +211,7 @@ function AssistantModalPanel({
 
             <ThreadPrimitive.Messages>
               {({ message }) => (
-                <AssistantMessage
-                  message={message}
-                  labels={labels}
-                  controller={controller}
-                />
+                <AssistantMessage message={message} labels={labels} />
               )}
             </ThreadPrimitive.Messages>
 
@@ -429,29 +422,14 @@ function OlderMessagesControl({
 }
 
 function AssistantMessage({
-  controller,
   message,
   labels,
 }: {
-  controller: MarketConversationAssistantController
   message: MessageState
   labels: Dictionary["aiAssistant"]
 }) {
   const isUser = message.role === "user"
   const isFailed = message.status?.type === "incomplete"
-  const AnalysisPart = ({ data }: DataMessagePartProps) => {
-    if (!isMarketAnalysisPartData(data)) {
-      return null
-    }
-
-    return (
-      <MarketAnalysisPart
-        data={data}
-        labels={labels.analysis}
-        controller={controller}
-      />
-    )
-  }
 
   return (
     <MessagePrimitive.Root
@@ -476,11 +454,6 @@ function AssistantMessage({
                 {isFailed ? labels.messageFailed : labels.emptyMessage}
               </p>
             ),
-            data: {
-              by_name: {
-                "market-analysis": AnalysisPart,
-              },
-            },
           }}
         />
         {isFailed ? (

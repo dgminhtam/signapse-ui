@@ -6,21 +6,13 @@ import { getDictionary } from "@/app/lib/i18n/dictionaries"
 import { getRequestLocale } from "@/app/lib/i18n/server"
 import {
   CreateMarketConversationRequest,
-  DeliverMarketAnalysisTelegramRequest,
-  MarketAnalysisEvidenceResponse,
-  MarketAnalysisResponse,
-  MarketAnalysisTelegramDeliveryResponse,
   MarketConversationDetailResponse,
   MarketConversationMessagePageResponse,
   MarketConversationSummaryResponse,
   SubmitMarketConversationMessageRequest,
   SubmitMarketConversationMessageResponse,
   getCreateMarketConversationSchema,
-  getDeliverMarketAnalysisTelegramSchema,
   getSubmitMarketConversationMessageSchema,
-  marketAnalysisEvidenceListResponseSchema,
-  marketAnalysisResponseSchema,
-  marketAnalysisTelegramDeliveryResponseSchema,
   marketConversationDetailResponseSchema,
   marketConversationMessagePageResponseSchema,
   marketConversationSummaryResponseSchema,
@@ -179,73 +171,6 @@ export async function submitMarketConversationMessage(
     return {
       success: false,
       error: getActionError(error, dictionary.marketConversations.submitError),
-    }
-  }
-}
-
-export async function getMarketAnalysisById(
-  id: number
-): Promise<MarketAnalysisResponse> {
-  const dictionary = await getMarketConversationDictionary()
-  const response = await fetchAuthenticated<unknown>(`/market-analyses/${id}`)
-
-  return parseOrThrow(
-    marketAnalysisResponseSchema,
-    response,
-    dictionary.marketConversations.responseInvalid
-  )
-}
-
-export async function getMarketAnalysisEvidence(
-  id: number
-): Promise<MarketAnalysisEvidenceResponse[]> {
-  const dictionary = await getMarketConversationDictionary()
-  const response = await fetchAuthenticated<unknown>(
-    `/market-analyses/${id}/evidence`
-  )
-
-  return parseOrThrow(
-    marketAnalysisEvidenceListResponseSchema,
-    response,
-    dictionary.marketConversations.responseInvalid
-  )
-}
-
-export async function deliverMarketAnalysisToTelegram(
-  id: number,
-  request: DeliverMarketAnalysisTelegramRequest
-): Promise<ActionResult<MarketAnalysisTelegramDeliveryResponse>> {
-  const dictionary = await getMarketConversationDictionary()
-  const parsedRequest = getDeliverMarketAnalysisTelegramSchema().safeParse(request)
-
-  if (!parsedRequest.success) {
-    return {
-      success: false,
-      error:
-        parsedRequest.error.issues[0]?.message ||
-        dictionary.marketConversations.telegram.destinationRequired,
-    }
-  }
-
-  try {
-    const response = await fetchAuthenticated<unknown>(
-      `/market-analyses/${id}/telegram-deliveries`,
-      {
-        method: "POST",
-        body: JSON.stringify({ destinationId: parsedRequest.data.destinationId }),
-      }
-    )
-    const delivery = parseOrThrow(
-      marketAnalysisTelegramDeliveryResponseSchema,
-      response,
-      dictionary.marketConversations.responseInvalid
-    )
-
-    return { success: true, data: delivery }
-  } catch (error: unknown) {
-    return {
-      success: false,
-      error: getActionError(error, dictionary.marketConversations.telegram.sendError),
     }
   }
 }

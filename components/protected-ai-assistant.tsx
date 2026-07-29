@@ -10,10 +10,10 @@ import { useHasAnyPermission } from "@/components/permission-provider"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 
-const AssistantRuntime = dynamic(
+const MarketConversationAssistant = dynamic(
   () =>
-    import("@/components/assistant-ui/assistant-runtime").then(
-      (module) => module.AssistantRuntime
+    import("@/components/market-conversation-assistant/market-conversation-assistant").then(
+      (module) => module.MarketConversationAssistant
     ),
   {
     ssr: false,
@@ -22,10 +22,14 @@ const AssistantRuntime = dynamic(
 )
 
 interface ProtectedAiAssistantProps {
+  displayName: string | null
   workspaceId: number | null
 }
 
-export function ProtectedAiAssistant({ workspaceId }: ProtectedAiAssistantProps) {
+export function ProtectedAiAssistant({
+  displayName,
+  workspaceId,
+}: ProtectedAiAssistantProps) {
   const { dictionary } = useLocalization()
   const canExecuteMarketQuery = useHasAnyPermission(
     MARKET_QUERY_EXECUTE_PERMISSIONS
@@ -39,7 +43,11 @@ export function ProtectedAiAssistant({ workspaceId }: ProtectedAiAssistantProps)
     <AssistantErrorBoundary
       fallback={<AssistantLoadError label={dictionary.aiAssistant.error} />}
     >
-      <AssistantRuntime workspaceId={workspaceId} />
+      <MarketConversationAssistant
+        key={workspaceId ?? "no-workspace"}
+        displayName={displayName}
+        workspaceId={workspaceId}
+      />
     </AssistantErrorBoundary>
   )
 }

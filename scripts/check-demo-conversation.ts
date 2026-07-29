@@ -1,59 +1,81 @@
 import assert from "node:assert/strict"
-import { createChat } from "@shadcn/helpers/ai-sdk"
-import type { UIMessage } from "ai"
+import { readFile } from "node:fs/promises"
 
-const { en } = await import("../app/lib/i18n/dictionaries/en" + ".ts")
-const { getMessageText } = await import(
-  "../app/[lang]/(main)/demo-conversation/fixture" + ".ts"
+import type { MarketChatMessageResponse } from "../app/lib/market-query/definitions"
+
+const {
+  getMessagePreviewText,
+  getRenderableConversationMessages,
+  getTrackingRailState,
+} = await import(
+  "../components/market-conversation-assistant/history-state" + ".ts"
 )
+const message = (
+  id: number,
+  role: "USER" | "ASSISTANT",
+  content: string | null,
+  status: "COMPLETED" | "FAILED" = "COMPLETED",
+  failureReason: string | null = null
+): MarketChatMessageResponse => ({
+  id,
+  role,
+  status,
+  content,
+  failureReason,
+  createdDate: "2026-07-29T00:00:00Z",
+})
 
-const chat = createChat()
-const scriptedTurns = [
-  [
-    en.demoConversation.script.scrollQuestion,
-    en.demoConversation.script.scrollAnswer,
-  ],
-  [
-    en.demoConversation.script.anchorQuestion,
-    en.demoConversation.script.anchorAnswer,
-  ],
-  [
-    en.demoConversation.script.readerQuestion,
-    en.demoConversation.script.readerAnswer,
-  ],
-  [
-    en.demoConversation.script.accessibilityQuestion,
-    en.demoConversation.script.accessibilityAnswer,
-  ],
-] as const
-
-for (let index = 0; index < 25; index += 1) {
-  const turn = scriptedTurns[index % scriptedTurns.length]
-
-  if (turn) {
-    chat.user(turn[0]).assistant(turn[1])
-  }
-}
-
-const messages: UIMessage[] = chat.get()
-const historySnapshots = Array.from({ length: 25 }, (_, index) =>
-  chat.get((index + 1) * 2)
+const failed = message(2, "ASSISTANT", null, "FAILED", "Backend failed")
+assert.deepEqual(
+  getRenderableConversationMessages([
+    message(1, "USER", "Question"),
+    failed,
+    message(3, "ASSISTANT", null),
+  ]).map((item: MarketChatMessageResponse) => item.id),
+  [1, 2]
 )
-
-assert.equal(messages.length, 50)
-assert.equal(historySnapshots.length, 25)
-assert.equal(historySnapshots[0]?.length, 2)
-assert.equal(historySnapshots.at(-1)?.length, 50)
-assert.equal(messages.filter((message) => message.role === "user").length, 25)
+assert.equal(getMessagePreviewText(failed, "Fallback"), "Backend failed")
 assert.equal(
-  messages.filter((message) => message.role === "assistant").length,
-  25
+  getMessagePreviewText(message(3, "ASSISTANT", null, "FAILED"), "Fallback"),
+  "Fallback"
 )
-assert.equal(
-  getMessageText(messages[0]),
-  en.demoConversation.script.scrollQuestion
-)
-assert.equal(chat.next([])?.id, messages[0].id)
-assert.equal(chat.next(messages), null)
 
-console.log("Demo conversation fixture checks passed")
+assert.deepEqual(
+  Array.from(
+    { length: 9 },
+    (_, index) =>
+      getTrackingRailState({
+        index,
+        hoveredIndex: 4,
+        isActive: false,
+        isVisible: false,
+      }).width
+  ),
+  [6, 10, 14, 20, 26, 20, 14, 10, 6]
+)
+
+const source = await readFile(
+  new URL(
+    "../components/market-conversation-assistant/market-conversation-assistant.tsx",
+    import.meta.url
+  ),
+  "utf8"
+)
+const selectCreatedIndex = source.indexOf(
+  "setSelectedConversation(conversation)"
+)
+const submitCreatedIndex = source.indexOf(
+  "submitMarketConversationMessage(",
+  selectCreatedIndex
+)
+const pendingUserIndex = source.indexOf("setPendingUserMessage(message)")
+assert.ok(selectCreatedIndex >= 0)
+assert.ok(submitCreatedIndex > selectCreatedIndex)
+assert.ok(pendingUserIndex >= 0)
+assert.ok(pendingUserIndex < submitCreatedIndex)
+assert.match(source, /let conversation = selectedConversation/)
+assert.match(source, /deriveMarketConversationTitle\(message\)/)
+assert.match(source, /reconcileMarketConversationMessages\(current,/)
+assert.match(source, /if \(!submissionSucceeded\) \{\s+setDraft\(message\)/)
+
+console.log("Demo conversation checks passed")

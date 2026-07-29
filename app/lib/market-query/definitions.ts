@@ -62,15 +62,7 @@ export interface MarketQueryResponse {
 }
 
 export type MarketChatMessageRole = "USER" | "ASSISTANT"
-export type MarketChatMessageKind = "TEXT" | "ANALYSIS"
-export type MarketChatMessageStatus = "PENDING" | "COMPLETED" | "FAILED"
-export type MarketAnalysisStatus = "PENDING" | "COMPLETED" | "FAILED"
-export type MarketAnalysisEvidenceSourceType =
-  | "EVENT"
-  | "NARRATIVE"
-  | "NEWS_ARTICLE"
-  | "EVENT_NEWS_ARTICLE_EVIDENCE"
-  | "ECONOMIC_CALENDAR_ENTRY"
+export type MarketChatMessageStatus = "COMPLETED" | "FAILED"
 
 export interface CreateMarketConversationRequest {
   title: string
@@ -87,10 +79,8 @@ export interface MarketConversationSummaryResponse {
 export interface MarketChatMessageResponse {
   id: number
   role: MarketChatMessageRole
-  kind: MarketChatMessageKind
   status: MarketChatMessageStatus
   content: string | null
-  analysisId: number | null
   failureReason: string | null
   createdDate: string
 }
@@ -113,65 +103,6 @@ export interface SubmitMarketConversationMessageRequest {
 export interface SubmitMarketConversationMessageResponse {
   userMessage: MarketChatMessageResponse
   assistantMessage: MarketChatMessageResponse
-  analysisId: number | null
-}
-
-export interface MarketAnalysisResponse {
-  id: number
-  conversationId: number
-  userMessageId: number
-  assistantMessageId: number
-  workspaceId: number
-  questionSnapshot: string
-  assetScopeSnapshot: Record<string, unknown>[] | null
-  answer: string
-  reasoningChain: string[]
-  keyEvents: Record<string, unknown>[]
-  keyNarratives: Record<string, unknown>[]
-  assetsConsidered: string[]
-  confidence: number | null
-  limitations: string[]
-  modelProvider: string | null
-  modelName: string | null
-  status: MarketAnalysisStatus
-  completedAt: string | null
-  failureReason?: string | null
-  createdDate: string
-  lastModifiedDate: string
-}
-
-export interface MarketAnalysisEvidenceResponse {
-  id: number
-  analysisId: number
-  sourceType: MarketAnalysisEvidenceSourceType
-  eventId: number | null
-  narrativeId: number | null
-  newsArticleId: number | null
-  eventNewsArticleEvidenceId: number | null
-  economicCalendarEntryId: number | null
-  titleSnapshot: string
-  urlSnapshot: string | null
-  sourceSnapshot: string | null
-  publishedAtSnapshot: string | null
-  evidenceNoteSnapshot: string | null
-  role: Exclude<MarketQueryEvidenceRole, "UPDATE">
-  sortOrder: number
-}
-
-export interface DeliverMarketAnalysisTelegramRequest {
-  destinationId: number
-}
-
-export interface MarketAnalysisTelegramDeliveryResponse {
-  id: number
-  workflow: string
-  workflowKey: string
-  destinationId: number
-  status: string
-  attemptCount: number
-  sentAt: string | null
-  failureReason: string | null
-  duplicate: boolean
 }
 
 export function getMarketQueryRequestSchema(dictionary: Dictionary) {
@@ -229,7 +160,6 @@ export const marketQueryResponseSchema = z.object({
 
 const nullableStringSchema = z.string().nullable()
 const nullableNumberSchema = z.number().int().nullable()
-const jsonObjectSchema = z.record(z.string(), z.unknown())
 
 export function getCreateMarketConversationSchema(dictionary: Dictionary) {
   return z.object({
@@ -243,19 +173,11 @@ export function getSubmitMarketConversationMessageSchema(dictionary: Dictionary)
   }) satisfies z.ZodType<SubmitMarketConversationMessageRequest>
 }
 
-export function getDeliverMarketAnalysisTelegramSchema() {
-  return z.object({
-    destinationId: z.coerce.number().int().positive(),
-  }) satisfies z.ZodType<DeliverMarketAnalysisTelegramRequest>
-}
-
 export const marketChatMessageResponseSchema = z.object({
   id: z.number().int(),
   role: z.enum(["USER", "ASSISTANT"]),
-  kind: z.enum(["TEXT", "ANALYSIS"]),
-  status: z.enum(["PENDING", "COMPLETED", "FAILED"]),
+  status: z.enum(["COMPLETED", "FAILED"]),
   content: nullableStringSchema,
-  analysisId: nullableNumberSchema,
   failureReason: nullableStringSchema,
   createdDate: z.string(),
 }) satisfies z.ZodType<MarketChatMessageResponse>
@@ -292,7 +214,6 @@ export const marketConversationMessagePageResponseSchema = z
 export const submitMarketConversationMessageResponseSchema = z.object({
   userMessage: marketChatMessageResponseSchema,
   assistantMessage: marketChatMessageResponseSchema,
-  analysisId: nullableNumberSchema,
 }) satisfies z.ZodType<SubmitMarketConversationMessageResponse>
 
 export const pageMarketConversationSummaryResponseSchema = z.object({
@@ -313,70 +234,6 @@ export const pageMarketConversationSummaryResponseSchema = z.object({
   numberOfElements: z.number().int(),
   empty: z.boolean(),
 })
-
-export const marketAnalysisResponseSchema = z.object({
-  id: z.number().int(),
-  conversationId: z.number().int(),
-  userMessageId: z.number().int(),
-  assistantMessageId: z.number().int(),
-  workspaceId: z.number().int(),
-  questionSnapshot: z.string(),
-  assetScopeSnapshot: z.array(jsonObjectSchema).nullable(),
-  answer: z.string(),
-  reasoningChain: z.array(z.string()),
-  keyEvents: z.array(jsonObjectSchema),
-  keyNarratives: z.array(jsonObjectSchema),
-  assetsConsidered: z.array(z.string()),
-  confidence: z.number().nullable(),
-  limitations: z.array(z.string()),
-  modelProvider: nullableStringSchema,
-  modelName: nullableStringSchema,
-  status: z.enum(["PENDING", "COMPLETED", "FAILED"]),
-  completedAt: nullableStringSchema,
-  failureReason: nullableStringSchema.optional(),
-  createdDate: z.string(),
-  lastModifiedDate: z.string(),
-}) satisfies z.ZodType<MarketAnalysisResponse>
-
-export const marketAnalysisEvidenceResponseSchema = z.object({
-  id: z.number().int(),
-  analysisId: z.number().int(),
-  sourceType: z.enum([
-    "EVENT",
-    "NARRATIVE",
-    "NEWS_ARTICLE",
-    "EVENT_NEWS_ARTICLE_EVIDENCE",
-    "ECONOMIC_CALENDAR_ENTRY",
-  ]),
-  eventId: nullableNumberSchema,
-  narrativeId: nullableNumberSchema,
-  newsArticleId: nullableNumberSchema,
-  eventNewsArticleEvidenceId: nullableNumberSchema,
-  economicCalendarEntryId: nullableNumberSchema,
-  titleSnapshot: z.string(),
-  urlSnapshot: nullableStringSchema,
-  sourceSnapshot: nullableStringSchema,
-  publishedAtSnapshot: nullableStringSchema,
-  evidenceNoteSnapshot: nullableStringSchema,
-  role: z.enum(["PRIMARY", "SUPPORTING", "CONTRADICTING", "CONTEXT"]),
-  sortOrder: z.number().int(),
-}) satisfies z.ZodType<MarketAnalysisEvidenceResponse>
-
-export const marketAnalysisEvidenceListResponseSchema = z.array(
-  marketAnalysisEvidenceResponseSchema
-)
-
-export const marketAnalysisTelegramDeliveryResponseSchema = z.object({
-  id: z.number().int(),
-  workflow: z.string(),
-  workflowKey: z.string(),
-  destinationId: z.number().int(),
-  status: z.string(),
-  attemptCount: z.number().int(),
-  sentAt: nullableStringSchema,
-  failureReason: nullableStringSchema,
-  duplicate: z.boolean(),
-}) satisfies z.ZodType<MarketAnalysisTelegramDeliveryResponse>
 
 export function deriveMarketConversationTitle(
   question: string,

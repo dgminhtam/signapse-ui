@@ -24,7 +24,6 @@ function getFriendlySegmentNames(
     categories: dictionary.navigation.categories,
     create: dictionary.common.create,
     "ai-provider-configs": dictionary.navigation.aiProviders,
-    "demo-conversation": dictionary.navigation.demoConversation,
     blogs: dictionary.navigation.blogs,
     cronjobs: dictionary.navigation.cronjobs,
     dashboard: dictionary.navigation.dashboard,
@@ -42,11 +41,7 @@ function getFriendlySegmentNames(
   }
 }
 
-function formatSegment(
-  segment: string,
-  index: number,
-  dictionary: Dictionary
-) {
+function formatSegment(segment: string, index: number, dictionary: Dictionary) {
   const decodedSegment = decodeURIComponent(segment)
   const friendlySegmentNames = getFriendlySegmentNames(dictionary)
 
@@ -77,7 +72,10 @@ export function AppBreadcrumb() {
   const visibleSegments = isDashboardRoute ? [] : segments
 
   return (
-    <Breadcrumb className="min-w-0" aria-label={dictionary.navigation.breadcrumb}>
+    <Breadcrumb
+      className="min-w-0"
+      aria-label={dictionary.navigation.breadcrumb}
+    >
       <BreadcrumbList className="flex-nowrap">
         {showOverviewCrumb ? (
           <BreadcrumbItem className="hidden md:block">
@@ -102,7 +100,9 @@ export function AppBreadcrumb() {
               {showSeparator ? (
                 <BreadcrumbSeparator className="hidden md:block" />
               ) : null}
-              <BreadcrumbItem className={!isLast ? "hidden md:block" : "min-w-0"}>
+              <BreadcrumbItem
+                className={!isLast ? "hidden md:block" : "min-w-0"}
+              >
                 {isLast ? (
                   <BreadcrumbPage className="max-w-[45vw] truncate md:max-w-[36rem]">
                     {title}

@@ -17,7 +17,11 @@ import { ModeToggle } from "@/components/mode-toggle"
 import { PermissionProvider } from "@/components/permission-provider"
 import { PersonalNotesQuickSheet } from "@/components/personal-notes-quick-sheet"
 import { ProtectedAiAssistant } from "@/components/protected-ai-assistant"
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar"
 import { WorkspaceSwitcher } from "@/components/workspace-switcher"
 import { Separator } from "@/components/ui/separator"
 
@@ -40,12 +44,12 @@ export default async function Layout({
   const simpleUser = devAuthMode
     ? getDevAuthUser()
     : user
-    ? {
-      imageUrl: user.imageUrl,
-      fullName: user.fullName,
-      username: user.username,
-    }
-    : null
+      ? {
+          imageUrl: user.imageUrl,
+          fullName: user.fullName,
+          username: user.username,
+        }
+      : null
 
   const cookieStore = await cookies()
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "true"
@@ -69,6 +73,8 @@ export default async function Layout({
   }
 
   const currentWorkspace = resolveActiveWorkspace(workspaces)
+  const assistantDisplayName =
+    simpleUser?.fullName ?? simpleUser?.username ?? null
 
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
@@ -82,7 +88,9 @@ export default async function Layout({
           <header className="flex min-h-16 shrink-0 items-center border-b px-4 py-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:min-h-12">
             <div className="flex w-full flex-col gap-2 md:flex-row md:items-center md:justify-between">
               <div className="flex min-w-0 items-center gap-2">
-                <SidebarTrigger aria-label={dictionary.navigation.toggleSidebar} />
+                <SidebarTrigger
+                  aria-label={dictionary.navigation.toggleSidebar}
+                />
                 <Separator
                   orientation="vertical"
                   className="mr-2 data-[orientation=vertical]:h-8"
@@ -95,13 +103,31 @@ export default async function Layout({
                   <WorkspaceSwitcher
                     workspaces={workspaces}
                     currentWorkspace={currentWorkspace}
-                    canCreateWorkspace={hasPermission(permissions, "workspace:create")}
-                    canRenameWorkspace={hasPermission(permissions, "workspace:update")}
-                    canSetCurrentWorkspace={hasPermission(permissions, "workspace:set-current")}
+                    canCreateWorkspace={hasPermission(
+                      permissions,
+                      "workspace:create"
+                    )}
+                    canRenameWorkspace={hasPermission(
+                      permissions,
+                      "workspace:update"
+                    )}
+                    canSetCurrentWorkspace={hasPermission(
+                      permissions,
+                      "workspace:set-current"
+                    )}
                     canReadAsset={hasPermission(permissions, "asset:read")}
-                    canReadWatchlist={hasPermission(permissions, "watchlist:read")}
-                    canCreateWatchlist={hasPermission(permissions, "watchlist:create")}
-                    canDeleteWatchlist={hasPermission(permissions, "watchlist:delete")}
+                    canReadWatchlist={hasPermission(
+                      permissions,
+                      "watchlist:read"
+                    )}
+                    canCreateWatchlist={hasPermission(
+                      permissions,
+                      "watchlist:create"
+                    )}
+                    canDeleteWatchlist={hasPermission(
+                      permissions,
+                      "watchlist:delete"
+                    )}
                     className="min-w-0 flex-1 md:flex-none"
                   />
                 ) : null}
@@ -115,7 +141,10 @@ export default async function Layout({
             {children}
           </div>
         </SidebarInset>
-        <ProtectedAiAssistant workspaceId={currentWorkspace?.id ?? null} />
+        <ProtectedAiAssistant
+          displayName={assistantDisplayName}
+          workspaceId={currentWorkspace?.id ?? null}
+        />
       </PermissionProvider>
     </SidebarProvider>
   )

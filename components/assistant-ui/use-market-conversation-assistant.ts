@@ -5,7 +5,6 @@ import type { AppendMessage } from "@assistant-ui/react"
 
 import {
   createMarketConversation,
-  getMarketAnalysisById,
   getMarketConversationMessages,
   getMarketConversations,
   submitMarketConversationMessage,
@@ -14,7 +13,6 @@ import {
   deriveMarketConversationTitle,
   normalizeMarketConversationMessages,
   reconcileMarketConversationMessages,
-  type MarketAnalysisResponse,
   type MarketChatMessageResponse,
   type MarketConversationSummaryResponse,
 } from "@/app/lib/market-query/definitions"
@@ -24,12 +22,6 @@ import {
 } from "@/components/assistant-ui/market-conversation-runtime"
 
 const HISTORY_PAGE_SIZE = 10
-
-export type AnalysisLoadState =
-  | { status: "idle" }
-  | { status: "loading" }
-  | { status: "loaded"; data: MarketAnalysisResponse }
-  | { status: "error"; error: string }
 
 export function useMarketConversationAssistant(workspaceId: number | null) {
   const [conversations, setConversations] = React.useState<
@@ -54,22 +46,9 @@ export function useMarketConversationAssistant(workspaceId: number | null) {
   const [submissionError, setSubmissionError] = React.useState<string | null>(
     null
   )
-  const [analysisCache, setAnalysisCache] = React.useState<
-    Record<number, AnalysisLoadState>
-  >({})
-  const [expandedAnalysisIds, setExpandedAnalysisIds] = React.useState<
-    Set<number>
-  >(() => new Set())
 
   const workspaceEpochRef = React.useRef(0)
   const threadEpochRef = React.useRef(0)
-  const analysisRequestKeysRef = React.useRef(new Set<string>())
-
-  const resetAnalysisState = React.useCallback(() => {
-    setAnalysisCache({})
-    setExpandedAnalysisIds(new Set())
-    analysisRequestKeysRef.current.clear()
-  }, [])
 
   const loadHistoryPage = React.useCallback(
     async (page: number, append: boolean) => {
@@ -121,12 +100,11 @@ export function useMarketConversationAssistant(workspaceId: number | null) {
     setHistoryError(null)
     setMessagesError(null)
     setSubmissionError(null)
-    resetAnalysisState()
 
     if (workspaceId != null) {
       void loadHistoryPage(0, false)
     }
-  }, [loadHistoryPage, resetAnalysisState, workspaceId])
+  }, [loadHistoryPage, workspaceId])
 
   const selectConversation = React.useCallback(
     async (conversation: MarketConversationSummaryResponse) => {
@@ -139,7 +117,6 @@ export function useMarketConversationAssistant(workspaceId: number | null) {
       setMessagesError(null)
       setSubmissionError(null)
       setIsMessagesLoading(true)
-      resetAnalysisState()
 
       try {
         const page = await getMarketConversationMessages(conversation.id)
@@ -170,7 +147,7 @@ export function useMarketConversationAssistant(workspaceId: number | null) {
         }
       }
     },
-    [resetAnalysisState]
+    []
   )
 
   const startNewConversation = React.useCallback(() => {
@@ -181,86 +158,7 @@ export function useMarketConversationAssistant(workspaceId: number | null) {
     setHasMoreMessages(false)
     setMessagesError(null)
     setSubmissionError(null)
-    resetAnalysisState()
-  }, [resetAnalysisState])
-
-  const loadAnalysis = React.useCallback(
-    async (analysisId: number) => {
-      const current = analysisCache[analysisId]
-      if (current?.status === "loading" || current?.status === "loaded") {
-        return
-      }
-
-      const workspaceEpoch = workspaceEpochRef.current
-      const threadEpoch = threadEpochRef.current
-      const requestKey = `${workspaceEpoch}:${threadEpoch}:${analysisId}`
-
-      if (analysisRequestKeysRef.current.has(requestKey)) {
-        return
-      }
-
-      analysisRequestKeysRef.current.add(requestKey)
-      setAnalysisCache((cache) => ({
-        ...cache,
-        [analysisId]: { status: "loading" },
-      }))
-
-      try {
-        const data = await getMarketAnalysisById(analysisId)
-
-        if (
-          workspaceEpoch !== workspaceEpochRef.current ||
-          threadEpoch !== threadEpochRef.current
-        ) {
-          return
-        }
-
-        setAnalysisCache((cache) => ({
-          ...cache,
-          [analysisId]: { status: "loaded", data },
-        }))
-      } catch (error) {
-        if (
-          workspaceEpoch === workspaceEpochRef.current &&
-          threadEpoch === threadEpochRef.current
-        ) {
-          setAnalysisCache((cache) => ({
-            ...cache,
-            [analysisId]: {
-              status: "error",
-              error: error instanceof Error ? error.message : String(error),
-            },
-          }))
-        }
-      } finally {
-        analysisRequestKeysRef.current.delete(requestKey)
-      }
-    },
-    [analysisCache]
-  )
-
-  const toggleAnalysis = React.useCallback(
-    (analysisId: number) => {
-      const isExpanded = expandedAnalysisIds.has(analysisId)
-
-      setExpandedAnalysisIds((current) => {
-        const next = new Set(current)
-
-        if (isExpanded) {
-          next.delete(analysisId)
-        } else {
-          next.add(analysisId)
-        }
-
-        return next
-      })
-
-      if (!isExpanded) {
-        void loadAnalysis(analysisId)
-      }
-    },
-    [expandedAnalysisIds, loadAnalysis]
-  )
+  }, [])
 
   const loadOlderMessages = React.useCallback(async () => {
     if (
@@ -415,16 +313,11 @@ export function useMarketConversationAssistant(workspaceId: number | null) {
     historyError,
     messagesError,
     submissionError,
-    analysisCache,
-    expandedAnalysisIds,
     loadMoreHistory: () => loadHistoryPage(historyPage + 1, true),
     retryHistory: () => loadHistoryPage(0, false),
     selectConversation,
     startNewConversation,
     loadOlderMessages,
-    loadAnalysis,
-    retryAnalysis: loadAnalysis,
-    toggleAnalysis,
     submitMessage,
   }
 }

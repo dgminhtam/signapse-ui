@@ -2,7 +2,7 @@
 
 Tài liệu này ánh xạ snapshot OpenAPI backend trong `docs/api_mapping.json` tới các điểm tích hợp frontend hiện tại của repo.
 
-Xác minh lần cuối: ngày 27 tháng 7 năm 2026
+Xác minh lần cuối: ngày 29 tháng 7 năm 2026
 
 ## Cấu hình cơ sở
 
@@ -59,10 +59,10 @@ Xác minh lần cuối: ngày 27 tháng 7 năm 2026
 - Snapshot mới thêm `POST /watchlists/assets` để bulk create watchlist assets; `responseSchema` của system prompts hiện là JSON object inline, không còn component schema `JsonNode`.
 - Snapshot mới thêm `GET /market-charts/live` cho live chart stream dạng `text/event-stream`, và `GET /market-charts/economic-calendar-events` cho event lịch kinh tế trên chart; cả hai dùng permission `market-chart:read`.
 - Snapshot ngày 27/7 thêm `pricePrecision` kiểu `integer(int32)` vào `AssetListResponse`, `AssetResponse`, và `MarketChartAssetResponse`; candles trả field này tại `asset.pricePrecision`, còn SSE snapshot runtime dùng cùng `MarketChartAssetResponse`.
-- Snapshot mới thêm workflow market conversations / persisted analyses dưới permission `query:execute`, gồm lưu hội thoại, submit message, xem analysis/evidence, và gửi analysis qua Telegram.
+- Snapshot có workflow market conversations / persisted analyses dưới permission `query:execute`; frontend hiện tích hợp hội thoại text-only, còn analysis/evidence/Telegram delivery không có surface hoặc action.
 - Snapshot ngày 7/6 đổi tên OpenAPI schema của market conversations sang nhóm `Conversation*` và đổi timestamp conversation/message sang `createdDate` / `lastModifiedDate`.
 - Snapshot ngày 11/6 thêm `GET /market-conversations/{conversationId}/messages` để tải lịch sử message theo cursor `beforeMessageId` và `size`.
-- Contract runtime ngày 11/6 cho phép `analysisId = null` trên conversation messages khi assistant turn là non-analysis (`TEXT`), gồm chat, clarification, hoặc refusal; chỉ turn `ANALYSIS` mới có `analysisId` để mở analysis detail.
+- Contract conversation hiện chỉ trả message text với `role`, `status`, `content`, `failureReason`, và `createdDate`; không còn `kind`, `analysisId`, hoặc status `PENDING`.
 - Snapshot ngày 25/6 bỏ `warm-episode` khỏi topology `graph-view`; `GraphNodeMetadata.knowledgeLayer` vẫn còn là metadata `HOT` / `WARM` trên các node hiện tại.
 - Snapshot ngay 18/6 cap nhat `graph-view`: bo node kind `theme`, bo edge kind `event-theme`, va them `metadata.themes[]` cho node `event` / `narrative`; event themes lay tu `EventTheme[]` co `relationType`, narrative theme lay tu `Narrative.primaryTheme`.
 - Snapshot mới mở rộng asset type enum từ `COMMODITY`, `CRYPTO`, `FX`, `INDEX` thành thêm `EQUITY`, `ETF` trên assets, watchlists, events, narratives, graph metadata, và market charts.
@@ -241,11 +241,11 @@ Ghi chu:
 | GET         | `/market-conversations`                       | `getConversations`   | `getMarketConversations(searchParams)` | Da tich hop | List persisted market conversations, response OpenAPI `PageConversationSummaryResponse`; permission `query:execute`. |
 | POST        | `/market-conversations`                       | `createConversation` | `createMarketConversation(request)` | Da tich hop | Tao conversation bang OpenAPI `CreateConversationRequest { title }`; title duoc derive tu cau hoi dau tien, permission `query:execute`. |
 | GET         | `/market-conversations/{id}`                  | `getConversation`    | `getMarketConversationById(id)` | Da tich hop | Doc conversation detail gom messages; permission `query:execute`. |
-| GET         | `/market-conversations/{conversationId}/messages` | `getMarketConversationMessages` | `getMarketConversationMessages(conversationId, beforeMessageId?)` | Da tich hop | Tai message history theo exclusive cursor `beforeMessageId` va optional `size`; response `MarketConversationMessagePageResponse` co message `analysisId` nullable cho non-analysis turn; permission `query:execute`. |
-| POST        | `/market-conversations/{id}/messages`         | `submitMessage`      | `submitMarketConversationMessage(id, request)` | Da tich hop | Submit message bang `{ message }`; frontend v1 khong gui `asOfTime`, tra `userMessage`, `assistantMessage`, va `analysisId` nullable; permission `query:execute`. |
-| GET         | `/market-analyses/{id}`                       | `getAnalysis`        | `getMarketAnalysisById(id)` | Da tich hop | Doc persisted analysis snapshot gom answer, reasoning, keyEvents, keyNarratives, model info, status; permission `query:execute`. |
-| GET         | `/market-analyses/{id}/evidence`              | `getAnalysisEvidence` | `getMarketAnalysisEvidence(id)` | Da tich hop | Doc evidence snapshot cua analysis; permission `query:execute`. |
-| POST        | `/market-analyses/{id}/telegram-deliveries`   | `deliverToTelegram`  | `deliverMarketAnalysisToTelegram(id, request)` | Da tich hop | Gui analysis sang Telegram destination bang `{ destinationId }`; permission `query:execute`. |
+| GET         | `/market-conversations/{conversationId}/messages` | `getMarketConversationMessages` | `getMarketConversationMessages(conversationId, beforeMessageId?)` | Da tich hop | Tai message history theo exclusive cursor `beforeMessageId` va optional `size`; message la text-only va khong con `kind`/`analysisId`; permission `query:execute`. |
+| POST        | `/market-conversations/{id}/messages`         | `submitMessage`      | `submitMarketConversationMessage(id, request)` | Da tich hop | Submit bang `{ message }`; frontend khong gui optional `asOfTime`; response chi gom `userMessage` va `assistantMessage`; permission `query:execute`. |
+| GET         | `/market-analyses/{id}`                       | `getAnalysis`        | `-` | Chua tich hop | Backend van publish persisted analysis snapshot, nhung frontend khong con action/surface vi conversation message khong co `analysisId`; permission `query:execute`. |
+| GET         | `/market-analyses/{id}/evidence`              | `getAnalysisEvidence` | `-` | Chua tich hop | Backend van publish evidence snapshot, nhung frontend khong con analysis entry point; permission `query:execute`. |
+| POST        | `/market-analyses/{id}/telegram-deliveries`   | `deliverToTelegram`  | `-` | Chua tich hop | Backend van ho tro delivery bang `{ destinationId }`, nhung frontend khong con manual delivery tu conversation; permission `query:execute`. |
 
 Frontend lien quan:
 
@@ -261,15 +261,15 @@ Ghi chu:
 - Spec request cua `POST /query` van cho phep field optional `asOfTime`, nhung workbench frontend v1 chu dong khong gui field nay de backend tu lay thoi diem hien tai.
 - Snapshot OpenAPI hien tai mo ta `evidence[].publishedAt` va `keyEvents[].occurredAt` la `date-time` string; frontend market-query definitions dang cho phep them `null` de tuong thich voi payload runtime da quan sat.
 - `MarketQueryKeyEventResponse` da doi `summary` thanh `description`; FE da dong bo DTO va legacy renderer cho field moi.
-- `MarketQueryResponse` co them `keyNarratives[]`; FE da them type/schema cho field nay va persisted analysis UI render key narratives tu `MarketAnalysisResponse`.
+- `MarketQueryResponse` co them `keyNarratives[]`; FE legacy query type/schema van map field nay, nhung conversation text-only khong render persisted analysis detail.
 - `MarketQueryEvidenceResponse` hien dung `eventId`, `eventTitle`, `newsArticleId`, `newsArticleTitle`, `newsArticleUrl`, `newsOutletName`, `publishedAt`, `evidenceRole`, `evidenceConfidence`, `evidenceNote`; FE da doi DTO/list legacy sang `newsArticle*` va render note.
 - Snapshot ngay 7/6 doi ten schema OpenAPI persisted conversation tu nhom `MarketConversation*` sang `ConversationSummaryResponse`, `ConversationDetailResponse`, `ChatMessageResponse`, `CreateConversationRequest`, `SubmitConversationMessageRequest`, va `SubmitConversationMessageResponse`.
 - Schema conversation summary/detail hien dung timestamp `createdDate` va `lastModifiedDate`; `ChatMessageResponse` dung `createdDate`. FE `app/lib/market-query/definitions.ts` va global assistant modal da parse/render theo field snapshot hien tai, va history sort mac dinh theo `lastModifiedDate`.
 - `MarketConversationMessagePageResponse` gom `content: ChatMessageResponse[]`, `hasMore`, va `nextBeforeMessageId`. Query `beforeMessageId` la exclusive cursor; `size` optional co gioi han `1..100`, nhung OpenAPI hien khai bao schema type la `string`.
-- `SubmitConversationMessageResponse.analysisId` va `ChatMessageResponse.analysisId` co the la `null` khi assistant tra CHAT, CLARIFICATION, hoac REFUSAL. Khi do `assistantMessage.kind = TEXT`; chi khi `assistantMessage.kind = ANALYSIS` va `analysisId` hop le thi FE moi hien analysis part/link detail.
-- API khong tra `responseType`; FE khong suy luan CHAT/CLARIFICATION/REFUSAL tu noi dung text, va cac turn non-analysis duoc render nhu assistant text thong thuong.
+- `ChatMessageResponse` gom `id`, `role`, `status`, `content`, `failureReason`, va `createdDate`; `status` chi con `COMPLETED` / `FAILED`, khong con `PENDING`, `kind`, hoac `analysisId`.
+- API khong tra message subtype; FE khong suy luan CHAT/CLARIFICATION/REFUSAL/ANALYSIS tu noi dung va render moi assistant turn nhu text thong thuong.
 - FE da co action/DTO cho paginated message history qua `GET /market-conversations/{conversationId}/messages` va global assistant modal dung cursor `beforeMessageId` de tai tin nhan cu.
-- `MarketAnalysisResponse` luu snapshot cau hoi, answer, reasoning, key events/narratives, asset scope, model provider/name, status, timestamps; `MarketAnalysisEvidenceResponse` co `sourceType` EVENT/NARRATIVE/NEWS_ARTICLE/EVENT_NEWS_ARTICLE_EVIDENCE/ECONOMIC_CALENDAR_ENTRY va evidence snapshot fields.
+- Backend van publish `MarketAnalysisResponse` va evidence/delivery endpoints, nhung frontend da bo action/DTO/UI khong con caller sau khi conversation message bo `analysisId`.
 - FE primary surface hien la global AI assistant modal; khong con UI route `/market-conversations`, `/market-conversations/{id}`, `/market-query`, hoac redirect compatibility cho lien ket cu.
 
 ### 7. API graph view
@@ -641,8 +641,8 @@ type ActionResult<T = void> =
 - `personal notes`: FE render/copy response `title` voi fallback da localize, nhung editor va draft da freeform, khong ep H1 dau hay title placeholder. Create title la backend snapshot tu content; content update giu stored title. OpenAPI van chua encode required/nullable hoac lifecycle cua `title`; delete va explicit rename chua tich hop.
 - `languages`: frontend da co URL locale va `Accept-Language`, nhung chua co backend action cho `GET /languages` va `PATCH /me/preferred-language`; `LanguageSelector` hien chi doi route locale.
 - `narratives`: snapshot moi them `/narratives*`, graph narrative node/edge, va market query `keyNarratives[]`; FE chua co module narratives rieng hoac market-query narrative panel, nhung Graph View da model/render narrative node/edge.
-- `market query`: spec van mo ta `asOfTime` la optional `date-time`; frontend conversation v1 chu dong omit field nay de backend tu lay thoi diem hien tai va harden parse cho payload runtime co the tra `null` o `publishedAt` va `occurredAt`. Frontend khong con legacy `/market-query` route hay redirect compatibility; global assistant modal la UI primary surface.
-- `market conversation messages`: snapshot da co cursor endpoint `GET /market-conversations/{conversationId}/messages`; FE da co action, response schema, va lazy history loading trong global assistant modal.
+- `market query`: spec van mo ta `asOfTime` la optional `date-time`; frontend conversation chu dong omit field nay de backend tu lay thoi diem hien tai va harden parse cho payload runtime co the tra `null` o `publishedAt` va `occurredAt`. Frontend khong con legacy `/market-query` route hay redirect compatibility; global assistant modal la UI primary surface.
+- `market conversation messages`: FE da dong bo `ChatMessageResponse` text-only, bo `kind`, `analysisId`, `PENDING`, analysis data part, va analysis detail actions; cursor history va synchronous submit van giu nguyen.
 - `graph view`: snapshot moi bo node kind `theme` va `warm-episode`, bo edge kind `event-theme`, `asset-warm-episode`, va `warm-episode-event`, va them `metadata.themes[]` cho event/narrative node; FE Graph View da dong bo definitions, visuals, model build, inspector, va i18n theo contract moi.
 - `user profile`: `GET /me` da dong bo `currentWorkspace`, `mainImage` media object, va `permissions[]`, nhung snapshot moi them `preferredLanguage`; runtime hien van chi dung permission loader.
 - `blogs`: create va response dung `visible`, update dung `isVisible`; frontend van can tiep tuc xu ly ky de tranh drift.
