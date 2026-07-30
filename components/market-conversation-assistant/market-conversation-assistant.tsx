@@ -595,7 +595,7 @@ export function MarketConversationAssistant({
                         </PopoverTrigger>
                         <PopoverContent
                           align="start"
-                          className="w-80 max-w-[calc(100vw-2rem)] p-0"
+                          className="w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl p-0"
                         >
                           <Command shouldFilter={false}>
                             <CommandInput
