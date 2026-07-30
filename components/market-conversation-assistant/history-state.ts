@@ -67,6 +67,17 @@ export function getMessageText(message: MarketChatMessageResponse) {
   return message.content ?? ""
 }
 
+export function shouldRenderAssistantMarkdown(
+  message: MarketChatMessageResponse,
+  isRevealing: boolean
+) {
+  return (
+    message.role === "ASSISTANT" &&
+    message.status === "COMPLETED" &&
+    !isRevealing
+  )
+}
+
 export function getRenderableConversationMessages(
   messages: MarketChatMessageResponse[]
 ): MarketChatMessageResponse[] {

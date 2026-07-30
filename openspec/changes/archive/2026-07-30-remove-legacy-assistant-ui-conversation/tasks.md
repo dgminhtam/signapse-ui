@@ -19,7 +19,7 @@
 
 - [x] 4.1 Run static searches confirming current application source, scripts, manifest, lockfile, guidance, and API ownership docs contain no legacy Assistant UI runtime imports, symbols, paths, or direct dependency, with archives and agent tooling explicitly excluded.
 - [x] 4.2 Run the deterministic `components/market-conversation-assistant/history-state.assert.mjs` check and targeted ESLint for the active conversation, protected boundary, dictionaries, and affected documentation-supporting source.
-- [ ] 4.3 Run the repository typecheck and production build to verify dependency pruning leaves the active protected conversation graph compilable.
+- [x] 4.3 Run the repository typecheck and production build to verify dependency pruning leaves the active protected conversation graph compilable.
 - [x] 4.4 Run `openspec validate remove-legacy-assistant-ui-conversation --strict` and confirm all artifacts remain apply-ready.
 - [x] 4.5 Confirm no Assistant UI-owned skill directory or lock entry remains and all unrelated skill directories still exist.
 

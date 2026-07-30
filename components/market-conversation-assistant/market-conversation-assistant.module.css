@@ -12,6 +12,12 @@
   animation: market-conversation-assistant-shimmer 1.5s linear infinite;
 }
 
+.markdown {
+  --typeset-size: 0.875rem;
+  --typeset-leading: 1.6;
+  --typeset-flow: 0.875em;
+}
+
 @keyframes market-conversation-assistant-shimmer {
   to {
     background-position: -200% 0;

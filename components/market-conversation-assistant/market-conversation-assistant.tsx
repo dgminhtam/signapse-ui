@@ -1,6 +1,8 @@
 "use client"
 
 import * as React from "react"
+import Markdown, { type Components } from "react-markdown"
+import remarkGfm from "remark-gfm"
 import { useDebouncedCallback } from "use-debounce"
 import {
   ArrowUpIcon,
@@ -88,6 +90,7 @@ import {
   getTrackingRailState,
   mergeConversationHistory,
   shouldLoadConversationHistory,
+  shouldRenderAssistantMarkdown,
   splitResponseIntoGraphemes,
   type DemoConversationLabels,
 } from "./history-state"
@@ -95,6 +98,21 @@ import {
 const USER_PREVIEW_LIMIT = 72
 const ASSISTANT_PREVIEW_LIMIT = 160
 const HISTORY_SCROLL_THRESHOLD = 32
+
+const assistantMarkdownComponents: Components = {
+  h1: ({ children }) => <h3>{children}</h3>,
+  h2: ({ children }) => <h4>{children}</h4>,
+  h3: ({ children }) => <h5>{children}</h5>,
+  h4: ({ children }) => <h6>{children}</h6>,
+  h5: ({ children }) => <h6>{children}</h6>,
+  h6: ({ children }) => <h6>{children}</h6>,
+  img: () => null,
+  table: ({ children }) => (
+    <div className="typeset-scroll">
+      <table>{children}</table>
+    </div>
+  ),
+}
 
 interface MarketConversationAssistantProps {
   displayName: string | null
@@ -1167,6 +1185,10 @@ function DemoMessage({
   const text = getMessageText(message)
   const isFailedAssistant =
     message.role === "ASSISTANT" && message.status === "FAILED"
+  const shouldRenderMarkdown = shouldRenderAssistantMarkdown(
+    message,
+    accessibleText !== undefined
+  )
   const failureText = message.failureReason?.trim() || labels.messageFailed
 
   return (
@@ -1185,15 +1207,33 @@ function DemoMessage({
               variant={isUser ? "default" : "ghost"}
               align={isUser ? "end" : "start"}
             >
-              <BubbleContent>
-                <p
-                  aria-hidden={accessibleText === undefined ? undefined : true}
-                  className="whitespace-pre-wrap"
-                >
-                  {text}
-                </p>
-                {accessibleText === undefined ? null : (
-                  <p className="sr-only">{accessibleText}</p>
+              <BubbleContent
+                className={shouldRenderMarkdown ? "w-full" : undefined}
+              >
+                {shouldRenderMarkdown ? (
+                  <div className={cn("typeset w-full", styles.markdown)}>
+                    <Markdown
+                      components={assistantMarkdownComponents}
+                      remarkPlugins={[remarkGfm]}
+                      skipHtml
+                    >
+                      {text}
+                    </Markdown>
+                  </div>
+                ) : (
+                  <>
+                    <p
+                      aria-hidden={
+                        accessibleText === undefined ? undefined : true
+                      }
+                      className="whitespace-pre-wrap"
+                    >
+                      {text}
+                    </p>
+                    {accessibleText === undefined ? null : (
+                      <p className="sr-only">{accessibleText}</p>
+                    )}
+                  </>
                 )}
               </BubbleContent>
             </Bubble>

@@ -8,6 +8,7 @@ import {
   getResponseRevealCount,
   getResponseRevealDuration,
   mergeConversationHistory,
+  shouldRenderAssistantMarkdown,
   splitResponseIntoGraphemes,
 } from "./history-state.ts"
 
@@ -89,6 +90,10 @@ assert.deepEqual(
   [1, 2, 3]
 )
 assert.equal(getMessagePreviewText(failed, "Fallback"), "Analysis failed")
+assert.equal(shouldRenderAssistantMarkdown(messages[0], false), false)
+assert.equal(shouldRenderAssistantMarkdown(messages[1], true), false)
+assert.equal(shouldRenderAssistantMarkdown(messages[1], false), true)
+assert.equal(shouldRenderAssistantMarkdown(failed, false), false)
 
 const graphemes = splitResponseIntoGraphemes("A\u0301 👨‍👩‍👧‍👦")
 assert.deepEqual(graphemes, ["A\u0301", " ", "👨‍👩‍👧‍👦"])
