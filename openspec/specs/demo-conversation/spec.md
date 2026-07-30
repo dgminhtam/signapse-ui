@@ -24,7 +24,7 @@ The system SHALL expose the promoted conversation surface from the locale-aware 
 
 ### Requirement: Global conversation session ownership
 
-The promoted conversation SHALL own one in-memory session for the active workspace and SHALL NOT read or mutate the inactive legacy assistant runtime.
+The promoted conversation SHALL own one in-memory session for the active workspace.
 
 #### Scenario: Close and reopen the conversation
 

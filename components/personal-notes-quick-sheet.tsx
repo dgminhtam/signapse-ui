@@ -603,15 +603,16 @@ function PersonalNotesQuickSheet() {
                         <Item
                           key={note.id}
                           role="listitem"
+                          className="cursor-pointer"
                           size="sm"
                           variant={isSelected ? "muted" : "outline"}
+                          onClick={() => void loadNoteDetail(note.id)}
                         >
                           <ItemContent>
                             <button
                               type="button"
-                              className="min-w-0 text-left"
+                              className="w-full min-w-0 cursor-pointer text-left"
                               aria-current={isSelected ? "true" : undefined}
-                              onClick={() => void loadNoteDetail(note.id)}
                             >
                               <span className="line-clamp-1 text-sm leading-snug font-medium">
                                 {displayTitle}
@@ -619,7 +620,9 @@ function PersonalNotesQuickSheet() {
                             </button>
                           </ItemContent>
                           {canUpdate || canDelete ? (
-                            <ItemActions>
+                            <ItemActions
+                              onClick={(event) => event.stopPropagation()}
+                            >
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                   <Button

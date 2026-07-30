@@ -253,7 +253,7 @@ Frontend lien quan:
 - `app/api/market-conversations/action.ts`
 - `app/lib/market-query/definitions.ts`
 - `app/lib/market-query/permissions.ts`
-- `components/assistant-ui/*`
+- `components/market-conversation-assistant/*`
 - `components/protected-ai-assistant.tsx`
 
 Ghi chu:
@@ -600,7 +600,7 @@ type ActionResult<T = void> =
 | Source documents (legacy, ngoai snapshot) | `app/(main)/source-documents/page.tsx`, `app/(main)/source-documents/[id]/page.tsx` (redirect compatibility)                                                    |
 | Events                                    | `app/api/events/action.ts`, `app/lib/events/definitions.ts`, `app/lib/events/permissions.ts`, `app/(main)/events/*`                                             |
 | Market charts                             | `app/api/market-charts/action.ts`, `app/lib/market-charts/definitions.ts`, `app/lib/market-charts/permissions.ts`, `app/(main)/market-charts/*`                 |
-| Market query                              | `app/api/query/action.ts`, `app/api/market-conversations/action.ts`, `app/lib/market-query/definitions.ts`, `app/lib/market-query/permissions.ts`, `components/assistant-ui/*`, `components/protected-ai-assistant.tsx` |
+| Market query                              | `app/api/query/action.ts`, `app/api/market-conversations/action.ts`, `app/lib/market-query/definitions.ts`, `app/lib/market-query/permissions.ts`, `components/market-conversation-assistant/*`, `components/protected-ai-assistant.tsx` |
 | Graph view                                | `app/api/graph-view/action.ts`, `app/lib/graph-view/definitions.ts`, `app/lib/graph-view/permissions.ts`, `app/(main)/graph-view/*`                             |
 | Narratives                                | `-`                                                                                                                                                             |
 | Blogs                                     | `app/api/blogs/action.ts`, `app/lib/blogs/definitions.ts`                                                                                                       |

@@ -1,6 +1,8 @@
-# Signapse Visual Design Direction
+# Signapse UI/UX Design System
 
-Tài liệu này là nguồn chuẩn cho hướng thiết kế thị giác của Signapse. Mục tiêu là dịch tinh thần từ hai reference trong `docs/design/` thành một visual system phù hợp với dashboard quản trị dữ liệu tài chính, không sao chép nguyên layout landing page.
+Tài liệu này là nguồn chuẩn cho các quy ước UI/UX bền vững của Signapse: visual, theme, layout, component composition, interaction, content, state, accessibility và UI review. Mọi thay đổi hoặc review UI hiển thị cho người dùng dưới `app/[lang]/**` hoặc `components/**` phải tuân theo tài liệu này cùng các technical boundary trong `components/AGENTS.override.md`.
+
+Tài liệu không sở hữu kiến trúc repository, dependency/import boundary, API, permission, validation, localization mechanism, workflow hay verification policy. Các nội dung đó vẫn thuộc `AGENTS.md`, scoped overrides và skills tương ứng.
 
 ## Reference
 
@@ -10,7 +12,7 @@ Tài liệu này là nguồn chuẩn cho hướng thiết kế thị giác của
 Hai reference thể hiện một ngôn ngữ thiết kế rất hợp với Signapse:
 
 - Tối giản, sắc nét, nhiều khoảng thở.
-- Card viền mảnh, bo lớn, shadow nhẹ.
+- Inner surface có viền mảnh, chiều sâu nhẹ và hierarchy rõ.
 - Nền grid rất tinh tế, không cạnh tranh với nội dung.
 - Typography rõ, heading mạnh, metadata nhỏ và tracking rộng.
 - Metric cards và status surfaces có hierarchy rõ.
@@ -33,7 +35,7 @@ Signapse không phải landing page marketing. Đây là công cụ vận hành 
 - Tạo một visual language thống nhất cho dashboard Signapse.
 - Áp dụng reference theo hướng token, surface và hierarchy, không hardcode theo từng màn.
 - Giữ UI tiếng Việt chuyên nghiệp, dễ đọc.
-- Giữ Inter làm font chính cho trải nghiệm SaaS/admin gọn và hỗ trợ tiếng Việt tốt.
+- Dùng Geist và Geist Mono theo stack hiện tại, với hierarchy rõ và khả năng đọc tiếng Việt tốt.
 - Tăng cảm giác tài chính, phân tích và vận hành mà vẫn giữ mật độ thông tin phù hợp admin tool.
 - Bảo toàn accessibility, responsive layout và skeleton parity.
 
@@ -41,11 +43,9 @@ Signapse không phải landing page marketing. Đây là công cụ vận hành 
 
 - Không clone layout hero/section của reference.
 - Không biến dashboard thành marketing page.
-- Không sửa shadcn primitives trong `components/ui`.
 - Không đổi API, permission, form validation hoặc workflow nghiệp vụ.
-- Không thêm font dependency mới trong first pass.
 - Không thêm animation lớn hoặc motion trang trí nặng.
-- Không rollout toàn bộ app trước khi pilot được kiểm tra.
+- Không dùng tài liệu này để thay thế component API rules, skill workflow hoặc technical guardrails.
 
 ## Design Principles
 
@@ -87,81 +87,62 @@ Reference là landing page. Signapse là dashboard. Khi có xung đột, ưu ti�
 
 Light mode và dark mode phải là hai biến thể của cùng một direction. Không để light mode quá trắng phẳng hoặc dark mode quá đen chìm.
 
-## Token Direction
+## Theme And Component Chrome
 
-Các giá trị cụ thể sẽ được chốt trong implementation sau. First pass nên đi theo hướng sau:
+- Feature/shared code dùng default chrome của preset `radix-nova` qua wrappers trong `@/components/ui/`.
+- `className` trên shadcn primitives chỉ dùng cho layout như width, max-width, flex/grid, gap, alignment, max-height, overflow, truncate hoặc responsive constraints.
+- Không thêm `h-*`, `min-h-*`, `rounded-*`, padding, foreground/background, border, ring, shadow hoặc typography classes chỉ để đổi height, radius, color, border hay density mặc định của primitive.
+- Khi cần control compact, ưu tiên variant/size sẵn có; chỉ hard-code height/radius khi không có option phù hợp và có product reason rõ.
+- Wrapper trong `components/ui` có thể được bảo trì theo shadcn workflow, nhưng không nhận feature-specific visual customization.
 
-| Token | Direction |
-| --- | --- |
-| `--background` | Warm neutral gần trắng ở light mode, near-black có độ sâu nhẹ ở dark mode |
-| `--foreground` | Contrast cao, không quá gắt |
-| `--card` | Gần background nhưng đủ tách lớp |
-| `--card-foreground` | Rõ, ưu tiên readability |
-| `--muted` | Surface phụ rất nhẹ, không làm đục UI |
-| `--muted-foreground` | Metadata dịu nhưng vẫn đủ contrast |
-| `--border` | Viền mảnh, opacity thấp, tạo structure hơn là decoration |
-| `--input` | Đồng bộ border treatment với card/table |
-| `--ring` | Focus rõ, chuyên nghiệp, không neon |
-| `--primary` | Monochrome mạnh, dùng cho CTA chính |
-| `--accent` | Dùng rất tiết chế cho hover/active surfaces |
-| `--destructive` | Giữ rõ ràng, không pha quá tối |
-| `--sidebar` | Cùng family với background/card, không lệch theme |
-| `--chart-*` | Màu data có độ phân biệt tốt, tránh quá rực |
-| `--radius` | Tăng nhẹ để gần reference, nhưng vẫn hợp bảng/form |
+### Semantic Tokens
 
-### Grid And Atmosphere
+- `app/globals.css` và `tailwind.baseColor` trong `components.json` giữ neutral default của `radix-nova`.
+- Không đổi `--primary`, `--accent`, `--sidebar-*`, `--chart-*`, radius hoặc wrapper chrome để sửa một vấn đề cục bộ.
+- Màu feature đi qua semantic tokens hoặc shared app-level surfaces; không dùng raw palette tùy ý.
+- Light và dark mode là hai biến thể của cùng một system, có contrast và hierarchy tương đương.
+- Background grid hoặc depth decoration, nếu có, chỉ thuộc app shell/shared surface và phải rất nhẹ; không lặp ở từng card.
+- Shadow tạo hierarchy nhẹ, không dùng để làm destructive/alert state nổi bật.
 
-Grid nền nên rất nhẹ, gần như chỉ cảm nhận được khi nhìn tổng thể. Không đặt grid làm họa tiết chính.
+### Badge Colors
 
-Guideline:
+- Ưu tiên các variant `default`, `secondary`, `destructive`, `outline` hoặc `ghost`.
+- Khi cần categorical color ngoài built-in variants, chỉ `<Badge>` được dùng các palette sau:
+  - Blue: `bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300`.
+  - Green: `bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300`.
+  - Sky: `bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-300`.
+  - Purple: `bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300`.
+  - Red: `bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300`.
+- Exception này không cho phép raw palette hoặc manual `dark:` color classes trên primitive khác.
 
-- Light mode: grid opacity cực thấp, tone warm gray.
-- Dark mode: grid hơi sáng hơn nền một chút, không tạo banding.
-- Grid chỉ nên nằm ở app shell hoặc wrapper cấp cao.
-- Không lặp grid trong từng card con.
-
-### Shadow And Depth
-
-Shadow nên dùng để tạo chiều sâu nhẹ, không tạo cảm giác floating SaaS generic.
-
-Guideline:
-
-- Table/card shell: shadow rất nhẹ hoặc không shadow.
-- Focused workbench/hero-like surfaces: có thể dùng shadow sâu hơn nhưng opacity thấp.
-- Destructive/alert states không dùng shadow để gây chú ý; dùng color/hierarchy.
-
-## Component Translation
+## Layout And Surface Composition
 
 ### App Shell
 
-App shell là nơi nên mang grid/background atmosphere. Layout cần giữ cảm giác yên, có khoảng thở và không tạo quá nhiều border cạnh tranh.
+App shell giữ cảm giác yên, có khoảng thở và không tạo quá nhiều border cạnh tranh. Page padding phải đủ thoáng trên desktop nhưng không làm mobile chật.
 
-Translation:
-
-- Main content có background rhythm nhẹ.
-- Header border mảnh, không quá nặng.
-- Page padding đủ thoáng trên desktop, không làm mobile bị chật.
+- Pages trong `app/[lang]/(main)` dùng cardless workspace từ parent padding layout.
+- Breadcrumb trong app header là page identity chính cho simple pages; sửa breadcrumb mapping thay vì thêm body heading trùng lặp.
+- Top loading bar luôn bật cho page transitions.
 
 ### Sidebar And Header
 
 Sidebar là navigation vận hành, không phải brand hero. Cần sạch, ít nhiễu, active state rõ.
 
-Translation:
+- Real active item dùng `sidebar-primary` và `sidebar-primary-foreground` như neutral selected surface, không giống CTA/inverse button.
+- Hover dùng `sidebar-accent`; focus-visible giữ `sidebar-ring`. Focus là accessibility state, không trộn với selected/current state.
+- Open parent không có background state; expanded state chỉ cần chevron rotation.
+- Active item và parent có active child không tăng font weight chỉ vì state.
+- Không thêm active-color token, dùng global `accent` hoặc đổi `--sidebar-*` để sửa cục bộ.
+- Density thuộc `AppSidebar`; child list giữ left indent rõ, mở rộng hợp lý và dùng `py-1`.
+- Không thêm decoration cạnh tranh với content; label tiếng Việt phải đúng dấu và nhất quán.
 
-- Giữ nav user behavior như hiện tại.
-- Active menu rõ bằng token sidebar/accent.
-- Không thêm decoration cạnh tranh với content.
-- Label tiếng Việt phải đúng dấu và nhất quán.
+### Page And Card Surfaces
 
-### Page Card Shell
-
-Card shell vẫn là convention chính của repo. Direction mới nên làm Card trông như một panel tài chính sạch:
-
-- Border mảnh.
-- Radius lớn vừa phải.
-- Header có hierarchy rõ.
-- Separator nhẹ.
+- Không bọc toàn bộ page trong main `<Card>` chỉ để lặp breadcrumb title.
+- Chỉ dùng `<Card>` cho inner surface có boundary thật như form section, detail panel, dashboard tile, access-denied/error panel hoặc repeated item.
 - Không dùng nested Card chỉ để lấy border/radius nếu đã có shared surface phù hợp.
+- List page render toolbar, `AppListTable` và pagination trực tiếp, không thêm outer Card/Header/Title/Description/Separator.
 
 ### List Table Surface
 
@@ -169,11 +150,14 @@ Table là bề mặt quan trọng nhất của dashboard. Reference có nhiều 
 
 Translation:
 
-- Shell nhất quán qua `AppListTable`.
+- Shell nhất quán qua `AppListTable`; component này cung cấp standard `mt-4`, còn `AppListToolbar` không sở hữu bottom margin.
 - Header row dịu, không quá đậm.
-- Empty state nằm trong table surface.
+- Table dùng shared header và empty-state components; empty state nằm trong table surface.
 - Skeleton phải giống bố cục table thật.
 - Row hover nhẹ, không làm mất contrast.
+- Multiline cell override default nowrap cục bộ; long text phải có wrapping, truncation hoặc line-clamp strategy rõ.
+- Boolean toggle trong row dùng compact status capsule có label, switch, `aria-label`, pending/disabled behavior ổn định và skeleton cùng hình dạng.
+- Plain timestamp dùng icon `size-3` và `text-xs text-muted-foreground tabular-nums`, không dùng badge hay strong value styling.
 
 ### Toolbar
 
@@ -181,10 +165,9 @@ Toolbar là control surface. Nó nên gọn, có nhóm trái/phải rõ, không 
 
 Translation:
 
-- Primary action bên trái.
-- Search gần action chính.
-- Sort/filter/page size bên phải.
-- Control group có border/background nhẹ, gần reference pill/card treatment.
+- Layout responsive dùng `flex-col sm:flex-row sm:justify-between`.
+- Leading area chứa primary action và search; trailing area chứa filter, sort và page size.
+- Primary controls giữ default shadcn size/chrome; không thêm custom height/radius/padding hoặc `size="sm"` chỉ để đổi density.
 
 ### Forms
 
@@ -192,10 +175,13 @@ Form cần rõ field, description, validation và pending state.
 
 Translation:
 
-- Field spacing thoáng nhưng không quá marketing.
+- Form dùng `AppFormShell`, `AppFormShellBody`, `AppFormShellFooter`; chọn width `sm` cho form đơn giản, `md` cho CRUD phổ biến và `lg` cho form dày.
+- Body dùng `FieldGroup`, `FieldSet` và `gap-*`; flex/grid layouts dùng `gap-*`, không dùng `space-y-*`.
 - Description dùng muted foreground.
-- Submit/pending state rõ với spinner.
-- Cancel trong edit mode giữ ghost variant.
+- Footer tách khỏi body bằng border/subtle background và chứa primary/secondary actions.
+- Submit/save pending phải disabled và hiển thị `<Spinner>`.
+- Edit flow có ghost Cancel khôi phục initial data hoặc thoát an toàn.
+- Switch trong create/update/detail dùng compact field treatment; row capsule, toolbar/workbench toggle, permission matrix và route-row switch giữ pattern riêng.
 
 ### Empty, Loading, Error, Permission
 
@@ -207,6 +193,7 @@ Translation:
 - Loading skeleton bám bố cục thật.
 - Error copy tiếng Việt rõ, không kỹ thuật hóa quá mức.
 - Permission denied nói rõ quyền cần thiết nhưng không đổ lỗi người dùng.
+- Irreversible destructive action dùng `<AlertDialog>` với warning rõ.
 
 ### Workbench Screens
 
@@ -219,55 +206,47 @@ Translation:
 - Evidence, status, confidence, limitations cần dễ scan.
 - Decorative atmosphere không được che mất canvas hoặc data.
 
-## Pilot Plan
+## Interaction And Navigation
 
-Pilot mặc định:
+### Submit And Transition Feedback
 
-- List/detail/form pilot: `/system-prompts`
-- Rich workbench pilot: `/market-query`
+- Sau submit thành công, dùng `router.push()` về list page rồi `router.refresh()`.
+- Pending state không thay đổi layout đột ngột; spinner thay thế feedback cùng vị trí thay vì thêm decoration mới.
 
-Lý do:
+### URL State, Search And Pagination
 
-- `/system-prompts` mới, có list, create, edit, delete, permission, empty/loading/error states tương đối rõ.
-- `/market-query` có nội dung phân tích giàu hierarchy, phù hợp kiểm tra direction trên workbench thật.
+- Filter, search, sort, `page` và `size` nằm trong URL; browser URL 1-indexed, backend pagination 0-indexed.
+- Search nằm trong `[feature]-search.tsx`, là controlled `type="search"` input khởi tạo từ `useSearchParams()` và sync khi query param thay đổi.
+- Input có `id` và `sr-only` label; search debounce `300ms` qua `use-debounce`, không thêm Search button nếu không có business requirement.
+- Khi search đổi, trim value, xóa query param nếu rỗng và reset `page` về `1`.
+- Search dùng `InputGroup`, `InputGroupInput`, `InputGroupAddon`; idle icon và pending `<Spinner>` thay nhau trong leading addon. Không dùng absolute icon, trailing spinner hoặc reserved trailing width.
+- Wrapper dùng `w-full sm:w-80 lg:w-96` và nằm ở leading area của toolbar.
+- Page-size selector nằm trong trailing controls với options `10`, `20`, `50`, `100`, mặc định `10`; không lặp trong footer pagination.
+- Sort/page-size pending chỉ disabled control, không render spinner trong hoặc cạnh select trigger.
 
-Nếu cần đổi pilot:
+### Quick Detail Overlay
 
-- `/economic-calendar` là lựa chọn tốt cho list/detail data-heavy.
-- `/graph-view` là lựa chọn tốt cho canvas/workspace, nhưng rủi ro cao hơn vì có đồ thị và layout phức tạp.
+- Quick detail trong Graph View, Market Charts hoặc dense workbench là local overlay do workspace sở hữu qua local state.
+- Open/close overlay không đổi URL và không dùng `router.back()`, `router.push()` hoặc `router.replace()` chỉ để quản lý drawer state.
+- Canonical routes như `/events/{id}` và `/news-articles/{id}` vẫn là full detail pages cho normal link, reload, copied URL, direct navigation và list/detail CRUD.
+- Drawer chứa loading, error/access-denied state bên trong overlay, focused content không embed full page shell và action rõ để mở canonical full detail page.
 
-## Rollout Order
+## Content And Language
 
-1. Hoàn thiện tài liệu này.
-2. Token pass trong `app/globals.css`.
-3. App shell pass trong `app/(main)/layout.tsx`.
-4. Shared surface pass cho `AppListTable` và `AppListToolbar`.
-5. Pilot `/system-prompts`.
-6. Pilot `/market-query`.
-7. Rollout sang các active list pages.
-8. Rollout sang detail/form pages.
-9. Rollout sang workbench/canvas pages còn lại.
-10. Cập nhật `AGENTS.md` nếu có rule visual bền vững cần review.
+- Mỗi screen chỉ hiển thị text giúp người dùng ra quyết định hoặc hoàn thành task; không lặp ý nghĩa của breadcrumb, control hoặc metric.
+- Tránh decorative badge, body heading lặp page identity, hero copy, `CardDescription`, placeholder panel hoặc implementation-detail copy không có decision value.
+- Dense data screen ưu tiên controls và primary data; long copy, roadmap/future notes và legal/vendor notes chuyển sang tooltip, help text, footer legal area hoặc docs.
+- User-facing copy phải được localization và tiếng Việt phải tự nhiên, đúng dấu; technical instructions chịu trách nhiệm quy định helper cụ thể.
+- Vendor/license attribution phải ở vị trí người dùng truy cập được khi rời main surface.
 
-## Deferred Rollout Targets
+## Accessibility And Responsive Behavior
 
-Các page nên được xem xét sau pilot:
-
-- `/economic-calendar`
-- `/news-outlets`
-- `/news-articles`
-- `/events`
-- `/ai-provider-configs`
-- `/cronjobs`
-- `/roles`
-- `/graph-view`
-
-Các route hidden hoặc legacy redirect không nên là mục tiêu đầu tiên:
-
-- `/topics`
-- `/sources`
-- `/news-sources`
-- `/source-documents`
+- Preserve semantic elements, labels, keyboard interaction, focus visibility và screen-reader names.
+- Dialog/overlay restore focus an toàn; icon-only control có accessible name.
+- Search, form controls và switches có label hoặc `aria-label` phù hợp.
+- Icons trong button dùng wrapper `data-icon` treatment.
+- Skeleton và Suspense fallback mirror final layout ở mọi breakpoint.
+- Desktop, tablet và mobile giữ hierarchy và không tạo horizontal overflow ngoài surface chủ đích.
 
 ## Intentional Deviations From Reference
 
@@ -276,12 +255,11 @@ Các route hidden hoặc legacy redirect không nên là mục tiêu đầu tiê
 - Không biến mọi content block thành card marketing.
 - Không giảm mật độ table quá nhiều.
 - Không thêm decorative floating cards nếu không phục vụ dữ liệu.
-- Không dùng animation reveal lớn trong first pass.
-- Không đổi font khỏi Inter trong first pass.
+- Không dùng animation reveal lớn hoặc decorative motion gây xao nhãng.
 
-## Visual QA Checklist
+## UI Review Criteria
 
-Trước khi coi rollout visual là xong, cần kiểm tra:
+Khi implement hoặc review UI, kiểm tra các state và breakpoint liên quan:
 
 - Light mode và dark mode.
 - Sidebar mở rộng và collapsed.
@@ -299,20 +277,4 @@ Trước khi coi rollout visual là xong, cần kiểm tra:
 - Không có mojibake.
 - Không có UI copy tiếng Anh mới hướng người dùng, trừ tên riêng hoặc thuật ngữ kỹ thuật cần thiết.
 
-## Implementation Guardrails
-
-- Không sửa `components/ui`.
-- Không đổi workflow nghiệp vụ.
-- Không đổi API contract.
-- Không hardcode màu nếu token/shared surface xử lý được.
-- Không sửa các page ngoài pilot trong first implementation pass.
-- Nếu full lint fail do nợ cũ, báo rõ lỗi nào không thuộc change.
-- Nếu visual direction làm giảm readability hoặc density, ưu tiên readability.
-
-## Rollback Notes
-
-Nếu rollout visual gây vấn đề:
-
-- Có thể revert code token/surface/pilot nhưng giữ lại tài liệu này để làm reference.
-- Nếu direction không còn phù hợp, cập nhật tài liệu này trước rồi mới sửa code.
-- Không cần rollback backend hoặc data vì direction này chỉ ảnh hưởng UI/documentation.
+Ưu tiên finding theo các UI drift category: shadcn chrome, toolbar/table spacing, main-card shell, form shell, table surface, skeleton mismatch, URL/search state, accessibility regression, UI copy noise và non-Vietnamese UI copy. Nếu visual direction làm giảm readability hoặc data density cần thiết, ưu tiên readability và decision path.
