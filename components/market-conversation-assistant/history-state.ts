@@ -17,6 +17,20 @@ export function getConversationHistoryFilterFields(query: string) {
   }
 }
 
+export function shouldLoadConversationHistory({
+  query,
+  loadedQuery,
+  isLoading,
+  hasError,
+}: {
+  query: string
+  loadedQuery: string | null
+  isLoading: boolean
+  hasError: boolean
+}) {
+  return loadedQuery !== query.trim() && !isLoading && !hasError
+}
+
 export function buildConversationHistorySearchParams(
   filter: string,
   page = 0

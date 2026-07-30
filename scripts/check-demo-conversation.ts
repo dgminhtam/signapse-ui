@@ -7,6 +7,7 @@ const {
   getMessagePreviewText,
   getRenderableConversationMessages,
   getTrackingRailState,
+  shouldLoadConversationHistory,
 } = await import(
   "../components/market-conversation-assistant/history-state" + ".ts"
 )
@@ -54,6 +55,61 @@ assert.deepEqual(
   [6, 10, 14, 20, 26, 20, 14, 10, 6]
 )
 
+assert.equal(
+  shouldLoadConversationHistory({
+    query: "",
+    loadedQuery: null,
+    isLoading: false,
+    hasError: false,
+  }),
+  true
+)
+assert.equal(
+  shouldLoadConversationHistory({
+    query: "  Gold ",
+    loadedQuery: "Gold",
+    isLoading: false,
+    hasError: false,
+  }),
+  false
+)
+assert.equal(
+  shouldLoadConversationHistory({
+    query: "",
+    loadedQuery: "",
+    isLoading: false,
+    hasError: false,
+  }),
+  false
+)
+assert.equal(
+  shouldLoadConversationHistory({
+    query: "Gold",
+    loadedQuery: null,
+    isLoading: true,
+    hasError: false,
+  }),
+  false
+)
+assert.equal(
+  shouldLoadConversationHistory({
+    query: "Gold",
+    loadedQuery: null,
+    isLoading: false,
+    hasError: true,
+  }),
+  false
+)
+assert.equal(
+  shouldLoadConversationHistory({
+    query: "Oil",
+    loadedQuery: "Gold",
+    isLoading: false,
+    hasError: false,
+  }),
+  true
+)
+
 const source = await readFile(
   new URL(
     "../components/market-conversation-assistant/market-conversation-assistant.tsx",
@@ -83,5 +139,8 @@ assert.doesNotMatch(source, /<Card/)
 assert.match(source, /<PopoverHeader/)
 assert.match(source, /<PopoverTitle/)
 assert.match(source, /<Separator \/>/)
+assert.match(source, /historyLoadedQueryRef\.current = query\.trim\(\)/)
+assert.match(source, /historyLoadedQueryRef\.current = null/)
+assert.doesNotMatch(source, /setHistoryPopoverOpen[\s\S]*setHistoryQuery\(""\)/)
 
 console.log("Demo conversation checks passed")

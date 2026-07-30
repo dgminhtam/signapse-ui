@@ -87,6 +87,7 @@ import {
   getResponseRevealCount,
   getTrackingRailState,
   mergeConversationHistory,
+  shouldLoadConversationHistory,
   splitResponseIntoGraphemes,
   type DemoConversationLabels,
 } from "./history-state"
@@ -155,6 +156,7 @@ export function MarketConversationAssistant({
   >(null)
   const historyRequestIdRef = React.useRef(0)
   const historyLoadingRef = React.useRef(false)
+  const historyLoadedQueryRef = React.useRef<string | null>(null)
   const messagesRequestIdRef = React.useRef(0)
   const olderMessagesLoadingRef = React.useRef(false)
   const revealedText = responseReveal
@@ -250,6 +252,9 @@ export function MarketConversationAssistant({
         )
         setHistoryPage(page)
         setHasMoreHistory(!result.last)
+        if (page === 0) {
+          historyLoadedQueryRef.current = query.trim()
+        }
       } catch (error) {
         if (requestId === historyRequestIdRef.current) {
           setHistoryError(getErrorMessage(error, labels.historyError))
@@ -372,6 +377,7 @@ export function MarketConversationAssistant({
     messagesRequestIdRef.current += 1
     historyRequestIdRef.current += 1
     historyLoadingRef.current = false
+    historyLoadedQueryRef.current = null
     olderMessagesLoadingRef.current = false
     searchHistory.cancel()
     setSelectedConversation(null)
@@ -515,20 +521,23 @@ export function MarketConversationAssistant({
     }
   }
 
-  function setHistoryPopoverOpen(open: boolean) {
-    if (open && workspaceId == null) {
+  function setHistoryPopoverOpen(nextOpen: boolean) {
+    if (nextOpen && workspaceId == null) {
       return
     }
 
-    setHistoryOpen(open)
-    setHistoryQuery("")
-    searchHistory.cancel()
-    historyRequestIdRef.current += 1
-    historyLoadingRef.current = false
-    setIsHistoryLoading(false)
+    setHistoryOpen(nextOpen)
 
-    if (open) {
-      void loadHistoryPage(0, "")
+    if (
+      nextOpen &&
+      shouldLoadConversationHistory({
+        query: historyQuery,
+        loadedQuery: historyLoadedQueryRef.current,
+        isLoading: isHistoryLoading || historyLoadingRef.current,
+        hasError: historyError !== null,
+      })
+    ) {
+      void loadHistoryPage(0, historyQuery)
     }
   }
 
@@ -595,6 +604,7 @@ export function MarketConversationAssistant({
                                 setHistoryQuery(value)
                                 historyRequestIdRef.current += 1
                                 historyLoadingRef.current = false
+                                historyLoadedQueryRef.current = null
                                 setIsHistoryLoading(true)
                                 setHistoryConversations([])
                                 setHistoryPage(0)
