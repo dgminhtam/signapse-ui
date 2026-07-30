@@ -11,8 +11,8 @@ import {
 import {
   CircleAlertIcon,
   EllipsisIcon,
-  ExpandIcon,
-  Minimize2Icon,
+  MaximizeIcon,
+  MinimizeIcon,
   NotebookPenIcon,
   PencilIcon,
   SaveIcon,
@@ -535,7 +535,7 @@ function PersonalNotesQuickSheet() {
                 aria-pressed={isFullscreen}
                 onClick={() => void handleFullscreenToggle()}
               >
-                {isFullscreen ? <Minimize2Icon /> : <ExpandIcon />}
+                {isFullscreen ? <MinimizeIcon /> : <MaximizeIcon />}
               </Button>
             </div>
             <ScrollArea className="min-h-0 flex-1 p-4">

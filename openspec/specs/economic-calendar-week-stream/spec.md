@@ -78,7 +78,7 @@ The economic calendar list page SHALL provide top and bottom controls for moving
 - **THEN** the page changes the selected `week` to the next UTC+7 week and reloads that week window
 
 ### Requirement: Existing calendar list behavior is preserved
-The week stream SHALL preserve existing economic calendar list behaviors that are not replaced by week-window navigation.
+The week stream SHALL preserve existing economic calendar list behaviors that are not replaced by week-window navigation and remain supported by the backend contract.
 
 #### Scenario: Search and sync remain available
 - **WHEN** the week stream renders
@@ -86,5 +86,5 @@ The week stream SHALL preserve existing economic calendar list behaviors that ar
 
 #### Scenario: Event rows remain detail-capable
 - **WHEN** an event row renders in the week stream
-- **THEN** grouped day rows, market-calendar row hierarchy, expandable support content, and canonical localized detail links remain available
-
+- **THEN** grouped day rows, market-calendar row hierarchy, localized publication status, and canonical localized detail links remain available
+- **AND** supporting-content expansion is not rendered

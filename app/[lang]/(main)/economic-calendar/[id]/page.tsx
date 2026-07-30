@@ -5,7 +5,6 @@ import {
   ChevronDown,
   Clock3,
   Database,
-  FileText,
   Hash,
   Landmark,
   RefreshCcw,
@@ -95,37 +94,22 @@ function DetailCard({
 }) {
   return (
     <div className="rounded-lg border border-border bg-muted/20 p-4">
-      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+      <div className="flex items-center gap-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
         <Icon className="h-3.5 w-3.5" />
         {title}
       </div>
       <div className="mt-2">
         {valueNode ?? (
-          <p className="break-words font-medium text-foreground">{value}</p>
+          <p className="font-medium break-words text-foreground">{value}</p>
         )}
       </div>
     </div>
   )
 }
 
-function SectionHeading({
-  title,
-  icon: Icon,
-}: {
-  title: string
-  icon: ElementType
-}) {
-  return (
-    <div className="flex items-center gap-2">
-      <Icon className="h-4 w-4 text-muted-foreground" />
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-        {title}
-      </h2>
-    </div>
-  )
-}
-
-export default async function EconomicCalendarDetailPage({ params }: PageProps) {
+export default async function EconomicCalendarDetailPage({
+  params,
+}: PageProps) {
   const permissions = await getCurrentPermissions()
   const locale = await getRequestLocale()
   const dictionary = await getServerDictionary()
@@ -189,7 +173,6 @@ async function FetchEconomicCalendarEntryData({
     throw error
   }
 
-  const hasContent = Boolean(entry.contentAvailable && entry.content?.trim())
   const description = entry.description?.trim()
 
   return (
@@ -200,22 +183,13 @@ async function FetchEconomicCalendarEntryData({
             <Badge {...getEconomicCalendarImpactBadgeProps(entry.impact)}>
               {getEconomicCalendarImpactLabel(entry.impact, dictionary)}
             </Badge>
-            <Badge
-              variant={getEconomicCalendarStatusVariant(
-                entry.status,
-                entry.contentAvailable
-              )}
-            >
-              {getEconomicCalendarStatusLabel(
-                entry.status,
-                entry.contentAvailable,
-                dictionary
-              )}
+            <Badge variant={getEconomicCalendarStatusVariant(entry.status)}>
+              {getEconomicCalendarStatusLabel(entry.status, dictionary)}
             </Badge>
           </div>
 
           <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-semibold leading-tight text-foreground">
+            <h1 className="text-2xl leading-tight font-semibold text-foreground">
               {formatEconomicCalendarValue(
                 entry.title,
                 dictionary.economicCalendar.untitled
@@ -246,113 +220,83 @@ async function FetchEconomicCalendarEntryData({
       </div>
 
       <div className="flex flex-col gap-8">
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <DetailCard
-              title={dictionary.economicCalendar.actual}
-              value={formatEconomicCalendarValue(
-                entry.actualValue,
-                dictionary.common.notAvailable
-              )}
-              icon={Database}
-            />
-            <DetailCard
-              title={dictionary.economicCalendar.forecast}
-              value={formatEconomicCalendarValue(
-                entry.forecastValue,
-                dictionary.common.notAvailable
-              )}
-              icon={Database}
-            />
-            <DetailCard
-              title={dictionary.economicCalendar.previous}
-              value={formatEconomicCalendarValue(
-                entry.previousValue,
-                dictionary.common.notAvailable
-              )}
-              icon={Database}
-            />
-            <DetailCard
-              title={dictionary.economicCalendar.syncedNewest}
-              valueNode={
-                <AppTimeMetadata icon={RefreshCcw}>
-                  {formatDateTime(entry.syncedAt, locale, dictionary)}
-                </AppTimeMetadata>
-              }
-              icon={RefreshCcw}
-            />
-          </div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <DetailCard
+            title={dictionary.economicCalendar.actual}
+            value={formatEconomicCalendarValue(
+              entry.actualValue,
+              dictionary.common.notAvailable
+            )}
+            icon={Database}
+          />
+          <DetailCard
+            title={dictionary.economicCalendar.forecast}
+            value={formatEconomicCalendarValue(
+              entry.forecastValue,
+              dictionary.common.notAvailable
+            )}
+            icon={Database}
+          />
+          <DetailCard
+            title={dictionary.economicCalendar.previous}
+            value={formatEconomicCalendarValue(
+              entry.previousValue,
+              dictionary.common.notAvailable
+            )}
+            icon={Database}
+          />
+          <DetailCard
+            title={dictionary.economicCalendar.syncedNewest}
+            valueNode={
+              <AppTimeMetadata icon={RefreshCcw}>
+                {formatDateTime(entry.syncedAt, locale, dictionary)}
+              </AppTimeMetadata>
+            }
+            icon={RefreshCcw}
+          />
+        </div>
 
-          <section className="flex flex-col gap-3">
-            <SectionHeading
-              title={dictionary.economicCalendar.contentTitle}
-              icon={FileText}
-            />
-            <div className="rounded-lg border border-border p-4">
-              {hasContent ? (
-                <div className="whitespace-pre-wrap text-sm leading-7 text-foreground/90">
-                  {entry.content}
-                </div>
-              ) : (
-                <div className="flex flex-col gap-2 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-2 font-medium text-foreground">
-                    <FileText className="h-4 w-4" />
-                    {dictionary.economicCalendar.contentUnavailableTitle}
-                  </div>
-                  <p>{dictionary.economicCalendar.contentUnavailableDescription}</p>
-                </div>
-              )}
+        <section className="rounded-lg border border-dashed bg-muted/10">
+          <details>
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4 text-sm font-semibold text-muted-foreground">
+              <span className="inline-flex items-center gap-2 tracking-wide uppercase">
+                <Hash className="h-4 w-4" />
+                {dictionary.economicCalendar.technicalInfo}
+              </span>
+              <ChevronDown className="h-4 w-4" />
+            </summary>
+            <div className="grid gap-4 border-t border-border p-4 sm:grid-cols-2 xl:grid-cols-3">
+              <DetailCard
+                title={dictionary.economicCalendar.itemIdLabel}
+                value={String(entry.id)}
+                icon={Hash}
+              />
+              <DetailCard
+                title={dictionary.economicCalendar.status}
+                value={getEconomicCalendarStatusLabel(entry.status, dictionary)}
+                icon={Activity}
+              />
+              <DetailCard
+                title={dictionary.economicCalendar.createdAt}
+                valueNode={
+                  <AppTimeMetadata icon={Clock3}>
+                    {formatDateTime(entry.createdDate, locale, dictionary)}
+                  </AppTimeMetadata>
+                }
+                icon={Clock3}
+              />
+              <DetailCard
+                title={dictionary.economicCalendar.updatedAt}
+                valueNode={
+                  <AppTimeMetadata icon={RefreshCcw}>
+                    {formatDateTime(entry.lastModifiedDate, locale, dictionary)}
+                  </AppTimeMetadata>
+                }
+                icon={RefreshCcw}
+              />
             </div>
-          </section>
-
-          <section className="rounded-lg border border-dashed bg-muted/10">
-            <details>
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4 text-sm font-semibold text-muted-foreground">
-                <span className="inline-flex items-center gap-2 uppercase tracking-wide">
-                  <Hash className="h-4 w-4" />
-                  {dictionary.economicCalendar.technicalInfo}
-                </span>
-                <ChevronDown className="h-4 w-4" />
-              </summary>
-              <div className="grid gap-4 border-t border-border p-4 sm:grid-cols-2 xl:grid-cols-3">
-                <DetailCard
-                  title={dictionary.economicCalendar.itemIdLabel}
-                  value={String(entry.id)}
-                  icon={Hash}
-                />
-                <DetailCard
-                  title={dictionary.economicCalendar.status}
-                  value={getEconomicCalendarStatusLabel(
-                    entry.status,
-                    entry.contentAvailable,
-                    dictionary
-                  )}
-                  icon={Activity}
-                />
-                <DetailCard
-                  title={dictionary.economicCalendar.createdAt}
-                  valueNode={
-                    <AppTimeMetadata icon={Clock3}>
-                      {formatDateTime(entry.createdDate, locale, dictionary)}
-                    </AppTimeMetadata>
-                  }
-                  icon={Clock3}
-                />
-                <DetailCard
-                  title={dictionary.economicCalendar.updatedAt}
-                  valueNode={
-                    <AppTimeMetadata icon={RefreshCcw}>
-                      {formatDateTime(
-                        entry.lastModifiedDate,
-                        locale,
-                        dictionary
-                      )}
-                    </AppTimeMetadata>
-                  }
-                  icon={RefreshCcw}
-                />
-              </div>
-            </details>
-          </section>
+          </details>
+        </section>
       </div>
     </div>
   )
@@ -379,10 +323,6 @@ function EconomicCalendarDetailSkeleton() {
               <Skeleton className="mt-3 h-5 w-full" />
             </div>
           ))}
-        </div>
-        <div className="flex flex-col gap-3">
-          <Skeleton className="h-4 w-32" />
-          <Skeleton className="h-40 w-full rounded-lg" />
         </div>
         <Skeleton className="h-14 w-full rounded-lg" />
       </div>

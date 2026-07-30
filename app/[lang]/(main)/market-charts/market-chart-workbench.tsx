@@ -16,8 +16,8 @@ import {
   Camera,
   ChartCandlestick,
   DatabaseZap,
-  Expand,
-  Minimize2,
+  Maximize,
+  Minimize,
   RefreshCw,
   SlidersHorizontal,
   Trash2,
@@ -1023,7 +1023,7 @@ function MarketChartTopToolbar({
                       : dictionary.marketCharts.controls.fullscreenAria
                   }
                 >
-                  {isFullscreen ? <Minimize2 /> : <Expand />}
+                  {isFullscreen ? <Minimize /> : <Maximize />}
                 </Button>
               </TooltipTrigger>
               <TooltipContent>

@@ -39,8 +39,9 @@ The system SHALL load asset-relevant economic calendar events through `GET /mark
 
 #### Scenario: Accept calendar response contract
 - **WHEN** the backend returns economic calendar event items
-- **THEN** the frontend accepts `id`, `assetId`, `time`, optional title and metadata fields, optional value fields, optional better/worse fields, optional localized `description`, `contentAvailable`, `status`, and optional `scheduledAt`
+- **THEN** the frontend accepts `id`, `assetId`, `time`, optional title and metadata fields, optional value fields, optional better/worse fields, optional localized `description`, `status`, and optional `scheduledAt`
 - **AND** `status` is limited to `PENDING` or `AVAILABLE`
+- **AND** runtime validation does not require `contentAvailable`
 
 #### Scenario: Calendar load failure
 - **WHEN** the calendar event request fails or returns invalid data
@@ -187,7 +188,7 @@ The system SHALL show a red vertical guide line over the chart when users hover 
 - **AND** the guide line does not render through the calendar lane itself
 
 ### Requirement: Calendar quick list and detail navigation
-The system SHALL provide an accessible, decision-focused quick list for loaded calendar events and route users to the existing economic calendar detail page for full content.
+The system SHALL provide an accessible, decision-focused quick list for loaded calendar events and route users to the existing economic calendar detail page for canonical entry details.
 
 #### Scenario: Show quick-list hierarchy
 - **WHEN** a user opens a calendar marker or grouped calendar marker
@@ -234,11 +235,11 @@ The system SHALL provide an accessible, decision-focused quick list for loaded c
 - **THEN** the events scroll inside the shared ScrollArea
 - **AND** the scrollbar does not cover event content or prevent keyboard access to detail actions
 
-#### Scenario: Open full calendar detail
+#### Scenario: Open calendar detail
 - **WHEN** a calendar event is displayed in the quick list
 - **THEN** the event provides one detail action labeled `Details` in English and `Chi tiết` in Vietnamese
 - **AND** activating the action navigates to the locale-preserving `/economic-calendar/{id}` detail route
-- **AND** it relies on the existing `GET /economic-calendar/{id}` detail endpoint for content
+- **AND** it relies on the existing `GET /economic-calendar/{id}` endpoint for canonical entry details without expecting `content` or `contentAvailable`
 - **AND** the quick list does not render a separate content-availability sentence
 
 #### Scenario: Keyboard calendar review

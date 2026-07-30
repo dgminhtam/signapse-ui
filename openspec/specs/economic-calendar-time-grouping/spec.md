@@ -67,7 +67,7 @@ The economic calendar week stream SHALL normalize unsupported or stale sort valu
 - **THEN** the week stream uses the requested scheduled-time sort
 
 ### Requirement: Existing stream behavior remains available
-The time-grouped stream SHALL preserve the existing week-strip and event-row capabilities from the current economic calendar week stream.
+The time-grouped stream SHALL preserve the existing week-strip and event-row capabilities from the current economic calendar week stream that remain supported by the backend contract.
 
 #### Scenario: Week controls render
 - **WHEN** the time-grouped stream renders
@@ -75,5 +75,5 @@ The time-grouped stream SHALL preserve the existing week-strip and event-row cap
 
 #### Scenario: Event row actions render
 - **WHEN** event rows render inside currency/region groups
-- **THEN** expandable support content and canonical localized detail links remain available
-
+- **THEN** canonical localized detail links and localized publication status remain available
+- **AND** the rows do not expose supporting-content expansion

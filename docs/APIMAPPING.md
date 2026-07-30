@@ -2,7 +2,7 @@
 
 Tài liệu này ánh xạ snapshot OpenAPI backend trong `docs/api_mapping.json` tới các điểm tích hợp frontend hiện tại của repo.
 
-Xác minh lần cuối: ngày 29 tháng 7 năm 2026
+Xác minh lần cuối: ngày 30 tháng 7 năm 2026
 
 ## Cấu hình cơ sở
 
@@ -59,6 +59,7 @@ Xác minh lần cuối: ngày 29 tháng 7 năm 2026
 - Snapshot mới thêm `POST /watchlists/assets` để bulk create watchlist assets; `responseSchema` của system prompts hiện là JSON object inline, không còn component schema `JsonNode`.
 - Snapshot mới thêm `GET /market-charts/live` cho live chart stream dạng `text/event-stream`, và `GET /market-charts/economic-calendar-events` cho event lịch kinh tế trên chart; cả hai dùng permission `market-chart:read`.
 - Snapshot ngày 27/7 thêm `pricePrecision` kiểu `integer(int32)` vào `AssetListResponse`, `AssetResponse`, và `MarketChartAssetResponse`; candles trả field này tại `asset.pricePrecision`, còn SSE snapshot runtime dùng cùng `MarketChartAssetResponse`.
+- Snapshot ngày 30/7 bỏ `contentAvailable` khỏi `EconomicCalendarListResponse` và `MarketChartEconomicCalendarEventResponse`; `EconomicCalendarResponse` đồng thời bỏ cả `content` và `contentAvailable`.
 - Snapshot có workflow market conversations / persisted analyses dưới permission `query:execute`; frontend hiện tích hợp hội thoại text-only, còn analysis/evidence/Telegram delivery không có surface hoặc action.
 - Snapshot ngày 7/6 đổi tên OpenAPI schema của market conversations sang nhóm `Conversation*` và đổi timestamp conversation/message sang `createdDate` / `lastModifiedDate`.
 - Snapshot ngày 11/6 thêm `GET /market-conversations/{conversationId}/messages` để tải lịch sử message theo cursor `beforeMessageId` và `size`.
@@ -193,7 +194,7 @@ Ghi chu:
 | ----------- | ------------------------ | ------------ | -------------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | GET         | `/market-charts/candles` | `getCandles` | `getMarketChartCandles(request)` | Da dong bo `pricePrecision` | Endpoint duoc gate backend bang `market-chart:read`; FE gui `assetId`, `timeframe`, `from`, `to`. FE parse `MarketChartCandleResponse.asset.pricePrecision` va dung field nay de cau hinh chart. |
 | GET         | `/market-charts/annotations` | `getAnnotations` | `getMarketChartAnnotations(request)` | Da trien khai | FE parse timeline top-level `HOT_EVENT` / `WARM_EPISODE`, render marker va warm overlay tu nested `hotEvent` / `warmEpisode`. |
-| GET         | `/market-charts/economic-calendar-events` | `getEconomicCalendarEvents` | `getMarketChartEconomicCalendarEvents(request)` | Da trien khai | FE tai event theo cua so candle, loc impact va render calendar lane tren chart. |
+| GET         | `/market-charts/economic-calendar-events` | `getEconomicCalendarEvents` | `getMarketChartEconomicCalendarEvents(request)` | Da tich hop | Contract va FE type/parser/canvas deu khong con `contentAvailable`. |
 | GET         | `/market-charts/live`    | `streamLive` | `/api/market-charts/live` + `openMarketChartLiveStream()` | Da dong bo `pricePrecision` | FE da proxy SSE, parse `snapshot` / `price` / `candle` / `status` / `error`, va cap nhat live state. Shared asset schema preserve `snapshot.asset.pricePrecision`; OpenAPI chi expose `SseEmitter`, nen shape event duoc xac minh tu source BE. |
 
 Frontend lien quan:
@@ -216,7 +217,7 @@ Ghi chu:
 - `MarketChartCandleRequest` gom `assetId`, `timeframe`, `from`, `to`; snapshot hien tai khong mo ta enum hay danh sach gia tri hop le cho `timeframe`, trong khi FE data layer hien gioi han `timeframe` theo union `1m`, `5m`, `15m`, `30m`, `1h`, `1d`, `1w`, `1mo`.
 - `MarketChartAnnotationRequest` gom `assetId`, `from`, `to`; range dung `[from, to)`, `from` inclusive va `to` exclusive; response cua `/market-charts/annotations` la mang `MarketChartAnnotationResponse`.
 - `MarketChartEconomicCalendarEventRequest` gom `assetId`, `from`, `to`; response cua `/market-charts/economic-calendar-events` la mang `MarketChartEconomicCalendarEventResponse`.
-- `MarketChartEconomicCalendarEventResponse` gom `id`, `assetId`, `time`, `title`, `currencyCode`, `type`, `impact`, `forecastValue`, `previousValue`, `actualValue`, `revision`, `actualBetterWorse`, `revisionBetterWorse`, `description`, `contentAvailable`, `status`, va `scheduledAt`.
+- `MarketChartEconomicCalendarEventResponse` gom `id`, `assetId`, `time`, `title`, `currencyCode`, `type`, `impact`, `forecastValue`, `previousValue`, `actualValue`, `revision`, `actualBetterWorse`, `revisionBetterWorse`, `description`, `status`, va `scheduledAt`; FE da dong bo type, parser va canvas theo contract khong co `contentAvailable`.
 - `MarketChartLiveRequest` gom `assetId` va `timeframe`; response cua `/market-charts/live` la `text/event-stream`. OpenAPI chi mo ta `SseEmitter.timeout`, con runtime snapshot gom `asset`, `symbol`, `timeframe`, `quote`, `candle`, `status`.
 - `MarketChartCandleItemResponse` gom `time`, `open`, `high`, `low`, `close`, `volume`, `partial`.
 - `MarketChartCandleResponse` gom optional `symbol`, `asset: MarketChartAssetResponse`, `timeframe`, `from`, `to`, va `candles[]`; `MarketChartAssetResponse` moi co optional `pricePrecision`; annotation khong con nam trong candle response.
@@ -391,19 +392,20 @@ Ghi chu:
 
 | Phương thức | Endpoint backend          | operationId                   | Tích hợp frontend                          | Trạng thái    | Ghi chú                                                                                                                                  |
 | ----------- | ------------------------- | ----------------------------- | ------------------------------------------ | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| GET         | `/economic-calendar`      | `getEconomicCalendarEntries`  | `getEconomicCalendarEntries(searchParams)` | Đã triển khai | Trả về Spring `Page<EconomicCalendarListResponse>`; frontend đọc `content[]`, pagination metadata, và dùng `$filter/page/size/sort` qua `queryParamsToString()`. |
-| GET         | `/economic-calendar/{id}` | `getEconomicCalendarEntry`    | `getEconomicCalendarEntryById(id)`         | Đã triển khai | Trả về schema giống list item và có thêm `content`; frontend chỉ kỳ vọng `content` ở detail endpoint.                                   |
+| GET         | `/economic-calendar`      | `getEconomicCalendarEntries`  | `getEconomicCalendarEntries(searchParams)` | Đã tích hợp | Trả về Spring `Page<EconomicCalendarListResponse>`; contract và FE list đều không còn `contentAvailable`. |
+| GET         | `/economic-calendar/{id}` | `getEconomicCalendarEntry`    | `getEconomicCalendarEntryById(id)`         | Đã tích hợp | Detail và FE đều không còn `content` hoặc `contentAvailable`; UI giữ các field metrics và metadata hiện có. |
 | POST        | `/economic-calendar/sync` | `syncEconomicCalendarEntries` | `syncEconomicCalendarEntries()`            | Đã triển khai | Trả về `EconomicCalendarSyncResponse` với `fetchedCount`, `createdCount`, `updatedCount`, `skippedCount`.                                |
 
 Ghi chú:
 
 - Frontend đã có `app/api/economic-calendar/action.ts`, definitions, permissions, navigation và route UI `/economic-calendar`.
-- `EconomicCalendarListResponse` hiện gồm `id`, `title`, `currencyCode`, `type`, `impact`, `forecastValue`, `previousValue`, `actualValue`, `description`, `revision`, `newsUrl`, `actualBetterWorse`, `revisionBetterWorse`, `contentAvailable`, `status`, `scheduledAt`, `syncedAt`, `createdDate`, và `lastModifiedDate`.
-- `EconomicCalendarResponse` giống list item và có thêm `content`; `contentAvailable = true` nghĩa là detail có content để render, nhưng list endpoint không trả `content`.
+- `EconomicCalendarListResponse` hiện gồm `id`, `title`, `currencyCode`, `type`, `impact`, `forecastValue`, `previousValue`, `actualValue`, `description`, `revision`, `newsUrl`, `actualBetterWorse`, `revisionBetterWorse`, `status`, `scheduledAt`, `syncedAt`, `createdDate`, và `lastModifiedDate`.
+- `EconomicCalendarResponse` hiện có cùng field surface với list item; snapshot không còn `content` hoặc `contentAvailable`.
 - Các field văn bản domain phần lớn có thể `null`; `status` chỉ gồm `PENDING` hoặc `AVAILABLE`; timestamp là ISO datetime string.
 - `description` đã được backend localized theo current user/request language. `actualBetterWorse` và `revisionBetterWorse` là giá trị từ MDG, frontend không dịch.
 - `newsUrl` là source URL gốc; frontend có thể dùng để mở link ngoài khi cần.
 - Frontend không còn phụ thuộc vào các field cũ đã bị backend loại bỏ như `url`, `externalKey`, `provider`, `countryCode`, `importance`, `ingestedAt`, `rawContent`, hoặc `rawMetadata`.
+- Frontend đã đồng bộ definitions, list/detail UI, dictionary copy và market-chart layer; không còn tham chiếu Economic Calendar `content` hoặc `contentAvailable`.
 
 ### 15. API workspace
 

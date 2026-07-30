@@ -866,11 +866,6 @@ export const en: Dictionary = {
     forecast: "Forecast",
     previous: "Previous",
     viewDetail: "View economic calendar details",
-    expandEventDetails: "Show supporting details for {title}",
-    collapseEventDetails: "Hide supporting details for {title}",
-    contentAvailableSummary:
-      "Supporting content is available for this event. Open the full detail page to review the complete context.",
-    openFullDetail: "Open full detail",
     today: "Today",
     weekRange: "{start} - {end}",
     previousDay: "Previous day",
@@ -889,10 +884,6 @@ export const en: Dictionary = {
     syncSummaryWithTime:
       "Synced economic calendar: fetched {fetched}, created {created}, updated {updated}, skipped {skipped}. Sync time: {time}.",
     currency: "Currency {value}",
-    contentTitle: "Detailed content",
-    contentUnavailableTitle: "Detailed content is not ready",
-    contentUnavailableDescription:
-      "The backend has no detailed content for this economic calendar entry yet. Sync again or check after the status changes to available.",
     technicalInfo: "Technical information",
     status: "Status",
     createdAt: "Created",
@@ -1317,6 +1308,8 @@ export const en: Dictionary = {
   demoConversation: {
     title: "New Chat",
     newConversation: "New chat",
+    expandConversation: "Expand conversation window",
+    collapseConversation: "Collapse conversation window",
     historyTitle: "Conversation history",
     historySearchLabel: "Search conversation history",
     historySearchPlaceholder: "Search conversations...",
@@ -1639,7 +1632,6 @@ export const en: Dictionary = {
     },
     calendar: {
       actual: "Actual",
-      contentAvailable: "Detailed content available",
       eventFallback: "Economic calendar event",
       eventMarkers: "{count} calendar events",
       forecast: "Forecast",

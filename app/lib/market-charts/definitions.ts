@@ -178,7 +178,6 @@ export interface MarketChartEconomicCalendarEventResponse {
   actualBetterWorse?: string | null
   revisionBetterWorse?: string | null
   description?: string | null
-  contentAvailable: boolean
   status: MarketChartEconomicCalendarEventStatus
   scheduledAt?: string | null
 }
@@ -495,7 +494,6 @@ export const marketChartEconomicCalendarEventResponseSchema = z.object({
   actualBetterWorse: z.string().nullable().optional(),
   revisionBetterWorse: z.string().nullable().optional(),
   description: z.string().nullable().optional(),
-  contentAvailable: z.boolean(),
   status: marketChartEconomicCalendarEventStatusSchema,
   scheduledAt: z.string().nullable().optional(),
 }) satisfies z.ZodType<MarketChartEconomicCalendarEventResponse>

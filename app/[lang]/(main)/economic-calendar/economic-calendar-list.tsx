@@ -1,23 +1,8 @@
 "use client"
 
-import {
-  CalendarDays,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  ChevronUp,
-  ExternalLink,
-  Eye,
-  RefreshCcw,
-} from "lucide-react"
+import { CalendarDays, ChevronLeft, ChevronRight, Eye } from "lucide-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import {
-  Fragment,
-  useMemo,
-  useState,
-  useSyncExternalStore,
-  useTransition,
-} from "react"
+import { Fragment, useMemo, useSyncExternalStore, useTransition } from "react"
 import { LocalizedLink as Link } from "@/components/localized-link"
 
 import { Page } from "@/app/lib/definitions"
@@ -27,8 +12,9 @@ import {
   formatEconomicCalendarValue,
   getEconomicCalendarImpactBadgeProps,
   getEconomicCalendarImpactLabel,
+  getEconomicCalendarStatusLabel,
+  getEconomicCalendarStatusVariant,
 } from "@/app/lib/economic-calendar/definitions"
-import { AppTimeMetadata } from "@/components/app-time-metadata"
 import {
   AppListToolbar,
   AppListToolbarLeading,
@@ -111,13 +97,13 @@ function useCurrentMinuteDate() {
     getServerMinuteSnapshot
   )
 
-  return useMemo(() => (minute > 0 ? new Date(minute * 60_000) : null), [minute])
+  return useMemo(
+    () => (minute > 0 ? new Date(minute * 60_000) : null),
+    [minute]
+  )
 }
 
-function updateDateQuery(
-  searchParams: URLSearchParams,
-  date: string
-) {
+function updateDateQuery(searchParams: URLSearchParams, date: string) {
   const params = new URLSearchParams(searchParams)
 
   params.set("date", date)
@@ -132,10 +118,7 @@ function formatCurrency(value: string | null | undefined, fallback: string) {
   return value?.trim().toUpperCase() || fallback
 }
 
-function getEntryTitle(
-  entry: EconomicCalendarListResponse,
-  fallback: string
-) {
+function getEntryTitle(entry: EconomicCalendarListResponse, fallback: string) {
   return formatEconomicCalendarValue(entry.title, fallback)
 }
 
@@ -237,8 +220,7 @@ function groupEconomicCalendarEntries(
 
     const timeKey =
       getUtc7TimeKeyFromTimestamp(entry.scheduledAt) ?? "unscheduled-time"
-    const timeLabel =
-      timeKey === "unscheduled-time" ? timeFallback : timeKey
+    const timeLabel = timeKey === "unscheduled-time" ? timeFallback : timeKey
     const currencyKey = formatCurrency(entry.currencyCode, "unavailable")
     const currencyLabel =
       currencyKey === "unavailable" ? currencyFallback : currencyKey
@@ -255,38 +237,9 @@ function groupEconomicCalendarEntries(
   return [selectedGroup]
 }
 
-function hasSupportingContent(entry: EconomicCalendarListResponse) {
-  return entry.contentAvailable === true
-}
-
-function getEventDetailId(entry: EconomicCalendarListResponse) {
-  return `economic-calendar-event-${entry.id}-support`
-}
-
-function getEntryVisibleRowCount(
-  entry: EconomicCalendarListResponse,
-  expandedEntryId: number | null
-) {
-  return expandedEntryId === entry.id ? 2 : 1
-}
-
-function getCurrencyGroupVisibleRowCount(
-  currencyGroup: EconomicCalendarCurrencyGroup,
-  expandedEntryId: number | null
-) {
-  return currencyGroup.entries.reduce(
-    (count, entry) => count + getEntryVisibleRowCount(entry, expandedEntryId),
-    0
-  )
-}
-
-function getTimeGroupVisibleRowCount(
-  timeGroup: EconomicCalendarTimeGroup,
-  expandedEntryId: number | null
-) {
+function getTimeGroupRowCount(timeGroup: EconomicCalendarTimeGroup) {
   return timeGroup.currencyGroups.reduce(
-    (count, currencyGroup) =>
-      count + getCurrencyGroupVisibleRowCount(currencyGroup, expandedEntryId),
+    (count, currencyGroup) => count + currencyGroup.entries.length,
     0
   )
 }
@@ -335,11 +288,7 @@ function getValueSignalClassName(value: string | null | undefined) {
     : "font-medium text-destructive"
 }
 
-function CurrentTimeLine({
-  now,
-}: {
-  now: Date
-}) {
+function CurrentTimeLine({ now }: { now: Date }) {
   const { dictionary, formatMessage } = useLocalization()
 
   return (
@@ -531,7 +480,7 @@ export function EconomicCalendarList({
   economicCalendarPage,
   sort,
 }: EconomicCalendarListProps) {
-  const { dictionary, formatDateTime, formatMessage } = useLocalization()
+  const { dictionary, formatDateTime } = useLocalization()
   const now = useCurrentMinuteDate()
   const entries = useMemo(
     () => economicCalendarPage.content ?? [],
@@ -560,8 +509,6 @@ export function EconomicCalendarList({
   const nowTimeKey = now ? formatUtc7TimeLabel(now) : null
   const shouldRenderNowLine =
     now && nowDateKey ? nowDateKey === dateState.selectedDate : false
-  const [expandedEntryId, setExpandedEntryId] = useState<number | null>(null)
-
   return (
     <div className="w-full">
       <AppListToolbar>
@@ -594,10 +541,7 @@ export function EconomicCalendarList({
 
       <EconomicCalendarDateStrip dateState={dateState} />
 
-      <AdjacentDayButton
-        direction="previous"
-        date={dateState.previousDate}
-      />
+      <AdjacentDayButton direction="previous" date={dateState.previousDate} />
 
       <AppListTable>
         <Table>
@@ -665,10 +609,7 @@ export function EconomicCalendarList({
                   ) : (
                     <>
                       {group.timeGroups.map((timeGroup) => {
-                        const timeRowSpan = getTimeGroupVisibleRowCount(
-                          timeGroup,
-                          expandedEntryId
-                        )
+                        const timeRowSpan = getTimeGroupRowCount(timeGroup)
 
                         return (
                           <Fragment key={timeGroup.key}>
@@ -685,241 +626,145 @@ export function EconomicCalendarList({
                             {timeGroup.currencyGroups.map(
                               (currencyGroup, currencyGroupIndex) => {
                                 const currencyRowSpan =
-                                  getCurrencyGroupVisibleRowCount(
-                                    currencyGroup,
-                                    expandedEntryId
-                                  )
+                                  currencyGroup.entries.length
 
                                 return (
                                   <Fragment key={currencyGroup.key}>
-                                    {currencyGroup.entries.map((entry, entryIndex) => {
-                                const isFirstTimeRow =
-                                  currencyGroupIndex === 0 && entryIndex === 0
-                                const isFirstCurrencyRow = entryIndex === 0
-                                const entryTitle = getEntryTitle(
-                                  entry,
-                                  dictionary.economicCalendar.untitled
-                                )
-                                const canExpand = hasSupportingContent(entry)
-                                const isExpanded = expandedEntryId === entry.id
-                                const detailId = getEventDetailId(entry)
+                                    {currencyGroup.entries.map(
+                                      (entry, entryIndex) => {
+                                        const isFirstTimeRow =
+                                          currencyGroupIndex === 0 &&
+                                          entryIndex === 0
+                                        const isFirstCurrencyRow =
+                                          entryIndex === 0
+                                        const entryTitle = getEntryTitle(
+                                          entry,
+                                          dictionary.economicCalendar.untitled
+                                        )
 
-                                return (
-                                  <Fragment key={entry.id}>
-                                    <TableRow
-                                      aria-expanded={
-                                        canExpand ? isExpanded : undefined
-                                      }
-                                    >
-                                      {isFirstTimeRow ? (
-                                        <TableCell
-                                          rowSpan={timeRowSpan}
-                                          className="w-28 align-top bg-muted/10 text-sm font-medium tabular-nums text-foreground"
-                                        >
-                                          {timeGroup.label}
-                                        </TableCell>
-                                      ) : null}
-                                      {isFirstCurrencyRow ? (
-                                        <TableCell
-                                          rowSpan={currencyRowSpan}
-                                          className="w-24 align-top bg-muted/5 text-sm font-medium text-foreground"
-                                        >
-                                          {currencyGroup.label}
-                                        </TableCell>
-                                      ) : null}
-                                      <TableCell className="w-28 align-top">
-                                        <Badge
-                                          {...getEconomicCalendarImpactBadgeProps(
-                                            entry.impact
-                                          )}
-                                        >
-                                          {getEconomicCalendarImpactLabel(
-                                            entry.impact,
-                                            dictionary
-                                          )}
-                                        </Badge>
-                                      </TableCell>
-                                      <TableCell className="min-w-72 align-top whitespace-normal">
-                                        <div className="flex min-w-0 flex-col gap-1">
-                                          <Link
-                                            href={`/economic-calendar/${entry.id}`}
-                                            className="line-clamp-2 font-medium break-words hover:underline"
-                                          >
-                                            {entryTitle}
-                                          </Link>
-                                        </div>
-                                      </TableCell>
-                                      <TableCell className="w-28 align-top text-sm">
-                                        <span
-                                          className={cn(
-                                            "block max-w-28 truncate tabular-nums",
-                                            getValueSignalClassName(
-                                              entry.actualValue
-                                            )
-                                          )}
-                                        >
-                                          {formatEconomicCalendarValue(
-                                            entry.actualValue,
-                                            dictionary.common.notAvailable
-                                          )}
-                                        </span>
-                                      </TableCell>
-                                      <TableCell className="w-28 align-top text-sm">
-                                        <span
-                                          className={cn(
-                                            "block max-w-28 truncate tabular-nums",
-                                            getValueSignalClassName(
-                                              entry.forecastValue
-                                            )
-                                          )}
-                                        >
-                                          {formatEconomicCalendarValue(
-                                            entry.forecastValue,
-                                            dictionary.common.notAvailable
-                                          )}
-                                        </span>
-                                      </TableCell>
-                                      <TableCell className="w-28 align-top text-sm">
-                                        <span
-                                          className={cn(
-                                            "block max-w-28 truncate tabular-nums",
-                                            getValueSignalClassName(
-                                              entry.previousValue
-                                            )
-                                          )}
-                                        >
-                                          {formatEconomicCalendarValue(
-                                            entry.previousValue,
-                                            dictionary.common.notAvailable
-                                          )}
-                                        </span>
-                                      </TableCell>
-                                      <TableCell className="w-20 align-top text-right">
-                                        <div className="flex justify-end gap-1">
-                                          {canExpand ? (
-                                            <Button
-                                              type="button"
-                                              variant="ghost"
-                                              size="icon-sm"
-                                              aria-expanded={isExpanded}
-                                              aria-controls={detailId}
-                                              onClick={() => {
-                                                setExpandedEntryId(
-                                                  isExpanded ? null : entry.id
-                                                )
-                                              }}
-                                            >
-                                              {isExpanded ? (
-                                                <ChevronUp data-icon="inline-start" />
-                                              ) : (
-                                                <ChevronDown data-icon="inline-start" />
-                                              )}
-                                              <span className="sr-only">
-                                                {formatMessage(
-                                                  isExpanded
-                                                    ? dictionary.economicCalendar.collapseEventDetails
-                                                    : dictionary.economicCalendar.expandEventDetails,
-                                                  { title: entryTitle }
+                                        return (
+                                          <TableRow key={entry.id}>
+                                            {isFirstTimeRow ? (
+                                              <TableCell
+                                                rowSpan={timeRowSpan}
+                                                className="w-28 bg-muted/10 align-top text-sm font-medium text-foreground tabular-nums"
+                                              >
+                                                {timeGroup.label}
+                                              </TableCell>
+                                            ) : null}
+                                            {isFirstCurrencyRow ? (
+                                              <TableCell
+                                                rowSpan={currencyRowSpan}
+                                                className="w-24 bg-muted/5 align-top text-sm font-medium text-foreground"
+                                              >
+                                                {currencyGroup.label}
+                                              </TableCell>
+                                            ) : null}
+                                            <TableCell className="w-28 align-top">
+                                              <Badge
+                                                {...getEconomicCalendarImpactBadgeProps(
+                                                  entry.impact
+                                                )}
+                                              >
+                                                {getEconomicCalendarImpactLabel(
+                                                  entry.impact,
+                                                  dictionary
+                                                )}
+                                              </Badge>
+                                            </TableCell>
+                                            <TableCell className="min-w-72 align-top whitespace-normal">
+                                              <div className="flex min-w-0 flex-col gap-1">
+                                                <div className="flex min-w-0 flex-wrap items-center gap-2">
+                                                  <Link
+                                                    href={`/economic-calendar/${entry.id}`}
+                                                    className="line-clamp-2 min-w-0 font-medium break-words hover:underline"
+                                                  >
+                                                    {entryTitle}
+                                                  </Link>
+                                                  <Badge
+                                                    variant={getEconomicCalendarStatusVariant(
+                                                      entry.status
+                                                    )}
+                                                  >
+                                                    {getEconomicCalendarStatusLabel(
+                                                      entry.status,
+                                                      dictionary
+                                                    )}
+                                                  </Badge>
+                                                </div>
+                                              </div>
+                                            </TableCell>
+                                            <TableCell className="w-28 align-top text-sm">
+                                              <span
+                                                className={cn(
+                                                  "block max-w-28 truncate tabular-nums",
+                                                  getValueSignalClassName(
+                                                    entry.actualValue
+                                                  )
+                                                )}
+                                              >
+                                                {formatEconomicCalendarValue(
+                                                  entry.actualValue,
+                                                  dictionary.common.notAvailable
                                                 )}
                                               </span>
-                                            </Button>
-                                          ) : null}
-                                          <Button
-                                            variant="ghost"
-                                            size="icon-sm"
-                                            asChild
-                                          >
-                                            <Link
-                                              href={`/economic-calendar/${entry.id}`}
-                                            >
-                                              <Eye data-icon="inline-start" />
-                                              <span className="sr-only">
-                                                {
-                                                  dictionary.economicCalendar
-                                                    .viewDetail
-                                                }
-                                              </span>
-                                            </Link>
-                                          </Button>
-                                        </div>
-                                      </TableCell>
-                                    </TableRow>
-                                    {isExpanded ? (
-                                      <TableRow
-                                        key={`${entry.id}-support`}
-                                        className="hover:bg-transparent"
-                                      >
-                                        <TableCell
-                                          colSpan={6}
-                                          className="whitespace-normal px-3 py-3"
-                                        >
-                                          <div
-                                            id={detailId}
-                                            className="flex flex-col gap-3 text-sm sm:flex-row sm:items-start sm:justify-between"
-                                          >
-                                            <div className="flex min-w-0 flex-col gap-2">
-                                              <p className="text-muted-foreground">
-                                                {
-                                                  dictionary.economicCalendar
-                                                    .contentAvailableSummary
-                                                }
-                                              </p>
-                                              <div className="flex flex-col gap-1">
-                                                <AppTimeMetadata
-                                                  icon={RefreshCcw}
-                                                >
-                                                  {formatMessage(
-                                                    dictionary.economicCalendar
-                                                      .syncedAt,
-                                                    {
-                                                      time: formatDateTime(
-                                                        entry.syncedAt,
-                                                        {
-                                                          year: "numeric",
-                                                          month: "2-digit",
-                                                          day: "2-digit",
-                                                          hour: "2-digit",
-                                                          minute: "2-digit",
-                                                        },
-                                                        dictionary.common
-                                                          .notAvailable
-                                                      ),
-                                                    }
-                                                  )}
-                                                </AppTimeMetadata>
-                                                <span className="text-xs text-muted-foreground">
-                                                  {formatMessage(
-                                                    dictionary.economicCalendar
-                                                      .itemId,
-                                                    {
-                                                      id: entry.id,
-                                                    }
-                                                  )}
-                                                </span>
-                                              </div>
-                                            </div>
-                                            <Button
-                                              variant="outline"
-                                              size="sm"
-                                              asChild
-                                            >
-                                              <Link
-                                                href={`/economic-calendar/${entry.id}`}
+                                            </TableCell>
+                                            <TableCell className="w-28 align-top text-sm">
+                                              <span
+                                                className={cn(
+                                                  "block max-w-28 truncate tabular-nums",
+                                                  getValueSignalClassName(
+                                                    entry.forecastValue
+                                                  )
+                                                )}
                                               >
-                                                <ExternalLink data-icon="inline-start" />
-                                                {
-                                                  dictionary.economicCalendar
-                                                    .openFullDetail
-                                                }
-                                              </Link>
-                                            </Button>
-                                          </div>
-                                        </TableCell>
-                                      </TableRow>
-                                    ) : null}
-                                  </Fragment>
-                                )
-                              })}
+                                                {formatEconomicCalendarValue(
+                                                  entry.forecastValue,
+                                                  dictionary.common.notAvailable
+                                                )}
+                                              </span>
+                                            </TableCell>
+                                            <TableCell className="w-28 align-top text-sm">
+                                              <span
+                                                className={cn(
+                                                  "block max-w-28 truncate tabular-nums",
+                                                  getValueSignalClassName(
+                                                    entry.previousValue
+                                                  )
+                                                )}
+                                              >
+                                                {formatEconomicCalendarValue(
+                                                  entry.previousValue,
+                                                  dictionary.common.notAvailable
+                                                )}
+                                              </span>
+                                            </TableCell>
+                                            <TableCell className="w-20 text-right align-top">
+                                              <div className="flex justify-end gap-1">
+                                                <Button
+                                                  variant="ghost"
+                                                  size="icon-sm"
+                                                  asChild
+                                                >
+                                                  <Link
+                                                    href={`/economic-calendar/${entry.id}`}
+                                                  >
+                                                    <Eye data-icon="inline-start" />
+                                                    <span className="sr-only">
+                                                      {
+                                                        dictionary
+                                                          .economicCalendar
+                                                          .viewDetail
+                                                      }
+                                                    </span>
+                                                  </Link>
+                                                </Button>
+                                              </div>
+                                            </TableCell>
+                                          </TableRow>
+                                        )
+                                      }
+                                    )}
                                   </Fragment>
                                 )
                               }

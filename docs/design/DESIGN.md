@@ -307,6 +307,7 @@ Delete confirmation tuân theo pattern sau:
 - Ưu tiên native semantic elements. Mỗi page có một `<h1>`, heading hierarchy tuần tự và skip link đến main content khi có repeated navigation.
 - Mọi interaction dùng được bằng keyboard với tab order hợp lý; focus luôn nhìn thấy, không bị sticky surface che và được quản lý đúng sau route change.
 - Dialog/overlay restore focus an toàn; icon-only control có accessible name. Meaningful image có `alt`, decorative image dùng `alt=""`.
+- Mọi control vào/thoát fullscreen hoặc mở rộng/thu gọn surface theo fullscreen pattern phải dùng nhất quán Lucide `Maximize` khi mở rộng và `Minimize` khi thu gọn; không dùng các biến thể `Expand`, `Maximize2` hoặc `Minimize2` cho hành động này.
 - Search, form controls và switches có label phù hợp; error và dynamic status vừa hiển thị trực quan vừa được thông báo qua `aria-live`, `role="alert"` hoặc primitive tương đương.
 - Không dùng color làm tín hiệu duy nhất; status cần thêm text, icon, sign, shape hoặc pattern phù hợp.
 - Icons trong button dùng wrapper `data-icon` treatment.

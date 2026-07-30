@@ -36,17 +36,6 @@ The economic calendar week stream SHALL keep selected UTC+7 day shells as compac
 - **WHEN** a selected UTC+7 day has no events
 - **THEN** the day remains available as a week-strip navigation target and renders compact empty-day content
 
-### Requirement: Expanded row alignment
-The economic calendar week stream SHALL keep table columns aligned when event support content is expanded under merged time and currency/region cells.
-
-#### Scenario: Event support row is expanded
-- **WHEN** an event row is expanded inside a merged time and currency/region bucket
-- **THEN** the merged time and currency/region cells continue spanning the expanded support row and the support content fills the remaining columns
-
-#### Scenario: Event support row is collapsed
-- **WHEN** an expanded event row is collapsed
-- **THEN** the merged time and currency/region cells recalculate to span only the remaining visible event/support rows in their buckets
-
 ### Requirement: Current-time line remains available
 The economic calendar week stream SHALL preserve the red current-time line inside today's UTC+7 day shell while using merged time and currency/region cells.
 
@@ -72,4 +61,3 @@ The merged-cell presentation SHALL use `currencyCode` as the currency/region sou
 #### Scenario: Unsupported country UI is avoided
 - **WHEN** merged time and currency/region cells render
 - **THEN** the stream does not render flags, inferred country names, or country-specific controls
-

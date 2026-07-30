@@ -25,7 +25,6 @@ export interface EconomicCalendarListResponse {
   newsUrl: string | null
   actualBetterWorse: string | null
   revisionBetterWorse: string | null
-  contentAvailable: boolean
   status: EconomicCalendarStatus
   scheduledAt: string | null
   syncedAt: string | null
@@ -33,9 +32,7 @@ export interface EconomicCalendarListResponse {
   lastModifiedDate: string | null
 }
 
-export interface EconomicCalendarResponse extends EconomicCalendarListResponse {
-  content: string | null
-}
+export type EconomicCalendarResponse = EconomicCalendarListResponse
 
 export interface EconomicCalendarSyncResponse {
   fetchedCount?: number
@@ -114,7 +111,6 @@ export function getEconomicCalendarImpactBadgeProps(
 
 export function getEconomicCalendarStatusLabel(
   status?: string | null,
-  contentAvailable?: boolean,
   dictionary?: Dictionary
 ) {
   const labels = dictionary?.economicCalendar.statusLabels
@@ -125,21 +121,12 @@ export function getEconomicCalendarStatusLabel(
     case "PENDING":
       return labels?.PENDING ?? "PENDING"
     default:
-      if (contentAvailable === true) {
-        return labels?.AVAILABLE ?? "AVAILABLE"
-      }
-
-      if (contentAvailable === false) {
-        return labels?.PENDING ?? "PENDING"
-      }
-
       return labels?.UNKNOWN ?? "UNKNOWN"
   }
 }
 
 export function getEconomicCalendarStatusVariant(
-  status?: string | null,
-  contentAvailable?: boolean
+  status?: string | null
 ): "default" | "secondary" | "outline" {
   switch (status?.toUpperCase()) {
     case "AVAILABLE":
@@ -147,14 +134,6 @@ export function getEconomicCalendarStatusVariant(
     case "PENDING":
       return "secondary"
     default:
-      if (contentAvailable === true) {
-        return "default"
-      }
-
-      if (contentAvailable === false) {
-        return "secondary"
-      }
-
       return "outline"
   }
 }

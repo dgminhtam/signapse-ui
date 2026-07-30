@@ -8,6 +8,8 @@ import {
   ArrowUpIcon,
   BotMessageSquareIcon,
   ChevronDownIcon,
+  MaximizeIcon,
+  MinimizeIcon,
   PenLineIcon,
   TriangleAlertIcon,
   XIcon,
@@ -133,6 +135,7 @@ export function MarketConversationAssistant({
   const { dictionary } = useLocalization()
   const labels = dictionary.demoConversation
   const [open, setOpen] = React.useState(false)
+  const [isExpanded, setIsExpanded] = React.useState(false)
   const [messages, setMessages] = React.useState<MarketChatMessageResponse[]>(
     []
   )
@@ -567,6 +570,11 @@ export function MarketConversationAssistant({
     }
   }
 
+  function toggleConversationSize() {
+    setHistoryOpen(false)
+    setIsExpanded((current) => !current)
+  }
+
   return (
     <Popover modal={false} open={open} onOpenChange={setAssistantOpen}>
       <PopoverTrigger asChild>
@@ -583,12 +591,30 @@ export function MarketConversationAssistant({
         side="top"
         align="end"
         sideOffset={12}
+        collisionPadding={16}
         aria-label={currentTitle}
-        className="max-h-[var(--radix-popover-content-available-height)] w-[calc(100vw-2rem)] max-w-xl gap-0 overflow-hidden rounded-2xl sm:max-w-xl"
+        className={cn(
+          "max-h-[var(--radix-popover-content-available-height)] w-[calc(100vw-2rem)] gap-0 overflow-hidden rounded-2xl",
+          isExpanded
+            ? "max-w-[min(64rem,var(--radix-popover-content-available-width))]"
+            : "max-w-xl sm:max-w-xl"
+        )}
       >
         <MessageScrollerProvider autoScroll>
-          <div className="relative flex h-[min(36rem,calc(var(--radix-popover-content-available-height)-1.25rem))] min-h-0 flex-col">
-            <div className="mx-auto flex min-h-0 w-full max-w-xl flex-1">
+          <div
+            className={cn(
+              "relative flex min-h-0 flex-col",
+              isExpanded
+                ? "h-[min(48rem,calc(var(--radix-popover-content-available-height)-1.25rem))]"
+                : "h-[min(36rem,calc(var(--radix-popover-content-available-height)-1.25rem))]"
+            )}
+          >
+            <div
+              className={cn(
+                "mx-auto flex min-h-0 w-full flex-1",
+                isExpanded ? "max-w-5xl" : "max-w-xl"
+              )}
+            >
               <div className="flex h-full min-h-0 w-full flex-col">
                 <PopoverHeader className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-0">
                   <PopoverTitle className="min-w-0">
@@ -734,6 +760,20 @@ export function MarketConversationAssistant({
                       }
                     >
                       <PenLineIcon />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label={
+                        isExpanded
+                          ? labels.collapseConversation
+                          : labels.expandConversation
+                      }
+                      aria-pressed={isExpanded}
+                      onClick={toggleConversationSize}
+                    >
+                      {isExpanded ? <MinimizeIcon /> : <MaximizeIcon />}
                     </Button>
                     <Button
                       type="button"

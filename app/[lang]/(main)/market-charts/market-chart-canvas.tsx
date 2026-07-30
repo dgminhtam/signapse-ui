@@ -268,10 +268,7 @@ export function MarketChartCalendarEventList({
                     </span>
                   ) : null}
                   <Badge
-                    variant={getEconomicCalendarStatusVariant(
-                      event.status,
-                      event.contentAvailable
-                    )}
+                    variant={getEconomicCalendarStatusVariant(event.status)}
                   >
                     {dictionary.marketCharts.calendar.statusLabels[event.status]}
                   </Badge>

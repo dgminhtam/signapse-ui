@@ -863,11 +863,6 @@ export const vi = {
     scheduledTimeUnavailable: "Chưa có thời gian",
     currencyRegionUnavailable: "Chưa có tiền tệ",
     emptyDay: "Không có sự kiện nào trong ngày này.",
-    expandEventDetails: "Hiển thị thông tin hỗ trợ cho {title}",
-    collapseEventDetails: "Ẩn thông tin hỗ trợ cho {title}",
-    contentAvailableSummary:
-      "Sự kiện này đã có nội dung hỗ trợ. Mở trang chi tiết để xem đầy đủ ngữ cảnh.",
-    openFullDetail: "Mở chi tiết đầy đủ",
     today: "Hôm nay",
     weekRange: "{start} - {end}",
     previousDay: "Ngày trước",
@@ -887,10 +882,6 @@ export const vi = {
     syncSummaryWithTime:
       "Đã đồng bộ lịch kinh tế: đã lấy {fetched}, tạo mới {created}, cập nhật {updated}, bỏ qua {skipped}. Thời điểm đồng bộ: {time}.",
     currency: "Tiền tệ {value}",
-    contentTitle: "Nội dung chi tiết",
-    contentUnavailableTitle: "Nội dung chi tiết chưa sẵn sàng",
-    contentUnavailableDescription:
-      "Backend chưa có nội dung chi tiết cho mục lịch kinh tế này. Hãy đồng bộ lại hoặc kiểm tra sau khi trạng thái chuyển sang có dữ liệu.",
     technicalInfo: "Thông tin kỹ thuật",
     status: "Trạng thái",
     createdAt: "Tạo lúc",
@@ -1305,6 +1296,8 @@ export const vi = {
   demoConversation: {
     title: "Cuộc trò chuyện mới",
     newConversation: "Hội thoại mới",
+    expandConversation: "Mở rộng cửa sổ hội thoại",
+    collapseConversation: "Thu gọn cửa sổ hội thoại",
     historyTitle: "Lịch sử hội thoại",
     historySearchLabel: "Tìm kiếm lịch sử hội thoại",
     historySearchPlaceholder: "Tìm kiếm hội thoại...",
@@ -1628,7 +1621,6 @@ export const vi = {
     },
     calendar: {
       actual: "Thực tế",
-      contentAvailable: "Có nội dung chi tiết",
       eventFallback: "Sự kiện lịch kinh tế",
       eventMarkers: "{count} sự kiện lịch kinh tế",
       forecast: "Dự báo",
