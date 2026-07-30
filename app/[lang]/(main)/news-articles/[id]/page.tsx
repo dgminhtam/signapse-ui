@@ -1,4 +1,4 @@
-import { ArrowLeft, Calendar, ExternalLink, Globe2 } from "lucide-react"
+import { ArrowLeft, ArrowUpRightIcon, Calendar, Globe2 } from "lucide-react"
 import { NewsArticleMarkdown } from "../news-article-markdown"
 import { LocalizedLink as Link } from "@/components/localized-link"
 import { notFound } from "next/navigation"
@@ -15,6 +15,7 @@ import { hasAnyPermission } from "@/app/lib/permissions"
 import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { AccessDenied } from "@/components/access-denied"
 import { AppTimeMetadata } from "@/components/app-time-metadata"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import Image from "next/image"
@@ -86,7 +87,7 @@ export default async function NewsArticleDetailPage({ params }: PageProps) {
   const newsArticleId = Number(id)
 
   return (
-    <div className="flex w-full flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-[72ch] flex-col gap-6">
       <div className="flex items-center">
         <Button asChild variant="secondary" size="sm">
           <Link href="/news-articles">
@@ -153,16 +154,12 @@ async function FetchNewsArticleData({
               {formatDateTime(article.publishedAt, locale, dictionary)}
             </AppTimeMetadata>
             {article.url ? (
-              <AppTimeMetadata icon={ExternalLink}>
-                <a
-                  href={article.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline-offset-4 hover:text-foreground hover:underline"
-                >
+              <Badge asChild className="min-h-6">
+                <a href={article.url} target="_blank" rel="noopener noreferrer">
                   {dictionary.newsArticles.openOriginalLink}
+                  <ArrowUpRightIcon aria-hidden="true" data-icon="inline-end" />
                 </a>
-              </AppTimeMetadata>
+              </Badge>
             ) : null}
           </div>
         </div>
@@ -179,6 +176,7 @@ async function FetchNewsArticleData({
         ) : null}
 
         <NewsArticleMarkdown
+          className="max-w-none"
           content={content || dictionary.newsArticles.contentEmpty}
         />
       </div>
@@ -191,18 +189,18 @@ function NewsArticleDetailSkeleton() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex min-w-0 flex-1 flex-col gap-3">
-          <Skeleton className="h-8 w-full max-w-4xl" />
+          <Skeleton className="h-8 w-full" />
           <Skeleton className="h-4 w-full max-w-80" />
         </div>
         <Skeleton className="size-8 shrink-0" />
       </div>
       <div className="flex flex-col gap-8">
-        <div className="flex w-full max-w-[72ch] flex-col gap-3">
+        <div className="flex w-full flex-col gap-3">
           <Skeleton className="h-5 w-full" />
           <Skeleton className="h-5 w-4/5" />
         </div>
         <Skeleton className="aspect-video w-full rounded-lg" />
-        <div className="flex w-full max-w-[72ch] flex-col gap-3">
+        <div className="flex w-full flex-col gap-3">
           <Skeleton className="h-5 w-full" />
           <Skeleton className="h-5 w-full" />
           <Skeleton className="h-5 w-11/12" />

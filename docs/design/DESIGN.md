@@ -41,8 +41,8 @@ Signapse không phải landing page marketing. Đây là công cụ vận hành 
 
 ## Non-Goals
 
-- Không clone layout hero/section của reference.
-- Không biến dashboard thành marketing page.
+- Không clone layout hero/section, dùng nhiều CTA marketing hoặc biến dashboard thành marketing page.
+- Không biến mọi content block thành card, thêm floating decoration không phục vụ dữ liệu hoặc giảm mật độ table chỉ để giống reference.
 - Không đổi API, permission, form validation hoặc workflow nghiệp vụ.
 - Không thêm animation lớn hoặc motion trang trí nặng.
 - Không dùng tài liệu này để thay thế component API rules, skill workflow hoặc technical guardrails.
@@ -66,13 +66,7 @@ Reference đẹp vì surface rhythm rõ: nền yên, card nổi nhẹ, metric mo
 
 ### 3. Token First
 
-Màu sắc và cảm giác nền phải đi qua semantic tokens hoặc shared app-level surfaces. Tránh class màu tùy hứng trong feature page.
-
-Ưu tiên:
-
-- `app/globals.css` cho token nền, card, border, muted, sidebar, chart.
-- Shared components ngoài `components/ui` cho table, toolbar, app shell.
-- Feature-level class chỉ dùng khi cần hierarchy hoặc trạng thái nghiệp vụ riêng.
+Màu sắc và cảm giác nền phải đi qua semantic tokens hoặc shared app-level surfaces. Quy tắc thực thi nằm ở `Semantic Tokens`; feature-level class chỉ dùng khi cần hierarchy hoặc trạng thái nghiệp vụ riêng.
 
 ### 4. Dashboard Translation, Not Screenshot Copy
 
@@ -104,16 +98,11 @@ Light mode và dark mode phải là hai biến thể của cùng một direction
 - Background grid hoặc depth decoration, nếu có, chỉ thuộc app shell/shared surface và phải rất nhẹ; không lặp ở từng card.
 - Shadow tạo hierarchy nhẹ, không dùng để làm destructive/alert state nổi bật.
 
-### Badge Colors
+### Badge Semantics
 
 - Ưu tiên các variant `default`, `secondary`, `destructive`, `outline` hoặc `ghost`.
-- Khi cần categorical color ngoài built-in variants, chỉ `<Badge>` được dùng các palette sau:
-  - Blue: `bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300`.
-  - Green: `bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300`.
-  - Sky: `bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-300`.
-  - Purple: `bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300`.
-  - Red: `bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300`.
-- Exception này không cho phép raw palette hoặc manual `dark:` color classes trên primitive khác.
+- Categorical badge ngoài built-in variants chỉ dùng các intent `info`, `success`, `warning` hoặc `danger`; mapping màu và dark mode phải nằm trong shared `<Badge>` variant, feature code không tự ghép raw palette hay manual `dark:` classes.
+- Badge luôn có text hoặc icon hỗ trợ ý nghĩa; màu không phải tín hiệu duy nhất của trạng thái.
 
 ## Layout And Surface Composition
 
@@ -122,7 +111,8 @@ Light mode và dark mode phải là hai biến thể của cùng một direction
 App shell giữ cảm giác yên, có khoảng thở và không tạo quá nhiều border cạnh tranh. Page padding phải đủ thoáng trên desktop nhưng không làm mobile chật.
 
 - Pages trong `app/[lang]/(main)` dùng cardless workspace từ parent padding layout.
-- Breadcrumb trong app header là page identity chính cho simple pages; sửa breadcrumb mapping thay vì thêm body heading trùng lặp.
+- Breadcrumb trong app header là page identity hiển thị chính cho simple pages; sửa breadcrumb mapping thay vì thêm body heading trùng lặp.
+- Mỗi route vẫn phải có đúng một `<h1>` ngữ nghĩa. Heading có thể là `sr-only` khi trùng hoàn toàn với breadcrumb; sau client navigation, focus chuyển đến heading hoặc main content mà không làm cuộn trang bất ngờ.
 - Top loading bar luôn bật cho page transitions.
 
 ### Sidebar And Header
@@ -155,9 +145,11 @@ Translation:
 - Table dùng shared header và empty-state components; empty state nằm trong table surface.
 - Skeleton phải giống bố cục table thật.
 - Row hover nhẹ, không làm mất contrast.
-- Multiline cell override default nowrap cục bộ; long text phải có wrapping, truncation hoặc line-clamp strategy rõ.
+- Multiline cell override default nowrap cục bộ; long text phải có wrapping, truncation hoặc line-clamp strategy rõ. Nội dung bị truncate phải có cách xem đầy đủ bằng tooltip, expand hoặc detail view và không chỉ phụ thuộc hover.
 - Boolean toggle trong row dùng compact status capsule có label, switch, `aria-label`, pending/disabled behavior ổn định và skeleton cùng hình dạng.
 - Plain timestamp dùng icon `size-3` và `text-xs text-muted-foreground tabular-nums`, không dùng badge hay strong value styling.
+- Sortable header phải dùng control keyboard-accessible; header cell expose `aria-sort` đúng với trạng thái hiện tại.
+- Trên viewport nhỏ, ưu tiên cột phục vụ quyết định và ẩn/gộp metadata thứ cấp. Wide table chỉ horizontal scroll bên trong table surface, không làm page overflow.
 
 ### Toolbar
 
@@ -168,6 +160,7 @@ Translation:
 - Layout responsive dùng `flex-col sm:flex-row sm:justify-between`.
 - Leading area chứa primary action và search; trailing area chứa filter, sort và page size.
 - Primary controls giữ default shadcn size/chrome; không thêm custom height/radius/padding hoặc `size="sm"` chỉ để đổi density.
+- Mỗi surface chỉ có một primary action. Secondary actions giảm emphasis; destructive actions tách khỏi primary flow hoặc nằm trong overflow menu khi toolbar dày.
 
 ### Forms
 
@@ -179,8 +172,11 @@ Translation:
 - Body dùng `FieldGroup`, `FieldSet` và `gap-*`; flex/grid layouts dùng `gap-*`, không dùng `space-y-*`.
 - Description dùng muted foreground.
 - Footer tách khỏi body bằng border/subtle background và chứa primary/secondary actions.
+- Mỗi input có visible label; placeholder không thay thế label. Required state, helper text và format yêu cầu phải rõ trước khi submit.
+- Dùng semantic input type và `autocomplete` phù hợp để hỗ trợ mobile keyboard và browser autofill.
+- Field error nằm cạnh field, dùng `aria-invalid` và liên kết bằng `aria-describedby`; sau submit lỗi, focus chuyển đến field lỗi đầu tiên hoặc error summary khi có nhiều lỗi.
 - Submit/save pending phải disabled và hiển thị `<Spinner>`.
-- Edit flow có ghost Cancel khôi phục initial data hoặc thoát an toàn.
+- Submit lỗi không xóa dữ liệu hợp lệ đã nhập. Edit flow có ghost Cancel khôi phục initial data hoặc thoát an toàn; form dài hoặc quan trọng phải cảnh báo trước khi bỏ thay đổi chưa lưu.
 - Switch trong create/update/detail dùng compact field treatment; row capsule, toolbar/workbench toggle, permission matrix và route-row switch giữ pattern riêng.
 
 ### Empty, Loading, Error, Permission
@@ -189,11 +185,12 @@ Các state này phải trông như một phần của system, không phải afte
 
 Translation:
 
-- Empty dùng `<Empty>` và nằm đúng surface.
+- Empty dùng `<Empty>` và nằm đúng surface; phân biệt first-use empty với no-results do filter/search.
 - Loading skeleton bám bố cục thật.
-- Error copy tiếng Việt rõ, không kỹ thuật hóa quá mức.
+- Error copy tiếng Việt rõ, không kỹ thuật hóa quá mức, nêu recovery action như retry, sửa dữ liệu hoặc mở trợ giúp.
+- Submit hoặc refresh lỗi không xóa input, filter hay context người dùng đang thao tác.
+- Partial, stale hoặc offline state phải chỉ rõ dữ liệu nào chưa khả dụng và thời điểm cập nhật gần nhất; không trình bày dữ liệu cũ như dữ liệu live.
 - Permission denied nói rõ quyền cần thiết nhưng không đổ lỗi người dùng.
-- Irreversible destructive action dùng `<AlertDialog>` với warning rõ.
 
 ### Workbench Screens
 
@@ -206,23 +203,88 @@ Translation:
 - Evidence, status, confidence, limitations cần dễ scan.
 - Decorative atmosphere không được che mất canvas hoặc data.
 
+### Data Visualization And Financial Data
+
+- Chọn chart theo quyết định cần hỗ trợ: line cho trend, candlestick/OHLC cho giá giao dịch, bar cho so sánh; không dùng chart chỉ để trang trí.
+- Axis, legend và tooltip phải nêu rõ đơn vị, timezone, time granularity và precision. Số, ngày, currency và percentage dùng localization formatters; phân biệt rõ `0`, giá trị âm và không có dữ liệu.
+- Giá trị tăng/giảm, bullish/bearish, confidence hoặc anomaly không chỉ dựa vào đỏ/xanh; bổ sung sign, label, icon, shape hoặc line style.
+- Legend, tooltip và data point tương tác phải dùng được bằng keyboard và tap, không chỉ bằng hover. Chart quan trọng cần text summary và table/detail alternative cho dữ liệu chính.
+- Chart responsive bằng cách reflow, giảm tick hoặc ưu tiên series chính; không ép label nhỏ, xoay khó đọc hoặc tạo page overflow.
+- Loading dùng skeleton cùng footprint; empty không render khung axis vô nghĩa; error có retry action và giữ context/range đang xem.
+- Realtime view hiển thị current value, thời điểm cập nhật cuối và trạng thái stale. Khi dữ liệu cập nhật nhanh, cung cấp pause/freeze, tôn trọng `prefers-reduced-motion` và aggregate/downsample khi mật độ làm giảm readability hoặc interaction.
+
 ## Interaction And Navigation
 
-### Submit And Transition Feedback
+### Dialog And Destructive Confirmation
 
-- Sau submit thành công, dùng `router.push()` về list page rồi `router.refresh()`.
-- Pending state không thay đổi layout đột ngột; spinner thay thế feedback cùng vị trí thay vì thêm decoration mới.
+Chọn overlay theo mục đích, không theo hình thức:
+
+| Nhu cầu                                                    | Component            |
+| ---------------------------------------------------------- | -------------------- |
+| Form, lựa chọn hoặc tác vụ có thể hủy an toàn              | `<Dialog>`           |
+| Xác nhận hành động quan trọng, khó hoặc không thể hoàn tác | `<AlertDialog>`      |
+| Thông báo không cần chặn workflow                          | `<Alert>` hoặc toast |
+
+- Mọi `Dialog` và `AlertDialog` phải có title hiển thị. Description phải giải thích mục đích, tác động hoặc hậu quả đủ để người dùng quyết định.
+- Không dùng `AlertDialog` cho form, input, lựa chọn thông thường hoặc nội dung chỉ để đọc; các trường hợp này dùng `Dialog`.
+- Dialog phải có cách đóng hiển thị rõ. Focus di chuyển vào overlay khi mở, bị giới hạn phù hợp trong overlay và trở về trigger hoặc điểm tiếp theo hợp lý khi đóng.
+- Không hiển thị confirmation cho hành động dễ hoàn tác hoặc không có hậu quả đáng kể.
+
+Delete confirmation tuân theo pattern sau:
+
+- Trigger là button có label dùng `variant="destructive"`; icon dùng `Trash2Icon` và `data-icon="inline-start"`. Icon-only trigger phải có accessible name và tooltip.
+- Trong table row hoặc menu dày đặc, ưu tiên destructive menu item thay vì lặp nhiều destructive button nổi bật.
+- Dùng `AlertDialogContent size="sm"` với `AlertDialogMedia`, `AlertDialogTitle`, `AlertDialogDescription` và `AlertDialogFooter`.
+- `AlertDialogMedia` dùng `Trash2Icon` với semantic tokens `bg-destructive/10 text-destructive`; không thêm raw palette hoặc manual dark-mode overrides.
+- Title hỏi trực tiếp về đối tượng cần xóa. Description nêu rõ đối tượng, dữ liệu liên quan và tính không thể hoàn tác; tránh copy chung chung như “Bạn có chắc không?”.
+- Cancel đứng trước Delete trong DOM và dùng `variant="outline"`. Confirm action dùng `variant="destructive"`; không tự dựng destructive chrome bằng `className`.
+- Copy phải lấy từ dictionary. Không hardcode label, title, description hoặc pending text trong feature component.
+- Với async delete, dùng controlled state, giữ dialog mở trong khi pending hoặc khi có lỗi, disable cả Cancel và Delete, hiển thị `<Spinner>`, chỉ đóng sau thành công. Nếu chặn hành vi đóng mặc định của `AlertDialogAction`, gọi `event.preventDefault()` trước khi chạy action.
+- Async delete không được khóa dialog vô hạn. Timeout hoặc error phải bật lại controls, hiển thị lỗi có recovery path và cho phép retry hoặc cancel.
+
+```tsx
+<AlertDialog>
+  <AlertDialogTrigger asChild>
+    <Button type="button" variant="destructive">
+      <Trash2Icon data-icon="inline-start" />
+      {t.delete}
+    </Button>
+  </AlertDialogTrigger>
+
+  <AlertDialogContent size="sm">
+    <AlertDialogHeader>
+      <AlertDialogMedia className="bg-destructive/10 text-destructive">
+        <Trash2Icon />
+      </AlertDialogMedia>
+      <AlertDialogTitle>{t.deleteTitle}</AlertDialogTitle>
+      <AlertDialogDescription>{t.deleteDescription}</AlertDialogDescription>
+    </AlertDialogHeader>
+
+    <AlertDialogFooter>
+      <AlertDialogCancel variant="outline">
+        {dictionary.common.cancel}
+      </AlertDialogCancel>
+      <AlertDialogAction variant="destructive">{t.delete}</AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
+```
+
+### Feedback And Recovery
+
+- Submit thành công có feedback ngắn và chuyển đến destination phù hợp mà không phá Back behavior hoặc context cần giữ.
+- Pending state không thay đổi layout đột ngột; spinner hoặc progress thay feedback cùng vị trí và chỉ disable phạm vi control liên quan.
+- Error hiển thị gần nguồn phát sinh, nêu nguyên nhân có ích và recovery action; timeout phải cho retry hoặc cancel.
+- Toast và dynamic status không cướp focus, được thông báo qua live region phù hợp và không thay thế field-level hoặc blocking error.
 
 ### URL State, Search And Pagination
 
-- Filter, search, sort, `page` và `size` nằm trong URL; browser URL 1-indexed, backend pagination 0-indexed.
-- Search nằm trong `[feature]-search.tsx`, là controlled `type="search"` input khởi tạo từ `useSearchParams()` và sync khi query param thay đổi.
-- Input có `id` và `sr-only` label; search debounce `300ms` qua `use-debounce`, không thêm Search button nếu không có business requirement.
-- Khi search đổi, trim value, xóa query param nếu rỗng và reset `page` về `1`.
-- Search dùng `InputGroup`, `InputGroupInput`, `InputGroupAddon`; idle icon và pending `<Spinner>` thay nhau trong leading addon. Không dùng absolute icon, trailing spinner hoặc reserved trailing width.
-- Wrapper dùng `w-full sm:w-80 lg:w-96` và nằm ở leading area của toolbar.
+- Filter, search, sort, `page` và `size` nằm trong URL để deep link, refresh và Back/Forward khôi phục đúng view.
+- Khi search, filter, sort hoặc page size đổi, xóa param rỗng và reset `page` về `1` khi page hiện tại có thể không còn hợp lệ.
+- Search dùng `type="search"`, có label hiển thị hoặc `sr-only`, debounce khoảng `300ms` và không cần Search button nếu không có business requirement.
+- Search nằm ở leading area, full-width trên mobile và có width giới hạn trên desktop; pending feedback giữ nguyên footprint của control.
 - Page-size selector nằm trong trailing controls với options `10`, `20`, `50`, `100`, mặc định `10`; không lặp trong footer pagination.
-- Sort/page-size pending chỉ disabled control, không render spinner trong hoặc cạnh select trigger.
+- Sort/page-size pending chỉ disable control liên quan và không làm toolbar thay đổi layout.
 
 ### Quick Detail Overlay
 
@@ -241,21 +303,17 @@ Translation:
 
 ## Accessibility And Responsive Behavior
 
-- Preserve semantic elements, labels, keyboard interaction, focus visibility và screen-reader names.
-- Dialog/overlay restore focus an toàn; icon-only control có accessible name.
-- Search, form controls và switches có label hoặc `aria-label` phù hợp.
+- Mục tiêu là WCAG 2.2 AA. Normal text đạt contrast tối thiểu `4.5:1`; large text, component boundary, state indicator và focus indicator đạt tối thiểu `3:1` trong cả light và dark mode.
+- Ưu tiên native semantic elements. Mỗi page có một `<h1>`, heading hierarchy tuần tự và skip link đến main content khi có repeated navigation.
+- Mọi interaction dùng được bằng keyboard với tab order hợp lý; focus luôn nhìn thấy, không bị sticky surface che và được quản lý đúng sau route change.
+- Dialog/overlay restore focus an toàn; icon-only control có accessible name. Meaningful image có `alt`, decorative image dùng `alt=""`.
+- Search, form controls và switches có label phù hợp; error và dynamic status vừa hiển thị trực quan vừa được thông báo qua `aria-live`, `role="alert"` hoặc primitive tương đương.
+- Không dùng color làm tín hiệu duy nhất; status cần thêm text, icon, sign, shape hoặc pattern phù hợp.
 - Icons trong button dùng wrapper `data-icon` treatment.
+- Interactive target tối thiểu `24×24` CSS px; ưu tiên `44×44` px trên mobile hoặc coarse pointer mà không làm giảm density desktop.
+- Motion phải có mục đích, không block interaction và tôn trọng `prefers-reduced-motion`.
 - Skeleton và Suspense fallback mirror final layout ở mọi breakpoint.
-- Desktop, tablet và mobile giữ hierarchy và không tạo horizontal overflow ngoài surface chủ đích.
-
-## Intentional Deviations From Reference
-
-- Không dùng hero headline lớn trong admin pages.
-- Không dùng nhiều CTA marketing như reference.
-- Không biến mọi content block thành card marketing.
-- Không giảm mật độ table quá nhiều.
-- Không thêm decorative floating cards nếu không phục vụ dữ liệu.
-- Không dùng animation reveal lớn hoặc decorative motion gây xao nhãng.
+- Desktop, tablet, mobile và zoom `200%` giữ hierarchy, không mất nội dung/chức năng và không tạo horizontal overflow ngoài surface chủ đích.
 
 ## UI Review Criteria
 
@@ -273,8 +331,13 @@ Khi implement hoặc review UI, kiểm tra các state và breakpoint liên quan:
 - Edit form.
 - Delete confirmation.
 - Workbench idle/loading/success/error.
-- Focus ring và keyboard navigation cơ bản.
+- Chart loading/empty/error, keyboard interaction, text/table alternative và responsive behavior.
+- Realtime current value, last-updated, stale state, pause/freeze và reduced motion.
+- Semantic heading, skip link, route-change focus, focus ring và keyboard navigation.
+- Contrast light/dark, non-color status cues, target size và zoom `200%`.
+- Form labels, announced errors, recovery action, unsaved-change protection và data retention sau lỗi.
+- Horizontal overflow chỉ xuất hiện bên trong surface chủ đích.
 - Không có mojibake.
 - Không có UI copy tiếng Anh mới hướng người dùng, trừ tên riêng hoặc thuật ngữ kỹ thuật cần thiết.
 
-Ưu tiên finding theo các UI drift category: shadcn chrome, toolbar/table spacing, main-card shell, form shell, table surface, skeleton mismatch, URL/search state, accessibility regression, UI copy noise và non-Vietnamese UI copy. Nếu visual direction làm giảm readability hoặc data density cần thiết, ưu tiên readability và decision path.
+Ưu tiên finding theo các UI drift category: shadcn chrome, toolbar/table spacing, main-card shell, form shell, table/chart surface, skeleton mismatch, URL/search state, accessibility regression, stale-data ambiguity, recovery gap, UI copy noise và non-Vietnamese UI copy. Nếu visual direction làm giảm readability hoặc data density cần thiết, ưu tiên readability và decision path.
