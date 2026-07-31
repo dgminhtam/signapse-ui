@@ -8,12 +8,16 @@ import {
   ArrowUpIcon,
   BotMessageSquareIcon,
   ChevronDownIcon,
+  CopyIcon,
+  ClockIcon,
   MaximizeIcon,
   MinimizeIcon,
   PenLineIcon,
+  SendIcon,
   TriangleAlertIcon,
   XIcon,
 } from "lucide-react"
+import { toast } from "sonner"
 
 import {
   createMarketConversation,
@@ -31,6 +35,7 @@ import {
 } from "@/app/lib/market-query/definitions"
 import { buildFilterQuery } from "@/app/lib/utils"
 import { Logo } from "@/components/logo"
+import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { Bubble, BubbleContent } from "@/components/ui/bubble"
 import { Button } from "@/components/ui/button"
 import {
@@ -59,7 +64,12 @@ import {
   InputGroupTextarea,
 } from "@/components/ui/input-group"
 import { Marker, MarkerContent, MarkerIcon } from "@/components/ui/marker"
-import { Message, MessageContent, MessageHeader } from "@/components/ui/message"
+import {
+  Message,
+  MessageContent,
+  MessageFooter,
+  MessageHeader,
+} from "@/components/ui/message"
 import {
   MessageScroller,
   MessageScrollerButton,
@@ -79,6 +89,11 @@ import {
 } from "@/components/ui/popover"
 import { Separator } from "@/components/ui/separator"
 import { Spinner } from "@/components/ui/spinner"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
 import styles from "./market-conversation-assistant.module.css"
@@ -894,8 +909,8 @@ export function MarketConversationAssistant({
                                   ? "mt-0"
                                   : renderableMessages[index - 1]?.role ===
                                       message.role
-                                    ? "mt-2"
-                                    : "mt-6"
+                                    ? "mt-1"
+                                    : "mt-4"
                               }
                             />
                           ))}
@@ -906,8 +921,8 @@ export function MarketConversationAssistant({
                                 renderableMessages.length === 0
                                   ? "mt-0"
                                   : renderableMessages.at(-1)?.role === "USER"
-                                    ? "mt-2"
-                                    : "mt-6"
+                                    ? "mt-1"
+                                    : "mt-4"
                               )}
                             >
                               <Message align="end">
@@ -932,13 +947,13 @@ export function MarketConversationAssistant({
                               roleLabel={labels.assistantRole}
                               spacingClassName={
                                 pendingUserMessage
-                                  ? "mt-6"
+                                  ? "mt-4"
                                   : renderableMessages.length === 0
                                     ? "mt-0"
                                     : renderableMessages.at(-1)?.role ===
                                         "ASSISTANT"
-                                      ? "mt-2"
-                                      : "mt-6"
+                                      ? "mt-1"
+                                      : "mt-4"
                               }
                             />
                           ) : null}
@@ -1219,7 +1234,7 @@ function DemoMessage({
   accessibleText?: string
   labels: DemoConversationLabels
   message: MarketChatMessageResponse
-  spacingClassName: "mt-0" | "mt-2" | "mt-6"
+  spacingClassName: "mt-0" | "mt-1" | "mt-4"
 }) {
   const isUser = message.role === "USER"
   const text = getMessageText(message)
@@ -1230,6 +1245,71 @@ function DemoMessage({
     accessibleText !== undefined
   )
   const failureText = message.failureReason?.trim() || labels.messageFailed
+  const hasContent = text.trim().length > 0
+  const hasStableAssistantContent =
+    message.role === "ASSISTANT" &&
+    message.status === "COMPLETED" &&
+    hasContent &&
+    accessibleText === undefined
+  const canCopy = isUser ? hasContent : hasStableAssistantContent
+  const createdAt = useLocalization().formatDateTime(
+    message.createdDate,
+    { weekday: "short", hour: "2-digit", minute: "2-digit" },
+    "-"
+  )
+  const timeMetadata = (
+    <AppTimeMetadata icon={ClockIcon}>
+      <time
+        aria-label={`${labels.createdAt}: ${createdAt}`}
+        dateTime={message.createdDate}
+      >
+        {createdAt}
+      </time>
+    </AppTimeMetadata>
+  )
+  const messageActions = canCopy ? (
+    <div className="flex items-center gap-0.5">
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            aria-label={labels.copy}
+            onClick={() => void handleCopy()}
+          >
+            <CopyIcon />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>{labels.copy}</TooltipContent>
+      </Tooltip>
+      {hasStableAssistantContent ? (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-xs"
+              aria-label={labels.sendToTelegram}
+              onClick={() => toast.info(labels.telegramUnavailable)}
+            >
+              <SendIcon />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{labels.sendToTelegram}</TooltipContent>
+        </Tooltip>
+      ) : null}
+    </div>
+  ) : null
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(text)
+      toast.success(labels.copySuccess)
+    } catch {
+      toast.error(labels.copyError)
+    }
+  }
 
   return (
     <MessageScrollerItem
@@ -1238,7 +1318,7 @@ function DemoMessage({
       className={`animate-in fade-in slide-in-from-bottom-2 motion-reduce:animate-none ${spacingClassName}`}
     >
       <Message align={isUser ? "end" : "start"}>
-        <MessageContent>
+        <MessageContent className="gap-1">
           <MessageHeader className="sr-only">
             {isUser ? labels.userRole : labels.assistantRole}
           </MessageHeader>
@@ -1286,6 +1366,11 @@ function DemoMessage({
               <MarkerContent>{failureText}</MarkerContent>
             </Marker>
           ) : null}
+          <MessageFooter className="mt-0 gap-1 transition-opacity duration-150 motion-reduce:transition-none [@media(hover:hover)]:pointer-events-none [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-focus-within/message:pointer-events-auto [@media(hover:hover)]:group-focus-within/message:opacity-100 [@media(hover:hover)]:group-hover/message:pointer-events-auto [@media(hover:hover)]:group-hover/message:opacity-100">
+            {isUser ? timeMetadata : null}
+            {messageActions}
+            {!isUser ? timeMetadata : null}
+          </MessageFooter>
         </MessageContent>
       </Message>
     </MessageScrollerItem>
@@ -1299,7 +1384,7 @@ function PendingAssistantMessage({
 }: {
   label: string
   roleLabel: string
-  spacingClassName: "mt-0" | "mt-2" | "mt-6"
+  spacingClassName: "mt-0" | "mt-1" | "mt-4"
 }) {
   return (
     <div className={spacingClassName}>

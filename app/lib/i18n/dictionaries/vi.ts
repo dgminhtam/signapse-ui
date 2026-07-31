@@ -1337,6 +1337,12 @@ export const vi = {
     scrollToLatest: "Cuộn tới tin nhắn mới nhất",
     userRole: "Bạn",
     assistantRole: "Trợ lý",
+    copy: "Sao chép",
+    copySuccess: "Đã sao chép tin nhắn.",
+    copyError: "Không thể sao chép tin nhắn.",
+    sendToTelegram: "Gửi đến Telegram",
+    telegramUnavailable: "Chưa thể gửi đến Telegram.",
+    createdAt: "Thời điểm tạo",
   },
   marketConversations: {
     readDenied: "Bạn không có quyền sử dụng hội thoại truy vấn thị trường.",
