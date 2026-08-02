@@ -21,7 +21,7 @@ export interface MarketQueryEvidenceResponse {
   newsArticleId?: number
   newsArticleTitle?: string
   newsArticleUrl?: string
-  newsOutletName?: string
+  sourceName?: string
   publishedAt?: string | null
   artifactType?: ArtifactType
   evidenceRole?: MarketQueryEvidenceRole
@@ -118,7 +118,7 @@ export const marketQueryEvidenceResponseSchema = z.object({
   newsArticleId: z.number().int().optional(),
   newsArticleTitle: z.string().optional(),
   newsArticleUrl: z.string().optional(),
-  newsOutletName: z.string().optional(),
+  sourceName: z.string().optional(),
   publishedAt: z.string().nullish(),
   artifactType: z.enum(artifactTypes).optional(),
   evidenceRole: z.enum(["PRIMARY", "SUPPORTING", "UPDATE", "CONTRADICTING", "CONTEXT"]).optional(),

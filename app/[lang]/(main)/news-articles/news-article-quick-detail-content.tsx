@@ -64,7 +64,7 @@ export function NewsArticleQuickDetailContent({
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <AppTimeMetadata icon={Globe2}>
-          {article.newsOutletName?.trim() || dictionary.newsArticles.noOutlet}
+          {article.sourceName?.trim() || dictionary.newsArticles.noOutlet}
         </AppTimeMetadata>
         <AppTimeMetadata icon={Calendar}>
           {formatDateTime(article.publishedAt, locale, dictionary)}

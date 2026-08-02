@@ -159,7 +159,7 @@ export function EventQuickDetailContent({
                   {evidence.newsArticleTitle || dictionary.events.evidenceUntitled}
                 </h3>
                 <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                  <span>{evidence.newsOutletName || dictionary.newsArticles.noOutlet}</span>
+                  <span>{evidence.sourceName || dictionary.newsArticles.noOutlet}</span>
                   <AppTimeMetadata icon={Calendar}>
                     {formatDateTime(evidence.publishedAt, locale, dictionary)}
                   </AppTimeMetadata>

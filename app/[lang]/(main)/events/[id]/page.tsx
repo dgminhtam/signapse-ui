@@ -430,7 +430,7 @@ async function FetchEventData({
                       <div className="flex flex-col gap-1 text-sm text-muted-foreground">
                         <span>
                           {dictionary.events.newsOutlet}:{" "}
-                          {evidence.newsOutletName ||
+                          {evidence.sourceName ||
                             dictionary.common.notAvailable}
                         </span>
                         <AppTimeMetadata icon={Calendar}>

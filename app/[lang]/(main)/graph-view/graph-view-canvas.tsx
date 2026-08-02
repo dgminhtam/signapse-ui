@@ -375,7 +375,7 @@ function getGraphNodeInspectorFields({
 }) {
   const eventStatus = getMeaningfulInspectorStatus(metadata?.status)
   const narrativeStatus = getInspectorText(metadata?.narrativeStatus)
-  const newsOutletName = getInspectorText(metadata?.newsOutletName)
+  const sourceName = getInspectorText(metadata?.sourceName)
   const assetType = getInspectorText(metadata?.assetType)
   const thesis = getInspectorText(metadata?.thesis)
   const symbol = getInspectorText(metadata?.symbol)
@@ -427,7 +427,7 @@ function getGraphNodeInspectorFields({
       {
         key: "news-outlet",
         label: dictionary.graphView.inspector.newsOutlet,
-        value: newsOutletName,
+        value: sourceName,
       },
       {
         key: "published-at",

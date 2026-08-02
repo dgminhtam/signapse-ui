@@ -24,7 +24,7 @@ export interface GraphViewNodeMetadata {
   canonicalKey?: string | null
   symbol?: string | null
   assetType?: string | null
-  newsOutletName?: string | null
+  sourceName?: string | null
   url?: string | null
   occurredAt?: string | null
   publishedAt?: string | null
@@ -92,7 +92,7 @@ export const graphViewNodeMetadataSchema = z.object({
   canonicalKey: z.string().nullish(),
   symbol: z.string().nullish(),
   assetType: z.string().nullish(),
-  newsOutletName: z.string().nullish(),
+  sourceName: z.string().nullish(),
   url: z.string().nullish(),
   occurredAt: z.string().nullish(),
   publishedAt: z.string().nullish(),

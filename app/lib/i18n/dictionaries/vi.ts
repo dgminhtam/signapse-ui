@@ -66,6 +66,206 @@ export const vi = {
     toggleSidebar: "Thu gọn/mở rộng thanh điều hướng",
     breadcrumb: "Đường dẫn điều hướng",
   },
+  dashboardPrototype: {
+    routeLabel: "Prototype bảng điều khiển",
+    title: "Prototype Trading Intelligence Home",
+    controls: {
+      label: "Chế độ prototype",
+      description:
+        "Chuyển trạng thái để đánh giá hierarchy mà không dùng dữ liệu thật.",
+      scenarios: {
+        default: "Mặc định",
+        loading: "Đang tải",
+        empty: "Trống",
+        partialError: "Lỗi từng phần",
+      },
+    },
+    context: {
+      workspace: "Workspace Alpha",
+      workspaceDescription:
+        "Phạm vi dữ liệu và phân tích đang hoạt động trên dashboard.",
+      assetsLabel: "Tài sản đang theo dõi",
+      assetsDescription:
+        "Danh sách này được lưu theo workspace đang hoạt động.",
+      emptyAssets: "Workspace chưa có tài sản theo dõi.",
+      manageAssets: "Quản lý tài sản",
+    },
+    snapshot: {
+      title: "Tóm tắt thị trường",
+      nextEvent: "Sự kiện quan trọng sắp tới",
+      eventTitle: "CPI Hoa Kỳ",
+      eventTime: "19:30",
+      eventCurrency: "USD",
+      events: "Sự kiện thị trường",
+      eventsWindow: "mới trong 24 giờ",
+      narratives: "Luận điểm thị trường",
+      narrativesWindow: "đang hoạt động hoặc mới hình thành",
+      news: "Tin tức mới",
+      newsWindow: "xuất bản trong 6 giờ gần nhất",
+    },
+    events: {
+      title: "Dòng sự kiện",
+      description: "Các sự kiện thị trường mới nhất đã được ghi nhận.",
+      viewAll: "Xem toàn bộ sự kiện",
+      openEvent: "Mở danh sách sự kiện",
+      themes: "Chủ đề",
+      affectedAssets: "Tài sản ảnh hưởng",
+      items: {
+        jobs: {
+          title: "Kỳ vọng lãi suất Mỹ dịch chuyển sau dữ liệu việc làm",
+          description:
+            "Dữ liệu việc làm khiến thị trường điều chỉnh kỳ vọng chính sách ngắn hạn.",
+          themes: ["Chính sách tiền tệ", "Thị trường lao động"],
+        },
+        cpi: {
+          title: "Lợi suất Mỹ tăng khi kỳ vọng lạm phát nóng trở lại",
+          description:
+            "Trái phiếu bị bán ra khi thị trường đánh giá lại lộ trình lãi suất.",
+          themes: ["Lạm phát Hoa Kỳ", "Lợi suất trái phiếu"],
+        },
+        semiconductors: {
+          title: "Dòng vốn quay lại nhóm bán dẫn trong phiên Mỹ",
+          description:
+            "Cổ phiếu chip dẫn dắt đà phục hồi của nhóm công nghệ vốn hóa lớn.",
+          themes: ["Chu kỳ đầu tư AI", "Bán dẫn"],
+        },
+        ecb: {
+          title: "Đồng euro suy yếu sau tín hiệu thận trọng từ ECB",
+          description:
+            "Kỳ vọng nới lỏng chính sách tiếp tục gây áp lực lên đồng tiền chung.",
+          themes: ["Chính sách ECB", "Đồng euro"],
+        },
+        bitcoin: {
+          title: "Thanh khoản Bitcoin giảm trong phiên châu Á",
+          description:
+            "Khối lượng giao dịch suy yếu quanh vùng hỗ trợ ngắn hạn.",
+          themes: ["Thanh khoản tiền mã hóa"],
+        },
+        oil: {
+          title: "Tồn kho dầu thô Hoa Kỳ giảm mạnh hơn dự kiến",
+          description:
+            "Giá dầu được hỗ trợ khi số liệu tồn kho giảm vượt dự báo đồng thuận.",
+          themes: ["Năng lượng", "Tồn kho Hoa Kỳ"],
+        },
+      },
+    },
+    articles: {
+      title: "Tin tức mới nhất",
+      description: "Tin tức mới trong phạm vi theo dõi.",
+      viewAll: "Xem toàn bộ tin tức",
+      items: {
+        gold: {
+          title: "Vàng giữ vùng cao trước báo cáo CPI Hoa Kỳ",
+          summary:
+            "Giá vàng duy trì đà phòng thủ khi thị trường chờ dữ liệu lạm phát mới.",
+          source: "Reuters",
+          time: "35 phút trước",
+        },
+        ecb: {
+          title: "ECB giữ lập trường thận trọng về cắt giảm lãi suất",
+          summary:
+            "Giới chức ECB nhấn mạnh quyết định tiếp theo vẫn phụ thuộc vào dữ liệu.",
+          source: "Bloomberg",
+          time: "1 giờ trước",
+        },
+        semiconductors: {
+          title: "Dòng vốn quay lại nhóm bán dẫn",
+          summary:
+            "Nhà đầu tư quay lại cổ phiếu chip sau nhịp điều chỉnh ngắn hạn.",
+          source: "Financial Times",
+          time: "1 giờ 20 phút trước",
+        },
+        bitcoin: {
+          title: "Bitcoin kiểm tra lại vùng hỗ trợ ngắn hạn",
+          summary:
+            "Giá phản ứng quanh vùng hỗ trợ khi thanh khoản thị trường suy yếu.",
+          source: "CoinDesk",
+          time: "2 giờ trước",
+        },
+        oil: {
+          title: "Giá dầu tăng khi tồn kho Hoa Kỳ giảm",
+          summary:
+            "Tồn kho giảm mạnh hơn dự kiến giúp giá dầu lấy lại động lượng.",
+          source: "Reuters",
+          time: "2 giờ 15 phút trước",
+        },
+      },
+    },
+    watchlist: {
+      title: "Tài sản cần chú ý",
+      description: "Tài sản cần chú ý và đường dẫn phân tích tiếp theo.",
+      marketCharts: "Biểu đồ giá",
+      graphView: "Biểu đồ tri thức",
+      types: {
+        forex: "Ngoại hối",
+        metal: "Kim loại",
+        crypto: "Tiền mã hóa",
+        equity: "Cổ phiếu",
+        energy: "Năng lượng",
+        index: "Chỉ số",
+      },
+      contexts: {
+        eurusd: "Chờ quyết định lãi suất ECB lúc 20:15.",
+        xauusd: "Động lượng phòng thủ tăng trước CPI Hoa Kỳ.",
+        btcusd: "Thanh khoản ngắn hạn đang thu hẹp.",
+        nvda: "Narrative bán dẫn chuyển sang trạng thái hoạt động.",
+        usdjpy: "Nhạy cảm với chênh lệch lợi suất Hoa Kỳ–Nhật Bản.",
+        brent: "Tồn kho giảm hỗ trợ giá trong phiên châu Á.",
+      },
+    },
+    narratives: {
+      title: "Luận điểm thị trường",
+      description: "Luận điểm đang hình thành, hoạt động hoặc suy yếu.",
+      viewGraph: "Điều tra trên biểu đồ tri thức",
+      theme: "Chủ đề",
+      affectedAssets: "Tài sản ảnh hưởng",
+      confidence: "Độ tin cậy {value}",
+      updated: "Cập nhật {time}",
+      statuses: {
+        emerging: "Mới hình thành",
+        active: "Đang hoạt động",
+        weakening: "Đang suy yếu",
+      },
+      items: {
+        dollar: {
+          title: "Định giá lại thanh khoản USD",
+          thesis: "Dữ liệu lao động làm thay đổi kỳ vọng lãi suất ngắn hạn.",
+          theme: "Chính sách tiền tệ",
+          updated: "25 phút trước",
+        },
+        gold: {
+          title: "Nhu cầu phòng thủ với vàng",
+          thesis: "CPI và rủi ro địa chính trị cùng hỗ trợ nhu cầu trú ẩn.",
+          theme: "Nhu cầu trú ẩn",
+          updated: "40 phút trước",
+        },
+        ai: {
+          title: "Động lượng chu kỳ đầu tư AI",
+          thesis: "Dòng vốn vẫn tích cực nhưng độ rộng thị trường đang giảm.",
+          theme: "Chu kỳ đầu tư AI",
+          updated: "1 giờ trước",
+        },
+      },
+    },
+    empty: {
+      eventsTitle: "Chưa có sự kiện thị trường mới",
+      eventsDescription:
+        "Mở danh sách sự kiện để tiếp tục điều tra thị trường.",
+      articlesTitle: "Chưa có tin tức mới",
+      articlesDescription:
+        "Mở danh sách tin tức để xem nguồn tin trong phạm vi khác.",
+      watchlistTitle: "Chưa có tài sản cần chú ý",
+      watchlistDescription: "Quản lý tài sản để mở rộng phạm vi theo dõi.",
+      narrativesTitle: "Chưa có luận điểm thị trường đáng chú ý",
+      narrativesDescription: "Mở biểu đồ tri thức để khám phá theme liên quan.",
+    },
+    error: {
+      narrativesTitle: "Không thể tải luận điểm thị trường",
+      narrativesDescription:
+        "Các khu vực khác vẫn khả dụng. Thử lại để xem luận điểm mới nhất.",
+      retry: "Thử tải lại",
+    },
+  },
   theme: {
     toggle: "Chọn giao diện",
     light: "Sáng",

@@ -73,7 +73,7 @@ export interface EventEvidenceSummaryResponse {
   newsArticleId?: number
   newsArticleTitle?: string
   newsArticleUrl?: string
-  newsOutletName?: string
+  sourceName?: string
   publishedAt?: string | null
   evidenceRole?: EventEvidenceRole
   confidence?: number

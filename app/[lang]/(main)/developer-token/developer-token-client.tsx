@@ -92,7 +92,7 @@ export function DeveloperTokenClient() {
   const handleGetToken = async () => {
     setLoading(true)
     try {
-      const jwt = await getToken()
+      const jwt = await getToken({ template: "signapse" })
       if (jwt) {
         setToken(jwt)
         setDecoded(decodeJWT(jwt))

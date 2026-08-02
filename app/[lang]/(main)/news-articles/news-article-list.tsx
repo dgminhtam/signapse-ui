@@ -117,7 +117,7 @@ export function NewsArticleList({ newsArticlePage }: NewsArticleListProps) {
                   </TableCell>
                   <TableCell className="w-44 max-w-[11rem] text-sm text-muted-foreground">
                     <span className="block truncate">
-                      {article.newsOutletName?.trim() ||
+                      {article.sourceName?.trim() ||
                         dictionary.newsArticles.noOutlet}
                     </span>
                   </TableCell>

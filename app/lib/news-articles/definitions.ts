@@ -35,8 +35,7 @@ export interface NewsArticleListResponse {
   description?: string
   url: string
   featureImage?: MediaResponse
-  newsOutletId?: number
-  newsOutletName?: string
+  sourceName?: string
   publishedAt?: string
   status: NewsArticleStatus
   createdDate: string

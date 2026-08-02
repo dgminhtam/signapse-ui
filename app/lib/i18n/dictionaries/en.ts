@@ -68,6 +68,206 @@ export const en: Dictionary = {
     toggleSidebar: "Toggle navigation sidebar",
     breadcrumb: "Breadcrumb navigation",
   },
+  dashboardPrototype: {
+    routeLabel: "Dashboard prototype",
+    title: "Trading Intelligence Home prototype",
+    controls: {
+      label: "Prototype mode",
+      description:
+        "Switch states to review the hierarchy without using live data.",
+      scenarios: {
+        default: "Default",
+        loading: "Loading",
+        empty: "Empty",
+        partialError: "Partial error",
+      },
+    },
+    context: {
+      workspace: "Workspace Alpha",
+      workspaceDescription:
+        "The data and analysis scope currently active on this dashboard.",
+      assetsLabel: "Tracked assets",
+      assetsDescription: "This list is saved to the active workspace.",
+      emptyAssets: "This workspace has no tracked assets.",
+      manageAssets: "Manage assets",
+    },
+    snapshot: {
+      title: "Market snapshot",
+      nextEvent: "Next Key Event",
+      eventTitle: "US CPI",
+      eventTime: "19:30",
+      eventCurrency: "USD",
+      events: "Market events",
+      eventsWindow: "new in the last 24 hours",
+      narratives: "Market narratives",
+      narrativesWindow: "active or emerging",
+      news: "Latest news",
+      newsWindow: "published in the last 6 hours",
+    },
+    events: {
+      title: "Event Timeline",
+      description: "Recently recorded market events.",
+      viewAll: "View all events",
+      openEvent: "Open event list",
+      themes: "Themes",
+      affectedAssets: "Affected assets",
+      items: {
+        jobs: {
+          title: "US rate expectations shift after labor data",
+          description:
+            "Labor data prompted markets to reprice the near-term policy path.",
+          themes: ["Monetary policy", "Labor market"],
+        },
+        cpi: {
+          title: "US yields rise as inflation expectations heat up again",
+          description:
+            "Bonds sold off as markets reassessed the path for interest rates.",
+          themes: ["US inflation", "Bond yields"],
+        },
+        semiconductors: {
+          title: "Flows return to semiconductors during the US session",
+          description:
+            "Chip stocks led the recovery in large-cap technology shares.",
+          themes: ["AI investment cycle", "Semiconductors"],
+        },
+        ecb: {
+          title: "Euro weakens after cautious signals from the ECB",
+          description:
+            "Expectations of policy easing continued to weigh on the common currency.",
+          themes: ["ECB policy", "Euro"],
+        },
+        bitcoin: {
+          title: "Bitcoin liquidity contracts during the Asian session",
+          description:
+            "Trading volume softened around the short-term support area.",
+          themes: ["Crypto liquidity"],
+        },
+        oil: {
+          title: "US crude inventories fall more than expected",
+          description:
+            "Oil prices found support as inventories fell beyond consensus forecasts.",
+          themes: ["Energy", "US inventories"],
+        },
+      },
+    },
+    articles: {
+      title: "Latest News",
+      description: "Recent news in the tracked scope.",
+      viewAll: "View all news",
+      items: {
+        gold: {
+          title: "Gold holds near highs before the US CPI report",
+          summary:
+            "Gold retains its defensive momentum as markets await fresh inflation data.",
+          source: "Reuters",
+          time: "35 minutes ago",
+        },
+        ecb: {
+          title: "ECB remains cautious on the pace of rate cuts",
+          summary:
+            "ECB officials stress that the next decision will remain data-dependent.",
+          source: "Bloomberg",
+          time: "1 hour ago",
+        },
+        semiconductors: {
+          title: "Capital rotates back into semiconductors",
+          summary:
+            "Investors return to chip stocks after a short-term pullback.",
+          source: "Financial Times",
+          time: "1 hour 20 minutes ago",
+        },
+        bitcoin: {
+          title: "Bitcoin retests short-term support",
+          summary:
+            "Price reacts around support as broader market liquidity weakens.",
+          source: "CoinDesk",
+          time: "2 hours ago",
+        },
+        oil: {
+          title: "Oil rises as US inventories decline",
+          summary:
+            "A larger-than-expected inventory draw helps oil regain momentum.",
+          source: "Reuters",
+          time: "2 hours 15 minutes ago",
+        },
+      },
+    },
+    watchlist: {
+      title: "Assets in Focus",
+      description: "Assets requiring attention and their next analysis paths.",
+      marketCharts: "Market charts",
+      graphView: "Knowledge graph",
+      types: {
+        forex: "Forex",
+        metal: "Metal",
+        crypto: "Crypto",
+        equity: "Equity",
+        energy: "Energy",
+        index: "Index",
+      },
+      contexts: {
+        eurusd: "Waiting for the ECB rate decision at 20:15.",
+        xauusd: "Defensive momentum is rising before US CPI.",
+        btcusd: "Short-term liquidity is tightening.",
+        nvda: "The semiconductor narrative has moved to active.",
+        usdjpy: "Sensitive to the US–Japan yield spread.",
+        brent: "Lower inventories support prices in the Asian session.",
+      },
+    },
+    narratives: {
+      title: "Market Narratives",
+      description: "Theses that are emerging, active, or weakening.",
+      viewGraph: "Investigate in the knowledge graph",
+      theme: "Theme",
+      affectedAssets: "Affected assets",
+      confidence: "{value} confidence",
+      updated: "Updated {time}",
+      statuses: {
+        emerging: "Emerging",
+        active: "Active",
+        weakening: "Weakening",
+      },
+      items: {
+        dollar: {
+          title: "USD liquidity repricing",
+          thesis: "Labor data is shifting short-term rate expectations.",
+          theme: "Monetary policy",
+          updated: "25 minutes ago",
+        },
+        gold: {
+          title: "Defensive demand for gold",
+          thesis: "CPI and geopolitical risk are supporting haven demand.",
+          theme: "Safe-haven demand",
+          updated: "40 minutes ago",
+        },
+        ai: {
+          title: "AI investment-cycle momentum",
+          thesis: "Flows remain positive while market breadth is narrowing.",
+          theme: "AI investment cycle",
+          updated: "1 hour ago",
+        },
+      },
+    },
+    empty: {
+      eventsTitle: "No new market events",
+      eventsDescription:
+        "Open the event list to continue investigating the market.",
+      articlesTitle: "No recent news",
+      articlesDescription:
+        "Open the news list to review sources from another scope.",
+      watchlistTitle: "No assets in focus",
+      watchlistDescription: "Manage assets to expand the tracked scope.",
+      narrativesTitle: "No notable market narratives",
+      narrativesDescription:
+        "Open the knowledge graph to explore related themes.",
+    },
+    error: {
+      narrativesTitle: "Could not load market narratives",
+      narrativesDescription:
+        "The other areas remain available. Try again to see the latest narratives.",
+      retry: "Try loading again",
+    },
+  },
   theme: {
     toggle: "Choose theme",
     light: "Light",
