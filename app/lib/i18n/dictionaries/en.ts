@@ -1549,6 +1549,12 @@ export const en: Dictionary = {
     scrollToLatest: "Scroll to the latest message",
     userRole: "You",
     assistantRole: "Assistant",
+    copy: "Copy",
+    copySuccess: "Message copied.",
+    copyError: "Could not copy the message.",
+    sendToTelegram: "Send to Telegram",
+    telegramUnavailable: "Sending to Telegram is not available yet.",
+    createdAt: "Created",
   },
   marketConversations: {
     readDenied: "You do not have permission to use market conversations.",
