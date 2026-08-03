@@ -12,7 +12,7 @@ The accepted dashboard direction in `docs/design/DASHBOARD.md` needs a safe, rev
 - Present Latest News as raw recent news with concise summaries, source, and publication time without requiring asset or event relationships, and place module-wide navigation in module headers while keeping asset-specific Market Charts actions in asset rows.
 - Enrich Event Timeline mock rows with occurred time, description, confidence, neutral themes, and affected-asset context without adding direction or backend integration.
 - Use localized Manage Assets terminology for the workspace-wide asset-management action instead of exposing the implementation-oriented watchlist term.
-- Give decision-bearing badges a restrained semantic hierarchy: reproduce the complete Economic Calendar impact badge presentation for Next Key Event and use only shared Badge intent variants for narrative states.
+- Give decision-bearing badges a restrained semantic hierarchy: reproduce the complete Economic Calendar impact badge presentation for Next Key Event and map narrative states to upstream Badge variants.
 - Keep workspace assets, related assets, affected assets, and raw news visually neutral so color remains focused on status with decision value.
 - Add URL-selectable `default`, `loading`, `empty`, and `partial-error` prototype scenarios.
 - Add localized prototype copy and a friendly breadcrumb label while keeping the route out of the sidebar.
@@ -39,5 +39,5 @@ None.
 - Reuses the existing localized number formatter for the additive tracked-asset count and keeps the workspace and asset descriptions prototype-local.
 - Reuses the shared `AppTimeMetadata`, date-time formatter, and Economic Calendar impact helpers without adding timestamp copy or a prototype-specific impact label.
 - Keeps event themes as neutral text and affected asset symbols as neutral outline badges using route-local mock records only.
-- Reuses the existing Economic Calendar impact badge helpers for Next Key Event and the shared Badge intent variants required by narrative status mapping, without adding a global token or CSS rule.
+- Reuses the existing Economic Calendar impact badge helpers for Next Key Event and upstream Badge variants for narrative status mapping, without extending the shared wrapper or adding a global token or CSS rule.
 - Does not change APIs, backend contracts, permissions, dependencies, the sidebar, or the existing dashboard route.

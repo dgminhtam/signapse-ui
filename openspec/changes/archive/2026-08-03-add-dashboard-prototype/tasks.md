@@ -49,11 +49,11 @@
 
 ## 8. Badge Contract Alignment
 
-- [x] 8.1 Align the proposal, design, prototype spec, tasks, and `docs/design/DASHBOARD.md` with the complete Economic Calendar impact badge contract and the Badge variants permitted by `docs/design/DESIGN.md`.
-- [x] 8.2 Add the minimal shared `info` and `warning` Badge intent variants without adding global CSS or semantic tokens.
+- [x] 8.1 Align `docs/design/DESIGN.md`, the proposal, design, prototype spec, tasks, and `docs/design/DASHBOARD.md` with the upstream-only shadcn wrapper contract and permitted Badge variants.
+- [x] 8.2 Revert the shared Badge wrapper to the current shadcn registry item without changing the Economic Calendar helper contract, global CSS, or semantic tokens.
 - [x] 8.3 Render Event Timeline impact badges with the same helpers, localized labels, chrome, and icon-free composition as Economic Calendar, and remove obsolete prototype impact copy.
-- [x] 8.4 Replace route-local palette classes with approved Badge variants for event state, narrative lifecycle, and asset type while preserving explicit text cues.
-- [x] 8.5 Run targeted formatting, lint, typecheck, strict OpenSpec validation, static isolation review, and diff checks for the badge contract refinement.
+- [x] 8.4 Map prototype narrative lifecycle states to approved upstream Badge variants while preserving explicit text cues.
+- [x] 8.5 Run targeted formatting, lint, typecheck, strict OpenSpec validation, static isolation review, and shadcn diff checks for the restored badge contract.
 
 ## 9. Detailed Current Workspace Assets
 

@@ -4,7 +4,7 @@ The current `/[lang]/dashboard` page is a Server Component that resolves permiss
 
 The prototype must remain inside the authenticated locale-aware main shell, follow `docs/design/DESIGN.md`, and reuse existing shadcn wrappers. It must not share data flow or feature-specific components with the current dashboard because those components are coupled to live permissions and API response types.
 
-Review of the first prototype established a clearer responsibility boundary: workspace scope must be explicit, events and news must not share one feed, the right rail should show recent evidence instead of another calendar surface, and every narrative must identify its affected assets. Further review established that raw news must not imply asset or event enrichment and that an action's placement must match whether it applies to a whole module or one item. Color review found that the remaining `outline`, `secondary`, and `ghost` badges are too visually uniform in both themes, so decision-bearing states need restrained semantic color while contextual asset chips remain neutral. Workspace review then established that the active workspace name, rather than a repeated generic Current Workspace label, should own the section hierarchy, while the tracked-asset list needs its own count and concise explanation. The metadata review adds a localized workspace update time between that explanation and the tracked-asset subsection and extends the complete Economic Calendar impact badge contract to the Next Key Event snapshot. Event Timeline review then established that occurred time and confidence alone do not provide enough market context, so each mock event should also identify its themes and affected assets without reintroducing Economic Calendar impact or directional inference.
+Review of the first prototype established a clearer responsibility boundary: workspace scope must be explicit, events and news must not share one feed, the right rail should show recent evidence instead of another calendar surface, and every narrative must identify its affected assets. Further review established that raw news must not imply asset or event enrichment and that an action's placement must match whether it applies to a whole module or one item. Badge review established that the prototype must preserve the upstream shadcn wrapper contract, map narrative states to built-in variants, and keep contextual asset chips neutral. Workspace review then established that the active workspace name, rather than a repeated generic Current Workspace label, should own the section hierarchy, while the tracked-asset list needs its own count and concise explanation. The metadata review adds a localized workspace update time between that explanation and the tracked-asset subsection and extends the complete Economic Calendar impact badge contract to the Next Key Event snapshot. Event Timeline review then established that occurred time and confidence alone do not provide enough market context, so each mock event should also identify its themes and affected assets without reintroducing Economic Calendar impact or directional inference.
 
 ## Goals / Non-Goals
 
@@ -96,9 +96,9 @@ The existing dashboard route, sidebar, redirects, route ownership, and global de
 
 Next Key Event impact will use both `getEconomicCalendarImpactBadgeProps` and `getEconomicCalendarImpactLabel` in the same composition as Economic Calendar. The snapshot will separate time and currency metadata from impact so it can render the helper-provided badge instead of embedding an alternate impact phrase in one description string. Empty state will omit the badge. The prototype will therefore render the same chrome and localized labels, without adding a prototype-only impact icon or copy.
 
-Event Timeline will not render status badges; only affected asset symbols use neutral `outline` badges. Market Narratives will use `info` for emerging, `default` for active, and `warning` for weakening. Assets in Focus category badges will use `secondary`; workspace assets, event themes, narrative-affected assets, and Latest News remain neutral.
+Event Timeline will not render status badges; only affected asset symbols use neutral `outline` badges. Market Narratives will use `secondary` for emerging and weakening, and `default` for active, matching the production dashboard mapping. Assets in Focus category badges will use `secondary`; workspace assets, event themes, narrative-affected assets, and Latest News remain neutral.
 
-The shared Badge wrapper will receive only the additive `info` and `warning` intent variants. Their theme-aware palette mapping stays inside the wrapper, as required by `docs/design/DESIGN.md`; feature code will not provide raw palette classes or manual dark-mode overrides. Explicit localized text remains the non-color cue, and no badge implies unsupported bullish or bearish direction.
+The shared Badge wrapper will remain identical to the current shadcn registry item and will not receive prototype-specific variants. Feature code will not provide raw palette classes or manual dark-mode overrides. Explicit localized text remains the non-color cue, and no badge implies unsupported bullish or bearish direction.
 
 ### Verify the isolation boundary explicitly
 
@@ -118,12 +118,12 @@ Implementation verification will include lint, typecheck, a small assertion for 
 - **Event relationship mocks can be mistaken for an approved backend contract** → Keep them route-local, avoid DTO imports, and defer API or aggregate design to a separate production change.
 
 - **Many colored chips can turn a dense dashboard into visual noise** → Color only impact and decision-bearing status badges; keep categories, asset symbols, and raw articles neutral.
-- **Color can lose meaning or contrast across themes** → Keep explicit labels, centralize intent mapping in the Badge wrapper, and verify every mapping in both themes and at responsive widths.
+- **Color can lose meaning or contrast across themes** → Keep explicit labels, use the closest upstream Badge variant, and verify every mapping in both themes and at responsive widths.
 
 ## Migration Plan
 
 1. Add the isolated route and mock scenarios without linking it from production navigation.
-2. Align the OpenSpec artifacts and `docs/design/DASHBOARD.md` with the reviewed information architecture and approved Badge intent variants.
+2. Align the OpenSpec artifacts and `docs/design/DASHBOARD.md` with the reviewed information architecture and upstream Badge variants.
 3. Update prototype-only dictionary keys, mock content, modules, and states without changing production dashboard behavior.
 4. Run deterministic and browser verification while confirming the current dashboard diff is empty.
 5. Share the direct prototype URL for review.

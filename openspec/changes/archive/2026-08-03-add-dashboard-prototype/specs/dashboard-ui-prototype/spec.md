@@ -228,7 +228,7 @@ The prototype SHALL reproduce the complete Economic Calendar impact badge presen
 #### Scenario: Reviewer scans narrative and asset-class badges
 
 - **WHEN** Market Narratives and Assets in Focus render their category badges
-- **THEN** emerging, active, and weakening narratives use the shared `info`, `default`, and `warning` Badge variants respectively
+- **THEN** emerging, active, and weakening narratives use the upstream `secondary`, `default`, and `secondary` Badge variants respectively
 - **AND** foreign exchange, metals, cryptocurrency, equities, and energy use the neutral `secondary` Badge variant
 - **AND** no color implies an unsupported bullish or bearish direction
 
@@ -242,7 +242,7 @@ The prototype SHALL reproduce the complete Economic Calendar impact badge presen
 - **WHEN** the prototype is reviewed in light and dark themes
 - **THEN** every semantic badge remains readable with equivalent meaning and sufficient text/background contrast
 - **AND** no feature code supplies raw palette classes or manual dark-mode overrides
-- **AND** no global CSS rule, semantic token, dependency, or feature-specific badge abstraction is required
+- **AND** no global CSS rule, semantic token, dependency, feature-specific badge abstraction, or custom shared Badge variant is required
 
 ### Requirement: Localized prototype copy
 

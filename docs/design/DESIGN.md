@@ -88,6 +88,8 @@ Light mode và dark mode phải là hai biến thể của cùng một direction
 - Không thêm `h-*`, `min-h-*`, `rounded-*`, padding, foreground/background, border, ring, shadow hoặc typography classes chỉ để đổi height, radius, color, border hay density mặc định của primitive.
 - Khi cần control compact, ưu tiên variant/size sẵn có; chỉ hard-code height/radius khi không có option phù hợp và có product reason rõ.
 - Wrapper trong `components/ui` có thể được bảo trì theo shadcn workflow, nhưng không nhận feature-specific visual customization.
+- Wrapper shadcn mặc định phải giữ contract variant, size và chrome từ registry item của preset hiện tại.
+- Không thêm variant, size hoặc chrome vào wrapper chỉ để phục vụ một feature, prototype hoặc trạng thái cục bộ. Ngoại lệ phải là quyết định design-system có nhu cầu dùng chung rõ ràng và được ghi nhận trong tài liệu này trước khi triển khai.
 
 ### Semantic Tokens
 
@@ -100,8 +102,8 @@ Light mode và dark mode phải là hai biến thể của cùng một direction
 
 ### Badge Semantics
 
-- Ưu tiên các variant `default`, `secondary`, `destructive`, `outline` hoặc `ghost`.
-- Categorical badge ngoài built-in variants chỉ dùng các intent `info`, `success`, `warning` hoặc `danger`; mapping màu và dark mode phải nằm trong shared `<Badge>` variant, feature code không tự ghép raw palette hay manual `dark:` classes.
+- Chỉ dùng các variant mặc định `default`, `secondary`, `destructive`, `outline`, `ghost` hoặc `link`.
+- Status không có variant tương ứng phải dùng built-in variant gần nhất và giữ text hoặc icon làm tín hiệu chính; không thêm `info`, `success`, `warning`, `danger` hoặc intent feature-specific vào shared `<Badge>`.
 - Badge luôn có text hoặc icon hỗ trợ ý nghĩa; màu không phải tín hiệu duy nhất của trạng thái.
 
 ## Layout And Surface Composition

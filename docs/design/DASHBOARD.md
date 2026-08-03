@@ -210,9 +210,9 @@ phù hợp với lịch sử hoặc màn danh sách đầy đủ hơn.
 Không suy diễn chiều tăng hoặc giảm của asset nếu data contract production chưa
 cung cấp thông tin đó.
 
-Status badge dùng Badge variant `info` cho `EMERGING`, `default` cho `ACTIVE` và
-`warning` cho `WEAKENING`. Các intent này biểu đạt vòng đời luận điểm, không biểu
-đạt bullish hay bearish; theme là text trung tính và asset bị ảnh hưởng vẫn là badge trung tính.
+Status badge dùng Badge variant `secondary` cho `EMERGING` và `WEAKENING`, và
+`default` cho `ACTIVE`. Label vẫn biểu đạt vòng đời luận điểm; variant không biểu đạt
+bullish hay bearish, theme là text trung tính và asset bị ảnh hưởng vẫn là badge trung tính.
 
 ### Assets in Focus
 
@@ -292,16 +292,16 @@ Badge tuân theo hierarchy `impact > trạng thái narrative > category > contex
 Workspace asset, related asset, affected asset, asset type và raw article giữ trung
 tính; chỉ impact và trạng thái có semantic intent.
 
-| Nhóm                  | Mapping                                                   |
-| --------------------- | --------------------------------------------------------- |
-| Next Key Event impact | Exact Economic Calendar helper props + localized label    |
-| Narrative             | Emerging: `info`; Active: `default`; Weakening: `warning` |
-| Asset type            | `secondary`                                               |
+| Nhóm                  | Mapping                                                          |
+| --------------------- | ---------------------------------------------------------------- |
+| Next Key Event impact | Exact Economic Calendar helper props + localized label           |
+| Narrative             | Emerging: `secondary`; Active: `default`; Weakening: `secondary` |
+| Asset type            | `secondary`                                                      |
 
 Event impact tái sử dụng cả helper chrome và helper label của Economic Calendar,
-không thêm icon hoặc copy riêng tại feature. Các semantic intent bổ sung phải nằm
-trong shared `<Badge>` variant; feature code không dùng raw palette class hoặc
-manual `dark:` override. Không thêm global CSS hay semantic token. Mọi badge có
+không thêm icon hoặc copy riêng tại feature. Các trạng thái khác map sang variant
+mặc định gần nhất của shared `<Badge>`; feature code không thêm variant, raw palette
+class hoặc manual `dark:` override. Không thêm global CSS hay semantic token. Mọi badge có
 text rõ nghĩa để màu không trở thành tín hiệu duy nhất.
 
 Quy tắc impact chỉ áp dụng cho tile Sự kiện quan trọng sắp tới. Tile snapshot tách
@@ -341,5 +341,5 @@ Thiết kế được xem là đạt khi:
 - Dashboard vẫn hữu ích khi một hoặc nhiều optional modules không có dữ liệu.
 - Loading skeleton, empty state và error state giữ cùng hierarchy với nội dung
   thật.
-- Badge impact khớp hoàn toàn với Economic Calendar; event và narrative state dùng
-  shared semantic variants; asset type, asset context và raw article vẫn trung tính.
+- Badge impact khớp hoàn toàn với Economic Calendar; narrative state dùng variant
+  mặc định được phép; asset type, asset context và raw article vẫn trung tính.
