@@ -2,7 +2,9 @@
 
 import { BlockSelectionPlugin } from '@platejs/selection/react';
 import { getPluginTypes, KEYS } from 'platejs';
+import type { PlateElementProps } from 'platejs/react';
 
+import { BlockSelectionAfterEditable } from './block-selection-after-editable';
 import { BlockSelection } from '@/components/ui/block-selection';
 
 export const hasSelectableClass = ({
@@ -20,7 +22,6 @@ export const hasSelectableClass = ({
 export const BlockSelectionKit = [
   BlockSelectionPlugin.configure(({ editor }) => ({
     options: {
-      disableSelectAll: true,
       enableContextMenu: true,
       isSelectable: (element) =>
         !getPluginTypes(editor, [KEYS.column, KEYS.codeLine, KEYS.td]).includes(
@@ -28,10 +29,16 @@ export const BlockSelectionKit = [
         ),
     },
     render: {
+      afterEditable: BlockSelectionAfterEditable,
       belowRootNodes: (props) => {
         if (!hasSelectableClass(props)) return null;
 
-        return <BlockSelection {...(props as any)} />;
+        return (
+          <BlockSelection
+            {...props}
+            plugin={props.plugin as unknown as PlateElementProps['plugin']}
+          />
+        );
       },
     },
   })),

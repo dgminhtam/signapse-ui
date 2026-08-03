@@ -26,7 +26,11 @@ export function ImageElementStatic(
                 'w-full max-w-full cursor-default object-cover px-0',
                 'rounded-sm'
               )}
-              alt={(props.attributes as any).alt}
+              alt={
+                typeof props.attributes.alt === 'string'
+                  ? props.attributes.alt
+                  : ''
+              }
               src={url}
             />
           </div>

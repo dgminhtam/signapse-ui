@@ -15,7 +15,7 @@ export const MarkdownKit = [
       remarkPlugins: [
         remarkMath,
         remarkGfm,
-        remarkEmoji as any,
+        remarkEmoji as unknown as typeof remarkMdx,
         remarkMdx,
         remarkMention,
       ],

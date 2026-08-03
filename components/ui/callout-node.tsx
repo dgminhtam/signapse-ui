@@ -17,6 +17,12 @@ export function CalloutElement({
   className,
   ...props
 }: React.ComponentProps<typeof PlateElement>) {
+  const backgroundColor =
+    typeof props.element.backgroundColor === 'string'
+      ? props.element.backgroundColor
+      : undefined;
+  const icon =
+    typeof props.element.icon === 'string' ? props.element.icon : undefined;
   const { emojiPickerState, isOpen, setIsOpen } = useEmojiDropdownMenuState({
     closeOnSelect: true,
   });
@@ -31,7 +37,7 @@ export function CalloutElement({
     <PlateElement
       className={cn('my-1 flex rounded-sm bg-muted p-4 pl-3', className)}
       style={{
-        backgroundColor: props.element.backgroundColor as any,
+        backgroundColor,
       }}
       attributes={{
         ...attributes,
@@ -52,7 +58,7 @@ export function CalloutElement({
               }}
               contentEditable={false}
             >
-              {(props.element.icon as any) || '💡'}
+              {icon || '💡'}
             </Button>
           }
         >

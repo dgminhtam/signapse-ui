@@ -422,21 +422,23 @@ function ColorInput({
   ...props
 }: React.ComponentProps<'input'> & { className?: string }) {
   const inputRef = React.useRef<HTMLInputElement | null>(null);
+  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (
+      event.target === event.currentTarget ||
+      event.target instanceof HTMLInputElement
+    ) {
+      return;
+    }
+
+    inputRef.current?.click();
+  };
 
   return (
-    <div className={cn('flex flex-col items-center', className)}>
-      {React.Children.map(children, (child) => {
-        if (!child) return child;
-
-        return React.cloneElement(
-          child as React.ReactElement<{
-            onClick: () => void;
-          }>,
-          {
-            onClick: () => inputRef.current?.click(),
-          }
-        );
-      })}
+    <div
+      className={cn('flex flex-col items-center', className)}
+      onClick={handleClick}
+    >
+      {children}
       <input
         {...props}
         className="size-0 overflow-hidden border-0 p-0"

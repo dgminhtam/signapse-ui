@@ -1267,6 +1267,16 @@ function DemoMessage({
       </time>
     </AppTimeMetadata>
   )
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(text)
+      toast.success(labels.copySuccess)
+    } catch {
+      toast.error(labels.copyError)
+    }
+  }
+
   const messageActions = canCopy ? (
     <div className="flex items-center gap-0.5">
       <Tooltip>
@@ -1301,15 +1311,6 @@ function DemoMessage({
       ) : null}
     </div>
   ) : null
-
-  async function handleCopy() {
-    try {
-      await navigator.clipboard.writeText(text)
-      toast.success(labels.copySuccess)
-    } catch {
-      toast.error(labels.copyError)
-    }
-  }
 
   return (
     <MessageScrollerItem
