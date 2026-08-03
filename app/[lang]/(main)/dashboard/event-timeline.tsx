@@ -47,6 +47,8 @@ import {
 } from "@/components/ui/item"
 import { Skeleton } from "@/components/ui/skeleton"
 
+import { DashboardQuickDetailLink } from "./dashboard-quick-detail"
+
 export function EventTimeline({
   dictionary,
   error,
@@ -174,7 +176,8 @@ function EventTimelineItems({
         <div key={item.id}>
           {index > 0 ? <ItemSeparator /> : null}
           <Item asChild>
-            <LocalizedLink
+            <DashboardQuickDetailLink
+              entity={{ id: item.id, kind: "event" }}
               href={`/events/${item.id}`}
               aria-label={`${t.openEvent}: ${item.title}`}
             >
@@ -209,7 +212,7 @@ function EventTimelineItems({
                   </span>
                 </div>
               </ItemFooter>
-            </LocalizedLink>
+            </DashboardQuickDetailLink>
           </Item>
         </div>
       ))}

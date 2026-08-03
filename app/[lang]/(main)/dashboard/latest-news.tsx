@@ -37,6 +37,8 @@ import {
 } from "@/components/ui/item"
 import { Skeleton } from "@/components/ui/skeleton"
 
+import { DashboardQuickDetailLink } from "./dashboard-quick-detail"
+
 export function LatestNews({
   articles,
   dictionary,
@@ -172,23 +174,29 @@ function LatestNewsItems({
         return (
           <div key={article.id}>
             {index > 0 ? <ItemSeparator /> : null}
-            <Item>
-              <ItemMedia variant="icon">
-                <NewspaperIcon aria-hidden="true" />
-              </ItemMedia>
-              <ItemContent className="min-w-0">
-                <ItemTitle>
-                  <h3 className="line-clamp-2">{article.title}</h3>
-                </ItemTitle>
-                <ItemDescription className="line-clamp-2">
-                  {description}
-                </ItemDescription>
-                <p className="text-xs text-muted-foreground">
-                  <span>{source}</span>
-                  <span aria-hidden="true"> · </span>
-                  <span>{publishedAt}</span>
-                </p>
-              </ItemContent>
+            <Item asChild>
+              <DashboardQuickDetailLink
+                entity={{ id: article.id, kind: "news-article" }}
+                href={`/news-articles/${article.id}`}
+                aria-label={`${t.openArticle}: ${article.title}`}
+              >
+                <ItemMedia variant="icon">
+                  <NewspaperIcon aria-hidden="true" />
+                </ItemMedia>
+                <ItemContent className="min-w-0">
+                  <ItemTitle>
+                    <h3 className="line-clamp-2">{article.title}</h3>
+                  </ItemTitle>
+                  <ItemDescription className="line-clamp-2">
+                    {description}
+                  </ItemDescription>
+                  <p className="text-xs text-muted-foreground">
+                    <span>{source}</span>
+                    <span aria-hidden="true"> · </span>
+                    <span>{publishedAt}</span>
+                  </p>
+                </ItemContent>
+              </DashboardQuickDetailLink>
             </Item>
           </div>
         )

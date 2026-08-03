@@ -60,6 +60,7 @@ import {
 } from "./trading-snapshot"
 import { EventTimeline, EventTimelineSkeleton } from "./event-timeline"
 import { LatestNews, LatestNewsSkeleton } from "./latest-news"
+import { DashboardQuickDetailProvider } from "./dashboard-quick-detail"
 import { WorkspaceOverviewActions } from "../workspace-overview-actions"
 
 const WORKSPACE_SEARCH = {
@@ -221,21 +222,23 @@ async function WorkspaceOverview() {
           locale={locale}
           summary={dashboardSummary.summary}
         />
-        {canReadNews ? (
-          <div className="grid min-w-0 gap-4 lg:grid-cols-12">
-            <div className="min-w-0 lg:col-span-8">{eventTimeline}</div>
-            <div className="min-w-0 lg:col-span-4">
-              <LatestNews
-                articles={latestNews.articles}
-                dictionary={dictionary}
-                error={latestNews.error}
-                locale={locale}
-              />
+        <DashboardQuickDetailProvider>
+          {canReadNews ? (
+            <div className="grid min-w-0 gap-4 lg:grid-cols-12">
+              <div className="min-w-0 lg:col-span-8">{eventTimeline}</div>
+              <div className="min-w-0 lg:col-span-4">
+                <LatestNews
+                  articles={latestNews.articles}
+                  dictionary={dictionary}
+                  error={latestNews.error}
+                  locale={locale}
+                />
+              </div>
             </div>
-          </div>
-        ) : (
-          eventTimeline
-        )}
+          ) : (
+            eventTimeline
+          )}
+        </DashboardQuickDetailProvider>
       </>
     </WorkspaceOverviewShell>
   )

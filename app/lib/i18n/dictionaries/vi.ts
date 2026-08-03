@@ -468,6 +468,7 @@ export const vi = {
       title: "Tin tức mới nhất",
       description: "Các bài viết tin tức mới nhất trên Signapse.",
       viewAll: "Xem tất cả tin tức",
+      openArticle: "Mở bài viết",
       emptyTitle: "Chưa có tin tức mới",
       emptyDescription:
         "Tin tức mới nhất sẽ hiển thị tại đây khi có bài viết.",

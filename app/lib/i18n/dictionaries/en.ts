@@ -468,6 +468,7 @@ export const en: Dictionary = {
       title: "Latest news",
       description: "The most recent news articles across Signapse.",
       viewAll: "View all news",
+      openArticle: "Open article",
       emptyTitle: "No recent news yet",
       emptyDescription:
         "Latest news will appear here when articles are available.",
