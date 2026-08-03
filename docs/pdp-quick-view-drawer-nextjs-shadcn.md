@@ -67,6 +67,10 @@ router.push(`/events/${eventId}`)
 
 Lý do: route transition có thể remount hoặc reload Server/Client Component phía sau, đặc biệt với chart/graph có dữ liệu và instance đắt tiền.
 
+## Dashboard Row Trigger
+
+Khi một row trên dashboard chỉ có nhiệm vụ mở local quick detail và không cần điều hướng trực tiếp, trigger nên là native `<button type="button">`. Row không giữ canonical `href`; drawer cung cấp action rõ ràng để mở full detail page khi user cần.
+
 ## UI Shell
 
 Quick detail overlay nên dùng shadcn primitive đã wrap trong `@/components/ui`, ví dụ `Drawer` hoặc `Sheet` tùy layout đã được proposal chốt. Với các workspace hiện tại, bottom `Drawer` phù hợp vì giữ được bề mặt đọc rộng mà vẫn không rời khỏi canvas/chart.

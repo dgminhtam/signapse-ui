@@ -37,7 +37,7 @@ import {
 } from "@/components/ui/item"
 import { Skeleton } from "@/components/ui/skeleton"
 
-import { DashboardQuickDetailLink } from "./dashboard-quick-detail"
+import { DashboardQuickDetailButton } from "./dashboard-quick-detail"
 
 export function LatestNews({
   articles,
@@ -175,9 +175,8 @@ function LatestNewsItems({
           <div key={article.id}>
             {index > 0 ? <ItemSeparator /> : null}
             <Item asChild>
-              <DashboardQuickDetailLink
+              <DashboardQuickDetailButton
                 entity={{ id: article.id, kind: "news-article" }}
-                href={`/news-articles/${article.id}`}
                 aria-label={`${t.openArticle}: ${article.title}`}
               >
                 <ItemMedia variant="icon">
@@ -196,7 +195,7 @@ function LatestNewsItems({
                     <span>{publishedAt}</span>
                   </p>
                 </ItemContent>
-              </DashboardQuickDetailLink>
+              </DashboardQuickDetailButton>
             </Item>
           </div>
         )

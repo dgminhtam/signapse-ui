@@ -3,9 +3,7 @@
 ## Purpose
 
 Define the live, localized Event Timeline section on the production dashboard using the `recentEvents` metric returned by `GET /dashboard/summary`.
-
 ## Requirements
-
 ### Requirement: Production dashboard consumes the recentEvents summary metric
 
 The localized production dashboard SHALL render Event Timeline from `DashboardSummaryResponse.recentEvents` returned by the same authenticated `GET /dashboard/summary` request used by Trading Snapshot after the workspace gate and a readable current workspace have been resolved. It SHALL NOT call `/events` to assemble the timeline.
@@ -86,7 +84,7 @@ The Event Timeline SHALL render `AVAILABLE`, `EMPTY`, `DENIED`, and `ERROR` as d
 
 ### Requirement: Timeline navigation uses existing localized event routes
 
-The timeline SHALL provide one module-level link to the localized `/events` list and SHALL retain a localized `/events/{id}` canonical `href` on each event row using the backend event ID. An ordinary primary activation of an available event row SHALL open the dashboard-owned event quick-detail drawer without changing the current dashboard URL. The quick-detail drawer SHALL provide the explicit action for navigating to the canonical event detail route.
+The timeline SHALL provide one module-level link to the localized `/events` list. Each event row SHALL be a button-backed local quick-detail trigger using the backend event ID and SHALL NOT expose a per-row canonical `href`. An ordinary pointer or keyboard activation of an available event row SHALL open the dashboard-owned event quick-detail drawer without changing the current dashboard URL. The quick-detail drawer SHALL provide the explicit action for navigating to the canonical event detail route.
 
 #### Scenario: User opens the event list
 
@@ -95,13 +93,14 @@ The timeline SHALL provide one module-level link to the localized `/events` list
 
 #### Scenario: User reads an event from the dashboard
 
-- **WHEN** a user activates an available event row with an ordinary primary click or keyboard Enter
+- **WHEN** a user activates an available event row with a pointer click, keyboard Enter, or keyboard Space
 - **THEN** the dashboard-owned quick-detail drawer opens for that row's backend event ID
 - **AND** the current dashboard URL remains unchanged
+- **AND** the page transition loading bar does not start for the row activation
 
 #### Scenario: User opens the canonical event detail
 
-- **WHEN** a user activates the event row with a modifier click, middle-click, context-menu link action, or the drawer's full-page action
+- **WHEN** a user activates the drawer's full-page action
 - **THEN** the application navigates to the current-locale `/events/{id}` route
 
 ### Requirement: Timeline content and time metadata are localized
@@ -122,7 +121,7 @@ All module labels, descriptions, state text, accessible names, and actions SHALL
 
 ### Requirement: Timeline loading and responsive presentation preserve accessibility
 
-The production dashboard SHALL render a localized Event Timeline skeleton while the summary is pending. The final surface SHALL use existing Signapse UI primitives, a semantic section/card heading, keyboard-reachable links with visible focus, decorative icons hidden from assistive technology, and responsive rows without page-level horizontal overflow at mobile width or 200% zoom.
+The production dashboard SHALL render a localized Event Timeline skeleton while the summary is pending. The final surface SHALL use existing Signapse UI primitives, a semantic section/card heading, keyboard-reachable buttons with visible focus, decorative icons hidden from assistive technology, and responsive rows without page-level horizontal overflow at mobile width or 200% zoom.
 
 #### Scenario: Timeline is loading
 

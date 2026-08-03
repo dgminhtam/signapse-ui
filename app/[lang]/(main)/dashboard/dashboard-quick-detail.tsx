@@ -9,8 +9,6 @@ import {
   type ReactNode,
 } from "react"
 
-import { LocalizedLink } from "@/components/localized-link"
-
 import {
   LocalEntityQuickDetailDrawer,
   type LocalQuickDetailEntity,
@@ -38,45 +36,38 @@ export function DashboardQuickDetailProvider({
   )
 }
 
-export function DashboardQuickDetailLink({
+export function DashboardQuickDetailButton({
   "aria-haspopup": ariaHasPopup = "dialog",
   entity,
   onClick,
   ...props
-}: ComponentProps<typeof LocalizedLink> & {
+}: ComponentProps<"button"> & {
   entity: LocalQuickDetailEntity
 }) {
   const openQuickDetail = useContext(DashboardQuickDetailContext)
 
   if (!openQuickDetail) {
     throw new Error(
-      "DashboardQuickDetailLink must be used within DashboardQuickDetailProvider"
+      "DashboardQuickDetailButton must be used within DashboardQuickDetailProvider"
     )
   }
 
   const open = openQuickDetail
 
-  function handleClick(event: MouseEvent<HTMLAnchorElement>) {
+  function handleClick(event: MouseEvent<HTMLButtonElement>) {
     onClick?.(event)
 
-    if (
-      event.defaultPrevented ||
-      event.button !== 0 ||
-      event.metaKey ||
-      event.ctrlKey ||
-      event.shiftKey ||
-      event.altKey
-    ) {
+    if (event.defaultPrevented) {
       return
     }
 
-    event.preventDefault()
     open(entity)
   }
 
   return (
-    <LocalizedLink
+    <button
       {...props}
+      type="button"
       aria-haspopup={ariaHasPopup}
       onClick={handleClick}
     />
