@@ -7,8 +7,10 @@ import {
   TargetIcon,
 } from "lucide-react"
 
+import { getDashboardSummary } from "@/app/api/dashboard/action"
 import { getWorkspaceWatchlistAssets } from "@/app/api/watchlists/action"
 import { getMyWorkspaces } from "@/app/api/workspaces/action"
+import type { DashboardSummaryResponse } from "@/app/lib/dashboard/definitions"
 import type { AppLocale } from "@/app/lib/i18n/config"
 import { getDictionary } from "@/app/lib/i18n/dictionaries"
 import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
@@ -49,6 +51,10 @@ import {
 } from "@/components/ui/item"
 import { Skeleton } from "@/components/ui/skeleton"
 
+import {
+  TradingSnapshot,
+  TradingSnapshotSkeleton,
+} from "./trading-snapshot"
 import { WorkspaceOverviewActions } from "../workspace-overview-actions"
 
 const WORKSPACE_SEARCH = {
@@ -69,6 +75,11 @@ interface WatchlistPreviewState {
   assets: WorkspaceWatchlistAssetListItemResponse[]
   error: string | null
   total: number
+}
+
+interface DashboardSummaryState {
+  error: string | null
+  summary: DashboardSummaryResponse | null
 }
 
 export default function Page() {
@@ -158,23 +169,31 @@ async function WorkspaceOverview() {
     )
   }
 
-  const watchlistPreview = await loadWatchlistPreview(
-    canReadAsset && canReadWatchlist,
-    dictionary
-  )
+  const [watchlistPreview, dashboardSummary] = await Promise.all([
+    loadWatchlistPreview(canReadAsset && canReadWatchlist, dictionary),
+    loadDashboardSummary(dictionary),
+  ])
 
   return (
     <WorkspaceOverviewShell>
-      <WorkspaceOverviewPanel
-        workspace={currentWorkspace}
-        preview={watchlistPreview}
-        canReadAsset={canReadAsset}
-        canReadWatchlist={canReadWatchlist}
-        canCreateWatchlist={canCreateWatchlist}
-        canDeleteWatchlist={canDeleteWatchlist}
-        dictionary={dictionary}
-        locale={locale}
-      />
+      <>
+        <WorkspaceOverviewPanel
+          workspace={currentWorkspace}
+          preview={watchlistPreview}
+          canReadAsset={canReadAsset}
+          canReadWatchlist={canReadWatchlist}
+          canCreateWatchlist={canCreateWatchlist}
+          canDeleteWatchlist={canDeleteWatchlist}
+          dictionary={dictionary}
+          locale={locale}
+        />
+        <TradingSnapshot
+          dictionary={dictionary}
+          error={dashboardSummary.error}
+          locale={locale}
+          summary={dashboardSummary.summary}
+        />
+      </>
     </WorkspaceOverviewShell>
   )
 }
@@ -205,8 +224,27 @@ async function loadWatchlistPreview(
   }
 }
 
+async function loadDashboardSummary(
+  dictionary: Dictionary
+): Promise<DashboardSummaryState> {
+  try {
+    return {
+      error: null,
+      summary: await getDashboardSummary(),
+    }
+  } catch (error: unknown) {
+    return {
+      error:
+        error instanceof Error
+          ? error.message
+          : dictionary.workspaceOverview.tradingSnapshot.summaryErrorDescription,
+      summary: null,
+    }
+  }
+}
+
 function WorkspaceOverviewShell({ children }: { children: ReactNode }) {
-  return <>{children}</>
+  return <div className="flex min-w-0 flex-col gap-4 sm:gap-6">{children}</div>
 }
 
 function WorkspaceOverviewPanel({
@@ -355,33 +393,38 @@ function WorkspaceOverviewPanel({
 
 function WorkspaceOverviewSkeleton() {
   return (
-    <Card size="sm">
-      <CardHeader>
-        <CardTitle>
-          <Skeleton className="h-7 w-full max-w-md" />
-        </CardTitle>
-        <CardDescription>
-          <Skeleton className="h-4 w-full max-w-3xl" />
-        </CardDescription>
-        <CardAction>
-          <Skeleton className="h-9 w-44" />
-        </CardAction>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-col gap-2">
-          <Skeleton className="h-4 w-48" />
-          <div className="flex flex-col gap-1">
-            <Skeleton className="h-5 w-40" />
-            <Skeleton className="h-4 w-full max-w-lg" />
-          </div>
-          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
-            {Array.from({ length: 8 }).map((_, index) => (
-              <Skeleton key={index} className="h-16 rounded-lg" />
-            ))}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    <WorkspaceOverviewShell>
+      <>
+        <Card size="sm">
+          <CardHeader>
+            <CardTitle>
+              <Skeleton className="h-7 w-full max-w-md" />
+            </CardTitle>
+            <CardDescription>
+              <Skeleton className="h-4 w-full max-w-3xl" />
+            </CardDescription>
+            <CardAction>
+              <Skeleton className="h-9 w-44" />
+            </CardAction>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-4 w-48" />
+              <div className="flex flex-col gap-1">
+                <Skeleton className="h-5 w-40" />
+                <Skeleton className="h-4 w-full max-w-lg" />
+              </div>
+              <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+                {Array.from({ length: 8 }).map((_, index) => (
+                  <Skeleton key={index} className="h-16 rounded-lg" />
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <TradingSnapshotSkeleton />
+      </>
+    </WorkspaceOverviewShell>
   )
 }
 

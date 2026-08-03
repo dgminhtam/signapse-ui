@@ -4,14 +4,14 @@
 TBD - created by archiving change simplify-workspace-overview-surface. Update Purpose after archive.
 ## Requirements
 ### Requirement: Overview prioritizes workspace orientation and tracked-asset readiness
-The root workspace overview SHALL render its successful state as a single Current Workspace surface focused on the active workspace identity and the readiness of its tracked-asset list.
+The root workspace overview SHALL render its successful state as a Current Workspace surface followed by a live Trading Snapshot section. The Current Workspace surface SHALL remain focused on the active workspace identity and the readiness of its tracked-asset list, while Trading Snapshot provides the separate decision-oriented summary for the same backend-resolved dashboard context.
 
 #### Scenario: Successful overview renders
 - **WHEN** an authenticated user opens the root overview with a readable workspace
-- **THEN** the page renders one Current Workspace content surface
-- **AND** the surface identifies the active workspace by name
-- **AND** the surface presents tracked-asset readiness as its primary content region
-- **AND** the page does not render narrative previews or unrelated dashboard modules
+- **THEN** the page renders one Current Workspace content surface and one Trading Snapshot section
+- **AND** the Current Workspace surface identifies the active workspace by name
+- **AND** the Current Workspace surface presents tracked-asset readiness as its primary content region
+- **AND** the Trading Snapshot renders only live summary metrics or explicit loading/empty/error states
 
 #### Scenario: Current Workspace surface uses the accepted hierarchy
 - **WHEN** the successful overview renders
@@ -22,6 +22,7 @@ The root workspace overview SHALL render its successful state as a single Curren
 #### Scenario: Overview is scanned quickly
 - **WHEN** a user scans the overview
 - **THEN** they can tell which workspace is active and whether tracked assets are configured without reading repeated explanatory copy
+- **AND** they can scan the next key event and the three summary counts without opening a separate dashboard route
 
 ### Requirement: Overview avoids repeated status and metadata
 The overview SHALL NOT show the same workspace status, scope, update time, or action in multiple primary locations.

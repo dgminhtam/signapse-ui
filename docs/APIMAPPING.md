@@ -2,7 +2,7 @@
 
 Tài liệu này ánh xạ snapshot OpenAPI backend trong `docs/api_mapping.json` tới các điểm tích hợp frontend hiện tại của repo.
 
-Xác minh lần cuối: ngày 2 tháng 8 năm 2026
+Xác minh lần cuối: ngày 3 tháng 8 năm 2026
 
 ## Cấu hình cơ sở
 
@@ -36,7 +36,8 @@ Xác minh lần cuối: ngày 2 tháng 8 năm 2026
 
 ## Tổng quan thay đổi lớn từ snapshot hiện tại
 
-- Snapshot backend hiện tại gồm `116` operation.
+- Snapshot backend hiện tại gồm `117` operation.
+- Snapshot ngày 3/8 thêm `GET /dashboard/summary` cho Trading Snapshot: một response UTC theo workspace hiện tại, gồm `nextKeyEvent`, `marketEvents24h`, `activeNarratives`, và `latestNews6h`; frontend đã tích hợp endpoint này vào dashboard chính.
 - Backend đã chuyển domain nội dung canon từ `sources` / `source-documents` sang `news-outlets` / `news-articles`.
 - Backend đã unlink `NewsArticle` khỏi `NewsOutlet`: bài viết snapshot tên nguồn vào `sourceName` khi ingest, nên việc đổi tên hoặc xóa outlet không làm thay đổi nguồn đã lưu trên bài viết. Snapshot OpenAPI và frontend hiện đã đồng bộ contract này.
 - Backend vẫn giữ các surface `events`, `query`, và `graph-view`, nhưng nhiều payload đã đổi naming từ `sourceDocument*` sang `artifact*` hoặc `news-article`.
@@ -529,6 +530,20 @@ Ghi chu:
 | Phuong thuc | Endpoint backend | operationId   | Tich hop frontend | Trang thai      | Ghi chu               |
 | ----------- | ---------------- | ------------- | ----------------- | --------------- | --------------------- |
 | GET         | `/health`        | `healthCheck` | `-`               | Chua trien khai | Chua co helper rieng. |
+
+### API dashboard summary
+
+| Phuong thuc | Endpoint backend      | operationId | Tich hop frontend | Trang thai      | Ghi chu |
+| ----------- | --------------------- | ----------- | ----------------- | --------------- | ------- |
+| GET         | `/dashboard/summary`  | `getSummary` | `app/api/dashboard/action.ts` + `dashboard/page.tsx` | Da tich hop | Khong co body/query. Response dung mot `asOf` UTC va scope workspace hien tai; tra bon metric voi state `AVAILABLE` / `EMPTY` / `DENIED` / `ERROR`. Endpoint gate `workspace:read`; loi endpoint la `403`/`409`, loi tung metric nam trong HTTP `200`. |
+
+Ghi chu:
+
+- `scope` gom `workspaceId` va `watchlistAssetCount`; count co the `null` khi thieu quyen scope.
+- `nextKeyEvent` la economic-calendar event `HIGH` sap toi, lien quan currency base/quote cua watchlist hien tai.
+- `marketEvents24h` dem distinct event du dieu kien trong UTC `[asOf - 24h, asOf)`; `activeNarratives` dem distinct narrative `EMERGING`/`ACTIVE`; `latestNews6h` dem NewsArticle co `publishedAt` trong UTC `[asOf - 6h, asOf)`, khong phu thuoc asset/status.
+- Cac permission metric lan luot la `economic-calendar:read` + `watchlist:read` + `asset:read`; `event:read` + `watchlist:read` + `asset:read`; `narrative:read` + `watchlist:read` + `asset:read`; va `news-article:read`.
+- FE da co action/definitions va map state rieng; khong duoc coi `DENIED`/`ERROR` la count `0`.
 
 ## Nhom frontend khong nam trong snapshot API hien tai
 
