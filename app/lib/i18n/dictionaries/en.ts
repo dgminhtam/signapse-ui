@@ -446,6 +446,24 @@ export const en: Dictionary = {
       INVALIDATED: "Invalidated",
       ARCHIVED: "Archived",
     },
+    eventTimeline: {
+      title: "Event timeline",
+      description: "Recent market events in the current tracking scope.",
+      viewAll: "View all events",
+      openEvent: "Open event",
+      themes: "Themes",
+      affectedAssets: "Affected assets",
+      confidence: "Confidence",
+      emptyTitle: "No recent events yet",
+      emptyDescription:
+        "Relevant events will appear here when they match the current tracking scope.",
+      deniedTitle: "No permission to view the event timeline",
+      deniedDescription:
+        "The account needs event read, watchlist read, and asset read permissions to view this module.",
+      errorTitle: "Could not load the event timeline",
+      errorDescription: "The event timeline is currently unavailable.",
+      invalidDate: "Invalid time",
+    },
     tradingSnapshot: {
       title: "Market snapshot",
       nextEvent: "Next key event",

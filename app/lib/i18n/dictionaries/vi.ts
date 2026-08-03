@@ -446,6 +446,24 @@ export const vi = {
       INVALIDATED: "Không còn hợp lệ",
       ARCHIVED: "Lưu trữ",
     },
+    eventTimeline: {
+      title: "Dòng sự kiện",
+      description: "Các sự kiện thị trường gần đây trong phạm vi theo dõi hiện tại.",
+      viewAll: "Xem tất cả sự kiện",
+      openEvent: "Mở sự kiện",
+      themes: "Chủ đề",
+      affectedAssets: "Tài sản ảnh hưởng",
+      confidence: "Độ tin cậy",
+      emptyTitle: "Chưa có sự kiện gần đây",
+      emptyDescription:
+        "Các sự kiện phù hợp sẽ hiển thị tại đây khi khớp với phạm vi theo dõi hiện tại.",
+      deniedTitle: "Chưa có quyền xem dòng sự kiện",
+      deniedDescription:
+        "Tài khoản cần quyền đọc sự kiện, danh sách theo dõi và tài sản để xem module này.",
+      errorTitle: "Không thể tải dòng sự kiện",
+      errorDescription: "Dòng sự kiện hiện không khả dụng.",
+      invalidDate: "Thời gian không hợp lệ",
+    },
     tradingSnapshot: {
       title: "Tóm tắt thị trường",
       nextEvent: "Sự kiện quan trọng sắp tới",

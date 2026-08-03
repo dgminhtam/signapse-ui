@@ -37,7 +37,7 @@ Xác minh lần cuối: ngày 3 tháng 8 năm 2026
 ## Tổng quan thay đổi lớn từ snapshot hiện tại
 
 - Snapshot backend hiện tại gồm `117` operation.
-- Snapshot ngày 3/8 thêm `GET /dashboard/summary` cho Trading Snapshot: một response UTC theo workspace hiện tại, gồm `nextKeyEvent`, `marketEvents24h`, `activeNarratives`, và `latestNews6h`; frontend đã tích hợp endpoint này vào dashboard chính.
+- Snapshot ngày 3/8 mở rộng `GET /dashboard/summary` cho Trading Snapshot: response UTC theo workspace hiện tại thêm metric `recentEvents` bên cạnh `nextKeyEvent`, `marketEvents24h`, `activeNarratives`, và `latestNews6h`; frontend chưa tích hợp metric mới này.
 - Backend đã chuyển domain nội dung canon từ `sources` / `source-documents` sang `news-outlets` / `news-articles`.
 - Backend đã unlink `NewsArticle` khỏi `NewsOutlet`: bài viết snapshot tên nguồn vào `sourceName` khi ingest, nên việc đổi tên hoặc xóa outlet không làm thay đổi nguồn đã lưu trên bài viết. Snapshot OpenAPI và frontend hiện đã đồng bộ contract này.
 - Backend vẫn giữ các surface `events`, `query`, và `graph-view`, nhưng nhiều payload đã đổi naming từ `sourceDocument*` sang `artifact*` hoặc `news-article`.
@@ -535,15 +535,16 @@ Ghi chu:
 
 | Phuong thuc | Endpoint backend      | operationId | Tich hop frontend | Trang thai      | Ghi chu |
 | ----------- | --------------------- | ----------- | ----------------- | --------------- | ------- |
-| GET         | `/dashboard/summary`  | `getSummary` | `app/api/dashboard/action.ts` + `dashboard/page.tsx` | Da tich hop | Khong co body/query. Response dung mot `asOf` UTC va scope workspace hien tai; tra bon metric voi state `AVAILABLE` / `EMPTY` / `DENIED` / `ERROR`. Endpoint gate `workspace:read`; loi endpoint la `403`/`409`, loi tung metric nam trong HTTP `200`. |
+| GET         | `/dashboard/summary`  | `getSummary` | `app/api/dashboard/action.ts` + `dashboard/page.tsx` | Da tich hop mot phan | Khong co body/query. Response dung mot `asOf` UTC va scope workspace hien tai; tra nam metric voi state `AVAILABLE` / `EMPTY` / `DENIED` / `ERROR`. `recentEvents` tra `items[]` gom event co ban, `themes[]` va `affectedAssets[]`. Endpoint gate `workspace:read`; loi endpoint la `403`/`409`, loi tung metric nam trong HTTP `200`. |
 
 Ghi chu:
 
 - `scope` gom `workspaceId` va `watchlistAssetCount`; count co the `null` khi thieu quyen scope.
 - `nextKeyEvent` la economic-calendar event `HIGH` sap toi, lien quan currency base/quote cua watchlist hien tai.
+- `recentEvents` dung `DashboardRecentEventsMetricResponse`; moi item dung `DashboardRecentEventItemResponse` voi `id`, `title`, `description`, `occurredAt`, `confidence`, `themes[]` va `affectedAssets[]`. Hai mang quan he tai su dung `EventThemeSummaryResponse` va `EventAssetSummaryResponse`.
 - `marketEvents24h` dem distinct event du dieu kien trong UTC `[asOf - 24h, asOf)`; `activeNarratives` dem distinct narrative `EMERGING`/`ACTIVE`; `latestNews6h` dem NewsArticle co `publishedAt` trong UTC `[asOf - 6h, asOf)`, khong phu thuoc asset/status.
-- Cac permission metric lan luot la `economic-calendar:read` + `watchlist:read` + `asset:read`; `event:read` + `watchlist:read` + `asset:read`; `narrative:read` + `watchlist:read` + `asset:read`; va `news-article:read`.
-- FE da co action/definitions va map state rieng; khong duoc coi `DENIED`/`ERROR` la count `0`.
+- Permission metric lan luot la `economic-calendar:read` + `watchlist:read` + `asset:read` cho `nextKeyEvent`; `event:read` + `watchlist:read` + `asset:read` cho `recentEvents` va `marketEvents24h`; `narrative:read` + `watchlist:read` + `asset:read` cho `activeNarratives`; va `news-article:read` cho `latestNews6h`.
+- FE da co action/definitions va map state rieng cho bon metric cu; `recentEvents` chua co trong `app/lib/dashboard/definitions.ts`, chua duoc parse trong action va chua duoc render o dashboard chinh. Khong duoc coi `DENIED`/`ERROR` la count `0`.
 
 ## Nhom frontend khong nam trong snapshot API hien tai
 
@@ -656,6 +657,7 @@ type ActionResult<T = void> =
 - `watchlists`: FE workspace watchlist editor da chuyen add flow sang bulk endpoint `POST /watchlists/assets` voi request `{ assetIds }`, chunk toi da 100 id moi request; remove flow van dung `DELETE /watchlists/assets/{assetId}`. `assetPricePrecision` chua co trong snapshot/source BE va chi la toi uu tuy chon, khong phai dependency de sua chart.
 - `news articles`: endpoint crawl full content da bi bo khoi snapshot, nhung FE van con action `crawlNewsArticleFullContent()` va menu crawl tren detail.
 - `events`: snapshot moi da bo `slug` va `confirmedAt`, va doi evidence sang `newsArticle*`; FE events da dong bo DTO, detail, quick detail, va action layout theo contract hien tai.
+- `dashboard summary`: snapshot moi them `recentEvents` vao `DashboardSummaryResponse` cung hai schema `DashboardRecentEventsMetricResponse` va `DashboardRecentEventItemResponse`; FE hien moi dong bo bon metric cu, can cap nhat definitions, action validation, dashboard data flow, UI states va i18n truoc khi apply Event Timeline.
 - `telegram`: frontend da co route/action/type/permission/navigation cho surface Telegram, nhung snapshot moi them `outputLanguageIsoCode` request va `outputLanguage` response cho feature setting/schedule ma FE chua expose.
 - `ai-provider credentials`: snapshot moi doi credential `label` thanh `model` va bo top-level config `name`/`model`; FE hien van giu `name`, top-level `model`, va credential `label` trong definitions, form, list, detail, va credential panel.
 - `cronjobs`: FE da bo create/delete flow va doi update schedule sang inline list chi gui `expression`; endpoint `stop` duoc ghi nhan nhung khong tich hop co chu dich.

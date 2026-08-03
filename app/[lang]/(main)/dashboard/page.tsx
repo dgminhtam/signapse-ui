@@ -55,6 +55,7 @@ import {
   TradingSnapshot,
   TradingSnapshotSkeleton,
 } from "./trading-snapshot"
+import { EventTimeline, EventTimelineSkeleton } from "./event-timeline"
 import { WorkspaceOverviewActions } from "../workspace-overview-actions"
 
 const WORKSPACE_SEARCH = {
@@ -192,6 +193,12 @@ async function WorkspaceOverview() {
           error={dashboardSummary.error}
           locale={locale}
           summary={dashboardSummary.summary}
+        />
+        <EventTimeline
+          dictionary={dictionary}
+          error={dashboardSummary.error}
+          locale={locale}
+          metric={dashboardSummary.summary?.recentEvents ?? null}
         />
       </>
     </WorkspaceOverviewShell>
@@ -423,6 +430,7 @@ function WorkspaceOverviewSkeleton() {
           </CardContent>
         </Card>
         <TradingSnapshotSkeleton />
+        <EventTimelineSkeleton />
       </>
     </WorkspaceOverviewShell>
   )
