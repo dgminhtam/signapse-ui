@@ -8,6 +8,7 @@ import {
 } from "lucide-react"
 
 import { getDashboardSummary } from "@/app/api/dashboard/action"
+import { getNewsArticles } from "@/app/api/news-articles/action"
 import { getWorkspaceWatchlistAssets } from "@/app/api/watchlists/action"
 import { getMyWorkspaces } from "@/app/api/workspaces/action"
 import type { DashboardSummaryResponse } from "@/app/lib/dashboard/definitions"
@@ -19,6 +20,8 @@ import {
   formatNumber,
 } from "@/app/lib/i18n/format"
 import { getRequestLocale } from "@/app/lib/i18n/server"
+import type { NewsArticleListResponse } from "@/app/lib/news-articles/definitions"
+import { canReadNewsArticles } from "@/app/lib/news-articles/permissions"
 import { hasPermission } from "@/app/lib/permissions"
 import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { resolveActiveWorkspace } from "@/app/lib/workspaces/active"
@@ -56,6 +59,7 @@ import {
   TradingSnapshotSkeleton,
 } from "./trading-snapshot"
 import { EventTimeline, EventTimelineSkeleton } from "./event-timeline"
+import { LatestNews, LatestNewsSkeleton } from "./latest-news"
 import { WorkspaceOverviewActions } from "../workspace-overview-actions"
 
 const WORKSPACE_SEARCH = {
@@ -72,6 +76,13 @@ const WATCHLIST_PREVIEW_SEARCH = {
   sort: [{ field: "createdDate", direction: "desc" as const }],
 }
 
+const LATEST_NEWS_SEARCH = {
+  filter: "",
+  page: 0,
+  size: 5,
+  sort: [{ field: "publishedAt", direction: "desc" as const }],
+}
+
 interface WatchlistPreviewState {
   assets: WorkspaceWatchlistAssetListItemResponse[]
   error: string | null
@@ -81,6 +92,11 @@ interface WatchlistPreviewState {
 interface DashboardSummaryState {
   error: string | null
   summary: DashboardSummaryResponse | null
+}
+
+interface LatestNewsState {
+  articles: NewsArticleListResponse[]
+  error: string | null
 }
 
 export default function Page() {
@@ -100,6 +116,7 @@ async function WorkspaceOverview() {
   const canReadWorkspace = hasPermission(permissions, "workspace:read")
   const canReadAsset = hasPermission(permissions, "asset:read")
   const canReadWatchlist = hasPermission(permissions, "watchlist:read")
+  const canReadNews = canReadNewsArticles(permissions)
   const canCreateWatchlist = hasPermission(permissions, "watchlist:create")
   const canDeleteWatchlist = hasPermission(permissions, "watchlist:delete")
 
@@ -170,10 +187,20 @@ async function WorkspaceOverview() {
     )
   }
 
-  const [watchlistPreview, dashboardSummary] = await Promise.all([
+  const [watchlistPreview, dashboardSummary, latestNews] = await Promise.all([
     loadWatchlistPreview(canReadAsset && canReadWatchlist, dictionary),
     loadDashboardSummary(dictionary),
+    loadLatestNews(canReadNews, dictionary),
   ])
+
+  const eventTimeline = (
+    <EventTimeline
+      dictionary={dictionary}
+      error={dashboardSummary.error}
+      locale={locale}
+      metric={dashboardSummary.summary?.recentEvents ?? null}
+    />
+  )
 
   return (
     <WorkspaceOverviewShell>
@@ -194,12 +221,21 @@ async function WorkspaceOverview() {
           locale={locale}
           summary={dashboardSummary.summary}
         />
-        <EventTimeline
-          dictionary={dictionary}
-          error={dashboardSummary.error}
-          locale={locale}
-          metric={dashboardSummary.summary?.recentEvents ?? null}
-        />
+        {canReadNews ? (
+          <div className="grid min-w-0 gap-4 lg:grid-cols-12">
+            <div className="min-w-0 lg:col-span-8">{eventTimeline}</div>
+            <div className="min-w-0 lg:col-span-4">
+              <LatestNews
+                articles={latestNews.articles}
+                dictionary={dictionary}
+                error={latestNews.error}
+                locale={locale}
+              />
+            </div>
+          </div>
+        ) : (
+          eventTimeline
+        )}
       </>
     </WorkspaceOverviewShell>
   )
@@ -246,6 +282,31 @@ async function loadDashboardSummary(
           ? error.message
           : dictionary.workspaceOverview.tradingSnapshot.summaryErrorDescription,
       summary: null,
+    }
+  }
+}
+
+async function loadLatestNews(
+  canReadNews: boolean,
+  dictionary: Dictionary
+): Promise<LatestNewsState> {
+  if (!canReadNews) {
+    return { articles: [], error: null }
+  }
+
+  try {
+    const response = await getNewsArticles(LATEST_NEWS_SEARCH)
+    return {
+      articles: (response.content ?? []).slice(0, LATEST_NEWS_SEARCH.size),
+      error: null,
+    }
+  } catch (error: unknown) {
+    return {
+      articles: [],
+      error:
+        error instanceof Error
+          ? error.message
+          : dictionary.workspaceOverview.latestNews.errorDescription,
     }
   }
 }
@@ -430,7 +491,14 @@ function WorkspaceOverviewSkeleton() {
           </CardContent>
         </Card>
         <TradingSnapshotSkeleton />
-        <EventTimelineSkeleton />
+        <div className="grid min-w-0 gap-4 lg:grid-cols-12">
+          <div className="min-w-0 lg:col-span-8">
+            <EventTimelineSkeleton />
+          </div>
+          <div className="min-w-0 lg:col-span-4">
+            <LatestNewsSkeleton />
+          </div>
+        </div>
       </>
     </WorkspaceOverviewShell>
   )

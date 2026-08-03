@@ -464,6 +464,17 @@ export const vi = {
       errorDescription: "Dòng sự kiện hiện không khả dụng.",
       invalidDate: "Thời gian không hợp lệ",
     },
+    latestNews: {
+      title: "Tin tức mới nhất",
+      description: "Các bài viết tin tức mới nhất trên Signapse.",
+      viewAll: "Xem tất cả tin tức",
+      emptyTitle: "Chưa có tin tức mới",
+      emptyDescription:
+        "Tin tức mới nhất sẽ hiển thị tại đây khi có bài viết.",
+      errorTitle: "Không thể tải tin tức mới nhất",
+      errorDescription: "Tin tức mới nhất hiện không khả dụng.",
+      invalidDate: "Thời gian không hợp lệ",
+    },
     tradingSnapshot: {
       title: "Tóm tắt thị trường",
       nextEvent: "Sự kiện quan trọng sắp tới",

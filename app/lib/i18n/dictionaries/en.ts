@@ -464,6 +464,17 @@ export const en: Dictionary = {
       errorDescription: "The event timeline is currently unavailable.",
       invalidDate: "Invalid time",
     },
+    latestNews: {
+      title: "Latest news",
+      description: "The most recent news articles across Signapse.",
+      viewAll: "View all news",
+      emptyTitle: "No recent news yet",
+      emptyDescription:
+        "Latest news will appear here when articles are available.",
+      errorTitle: "Could not load latest news",
+      errorDescription: "Latest news is currently unavailable.",
+      invalidDate: "Invalid time",
+    },
     tradingSnapshot: {
       title: "Market snapshot",
       nextEvent: "Next key event",

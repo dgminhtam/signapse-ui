@@ -1,0 +1,198 @@
+import {
+  ArrowRightIcon,
+  CircleSlashIcon,
+  NewspaperIcon,
+} from "lucide-react"
+
+import type { AppLocale } from "@/app/lib/i18n/config"
+import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
+import { formatDateTime } from "@/app/lib/i18n/format"
+import type { NewsArticleListResponse } from "@/app/lib/news-articles/definitions"
+import { LocalizedLink } from "@/components/localized-link"
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
+import {
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+  ItemMedia,
+  ItemSeparator,
+  ItemTitle,
+} from "@/components/ui/item"
+import { Skeleton } from "@/components/ui/skeleton"
+
+export function LatestNews({
+  articles,
+  dictionary,
+  error,
+  locale,
+}: {
+  articles: NewsArticleListResponse[]
+  dictionary: Dictionary
+  error: string | null
+  locale: AppLocale
+}) {
+  const t = dictionary.workspaceOverview.latestNews
+  const hasArticles = articles.length > 0
+
+  return (
+    <section aria-labelledby="dashboard-latest-news-title">
+      <Card className="min-w-0" size="sm">
+        <CardHeader>
+          <CardTitle>
+            <h2 id="dashboard-latest-news-title">{t.title}</h2>
+          </CardTitle>
+          <CardDescription>{t.description}</CardDescription>
+          {hasArticles || error ? (
+            <CardAction>
+              <Button asChild variant="ghost">
+                <LocalizedLink href="/news-articles" aria-label={t.viewAll}>
+                  <span className="hidden sm:inline">{t.viewAll}</span>
+                  <ArrowRightIcon data-icon="inline-end" />
+                </LocalizedLink>
+              </Button>
+            </CardAction>
+          ) : null}
+        </CardHeader>
+        <CardContent>
+          {error ? (
+            <Empty className="min-h-48">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <CircleSlashIcon />
+                </EmptyMedia>
+                <EmptyTitle>{t.errorTitle}</EmptyTitle>
+                <EmptyDescription>{error}</EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          ) : hasArticles ? (
+            <LatestNewsItems
+              articles={articles}
+              dictionary={dictionary}
+              locale={locale}
+            />
+          ) : (
+            <Empty className="min-h-48">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <NewspaperIcon />
+                </EmptyMedia>
+                <EmptyTitle>{t.emptyTitle}</EmptyTitle>
+                <EmptyDescription>{t.emptyDescription}</EmptyDescription>
+              </EmptyHeader>
+              <EmptyContent>
+                <Button asChild variant="outline">
+                  <LocalizedLink href="/news-articles">{t.viewAll}</LocalizedLink>
+                </Button>
+              </EmptyContent>
+            </Empty>
+          )}
+        </CardContent>
+      </Card>
+    </section>
+  )
+}
+
+export function LatestNewsSkeleton() {
+  return (
+    <section aria-hidden="true">
+      <Card className="min-w-0" size="sm">
+        <CardHeader>
+          <CardTitle>
+            <Skeleton className="h-5 w-36 motion-reduce:animate-none" />
+          </CardTitle>
+          <CardDescription>
+            <Skeleton className="h-4 w-56 max-w-full motion-reduce:animate-none" />
+          </CardDescription>
+          <CardAction>
+            <Skeleton className="h-9 w-9 motion-reduce:animate-none sm:w-28" />
+          </CardAction>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-4">
+            {Array.from({ length: 5 }, (_, index) => (
+              <div className="flex items-start gap-3" key={index}>
+                <Skeleton className="size-8 shrink-0 motion-reduce:animate-none" />
+                <div className="flex min-w-0 flex-1 flex-col gap-2">
+                  <Skeleton className="h-4 w-full motion-reduce:animate-none" />
+                  <Skeleton className="h-3 w-full max-w-xl motion-reduce:animate-none" />
+                  <Skeleton className="h-3 w-2/3 motion-reduce:animate-none" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </section>
+  )
+}
+
+function LatestNewsItems({
+  articles,
+  dictionary,
+  locale,
+}: {
+  articles: NewsArticleListResponse[]
+  dictionary: Dictionary
+  locale: AppLocale
+}) {
+  const t = dictionary.workspaceOverview.latestNews
+
+  return (
+    <ItemGroup className="gap-0">
+      {articles.map((article, index) => {
+        const description =
+          article.description?.trim() || dictionary.newsArticles.noDescription
+        const source = article.sourceName?.trim() || dictionary.newsArticles.noOutlet
+        const publishedAt = article.publishedAt
+          ? formatDateTime(
+              article.publishedAt,
+              locale,
+              { dateStyle: "medium", timeStyle: "short" },
+              t.invalidDate
+            )
+          : dictionary.workspaceOverview.noData
+
+        return (
+          <div key={article.id}>
+            {index > 0 ? <ItemSeparator /> : null}
+            <Item>
+              <ItemMedia variant="icon">
+                <NewspaperIcon aria-hidden="true" />
+              </ItemMedia>
+              <ItemContent className="min-w-0">
+                <ItemTitle>
+                  <h3 className="line-clamp-2">{article.title}</h3>
+                </ItemTitle>
+                <ItemDescription className="line-clamp-2">
+                  {description}
+                </ItemDescription>
+                <p className="text-xs text-muted-foreground">
+                  <span>{source}</span>
+                  <span aria-hidden="true"> · </span>
+                  <span>{publishedAt}</span>
+                </p>
+              </ItemContent>
+            </Item>
+          </div>
+        )
+      })}
+    </ItemGroup>
+  )
+}
