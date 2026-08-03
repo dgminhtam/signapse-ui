@@ -66,7 +66,7 @@ export function EventTimeline({
 
   return (
     <section aria-labelledby="dashboard-event-timeline-title">
-      <Card className="min-w-0" size="sm">
+      <Card className="min-w-0">
         <CardHeader>
           <CardTitle>
             <h2 id="dashboard-event-timeline-title">{t.title}</h2>
@@ -120,7 +120,7 @@ export function EventTimeline({
 export function EventTimelineSkeleton() {
   return (
     <section aria-hidden="true">
-      <Card className="min-w-0" size="sm">
+      <Card className="min-w-0">
         <CardHeader>
           <CardTitle>
             <Skeleton className="h-5 w-36 motion-reduce:animate-none" />
@@ -175,43 +175,46 @@ function EventTimelineItems({
       {items.map((item, index) => (
         <div key={item.id}>
           {index > 0 ? <ItemSeparator /> : null}
-          <Item asChild>
-            <DashboardQuickDetailButton
-              entity={{ id: item.id, kind: "event" }}
-              aria-label={`${t.openEvent}: ${item.title}`}
-            >
-              <ItemMedia className="self-start" variant="icon">
-                <ActivityIcon aria-hidden="true" />
-              </ItemMedia>
-              <ItemContent>
-                <ItemTitle>
-                  <h3>{item.title}</h3>
-                </ItemTitle>
-                <ItemDescription className="line-clamp-2">
-                  {item.description}
-                </ItemDescription>
-              </ItemContent>
-              <ItemFooter className="flex-col items-start gap-2">
-                <EventContext
-                  affectedAssets={item.affectedAssets}
-                  dictionary={dictionary}
-                  themes={item.themes}
-                />
-                <div className="flex w-full flex-wrap justify-between gap-2">
-                  <AppTimeMetadata icon={CalendarClockIcon}>
-                    {formatDateTime(
-                      item.occurredAt,
-                      locale,
-                      { dateStyle: "medium", timeStyle: "short" },
-                      t.invalidDate
-                    )}
-                  </AppTimeMetadata>
-                  <span className="text-xs text-muted-foreground tabular-nums">
-                    {t.confidence}: {formatConfidence(item.confidence, locale)}
-                  </span>
-                </div>
-              </ItemFooter>
-            </DashboardQuickDetailButton>
+          <Item>
+            <ItemMedia className="self-start" variant="icon">
+              <ActivityIcon aria-hidden="true" />
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>
+                <h3>
+                  <DashboardQuickDetailButton
+                    className="cursor-pointer text-left font-medium underline-offset-4 outline-none transition-colors hover:text-primary hover:underline focus-visible:ring-2 focus-visible:ring-ring/50"
+                    entity={{ id: item.id, kind: "event" }}
+                    aria-label={`${t.openEvent}: ${item.title}`}
+                  >
+                    {item.title}
+                  </DashboardQuickDetailButton>
+                </h3>
+              </ItemTitle>
+              <ItemDescription className="line-clamp-2">
+                {item.description}
+              </ItemDescription>
+            </ItemContent>
+            <ItemFooter className="flex-col items-start gap-2">
+              <EventContext
+                affectedAssets={item.affectedAssets}
+                dictionary={dictionary}
+                themes={item.themes}
+              />
+              <div className="flex w-full flex-wrap justify-between gap-2">
+                <AppTimeMetadata icon={CalendarClockIcon}>
+                  {formatDateTime(
+                    item.occurredAt,
+                    locale,
+                    { dateStyle: "medium", timeStyle: "short" },
+                    t.invalidDate
+                  )}
+                </AppTimeMetadata>
+                <span className="text-xs text-muted-foreground tabular-nums">
+                  {t.confidence}: {formatConfidence(item.confidence, locale)}
+                </span>
+              </div>
+            </ItemFooter>
           </Item>
         </div>
       ))}

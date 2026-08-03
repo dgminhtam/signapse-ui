@@ -20,32 +20,32 @@ The dashboard SHALL own one local quick-detail state boundary for Event Timeline
 - **THEN** the dashboard remains mounted at the same URL
 - **AND** the selected entity state is cleared
 
-### Requirement: Event and news rows use the same button-backed Item interaction
+### Requirement: Event and news rows use the same title-only button interaction
 
-Available Event Timeline and Latest News rows SHALL use a button-backed shadcn `Item asChild` structure and SHALL expose the entity kind and backend ID to the shared dashboard quick-detail trigger. Rows SHALL NOT expose a per-row canonical detail `href`.
+Available Event Timeline and Latest News rows SHALL use a regular shadcn `Item` container and SHALL expose the entity kind and backend ID through a native button around the visible title only. Descriptions, icons, metadata, and footers SHALL remain non-interactive. Rows SHALL NOT expose a per-row canonical detail `href`.
 
 #### Scenario: Event row is rendered
 
 - **WHEN** an available event item is rendered
-- **THEN** its row is an `Item asChild` whose child is a native button trigger for `{ kind: "event", id }`
-- **AND** the row exposes its localized event-open accessible name
+- **THEN** its row is an `Item` whose title contains a native button trigger for `{ kind: "event", id }`
+- **AND** the title button exposes its localized event-open accessible name
 
 #### Scenario: News row is rendered
 
 - **WHEN** a news article is rendered
-- **THEN** its row is an `Item asChild` whose child is a native button trigger for `{ kind: "news-article", id }`
-- **AND** the row exposes its localized article-open accessible name
+- **THEN** its row is an `Item` whose title contains a native button trigger for `{ kind: "news-article", id }`
+- **AND** the title button exposes its localized article-open accessible name
 
 ### Requirement: Dashboard quick-detail activation uses native button behavior
 
-The shared dashboard trigger SHALL open local quick detail for every normal button activation, including pointer click, keyboard Enter, and keyboard Space. It SHALL NOT perform route navigation or require modifier-click, middle-click, or context-menu link behavior. Canonical full-page escalation SHALL remain an explicit action inside the drawer.
+The shared dashboard title trigger SHALL open local quick detail for every normal button activation, including pointer click, keyboard Enter, and keyboard Space. It SHALL NOT perform route navigation or require modifier-click, middle-click, or context-menu link behavior. Canonical full-page escalation SHALL remain an explicit action inside the drawer.
 
 #### Scenario: User activates a row normally
 
-- **WHEN** a user clicks an event or news row, or activates it with Enter or Space
+- **WHEN** a user clicks an event or news title button, or activates it with Enter or Space
 - **THEN** the trigger opens the existing drawer for that row's entity kind and ID
 - **AND** the current dashboard URL remains unchanged
-- **AND** no page-transition loading bar is started by the row activation
+- **AND** no page-transition loading bar is started by the title activation
 
 #### Scenario: User requests a full page
 
@@ -55,13 +55,13 @@ The shared dashboard trigger SHALL open local quick detail for every normal butt
 
 ### Requirement: Dashboard quick-detail triggers remain accessible
 
-Event and news row triggers SHALL remain keyboard reachable, expose an accessible localized name, identify the dialog relationship with `aria-haspopup="dialog"`, and preserve the existing drawer's focus, Escape, loading, permission, error, and scroll behavior.
+Event and news title buttons SHALL remain keyboard reachable, expose an accessible localized name, identify the dialog relationship with `aria-haspopup="dialog"`, and preserve the existing drawer's focus, Escape, loading, permission, error, and scroll behavior. Other row content SHALL remain non-interactive.
 
 #### Scenario: User opens and closes with the keyboard
 
-- **WHEN** a user focuses a row trigger and presses Enter, then presses Escape in the open drawer
+- **WHEN** a user focuses a title trigger and presses Enter, then presses Escape in the open drawer
 - **THEN** the corresponding local quick-detail drawer opens and closes
-- **AND** focus returns to the activating row trigger
+- **AND** focus returns to the activating title trigger
 
 #### Scenario: Detail loading or access fails
 

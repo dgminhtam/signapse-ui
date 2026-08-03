@@ -16,15 +16,16 @@ The Latest News module SHALL use the existing authenticated `GET /news-articles`
 
 ### Requirement: Latest News presents article information without internal metadata
 
-The Latest News module SHALL render each returned article using its title, description, source name, and publication time when available. Missing optional values SHALL use localized fallbacks. The module SHALL provide a localized header action to the existing `/news-articles` route. Each article row SHALL be a button-backed shadcn `Item asChild` that opens the shared dashboard news-article quick-detail drawer on pointer or keyboard activation. Rows SHALL NOT expose a per-row canonical `/news-articles/{id}` `href`; the drawer SHALL provide the explicit full-page action. The module SHALL NOT expose internal derivation status, event/calendar relationships, or other unsupported metadata.
+The Latest News module SHALL render each returned article using its title, description, source name, publication time, and optional `featureImage` when available. Missing optional values SHALL use localized fallbacks. When an article has an image, the row SHALL render it through `ItemMedia variant="image"` using the best available media URL in thumbnail-to-original order; when no usable image exists, it SHALL render the existing newspaper icon. The module SHALL provide a localized header action to the existing `/news-articles` route. Each article row SHALL be a regular shadcn `Item` container with a native button around the visible title only, opening the shared dashboard news-article quick-detail drawer on pointer or keyboard activation. Descriptions, source, publication time, and media SHALL remain non-interactive. Rows SHALL NOT expose a per-row canonical `/news-articles/{id}` `href`; the drawer SHALL provide the explicit full-page action. The module SHALL NOT expose internal derivation status, event/calendar relationships, or other unsupported metadata.
 
 #### Scenario: Latest News has articles
 
 - **WHEN** the news request succeeds with one or more articles
 - **THEN** the module renders no more than five article rows
 - **AND** each row presents the article title and available description, source, and publication time
-- **AND** each row is a keyboard-reachable localized button-backed `Item asChild` with an accessible article-open name
-- **AND** a pointer click, Enter, or Space opens the shared news-article quick-detail drawer without changing the dashboard URL
+- **AND** each title is a keyboard-reachable localized button with an accessible article-open name
+- **AND** each row renders its available feature image through `ItemMedia variant="image"`, or the newspaper icon when no usable image exists
+- **AND** a pointer click, Enter, or Space on the title opens the shared news-article quick-detail drawer without changing the dashboard URL
 - **AND** the module header links to the localized `/news-articles` list route
 - **AND** no row presents derivation status, event relationship, calendar metadata, or unsupported internal metadata
 

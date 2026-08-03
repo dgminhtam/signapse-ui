@@ -69,7 +69,9 @@ Lý do: route transition có thể remount hoặc reload Server/Client Component
 
 ## Dashboard Row Trigger
 
-Khi một row trên dashboard chỉ có nhiệm vụ mở local quick detail và không cần điều hướng trực tiếp, trigger nên là native `<button type="button">`. Row không giữ canonical `href`; drawer cung cấp action rõ ràng để mở full detail page khi user cần.
+Khi một row trên dashboard chỉ có nhiệm vụ mở local quick detail và không cần điều hướng trực tiếp, row nên là container thường; native `<button type="button">` chỉ nên bọc title và được style như một link. Icon, description và metadata không nên là vùng action. Row không giữ canonical `href`; drawer cung cấp action rõ ràng để mở full detail page khi user cần.
+
+Với Latest News, nếu article có `featureImage`, dùng `ItemMedia variant="image"` với URL ưu tiên `urlThumbnail`, `urlMedium`, `urlLarge`, rồi `urlOriginal`; nếu thiếu ảnh thì giữ newspaper icon làm fallback.
 
 ## UI Shell
 

@@ -83,7 +83,7 @@ các card có cùng trọng lượng.
 
 ┌ Dòng sự kiện — 8 cột ────────────────────┐ ┌ Tin tức mới nhất — 4 cột ┐
 │ Sự kiện mới nhất theo occurredAt         │ │        [Xem toàn bộ]       │
-│ Tiêu đề · mô tả · theme · affected asset │ │ Tiêu đề · summary          │
+│ Tiêu đề · mô tả · theme · affected asset │ │ Ảnh · tiêu đề · summary    │
 │ [Mở event]                               │ │ Raw article, không relation│
 └──────────────────────────────────────────┘ └───────────────────────────┘
 

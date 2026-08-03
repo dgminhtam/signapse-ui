@@ -3,6 +3,7 @@ import {
   CircleSlashIcon,
   NewspaperIcon,
 } from "lucide-react"
+import Image from "next/image"
 
 import type { AppLocale } from "@/app/lib/i18n/config"
 import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
@@ -55,7 +56,7 @@ export function LatestNews({
 
   return (
     <section aria-labelledby="dashboard-latest-news-title">
-      <Card className="min-w-0" size="sm">
+      <Card className="min-w-0">
         <CardHeader>
           <CardTitle>
             <h2 id="dashboard-latest-news-title">{t.title}</h2>
@@ -114,7 +115,7 @@ export function LatestNews({
 export function LatestNewsSkeleton() {
   return (
     <section aria-hidden="true">
-      <Card className="min-w-0" size="sm">
+      <Card className="min-w-0">
         <CardHeader>
           <CardTitle>
             <Skeleton className="h-5 w-36 motion-reduce:animate-none" />
@@ -130,7 +131,7 @@ export function LatestNewsSkeleton() {
           <div className="flex flex-col gap-4">
             {Array.from({ length: 5 }, (_, index) => (
               <div className="flex items-start gap-3" key={index}>
-                <Skeleton className="size-8 shrink-0 motion-reduce:animate-none" />
+                <Skeleton className="size-10 shrink-0 motion-reduce:animate-none" />
                 <div className="flex min-w-0 flex-1 flex-col gap-2">
                   <Skeleton className="h-4 w-full motion-reduce:animate-none" />
                   <Skeleton className="h-3 w-full max-w-xl motion-reduce:animate-none" />
@@ -170,32 +171,51 @@ function LatestNewsItems({
               t.invalidDate
             )
           : dictionary.workspaceOverview.noData
+        const imageUrl =
+          article.featureImage?.urlThumbnail ||
+          article.featureImage?.urlMedium ||
+          article.featureImage?.urlLarge ||
+          article.featureImage?.urlOriginal
 
         return (
           <div key={article.id}>
             {index > 0 ? <ItemSeparator /> : null}
-            <Item asChild>
-              <DashboardQuickDetailButton
-                entity={{ id: article.id, kind: "news-article" }}
-                aria-label={`${t.openArticle}: ${article.title}`}
-              >
-                <ItemMedia variant="icon">
+            <Item>
+              <ItemMedia variant={imageUrl ? "image" : "icon"}>
+                {imageUrl ? (
+                  <Image
+                    src={imageUrl}
+                    alt={article.featureImage?.altText?.trim() || article.title}
+                    width={40}
+                    height={40}
+                    sizes="40px"
+                    className="object-cover"
+                  />
+                ) : (
                   <NewspaperIcon aria-hidden="true" />
-                </ItemMedia>
-                <ItemContent className="min-w-0">
-                  <ItemTitle>
-                    <h3 className="line-clamp-2">{article.title}</h3>
-                  </ItemTitle>
-                  <ItemDescription className="line-clamp-2">
-                    {description}
-                  </ItemDescription>
-                  <p className="text-xs text-muted-foreground">
-                    <span>{source}</span>
-                    <span aria-hidden="true"> · </span>
-                    <span>{publishedAt}</span>
-                  </p>
-                </ItemContent>
-              </DashboardQuickDetailButton>
+                )}
+              </ItemMedia>
+              <ItemContent className="min-w-0">
+                <ItemTitle>
+                  <h3 className="line-clamp-2">
+                    <DashboardQuickDetailButton
+                      className="cursor-pointer text-left font-medium underline-offset-4 outline-none transition-colors hover:text-primary hover:underline focus-visible:ring-2 focus-visible:ring-ring/50"
+                      entity={{ id: article.id, kind: "news-article" }}
+                      aria-label={`${t.openArticle}: ${article.title}`}
+                    >
+                      {article.title}
+                    </DashboardQuickDetailButton>
+                  </h3>
+                </ItemTitle>
+                <ItemDescription className="line-clamp-2">
+                  {description}
+                </ItemDescription>
+                <p className="text-xs text-muted-foreground">
+                  <span>{source}</span>
+                  <span aria-hidden="true"> · </span>
+                  <span>{publishedAt}</span>
+                </p>
+              </ItemContent>
             </Item>
           </div>
         )
