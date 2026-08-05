@@ -13,6 +13,7 @@ import {
   CalendarClock,
   CheckCircle2,
   Clipboard,
+  ExternalLink,
   Link2,
   MessageCircle,
   Pencil,
@@ -1195,6 +1196,23 @@ function DestinationLinkSheet({
   )
   const [isPending, startTransition] = useTransition()
   const canSubmit = canManage && botConnectionId
+  const linkedBotConnection = activeBotConnections.find(
+    (connection) => connection.id === linkToken?.botConnectionId
+  )
+  const botUsername = linkedBotConnection?.botUsername
+    ?.trim()
+    .replace(/^@/, "")
+
+  function buildDeepLink(parameter: "start" | "startgroup") {
+    if (!botUsername || !linkToken?.token) return null
+
+    const url = new URL(`https://t.me/${botUsername}`)
+    url.searchParams.set(parameter, linkToken.token)
+    return url.toString()
+  }
+
+  const privateLink = buildDeepLink("start")
+  const groupLink = buildDeepLink("startgroup")
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -1250,7 +1268,10 @@ function DestinationLinkSheet({
               <FieldLabel>{t.destination.commandBot}</FieldLabel>
               <Select
                 value={botConnectionId}
-                onValueChange={setBotConnectionId}
+                onValueChange={(value) => {
+                  setBotConnectionId(value)
+                  setLinkToken(null)
+                }}
                 disabled={isPending}
               >
                 <SelectTrigger className="w-full">
@@ -1286,6 +1307,36 @@ function DestinationLinkSheet({
                   time: formatTime(linkToken.expiresAt),
                 })}
               </AppTimeMetadata>
+              {privateLink || groupLink ? (
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  {privateLink ? (
+                    <Button asChild variant="outline">
+                      <a
+                        href={privateLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={handleRefresh}
+                      >
+                        <ExternalLink data-icon="inline-start" />
+                        {t.destination.openPrivate}
+                      </a>
+                    </Button>
+                  ) : null}
+                  {groupLink ? (
+                    <Button asChild variant="outline">
+                      <a
+                        href={groupLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={handleRefresh}
+                      >
+                        <ExternalLink data-icon="inline-start" />
+                        {t.destination.openGroup}
+                      </a>
+                    </Button>
+                  ) : null}
+                </div>
+              ) : null}
               <div className="flex flex-col gap-2 sm:flex-row">
                 <Button type="button" variant="outline" onClick={handleCopy}>
                   <Clipboard data-icon="inline-start" />

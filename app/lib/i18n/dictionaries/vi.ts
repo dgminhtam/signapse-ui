@@ -2205,6 +2205,8 @@ export const vi = {
       refreshed: "Đã làm mới danh sách điểm nhận.",
       copied: "Đã sao chép lệnh liên kết.",
       copyError: "Không thể sao chép lệnh liên kết.",
+      openPrivate: "Mở chat riêng",
+      openGroup: "Mở group chat",
       editTrigger: "Sửa điểm nhận",
       editTitle: "Chỉnh sửa điểm nhận",
       editDescription:

@@ -2219,6 +2219,8 @@ export const en: Dictionary = {
       refreshed: "Destination list refreshed.",
       copied: "Link command copied.",
       copyError: "Could not copy the link command.",
+      openPrivate: "Open private chat",
+      openGroup: "Open group chat",
       editTrigger: "Edit destination",
       editTitle: "Edit destination",
       editDescription:
