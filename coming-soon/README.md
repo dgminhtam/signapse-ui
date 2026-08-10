@@ -14,8 +14,8 @@ python -m http.server 4173 --directory coming-soon
 
 Các URL cần kiểm tra:
 
-- Tiếng Việt: `http://localhost:4173/`
-- English: `http://localhost:4173/en/`
+- English canonical: `http://localhost:4173/`
+- English compatibility alias: `http://localhost:4173/en/`
 - Một đường dẫn không tồn tại, ví dụ `http://localhost:4173/not-found`, phải trả
   về `404`.
 
@@ -39,7 +39,7 @@ Thời điểm ra mắt được cố định trong `assets/countdown.js` là
 4. Tắt/để trống **Build Command**. Không chạy `pnpm` và không khai báo biến môi
    trường của ứng dụng. Nếu giao diện yêu cầu Output Directory, dùng `.`.
 5. Deploy preview, sau đó xác nhận `/`, `/en/`, CSS, logo, social preview,
-   language switch và một unknown route trả `404` trước khi gắn domain.
+   footer domain và một unknown route trả `404` trước khi gắn domain.
 
 ## Cutover `signapse.cloud`
 
@@ -70,8 +70,8 @@ thực hiện. Không thay DNS trước khi preview đã được duyệt.
    curl.exe -I https://www.signapse.cloud/
    ```
 
-   Hai locale phải trả `200`; `www` phải redirect về apex; `dev.signapse.cloud`
-   phải tiếp tục trỏ đến và phục vụ ứng dụng dev như trước.
+   Hai English routes phải trả `200`; `www` phải redirect về apex;
+   `dev.signapse.cloud` phải tiếp tục trỏ đến và phục vụ ứng dụng dev như trước.
 
 ## Rollback và lần chuyển production sau này
 

@@ -1,20 +1,9 @@
 export const LAUNCH_AT = Date.parse("2026-09-01T09:00:00+07:00")
 
 const COPY = Object.freeze({
-  en: Object.freeze({
-    countdownEyebrow: "Launching · September 1, 2026",
-    countdownHeading: "Launching in",
-    launchedEyebrow: "Live · September 1, 2026",
-    launchedHeading: "Now live",
-    launchedMessage: "Signapse is live.",
-  }),
-  vi: Object.freeze({
-    countdownEyebrow: "Sắp ra mắt · 01.09.2026",
-    countdownHeading: "Ra mắt sau",
-    launchedEyebrow: "Đã ra mắt · 01.09.2026",
-    launchedHeading: "Đã ra mắt",
-    launchedMessage: "Signapse đã ra mắt.",
-  }),
+  countdownHeading: "Launching in",
+  launchedHeading: "Now live",
+  launchedMessage: "Signapse is live.",
 })
 
 export function getCountdown(targetMs = LAUNCH_AT, nowMs = Date.now()) {
@@ -30,22 +19,14 @@ export function getCountdown(targetMs = LAUNCH_AT, nowMs = Date.now()) {
   }
 }
 
-export function getCountdownView(
-  locale,
-  targetMs = LAUNCH_AT,
-  nowMs = Date.now()
-) {
+export function getCountdownView(targetMs = LAUNCH_AT, nowMs = Date.now()) {
   const countdown = getCountdown(targetMs, nowMs)
-  const resolvedLocale = locale === "en" ? "en" : "vi"
-  const copy = COPY[resolvedLocale]
   const launched = countdown.state === "launched"
 
   return {
     ...countdown,
-    eyebrow: launched ? copy.launchedEyebrow : copy.countdownEyebrow,
-    heading: launched ? copy.launchedHeading : copy.countdownHeading,
-    launchedMessage: copy.launchedMessage,
-    locale: resolvedLocale,
+    heading: launched ? COPY.launchedHeading : COPY.countdownHeading,
+    launchedMessage: COPY.launchedMessage,
   }
 }
 
@@ -58,7 +39,6 @@ export function renderCountdown(root, nowMs = Date.now()) {
   const heading = root.querySelector("[data-countdown-heading]")
   const fallback = root.querySelector("[data-countdown-fallback]")
   const launchState = root.querySelector("[data-launch-state]")
-  const eyebrow = root.ownerDocument?.querySelector("[data-launch-eyebrow]")
   const values = Object.fromEntries(
     ["days", "hours", "minutes", "seconds"].map((unit) => [
       unit,
@@ -75,10 +55,9 @@ export function renderCountdown(root, nowMs = Date.now()) {
     return null
   }
 
-  const view = getCountdownView(root.dataset.locale, LAUNCH_AT, nowMs)
+  const view = getCountdownView(LAUNCH_AT, nowMs)
   root.dataset.state = view.state
   if (heading) heading.textContent = view.heading
-  if (eyebrow) eyebrow.textContent = view.eyebrow
   fallback.hidden = true
 
   if (view.state === "launched") {

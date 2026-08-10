@@ -23,32 +23,27 @@ The system SHALL serve the coming-soon experience from a self-contained static d
 - **WHEN** the coming-soon site is deployed or updated
 - **THEN** the deployment and DNS target for `dev.signapse.cloud` remain unchanged
 
-### Requirement: Vietnamese and English canonical routes
+### Requirement: English canonical launch route
 
-The static site SHALL render Vietnamese at `/` and English at `/en/`, with localized visible copy, assistive copy, metadata, and document language.
+The static site SHALL render English at `/` and may retain `/en/` as an English-only compatibility alias. The canonical document language and metadata SHALL be English.
 
-#### Scenario: Vietnamese root renders
+#### Scenario: English root renders
 
 - **WHEN** a visitor opens `/`
-- **THEN** the document uses `lang="vi"`
-- **AND** all visible and assistive page copy is Vietnamese
-
-#### Scenario: English route renders
-
-- **WHEN** a visitor opens `/en/`
 - **THEN** the document uses `lang="en"`
 - **AND** all visible and assistive page copy is English
 
-#### Scenario: Visitor switches language
+#### Scenario: English compatibility route renders
 
-- **WHEN** a visitor activates the visible language switch on either locale page
-- **THEN** the site navigates to the equivalent canonical route in the other language
+- **WHEN** a visitor opens `/en/`
+- **THEN** the page renders the same English experience
+- **AND** its canonical URL is `https://signapse.cloud/`
 
-#### Scenario: Locale metadata is discoverable
+#### Scenario: Single-language metadata is discoverable
 
-- **WHEN** a crawler inspects either locale document
-- **THEN** that document exposes its own canonical URL
-- **AND** it links Vietnamese, English, and `x-default` alternatives with `hreflang`
+- **WHEN** a crawler inspects either English document
+- **THEN** it exposes the apex canonical URL
+- **AND** it does not advertise a Vietnamese locale or language switch
 
 ### Requirement: Concise Signapse product introduction
 
@@ -57,7 +52,8 @@ The static site SHALL identify Signapse with the approved logo and concise, evid
 #### Scenario: First viewport communicates the launch
 
 - **WHEN** a visitor views the first viewport
-- **THEN** the page shows the Signapse logo, coming-soon status, primary product statement, launch date or countdown, and no more than one short supporting paragraph
+- **THEN** the page foregrounds the launch date or countdown without requiring a marketing hero statement
+- **AND** the Signapse logo and apex domain remain available in the page footer
 
 #### Scenario: Product pillars render
 
@@ -77,14 +73,14 @@ The static site SHALL use the approved dark-background Signapse logo variant and
 
 #### Scenario: Approved logo renders
 
-- **WHEN** either locale page loads
+- **WHEN** either English page loads
 - **THEN** it renders an unmodified site-local copy sourced from `public/images/signapse_logo_dark.svg`
-- **AND** the logo has an appropriate localized accessible name
+- **AND** the logo has an appropriate English accessible name
 
 #### Scenario: Layout adapts to viewport size
 
 - **WHEN** the page is viewed at mobile, tablet, or desktop widths
-- **THEN** the hero, countdown, language switch, and product pillars remain readable without horizontal page overflow
+- **THEN** the hero, countdown, footer domain, and product pillars remain readable without horizontal page overflow
 
 #### Scenario: Decorative signal visual renders
 
@@ -94,7 +90,7 @@ The static site SHALL use the approved dark-background Signapse logo variant and
 
 ### Requirement: Fixed launch countdown
 
-The static site SHALL count down to `2026-09-01T09:00:00+07:00` as one absolute instant and SHALL localize countdown labels for the active page language.
+The static site SHALL count down to `2026-09-01T09:00:00+07:00` as one absolute instant and SHALL use English countdown labels.
 
 #### Scenario: Countdown runs before launch
 
@@ -125,12 +121,12 @@ The coming-soon site MUST remain informational and MUST NOT collect visitor data
 
 #### Scenario: Visitor reviews available actions
 
-- **WHEN** either locale page renders
+- **WHEN** either English route renders
 - **THEN** it contains no waitlist form, request-access control, email input, referral control, or user-data submission
 
 #### Scenario: Visitor reviews launch claims
 
-- **WHEN** either locale page renders
+- **WHEN** either English route renders
 - **THEN** it contains no fabricated waitlist count, testimonial, customer logo, scarcity claim, or usage metric
 
 ### Requirement: Accessible and lightweight static experience

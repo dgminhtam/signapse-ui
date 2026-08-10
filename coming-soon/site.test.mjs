@@ -19,17 +19,13 @@ const REPO_ROOT = join(SITE_ROOT, "..")
 const pages = Object.freeze([
   {
     file: "index.html",
-    lang: "vi",
+    lang: "en",
     canonical: "https://signapse.cloud/",
-    heading: "Thấy chuyển động.",
-    languageSwitchHref: "/en/",
   },
   {
     file: join("en", "index.html"),
     lang: "en",
-    canonical: "https://signapse.cloud/en/",
-    heading: "See the move.",
-    languageSwitchHref: "/",
+    canonical: "https://signapse.cloud/",
   },
 ])
 
@@ -37,10 +33,9 @@ async function sha256(path) {
   return createHash("sha256").update(await readFile(path)).digest("hex")
 }
 
-function createCountdownRoot(locale) {
+function createCountdownRoot() {
   const grid = { hidden: false }
   const heading = { textContent: "" }
-  const eyebrow = { textContent: "" }
   const fallback = { hidden: false }
   const launchState = { textContent: "" }
   const values = Object.fromEntries(
@@ -51,17 +46,11 @@ function createCountdownRoot(locale) {
   )
 
   return {
-    dataset: { locale },
+    dataset: {},
     grid,
     heading,
-    eyebrow,
     fallback,
     launchState,
-    ownerDocument: {
-      querySelector(selector) {
-        return selector === "[data-launch-eyebrow]" ? eyebrow : null
-      },
-    },
     querySelector(selector) {
       if (selector === "[data-countdown-grid]") return grid
       if (selector === "[data-countdown-heading]") return heading
@@ -108,17 +97,13 @@ test("exact and post-launch times clamp to a stable launched state", () => {
   }
 
   assert.equal(
-    getCountdownView("vi", LAUNCH_AT, LAUNCH_AT).launchedMessage,
-    "Signapse đã ra mắt."
-  )
-  assert.equal(
-    getCountdownView("en", LAUNCH_AT, LAUNCH_AT).launchedMessage,
+    getCountdownView(LAUNCH_AT, LAUNCH_AT).launchedMessage,
     "Signapse is live."
   )
 })
 
-test("DOM rendering selects localized countdown and launched states", () => {
-  const beforeLaunch = createCountdownRoot("en")
+test("DOM rendering selects English countdown and launched states", () => {
+  const beforeLaunch = createCountdownRoot()
   assert.equal(renderCountdown(beforeLaunch, LAUNCH_AT - 1_000), "countdown")
   assert.equal(beforeLaunch.dataset.state, "countdown")
   assert.equal(beforeLaunch.values.seconds.textContent, "01")
@@ -126,37 +111,42 @@ test("DOM rendering selects localized countdown and launched states", () => {
   assert.equal(beforeLaunch.fallback.hidden, true)
   assert.equal(beforeLaunch.launchState.textContent, "")
   assert.equal(beforeLaunch.heading.textContent, "Launching in")
-  assert.equal(beforeLaunch.eyebrow.textContent, "Launching · September 1, 2026")
 
-  const launched = createCountdownRoot("vi")
+  const launched = createCountdownRoot()
   assert.equal(renderCountdown(launched, LAUNCH_AT), "launched")
   assert.equal(launched.dataset.state, "launched")
   assert.equal(launched.grid.hidden, true)
   assert.equal(launched.fallback.hidden, true)
-  assert.equal(launched.launchState.textContent, "Signapse đã ra mắt.")
-  assert.equal(launched.heading.textContent, "Đã ra mắt")
-  assert.equal(launched.eyebrow.textContent, "Đã ra mắt · 01.09.2026")
+  assert.equal(launched.launchState.textContent, "Signapse is live.")
+  assert.equal(launched.heading.textContent, "Now live")
 })
 
 for (const page of pages) {
-  test(`${page.file} is localized, indexable, and self-contained`, async () => {
+  test(`${page.file} is English-only, indexable, and self-contained`, async () => {
     const html = await readFile(join(SITE_ROOT, page.file), "utf8")
 
     assert.match(html, new RegExp(`<html lang="${page.lang}">`))
-    assert.match(html, new RegExp(page.heading, "u"))
     assert.match(
       html,
       new RegExp(`<link rel="canonical" href="${page.canonical.replaceAll("/", "\\/")}" \\/>`)
     )
-    assert.match(html, /hreflang="vi"/)
-    assert.match(html, /hreflang="en"/)
-    assert.match(html, /hreflang="x-default"/)
+    assert.doesNotMatch(html, /hreflang=/)
     assert.match(html, /<noscript>/)
     assert.match(html, /name="twitter:image:alt"/)
-    assert.match(html, new RegExp(`href="${page.languageSwitchHref.replaceAll("/", "\\/")}"`))
+    assert.doesNotMatch(html, /<header\b/i)
+    assert.doesNotMatch(html, /class="language-switch"/)
+    assert.doesNotMatch(
+      html,
+      /Thấy chuyển động|Hiểu nguyên nhân|Signapse kết nối giá|See the move|Understand why|Signapse connects prices|Hiểu chuyển động giá|Hỏi AI có căn cứ|Thấy bối cảnh liên kết/i
+    )
+    assert.match(html, /<footer[\s\S]*?signapse\.cloud[\s\S]*?<\/footer>/)
+    assert.match(html, /Understand market moves \(Chart Annotation\)/)
+    assert.match(html, /Ask the market with grounded AI \(Market Query\)/)
+    assert.match(html, /Explore connected market context \(Knowledge Graph\)/)
+    assert.doesNotMatch(html, /<li class="capability">[\s\S]*?<p\b/)
     assert.equal(html.match(/data-countdown-root/g)?.length, 1)
     assert.equal(html.match(/data-countdown-fallback/g)?.length, 1)
-    assert.equal(html.match(/<h1\b/g)?.length, 1)
+    assert.equal(html.match(/<h1\b/g)?.length ?? 0, 0)
     assert.equal(html.match(/<li class="capability">/g)?.length, 3)
 
     const launchRegion = html.match(
