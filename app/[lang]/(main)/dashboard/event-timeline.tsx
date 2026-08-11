@@ -192,7 +192,7 @@ function EventTimelineItems({
                 </h3>
               </ItemTitle>
               <ItemDescription className="line-clamp-2">
-                {item.description}
+                {item.description ?? dictionary.common.notAvailable}
               </ItemDescription>
             </ItemContent>
             <ItemFooter className="flex-col items-start gap-2">
@@ -211,7 +211,9 @@ function EventTimelineItems({
                   )}
                 </AppTimeMetadata>
                 <span className="text-xs text-muted-foreground tabular-nums">
-                  {t.confidence}: {formatConfidence(item.confidence, locale)}
+                  {t.confidence}: {item.confidence === null
+                    ? dictionary.common.notAvailable
+                    : formatConfidence(item.confidence, locale)}
                 </span>
               </div>
             </ItemFooter>

@@ -464,6 +464,30 @@ export const vi = {
       errorDescription: "Dòng sự kiện hiện không khả dụng.",
       invalidDate: "Thời gian không hợp lệ",
     },
+    assetsInFocus: {
+      title: "Tài sản cần chú ý",
+      description:
+        "Các tài sản được xếp hạng cùng bối cảnh thị trường mới nhất trong phạm vi này.",
+      graphView: "Mở Graph View",
+      marketCharts: "Mở biểu đồ thị trường",
+      emptyTitle: "Chưa có tài sản cần chú ý",
+      emptyDescription:
+        "Bối cảnh phù hợp sẽ hiển thị khi tài sản theo dõi có sự kiện hoặc luận điểm gần đây.",
+      deniedTitle: "Chưa có quyền xem tài sản cần chú ý",
+      deniedDescription:
+        "Tài khoản cần quyền đọc danh sách theo dõi, tài sản và ít nhất quyền đọc sự kiện hoặc luận điểm để xem module này.",
+      errorTitle: "Không thể tải tài sản cần chú ý",
+      errorDescription: "Tài sản cần chú ý hiện không khả dụng.",
+      invalidDate: "Thời gian không hợp lệ",
+      assetTypes: {
+        COMMODITY: "Hàng hóa",
+        CRYPTO: "Crypto",
+        EQUITY: "Cổ phiếu",
+        ETF: "ETF",
+        FX: "Ngoại hối",
+        INDEX: "Chỉ số",
+      },
+    },
     latestNews: {
       title: "Tin tức mới nhất",
       description: "Các bài viết tin tức mới nhất trên Signapse.",

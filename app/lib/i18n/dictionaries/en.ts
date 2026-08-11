@@ -464,6 +464,29 @@ export const en: Dictionary = {
       errorDescription: "The event timeline is currently unavailable.",
       invalidDate: "Invalid time",
     },
+    assetsInFocus: {
+      title: "Assets in focus",
+      description: "Ranked assets with the latest market context in this scope.",
+      graphView: "Open Graph View",
+      marketCharts: "Open Market Charts",
+      emptyTitle: "No assets in focus yet",
+      emptyDescription:
+        "Relevant asset context will appear here when tracked assets have recent events or narratives.",
+      deniedTitle: "No permission to view assets in focus",
+      deniedDescription:
+        "The account needs watchlist and asset read permission plus event or narrative read permission to view this module.",
+      errorTitle: "Could not load assets in focus",
+      errorDescription: "Assets in focus are currently unavailable.",
+      invalidDate: "Invalid time",
+      assetTypes: {
+        COMMODITY: "Commodity",
+        CRYPTO: "Crypto",
+        EQUITY: "Equity",
+        ETF: "ETF",
+        FX: "Foreign exchange",
+        INDEX: "Index",
+      },
+    },
     latestNews: {
       title: "Latest news",
       description: "The most recent news articles across Signapse.",

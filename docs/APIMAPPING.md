@@ -2,13 +2,13 @@
 
 Tài liệu này ánh xạ snapshot OpenAPI backend trong `docs/api_mapping.json` tới các điểm tích hợp frontend hiện tại của repo.
 
-Xác minh lần cuối: ngày 3 tháng 8 năm 2026
+Xác minh lần cuối: ngày 11 tháng 8 năm 2026
 
 ## Cấu hình cơ sở
 
 | Mục                  | Giá trị                                               |
 | -------------------- | ----------------------------------------------------- |
-| URL gốc API          | `http://localhost:8484`                               |
+| URL gốc API          | `http://dev-api.signapse.cloud`                       |
 | Nguồn chuẩn          | `docs/api_mapping.json`                               |
 | Hàm auth chính       | `fetchAuthenticated()` trong `app/api/auth/action.ts` |
 | Hàm public           | `fetchPublic()` trong `app/api/auth/action.ts`        |
@@ -24,7 +24,7 @@ Xác minh lần cuối: ngày 3 tháng 8 năm 2026
 - Frontend runtime list/search đang serialize query thành `$filter`, `page`, `size`, `sort` thông qua `queryParamsToString()`.
 - OpenAPI vẫn mô tả list query bằng `specification` và `pageable`, nên cần tách biệt giữa spec contract và effective runtime contract mà frontend đang gọi.
 - Snapshot backend hiện có `securitySchemes.bearerAuth` và metadata `x-signapse-auth` trên từng operation.
-- `x-signapse-auth.type` hiện gồm `permission`, `active-user`, và `public`; frontend vẫn gate UI bằng permission list lấy từ `/me`.
+- `x-signapse-auth.type` hiện gồm `permission`, `active-user`, `authenticated`, và `public`; frontend vẫn gate UI bằng permission list lấy từ `/me`.
 
 ## Contract ngôn ngữ frontend/backend
 
@@ -37,7 +37,7 @@ Xác minh lần cuối: ngày 3 tháng 8 năm 2026
 ## Tổng quan thay đổi lớn từ snapshot hiện tại
 
 - Snapshot backend hiện tại gồm `117` operation.
-- Snapshot ngày 3/8 mở rộng `GET /dashboard/summary` cho Trading Snapshot: response UTC theo workspace hiện tại thêm metric `recentEvents` bên cạnh `nextKeyEvent`, `marketEvents24h`, `activeNarratives`, và `latestNews6h`; frontend chưa tích hợp metric mới này.
+- Snapshot ngày 11/8 mở rộng `GET /dashboard/summary` thêm metric `assetsInFocus` bên cạnh năm metric hiện có. Backend trả tối đa sáu tài sản theo thứ tự xếp hạng authoritative; frontend đã tích hợp `recentEvents` nhưng chưa parse hoặc render `assetsInFocus`.
 - Backend đã chuyển domain nội dung canon từ `sources` / `source-documents` sang `news-outlets` / `news-articles`.
 - Backend đã unlink `NewsArticle` khỏi `NewsOutlet`: bài viết snapshot tên nguồn vào `sourceName` khi ingest, nên việc đổi tên hoặc xóa outlet không làm thay đổi nguồn đã lưu trên bài viết. Snapshot OpenAPI và frontend hiện đã đồng bộ contract này.
 - Backend vẫn giữ các surface `events`, `query`, và `graph-view`, nhưng nhiều payload đã đổi naming từ `sourceDocument*` sang `artifact*` hoặc `news-article`.
@@ -516,14 +516,14 @@ Ghi chu:
 - DTO chinh moi gom `TelegramBotConnectionResponse`, `TelegramDestinationResponse`, `TelegramFeatureSettingResponse`, `TelegramMarketAnalysisScheduleResponse`, `TelegramLinkTokenResponse`, va `ScheduledAssetResponse`.
 - Enum feature key cua Telegram gom `ECONOMIC_CALENDAR_ALERT`, `MARKET_NEWS_ALERT`, `SCHEDULED_MARKET_ANALYSIS`; day la enum cua feature setting, khong phai system prompt type.
 - Snapshot moi them `outputLanguageIsoCode` trong request feature setting/schedule va `outputLanguage` trong response; FE Telegram chua expose cau hinh output language.
-- Snapshot import nhieu schema Telegram Bot API cho webhook `Update`; FE admin khong nen model toan bo nhom schema nay neu chi tich hop man hinh cau hinh.
+- Snapshot da bo 152 schema Telegram Bot API tong quat tung duoc import cho webhook va thay bang ba schema toi thieu `TelegramWebhookChat`, `TelegramWebhookMessage`, `TelegramWebhookUpdateRequest`. Day la contract backend-only, khong lam thay doi DTO cua man hinh quan tri Telegram.
 
 ### 24. Webhook
 
 | Phuong thuc | Endpoint backend                    | operationId            | Tich hop frontend | Trang thai  | Ghi chu                                                     |
 | ----------- | ----------------------------------- | ---------------------- | ----------------- | ----------- | ----------------------------------------------------------- |
 | POST        | `/webhooks/clerk`                   | `handleClerkWebhook`   | `-`               | Chi backend | Khong ky vong co frontend caller.                           |
-| POST        | `/webhooks/telegram/{connectionId}` | `handleTelegramUpdate` | `-`               | Chi backend | Webhook nhan `Update` tu Telegram, khong ky vong FE caller. |
+| POST        | `/webhooks/telegram/{connectionId}` | `handleTelegramUpdate` | `-`               | Chi backend | Webhook nhan `TelegramWebhookUpdateRequest` tu Telegram, khong ky vong FE caller. |
 
 ### 25. Health check
 
@@ -535,16 +535,20 @@ Ghi chu:
 
 | Phuong thuc | Endpoint backend      | operationId | Tich hop frontend | Trang thai      | Ghi chu |
 | ----------- | --------------------- | ----------- | ----------------- | --------------- | ------- |
-| GET         | `/dashboard/summary`  | `getSummary` | `app/api/dashboard/action.ts` + `dashboard/page.tsx` | Da tich hop mot phan | Khong co body/query. Response dung mot `asOf` UTC va scope workspace hien tai; tra nam metric voi state `AVAILABLE` / `EMPTY` / `DENIED` / `ERROR`. `recentEvents` tra `items[]` gom event co ban, `themes[]` va `affectedAssets[]`. Endpoint gate `workspace:read`; loi endpoint la `403`/`409`, loi tung metric nam trong HTTP `200`. |
+| GET         | `/dashboard/summary`  | `getSummary` | `app/api/dashboard/action.ts` + `dashboard/page.tsx` | Da tich hop mot phan | Khong co body/query. Response dung mot `asOf` UTC va scope workspace hien tai; tra sau metric voi state `AVAILABLE` / `EMPTY` / `DENIED` / `ERROR`. `assetsInFocus` tra toi da sau tai san theo thu tu authoritative cua backend. Endpoint gate `workspace:read`; loi endpoint la `403`/`409`, loi tung metric nam trong HTTP `200`. |
 
 Ghi chu:
 
 - `scope` gom `workspaceId` va `watchlistAssetCount`; count co the `null` khi thieu quyen scope.
 - `nextKeyEvent` la economic-calendar event `HIGH` sap toi, lien quan currency base/quote cua watchlist hien tai.
-- `recentEvents` dung `DashboardRecentEventsMetricResponse`; moi item dung `DashboardRecentEventItemResponse` voi `id`, `title`, `description`, `occurredAt`, `confidence`, `themes[]` va `affectedAssets[]`. Hai mang quan he tai su dung `EventThemeSummaryResponse` va `EventAssetSummaryResponse`.
+- `recentEvents` dung `DashboardRecentEventsMetricResponse`; moi item dung `DashboardRecentEventItemResponse` voi `id`, `title`, `description`, `occurredAt`, `confidence`, `themes[]` va `affectedAssets[]`; `description` va `confidence` la required-nullable theo snapshot. Hai mang quan he tai su dung `EventThemeSummaryResponse` va `EventAssetSummaryResponse`.
 - `marketEvents24h` dem distinct event du dieu kien trong UTC `[asOf - 24h, asOf)`; `activeNarratives` dem distinct narrative `EMERGING`/`ACTIVE`; `latestNews6h` dem NewsArticle co `publishedAt` trong UTC `[asOf - 6h, asOf)`, khong phu thuoc asset/status.
-- Permission metric lan luot la `economic-calendar:read` + `watchlist:read` + `asset:read` cho `nextKeyEvent`; `event:read` + `watchlist:read` + `asset:read` cho `recentEvents` va `marketEvents24h`; `narrative:read` + `watchlist:read` + `asset:read` cho `activeNarratives`; va `news-article:read` cho `latestNews6h`.
-- FE da co action/definitions va map state rieng cho bon metric cu; `recentEvents` chua co trong `app/lib/dashboard/definitions.ts`, chua duoc parse trong action va chua duoc render o dashboard chinh. Khong duoc coi `DENIED`/`ERROR` la count `0`.
+- `assetsInFocus` dung `DashboardAssetsInFocusMetricResponse` voi `state`, `items[]` bat buoc va `errorCode` bat buoc nhung nullable. Mang co toi da sau `DashboardAssetInFocusItemResponse`; moi item bat buoc co `assetId`, `assetName`, `assetSymbol`, `assetType` (`COMMODITY` / `CRYPTO` / `EQUITY` / `ETF` / `FX` / `INDEX`) va mot `context`.
+- `context` dung `DashboardAssetFocusContextResponse`: `title` va `observedAt` bat buoc; `summary` bat buoc nhung co the `null`. `observedAt` la `Event.occurredAt` hoac `Narrative.lastUpdatedAt`, serialize UTC. Contract khong expose `sourceType` hoac source id cho frontend.
+- Thu tu `assetsInFocus.items` la authoritative cua backend: Event truoc Narrative `EMERGING`, `WEAKENING`, `ACTIVE`; sau do uu tien primary relation, `observedAt DESC`, `confidence DESC NULLS LAST`, source id DESC va asset id ASC. Frontend khong sap xep lai.
+- Cua so ung vien cho `assetsInFocus` la Event UTC `[asOf - 24h, asOf)` va Narrative UTC `[asOf - 7d, asOf)`. Metric can `watchlist:read` + `asset:read` va it nhat mot trong `event:read` / `narrative:read`; neu khong co quyen doc source nao thi `errorCode` la `ASSETS_IN_FOCUS_READ_REQUIRED`.
+- Permission cac metric con lai la `economic-calendar:read` + `watchlist:read` + `asset:read` cho `nextKeyEvent`; `event:read` + `watchlist:read` + `asset:read` cho `recentEvents` va `marketEvents24h`; `narrative:read` + `watchlist:read` + `asset:read` cho `activeNarratives`; va `news-article:read` cho `latestNews6h`.
+- Tat ca field cua `DashboardSummaryResponse` va cac metric dashboard hien duoc danh dau required theo snapshot; cac field nullable van phai co mat trong payload. FE da parse va render `recentEvents`, nhung Zod schema hien chua khai bao `assetsInFocus`, nen field moi se bi strip va chua den duoc dashboard chinh. Khong duoc coi `DENIED`/`ERROR` la count `0` hoac empty state.
 
 ## Nhom frontend khong nam trong snapshot API hien tai
 
@@ -657,7 +661,7 @@ type ActionResult<T = void> =
 - `watchlists`: FE workspace watchlist editor da chuyen add flow sang bulk endpoint `POST /watchlists/assets` voi request `{ assetIds }`, chunk toi da 100 id moi request; remove flow van dung `DELETE /watchlists/assets/{assetId}`. `assetPricePrecision` chua co trong snapshot/source BE va chi la toi uu tuy chon, khong phai dependency de sua chart.
 - `news articles`: endpoint crawl full content da bi bo khoi snapshot, nhung FE van con action `crawlNewsArticleFullContent()` va menu crawl tren detail.
 - `events`: snapshot moi da bo `slug` va `confirmedAt`, va doi evidence sang `newsArticle*`; FE events da dong bo DTO, detail, quick detail, va action layout theo contract hien tai.
-- `dashboard summary`: snapshot moi them `recentEvents` vao `DashboardSummaryResponse` cung hai schema `DashboardRecentEventsMetricResponse` va `DashboardRecentEventItemResponse`; FE hien moi dong bo bon metric cu, can cap nhat definitions, action validation, dashboard data flow, UI states va i18n truoc khi apply Event Timeline.
+- `dashboard summary`: FE da dong bo va render `recentEvents`. Snapshot moi them required metric `assetsInFocus` cung ba schema `DashboardAssetsInFocusMetricResponse`, `DashboardAssetInFocusItemResponse` va `DashboardAssetFocusContextResponse`; FE can cap nhat definitions/action validation, dashboard data flow, UI states, action links va i18n truoc khi apply section Tai san can chu y.
 - `telegram`: frontend da co route/action/type/permission/navigation cho surface Telegram, nhung snapshot moi them `outputLanguageIsoCode` request va `outputLanguage` response cho feature setting/schedule ma FE chua expose.
 - `ai-provider credentials`: snapshot moi doi credential `label` thanh `model` va bo top-level config `name`/`model`; FE hien van giu `name`, top-level `model`, va credential `label` trong definitions, form, list, detail, va credential panel.
 - `cronjobs`: FE da bo create/delete flow va doi update schedule sang inline list chi gui `expression`; endpoint `stop` duoc ghi nhan nhung khong tich hop co chu dich.
