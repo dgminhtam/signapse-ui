@@ -15,11 +15,13 @@ import type { DashboardSummaryResponse } from "@/app/lib/dashboard/definitions"
 import type { AppLocale } from "@/app/lib/i18n/config"
 import { getDictionary } from "@/app/lib/i18n/dictionaries"
 import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
+import { canReadGraphView } from "@/app/lib/graph-view/permissions"
 import {
   formatDateTime as formatLocalizedDateTime,
   formatNumber,
 } from "@/app/lib/i18n/format"
 import { getRequestLocale } from "@/app/lib/i18n/server"
+import { canAccessMarketChartWorkbench } from "@/app/lib/market-charts/permissions"
 import type { NewsArticleListResponse } from "@/app/lib/news-articles/definitions"
 import { canReadNewsArticles } from "@/app/lib/news-articles/permissions"
 import { hasPermission } from "@/app/lib/permissions"
@@ -58,8 +60,10 @@ import {
   TradingSnapshot,
   TradingSnapshotSkeleton,
 } from "./trading-snapshot"
+import { AssetsInFocus, AssetsInFocusSkeleton } from "./assets-in-focus"
 import { EventTimeline, EventTimelineSkeleton } from "./event-timeline"
 import { LatestNews, LatestNewsSkeleton } from "./latest-news"
+import { MarketNarratives, MarketNarrativesSkeleton } from "./market-narratives"
 import { DashboardQuickDetailProvider } from "./dashboard-quick-detail"
 import { WorkspaceOverviewActions } from "../workspace-overview-actions"
 
@@ -118,6 +122,8 @@ async function WorkspaceOverview() {
   const canReadAsset = hasPermission(permissions, "asset:read")
   const canReadWatchlist = hasPermission(permissions, "watchlist:read")
   const canReadNews = canReadNewsArticles(permissions)
+  const canReadGraph = canReadGraphView(permissions)
+  const canAccessMarketCharts = canAccessMarketChartWorkbench(permissions)
   const canCreateWatchlist = hasPermission(permissions, "watchlist:create")
   const canDeleteWatchlist = hasPermission(permissions, "watchlist:delete")
 
@@ -239,6 +245,27 @@ async function WorkspaceOverview() {
             eventTimeline
           )}
         </DashboardQuickDetailProvider>
+        <div className="grid min-w-0 gap-4 lg:grid-cols-12">
+          <div className="min-w-0 lg:col-span-7">
+            <AssetsInFocus
+              canAccessMarketCharts={canAccessMarketCharts}
+              canReadGraphView={canReadGraph}
+              dictionary={dictionary}
+              error={dashboardSummary.error}
+              locale={locale}
+              metric={dashboardSummary.summary?.assetsInFocus ?? null}
+            />
+          </div>
+          <div className="min-w-0 lg:col-span-5">
+            <MarketNarratives
+              canReadGraphView={canReadGraph}
+              dictionary={dictionary}
+              error={dashboardSummary.error}
+              locale={locale}
+              metric={dashboardSummary.summary?.marketNarratives ?? null}
+            />
+          </div>
+        </div>
       </>
     </WorkspaceOverviewShell>
   )
@@ -500,6 +527,14 @@ function WorkspaceOverviewSkeleton() {
           </div>
           <div className="min-w-0 lg:col-span-4">
             <LatestNewsSkeleton />
+          </div>
+        </div>
+        <div className="grid min-w-0 gap-4 lg:grid-cols-12">
+          <div className="min-w-0 lg:col-span-7">
+            <AssetsInFocusSkeleton />
+          </div>
+          <div className="min-w-0 lg:col-span-5">
+            <MarketNarrativesSkeleton />
           </div>
         </div>
       </>

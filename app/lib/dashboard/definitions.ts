@@ -1,5 +1,10 @@
 import { z } from "zod"
 
+import {
+  narrativeAssetSummaryResponseSchema,
+  type NarrativeAssetSummaryResponse,
+} from "@/app/lib/narratives/definitions"
+
 export const dashboardMetricStates = [
   "AVAILABLE",
   "EMPTY",
@@ -7,28 +12,13 @@ export const dashboardMetricStates = [
   "ERROR",
 ] as const
 
-export const dashboardSummaryErrorCodes = [
-  "WORKSPACE_READ_REQUIRED",
-  "NO_ACTIVE_WORKSPACE",
-  "ECONOMIC_CALENDAR_READ_REQUIRED",
-  "EVENT_READ_REQUIRED",
-  "NARRATIVE_READ_REQUIRED",
-  "NEWS_ARTICLE_READ_REQUIRED",
-  "WATCHLIST_READ_REQUIRED",
-  "ASSET_READ_REQUIRED",
-  "UPSTREAM_TIMEOUT",
-  "UPSTREAM_UNAVAILABLE",
-  "SUMMARY_UNAVAILABLE",
-] as const
-
 const dashboardMetricStateSchema = z.enum(dashboardMetricStates)
-const dashboardSummaryErrorCodeSchema = z.enum(dashboardSummaryErrorCodes)
 const dashboardTimeWindowResponseSchema = z.object({
   from: z.string(),
   to: z.string(),
 })
 
-const dashboardMetricErrorCodeSchema = dashboardSummaryErrorCodeSchema.nullish()
+const dashboardMetricErrorCodeSchema = z.string().nullable()
 
 export const dashboardNextKeyEventDataSchema = z.object({
   id: z.number().int(),
@@ -40,23 +30,32 @@ export const dashboardNextKeyEventDataSchema = z.object({
 
 export const dashboardNextKeyEventResponseSchema = z.object({
   state: dashboardMetricStateSchema,
-  data: dashboardNextKeyEventDataSchema.nullish(),
+  data: dashboardNextKeyEventDataSchema.nullable(),
   errorCode: dashboardMetricErrorCodeSchema,
 })
 
 export const dashboardCountMetricResponseSchema = z.object({
   state: dashboardMetricStateSchema,
-  count: z.number().int().nullish(),
-  window: dashboardTimeWindowResponseSchema.nullish(),
+  count: z.number().int().nullable(),
+  window: dashboardTimeWindowResponseSchema.nullable(),
   errorCode: dashboardMetricErrorCodeSchema,
 })
 
 export const dashboardNarrativeMetricResponseSchema = z.object({
   state: dashboardMetricStateSchema,
-  count: z.number().int().nullish(),
+  count: z.number().int().nullable(),
   statuses: z.array(z.string()),
   errorCode: dashboardMetricErrorCodeSchema,
 })
+
+const dashboardAssetTypeSchema = z.enum([
+  "COMMODITY",
+  "CRYPTO",
+  "EQUITY",
+  "ETF",
+  "FX",
+  "INDEX",
+])
 
 const dashboardEventThemeRelationTypeSchema = z.enum([
   "PRIMARY_THEME",
@@ -67,15 +66,6 @@ const dashboardEventAssetRelationTypeSchema = z.enum([
   "PRIMARY_SUBJECT",
   "AFFECTED_ASSET",
   "REFERENCE_ASSET",
-])
-
-const dashboardEventAssetTypeSchema = z.enum([
-  "COMMODITY",
-  "CRYPTO",
-  "EQUITY",
-  "ETF",
-  "FX",
-  "INDEX",
 ])
 
 export const dashboardRecentEventThemeSummarySchema = z.object({
@@ -90,7 +80,7 @@ export const dashboardRecentEventAssetSummarySchema = z.object({
   assetId: z.number().int().nullish(),
   assetName: z.string().nullish(),
   assetSymbol: z.string().nullish(),
-  assetType: dashboardEventAssetTypeSchema.nullish(),
+  assetType: dashboardAssetTypeSchema.nullish(),
   relationType: dashboardEventAssetRelationTypeSchema.nullish(),
   weight: z.number().nullish(),
 })
@@ -98,9 +88,9 @@ export const dashboardRecentEventAssetSummarySchema = z.object({
 export const dashboardRecentEventItemResponseSchema = z.object({
   id: z.number().int(),
   title: z.string(),
-  description: z.string(),
+  description: z.string().nullable(),
   occurredAt: z.string(),
-  confidence: z.number(),
+  confidence: z.number().nullable(),
   themes: z.array(dashboardRecentEventThemeSummarySchema),
   affectedAssets: z.array(dashboardRecentEventAssetSummarySchema),
 })
@@ -111,9 +101,62 @@ export const dashboardRecentEventsMetricResponseSchema = z.object({
   errorCode: dashboardMetricErrorCodeSchema,
 })
 
+export const dashboardAssetFocusContextResponseSchema = z.object({
+  title: z.string(),
+  summary: z.string().nullable(),
+  observedAt: z.string(),
+})
+
+export const dashboardAssetInFocusItemResponseSchema = z.object({
+  assetId: z.number().int(),
+  assetName: z.string(),
+  assetSymbol: z.string(),
+  assetType: dashboardAssetTypeSchema,
+  context: dashboardAssetFocusContextResponseSchema,
+})
+
+export const dashboardAssetsInFocusMetricResponseSchema = z.object({
+  state: dashboardMetricStateSchema,
+  items: z.array(dashboardAssetInFocusItemResponseSchema).max(6),
+  errorCode: dashboardMetricErrorCodeSchema,
+})
+
+export const dashboardMarketNarrativeStatuses = [
+  "EMERGING",
+  "WEAKENING",
+  "ACTIVE",
+] as const
+
+const dashboardMarketNarrativeStatusSchema = z.enum(
+  dashboardMarketNarrativeStatuses
+)
+
+export const dashboardMarketNarrativeThemeResponseSchema = z.object({
+  themeId: z.number().int(),
+  themeTitle: z.string().nullable(),
+  themeSlug: z.string(),
+})
+
+export const dashboardMarketNarrativeItemResponseSchema = z.object({
+  id: z.number().int(),
+  title: z.string().nullable(),
+  thesis: z.string().nullable(),
+  status: dashboardMarketNarrativeStatusSchema,
+  confidence: z.number().nullable(),
+  lastUpdatedAt: z.string(),
+  primaryTheme: dashboardMarketNarrativeThemeResponseSchema,
+  assets: z.array(narrativeAssetSummaryResponseSchema),
+})
+
+export const dashboardMarketNarrativesMetricResponseSchema = z.object({
+  state: dashboardMetricStateSchema,
+  items: z.array(dashboardMarketNarrativeItemResponseSchema).max(3),
+  errorCode: dashboardMetricErrorCodeSchema,
+})
+
 export const dashboardSummaryScopeResponseSchema = z.object({
   workspaceId: z.number().int(),
-  watchlistAssetCount: z.number().int().nullish(),
+  watchlistAssetCount: z.number().int().nullable(),
 })
 
 export const dashboardSummaryResponseSchema = z.object({
@@ -124,13 +167,12 @@ export const dashboardSummaryResponseSchema = z.object({
   recentEvents: dashboardRecentEventsMetricResponseSchema,
   marketEvents24h: dashboardCountMetricResponseSchema,
   activeNarratives: dashboardNarrativeMetricResponseSchema,
+  marketNarratives: dashboardMarketNarrativesMetricResponseSchema,
   latestNews6h: dashboardCountMetricResponseSchema,
+  assetsInFocus: dashboardAssetsInFocusMetricResponseSchema,
 })
 
 export type DashboardMetricState = z.infer<typeof dashboardMetricStateSchema>
-export type DashboardSummaryErrorCode = z.infer<
-  typeof dashboardSummaryErrorCodeSchema
->
 export type DashboardNextKeyEventData = z.infer<
   typeof dashboardNextKeyEventDataSchema
 >
@@ -155,6 +197,25 @@ export type DashboardRecentEventItemResponse = z.infer<
 export type DashboardRecentEventsMetricResponse = z.infer<
   typeof dashboardRecentEventsMetricResponseSchema
 >
+export type DashboardAssetFocusContextResponse = z.infer<
+  typeof dashboardAssetFocusContextResponseSchema
+>
+export type DashboardAssetInFocusItemResponse = z.infer<
+  typeof dashboardAssetInFocusItemResponseSchema
+>
+export type DashboardAssetsInFocusMetricResponse = z.infer<
+  typeof dashboardAssetsInFocusMetricResponseSchema
+>
+export type DashboardMarketNarrativeThemeResponse = z.infer<
+  typeof dashboardMarketNarrativeThemeResponseSchema
+>
+export type DashboardMarketNarrativeItemResponse = z.infer<
+  typeof dashboardMarketNarrativeItemResponseSchema
+>
+export type DashboardMarketNarrativesMetricResponse = z.infer<
+  typeof dashboardMarketNarrativesMetricResponseSchema
+>
+export type { NarrativeAssetSummaryResponse }
 export type DashboardSummaryScopeResponse = z.infer<
   typeof dashboardSummaryScopeResponseSchema
 >

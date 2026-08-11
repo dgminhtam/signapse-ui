@@ -10,6 +10,30 @@ export const narrativeStatuses = [
 
 export type NarrativeStatus = (typeof narrativeStatuses)[number]
 
+export const narrativeAssetTypes = [
+  "COMMODITY",
+  "CRYPTO",
+  "EQUITY",
+  "ETF",
+  "FX",
+  "INDEX",
+] as const
+
+export const narrativeAssetRelationTypes = ["PRIMARY", "AFFECTED"] as const
+
+export const narrativeAssetSummaryResponseSchema = z.object({
+  assetId: z.number().int(),
+  assetName: z.string(),
+  assetSymbol: z.string(),
+  assetType: z.enum(narrativeAssetTypes),
+  relationType: z.enum(narrativeAssetRelationTypes),
+  weight: z.number().nullable(),
+})
+
+export type NarrativeAssetSummaryResponse = z.infer<
+  typeof narrativeAssetSummaryResponseSchema
+>
+
 export interface NarrativeSummaryResponse {
   id: number
   title?: string | null

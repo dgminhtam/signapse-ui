@@ -464,6 +464,56 @@ export const vi = {
       errorDescription: "Dòng sự kiện hiện không khả dụng.",
       invalidDate: "Thời gian không hợp lệ",
     },
+    assetsInFocus: {
+      title: "Tài sản cần chú ý",
+      description:
+        "Các tài sản được xếp hạng cùng bối cảnh thị trường mới nhất trong phạm vi này.",
+      graphView: "Mở Graph View",
+      marketCharts: "Mở biểu đồ thị trường",
+      emptyTitle: "Chưa có tài sản cần chú ý",
+      emptyDescription:
+        "Bối cảnh phù hợp sẽ hiển thị khi tài sản theo dõi có sự kiện hoặc luận điểm gần đây.",
+      deniedTitle: "Chưa có quyền xem tài sản cần chú ý",
+      deniedDescription:
+        "Tài khoản cần quyền đọc danh sách theo dõi, tài sản và ít nhất quyền đọc sự kiện hoặc luận điểm để xem module này.",
+      errorTitle: "Không thể tải tài sản cần chú ý",
+      errorDescription: "Tài sản cần chú ý hiện không khả dụng.",
+      invalidDate: "Thời gian không hợp lệ",
+      assetTypes: {
+        COMMODITY: "Hàng hóa",
+        CRYPTO: "Crypto",
+        EQUITY: "Cổ phiếu",
+        ETF: "ETF",
+        FX: "Ngoại hối",
+        INDEX: "Chỉ số",
+      },
+    },
+    marketNarratives: {
+      title: "Luận điểm thị trường",
+      description:
+        "Các luận điểm được xếp hạng trong phạm vi theo dõi của không gian làm việc.",
+      graphView: "Mở Graph View",
+      theme: "Chủ đề",
+      affectedAssets: "Tài sản liên quan",
+      confidence: "Độ tin cậy {value}",
+      updated: "Cập nhật {time}",
+      status: {
+        EMERGING: "Mới hình thành",
+        WEAKENING: "Yếu dần",
+        ACTIVE: "Đang hoạt động",
+      },
+      untitled: "Luận điểm chưa có tiêu đề",
+      thesisEmpty: "Chưa có mô tả cho luận điểm này.",
+      emptyTitle: "Chưa có luận điểm thị trường",
+      emptyDescription:
+        "Các luận điểm phù hợp sẽ hiển thị tại đây khi backend trả về dữ liệu.",
+      deniedTitle: "Chưa có quyền xem luận điểm thị trường",
+      deniedDescription:
+        "Tài khoản cần quyền đọc luận điểm, danh sách theo dõi và tài sản để xem module này.",
+      errorTitle: "Không thể tải luận điểm thị trường",
+      errorDescription: "Luận điểm thị trường hiện không khả dụng.",
+      invalidDate: "Thời gian không hợp lệ",
+    },
     latestNews: {
       title: "Tin tức mới nhất",
       description: "Các bài viết tin tức mới nhất trên Signapse.",
