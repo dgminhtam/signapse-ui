@@ -37,7 +37,7 @@ Xác minh lần cuối: ngày 11 tháng 8 năm 2026
 ## Tổng quan thay đổi lớn từ snapshot hiện tại
 
 - Snapshot backend hiện tại gồm `117` operation.
-- Snapshot ngày 11/8 mở rộng `GET /dashboard/summary` thêm metric `assetsInFocus` bên cạnh năm metric hiện có. Backend trả tối đa sáu tài sản theo thứ tự xếp hạng authoritative; frontend đã tích hợp `recentEvents` nhưng chưa parse hoặc render `assetsInFocus`.
+- Snapshot ngày 11/8 mở rộng `GET /dashboard/summary` thêm hai metric bắt buộc `assetsInFocus` và `marketNarratives`. Backend trả tối đa sáu tài sản và ba luận điểm theo thứ tự authoritative; frontend đã parse/render `recentEvents` và `assetsInFocus`, nhưng chưa parse hoặc render `marketNarratives`.
 - Backend đã chuyển domain nội dung canon từ `sources` / `source-documents` sang `news-outlets` / `news-articles`.
 - Backend đã unlink `NewsArticle` khỏi `NewsOutlet`: bài viết snapshot tên nguồn vào `sourceName` khi ingest, nên việc đổi tên hoặc xóa outlet không làm thay đổi nguồn đã lưu trên bài viết. Snapshot OpenAPI và frontend hiện đã đồng bộ contract này.
 - Backend vẫn giữ các surface `events`, `query`, và `graph-view`, nhưng nhiều payload đã đổi naming từ `sourceDocument*` sang `artifact*` hoặc `news-article`.
@@ -301,7 +301,7 @@ Ghi chu:
 
 | Phuong thuc | Endpoint backend                      | operationId                 | Tich hop frontend | Trang thai      | Ghi chu                                                        |
 | ----------- | ------------------------------------- | --------------------------- | ----------------- | --------------- | -------------------------------------------------------------- |
-| GET         | `/narratives`                         | `getNarratives`             | `-`               | Chua trien khai | Tra ve `PageNarrativeSummaryResponse`; permission `narrative:read`. |
+| GET         | `/narratives`                         | `getNarratives(searchParams)` | `app/api/narratives/action.ts` | Da tich hop data layer | Tra ve `PageNarrativeSummaryResponse`; permission `narrative:read`. Chua co route/list UI. |
 | GET         | `/narratives/{id}`                    | `getNarrative`              | `-`               | Chua trien khai | Detail gom core narrative, `assets[]`, va `events[]`; permission `narrative:read`. |
 | PUT         | `/narratives/{id}/status`             | `updateStatus`              | `-`               | Chua trien khai | Cap nhat status qua `UpdateNarrativeStatusRequest`; permission `narrative:manage`. |
 | POST        | `/narratives/{id}/archive`            | `archiveNarrative`          | `-`               | Chua trien khai | Archive narrative; permission `narrative:manage`.             |
@@ -314,7 +314,7 @@ Ghi chu:
 - `NarrativeSummaryResponse` gom `title`, `slug`, `thesis`, `summary`, `status`, `confidence`, `firstObservedAt`, `lastUpdatedAt`, primary asset/theme fields.
 - `NarrativeResponse` them `assets[]` va `events[]`; asset relation enum gom `PRIMARY`, `AFFECTED`, event relation enum gom `DRIVER`, `SUPPORTING`, `CONTRADICTING`.
 - `status` gom `EMERGING`, `ACTIVE`, `WEAKENING`, `INVALIDATED`, `ARCHIVED`.
-- Frontend hien chua co route, action, definitions, permissions, navigation, list/detail, hay operator UI cho narratives.
+- Frontend hien co action/schema summary va helper permission `narrative:read`, nhung chua co route, navigation, list/detail, action detail hay operator UI cho narratives.
 
 ### 9. API blogs
 
@@ -535,7 +535,7 @@ Ghi chu:
 
 | Phuong thuc | Endpoint backend      | operationId | Tich hop frontend | Trang thai      | Ghi chu |
 | ----------- | --------------------- | ----------- | ----------------- | --------------- | ------- |
-| GET         | `/dashboard/summary`  | `getSummary` | `app/api/dashboard/action.ts` + `dashboard/page.tsx` | Da tich hop mot phan | Khong co body/query. Response dung mot `asOf` UTC va scope workspace hien tai; tra sau metric voi state `AVAILABLE` / `EMPTY` / `DENIED` / `ERROR`. `assetsInFocus` tra toi da sau tai san theo thu tu authoritative cua backend. Endpoint gate `workspace:read`; loi endpoint la `403`/`409`, loi tung metric nam trong HTTP `200`. |
+| GET         | `/dashboard/summary`  | `getSummary` | `app/api/dashboard/action.ts` + `dashboard/page.tsx` | Da tich hop mot phan | Khong co body/query. Response dung mot `asOf` UTC va scope workspace hien tai; tra bay metric voi state `AVAILABLE` / `EMPTY` / `DENIED` / `ERROR`. `assetsInFocus` tra toi da sau tai san, `marketNarratives` tra toi da ba luan diem theo thu tu authoritative. Endpoint gate `workspace:read`; loi endpoint la `403`/`409`, loi tung metric nam trong HTTP `200`. |
 
 Ghi chu:
 
@@ -543,12 +543,17 @@ Ghi chu:
 - `nextKeyEvent` la economic-calendar event `HIGH` sap toi, lien quan currency base/quote cua watchlist hien tai.
 - `recentEvents` dung `DashboardRecentEventsMetricResponse`; moi item dung `DashboardRecentEventItemResponse` voi `id`, `title`, `description`, `occurredAt`, `confidence`, `themes[]` va `affectedAssets[]`; `description` va `confidence` la required-nullable theo snapshot. Hai mang quan he tai su dung `EventThemeSummaryResponse` va `EventAssetSummaryResponse`.
 - `marketEvents24h` dem distinct event du dieu kien trong UTC `[asOf - 24h, asOf)`; `activeNarratives` dem distinct narrative `EMERGING`/`ACTIVE`; `latestNews6h` dem NewsArticle co `publishedAt` trong UTC `[asOf - 6h, asOf)`, khong phu thuoc asset/status.
+- `marketNarratives` dung `DashboardMarketNarrativesMetricResponse` voi `state`, `items[]` bat buoc va `errorCode` bat buoc nhung nullable. Mang co toi da ba `DashboardMarketNarrativeItemResponse` theo thu tu authoritative cua backend.
+- Moi Market Narrative item bat buoc co `id`, `title`, `thesis`, `status`, `confidence`, `lastUpdatedAt`, `primaryTheme` va `assets[]`; `title`, `thesis`, `confidence` la required-nullable. `status` chi gom `EMERGING`, `WEAKENING`, `ACTIVE`; `lastUpdatedAt` la UTC date-time.
+- `primaryTheme` dung `DashboardMarketNarrativeThemeResponse` va la object bat buoc theo snapshot; `themeId`, `themeSlug`, `themeTitle` deu required, rieng `themeTitle` nullable. `assets[]` tai su dung `NarrativeAssetSummaryResponse`; moi field asset required, `weight` nullable, `relationType` gom `PRIMARY` / `AFFECTED`.
+- Cua so `marketNarratives` la UTC `[asOf - 7d, asOf)`. Thu tu item la status `EMERGING`, `WEAKENING`, `ACTIVE`; sau do canonical primary watchlist boost, `lastUpdatedAt DESC`, `confidence DESC NULLS LAST`, narrative id DESC. Frontend khong sap xep lai.
 - `assetsInFocus` dung `DashboardAssetsInFocusMetricResponse` voi `state`, `items[]` bat buoc va `errorCode` bat buoc nhung nullable. Mang co toi da sau `DashboardAssetInFocusItemResponse`; moi item bat buoc co `assetId`, `assetName`, `assetSymbol`, `assetType` (`COMMODITY` / `CRYPTO` / `EQUITY` / `ETF` / `FX` / `INDEX`) va mot `context`.
 - `context` dung `DashboardAssetFocusContextResponse`: `title` va `observedAt` bat buoc; `summary` bat buoc nhung co the `null`. `observedAt` la `Event.occurredAt` hoac `Narrative.lastUpdatedAt`, serialize UTC. Contract khong expose `sourceType` hoac source id cho frontend.
 - Thu tu `assetsInFocus.items` la authoritative cua backend: Event truoc Narrative `EMERGING`, `WEAKENING`, `ACTIVE`; sau do uu tien primary relation, `observedAt DESC`, `confidence DESC NULLS LAST`, source id DESC va asset id ASC. Frontend khong sap xep lai.
 - Cua so ung vien cho `assetsInFocus` la Event UTC `[asOf - 24h, asOf)` va Narrative UTC `[asOf - 7d, asOf)`. Metric can `watchlist:read` + `asset:read` va it nhat mot trong `event:read` / `narrative:read`; neu khong co quyen doc source nao thi `errorCode` la `ASSETS_IN_FOCUS_READ_REQUIRED`.
-- Permission cac metric con lai la `economic-calendar:read` + `watchlist:read` + `asset:read` cho `nextKeyEvent`; `event:read` + `watchlist:read` + `asset:read` cho `recentEvents` va `marketEvents24h`; `narrative:read` + `watchlist:read` + `asset:read` cho `activeNarratives`; va `news-article:read` cho `latestNews6h`.
-- Tat ca field cua `DashboardSummaryResponse` va cac metric dashboard hien duoc danh dau required theo snapshot; cac field nullable van phai co mat trong payload. FE da parse va render `recentEvents`, nhung Zod schema hien chua khai bao `assetsInFocus`, nen field moi se bi strip va chua den duoc dashboard chinh. Khong duoc coi `DENIED`/`ERROR` la count `0` hoac empty state.
+- Permission cac metric con lai la `economic-calendar:read` + `watchlist:read` + `asset:read` cho `nextKeyEvent`; `event:read` + `watchlist:read` + `asset:read` cho `recentEvents` va `marketEvents24h`; `narrative:read` + `watchlist:read` + `asset:read` cho `activeNarratives` va `marketNarratives`; va `news-article:read` cho `latestNews6h`.
+- `marketNarratives.errorCode` co the la `NARRATIVE_READ_REQUIRED`, `WATCHLIST_READ_REQUIRED`, `ASSET_READ_REQUIRED`, `UPSTREAM_TIMEOUT`, `UPSTREAM_UNAVAILABLE`, hoac `SUMMARY_UNAVAILABLE`; null khi metric `AVAILABLE` / `EMPTY`.
+- Tat ca field cua `DashboardSummaryResponse` va cac metric dashboard hien duoc danh dau required theo snapshot; cac field nullable van phai co mat trong payload. FE da parse/render `recentEvents` va `assetsInFocus`, nhung Zod schema chua khai bao required metric `marketNarratives`, nen field nay bi strip va chua den duoc dashboard chinh. Khong duoc coi `DENIED`/`ERROR` la count `0` hoac empty state.
 
 ## Nhom frontend khong nam trong snapshot API hien tai
 
@@ -628,7 +633,7 @@ type ActionResult<T = void> =
 | Market charts                             | `app/api/market-charts/action.ts`, `app/lib/market-charts/definitions.ts`, `app/lib/market-charts/permissions.ts`, `app/(main)/market-charts/*`                 |
 | Market query                              | `app/api/query/action.ts`, `app/api/market-conversations/action.ts`, `app/lib/market-query/definitions.ts`, `app/lib/market-query/permissions.ts`, `components/market-conversation-assistant/*`, `components/protected-ai-assistant.tsx` |
 | Graph view                                | `app/api/graph-view/action.ts`, `app/lib/graph-view/definitions.ts`, `app/lib/graph-view/permissions.ts`, `app/(main)/graph-view/*`                             |
-| Narratives                                | `-`                                                                                                                                                             |
+| Narratives                                | `app/api/narratives/action.ts`, `app/lib/narratives/definitions.ts`, `app/lib/narratives/permissions.ts`                                                        |
 | Blogs                                     | `app/api/blogs/action.ts`, `app/lib/blogs/definitions.ts`                                                                                                       |
 | Cronjobs                                  | `app/api/cronjobs/action.ts`, `app/lib/cronjobs/definitions.ts`                                                                                                 |
 | AI provider configs                       | `app/api/ai-provider-configs/action.ts`, `app/lib/ai-provider-configs/definitions.ts`                                                                           |
@@ -652,7 +657,7 @@ type ActionResult<T = void> =
 - Frontend da migrate route canon sang `/news-outlets*` va `/news-articles*`; `/sources*`, `/news-sources*`, va `/source-documents*` chi con redirect compatibility.
 - `news articles`: `linkedEvents[]` da co `eventStatus` enum moi theo enrichment lifecycle va khong con `eventEnrichmentStatus`; FE detail va quick detail da map theo contract moi.
 - `events`: backend gate enrich/market reaction operators bang `news-article:analyze`; FE events da gate bang permission canon nay truoc va chi giu `source-document:analyze` nhu alias compatibility tam thoi.
-- `permission scan`: cac literal FE-only `source-document:*` con lai deu la alias compatibility sau permission canon `news-article:*`; cac permission BE chua co FE literal gom `cronjob:stop`, `media:*`, va `narrative:*` vi cac surface/action nay chua duoc tich hop.
+- `permission scan`: cac literal FE-only `source-document:*` con lai deu la alias compatibility sau permission canon `news-article:*`; cac permission BE chua co FE literal gom `cronjob:stop`, `media:*`, va `narrative:manage`; frontend hien chi co helper cho `narrative:read`.
 - `asset type enum`: snapshot moi them `EQUITY` va `ETF` cho asset/watchlist/event/narrative/graph/market-chart payload. FE assets, watchlists, narratives, graph view, market charts dang string-compatible; rieng events van hard-code `EventAssetType` va `dictionary.events.assetTypeLabels` voi 4 gia tri cu, nen co nguy co render label `undefined` cho event assets/reactions moi.
 - `system prompts`: snapshot mới thêm prompt type `MARKET_QUERY_CONVERSATION_ORCHESTRATION`; frontend hiện còn thiếu enum/dictionary label cho giá trị này trong `app/lib/system-prompts/definitions.ts` và dictionary system prompt, dù DTO `name`/`responseSchema`/`localizedNames`, create request bắt buộc `responseSchema`, và form schema editor dạng builder + JSON đã được đồng bộ.
 - `market charts`: FE da dong bo candles, annotation timeline nested, economic-calendar layer, live SSE proxy/client, va `MarketChartAssetResponse.pricePrecision`; chart dung precision theo asset va fallback `4` cho metadata nullable/thieu.
@@ -661,7 +666,7 @@ type ActionResult<T = void> =
 - `watchlists`: FE workspace watchlist editor da chuyen add flow sang bulk endpoint `POST /watchlists/assets` voi request `{ assetIds }`, chunk toi da 100 id moi request; remove flow van dung `DELETE /watchlists/assets/{assetId}`. `assetPricePrecision` chua co trong snapshot/source BE va chi la toi uu tuy chon, khong phai dependency de sua chart.
 - `news articles`: endpoint crawl full content da bi bo khoi snapshot, nhung FE van con action `crawlNewsArticleFullContent()` va menu crawl tren detail.
 - `events`: snapshot moi da bo `slug` va `confirmedAt`, va doi evidence sang `newsArticle*`; FE events da dong bo DTO, detail, quick detail, va action layout theo contract hien tai.
-- `dashboard summary`: FE da dong bo va render `recentEvents`. Snapshot moi them required metric `assetsInFocus` cung ba schema `DashboardAssetsInFocusMetricResponse`, `DashboardAssetInFocusItemResponse` va `DashboardAssetFocusContextResponse`; FE can cap nhat definitions/action validation, dashboard data flow, UI states, action links va i18n truoc khi apply section Tai san can chu y.
+- `dashboard summary`: FE da dong bo va render `recentEvents` cung `assetsInFocus`. Snapshot moi them required metric `marketNarratives` va ba schema `DashboardMarketNarrativesMetricResponse`, `DashboardMarketNarrativeItemResponse`, `DashboardMarketNarrativeThemeResponse`; FE can cap nhat definitions/action validation, dashboard data flow, UI states, action Graph View va i18n truoc khi apply section Luan diem thi truong.
 - `telegram`: frontend da co route/action/type/permission/navigation cho surface Telegram, nhung snapshot moi them `outputLanguageIsoCode` request va `outputLanguage` response cho feature setting/schedule ma FE chua expose.
 - `ai-provider credentials`: snapshot moi doi credential `label` thanh `model` va bo top-level config `name`/`model`; FE hien van giu `name`, top-level `model`, va credential `label` trong definitions, form, list, detail, va credential panel.
 - `cronjobs`: FE da bo create/delete flow va doi update schedule sang inline list chi gui `expression`; endpoint `stop` duoc ghi nhan nhung khong tich hop co chu dich.

@@ -63,6 +63,7 @@ import {
 import { AssetsInFocus, AssetsInFocusSkeleton } from "./assets-in-focus"
 import { EventTimeline, EventTimelineSkeleton } from "./event-timeline"
 import { LatestNews, LatestNewsSkeleton } from "./latest-news"
+import { MarketNarratives, MarketNarrativesSkeleton } from "./market-narratives"
 import { DashboardQuickDetailProvider } from "./dashboard-quick-detail"
 import { WorkspaceOverviewActions } from "../workspace-overview-actions"
 
@@ -244,14 +245,27 @@ async function WorkspaceOverview() {
             eventTimeline
           )}
         </DashboardQuickDetailProvider>
-        <AssetsInFocus
-          canAccessMarketCharts={canAccessMarketCharts}
-          canReadGraphView={canReadGraph}
-          dictionary={dictionary}
-          error={dashboardSummary.error}
-          locale={locale}
-          metric={dashboardSummary.summary?.assetsInFocus ?? null}
-        />
+        <div className="grid min-w-0 gap-4 lg:grid-cols-12">
+          <div className="min-w-0 lg:col-span-7">
+            <AssetsInFocus
+              canAccessMarketCharts={canAccessMarketCharts}
+              canReadGraphView={canReadGraph}
+              dictionary={dictionary}
+              error={dashboardSummary.error}
+              locale={locale}
+              metric={dashboardSummary.summary?.assetsInFocus ?? null}
+            />
+          </div>
+          <div className="min-w-0 lg:col-span-5">
+            <MarketNarratives
+              canReadGraphView={canReadGraph}
+              dictionary={dictionary}
+              error={dashboardSummary.error}
+              locale={locale}
+              metric={dashboardSummary.summary?.marketNarratives ?? null}
+            />
+          </div>
+        </div>
       </>
     </WorkspaceOverviewShell>
   )
@@ -515,7 +529,14 @@ function WorkspaceOverviewSkeleton() {
             <LatestNewsSkeleton />
           </div>
         </div>
-        <AssetsInFocusSkeleton />
+        <div className="grid min-w-0 gap-4 lg:grid-cols-12">
+          <div className="min-w-0 lg:col-span-7">
+            <AssetsInFocusSkeleton />
+          </div>
+          <div className="min-w-0 lg:col-span-5">
+            <MarketNarrativesSkeleton />
+          </div>
+        </div>
       </>
     </WorkspaceOverviewShell>
   )

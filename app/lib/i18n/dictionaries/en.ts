@@ -487,6 +487,32 @@ export const en: Dictionary = {
         INDEX: "Index",
       },
     },
+    marketNarratives: {
+      title: "Market narratives",
+      description:
+        "Ranked narratives in the current workspace tracking scope.",
+      graphView: "Open Graph View",
+      theme: "Theme",
+      affectedAssets: "Related assets",
+      confidence: "Confidence {value}",
+      updated: "Updated {time}",
+      status: {
+        EMERGING: "Emerging",
+        WEAKENING: "Weakening",
+        ACTIVE: "Active",
+      },
+      untitled: "Untitled narrative",
+      thesisEmpty: "No thesis is available for this narrative yet.",
+      emptyTitle: "No market narratives yet",
+      emptyDescription:
+        "Relevant narratives will appear here when the backend returns them.",
+      deniedTitle: "No permission to view market narratives",
+      deniedDescription:
+        "The account needs narrative, watchlist, and asset read permission to view this module.",
+      errorTitle: "Could not load market narratives",
+      errorDescription: "Market narratives are currently unavailable.",
+      invalidDate: "Invalid time",
+    },
     latestNews: {
       title: "Latest news",
       description: "The most recent news articles across Signapse.",

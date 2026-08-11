@@ -488,6 +488,32 @@ export const vi = {
         INDEX: "Chỉ số",
       },
     },
+    marketNarratives: {
+      title: "Luận điểm thị trường",
+      description:
+        "Các luận điểm được xếp hạng trong phạm vi theo dõi của không gian làm việc.",
+      graphView: "Mở Graph View",
+      theme: "Chủ đề",
+      affectedAssets: "Tài sản liên quan",
+      confidence: "Độ tin cậy {value}",
+      updated: "Cập nhật {time}",
+      status: {
+        EMERGING: "Mới hình thành",
+        WEAKENING: "Yếu dần",
+        ACTIVE: "Đang hoạt động",
+      },
+      untitled: "Luận điểm chưa có tiêu đề",
+      thesisEmpty: "Chưa có mô tả cho luận điểm này.",
+      emptyTitle: "Chưa có luận điểm thị trường",
+      emptyDescription:
+        "Các luận điểm phù hợp sẽ hiển thị tại đây khi backend trả về dữ liệu.",
+      deniedTitle: "Chưa có quyền xem luận điểm thị trường",
+      deniedDescription:
+        "Tài khoản cần quyền đọc luận điểm, danh sách theo dõi và tài sản để xem module này.",
+      errorTitle: "Không thể tải luận điểm thị trường",
+      errorDescription: "Luận điểm thị trường hiện không khả dụng.",
+      invalidDate: "Thời gian không hợp lệ",
+    },
     latestNews: {
       title: "Tin tức mới nhất",
       description: "Các bài viết tin tức mới nhất trên Signapse.",

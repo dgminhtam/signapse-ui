@@ -1,5 +1,10 @@
 import { z } from "zod"
 
+import {
+  narrativeAssetSummaryResponseSchema,
+  type NarrativeAssetSummaryResponse,
+} from "@/app/lib/narratives/definitions"
+
 export const dashboardMetricStates = [
   "AVAILABLE",
   "EMPTY",
@@ -116,6 +121,39 @@ export const dashboardAssetsInFocusMetricResponseSchema = z.object({
   errorCode: dashboardMetricErrorCodeSchema,
 })
 
+export const dashboardMarketNarrativeStatuses = [
+  "EMERGING",
+  "WEAKENING",
+  "ACTIVE",
+] as const
+
+const dashboardMarketNarrativeStatusSchema = z.enum(
+  dashboardMarketNarrativeStatuses
+)
+
+export const dashboardMarketNarrativeThemeResponseSchema = z.object({
+  themeId: z.number().int(),
+  themeTitle: z.string().nullable(),
+  themeSlug: z.string(),
+})
+
+export const dashboardMarketNarrativeItemResponseSchema = z.object({
+  id: z.number().int(),
+  title: z.string().nullable(),
+  thesis: z.string().nullable(),
+  status: dashboardMarketNarrativeStatusSchema,
+  confidence: z.number().nullable(),
+  lastUpdatedAt: z.string(),
+  primaryTheme: dashboardMarketNarrativeThemeResponseSchema,
+  assets: z.array(narrativeAssetSummaryResponseSchema),
+})
+
+export const dashboardMarketNarrativesMetricResponseSchema = z.object({
+  state: dashboardMetricStateSchema,
+  items: z.array(dashboardMarketNarrativeItemResponseSchema).max(3),
+  errorCode: dashboardMetricErrorCodeSchema,
+})
+
 export const dashboardSummaryScopeResponseSchema = z.object({
   workspaceId: z.number().int(),
   watchlistAssetCount: z.number().int().nullable(),
@@ -129,6 +167,7 @@ export const dashboardSummaryResponseSchema = z.object({
   recentEvents: dashboardRecentEventsMetricResponseSchema,
   marketEvents24h: dashboardCountMetricResponseSchema,
   activeNarratives: dashboardNarrativeMetricResponseSchema,
+  marketNarratives: dashboardMarketNarrativesMetricResponseSchema,
   latestNews6h: dashboardCountMetricResponseSchema,
   assetsInFocus: dashboardAssetsInFocusMetricResponseSchema,
 })
@@ -167,6 +206,16 @@ export type DashboardAssetInFocusItemResponse = z.infer<
 export type DashboardAssetsInFocusMetricResponse = z.infer<
   typeof dashboardAssetsInFocusMetricResponseSchema
 >
+export type DashboardMarketNarrativeThemeResponse = z.infer<
+  typeof dashboardMarketNarrativeThemeResponseSchema
+>
+export type DashboardMarketNarrativeItemResponse = z.infer<
+  typeof dashboardMarketNarrativeItemResponseSchema
+>
+export type DashboardMarketNarrativesMetricResponse = z.infer<
+  typeof dashboardMarketNarrativesMetricResponseSchema
+>
+export type { NarrativeAssetSummaryResponse }
 export type DashboardSummaryScopeResponse = z.infer<
   typeof dashboardSummaryScopeResponseSchema
 >
