@@ -86,8 +86,8 @@ export function LocalEntityQuickDetailDrawer({
           : currentState?.phase === "news-article"
             ? currentState.article.title
             : currentState?.phase === "error"
-          ? dictionary.quickDetail.errorTitle
-            : dictionary.common.loading
+              ? dictionary.quickDetail.errorTitle
+              : dictionary.common.loading
   const fullDetailHref = entity ? getEntityFullDetailHref(entity) : null
 
   useEffect(() => {
@@ -132,7 +132,12 @@ export function LocalEntityQuickDetailDrawer({
     return () => {
       isActive = false
     }
-  }, [canReadSelectedEntity, dictionary.quickDetail.errorTitle, entity, entityKey])
+  }, [
+    canReadSelectedEntity,
+    dictionary.quickDetail.errorTitle,
+    entity,
+    entityKey,
+  ])
 
   return (
     <Drawer open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>

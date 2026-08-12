@@ -370,7 +370,8 @@ async function FetchEventData({
                 {event.title}
               </h1>
               <p className="max-w-4xl pt-1 text-sm leading-6 text-muted-foreground">
-                {event.description?.trim() || dictionary.events.detailNoDescription}
+                {event.description?.trim() ||
+                  dictionary.events.detailNoDescription}
               </p>
             </div>
           </div>
@@ -468,7 +469,9 @@ async function FetchEventData({
                           className="gap-2"
                           asChild
                         >
-                          <Link href={`/news-articles/${evidence.newsArticleId}`}>
+                          <Link
+                            href={`/news-articles/${evidence.newsArticleId}`}
+                          >
                             <FileText data-icon="inline-start" />
                             {dictionary.events.viewArticle}
                           </Link>
@@ -532,13 +535,16 @@ async function FetchEventData({
                           direction
                         )}
                       >
-                        {formatMessage(dictionary.events.reactionCountByDirection, {
-                          count: formatNumber(count, locale),
-                          direction: getEventMarketReactionDirectionLabel(
-                            direction,
-                            dictionary
-                          ).toLowerCase(),
-                        })}
+                        {formatMessage(
+                          dictionary.events.reactionCountByDirection,
+                          {
+                            count: formatNumber(count, locale),
+                            direction: getEventMarketReactionDirectionLabel(
+                              direction,
+                              dictionary
+                            ).toLowerCase(),
+                          }
+                        )}
                       </Badge>
                     )
                   }
@@ -568,7 +574,10 @@ async function FetchEventData({
         </section>
 
         <section className="flex flex-col gap-4">
-          <SectionHeading title={dictionary.events.relatedAssets} icon={Layers3} />
+          <SectionHeading
+            title={dictionary.events.relatedAssets}
+            icon={Layers3}
+          />
 
           {assets.length > 0 ? (
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -623,7 +632,10 @@ async function FetchEventData({
         </section>
 
         <section className="flex flex-col gap-4">
-          <SectionHeading title={dictionary.events.relatedThemes} icon={Layers3} />
+          <SectionHeading
+            title={dictionary.events.relatedThemes}
+            icon={Layers3}
+          />
 
           {themes.length > 0 ? (
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">

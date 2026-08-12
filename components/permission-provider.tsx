@@ -31,8 +31,9 @@ export function useHasPermission(permission?: string | null): boolean {
   return hasPermission(permissions, permission)
 }
 
-export function useHasAnyPermission(permissionsToCheck: readonly string[]): boolean {
+export function useHasAnyPermission(
+  permissionsToCheck: readonly string[]
+): boolean {
   const permissions = usePermissions()
   return hasAnyPermission(permissions, permissionsToCheck)
 }
-

@@ -40,7 +40,9 @@ export async function addAssetsToWorkspaceWatchlist(
   }
 }
 
-export async function removeAssetFromWorkspaceWatchlist(assetId: number): Promise<ActionResult> {
+export async function removeAssetFromWorkspaceWatchlist(
+  assetId: number
+): Promise<ActionResult> {
   try {
     await fetchAuthenticated<void>(`/watchlists/assets/${assetId}`, {
       method: "DELETE",

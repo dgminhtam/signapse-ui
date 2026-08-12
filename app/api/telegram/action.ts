@@ -32,10 +32,7 @@ async function getTelegramDictionary() {
   return getDictionary(await getRequestLocale())
 }
 
-function getValidationError(
-  error: z.ZodError,
-  dictionary: Dictionary
-): string {
+function getValidationError(error: z.ZodError, dictionary: Dictionary): string {
   return error.issues[0]?.message ?? dictionary.telegram.validationInvalid
 }
 
@@ -83,10 +80,14 @@ export async function createTelegramBotConnection(
   request: CreateTelegramBotConnectionRequest
 ): Promise<ActionResult<TelegramBotConnectionResponse>> {
   const dictionary = await getTelegramDictionary()
-  const parsed = getCreateTelegramBotConnectionSchema(dictionary).safeParse(request)
+  const parsed =
+    getCreateTelegramBotConnectionSchema(dictionary).safeParse(request)
 
   if (!parsed.success) {
-    return { success: false, error: getValidationError(parsed.error, dictionary) }
+    return {
+      success: false,
+      error: getValidationError(parsed.error, dictionary),
+    }
   }
 
   try {
@@ -117,7 +118,10 @@ export async function updateTelegramBotConnection(
   const parsed = getUpdateTelegramBotConnectionSchema().safeParse(request)
 
   if (!parsed.success) {
-    return { success: false, error: getValidationError(parsed.error, dictionary) }
+    return {
+      success: false,
+      error: getValidationError(parsed.error, dictionary),
+    }
   }
 
   try {
@@ -192,7 +196,10 @@ export async function createTelegramLinkToken(
   const parsed = getCreateTelegramLinkTokenSchema().safeParse(request)
 
   if (!parsed.success) {
-    return { success: false, error: getValidationError(parsed.error, dictionary) }
+    return {
+      success: false,
+      error: getValidationError(parsed.error, dictionary),
+    }
   }
 
   try {
@@ -208,7 +215,10 @@ export async function createTelegramLinkToken(
   } catch (error: unknown) {
     return {
       success: false,
-      error: getActionError(error, dictionary.telegram.destination.createLinkError),
+      error: getActionError(
+        error,
+        dictionary.telegram.destination.createLinkError
+      ),
     }
   }
 }
@@ -221,7 +231,10 @@ export async function updateTelegramDestination(
   const parsed = getUpdateTelegramDestinationSchema().safeParse(request)
 
   if (!parsed.success) {
-    return { success: false, error: getValidationError(parsed.error, dictionary) }
+    return {
+      success: false,
+      error: getValidationError(parsed.error, dictionary),
+    }
   }
 
   try {
@@ -296,7 +309,10 @@ export async function updateTelegramFeatureSetting(
   const parsed = getUpdateTelegramFeatureSettingSchema().safeParse(request)
 
   if (!parsed.success) {
-    return { success: false, error: getValidationError(parsed.error, dictionary) }
+    return {
+      success: false,
+      error: getValidationError(parsed.error, dictionary),
+    }
   }
 
   try {
@@ -327,7 +343,10 @@ export async function createTelegramMarketAnalysisSchedule(
     getSaveTelegramMarketAnalysisScheduleSchema(dictionary).safeParse(request)
 
   if (!parsed.success) {
-    return { success: false, error: getValidationError(parsed.error, dictionary) }
+    return {
+      success: false,
+      error: getValidationError(parsed.error, dictionary),
+    }
   }
 
   try {
@@ -360,7 +379,10 @@ export async function updateTelegramMarketAnalysisSchedule(
     getSaveTelegramMarketAnalysisScheduleSchema(dictionary).safeParse(request)
 
   if (!parsed.success) {
-    return { success: false, error: getValidationError(parsed.error, dictionary) }
+    return {
+      success: false,
+      error: getValidationError(parsed.error, dictionary),
+    }
   }
 
   try {

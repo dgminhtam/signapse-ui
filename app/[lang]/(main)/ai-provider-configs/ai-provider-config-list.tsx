@@ -139,7 +139,9 @@ export function AiProviderConfigListPage({
               <AppListTableHead className="w-36 text-center">
                 {t.defaultColumn}
               </AppListTableHead>
-              <AppListTableHead className="w-40">{t.createdColumn}</AppListTableHead>
+              <AppListTableHead className="w-40">
+                {t.createdColumn}
+              </AppListTableHead>
               <AppListTableHead className="w-28 text-right">
                 {t.actionsColumn}
               </AppListTableHead>
@@ -182,7 +184,9 @@ export function AiProviderConfigListPage({
                             aria-hidden="true"
                           />
                           {formatMessage(t.credentialCount, {
-                            count: formatCount(provider.credentials?.length || 0),
+                            count: formatCount(
+                              provider.credentials?.length || 0
+                            ),
                           })}
                         </span>
                       </div>
@@ -252,7 +256,9 @@ function CredentialSummary({
   const formatCount = (value: number) => formatNumber(value)
 
   if (credentials.length === 0) {
-    return <span className="text-sm text-muted-foreground">{t.noCredentials}</span>
+    return (
+      <span className="text-sm text-muted-foreground">{t.noCredentials}</span>
+    )
   }
 
   return (
@@ -282,11 +288,7 @@ function CredentialSummary({
 
 function CreatedTime({ value }: { value?: string }) {
   const { dictionary, formatDateTime } = useLocalization()
-  const formatted = formatDateTime(
-    value,
-    COMPACT_DATE_TIME_OPTIONS,
-    ""
-  )
+  const formatted = formatDateTime(value, COMPACT_DATE_TIME_OPTIONS, "")
 
   if (!formatted) {
     return (
@@ -361,13 +363,18 @@ function DeleteProviderButton({
   const router = useRouter()
   const { dictionary, formatMessage } = useLocalization()
   const t = dictionary.aiProviderConfigs
-  const providerLabel = getProviderOptionLabel(provider.providerType, dictionary)
+  const providerLabel = getProviderOptionLabel(
+    provider.providerType,
+    dictionary
+  )
 
   const handleDelete = () => {
     startTransition(async () => {
       const result = await deleteAiProviderConfig(provider.id)
       if (result.success) {
-        toast.success(formatMessage(t.deleteConfigSuccess, { provider: providerLabel }))
+        toast.success(
+          formatMessage(t.deleteConfigSuccess, { provider: providerLabel })
+        )
         setOpen(false)
         router.refresh()
       } else {

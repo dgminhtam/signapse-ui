@@ -44,7 +44,9 @@ export function LanguageSelector() {
     startTransition(() => {
       const nextPathname = replacePathLocale(pathname, value)
       const queryString = searchParams.toString()
-      router.replace(queryString ? `${nextPathname}?${queryString}` : nextPathname)
+      router.replace(
+        queryString ? `${nextPathname}?${queryString}` : nextPathname
+      )
     })
   }
 

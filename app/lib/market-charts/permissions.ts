@@ -13,7 +13,9 @@ export const MARKET_CHART_WORKBENCH_PERMISSIONS = [
 
 export const MARKET_CHART_NAV_PERMISSIONS = MARKET_CHART_READ_PERMISSIONS
 
-export function canReadMarketCharts(permissions: PermissionCollection): boolean {
+export function canReadMarketCharts(
+  permissions: PermissionCollection
+): boolean {
   return hasAnyPermission(permissions, MARKET_CHART_READ_PERMISSIONS)
 }
 

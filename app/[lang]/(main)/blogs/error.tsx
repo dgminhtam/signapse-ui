@@ -1,7 +1,13 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import { AlertCircle, RefreshCcw } from "lucide-react"
 import { useLocalization } from "@/app/lib/i18n/provider"
 
@@ -18,7 +24,10 @@ export default function Error({
     <div className="flex h-[400px] w-full items-center justify-center">
       <Empty>
         <EmptyHeader>
-          <EmptyMedia variant="icon" className="bg-destructive/10 text-destructive">
+          <EmptyMedia
+            variant="icon"
+            className="bg-destructive/10 text-destructive"
+          >
             <AlertCircle />
           </EmptyMedia>
           <EmptyTitle>{dictionary.blogs.errorTitle}</EmptyTitle>

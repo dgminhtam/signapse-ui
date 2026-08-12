@@ -30,7 +30,11 @@ function getActionError(error: unknown, fallback: string): string {
 }
 
 function parseOrThrow<T>(
-  schema: { safeParse: (value: unknown) => { success: true; data: T } | { success: false } },
+  schema: {
+    safeParse: (
+      value: unknown
+    ) => { success: true; data: T } | { success: false }
+  },
   value: unknown,
   errorMessage: string
 ): T {
@@ -75,10 +79,13 @@ export async function createMarketConversation(
   }
 
   try {
-    const response = await fetchAuthenticated<unknown>("/market-conversations", {
-      method: "POST",
-      body: JSON.stringify({ title: parsedRequest.data.title }),
-    })
+    const response = await fetchAuthenticated<unknown>(
+      "/market-conversations",
+      {
+        method: "POST",
+        body: JSON.stringify({ title: parsedRequest.data.title }),
+      }
+    )
     const conversation = parseOrThrow(
       marketConversationSummaryResponseSchema,
       response,

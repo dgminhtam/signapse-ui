@@ -56,10 +56,7 @@ import {
 } from "@/components/ui/item"
 import { Skeleton } from "@/components/ui/skeleton"
 
-import {
-  TradingSnapshot,
-  TradingSnapshotSkeleton,
-} from "./trading-snapshot"
+import { TradingSnapshot, TradingSnapshotSkeleton } from "./trading-snapshot"
 import { AssetsInFocus, AssetsInFocusSkeleton } from "./assets-in-focus"
 import { EventTimeline, EventTimelineSkeleton } from "./event-timeline"
 import { LatestNews, LatestNewsSkeleton } from "./latest-news"
@@ -168,7 +165,9 @@ async function WorkspaceOverview() {
             <EmptyMedia variant="icon">
               <CircleSlashIcon />
             </EmptyMedia>
-            <EmptyTitle>{dictionary.workspaceOverview.overviewLoadErrorTitle}</EmptyTitle>
+            <EmptyTitle>
+              {dictionary.workspaceOverview.overviewLoadErrorTitle}
+            </EmptyTitle>
             <EmptyDescription>{workspaceLoadError}</EmptyDescription>
           </EmptyHeader>
         </Empty>
@@ -184,7 +183,9 @@ async function WorkspaceOverview() {
             <EmptyMedia variant="icon">
               <FolderOpenIcon />
             </EmptyMedia>
-            <EmptyTitle>{dictionary.workspaceOverview.noActiveTitle}</EmptyTitle>
+            <EmptyTitle>
+              {dictionary.workspaceOverview.noActiveTitle}
+            </EmptyTitle>
             <EmptyDescription>
               {dictionary.workspaceOverview.noActiveDescription}
             </EmptyDescription>
@@ -289,9 +290,10 @@ async function loadWatchlistPreview(
   } catch (error: unknown) {
     return {
       assets: [],
-      error: error instanceof Error
-        ? error.message
-        : dictionary.workspaceOverview.watchlistLoadError,
+      error:
+        error instanceof Error
+          ? error.message
+          : dictionary.workspaceOverview.watchlistLoadError,
       total: 0,
     }
   }
@@ -310,7 +312,8 @@ async function loadDashboardSummary(
       error:
         error instanceof Error
           ? error.message
-          : dictionary.workspaceOverview.tradingSnapshot.summaryErrorDescription,
+          : dictionary.workspaceOverview.tradingSnapshot
+              .summaryErrorDescription,
       summary: null,
     }
   }
@@ -365,7 +368,8 @@ function WorkspaceOverviewPanel({
   locale: AppLocale
 }) {
   const canReadTrackedAssets = canReadAsset && canReadWatchlist
-  const canManageTrackedAssets = canReadTrackedAssets && canCreateWatchlist && canDeleteWatchlist
+  const canManageTrackedAssets =
+    canReadTrackedAssets && canCreateWatchlist && canDeleteWatchlist
   const hasAssets = preview.assets.length > 0
 
   return (
@@ -376,7 +380,9 @@ function WorkspaceOverviewPanel({
             {workspace.name}
           </h2>
         </CardTitle>
-        <CardDescription>{dictionary.workspaceOverview.description}</CardDescription>
+        <CardDescription>
+          {dictionary.workspaceOverview.description}
+        </CardDescription>
         {canManageTrackedAssets ? (
           <CardAction>
             <WorkspaceOverviewActions
@@ -408,7 +414,9 @@ function WorkspaceOverviewPanel({
                 {dictionary.workspaceOverview.trackedAssets}
               </h3>
               {canReadTrackedAssets ? (
-                <Badge variant="secondary">{formatNumber(preview.total, locale)}</Badge>
+                <Badge variant="secondary">
+                  {formatNumber(preview.total, locale)}
+                </Badge>
               ) : null}
             </div>
             <p className="text-sm text-muted-foreground">
@@ -422,7 +430,9 @@ function WorkspaceOverviewPanel({
                 <EmptyMedia variant="icon">
                   <ShieldAlertIcon />
                 </EmptyMedia>
-                <EmptyTitle>{dictionary.workspaceOverview.trackedAssetsDeniedTitle}</EmptyTitle>
+                <EmptyTitle>
+                  {dictionary.workspaceOverview.trackedAssetsDeniedTitle}
+                </EmptyTitle>
                 <EmptyDescription>
                   {dictionary.workspaceOverview.trackedAssetsDeniedDescription}
                 </EmptyDescription>
@@ -436,7 +446,9 @@ function WorkspaceOverviewPanel({
                 <EmptyMedia variant="icon">
                   <CircleSlashIcon />
                 </EmptyMedia>
-                <EmptyTitle>{dictionary.workspaceOverview.trackedAssetsLoadErrorTitle}</EmptyTitle>
+                <EmptyTitle>
+                  {dictionary.workspaceOverview.trackedAssetsLoadErrorTitle}
+                </EmptyTitle>
                 <EmptyDescription>{preview.error}</EmptyDescription>
               </EmptyHeader>
             </Empty>
@@ -448,7 +460,9 @@ function WorkspaceOverviewPanel({
                 <EmptyMedia variant="icon">
                   <TargetIcon />
                 </EmptyMedia>
-                <EmptyTitle>{dictionary.workspaceOverview.noTrackedAssetsTitle}</EmptyTitle>
+                <EmptyTitle>
+                  {dictionary.workspaceOverview.noTrackedAssetsTitle}
+                </EmptyTitle>
                 <EmptyDescription>
                   {dictionary.workspaceOverview.noTrackedAssetsDescription}
                 </EmptyDescription>

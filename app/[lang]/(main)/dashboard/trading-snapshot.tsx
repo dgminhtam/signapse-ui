@@ -121,7 +121,11 @@ export function TradingSnapshotSkeleton() {
           "xl:col-span-3",
           "xl:col-span-2",
         ].map((className, index) => (
-          <Card key={`snapshot-skeleton-${index}`} className={className} size="sm">
+          <Card
+            key={`snapshot-skeleton-${index}`}
+            className={className}
+            size="sm"
+          >
             <CardHeader>
               <CardTitle>
                 <Skeleton className="h-5 w-36" />

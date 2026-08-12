@@ -60,7 +60,12 @@ export default async function RootLayout({
     <html
       lang={lang}
       suppressHydrationWarning
-      className={cn("h-screen antialiased", fontMono.variable, "font-sans", fontSans.variable)}
+      className={cn(
+        "h-screen antialiased",
+        fontMono.variable,
+        "font-sans",
+        fontSans.variable
+      )}
     >
       <body className="flex h-screen flex-col">
         <NextTopLoader color="var(--primary)" showSpinner={false} height={3} />

@@ -183,7 +183,7 @@ function EventTimelineItems({
               <ItemTitle>
                 <h3>
                   <DashboardQuickDetailButton
-                    className="cursor-pointer text-left font-medium underline-offset-4 outline-none transition-colors hover:text-primary hover:underline focus-visible:ring-2 focus-visible:ring-ring/50"
+                    className="cursor-pointer text-left font-medium underline-offset-4 transition-colors outline-none hover:text-primary hover:underline focus-visible:ring-2 focus-visible:ring-ring/50"
                     entity={{ id: item.id, kind: "event" }}
                     aria-label={`${t.openEvent}: ${item.title}`}
                   >
@@ -211,7 +211,8 @@ function EventTimelineItems({
                   )}
                 </AppTimeMetadata>
                 <span className="text-xs text-muted-foreground tabular-nums">
-                  {t.confidence}: {item.confidence === null
+                  {t.confidence}:{" "}
+                  {item.confidence === null
                     ? dictionary.common.notAvailable
                     : formatConfidence(item.confidence, locale)}
                 </span>

@@ -8,7 +8,10 @@ import { withLocalePath } from "@/app/lib/i18n/routing"
 
 type LocalizedHref = LinkProps["href"]
 
-function localizeHref(href: LocalizedHref, locale: ReturnType<typeof useLocalization>["locale"]) {
+function localizeHref(
+  href: LocalizedHref,
+  locale: ReturnType<typeof useLocalization>["locale"]
+) {
   if (typeof href === "string") {
     return href.startsWith("/") ? withLocalePath(href, locale) : href
   }

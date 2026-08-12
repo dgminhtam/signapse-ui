@@ -57,7 +57,7 @@ export function NewsArticleQuickDetailContent({
   return (
     <div className="flex flex-col gap-5">
       {description ? (
-        <p className="whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
+        <p className="text-sm leading-6 whitespace-pre-wrap text-muted-foreground">
           {description}
         </p>
       ) : null}
@@ -92,7 +92,9 @@ export function NewsArticleQuickDetailContent({
 
       <NewsArticleMarkdown
         className="max-w-none"
-        content={article.content?.trim() || dictionary.newsArticles.contentEmpty}
+        content={
+          article.content?.trim() || dictionary.newsArticles.contentEmpty
+        }
       />
     </div>
   )

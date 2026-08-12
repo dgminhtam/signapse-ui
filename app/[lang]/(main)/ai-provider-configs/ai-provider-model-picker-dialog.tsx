@@ -76,9 +76,7 @@ function ModelPickerDialogContent({
     <DialogContent className="flex h-[min(80vh,720px)] flex-col overflow-hidden sm:max-w-[720px]">
       <DialogHeader>
         <DialogTitle>{t.modelPickerTitle}</DialogTitle>
-        <DialogDescription>
-          {t.modelPickerDescription}
-        </DialogDescription>
+        <DialogDescription>{t.modelPickerDescription}</DialogDescription>
       </DialogHeader>
 
       {models.length === 0 ? (

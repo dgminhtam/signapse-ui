@@ -91,7 +91,9 @@ export function PaginationPageSizeSelect({
           <SelectGroup>
             {options.map((option) => (
               <SelectItem key={option} value={option.toString()}>
-                {formatMessage(dictionary.pagination.perPage, { count: option })}
+                {formatMessage(dictionary.pagination.perPage, {
+                  count: option,
+                })}
               </SelectItem>
             ))}
           </SelectGroup>
@@ -214,10 +216,10 @@ export function AppPaginationControls<T>({
   const summaryText =
     page.totalElements > 0
       ? formatMessage(dictionary.pagination.displayedResults, {
-        from: formatNumber(visibleItems.start),
-        to: formatNumber(visibleItems.end),
-        total: formatNumber(page.totalElements),
-      })
+          from: formatNumber(visibleItems.start),
+          to: formatNumber(visibleItems.end),
+          total: formatNumber(page.totalElements),
+        })
       : dictionary.pagination.noResults
 
   return (

@@ -147,8 +147,7 @@ async function FetchNewsArticleData({
           ) : null}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <AppTimeMetadata icon={Globe2}>
-              {article.sourceName?.trim() ||
-                dictionary.newsArticles.noOutlet}
+              {article.sourceName?.trim() || dictionary.newsArticles.noOutlet}
             </AppTimeMetadata>
             <AppTimeMetadata icon={Calendar}>
               {formatDateTime(article.publishedAt, locale, dictionary)}

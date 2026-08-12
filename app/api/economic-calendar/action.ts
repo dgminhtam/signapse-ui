@@ -35,7 +35,9 @@ export async function getEconomicCalendarEntries(
 export async function getEconomicCalendarEntryById(
   id: number
 ): Promise<EconomicCalendarResponse> {
-  return fetchAuthenticated<EconomicCalendarResponse>(`/economic-calendar/${id}`)
+  return fetchAuthenticated<EconomicCalendarResponse>(
+    `/economic-calendar/${id}`
+  )
 }
 
 export async function syncEconomicCalendarEntries(): Promise<

@@ -1,46 +1,45 @@
 "use server"
 
-import { auth } from '@clerk/nextjs/server';
+import { auth } from "@clerk/nextjs/server"
 
-import { isDevAuthModeEnabled } from '@/app/lib/dev-auth-mode';
-import { getDictionary } from '@/app/lib/i18n/dictionaries';
-import { getRequestLocale } from '@/app/lib/i18n/server';
+import { isDevAuthModeEnabled } from "@/app/lib/dev-auth-mode"
+import { getDictionary } from "@/app/lib/i18n/dictionaries"
+import { getRequestLocale } from "@/app/lib/i18n/server"
 
-const API_TIMEOUT_MS = 60000;
-type ApiFetchError = Error & { status?: number };
+const API_TIMEOUT_MS = 60000
+type ApiFetchError = Error & { status?: number }
 
 async function apiFetch<T>(
   urlPath: string,
   options: RequestInit = {},
   timeoutMs = API_TIMEOUT_MS
 ): Promise<T> {
-
-  const locale = await getRequestLocale();
-  const dictionary = await getDictionary(locale);
-  const BASE_URL = process.env.API_BASE_URL;
+  const locale = await getRequestLocale()
+  const dictionary = await getDictionary(locale)
+  const BASE_URL = process.env.API_BASE_URL
   if (!BASE_URL) {
-    throw new Error(dictionary.errors.missingApiBaseUrl);
+    throw new Error(dictionary.errors.missingApiBaseUrl)
   }
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
-  const isFormData = options.body instanceof FormData;
-  const hasBody = options.body !== undefined && options.body !== null;
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), timeoutMs)
+  const isFormData = options.body instanceof FormData
+  const hasBody = options.body !== undefined && options.body !== null
   const defaultHeaders: Record<string, string> = {
-    Accept: 'application/json',
-    'Accept-Language': locale,
-  };
+    Accept: "application/json",
+    "Accept-Language": locale,
+  }
 
   if (hasBody && !isFormData) {
-    defaultHeaders['Content-Type'] = 'application/json';
+    defaultHeaders["Content-Type"] = "application/json"
   }
 
   const defaultOptions: RequestInit = {
-    method: 'GET',
+    method: "GET",
     headers: defaultHeaders,
-    cache: 'no-store',
+    cache: "no-store",
     signal: controller.signal,
-  };
+  }
 
   const finalOptions: RequestInit = {
     ...defaultOptions,
@@ -49,85 +48,83 @@ async function apiFetch<T>(
       ...(defaultOptions.headers as Record<string, string>),
       ...((options.headers || {}) as Record<string, string>),
     },
-  };
+  }
 
-  const fullUrl = `${BASE_URL}${urlPath}`;
+  const fullUrl = `${BASE_URL}${urlPath}`
   try {
-    const response = await fetch(fullUrl, finalOptions);
-    clearTimeout(timeout);
+    const response = await fetch(fullUrl, finalOptions)
+    clearTimeout(timeout)
 
     if (!response.ok) {
-      const errorText = await response.text();
-      let errorMessage = dictionary.errors.generic;
+      const errorText = await response.text()
+      let errorMessage = dictionary.errors.generic
       try {
         if (errorText) {
-          const errorJson = JSON.parse(errorText);
-          errorMessage = errorJson.message || errorMessage;
+          const errorJson = JSON.parse(errorText)
+          errorMessage = errorJson.message || errorMessage
         }
       } catch (e) {
-        errorMessage = errorText || errorMessage;
+        errorMessage = errorText || errorMessage
       }
-      const apiError = new Error(errorMessage) as ApiFetchError;
-      apiError.status = response.status;
-      throw apiError;
+      const apiError = new Error(errorMessage) as ApiFetchError
+      apiError.status = response.status
+      throw apiError
     }
 
     if (response.status === 204) {
-      return null as T;
+      return null as T
     }
 
-    const text = await response.text();
+    const text = await response.text()
     if (!text) {
-      return null as T;
+      return null as T
     }
 
-    const data: T = JSON.parse(text);
-    return data;
-
+    const data: T = JSON.parse(text)
+    return data
   } catch (error) {
-    clearTimeout(timeout);
+    clearTimeout(timeout)
     const isNotFoundError =
       error instanceof Error &&
       ((error as ApiFetchError).status === 404 ||
-        /(?:^|\b)(?:404|not[\s-]?found)(?:\b|$)/i.test(error.message));
+        /(?:^|\b)(?:404|not[\s-]?found)(?:\b|$)/i.test(error.message))
     if (isNotFoundError) {
-      throw error;
+      throw error
     }
-    console.error("apiFetch error:", error);
-    throw error;
+    console.error("apiFetch error:", error)
+    throw error
   }
 }
 
 export async function getClerkToken(): Promise<string> {
-  const { getToken, userId } = await auth();
-  const dictionary = await getDictionary(await getRequestLocale());
+  const { getToken, userId } = await auth()
+  const dictionary = await getDictionary(await getRequestLocale())
   if (!userId) {
-    throw new Error(dictionary.errors.unauthenticated);
+    throw new Error(dictionary.errors.unauthenticated)
   }
-  const token = await getToken({ template: 'signapse' });
+  const token = await getToken({ template: "signapse" })
   if (!token) {
-    throw new Error(dictionary.errors.missingToken);
+    throw new Error(dictionary.errors.missingToken)
   }
-  return token;
+  return token
 }
 
 export async function getBackendAuthHeaders(): Promise<Record<string, string>> {
   if (isDevAuthModeEnabled()) {
-    return {};
+    return {}
   }
 
-  const token = await getClerkToken();
+  const token = await getClerkToken()
   return {
     Authorization: `Bearer ${token}`,
-  };
+  }
 }
 
 export async function fetchAuthenticated<T>(
   urlPath: string,
   options: RequestInit = {}
 ): Promise<T> {
-
-  const authHeaders = await getBackendAuthHeaders();
+  const authHeaders = await getBackendAuthHeaders()
 
   const finalOptions: RequestInit = {
     ...options,
@@ -135,14 +132,14 @@ export async function fetchAuthenticated<T>(
       ...authHeaders,
       ...((options.headers || {}) as Record<string, string>),
     },
-  };
+  }
 
-  return apiFetch<T>(urlPath, finalOptions);
+  return apiFetch<T>(urlPath, finalOptions)
 }
 
 export async function fetchPublic<T>(
   urlPath: string,
   options: RequestInit = {}
 ): Promise<T> {
-  return apiFetch<T>(urlPath, options);
+  return apiFetch<T>(urlPath, options)
 }

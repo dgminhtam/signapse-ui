@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache"
 
 import { fetchAuthenticated } from "@/app/api/auth/action"
-import { ActionResult } from "@/app/lib/definitions"
+import { ActionResult, SearchParams } from "@/app/lib/definitions"
 import { getDictionary } from "@/app/lib/i18n/dictionaries"
 import { getRequestLocale } from "@/app/lib/i18n/server"
 import {
@@ -11,30 +11,22 @@ import {
   UpdateManagedUserRequest,
   UpdateUserProfileRequest,
   UserResponse,
-  UserSearchRequest,
   UserSearchResponse,
 } from "@/app/lib/users/definitions"
-
-function buildUserSearchQuery(request: UserSearchRequest) {
-  const params = new URLSearchParams()
-  const filter = request.filter?.trim()
-
-  if (filter) {
-    params.set("$filter", filter)
-  }
-
-  const query = params.toString()
-  return query ? `?${query}` : ""
-}
+import { queryParamsToString } from "@/app/lib/utils"
 
 export async function getMe(): Promise<BackendMeResponse> {
   return fetchAuthenticated<BackendMeResponse>("/me")
 }
 
 export async function getUsers(
-  request: UserSearchRequest = {}
+  request: SearchParams
 ): Promise<UserSearchResponse> {
-  return fetchAuthenticated<UserSearchResponse>(`/users${buildUserSearchQuery(request)}`)
+  const query = queryParamsToString(request)
+
+  return fetchAuthenticated<UserSearchResponse>(
+    `/users${query ? `?${query}` : ""}`
+  )
 }
 
 export async function updateManagedUser(
@@ -78,7 +70,9 @@ export async function updateMyProfile(
   } catch (error: unknown) {
     const dictionary = await getDictionary(await getRequestLocale())
     const errorMessage =
-      error instanceof Error ? error.message : dictionary.accountProfile.updateError
+      error instanceof Error
+        ? error.message
+        : dictionary.accountProfile.updateError
 
     return { success: false, error: errorMessage }
   }

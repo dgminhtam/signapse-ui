@@ -1,7 +1,10 @@
 import { cache } from "react"
 
 import { getMe } from "@/app/api/user/action"
-import { getDevAuthPermissions, isDevAuthModeEnabled } from "@/app/lib/dev-auth-mode"
+import {
+  getDevAuthPermissions,
+  isDevAuthModeEnabled,
+} from "@/app/lib/dev-auth-mode"
 import { hasPermission } from "@/app/lib/permissions"
 
 export const getCurrentPermissions = cache(async (): Promise<string[]> => {

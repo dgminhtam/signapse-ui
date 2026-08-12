@@ -2,11 +2,7 @@ import { z } from "zod"
 
 import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
 
-export type GraphViewNodeKind =
-  | "event"
-  | "asset"
-  | "news-article"
-  | "narrative"
+export type GraphViewNodeKind = "event" | "asset" | "news-article" | "narrative"
 
 export type GraphViewEdgeKind =
   | "event-asset"
@@ -131,10 +127,11 @@ export const graphViewResponseSchema = z.object({
   edges: z.array(graphViewEdgeSchema),
 }) satisfies z.ZodType<GraphViewResponse>
 
-const graphNodeIdPattern =
-  /^(event|asset|news-article|narrative):(\d+)$/
+const graphNodeIdPattern = /^(event|asset|news-article|narrative):(\d+)$/
 
-export function parseGraphViewNodeId(nodeId: string): GraphViewEntityReference | null {
+export function parseGraphViewNodeId(
+  nodeId: string
+): GraphViewEntityReference | null {
   const match = graphNodeIdPattern.exec(nodeId)
 
   if (!match) {
@@ -175,6 +172,9 @@ export function getGraphViewRelationLabel(
   relationType: string,
   dictionary: Dictionary
 ): string {
-  const relationLabels = dictionary.graphView.relationTypes as Record<string, string>
+  const relationLabels = dictionary.graphView.relationTypes as Record<
+    string,
+    string
+  >
   return relationLabels[relationType] || relationType
 }

@@ -1,27 +1,27 @@
-'use client';
+"use client"
 
-import * as React from 'react';
+import * as React from "react"
 
 import {
   formatDateValue,
   getDateDisplayLabel,
   parseCanonicalDateValue,
-} from '@platejs/date';
-import type { TDateElement } from 'platejs';
-import type { PlateElementProps } from 'platejs/react';
+} from "@platejs/date"
+import type { TDateElement } from "platejs"
+import type { PlateElementProps } from "platejs/react"
 
-import { PlateElement, useReadOnly } from 'platejs/react';
+import { PlateElement, useReadOnly } from "platejs/react"
 
-import { Calendar } from '@/components/ui/calendar';
+import { Calendar } from "@/components/ui/calendar"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover';
+} from "@/components/ui/popover"
 
 export function DateElement(props: PlateElementProps<TDateElement>) {
-  const { editor, element } = props;
-  const readOnly = useReadOnly();
+  const { editor, element } = props
+  const readOnly = useReadOnly()
 
   const trigger = (
     <span
@@ -35,7 +35,7 @@ export function DateElement(props: PlateElementProps<TDateElement>) {
         <span>Pick a date</span>
       )}
     </span>
-  );
+  )
 
   return (
     <PlateElement
@@ -53,14 +53,14 @@ export function DateElement(props: PlateElementProps<TDateElement>) {
           <PopoverTrigger asChild>{trigger}</PopoverTrigger>
           <PopoverContent className="w-auto p-0">
             <Calendar
-              selected={parseCanonicalDateValue(element.date ?? '')}
+              selected={parseCanonicalDateValue(element.date ?? "")}
               onSelect={(date) => {
-                if (!date) return;
+                if (!date) return
 
                 editor.tf.setNodes(
                   { date: formatDateValue(date), rawDate: undefined },
                   { at: element }
-                );
+                )
               }}
               mode="single"
               autoFocus
@@ -70,5 +70,5 @@ export function DateElement(props: PlateElementProps<TDateElement>) {
       )}
       {props.children}
     </PlateElement>
-  );
+  )
 }

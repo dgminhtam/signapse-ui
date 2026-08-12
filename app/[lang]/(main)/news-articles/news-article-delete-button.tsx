@@ -99,9 +99,13 @@ export function NewsArticleDeleteButton({
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{dictionary.newsArticles.deleteTitle}</AlertDialogTitle>
+          <AlertDialogTitle>
+            {dictionary.newsArticles.deleteTitle}
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            {formatMessage(dictionary.newsArticles.deleteDescription, { title })}
+            {formatMessage(dictionary.newsArticles.deleteDescription, {
+              title,
+            })}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

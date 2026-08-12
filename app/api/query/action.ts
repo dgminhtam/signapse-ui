@@ -15,12 +15,15 @@ export async function queryMarket(
   request: MarketQueryRequest
 ): Promise<ActionResult<MarketQueryResponse>> {
   const dictionary = await getDictionary(await getRequestLocale())
-  const parsedRequest = getMarketQueryRequestSchema(dictionary).safeParse(request)
+  const parsedRequest =
+    getMarketQueryRequestSchema(dictionary).safeParse(request)
 
   if (!parsedRequest.success) {
     return {
       success: false,
-      error: parsedRequest.error.issues[0]?.message || dictionary.marketQuery.validationInvalid,
+      error:
+        parsedRequest.error.issues[0]?.message ||
+        dictionary.marketQuery.validationInvalid,
     }
   }
 
@@ -29,7 +32,10 @@ export async function queryMarket(
       question: parsedRequest.data.question,
     }
 
-    if (typeof parsedRequest.data.asOfTime === "string" && parsedRequest.data.asOfTime.trim()) {
+    if (
+      typeof parsedRequest.data.asOfTime === "string" &&
+      parsedRequest.data.asOfTime.trim()
+    ) {
       payload.asOfTime = parsedRequest.data.asOfTime
     }
 
@@ -41,7 +47,10 @@ export async function queryMarket(
     const parsedResponse = marketQueryResponseSchema.safeParse(response)
 
     if (!parsedResponse.success) {
-      console.error("Market query response validation failed", parsedResponse.error.issues)
+      console.error(
+        "Market query response validation failed",
+        parsedResponse.error.issues
+      )
       return {
         success: false,
         error: dictionary.marketQuery.responseInvalid,

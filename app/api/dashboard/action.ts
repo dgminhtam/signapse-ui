@@ -18,7 +18,9 @@ export async function getDashboardSummary(): Promise<DashboardSummaryResponse> {
       "Dashboard summary response validation failed",
       parsedResponse.error.issues
     )
-    throw new Error(dictionary.workspaceOverview.tradingSnapshot.summaryErrorDescription)
+    throw new Error(
+      dictionary.workspaceOverview.tradingSnapshot.summaryErrorDescription
+    )
   }
 
   return parsedResponse.data

@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server'
-import { currentUser, auth } from '@clerk/nextjs/server'
+import { NextResponse } from "next/server"
+import { currentUser, auth } from "@clerk/nextjs/server"
 
-import { getDevAuthUser, isDevAuthModeEnabled } from '@/app/lib/dev-auth-mode'
+import { getDevAuthUser, isDevAuthModeEnabled } from "@/app/lib/dev-auth-mode"
 
 export async function GET() {
   if (isDevAuthModeEnabled()) {
@@ -10,7 +10,7 @@ export async function GET() {
 
   const { isAuthenticated } = await auth()
   if (!isAuthenticated) {
-    return new NextResponse('Unauthorized', { status: 401 })
+    return new NextResponse("Unauthorized", { status: 401 })
   }
 
   const user = await currentUser()

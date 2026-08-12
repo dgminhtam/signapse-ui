@@ -358,7 +358,9 @@ function ToggleNewsOutletActiveSwitch({
           active ? "text-foreground" : "text-muted-foreground"
         )}
       >
-        {active ? dictionary.newsOutlets.enabled : dictionary.newsOutlets.paused}
+        {active
+          ? dictionary.newsOutlets.enabled
+          : dictionary.newsOutlets.paused}
       </span>
       <Switch
         checked={active}
@@ -414,7 +416,9 @@ function DeleteNewsOutletButton({ id, name }: { id: number; name: string }) {
       </Tooltip>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{dictionary.newsOutlets.deleteTitle}</AlertDialogTitle>
+          <AlertDialogTitle>
+            {dictionary.newsOutlets.deleteTitle}
+          </AlertDialogTitle>
           <AlertDialogDescription>
             {formatMessage(dictionary.newsOutlets.deleteDescription, { name })}
           </AlertDialogDescription>

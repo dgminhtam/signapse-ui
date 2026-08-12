@@ -67,7 +67,7 @@ function GraphViewSkeleton() {
         </div>
       </div>
 
-      <div className="pointer-events-none absolute right-4 top-16 z-10 flex flex-col gap-1.5">
+      <div className="pointer-events-none absolute top-16 right-4 z-10 flex flex-col gap-1.5">
         <Skeleton className="size-7" />
         <Skeleton className="size-7" />
         <Skeleton className="size-7" />

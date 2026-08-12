@@ -1,10 +1,6 @@
 import { headers } from "next/headers"
 
-import {
-  AppLocale,
-  DEFAULT_APP_LOCALE,
-  isAppLocale,
-} from "./config"
+import { AppLocale, DEFAULT_APP_LOCALE, isAppLocale } from "./config"
 import { getDictionary } from "./dictionaries"
 import { getPathLocale, LOCALE_HEADER } from "./routing"
 

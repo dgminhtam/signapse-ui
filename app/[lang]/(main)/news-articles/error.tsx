@@ -25,7 +25,10 @@ export default function Error({
     <div className="flex h-[400px] w-full items-center justify-center">
       <Empty>
         <EmptyHeader>
-          <EmptyMedia variant="icon" className="bg-destructive/10 text-destructive">
+          <EmptyMedia
+            variant="icon"
+            className="bg-destructive/10 text-destructive"
+          >
             <AlertCircle />
           </EmptyMedia>
           <EmptyTitle>{dictionary.newsArticles.errorTitle}</EmptyTitle>

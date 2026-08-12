@@ -42,9 +42,7 @@ import { Textarea } from "@/components/ui/textarea"
 
 import { AI_PROVIDER_TYPES, providerOptions } from "./ai-provider-config-shared"
 
-function getAiProviderConfigUpdateSchema(
-  t: Dictionary["aiProviderConfigs"]
-) {
+function getAiProviderConfigUpdateSchema(t: Dictionary["aiProviderConfigs"]) {
   return z.object({
     providerType: z.enum(AI_PROVIDER_TYPES),
     description: z
@@ -52,11 +50,7 @@ function getAiProviderConfigUpdateSchema(
       .max(500, t.descriptionTooLong)
       .optional()
       .or(z.literal("")),
-    baseUrl: z
-      .string()
-      .max(500, t.baseUrlTooLong)
-      .optional()
-      .or(z.literal("")),
+    baseUrl: z.string().max(500, t.baseUrlTooLong).optional().or(z.literal("")),
     defaultProvider: z.boolean().default(false),
   })
 }
@@ -166,9 +160,7 @@ export function AiProviderConfigUpdateForm({
                     aria-invalid={fieldState.invalid}
                     placeholder="https://api.example.com/v1"
                   />
-                  <FieldDescription>
-                    {t.baseUrlDescription}
-                  </FieldDescription>
+                  <FieldDescription>{t.baseUrlDescription}</FieldDescription>
                   {fieldState.invalid ? (
                     <FieldError errors={[fieldState.error]} />
                   ) : null}

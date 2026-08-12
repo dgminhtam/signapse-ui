@@ -35,12 +35,17 @@ interface PageProps {
 }
 
 function getSingleParam(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] ?? "" : value ?? ""
+  return Array.isArray(value) ? (value[0] ?? "") : (value ?? "")
 }
 
-function getPositiveInteger(value: string | string[] | undefined, fallback: number) {
+function getPositiveInteger(
+  value: string | string[] | undefined,
+  fallback: number
+) {
   const parsedValue = Number(getSingleParam(value))
-  return Number.isInteger(parsedValue) && parsedValue > 0 ? parsedValue : fallback
+  return Number.isInteger(parsedValue) && parsedValue > 0
+    ? parsedValue
+    : fallback
 }
 
 function buildClientPage(
@@ -85,7 +90,9 @@ function normalizeUserPage(
   page: number,
   size: number
 ) {
-  return isUserPageResponse(response) ? response : buildClientPage(response, page, size)
+  return isUserPageResponse(response)
+    ? response
+    : buildClientPage(response, page, size)
 }
 
 async function getRoleOptions(permissions: string[]): Promise<{
@@ -137,7 +144,12 @@ async function UserListContent({
   const size = getPositiveInteger(sizeParam, 10)
   const filter = buildFilterQuery(filterParams)
   const permissions = await getCurrentPermissions()
-  const userResponse = await getUsers({ filter })
+  const userResponse = await getUsers({
+    filter,
+    page: page - 1,
+    size,
+    sort: [],
+  })
   const { roles, rolesAvailable } = await getRoleOptions(permissions)
   const userPage = normalizeUserPage(userResponse, page, size)
 

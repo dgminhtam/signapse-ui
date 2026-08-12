@@ -19,7 +19,7 @@ function AppTimeMetadata({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 text-xs leading-5 font-normal tabular-nums text-muted-foreground",
+        "inline-flex items-center gap-1.5 text-xs leading-5 font-normal text-muted-foreground tabular-nums",
         className
       )}
     >

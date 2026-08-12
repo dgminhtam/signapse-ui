@@ -448,7 +448,8 @@ export const vi = {
     },
     eventTimeline: {
       title: "Dòng sự kiện",
-      description: "Các sự kiện thị trường gần đây trong phạm vi theo dõi hiện tại.",
+      description:
+        "Các sự kiện thị trường gần đây trong phạm vi theo dõi hiện tại.",
       viewAll: "Xem tất cả sự kiện",
       openEvent: "Mở sự kiện",
       themes: "Chủ đề",
@@ -520,8 +521,7 @@ export const vi = {
       viewAll: "Xem tất cả tin tức",
       openArticle: "Mở bài viết",
       emptyTitle: "Chưa có tin tức mới",
-      emptyDescription:
-        "Tin tức mới nhất sẽ hiển thị tại đây khi có bài viết.",
+      emptyDescription: "Tin tức mới nhất sẽ hiển thị tại đây khi có bài viết.",
       errorTitle: "Không thể tải tin tức mới nhất",
       errorDescription: "Tin tức mới nhất hiện không khả dụng.",
       invalidDate: "Thời gian không hợp lệ",

@@ -8,11 +8,18 @@ export type NewsArticleStatus =
   | "CONTENT_FAILED"
   | "DERIVATION_FAILED"
 
-export type NewsPrimaryEventDerivationChangeType = "CREATED" | "UPDATED" | "NONE"
+export type NewsPrimaryEventDerivationChangeType =
+  | "CREATED"
+  | "UPDATED"
+  | "NONE"
 
 export type LinkedEventStatus = EventStatus
 
-export type LinkedEventEvidenceRole = "PRIMARY" | "SUPPORTING" | "UPDATE" | "CONTRADICTING"
+export type LinkedEventEvidenceRole =
+  | "PRIMARY"
+  | "SUPPORTING"
+  | "UPDATE"
+  | "CONTRADICTING"
 
 export interface MediaResponse {
   id: number

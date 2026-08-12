@@ -107,9 +107,11 @@ function getInitialRoleId(user: UserResponse | null, roles: RoleResponse[]) {
   }
 
   return (
-    roles.find(
-      (role) => role.key === user.role_name || role.name === user.role_name
-    )?.id.toString() ?? ""
+    roles
+      .find(
+        (role) => role.key === user.role_name || role.name === user.role_name
+      )
+      ?.id.toString() ?? ""
   )
 }
 
@@ -123,7 +125,10 @@ function getInitialValues(
       email: user.email || "",
       firstName: user.firstName || "",
       lastName: user.lastName || "",
-      phone: user.phone === null || user.phone === undefined ? "" : String(user.phone),
+      phone:
+        user.phone === null || user.phone === undefined
+          ? ""
+          : String(user.phone),
       roleId: getInitialRoleId(user, roles),
     }
   }

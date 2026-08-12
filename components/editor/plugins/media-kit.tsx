@@ -1,19 +1,19 @@
-'use client';
+"use client"
 
-import { CaptionPlugin } from '@platejs/caption/react';
+import { CaptionPlugin } from "@platejs/caption/react"
 import {
   AudioPlugin,
   FilePlugin,
   ImagePlugin,
   VideoPlugin,
-} from '@platejs/media/react';
-import { KEYS } from 'platejs';
+} from "@platejs/media/react"
+import { KEYS } from "platejs"
 
-import { AudioElement } from '@/components/ui/media-audio-node';
-import { FileElement } from '@/components/ui/media-file-node';
-import { ImageElement } from '@/components/ui/media-image-node';
-import { MediaPreviewDialog } from '@/components/ui/media-preview-dialog';
-import { VideoElement } from '@/components/ui/media-video-node';
+import { AudioElement } from "@/components/ui/media-audio-node"
+import { FileElement } from "@/components/ui/media-file-node"
+import { ImageElement } from "@/components/ui/media-image-node"
+import { MediaPreviewDialog } from "@/components/ui/media-preview-dialog"
+import { VideoElement } from "@/components/ui/media-video-node"
 
 export const MediaKit = [
   ImagePlugin.configure({
@@ -39,4 +39,4 @@ export const MediaKit = [
       },
     },
   }),
-];
+]

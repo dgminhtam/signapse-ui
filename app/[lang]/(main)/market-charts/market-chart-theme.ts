@@ -84,24 +84,55 @@ function getCssTextVariable(name: string, fallback: string) {
 
 export interface CreateChartStylesResult {
   grid: {
-    horizontal: { color: string; dashedValue: number[]; show: boolean; size: number; style: LineType }
-    vertical: { color: string; dashedValue: number[]; show: boolean; size: number; style: LineType }
+    horizontal: {
+      color: string
+      dashedValue: number[]
+      show: boolean
+      size: number
+      style: LineType
+    }
+    vertical: {
+      color: string
+      dashedValue: number[]
+      show: boolean
+      size: number
+      style: LineType
+    }
   }
   candle: {
     bar: Record<string, string>
-    priceMark: { high: { show: boolean }; low: { show: boolean }; last: { line: { size: number }; text: { family: string; size: number } } }
-    tooltip: { legend: { family: string }; title: { family: string; show: boolean } }
+    priceMark: {
+      high: { show: boolean }
+      low: { show: boolean }
+      last: { line: { size: number }; text: { family: string; size: number } }
+    }
+    tooltip: {
+      legend: { family: string }
+      title: { family: string; show: boolean }
+    }
   }
   indicator: {
     ohlc: Record<string, string>
     tooltip: { legend: { family: string }; title: { family: string } }
     lastValueMark: { text: { family: string } }
   }
-  xAxis: { axisLine: { color: string; size: number }; tickText: { color: string; family: string } }
-  yAxis: { axisLine: { color: string; size: number }; tickText: { color: string; family: string } }
+  xAxis: {
+    axisLine: { color: string; size: number }
+    tickText: { color: string; family: string }
+  }
+  yAxis: {
+    axisLine: { color: string; size: number }
+    tickText: { color: string; family: string }
+  }
   crosshair: {
-    horizontal: { line: { color: string }; text: { backgroundColor: string; color: string; family: string } }
-    vertical: { line: { color: string }; text: { backgroundColor: string; color: string; family: string } }
+    horizontal: {
+      line: { color: string }
+      text: { backgroundColor: string; color: string; family: string }
+    }
+    vertical: {
+      line: { color: string }
+      text: { backgroundColor: string; color: string; family: string }
+    }
   }
   overlay: { text: { family: string; size: number } }
 }
@@ -203,7 +234,12 @@ export function createChartStyles(
 
 export interface CreateDrawingOverlayStylesResult {
   [key: string]: unknown
-  circle: { borderColor: string; borderSize: number; color: string; style: PolygonType }
+  circle: {
+    borderColor: string
+    borderSize: number
+    color: string
+    style: PolygonType
+  }
   line: { color: string; size: number; style: LineType }
   point: {
     activeBorderColor: string
@@ -215,8 +251,18 @@ export interface CreateDrawingOverlayStylesResult {
     color: string
     radius: number
   }
-  rect: { borderColor: string; borderSize: number; color: string; style: PolygonType }
-  polygon: { style: PolygonType; color: string; borderColor: string; borderSize: number }
+  rect: {
+    borderColor: string
+    borderSize: number
+    color: string
+    style: PolygonType
+  }
+  polygon: {
+    style: PolygonType
+    color: string
+    borderColor: string
+    borderSize: number
+  }
   text: { color: string }
 }
 

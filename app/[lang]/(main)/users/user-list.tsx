@@ -52,7 +52,10 @@ interface UserListPageProps {
 }
 
 function getDisplayName(user: UserResponse, fallback: string) {
-  const displayName = [user.lastName, user.firstName].filter(Boolean).join(" ").trim()
+  const displayName = [user.lastName, user.firstName]
+    .filter(Boolean)
+    .join(" ")
+    .trim()
   return displayName || fallback
 }
 
@@ -77,7 +80,11 @@ function getAvatarUrl(user: UserResponse) {
   )
 }
 
-export function UserListPage({ roles, rolesAvailable, userPage }: UserListPageProps) {
+export function UserListPage({
+  roles,
+  rolesAvailable,
+  userPage,
+}: UserListPageProps) {
   const { dictionary } = useLocalization()
   const [selectedUser, setSelectedUser] = useState<UserResponse | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -128,7 +135,10 @@ export function UserListPage({ roles, rolesAvailable, userPage }: UserListPagePr
           <TableBody>
             {users.length > 0 ? (
               users.map((user) => {
-                const displayName = getDisplayName(user, dictionary.users.noName)
+                const displayName = getDisplayName(
+                  user,
+                  dictionary.users.noName
+                )
                 const email = user.email || dictionary.users.noEmail
 
                 return (
@@ -139,7 +149,10 @@ export function UserListPage({ roles, rolesAvailable, userPage }: UserListPagePr
                     <TableCell className="align-top whitespace-normal">
                       <div className="flex min-w-0 items-center gap-3">
                         <Avatar className="size-9 rounded-lg">
-                          <AvatarImage src={getAvatarUrl(user)} alt={displayName} />
+                          <AvatarImage
+                            src={getAvatarUrl(user)}
+                            alt={displayName}
+                          />
                           <AvatarFallback className="rounded-lg">
                             {getAvatarFallback(displayName, email)}
                           </AvatarFallback>
@@ -174,7 +187,8 @@ export function UserListPage({ roles, rolesAvailable, userPage }: UserListPagePr
                     </TableCell>
                     <TableCell className="w-48 max-w-[12rem]">
                       <span className="block truncate text-sm text-muted-foreground">
-                        {user.currentWorkspace?.name || dictionary.users.noWorkspace}
+                        {user.currentWorkspace?.name ||
+                          dictionary.users.noWorkspace}
                       </span>
                     </TableCell>
                     <TableCell className="w-28 text-center">

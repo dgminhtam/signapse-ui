@@ -119,9 +119,7 @@ export function WorkspaceWatchlistEditor({
       setSelectedAssets(assets)
     } catch (error: unknown) {
       const errorMessage =
-        error instanceof Error
-          ? error.message
-          : watchlistLoadErrorFallback
+        error instanceof Error ? error.message : watchlistLoadErrorFallback
       setLoadError(errorMessage)
       setInitialAssets([])
       setSelectedAssets([])
@@ -191,7 +189,9 @@ export function WorkspaceWatchlistEditor({
       }
 
       setInitialAssets([...selectedAssets])
-      toast.success(formatMessage(dictionary.watchlist.updated, { name: workspace.name }))
+      toast.success(
+        formatMessage(dictionary.watchlist.updated, { name: workspace.name })
+      )
       onOpenChange(false)
       router.refresh()
     })
@@ -220,9 +220,7 @@ export function WorkspaceWatchlistEditor({
                 <EmptyMedia variant="icon">
                   <FolderOpenIcon />
                 </EmptyMedia>
-                <EmptyTitle>
-                  {dictionary.watchlist.noWorkspaceTitle}
-                </EmptyTitle>
+                <EmptyTitle>{dictionary.watchlist.noWorkspaceTitle}</EmptyTitle>
                 <EmptyDescription>
                   {dictionary.watchlist.noWorkspaceDescription}
                 </EmptyDescription>
@@ -236,9 +234,7 @@ export function WorkspaceWatchlistEditor({
                 <EmptyMedia variant="icon">
                   <ShieldAlertIcon />
                 </EmptyMedia>
-                <EmptyTitle>
-                  {dictionary.watchlist.permissionTitle}
-                </EmptyTitle>
+                <EmptyTitle>{dictionary.watchlist.permissionTitle}</EmptyTitle>
                 <EmptyDescription>
                   {dictionary.watchlist.permissionDescription}
                 </EmptyDescription>
@@ -299,15 +295,17 @@ export function WorkspaceWatchlistEditor({
         <p className="text-sm text-muted-foreground">
           {canShowEditorBody
             ? formatMessage(dictionary.watchlist.selectedCount, {
-              count: formatNumber(selectedAssets.length),
-            })
+                count: formatNumber(selectedAssets.length),
+              })
             : dictionary.watchlist.blockedSummary}
         </p>
 
         <DialogFooter>
           <DialogClose asChild>
             <Button type="button" variant="ghost" disabled={isPending}>
-              {canShowEditorBody ? dictionary.common.cancel : dictionary.common.close}
+              {canShowEditorBody
+                ? dictionary.common.cancel
+                : dictionary.common.close}
             </Button>
           </DialogClose>
           {canManageWorkspaceWatchlist ? (

@@ -122,17 +122,17 @@ export function createIchimokuCloudPolygons(
           { dataIndex: previous.dataIndex, value: previous.spanB },
         ],
         tone:
-          (previousDifference || currentDifference) >= 0 ? "bullish" : "bearish",
+          (previousDifference || currentDifference) >= 0
+            ? "bullish"
+            : "bearish",
       },
     ]
   }
 
-  const ratio =
-    previousDifference / (previousDifference - currentDifference)
+  const ratio = previousDifference / (previousDifference - currentDifference)
   const crossing = {
     dataIndex:
-      previous.dataIndex +
-      (current.dataIndex - previous.dataIndex) * ratio,
+      previous.dataIndex + (current.dataIndex - previous.dataIndex) * ratio,
     value: previous.spanA + (current.spanA - previous.spanA) * ratio,
   }
 

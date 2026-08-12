@@ -16,11 +16,19 @@ import { usePathname } from "next/navigation"
 
 import { useLocalization } from "@/app/lib/i18n/provider"
 import { stripLocaleFromPathname } from "@/app/lib/i18n/routing"
-import { NavItem, createSiteConfig, filterNavItemsByPermissions } from "@/config/site"
+import {
+  NavItem,
+  createSiteConfig,
+  filterNavItemsByPermissions,
+} from "@/config/site"
 import { Logo } from "@/components/logo"
 
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./ui/collapsible"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "./ui/collapsible"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -87,7 +95,9 @@ export function AppSidebar({
       <SidebarContent>
         <NavMain items={visibleNavItems} />
       </SidebarContent>
-      <SidebarFooter>{isAuthenticated && <NavUser user={user} />}</SidebarFooter>
+      <SidebarFooter>
+        {isAuthenticated && <NavUser user={user} />}
+      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   )
@@ -100,11 +110,17 @@ function SidebarBrand() {
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <SidebarMenuButton asChild size="lg" tooltip={localizedSiteConfig.brand.name}>
+        <SidebarMenuButton
+          asChild
+          size="lg"
+          tooltip={localizedSiteConfig.brand.name}
+        >
           <Link href="/dashboard">
             <Logo width={32} height={32} />
             <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
-              <span className="truncate font-medium">{localizedSiteConfig.brand.name}</span>
+              <span className="truncate font-medium">
+                {localizedSiteConfig.brand.name}
+              </span>
               <span className="truncate text-xs text-muted-foreground">
                 {localizedSiteConfig.brand.subtitle}
               </span>
@@ -136,7 +152,9 @@ export function NavMain({ items }: { items: NavItem[] }) {
         <SidebarMenu className="gap-1">
           {items.map((item, itemIndex) => {
             const hasSubItems = (item.items?.length ?? 0) > 0
-            const isActive = hasSubItems ? hasActiveSubItem(item.items) : matchesPath(item.url)
+            const isActive = hasSubItems
+              ? hasActiveSubItem(item.items)
+              : matchesPath(item.url)
             const collapsibleContentId = getNavCollapsibleContentId(itemIndex)
 
             if (!hasSubItems) {
@@ -165,7 +183,10 @@ export function NavMain({ items }: { items: NavItem[] }) {
                 className="group/collapsible"
               >
                 <SidebarMenuItem>
-                  <CollapsibleTrigger asChild aria-controls={collapsibleContentId}>
+                  <CollapsibleTrigger
+                    asChild
+                    aria-controls={collapsibleContentId}
+                  >
                     <SidebarMenuButton
                       tooltip={item.title}
                       isActive={false}
@@ -177,7 +198,7 @@ export function NavMain({ items }: { items: NavItem[] }) {
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent id={collapsibleContentId}>
-                    <SidebarMenuSub className="ml-3.5 mr-0 py-1 pr-0">
+                    <SidebarMenuSub className="mr-0 ml-3.5 py-1 pr-0">
                       {item.items?.map((subItem) => {
                         const isSubItemActive = matchesPath(subItem.url)
 
@@ -225,11 +246,16 @@ function NavUser({ user }: NavUserProps) {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user?.imageUrl ?? ""} alt={user?.fullName ?? ""} />
+                <AvatarImage
+                  src={user?.imageUrl ?? ""}
+                  alt={user?.fullName ?? ""}
+                />
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user?.fullName ?? ""}</span>
+                <span className="truncate font-medium">
+                  {user?.fullName ?? ""}
+                </span>
                 <span className="truncate text-xs">{user?.username ?? ""}</span>
               </div>
               <ChevronsUpDownIcon className="ml-auto size-4" />
@@ -245,12 +271,19 @@ function NavUser({ user }: NavUserProps) {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user?.imageUrl ?? ""} alt={user?.fullName ?? ""} />
+                  <AvatarImage
+                    src={user?.imageUrl ?? ""}
+                    alt={user?.fullName ?? ""}
+                  />
                   <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user?.fullName ?? ""}</span>
-                  <span className="truncate text-xs">{user?.username ?? ""}</span>
+                  <span className="truncate font-medium">
+                    {user?.fullName ?? ""}
+                  </span>
+                  <span className="truncate text-xs">
+                    {user?.username ?? ""}
+                  </span>
                 </div>
               </div>
             </DropdownMenuLabel>

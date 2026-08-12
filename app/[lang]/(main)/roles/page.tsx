@@ -22,7 +22,10 @@ export default async function RolesPage() {
     )
   }
 
-  const [roles, permissionCatalog] = await Promise.all([getRoles(), getPermissions()])
+  const [roles, permissionCatalog] = await Promise.all([
+    getRoles(),
+    getPermissions(),
+  ])
 
   return <RoleListPage roles={roles} permissions={permissionCatalog} />
 }

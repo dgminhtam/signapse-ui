@@ -1,4 +1,7 @@
-import { hasAnyPermission, type PermissionCollection } from "@/app/lib/permissions"
+import {
+  hasAnyPermission,
+  type PermissionCollection,
+} from "@/app/lib/permissions"
 
 // Prefer the canon news-article permission keys, but accept legacy source-document
 // keys until backend permission literals are confirmed and fully migrated.
@@ -24,18 +27,26 @@ export const NEWS_ARTICLE_DELETE_PERMISSIONS = [
 
 export const NEWS_ARTICLE_NAV_PERMISSIONS = NEWS_ARTICLE_READ_PERMISSIONS
 
-export function canReadNewsArticles(permissions: PermissionCollection): boolean {
+export function canReadNewsArticles(
+  permissions: PermissionCollection
+): boolean {
   return hasAnyPermission(permissions, NEWS_ARTICLE_READ_PERMISSIONS)
 }
 
-export function canAnalyzeNewsArticles(permissions: PermissionCollection): boolean {
+export function canAnalyzeNewsArticles(
+  permissions: PermissionCollection
+): boolean {
   return hasAnyPermission(permissions, NEWS_ARTICLE_ANALYZE_PERMISSIONS)
 }
 
-export function canUpdateNewsArticles(permissions: PermissionCollection): boolean {
+export function canUpdateNewsArticles(
+  permissions: PermissionCollection
+): boolean {
   return hasAnyPermission(permissions, NEWS_ARTICLE_UPDATE_PERMISSIONS)
 }
 
-export function canDeleteNewsArticles(permissions: PermissionCollection): boolean {
+export function canDeleteNewsArticles(
+  permissions: PermissionCollection
+): boolean {
   return hasAnyPermission(permissions, NEWS_ARTICLE_DELETE_PERMISSIONS)
 }

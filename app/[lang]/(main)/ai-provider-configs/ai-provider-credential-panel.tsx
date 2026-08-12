@@ -119,7 +119,9 @@ export function AiProviderCredentialPanel({
                 <KeyRound />
               </EmptyMedia>
               <EmptyTitle>{t.noCredentials}</EmptyTitle>
-              <EmptyDescription>{t.credentialEmptyDescription}</EmptyDescription>
+              <EmptyDescription>
+                {t.credentialEmptyDescription}
+              </EmptyDescription>
             </EmptyHeader>
           </Empty>
         )}
@@ -245,9 +247,7 @@ function CreateCredentialForm({
                 placeholder={t.apiKeyNewPlaceholder}
                 autoComplete="new-password"
               />
-              <FieldDescription>
-                {t.apiKeyDescription}
-              </FieldDescription>
+              <FieldDescription>{t.apiKeyDescription}</FieldDescription>
             </Field>
 
             <Field>
@@ -363,10 +363,14 @@ function CredentialItem({
     }
 
     startUpdating(async () => {
-      const result = await updateAiProviderCredential(provider.id, credential.id, {
-        apiKey: trimmedApiKey,
-        model: trimmedModel,
-      })
+      const result = await updateAiProviderCredential(
+        provider.id,
+        credential.id,
+        {
+          apiKey: trimmedApiKey,
+          model: trimmedModel,
+        }
+      )
 
       if (result.success) {
         toast.success(t.credentialUpdateSuccess)
@@ -387,7 +391,7 @@ function CredentialItem({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex min-w-0 flex-col gap-2">
             <div className="flex min-w-0 flex-wrap items-center gap-2">
-              <span className="min-w-0 break-all font-medium text-foreground">
+              <span className="min-w-0 font-medium break-all text-foreground">
                 {credential.model || t.noModel}
               </span>
               {credential.keyPreview ? (

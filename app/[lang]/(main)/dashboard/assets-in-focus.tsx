@@ -212,7 +212,9 @@ function AssetsInFocusItems({
                 ) : null}
               </ItemContent>
               <ItemActions>
-                <Badge variant="secondary">{t.assetTypes[item.assetType]}</Badge>
+                <Badge variant="secondary">
+                  {t.assetTypes[item.assetType]}
+                </Badge>
               </ItemActions>
               <ItemFooter className="flex-col items-start gap-2 sm:flex-row sm:items-center">
                 <AppTimeMetadata icon={CalendarClockIcon}>

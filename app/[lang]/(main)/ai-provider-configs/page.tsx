@@ -57,11 +57,7 @@ async function AiProviderConfigsContent({
   searchParamsPromise: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const resolvedParams = await searchParamsPromise
-  const {
-    page = "1",
-    size = "10",
-    sort = "id_desc",
-  } = resolvedParams
+  const { page = "1", size = "10", sort = "id_desc" } = resolvedParams
 
   const providerPage = await getAiProviderConfigs({
     page: Math.max(0, Number(page) - 1),

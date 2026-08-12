@@ -72,7 +72,9 @@ export function buildPrimaryEventDerivationSummary(
   }
 
   if (result.eventCanonicalKey) {
-    parts.push(formatMessage(summary.eventKey, { value: result.eventCanonicalKey }))
+    parts.push(
+      formatMessage(summary.eventKey, { value: result.eventCanonicalKey })
+    )
   } else if (typeof result.eventId === "number") {
     parts.push(formatMessage(summary.eventId, { value: result.eventId }))
   }

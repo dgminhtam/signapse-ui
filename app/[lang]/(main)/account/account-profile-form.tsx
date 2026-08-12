@@ -57,7 +57,7 @@ function getAccountProfileSchema(t: Dictionary["accountProfile"]) {
       .trim()
       .min(1, t.dateOfBirthRequired)
       .regex(/^\d{4}-\d{2}-\d{2}$/, t.dateOfBirthInvalid),
-    email: z  
+    email: z
       .string()
       .trim()
       .min(1, t.emailRequired)
@@ -196,7 +196,9 @@ export function AccountProfileForm({
                         .filter(Boolean)
                         .join(" ")}
                     />
-                    <AvatarFallback>{initialData.avatarFallback}</AvatarFallback>
+                    <AvatarFallback>
+                      {initialData.avatarFallback}
+                    </AvatarFallback>
                   </Avatar>
                 </button>
                 {avatarUrl ? (
@@ -295,7 +297,9 @@ export function AccountProfileForm({
                     disabled
                     aria-invalid={fieldState.invalid}
                   />
-                  <FieldDescription>{t.emailReadOnlyDescription}</FieldDescription>
+                  <FieldDescription>
+                    {t.emailReadOnlyDescription}
+                  </FieldDescription>
                   {fieldState.invalid ? (
                     <FieldError errors={[fieldState.error]} />
                   ) : null}

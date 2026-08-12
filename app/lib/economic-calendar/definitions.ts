@@ -90,20 +90,18 @@ export function getEconomicCalendarImpactBadgeProps(
 ) {
   switch (getEconomicCalendarImpactLevel(impact)) {
     case "HIGH":
-    return {
-      className:
-        "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300",
-    }
+      return {
+        className: "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300",
+      }
     case "MEDIUM":
-    return {
-      className:
-        "bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300",
-    }
+      return {
+        className:
+          "bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300",
+      }
     case "LOW":
-    return {
-      className:
-        "bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-300",
-    }
+      return {
+        className: "bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-300",
+      }
     default:
       return { variant: "outline" as const }
   }

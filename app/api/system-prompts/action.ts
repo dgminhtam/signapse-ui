@@ -44,17 +44,22 @@ export async function getSystemPrompts(
 export async function getSystemPromptByType(
   promptType: SystemPromptType
 ): Promise<SystemPromptResponse> {
-  return fetchAuthenticated<SystemPromptResponse>(getSystemPromptPath(promptType))
+  return fetchAuthenticated<SystemPromptResponse>(
+    getSystemPromptPath(promptType)
+  )
 }
 
 export async function createSystemPrompt(
   request: CreateSystemPromptRequest
 ): Promise<ActionResult<SystemPromptResponse>> {
   try {
-    const data = await fetchAuthenticated<SystemPromptResponse>("/system-prompts", {
-      method: "POST",
-      body: JSON.stringify(request),
-    })
+    const data = await fetchAuthenticated<SystemPromptResponse>(
+      "/system-prompts",
+      {
+        method: "POST",
+        body: JSON.stringify(request),
+      }
+    )
 
     revalidateSystemPromptRoutes(request.promptType)
 
@@ -118,7 +123,9 @@ export async function deleteSystemPrompt(
     return {
       success: false,
       error:
-        error instanceof Error ? error.message : dictionary.systemPrompts.deleteError,
+        error instanceof Error
+          ? error.message
+          : dictionary.systemPrompts.deleteError,
     }
   }
 }

@@ -394,9 +394,12 @@ function ReadinessSummary({
             count: formatCount(activeDestinationCount),
           })
         : t.readiness.noDestinationPermission,
-      state: activeDestinationCount > 0 ? t.readiness.ready : t.readiness.needsLink,
+      state:
+        activeDestinationCount > 0 ? t.readiness.ready : t.readiness.needsLink,
       status:
-        activeDestinationCount > 0 ? ("ready" as const) : ("attention" as const),
+        activeDestinationCount > 0
+          ? ("ready" as const)
+          : ("attention" as const),
       icon: MessageCircle,
     },
     {
@@ -408,8 +411,12 @@ function ReadinessSummary({
             workspace: data.currentWorkspace.name,
           })
         : t.readiness.noWorkspace,
-      state: configuredRoutes > 0 ? t.readiness.routesEnabled : t.readiness.needsReview,
-      status: configuredRoutes > 0 ? ("ready" as const) : ("attention" as const),
+      state:
+        configuredRoutes > 0
+          ? t.readiness.routesEnabled
+          : t.readiness.needsReview,
+      status:
+        configuredRoutes > 0 ? ("ready" as const) : ("attention" as const),
       icon: RadioTower,
     },
     {
@@ -439,7 +446,9 @@ function ReadinessSummary({
               </CardTitle>
               <CardDescription>{item.description}</CardDescription>
               <CardAction>
-                <ReadinessBadge status={item.status}>{item.state}</ReadinessBadge>
+                <ReadinessBadge status={item.status}>
+                  {item.state}
+                </ReadinessBadge>
               </CardAction>
             </CardHeader>
           </Card>
@@ -461,11 +470,7 @@ function BotConnectionSection({
   const { dictionary, formatDateTime, formatMessage } = useLocalization()
   const t = dictionary.telegram
   const formatTime = (value?: string) =>
-    formatTelegramDateTime(
-      value,
-      formatDateTime,
-      t.common.noData
-    )
+    formatTelegramDateTime(value, formatDateTime, t.common.noData)
 
   return (
     <section className="flex flex-col gap-4" aria-labelledby="telegram-bots">
@@ -512,7 +517,7 @@ function BotConnectionSection({
                   key={connection.id}
                   className="border-border transition-colors hover:bg-muted/50"
                 >
-                  <TableCell className="whitespace-normal align-top">
+                  <TableCell className="align-top whitespace-normal">
                     <div className="flex min-w-0 flex-col gap-1">
                       <span className="font-medium text-foreground">
                         {getBotLabel(connection, dictionary)}
@@ -528,11 +533,13 @@ function BotConnectionSection({
                   <TableCell className="align-top">
                     <StatusBadge status={connection.status} />
                   </TableCell>
-                  <TableCell className="whitespace-normal align-top">
+                  <TableCell className="align-top whitespace-normal">
                     <AppTimeMetadata icon={CalendarClock}>
                       {connection.lastWebhookRegisteredAt
                         ? formatMessage(t.bot.webhookRegistered, {
-                            time: formatTime(connection.lastWebhookRegisteredAt),
+                            time: formatTime(
+                              connection.lastWebhookRegisteredAt
+                            ),
                           })
                         : t.bot.webhookNotRegistered}
                     </AppTimeMetadata>
@@ -547,7 +554,7 @@ function BotConnectionSection({
                       {formatTime(connection.lastValidatedAt)}
                     </AppTimeMetadata>
                   </TableCell>
-                  <TableCell className="align-top text-right">
+                  <TableCell className="text-right align-top">
                     <div className="flex justify-end gap-1">
                       <BotConnectionSheet
                         canManage={canManage}
@@ -559,7 +566,9 @@ function BotConnectionSection({
                         actionLabel={t.common.pause}
                         triggerLabel={t.bot.pauseTrigger}
                         disabled={!canManage || connection.status !== "ACTIVE"}
-                        action={() => disableTelegramBotConnection(connection.id)}
+                        action={() =>
+                          disableTelegramBotConnection(connection.id)
+                        }
                         successMessage={t.bot.pauseSuccess}
                       />
                       <ActionConfirmDialog
@@ -568,7 +577,9 @@ function BotConnectionSection({
                         actionLabel={t.bot.deleteAction}
                         triggerLabel={t.bot.deleteTrigger}
                         disabled={!canManage}
-                        action={() => deleteTelegramBotConnection(connection.id)}
+                        action={() =>
+                          deleteTelegramBotConnection(connection.id)
+                        }
                         successMessage={t.bot.deleteSuccess}
                       />
                     </div>
@@ -607,14 +618,13 @@ function DestinationSection({
   const { dictionary, formatDateTime } = useLocalization()
   const t = dictionary.telegram
   const formatTime = (value?: string) =>
-    formatTelegramDateTime(
-      value,
-      formatDateTime,
-      t.common.noData
-    )
+    formatTelegramDateTime(value, formatDateTime, t.common.noData)
 
   return (
-    <section className="flex flex-col gap-4" aria-labelledby="telegram-destinations">
+    <section
+      className="flex flex-col gap-4"
+      aria-labelledby="telegram-destinations"
+    >
       <SectionHeader
         id="telegram-destinations"
         title={t.destination.sectionTitle}
@@ -657,14 +667,17 @@ function DestinationSection({
           </TableHeader>
           <TableBody>
             {!canRead ? (
-              <AccessLimitedRow colSpan={6} title={t.destination.accessLimited} />
+              <AccessLimitedRow
+                colSpan={6}
+                title={t.destination.accessLimited}
+              />
             ) : destinations.length > 0 ? (
               destinations.map((destination) => (
                 <TableRow
                   key={destination.id}
                   className="border-border transition-colors hover:bg-muted/50"
                 >
-                  <TableCell className="whitespace-normal align-top">
+                  <TableCell className="align-top whitespace-normal">
                     <div className="flex min-w-0 flex-col gap-1">
                       <span className="font-medium text-foreground">
                         {getDestinationLabel(destination, dictionary)}
@@ -682,7 +695,7 @@ function DestinationSection({
                       {formatChatType(destination.chatType, dictionary)}
                     </Badge>
                   </TableCell>
-                  <TableCell className="whitespace-normal align-top text-sm text-muted-foreground">
+                  <TableCell className="align-top text-sm whitespace-normal text-muted-foreground">
                     {destination.botDisplayLabel ??
                       destination.botUsername ??
                       formatLabel(
@@ -698,7 +711,7 @@ function DestinationSection({
                       {formatTime(destination.lastModifiedDate)}
                     </AppTimeMetadata>
                   </TableCell>
-                  <TableCell className="align-top text-right">
+                  <TableCell className="text-right align-top">
                     <div className="flex justify-end gap-1">
                       <DestinationUpdateSheet
                         destination={destination}
@@ -710,7 +723,9 @@ function DestinationSection({
                         actionLabel={t.common.pause}
                         triggerLabel={t.destination.pauseTrigger}
                         disabled={!canManage || destination.status !== "ACTIVE"}
-                        action={() => disableTelegramDestination(destination.id)}
+                        action={() =>
+                          disableTelegramDestination(destination.id)
+                        }
                         successMessage={t.destination.pauseSuccess}
                       />
                       <ActionConfirmDialog
@@ -806,7 +821,7 @@ function FeatureRoutingSection({
                 return (
                   <Fragment key={route.featureKey}>
                     <TableRow className="border-border transition-colors hover:bg-muted/50">
-                      <TableCell className="whitespace-normal align-top">
+                      <TableCell className="align-top whitespace-normal">
                         <div className="flex min-w-0 flex-col gap-1">
                           <span className="font-medium text-foreground">
                             {route.label}
@@ -820,9 +835,10 @@ function FeatureRoutingSection({
                         </div>
                       </TableCell>
                       <TableCell className="align-top text-sm text-muted-foreground">
-                        {currentWorkspace?.name ?? t.routing.noWorkspaceSelected}
+                        {currentWorkspace?.name ??
+                          t.routing.noWorkspaceSelected}
                       </TableCell>
-                      <TableCell className="whitespace-normal align-top">
+                      <TableCell className="align-top whitespace-normal">
                         <FeatureRouteDestinationSelect
                           route={route}
                           activeDestinations={activeDestinations}
@@ -840,7 +856,10 @@ function FeatureRoutingSection({
                     </TableRow>
                     {isScheduledMarketAnalysis ? (
                       <TableRow className="border-border bg-muted/10 hover:bg-muted/10">
-                        <TableCell colSpan={4} className="whitespace-normal p-4">
+                        <TableCell
+                          colSpan={4}
+                          className="p-4 whitespace-normal"
+                        >
                           <MarketAnalysisSchedulePanel
                             schedules={schedules}
                             activeDestinations={activeDestinations}
@@ -940,7 +959,7 @@ function MarketAnalysisSchedulePanel({
                   key={schedule.id}
                   className="border-border transition-colors hover:bg-muted/50"
                 >
-                  <TableCell className="whitespace-normal align-top">
+                  <TableCell className="align-top whitespace-normal">
                     <div className="flex min-w-0 flex-col gap-1">
                       <span className="font-medium text-foreground">
                         {schedule.name}
@@ -955,7 +974,7 @@ function MarketAnalysisSchedulePanel({
                       currentWorkspace?.name ??
                       t.schedule.currentWorkspaceFallback}
                   </TableCell>
-                  <TableCell className="whitespace-normal align-top text-sm text-muted-foreground">
+                  <TableCell className="align-top text-sm whitespace-normal text-muted-foreground">
                     {schedule.destination
                       ? getDestinationLabel(schedule.destination, dictionary)
                       : t.schedule.noDestination}
@@ -963,13 +982,13 @@ function MarketAnalysisSchedulePanel({
                   <TableCell className="align-top text-sm text-muted-foreground">
                     {schedule.localTimes.join(", ")}
                   </TableCell>
-                  <TableCell className="whitespace-normal align-top text-sm text-muted-foreground">
+                  <TableCell className="align-top text-sm whitespace-normal text-muted-foreground">
                     {formatScheduledAssets(schedule, dictionary)}
                   </TableCell>
                   <TableCell className="align-top">
                     <StatusBadge status={schedule.status} />
                   </TableCell>
-                  <TableCell className="align-top text-right">
+                  <TableCell className="text-right align-top">
                     <div className="flex justify-end gap-1">
                       <ScheduleFormSheet
                         schedule={schedule}
@@ -983,7 +1002,9 @@ function MarketAnalysisSchedulePanel({
                         description={t.schedule.pauseDescription}
                         actionLabel={t.common.pause}
                         triggerLabel={t.schedule.pauseTrigger}
-                        disabled={!canManageSchedules || schedule.status !== "ACTIVE"}
+                        disabled={
+                          !canManageSchedules || schedule.status !== "ACTIVE"
+                        }
                         action={() =>
                           disableTelegramMarketAnalysisSchedule(schedule.id)
                         }
@@ -1011,7 +1032,9 @@ function MarketAnalysisSchedulePanel({
                     <CalendarClock />
                   </EmptyMedia>
                   <EmptyTitle>{t.schedule.emptyTitle}</EmptyTitle>
-                  <EmptyDescription>{t.schedule.emptyDescription}</EmptyDescription>
+                  <EmptyDescription>
+                    {t.schedule.emptyDescription}
+                  </EmptyDescription>
                 </EmptyHeader>
               </AppListTableEmptyState>
             )}
@@ -1053,7 +1076,10 @@ function BotConnectionSheet({
       }
 
       startTransition(async () => {
-        const result = await updateTelegramBotConnection(connection!.id, request.data)
+        const result = await updateTelegramBotConnection(
+          connection!.id,
+          request.data
+        )
 
         if (result.success) {
           toast.success(t.bot.updateSuccess)
@@ -1115,9 +1141,7 @@ function BotConnectionSheet({
           <AppFormShell
             title={isEdit ? t.bot.formEditTitle : t.bot.formCreateTitle}
             description={
-              isEdit
-                ? t.bot.formEditDescription
-                : t.bot.formCreateDescription
+              isEdit ? t.bot.formEditDescription : t.bot.formCreateDescription
             }
             width="sm"
             className="max-w-none border-0 shadow-none"
@@ -1136,7 +1160,9 @@ function BotConnectionSheet({
                       placeholder={t.bot.tokenPlaceholder}
                       disabled={isPending}
                     />
-                    <FieldDescription>{t.bot.tokenDescription}</FieldDescription>
+                    <FieldDescription>
+                      {t.bot.tokenDescription}
+                    </FieldDescription>
                   </Field>
                 ) : null}
                 <Field>
@@ -1160,7 +1186,11 @@ function BotConnectionSheet({
                 </Button>
               </SheetClose>
               <Button type="submit" disabled={isPending || !canManage}>
-                {isPending ? <Spinner data-icon="inline-start" /> : <Send data-icon="inline-start" />}
+                {isPending ? (
+                  <Spinner data-icon="inline-start" />
+                ) : (
+                  <Send data-icon="inline-start" />
+                )}
                 {isEdit ? t.bot.saveBot : t.bot.connectBot}
               </Button>
             </AppFormShellFooter>
@@ -1183,11 +1213,7 @@ function DestinationLinkSheet({
   const { dictionary, formatDateTime, formatMessage } = useLocalization()
   const t = dictionary.telegram
   const formatTime = (value?: string) =>
-    formatTelegramDateTime(
-      value,
-      formatDateTime,
-      t.common.noData
-    )
+    formatTelegramDateTime(value, formatDateTime, t.common.noData)
   const [botConnectionId, setBotConnectionId] = useState(
     activeBotConnections[0]?.id.toString() ?? ""
   )
@@ -1199,9 +1225,7 @@ function DestinationLinkSheet({
   const linkedBotConnection = activeBotConnections.find(
     (connection) => connection.id === linkToken?.botConnectionId
   )
-  const botUsername = linkedBotConnection?.botUsername
-    ?.trim()
-    .replace(/^@/, "")
+  const botUsername = linkedBotConnection?.botUsername?.trim().replace(/^@/, "")
 
   function buildDeepLink(parameter: "start" | "startgroup") {
     if (!botUsername || !linkToken?.token) return null
@@ -1290,7 +1314,9 @@ function DestinationLinkSheet({
                   </SelectGroup>
                 </SelectContent>
               </Select>
-              <FieldDescription>{t.destination.botDescription}</FieldDescription>
+              <FieldDescription>
+                {t.destination.botDescription}
+              </FieldDescription>
             </Field>
           </FieldGroup>
           {linkToken ? (
@@ -1299,7 +1325,7 @@ function DestinationLinkSheet({
                 <Clipboard className="size-4 text-muted-foreground" />
                 {t.destination.linkCommand}
               </div>
-              <code className="min-w-0 break-all rounded-md bg-background px-3 py-2 text-sm">
+              <code className="min-w-0 rounded-md bg-background px-3 py-2 text-sm break-all">
                 {linkToken.startCommand}
               </code>
               <AppTimeMetadata icon={CalendarClock}>
@@ -1356,7 +1382,11 @@ function DestinationLinkSheet({
               </Button>
             </SheetClose>
             <Button type="submit" disabled={!canSubmit || isPending}>
-              {isPending ? <Spinner data-icon="inline-start" /> : <Link2 data-icon="inline-start" />}
+              {isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <Link2 data-icon="inline-start" />
+              )}
               {t.destination.createCommand}
             </Button>
           </SheetFooter>
@@ -1395,7 +1425,10 @@ function DestinationUpdateSheet({
     }
 
     startTransition(async () => {
-      const result = await updateTelegramDestination(destination.id, request.data)
+      const result = await updateTelegramDestination(
+        destination.id,
+        request.data
+      )
 
       if (result.success) {
         toast.success(t.destination.updateSuccess)
@@ -1429,7 +1462,9 @@ function DestinationUpdateSheet({
             <AppFormShellBody>
               <FieldGroup>
                 <Field>
-                  <FieldLabel htmlFor={`telegram-destination-${destination.id}`}>
+                  <FieldLabel
+                    htmlFor={`telegram-destination-${destination.id}`}
+                  >
                     {t.bot.displayName}
                   </FieldLabel>
                   <Input
@@ -1448,7 +1483,11 @@ function DestinationUpdateSheet({
                 </Button>
               </SheetClose>
               <Button type="submit" disabled={isPending}>
-                {isPending ? <Spinner data-icon="inline-start" /> : <Send data-icon="inline-start" />}
+                {isPending ? (
+                  <Spinner data-icon="inline-start" />
+                ) : (
+                  <Send data-icon="inline-start" />
+                )}
                 {t.destination.saveDestination}
               </Button>
             </AppFormShellFooter>
@@ -1477,11 +1516,14 @@ function ScheduleFormSheet({
   const { dictionary, formatMessage } = useLocalization()
   const t = dictionary.telegram
   const [destinationId, setDestinationId] = useState(
-    schedule?.destination?.id.toString() ?? activeDestinations[0]?.id.toString() ?? ""
+    schedule?.destination?.id.toString() ??
+      activeDestinations[0]?.id.toString() ??
+      ""
   )
   const [isPending, startTransition] = useTransition()
   const isEdit = Boolean(schedule)
-  const canSubmit = canManage && Boolean(currentWorkspace) && Boolean(destinationId)
+  const canSubmit =
+    canManage && Boolean(currentWorkspace) && Boolean(destinationId)
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -1503,13 +1545,13 @@ function ScheduleFormSheet({
     const request = getSaveTelegramMarketAnalysisScheduleSchema(
       dictionary
     ).safeParse({
-        name: getFormString(formData, "name"),
-        workspaceId: currentWorkspace.id,
-        destinationId: Number(destinationId),
-        timezone: getFormString(formData, "timezone"),
-        localTimes: splitCommaValues(getFormString(formData, "localTimes")),
-        assetIds: assetIds.data,
-      })
+      name: getFormString(formData, "name"),
+      workspaceId: currentWorkspace.id,
+      destinationId: Number(destinationId),
+      timezone: getFormString(formData, "timezone"),
+      localTimes: splitCommaValues(getFormString(formData, "localTimes")),
+      assetIds: assetIds.data,
+    })
 
     if (!request.success) {
       toast.error(request.error.issues[0]?.message ?? t.schedule.invalidData)
@@ -1542,7 +1584,11 @@ function ScheduleFormSheet({
             <span className="sr-only">{t.schedule.editTrigger}</span>
           </Button>
         ) : (
-          <Button disabled={!canManage || !currentWorkspace || activeDestinations.length === 0}>
+          <Button
+            disabled={
+              !canManage || !currentWorkspace || activeDestinations.length === 0
+            }
+          >
             <Plus data-icon="inline-start" />
             {t.schedule.createSchedule}
           </Button>
@@ -1599,7 +1645,9 @@ function ScheduleFormSheet({
                         disabled={isPending}
                       >
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder={t.destination.placeholder} />
+                          <SelectValue
+                            placeholder={t.destination.placeholder}
+                          />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectGroup>
@@ -1619,7 +1667,10 @@ function ScheduleFormSheet({
                               <SelectItem
                                 value={schedule.destination.id.toString()}
                               >
-                                {getDestinationLabel(schedule.destination, dictionary)}
+                                {getDestinationLabel(
+                                  schedule.destination,
+                                  dictionary
+                                )}
                               </SelectItem>
                             ) : null}
                           </SelectGroup>
@@ -1686,7 +1737,11 @@ function ScheduleFormSheet({
                 </Button>
               </SheetClose>
               <Button type="submit" disabled={isPending || !canSubmit}>
-                {isPending ? <Spinner data-icon="inline-start" /> : <CalendarClock data-icon="inline-start" />}
+                {isPending ? (
+                  <Spinner data-icon="inline-start" />
+                ) : (
+                  <CalendarClock data-icon="inline-start" />
+                )}
                 {isEdit ? t.schedule.saveSchedule : t.schedule.createSchedule}
               </Button>
             </AppFormShellFooter>
@@ -1791,7 +1846,8 @@ function FeatureRouteSwitch({
   const t = dictionary.telegram
   const destinationId = route.setting?.destination?.id
   const checked = Boolean(route.setting?.enabled)
-  const disabled = !canUpdate || !currentWorkspaceId || !destinationId || isPending
+  const disabled =
+    !canUpdate || !currentWorkspaceId || !destinationId || isPending
 
   function handleCheckedChange(enabled: boolean) {
     if (!currentWorkspaceId || !destinationId) return

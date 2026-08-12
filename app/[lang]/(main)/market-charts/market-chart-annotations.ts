@@ -115,8 +115,12 @@ function isValidMarketChartCandle(
   )
 }
 
-function isWarmMarketChartAnnotation(annotation: MarketChartAnnotationResponse) {
-  return annotation.annotationType === "WARM_EPISODE" && !!annotation.warmEpisode
+function isWarmMarketChartAnnotation(
+  annotation: MarketChartAnnotationResponse
+) {
+  return (
+    annotation.annotationType === "WARM_EPISODE" && !!annotation.warmEpisode
+  )
 }
 
 function isHotMarketChartAnnotation(annotation: MarketChartAnnotationResponse) {
@@ -155,7 +159,9 @@ export function mergeMarketChartEconomicCalendarEvents(
     eventsById.set(event.id, event)
   }
 
-  for (const event of incoming.filter(isValidMarketChartEconomicCalendarEvent)) {
+  for (const event of incoming.filter(
+    isValidMarketChartEconomicCalendarEvent
+  )) {
     eventsById.set(event.id, event)
   }
 
@@ -192,7 +198,9 @@ function getDominantDirection(
         ? annotation.warmEpisode?.direction
         : annotation.hotEvent?.direction
     )
-    .filter((direction): direction is MarketChartAnnotationDirection => !!direction)
+    .filter(
+      (direction): direction is MarketChartAnnotationDirection => !!direction
+    )
 
   if (!directions.length) {
     return null
@@ -205,11 +213,14 @@ function getDominantDirection(
     : "MIXED"
 }
 
-function hasHighPriorityAnnotation(annotations: MarketChartAnnotationResponse[]) {
+function hasHighPriorityAnnotation(
+  annotations: MarketChartAnnotationResponse[]
+) {
   return annotations.some((annotation) => {
     const severity = (
       annotation.annotationType === "WARM_EPISODE"
-        ? annotation.warmEpisode?.events.find((event) => event.severity)?.severity
+        ? annotation.warmEpisode?.events.find((event) => event.severity)
+            ?.severity
         : annotation.hotEvent?.severity
     )?.toUpperCase()
 
@@ -322,7 +333,8 @@ export function createMarketChartAnnotationGroups(
         direction,
         annotations: groupedAnnotations,
         priority:
-          groupedAnnotations.length > 1 || hasHighPriorityAnnotation(groupedAnnotations)
+          groupedAnnotations.length > 1 ||
+          hasHighPriorityAnnotation(groupedAnnotations)
             ? "high"
             : "normal",
       }
@@ -339,7 +351,10 @@ export function createMarketChartEconomicCalendarEventGroups(
     .filter((time): time is MarketChartEpochMillis => time !== null)
     .sort((left, right) => Number(left) - Number(right))
   const candlesByTime = new Map<number, MarketChartCandleItemResponse>()
-  const groupsByTime = new Map<number, MarketChartEconomicCalendarEventResponse[]>()
+  const groupsByTime = new Map<
+    number,
+    MarketChartEconomicCalendarEventResponse[]
+  >()
 
   for (const candle of validCandles) {
     const time = toMarketChartEpochMillis(candle.time)
@@ -356,7 +371,9 @@ export function createMarketChartEconomicCalendarEventGroups(
       continue
     }
 
-    const key = Number(resolveNearestCandleTime(eventTime, candleTimes) ?? eventTime)
+    const key = Number(
+      resolveNearestCandleTime(eventTime, candleTimes) ?? eventTime
+    )
     const group = groupsByTime.get(key) ?? []
 
     group.push(event)

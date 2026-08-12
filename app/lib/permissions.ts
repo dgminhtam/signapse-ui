@@ -20,5 +20,7 @@ export function hasAnyPermission(
   permissions: PermissionCollection,
   requiredPermissions: readonly string[]
 ): boolean {
-  return requiredPermissions.some((permission) => hasPermission(permissions, permission))
+  return requiredPermissions.some((permission) =>
+    hasPermission(permissions, permission)
+  )
 }

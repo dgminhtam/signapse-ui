@@ -201,7 +201,10 @@ export const MARKET_CHART_DRAWING_TOOL_OVERLAYS: Record<
   "any-waves": "signapseAnyWaves",
 }
 
-const MARKET_CHART_DRAWING_OVERLAY_TOOLS = new Map<string, MarketChartDrawingTool>(
+const MARKET_CHART_DRAWING_OVERLAY_TOOLS = new Map<
+  string,
+  MarketChartDrawingTool
+>(
   Object.entries(MARKET_CHART_DRAWING_TOOL_OVERLAYS).map(([tool, name]) => [
     name,
     tool as MarketChartDrawingTool,
@@ -553,7 +556,9 @@ function createTriangleOverlayTemplate(): OverlayTemplate<MarketChartDrawingMeta
 
       return {
         type: "polygon",
-        attrs: { coordinates: [coordinates[0], coordinates[1], coordinates[2]] },
+        attrs: {
+          coordinates: [coordinates[0], coordinates[1], coordinates[2]],
+        },
       }
     },
   }

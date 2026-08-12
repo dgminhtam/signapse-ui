@@ -86,7 +86,9 @@ export function NewsArticleDetailActions({
               </Button>
             </DropdownMenuTrigger>
           </TooltipTrigger>
-          <TooltipContent>{dictionary.newsArticles.actionsTooltip}</TooltipContent>
+          <TooltipContent>
+            {dictionary.newsArticles.actionsTooltip}
+          </TooltipContent>
         </Tooltip>
         <DropdownMenuContent align="end" className="w-52">
           <DropdownMenuGroup>
@@ -105,9 +107,13 @@ export function NewsArticleDetailActions({
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{dictionary.newsArticles.deleteTitle}</AlertDialogTitle>
+            <AlertDialogTitle>
+              {dictionary.newsArticles.deleteTitle}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              {formatMessage(dictionary.newsArticles.deleteDescription, { title })}
+              {formatMessage(dictionary.newsArticles.deleteDescription, {
+                title,
+              })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

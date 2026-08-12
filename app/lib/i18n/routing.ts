@@ -24,9 +24,13 @@ export function stripLocaleFromPathname(pathname: string): string {
 }
 
 export function withLocalePath(pathname: string, locale: AppLocale): string {
-  const normalizedPathname = pathname.startsWith("/") ? pathname : `/${pathname}`
+  const normalizedPathname = pathname.startsWith("/")
+    ? pathname
+    : `/${pathname}`
   const pathWithoutLocale = stripLocaleFromPathname(normalizedPathname)
-  return pathWithoutLocale === "/" ? `/${locale}` : `/${locale}${pathWithoutLocale}`
+  return pathWithoutLocale === "/"
+    ? `/${locale}`
+    : `/${locale}${pathWithoutLocale}`
 }
 
 export function replacePathLocale(pathname: string, locale: AppLocale): string {
