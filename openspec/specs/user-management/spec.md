@@ -71,40 +71,12 @@ The system SHALL render user search results in the shared list table pattern.
 #### Scenario: No users match the search
 - **WHEN** the backend returns no user records
 - **THEN** the table renders an `<Empty>` state through the shared table empty-state surface
+- **AND** the empty state does not offer or suggest creating a Clerk account from Signapse
 
 #### Scenario: Long user data is displayed
 - **WHEN** names, emails, role names, or workspace names are long
 - **THEN** the table prevents page-level horizontal overflow
 - **AND** long content is truncated, clamped, or wrapped according to the column's layout strategy
-
-### Requirement: Operators can create Clerk accounts from a dialog
-The system SHALL let authorized operators create Clerk accounts from the user management list without navigating away.
-
-#### Scenario: Create dialog is opened
-- **WHEN** the operator activates `Tạo người dùng`
-- **THEN** the app opens a dialog for creating a user account
-- **AND** the dialog includes only email, last name, and first name fields
-- **AND** the dialog does not include phone, birthday, or role fields
-
-#### Scenario: Clerk account is created
-- **WHEN** the operator submits valid create values
-- **THEN** the app calls Clerk from server-side code
-- **AND** the Clerk request includes `emailAddress`, `firstName`, and `lastName`
-- **AND** the app does not call `POST /user` from the create flow
-- **AND** the submit button is disabled and shows a spinner while pending
-- **AND** the app shows localized success or error feedback
-- **AND** the success feedback communicates that the application user appears after backend synchronization
-- **AND** the user list refreshes after success
-
-#### Scenario: Backend sync creates the application user
-- **WHEN** Clerk emits `user.created` for the created account
-- **THEN** the backend webhook creates or updates the application user record
-- **AND** the application user can later be found by user management search
-
-#### Scenario: Create is cancelled
-- **WHEN** the operator cancels the create dialog
-- **THEN** no Clerk create request is sent
-- **AND** the form state is cleared or reset before the next create attempt
 
 ### Requirement: Operators can update editable user fields from a dialog
 The system SHALL let authorized operators update user first name, last name, phone, birthday, and role from a dialog while keeping email read-only.
@@ -135,16 +107,15 @@ The system SHALL let authorized operators update user first name, last name, pho
 The system SHALL compose the user management screen with existing Signapse UI, i18n, and accessibility patterns.
 
 #### Scenario: User management UI is rendered
-- **WHEN** the user management screen, table, search controls, or dialogs are displayed
+- **WHEN** the user management screen, table, search controls, or update dialog are displayed
 - **THEN** user-facing copy comes from dictionaries instead of hardcoded component strings
 - **AND** internal links preserve the active locale
 - **AND** shadcn components are used through local wrappers
 - **AND** buttons with icons follow the project's icon treatment
 
-#### Scenario: Dialog form controls are displayed
-- **WHEN** create or update dialog fields are rendered
+#### Scenario: Update dialog form controls are displayed
+- **WHEN** update dialog fields are rendered
 - **THEN** each form control has a visible or screen-reader label
 - **AND** validation errors are associated with their fields
 - **AND** cancel actions use the ghost button treatment
 - **AND** submit actions provide pending feedback with `<Spinner>`
-

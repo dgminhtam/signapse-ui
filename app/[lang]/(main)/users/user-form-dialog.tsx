@@ -1,18 +1,17 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Save, UserPlus } from "lucide-react"
+import { Save } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import * as z from "zod"
 
-import { createUser, updateManagedUser } from "@/app/api/user/action"
+import { updateManagedUser } from "@/app/api/user/action"
 import { useLocalization } from "@/app/lib/i18n/provider"
 import type { RoleResponse } from "@/app/lib/roles/definitions"
 import type {
-  CreateUserRequest,
   UpdateManagedUserRequest,
   UserResponse,
 } from "@/app/lib/users/definitions"
@@ -43,10 +42,7 @@ import {
 } from "@/components/ui/select"
 import { Spinner } from "@/components/ui/spinner"
 
-type UserFormMode = "create" | "update"
-
 interface UserFormDialogProps {
-  mode: UserFormMode
   open: boolean
   roles: RoleResponse[]
   rolesAvailable: boolean
@@ -118,11 +114,10 @@ function getInitialRoleId(user: UserResponse | null, roles: RoleResponse[]) {
 }
 
 function getInitialValues(
-  mode: UserFormMode,
   user: UserResponse | null,
   roles: RoleResponse[]
 ): UserFormValues {
-  if (mode === "update" && user) {
+  if (user) {
     return {
       birthday: getDateInputValue(user.birthday),
       email: user.email || "",
@@ -144,7 +139,6 @@ function getInitialValues(
 }
 
 export function UserFormDialog({
-  mode,
   open,
   roles,
   rolesAvailable,
@@ -154,21 +148,14 @@ export function UserFormDialog({
   const router = useRouter()
   const { dictionary } = useLocalization()
   const t = dictionary.users
-  const isUpdate = mode === "update"
   const initialValues = useMemo(
-    () => getInitialValues(mode, user, roles),
-    [mode, roles, user]
+    () => getInitialValues(user, roles),
+    [roles, user]
   )
   const schema = useMemo(
     () =>
       z.object({
-        email: isUpdate
-          ? z.string().trim()
-          : z
-              .string()
-              .trim()
-              .min(1, t.emailRequired)
-              .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, t.emailInvalid),
+        email: z.string().trim(),
         firstName: z.string().trim().min(1, t.firstNameRequired),
         lastName: z.string().trim().min(1, t.lastNameRequired),
         phone: z.string().trim(),
@@ -178,11 +165,9 @@ export function UserFormDialog({
           .refine((value) => !value || /^\d{4}-\d{2}-\d{2}$/.test(value), {
             message: t.birthdayInvalid,
           }),
-        roleId: isUpdate
-          ? z.string().trim().min(1, t.roleRequired)
-          : z.string().trim(),
+        roleId: z.string().trim().min(1, t.roleRequired),
       }),
-    [isUpdate, t]
+    [t]
   )
   const form = useForm<UserFormValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -198,24 +183,23 @@ export function UserFormDialog({
   }, [form, initialValues, open])
 
   async function onSubmit(values: UserFormValues) {
+    if (!user) {
+      return
+    }
+
     const names = {
       firstName: values.firstName.trim(),
       lastName: values.lastName.trim(),
     }
-    const result = isUpdate && user
-      ? await updateManagedUser(user.id, {
-          ...names,
-          birthday: values.birthday.trim(),
-          phone: values.phone.trim(),
-          roleId: Number(values.roleId),
-        } satisfies UpdateManagedUserRequest)
-      : await createUser({
-          ...names,
-          email: values.email.trim(),
-        } satisfies CreateUserRequest)
+    const result = await updateManagedUser(user.id, {
+      ...names,
+      birthday: values.birthday.trim(),
+      phone: values.phone.trim(),
+      roleId: Number(values.roleId),
+    } satisfies UpdateManagedUserRequest)
 
     if (result.success) {
-      toast.success(isUpdate ? t.updateSuccess : t.createSuccess)
+      toast.success(t.updateSuccess)
       onOpenChange(false)
       router.refresh()
       return
@@ -233,10 +217,8 @@ export function UserFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>{isUpdate ? t.updateTitle : t.createTitle}</DialogTitle>
-          <DialogDescription>
-            {isUpdate ? t.updateDescription : t.createDescription}
-          </DialogDescription>
+          <DialogTitle>{t.updateTitle}</DialogTitle>
+          <DialogDescription>{t.updateDescription}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -245,26 +227,19 @@ export function UserFormDialog({
               name="email"
               control={form.control}
               render={({ field, fieldState }) => (
-                <Field
-                  data-invalid={fieldState.invalid}
-                  data-disabled={isUpdate ? true : undefined}
-                >
-                  <FieldLabel htmlFor="user-email">
-                    {t.emailLabel} <span className="text-destructive">*</span>
-                  </FieldLabel>
+                <Field data-invalid={fieldState.invalid} data-disabled>
+                  <FieldLabel htmlFor="user-email">{t.emailLabel}</FieldLabel>
                   <Input
                     {...field}
                     id="user-email"
                     type="email"
                     placeholder={t.emailPlaceholder}
                     aria-invalid={fieldState.invalid}
-                    disabled={isSubmitting || isUpdate}
+                    disabled
                   />
-                  {isUpdate ? (
-                    <FieldDescription>
-                      {t.emailReadOnlyDescription}
-                    </FieldDescription>
-                  ) : null}
+                  <FieldDescription>
+                    {t.emailReadOnlyDescription}
+                  </FieldDescription>
                   {fieldState.invalid ? (
                     <FieldError errors={[fieldState.error]} />
                   ) : null}
@@ -320,102 +295,92 @@ export function UserFormDialog({
               />
             </div>
 
-            {isUpdate ? (
-              <>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <Controller
-                    name="phone"
-                    control={form.control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor="user-phone">
-                          {t.phoneLabel}
-                        </FieldLabel>
-                        <Input
-                          {...field}
-                          id="user-phone"
-                          type="tel"
-                          placeholder={t.phonePlaceholder}
-                          aria-invalid={fieldState.invalid}
-                          disabled={isSubmitting}
-                        />
-                        {fieldState.invalid ? (
-                          <FieldError errors={[fieldState.error]} />
-                        ) : null}
-                      </Field>
-                    )}
-                  />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Controller
+                name="phone"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="user-phone">{t.phoneLabel}</FieldLabel>
+                    <Input
+                      {...field}
+                      id="user-phone"
+                      type="tel"
+                      placeholder={t.phonePlaceholder}
+                      aria-invalid={fieldState.invalid}
+                      disabled={isSubmitting}
+                    />
+                    {fieldState.invalid ? (
+                      <FieldError errors={[fieldState.error]} />
+                    ) : null}
+                  </Field>
+                )}
+              />
 
-                  <Controller
-                    name="birthday"
-                    control={form.control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor="user-birthday">
-                          {t.birthdayLabel}
-                        </FieldLabel>
-                        <Input
-                          {...field}
-                          id="user-birthday"
-                          type="date"
-                          aria-invalid={fieldState.invalid}
-                          disabled={isSubmitting}
-                        />
-                        {fieldState.invalid ? (
-                          <FieldError errors={[fieldState.error]} />
-                        ) : null}
-                      </Field>
-                    )}
-                  />
-                </div>
+              <Controller
+                name="birthday"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="user-birthday">
+                      {t.birthdayLabel}
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      id="user-birthday"
+                      type="date"
+                      aria-invalid={fieldState.invalid}
+                      disabled={isSubmitting}
+                    />
+                    {fieldState.invalid ? (
+                      <FieldError errors={[fieldState.error]} />
+                    ) : null}
+                  </Field>
+                )}
+              />
+            </div>
 
-                <Controller
-                  name="roleId"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="user-role">
-                        {t.roleLabel}{" "}
-                        <span className="text-destructive">*</span>
-                      </FieldLabel>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        disabled={isSubmitting || !rolesAvailable}
-                      >
-                        <SelectTrigger
-                          id="user-role"
-                          className="w-full"
-                          aria-invalid={fieldState.invalid}
-                        >
-                          <SelectValue placeholder={t.rolePlaceholder} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            {roles.map((role) => (
-                              <SelectItem
-                                key={role.id}
-                                value={role.id.toString()}
-                              >
-                                {role.name}
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                      {fieldState.invalid ? (
-                        <FieldError errors={[fieldState.error]} />
-                      ) : null}
-                      {!rolesAvailable ? (
-                        <FieldDescription>
-                          {t.roleCatalogUnavailable}
-                        </FieldDescription>
-                      ) : null}
-                    </Field>
-                  )}
-                />
-              </>
-            ) : null}
+            <Controller
+              name="roleId"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="user-role">
+                    {t.roleLabel} <span className="text-destructive">*</span>
+                  </FieldLabel>
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    disabled={isSubmitting || !rolesAvailable}
+                  >
+                    <SelectTrigger
+                      id="user-role"
+                      className="w-full"
+                      aria-invalid={fieldState.invalid}
+                    >
+                      <SelectValue placeholder={t.rolePlaceholder} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {roles.map((role) => (
+                          <SelectItem key={role.id} value={role.id.toString()}>
+                            {role.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  {fieldState.invalid ? (
+                    <FieldError errors={[fieldState.error]} />
+                  ) : null}
+                  {!rolesAvailable ? (
+                    <FieldDescription>
+                      {t.roleCatalogUnavailable}
+                    </FieldDescription>
+                  ) : null}
+                </Field>
+              )}
+            />
           </FieldGroup>
 
           <DialogFooter className="mt-5">
@@ -427,24 +392,16 @@ export function UserFormDialog({
             >
               {dictionary.common.cancel}
             </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting || (isUpdate && !rolesAvailable)}
-            >
+            <Button type="submit" disabled={isSubmitting || !rolesAvailable}>
               {isSubmitting ? (
                 <>
                   <Spinner data-icon="inline-start" />
-                  {isUpdate ? t.updatePending : t.createPending}
-                </>
-              ) : isUpdate ? (
-                <>
-                  <Save data-icon="inline-start" />
-                  {dictionary.common.update}
+                  {t.updatePending}
                 </>
               ) : (
                 <>
-                  <UserPlus data-icon="inline-start" />
-                  {t.createAction}
+                  <Save data-icon="inline-start" />
+                  {dictionary.common.update}
                 </>
               )}
             </Button>

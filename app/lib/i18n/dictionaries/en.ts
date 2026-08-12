@@ -1197,7 +1197,6 @@ export const en: Dictionary = {
   users: {
     accessDeniedDescription:
       "The current account does not have permission to manage users.",
-    createAction: "Create user",
     searchLabel: "Search users",
     searchPlaceholder:
       "Enter email, name, or phone number, then press Enter...",
@@ -1210,16 +1209,13 @@ export const en: Dictionary = {
     edit: "Edit user",
     editTooltip: "Edit user",
     emptyTitle: "No matching users",
-    emptyDescription: "Change the search criteria or create a new user.",
+    emptyDescription: "Change the search criteria and try again.",
     noName: "No name",
     noEmail: "No email",
     noPhone: "No phone number",
     noRole: "No role",
     noWorkspace: "No workspace",
-    createTitle: "Create user",
     updateTitle: "Update user",
-    createDescription:
-      "Enter email, first name, and last name to create a Clerk account. The user will appear after system synchronization.",
     updateDescription: "Update the user's personal information and role.",
     emailLabel: "Email address",
     emailPlaceholder: "name@example.com",
@@ -1236,18 +1232,12 @@ export const en: Dictionary = {
     rolePlaceholder: "Choose role",
     roleCatalogUnavailable:
       "Could not load roles. The account needs role:update or the backend must allow role lookup for user:update.",
-    emailRequired: "Please enter an email address.",
-    emailInvalid: "Email is invalid.",
     firstNameRequired: "Please enter a first name.",
     lastNameRequired: "Please enter a last name.",
     birthdayInvalid: "Date of birth is invalid.",
     roleRequired: "Please choose a role.",
-    createPending: "Creating account...",
     updatePending: "Updating...",
-    createSuccess:
-      "Clerk account created. The user will appear after system synchronization.",
     updateSuccess: "User updated.",
-    createError: "Could not create user.",
     updateError: "Could not update user.",
     loadErrorTitle: "Could not load users",
     loadErrorDescription: "Please try again to load user data.",

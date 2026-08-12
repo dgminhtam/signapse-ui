@@ -44,12 +44,6 @@ export interface UserResponse {
 
 export type UserSearchResponse = UserResponse[] | Page<UserResponse>
 
-export interface CreateUserRequest {
-  email: string
-  firstName: string
-  lastName: string
-}
-
 export interface UpdateManagedUserRequest {
   firstName: string
   lastName: string
