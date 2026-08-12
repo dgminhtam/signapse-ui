@@ -24,10 +24,6 @@ export interface UpdateUserProfileRequest {
   phone: string
 }
 
-export interface UserSearchRequest {
-  filter?: string
-}
-
 export interface UserResponse {
   id: number
   email: string

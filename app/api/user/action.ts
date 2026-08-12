@@ -5,7 +5,7 @@ import { isClerkAPIResponseError } from "@clerk/nextjs/errors"
 import { clerkClient } from "@clerk/nextjs/server"
 
 import { fetchAuthenticated } from "@/app/api/auth/action"
-import { ActionResult } from "@/app/lib/definitions"
+import { ActionResult, SearchParams } from "@/app/lib/definitions"
 import { getDictionary } from "@/app/lib/i18n/dictionaries"
 import { getRequestLocale } from "@/app/lib/i18n/server"
 import { hasPermission } from "@/app/lib/permissions"
@@ -16,31 +16,21 @@ import {
   UpdateManagedUserRequest,
   UpdateUserProfileRequest,
   UserResponse,
-  UserSearchRequest,
   UserSearchResponse,
 } from "@/app/lib/users/definitions"
-
-function buildUserSearchQuery(request: UserSearchRequest) {
-  const params = new URLSearchParams()
-  const filter = request.filter?.trim()
-
-  if (filter) {
-    params.set("$filter", filter)
-  }
-
-  const query = params.toString()
-  return query ? `?${query}` : ""
-}
+import { queryParamsToString } from "@/app/lib/utils"
 
 export async function getMe(): Promise<BackendMeResponse> {
   return fetchAuthenticated<BackendMeResponse>("/me")
 }
 
 export async function getUsers(
-  request: UserSearchRequest = {}
+  request: SearchParams
 ): Promise<UserSearchResponse> {
+  const query = queryParamsToString(request)
+
   return fetchAuthenticated<UserSearchResponse>(
-    `/users${buildUserSearchQuery(request)}`
+    `/users${query ? `?${query}` : ""}`
   )
 }
 

@@ -144,7 +144,12 @@ async function UserListContent({
   const size = getPositiveInteger(sizeParam, 10)
   const filter = buildFilterQuery(filterParams)
   const permissions = await getCurrentPermissions()
-  const userResponse = await getUsers({ filter })
+  const userResponse = await getUsers({
+    filter,
+    page: page - 1,
+    size,
+    sort: [],
+  })
   const { roles, rolesAvailable } = await getRoleOptions(permissions)
   const userPage = normalizeUserPage(userResponse, page, size)
 
