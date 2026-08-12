@@ -114,9 +114,15 @@ function SystemPromptListSkeleton({ dictionary }: { dictionary: Dictionary }) {
               <AppListTableHead className="w-44">
                 {t.workflowGroupColumn}
               </AppListTableHead>
-              <AppListTableHead className="w-28">{t.lengthColumn}</AppListTableHead>
-              <AppListTableHead className="w-40">{t.updatedColumn}</AppListTableHead>
-              <AppListTableHead className="w-40">{t.createdColumn}</AppListTableHead>
+              <AppListTableHead className="w-28">
+                {t.lengthColumn}
+              </AppListTableHead>
+              <AppListTableHead className="w-40">
+                {t.updatedColumn}
+              </AppListTableHead>
+              <AppListTableHead className="w-40">
+                {t.createdColumn}
+              </AppListTableHead>
               <AppListTableHead className="w-28 text-right">
                 {t.actionsColumn}
               </AppListTableHead>

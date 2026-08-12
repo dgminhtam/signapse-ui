@@ -4,7 +4,10 @@ import type {
   MarketChartTimeframe,
 } from "@/app/lib/market-charts/definitions"
 import { MINUTE_MS, HOUR_MS, DAY_MS } from "./market-chart-period"
-import { getCandleTimestamp, normalizeCandleItems } from "./market-chart-candle-helpers"
+import {
+  getCandleTimestamp,
+  normalizeCandleItems,
+} from "./market-chart-candle-helpers"
 
 export const TIMEFRAME_INTERVAL_MS: Record<MarketChartTimeframe, number> = {
   "1m": MINUTE_MS,

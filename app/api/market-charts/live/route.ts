@@ -79,10 +79,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(
       {
-        message:
-          error instanceof Error
-            ? error.message
-            : messages.openError,
+        message: error instanceof Error ? error.message : messages.openError,
       },
       { status: 500 }
     )

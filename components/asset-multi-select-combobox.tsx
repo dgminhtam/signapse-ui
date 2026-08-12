@@ -53,7 +53,8 @@ export function AssetMultiSelectCombobox({
       try {
         const response = await getAssets({
           filter: buildFilterQuery({
-            "name[containsIgnoreCase],symbol[containsIgnoreCase]": deferredSearchTerm.trim(),
+            "name[containsIgnoreCase],symbol[containsIgnoreCase]":
+              deferredSearchTerm.trim(),
           }),
           page: 0,
           size: 20,
@@ -102,7 +103,9 @@ export function AssetMultiSelectCombobox({
       return
     }
 
-    onSelectedAssetsChange(selectedAssets.filter((item) => item.id !== asset.id))
+    onSelectedAssetsChange(
+      selectedAssets.filter((item) => item.id !== asset.id)
+    )
   }
 
   function removeAsset(assetId: number) {
@@ -122,11 +125,15 @@ export function AssetMultiSelectCombobox({
             <span className="truncate">
               {selectedAssets.length > 0
                 ? formatMessage(dictionary.assets.selectedCount, {
-                  count: formatNumber(selectedAssets.length),
-                })
+                    count: formatNumber(selectedAssets.length),
+                  })
                 : dictionary.assets.chooseTracked}
             </span>
-            {isLoading ? <Spinner className="size-4" /> : <ChevronsUpDownIcon className="size-4" />}
+            {isLoading ? (
+              <Spinner className="size-4" />
+            ) : (
+              <ChevronsUpDownIcon className="size-4" />
+            )}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
@@ -150,7 +157,9 @@ export function AssetMultiSelectCombobox({
           <DropdownMenuLabel>{dictionary.assets.library}</DropdownMenuLabel>
 
           {loadError ? (
-            <div className="px-2 pb-2 text-sm text-destructive">{loadError}</div>
+            <div className="px-2 pb-2 text-sm text-destructive">
+              {loadError}
+            </div>
           ) : null}
 
           {!loadError && !isLoading && options.length === 0 ? (
@@ -166,7 +175,9 @@ export function AssetMultiSelectCombobox({
                   <DropdownMenuCheckboxItem
                     key={asset.id}
                     checked={isSelected(asset.id)}
-                    onCheckedChange={(checked) => toggleAsset(asset, checked === true)}
+                    onCheckedChange={(checked) =>
+                      toggleAsset(asset, checked === true)
+                    }
                     onSelect={(event) => event.preventDefault()}
                   >
                     <div className="flex min-w-0 flex-1 items-center justify-between gap-3">

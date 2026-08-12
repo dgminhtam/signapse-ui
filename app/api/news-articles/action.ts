@@ -34,7 +34,9 @@ export async function getNewsArticles(
   )
 }
 
-export async function getNewsArticleById(id: number): Promise<NewsArticleResponse> {
+export async function getNewsArticleById(
+  id: number
+): Promise<NewsArticleResponse> {
   return fetchAuthenticated<NewsArticleResponse>(`/news-articles/${id}`)
 }
 
@@ -116,12 +118,13 @@ export async function derivePendingNewsArticleEvents(
 ): Promise<ActionResult<PendingNewsEventDerivationBatchResult>> {
   try {
     const query = typeof batchSize === "number" ? `?batchSize=${batchSize}` : ""
-    const data = await fetchAuthenticated<PendingNewsEventDerivationBatchResult>(
-      `/news-articles/derive-pending-news-events${query}`,
-      {
-        method: "POST",
-      }
-    )
+    const data =
+      await fetchAuthenticated<PendingNewsEventDerivationBatchResult>(
+        `/news-articles/derive-pending-news-events${query}`,
+        {
+          method: "POST",
+        }
+      )
 
     revalidateNewsArticleRoutes()
 

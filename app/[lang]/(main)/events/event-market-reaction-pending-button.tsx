@@ -39,7 +39,9 @@ export function EventMarketReactionPendingButton({
       const result = await derivePendingEventMarketReactions(batchSize)
 
       if (!result.success) {
-        toast.error(result.error || dictionary.events.marketReactionPendingError)
+        toast.error(
+          result.error || dictionary.events.marketReactionPendingError
+        )
         return
       }
 

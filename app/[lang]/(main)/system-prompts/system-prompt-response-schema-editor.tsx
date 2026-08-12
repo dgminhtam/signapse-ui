@@ -164,7 +164,11 @@ export function SystemPromptResponseSchemaEditor({
             <InputGroupAddon align="block-end">
               <div className="flex w-full items-center justify-between gap-2">
                 <InputGroupText>{t.responseSchema}</InputGroupText>
-                <Button type="button" variant="outline" onClick={handleApplyJson}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleApplyJson}
+                >
                   {t.schemaApplyJson}
                 </Button>
               </div>
@@ -184,7 +188,9 @@ function SchemaNodeEditor({
 }: SchemaNodeEditorProps) {
   const { dictionary } = useLocalization()
   const t = dictionary.systemPrompts
-  const schemaObject = isJsonObject(schema) ? schema : createSchemaForType("object")
+  const schemaObject = isJsonObject(schema)
+    ? schema
+    : createSchemaForType("object")
   const type = getSchemaType(schemaObject) ?? "object"
   const nullable = getSchemaNullable(schemaObject)
   const isNested = depth > 0
@@ -248,7 +254,9 @@ function SchemaNodeEditor({
         <Field orientation="horizontal" className="sm:w-auto">
           <Checkbox
             checked={nullable}
-            onCheckedChange={(checked) => handleNullableChange(checked === true)}
+            onCheckedChange={(checked) =>
+              handleNullableChange(checked === true)
+            }
             aria-label={t.schemaNullable}
           />
           <FieldLabel>{t.schemaNullable}</FieldLabel>
@@ -503,7 +511,9 @@ function SchemaPropertyEditor({
               onCheckedChange={(checked) => onRequiredChange(checked === true)}
               aria-label={t.schemaRequired}
             />
-            <FieldLabel>{required ? t.schemaRequired : t.schemaOptional}</FieldLabel>
+            <FieldLabel>
+              {required ? t.schemaRequired : t.schemaOptional}
+            </FieldLabel>
           </Field>
           <div className="flex gap-2">
             <CollapsibleTrigger asChild>

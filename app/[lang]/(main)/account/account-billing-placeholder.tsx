@@ -23,7 +23,9 @@ export function AccountBillingPlaceholder({
           <CreditCard />
         </EmptyMedia>
         <EmptyTitle>{dictionary.billingEmptyTitle}</EmptyTitle>
-        <EmptyDescription>{dictionary.billingEmptyDescription}</EmptyDescription>
+        <EmptyDescription>
+          {dictionary.billingEmptyDescription}
+        </EmptyDescription>
       </EmptyHeader>
     </Empty>
   )

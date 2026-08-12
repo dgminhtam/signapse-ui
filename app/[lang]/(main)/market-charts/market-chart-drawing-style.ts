@@ -18,8 +18,7 @@ export const MARKET_CHART_DRAWING_SIZES = [1, 2, 3, 4, 5] as const
 export type MarketChartDrawingColor =
   (typeof MARKET_CHART_DRAWING_COLOR_PRESETS)[number]["value"]
 
-export type MarketChartDrawingSize =
-  (typeof MARKET_CHART_DRAWING_SIZES)[number]
+export type MarketChartDrawingSize = (typeof MARKET_CHART_DRAWING_SIZES)[number]
 
 export type MarketChartDrawingStyle = {
   color: MarketChartDrawingColor
@@ -43,8 +42,7 @@ export function isMarketChartDrawingColor(
   value: unknown
 ): value is MarketChartDrawingColor {
   return (
-    typeof value === "string" &&
-    MARKET_CHART_DRAWING_COLOR_VALUES.has(value)
+    typeof value === "string" && MARKET_CHART_DRAWING_COLOR_VALUES.has(value)
   )
 }
 
@@ -82,16 +80,12 @@ export function mergeMarketChartDrawingStyle(
   const current = normalizeMarketChartDrawingStyle(currentStyle)
 
   return {
-    color: isMarketChartDrawingColor(patch.color)
-      ? patch.color
-      : current.color,
+    color: isMarketChartDrawingColor(patch.color) ? patch.color : current.color,
     size: isMarketChartDrawingSize(patch.size) ? patch.size : current.size,
   }
 }
 
-export function resolveMarketChartDrawingColor(
-  value: MarketChartDrawingColor
-) {
+export function resolveMarketChartDrawingColor(value: MarketChartDrawingColor) {
   return (
     MARKET_CHART_DRAWING_COLOR_PRESETS.find((preset) => preset.value === value)
       ?.color ?? MARKET_CHART_DRAWING_COLOR_PRESETS[0].color

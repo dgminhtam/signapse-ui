@@ -72,7 +72,7 @@ export function AiProviderCredentialModelSummary({
           "min-w-0 truncate",
           model ? "text-foreground" : "text-muted-foreground"
         )}
-    >
+      >
         {model || dictionary.aiProviderConfigs.noModel}
       </span>
     </div>

@@ -57,8 +57,14 @@ export function NewsArticleList({ newsArticlePage }: NewsArticleListProps) {
           <SortSelect
             className="w-full sm:w-auto"
             options={[
-              { label: dictionary.newsArticles.newest, value: "publishedAt_desc" },
-              { label: dictionary.newsArticles.oldest, value: "publishedAt_asc" },
+              {
+                label: dictionary.newsArticles.newest,
+                value: "publishedAt_desc",
+              },
+              {
+                label: dictionary.newsArticles.oldest,
+                value: "publishedAt_asc",
+              },
               {
                 label: dictionary.newsArticles.createdDateSort,
                 value: "createdDate_desc",

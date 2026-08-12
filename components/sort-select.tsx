@@ -52,7 +52,7 @@ export function SortSelect({
 
   const sortParam = searchParams.get("sort")
   const hasSortParam = options.some((option) => option.value === sortParam)
-  const currentSort = hasSortParam ? sortParam ?? "" : defaultValue || ""
+  const currentSort = hasSortParam ? (sortParam ?? "") : defaultValue || ""
 
   const onSortChange = (value: string) => {
     const params = new URLSearchParams(searchParams)
@@ -81,7 +81,11 @@ export function SortSelect({
       {showLabel ? (
         <span className="text-sm text-muted-foreground">{resolvedLabel}</span>
       ) : null}
-      <Select value={currentSort} onValueChange={onSortChange} disabled={isPending}>
+      <Select
+        value={currentSort}
+        onValueChange={onSortChange}
+        disabled={isPending}
+      >
         <SelectTrigger
           className={cn("w-full sm:w-[200px]", triggerClassName)}
           aria-label={resolvedLabel}

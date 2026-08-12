@@ -4,10 +4,7 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-function AppListToolbar({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+function AppListToolbar({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="app-list-toolbar"

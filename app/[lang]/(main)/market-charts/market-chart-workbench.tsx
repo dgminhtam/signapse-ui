@@ -55,6 +55,7 @@ import {
   type MarketChartLiveStreamState,
   MarketChartTimeframe,
   getMarketChartTimeframeLabels,
+  isMarketChartWarmBandTimeframe,
   isMarketChartTimeframe,
 } from "@/app/lib/market-charts/definitions"
 import { WorkspaceWatchlistAssetListItemResponse } from "@/app/lib/watchlists/definitions"
@@ -119,6 +120,7 @@ import {
   LocalEntityQuickDetailDrawer,
   type LocalQuickDetailEntity,
 } from "../local-entity-quick-detail-drawer"
+import { OverlayPortalContainerProvider } from "@/components/ui/overlay-portal-container"
 import {
   MARKET_CHART_INDICATORS,
   MarketChartCalendarEventList,
@@ -242,7 +244,8 @@ const DEFAULT_MARKET_CHART_LIVE_STATE: MarketChartLiveRuntimeState = {
 const MARKET_CHART_ANNOTATION_BADGE_TONE_CLASS_NAMES = {
   blue: "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
   green: "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300",
-  purple: "bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300",
+  purple:
+    "bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300",
   red: "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300",
   sky: "bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-300",
 }
@@ -252,7 +255,8 @@ const MARKET_CHART_MOVEMENT_CLASS_NAMES = {
   up: "text-green-600 dark:text-green-400",
 }
 
-type MarketChartMovementDirection = keyof typeof MARKET_CHART_MOVEMENT_CLASS_NAMES
+type MarketChartMovementDirection =
+  keyof typeof MARKET_CHART_MOVEMENT_CLASS_NAMES
 
 type LocalizationContext = ReturnType<typeof useLocalization>
 
@@ -478,11 +482,8 @@ function formatOptionalMarketChartDateTime(
   return formatted === fallback ? null : formatted
 }
 
-function formatMarketChartValueRange(
-  start: string | null,
-  end: string | null
-) {
-  return start && end ? `${start} -> ${end}` : start ?? end
+function formatMarketChartValueRange(start: string | null, end: string | null) {
+  return start && end ? `${start} -> ${end}` : (start ?? end)
 }
 
 function getMarketChartPriceMovementDirection(
@@ -519,7 +520,9 @@ function getAnnotationEventId(annotation: MarketChartAnnotationResponse) {
 function isWarmAnnotationGroup(group: MarketChartAnnotationGroup) {
   const annotation = group.annotations[0]
 
-  return annotation?.annotationType === "WARM_EPISODE" && !!annotation.warmEpisode
+  return (
+    annotation?.annotationType === "WARM_EPISODE" && !!annotation.warmEpisode
+  )
 }
 
 function getFreshnessLabel(
@@ -529,9 +532,7 @@ function getFreshnessLabel(
   localization: LocalizationContext
 ) {
   const timestamp =
-    liveState.quote?.receivedAt ||
-    liveState.quote?.providerTime ||
-    data?.to
+    liveState.quote?.receivedAt || liveState.quote?.providerTime || data?.to
 
   if (phase !== "success" || !timestamp) {
     return null
@@ -603,7 +604,11 @@ function getLiveStatusTone(liveState: MarketChartLiveRuntimeState) {
     return "stale" as const
   }
 
-  if (state === "ERROR" || state === "DISCONNECTED" || state === "UNSUBSCRIBED") {
+  if (
+    state === "ERROR" ||
+    state === "DISCONNECTED" ||
+    state === "UNSUBSCRIBED"
+  ) {
     return "error" as const
   }
 
@@ -632,8 +637,7 @@ function downloadDataUrl(url: string, fileName: string) {
 }
 
 function createMarketChartDrawingState(
-  selectedTools: MarketChartDrawingPaletteSelection =
-    DEFAULT_MARKET_CHART_DRAWING_PALETTE_TOOLS
+  selectedTools: MarketChartDrawingPaletteSelection = DEFAULT_MARKET_CHART_DRAWING_PALETTE_TOOLS
 ): MarketChartDrawingState {
   return {
     ...DEFAULT_MARKET_CHART_DRAWING_STATE,
@@ -646,7 +650,9 @@ function getAnnotationGroupsSummaryDirection(
 ): MarketChartAnnotationDirection | null {
   const directions = groups
     .map((group) => group.direction)
-    .filter((direction): direction is MarketChartAnnotationDirection => !!direction)
+    .filter(
+      (direction): direction is MarketChartAnnotationDirection => !!direction
+    )
   const [firstDirection] = directions
 
   if (!firstDirection) {
@@ -769,7 +775,10 @@ function MarketChartTopToolbar({
         <Separator orientation="vertical" className="hidden lg:block" />
 
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
-          <Field className="w-fit min-w-0 gap-1" data-invalid={!!errors.timeframe}>
+          <Field
+            className="w-fit min-w-0 gap-1"
+            data-invalid={!!errors.timeframe}
+          >
             <FieldLabel id="market-chart-timeframe-label" className="sr-only">
               {dictionary.marketCharts.controls.timeframeLabel}
             </FieldLabel>
@@ -810,7 +819,9 @@ function MarketChartTopToolbar({
                   variant="outline"
                   size="sm"
                   disabled={isBusy || !!watchlistError || !selectedAsset}
-                  aria-label={dictionary.marketCharts.controls.eventSettingsAria}
+                  aria-label={
+                    dictionary.marketCharts.controls.eventSettingsAria
+                  }
                 >
                   <CalendarCog data-icon="inline-start" />
                   {dictionary.marketCharts.controls.annotationsLabel}
@@ -825,10 +836,7 @@ function MarketChartTopToolbar({
                     {dictionary.marketCharts.controls.eventSettingsTitle}
                   </PopoverTitle>
                   <PopoverDescription>
-                    {
-                      dictionary.marketCharts.controls
-                        .eventSettingsDescription
-                    }
+                    {dictionary.marketCharts.controls.eventSettingsDescription}
                   </PopoverDescription>
                 </PopoverHeader>
 
@@ -1060,6 +1068,7 @@ function ChartSurface({
   dataVersion,
   selection,
   selectedAsset,
+  quickDetailEntity,
   onAnnotationEventOpen,
   selectedAnnotationGroup,
   timeframeLabels,
@@ -1069,6 +1078,7 @@ function ChartSurface({
   onAnnotationClose,
   onAnnotationLayerChange,
   onAnnotationSelect,
+  onQuickDetailClose,
   onCalendarLayerChange,
   onCalendarImpactChange,
   onAssetChange,
@@ -1097,6 +1107,7 @@ function ChartSurface({
   phase: WorkbenchPhase
   selection: MarketChartSelectionState
   selectedAsset: WorkspaceWatchlistAssetListItemResponse | null
+  quickDetailEntity: LocalQuickDetailEntity | null
   onAnnotationEventOpen: (eventId: number) => void
   selectedAnnotationGroup: MarketChartAnnotationGroup | null
   timeframeLabels: Record<MarketChartTimeframe, string>
@@ -1106,6 +1117,7 @@ function ChartSurface({
   onAnnotationClose: () => void
   onAnnotationLayerChange: (checked: boolean) => void
   onAnnotationSelect: (groupId: string) => void
+  onQuickDetailClose: () => void
   onCalendarLayerChange: (checked: boolean) => void
   onCalendarImpactChange: (
     impact: EconomicCalendarImpactLevel,
@@ -1200,6 +1212,11 @@ function ChartSurface({
     )
   }
   const surfaceRef = useRef<HTMLElement | null>(null)
+  const [surfaceElement, setSurfaceElement] = useState<HTMLElement | null>(null)
+  const setSurfaceRef = useCallback((element: HTMLElement | null) => {
+    surfaceRef.current = element
+    setSurfaceElement(element)
+  }, [])
   const [activeIndicators, setActiveIndicators] = useState<
     MarketChartIndicatorName[]
   >([])
@@ -1209,8 +1226,6 @@ function ChartSurface({
   const [selectedDrawing, setSelectedDrawing] =
     useState<MarketChartDrawingSelection | null>(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
-
-
 
   const hasCandles = (data?.candles.length ?? 0) > 0 || !!liveCandle
   const volumeAvailable = hasUsableVolumeData(data?.candles, liveCandle)
@@ -1235,8 +1250,6 @@ function ChartSurface({
       document.removeEventListener("fullscreenchange", handleFullscreenChange)
     }
   }, [])
-
-
 
   function handleIndicatorChange(indicators: MarketChartIndicatorName[]) {
     const availableIndicators = volumeAvailable
@@ -1282,9 +1295,7 @@ function ChartSurface({
     }
   }
 
-  function handleDrawingStateChange(
-    patch: Partial<MarketChartDrawingState>
-  ) {
+  function handleDrawingStateChange(patch: Partial<MarketChartDrawingState>) {
     setDrawingState((current) => ({
       ...current,
       ...patch,
@@ -1374,277 +1385,344 @@ function ChartSurface({
 
   return (
     <section
-      ref={surfaceRef}
+      ref={setSurfaceRef}
       data-fullscreen={isFullscreen}
       className="flex h-[calc(100svh-8.5rem)] max-h-[58rem] min-h-[36rem] flex-col overflow-hidden rounded-xl border border-border bg-card data-[fullscreen=true]:mt-0 data-[fullscreen=true]:h-screen data-[fullscreen=true]:max-h-none data-[fullscreen=true]:min-h-0 data-[fullscreen=true]:rounded-none data-[fullscreen=true]:border-0"
     >
-      <MarketChartTopToolbar
-        activeIndicators={availableActiveIndicators}
-        annotationLayerEnabled={annotationLayerEnabled}
-        calendarLayerEnabled={calendarLayerEnabled}
-        selectedCalendarImpacts={selectedCalendarImpacts}
-        errors={errors}
-        hasCandles={hasCandles}
-        hasWatchlistAssets={hasWatchlistAssets}
-        isBusy={isBusy}
-        isFullscreen={isFullscreen}
-        phase={phase}
-        volumeAvailable={volumeAvailable}
-        selection={selection}
-        selectedAsset={selectedAsset}
-        timeframeLabels={timeframeLabels}
-        watchlistAssets={watchlistAssets}
-        watchlistError={watchlistError}
-        onAnnotationLayerChange={onAnnotationLayerChange}
-        onCalendarLayerChange={onCalendarLayerChange}
-        onCalendarImpactChange={onCalendarImpactChange}
-        onAssetChange={(value) => {
-          resetVolumeIndicator()
-          onAssetChange(value)
-        }}
-        onFullscreenToggle={handleFullscreenToggle}
-        onIndicatorChange={handleIndicatorChange}
-        onScreenshot={handleScreenshot}
-        onTimeframeChange={(value) => {
-          resetVolumeIndicator()
-          onTimeframeChange(value)
-        }}
-      />
-      <div
-        data-fullscreen={isFullscreen}
-        className="relative min-h-0 flex-1 overflow-hidden bg-card"
+      <OverlayPortalContainerProvider
+        value={isFullscreen ? surfaceElement : null}
       >
-
-
-        {/* Canvas: always mounted when there's a selected asset */}
-        {selectedAsset ? (
-          <div className="absolute inset-0" style={{ zIndex: 0 }}>
-            <div className="flex h-full min-h-0 min-w-0">
-              {data && hasCandles ? (
-                <MarketChartDrawingToolbar
-                  disabled={isBusy}
-                  state={drawingState}
-                  onClearAll={handleClearDrawings}
-                  onDeleteSelected={handleDeleteSelectedDrawing}
-                  onStateChange={handleDrawingStateChange}
-                  onToolChange={handleDrawingToolChange}
-                />
-              ) : null}
-              <div className={cn("relative min-h-0", phase === "success" && hasCandles ? "flex-1" : "flex-1 invisible")}>
-                <MarketChartCanvas
-                  ref={chartCanvasRef}
-                  activeIndicators={availableActiveIndicators}
-                  annotations={data?.annotations ?? []}
-                  assetId={selectedAsset.assetId}
-                  candles={data?.candles ?? []}
-                  dataVersion={dataVersion}
-                  className="h-full min-h-0"
-                  drawingToolActive={!!drawingState.activeTool}
-                  annotationLayerEnabled={annotationLayerEnabled}
-                  activeOutcomeHoverRange={activeOutcomeHoverRange}
-                  liveCandle={liveCandle}
-                  pricePrecision={data?.asset.pricePrecision}
-                  timeframe={selection.timeframe}
-                  symbol={displaySymbol}
-                  annotationGroups={annotationGroups}
-                  calendarEventGroups={calendarEventGroups}
-                  calendarEvents={data?.economicCalendarEvents ?? []}
-                  calendarLayerEnabled={calendarLayerEnabled}
-                  warmAnnotationGroups={warmAnnotationGroups}
-                  renderAnnotationPopup={renderAnnotationPopup}
-                  selectedAnnotationGroupId={selectedAnnotationGroup?.id}
-                  onAnnotationSelect={handleAnnotationSelect}
-                  onAnnotationClose={handleAnnotationClose}
-                  onDrawingSelectionChange={(selection) => {
-                    setSelectedDrawing(selection)
-                    setDrawingState((current) => ({
-                      ...current,
-                      hasSelectedDrawing: !!selection,
-                    }))
-                  }}
-                  onDrawingToolComplete={() =>
-                    setDrawingState((current) => ({
-                      ...current,
-                      activeTool: null,
-                    }))
-                  }
-                  onLoadedDataChange={onLoadedDataChange}
-                  onLoadOlderCandles={onLoadOlderCandles}
-                />
-                {selectedDrawing && !drawingState.activeTool ? (
-                  <MarketChartSelectedDrawingToolbar
-                    selection={selectedDrawing}
-                    onDelete={handleDeleteSelectedDrawing}
-                    onStyleChange={handleSelectedDrawingStyleChange}
+        <MarketChartTopToolbar
+          activeIndicators={availableActiveIndicators}
+          annotationLayerEnabled={annotationLayerEnabled}
+          calendarLayerEnabled={calendarLayerEnabled}
+          selectedCalendarImpacts={selectedCalendarImpacts}
+          errors={errors}
+          hasCandles={hasCandles}
+          hasWatchlistAssets={hasWatchlistAssets}
+          isBusy={isBusy}
+          isFullscreen={isFullscreen}
+          phase={phase}
+          volumeAvailable={volumeAvailable}
+          selection={selection}
+          selectedAsset={selectedAsset}
+          timeframeLabels={timeframeLabels}
+          watchlistAssets={watchlistAssets}
+          watchlistError={watchlistError}
+          onAnnotationLayerChange={onAnnotationLayerChange}
+          onCalendarLayerChange={onCalendarLayerChange}
+          onCalendarImpactChange={onCalendarImpactChange}
+          onAssetChange={(value) => {
+            resetVolumeIndicator()
+            onAssetChange(value)
+          }}
+          onFullscreenToggle={handleFullscreenToggle}
+          onIndicatorChange={handleIndicatorChange}
+          onScreenshot={handleScreenshot}
+          onTimeframeChange={(value) => {
+            resetVolumeIndicator()
+            onTimeframeChange(value)
+          }}
+        />
+        <div
+          data-fullscreen={isFullscreen}
+          className="relative min-h-0 flex-1 overflow-hidden bg-card"
+        >
+          {/* Canvas: always mounted when there's a selected asset */}
+          {selectedAsset ? (
+            <div className="absolute inset-0" style={{ zIndex: 0 }}>
+              <div className="flex h-full min-h-0 min-w-0">
+                {data && hasCandles ? (
+                  <MarketChartDrawingToolbar
+                    disabled={isBusy}
+                    state={drawingState}
+                    onClearAll={handleClearDrawings}
+                    onDeleteSelected={handleDeleteSelectedDrawing}
+                    onStateChange={handleDrawingStateChange}
+                    onToolChange={handleDrawingToolChange}
                   />
                 ) : null}
-              </div>
-            </div>
-          </div>
-        ) : null}
-
-        {/* Overlay states on top of canvas (only when non-success) */}
-        {selectedAsset && !(phase === "success" && hasCandles) ? (
-          <div className="absolute inset-0 z-10 bg-card">
-            {watchlistError ? (
-              <Empty className="h-full min-h-[32rem] border-0 bg-transparent">
-                <EmptyHeader>
-                  <EmptyMedia variant="icon" className="bg-destructive/10 text-destructive">
-                    <TriangleAlert />
-                  </EmptyMedia>
-                  <EmptyTitle>{dictionary.marketCharts.empty.watchlistErrorTitle}</EmptyTitle>
-                  <EmptyDescription>{watchlistError}</EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            ) : !hasWatchlistAssets ? (
-              <Empty className="h-full min-h-[32rem] border-0 bg-transparent">
-                <EmptyHeader>
-                  <EmptyMedia variant="icon"><ChartCandlestick /></EmptyMedia>
-                  <EmptyTitle>{dictionary.marketCharts.empty.noWatchlistAssetsTitle}</EmptyTitle>
-                  <EmptyDescription>{dictionary.marketCharts.empty.noWatchlistAssetsDescription}</EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            ) : phase === "idle" ? (
-              <Empty className="h-full min-h-[32rem] border-0 bg-transparent">
-                <EmptyHeader>
-                  <EmptyMedia variant="icon"><ChartCandlestick /></EmptyMedia>
-                  <EmptyTitle>{dictionary.marketCharts.empty.idleTitle}</EmptyTitle>
-                  <EmptyDescription>{dictionary.marketCharts.empty.idleDescription}</EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            ) : phase === "loading" ? (
-              <MarketChartSurfaceSkeleton embedded />
-            ) : phase === "error" ? (
-              <Empty className="h-full min-h-[32rem] border-0 bg-transparent">
-                <EmptyHeader>
-                  <EmptyMedia variant="icon" className="bg-destructive/10 text-destructive">
-                    <TriangleAlert />
-                  </EmptyMedia>
-                  <EmptyTitle>{dictionary.marketCharts.empty.loadErrorTitle}</EmptyTitle>
-                  <EmptyDescription>{error || dictionary.marketCharts.empty.loadErrorDescription}</EmptyDescription>
-                </EmptyHeader>
-                {selectedAsset ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      resetVolumeIndicator()
-                      onRetry()
-                    }}
-                  >
-                    <RefreshCw data-icon="inline-start" />
-                    {dictionary.marketCharts.controls.refreshLatestData}
-                  </Button>
-                ) : null}
-              </Empty>
-            ) : phase === "success" && data && !hasCandles ? (
-              <Empty className="h-full min-h-[32rem] border-0 bg-transparent">
-                <EmptyHeader>
-                  <EmptyMedia variant="icon"><DatabaseZap /></EmptyMedia>
-                  <EmptyTitle>{dictionary.marketCharts.empty.noCandlesTitle}</EmptyTitle>
-                  <EmptyDescription>
-                    {formatMessage(dictionary.marketCharts.empty.noCandlesDescription, {
-                      symbol: getDisplayAssetSymbol(data, selectedAsset, dictionary),
-                    })}
-                    <span className="mt-1 flex flex-wrap justify-center gap-3">
-                      <AppTimeMetadata icon={CalendarClock}>
-                        {formatMessage(dictionary.marketCharts.format.from, {
-                          time: formatMarketChartDateTime(data.from, localization),
-                        })}
-                      </AppTimeMetadata>
-                      <AppTimeMetadata icon={CalendarClock}>
-                        {formatMessage(dictionary.marketCharts.format.to, {
-                          time: formatMarketChartDateTime(data.to, localization),
-                        })}
-                      </AppTimeMetadata>
-                    </span>
-                  </EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            ) : null}
-          </div>
-        ) : null}
-      </div>
-
-      <MarketChartAnnotationLegend
-        annotationLayerEnabled={annotationLayerEnabled}
-        calendarEventCount={calendarEvents.length}
-        calendarLayerEnabled={calendarLayerEnabled}
-        groups={annotationGroups}
-      />
-
-      <MarketChartAnnotationControls
-        annotationLayerEnabled={annotationLayerEnabled}
-        calendarEvents={calendarEvents}
-        calendarLayerEnabled={calendarLayerEnabled}
-        calendarLoadError={calendarLoadError}
-        freshnessLabel={freshnessLabel}
-        groups={annotationGroups}
-        isLoading={phase === "loading"}
-        liveStatusLabel={liveStatusLabel}
-        liveStatusTone={liveStatusTone}
-      />
-
-      {selectedAnnotationGroup ? (
-        <div className="border-t bg-muted/10 p-3 sm:hidden">
-          <div className="overflow-hidden rounded-xl border bg-popover">
-            <div className="flex items-center justify-between gap-3 border-b px-3 py-2.5">
-              <div className="flex items-center gap-2">
-                {(() => {
-                  const warmEpisode = selectedAnnotationGroup.annotations[0]?.warmEpisode
-                  const eventCountLabel = formatMessage(
-                    dictionary.marketCharts.annotations.eventCount,
-                    {
-                      count: localization.formatNumber(
-                        warmEpisode?.events.length ??
-                          selectedAnnotationGroup.annotations.length
-                      ),
-                    }
-                  )
-
-                  return (
-                    <>
-                <span
+                <div
                   className={cn(
-                    "rounded-full px-2 py-0.5 text-xs font-semibold",
-                    getMarketChartAnnotationColorClassNames(selectedAnnotationGroup.direction).dot,
-                    getMarketChartAnnotationColorClassNames(selectedAnnotationGroup.direction).foreground
+                    "relative min-h-0",
+                    phase === "success" && hasCandles
+                      ? "flex-1"
+                      : "invisible flex-1"
                   )}
                 >
-                  {warmEpisode
-                    ? dictionary.marketCharts.annotations.warmEpisodeLabel
-                    : eventCountLabel}
-                </span>
-                      {warmEpisode ? (
-                        <span className="text-xs font-medium text-muted-foreground">
-                          {eventCountLabel}
-                        </span>
-                      ) : null}
-                    </>
-                  )
-                })()}
+                  <MarketChartCanvas
+                    ref={chartCanvasRef}
+                    activeIndicators={availableActiveIndicators}
+                    annotations={data?.annotations ?? []}
+                    assetId={selectedAsset.assetId}
+                    candles={data?.candles ?? []}
+                    dataVersion={dataVersion}
+                    className="h-full min-h-0"
+                    drawingToolActive={!!drawingState.activeTool}
+                    annotationLayerEnabled={annotationLayerEnabled}
+                    activeOutcomeHoverRange={activeOutcomeHoverRange}
+                    liveCandle={liveCandle}
+                    pricePrecision={data?.asset.pricePrecision}
+                    timeframe={selection.timeframe}
+                    symbol={displaySymbol}
+                    annotationGroups={annotationGroups}
+                    calendarEventGroups={calendarEventGroups}
+                    calendarEvents={data?.economicCalendarEvents ?? []}
+                    calendarLayerEnabled={calendarLayerEnabled}
+                    warmAnnotationGroups={warmAnnotationGroups}
+                    renderAnnotationPopup={renderAnnotationPopup}
+                    selectedAnnotationGroupId={selectedAnnotationGroup?.id}
+                    onAnnotationSelect={handleAnnotationSelect}
+                    onAnnotationClose={handleAnnotationClose}
+                    onDrawingSelectionChange={(selection) => {
+                      setSelectedDrawing(selection)
+                      setDrawingState((current) => ({
+                        ...current,
+                        hasSelectedDrawing: !!selection,
+                      }))
+                    }}
+                    onDrawingToolComplete={() =>
+                      setDrawingState((current) => ({
+                        ...current,
+                        activeTool: null,
+                      }))
+                    }
+                    onLoadedDataChange={onLoadedDataChange}
+                    onLoadOlderCandles={onLoadOlderCandles}
+                  />
+                  {selectedDrawing && !drawingState.activeTool ? (
+                    <MarketChartSelectedDrawingToolbar
+                      selection={selectedDrawing}
+                      onDelete={handleDeleteSelectedDrawing}
+                      onStyleChange={handleSelectedDrawingStyleChange}
+                    />
+                  ) : null}
+                </div>
               </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                onClick={handleAnnotationClose}
-                aria-label={dictionary.marketCharts.annotations.closeEventDetails}
-              >
-                <X />
-              </Button>
             </div>
-            <ScrollArea className="h-[min(24rem,calc(100vh-11rem))] p-3">
-              <MarketChartAnnotationDetail
-                group={selectedAnnotationGroup}
-                onEventOpen={onAnnotationEventOpen}
-                onOutcomeRangeHover={handleOutcomeRangeHover}
-                onOutcomeRangeLeave={handleOutcomeRangeLeave}
-              />
-            </ScrollArea>
-          </div>
+          ) : null}
+
+          {/* Overlay states on top of canvas (only when non-success) */}
+          {selectedAsset && !(phase === "success" && hasCandles) ? (
+            <div className="absolute inset-0 z-10 bg-card">
+              {watchlistError ? (
+                <Empty className="h-full min-h-[32rem] border-0 bg-transparent">
+                  <EmptyHeader>
+                    <EmptyMedia
+                      variant="icon"
+                      className="bg-destructive/10 text-destructive"
+                    >
+                      <TriangleAlert />
+                    </EmptyMedia>
+                    <EmptyTitle>
+                      {dictionary.marketCharts.empty.watchlistErrorTitle}
+                    </EmptyTitle>
+                    <EmptyDescription>{watchlistError}</EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
+              ) : !hasWatchlistAssets ? (
+                <Empty className="h-full min-h-[32rem] border-0 bg-transparent">
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <ChartCandlestick />
+                    </EmptyMedia>
+                    <EmptyTitle>
+                      {dictionary.marketCharts.empty.noWatchlistAssetsTitle}
+                    </EmptyTitle>
+                    <EmptyDescription>
+                      {
+                        dictionary.marketCharts.empty
+                          .noWatchlistAssetsDescription
+                      }
+                    </EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
+              ) : phase === "idle" ? (
+                <Empty className="h-full min-h-[32rem] border-0 bg-transparent">
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <ChartCandlestick />
+                    </EmptyMedia>
+                    <EmptyTitle>
+                      {dictionary.marketCharts.empty.idleTitle}
+                    </EmptyTitle>
+                    <EmptyDescription>
+                      {dictionary.marketCharts.empty.idleDescription}
+                    </EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
+              ) : phase === "loading" ? (
+                <MarketChartSurfaceSkeleton embedded />
+              ) : phase === "error" ? (
+                <Empty className="h-full min-h-[32rem] border-0 bg-transparent">
+                  <EmptyHeader>
+                    <EmptyMedia
+                      variant="icon"
+                      className="bg-destructive/10 text-destructive"
+                    >
+                      <TriangleAlert />
+                    </EmptyMedia>
+                    <EmptyTitle>
+                      {dictionary.marketCharts.empty.loadErrorTitle}
+                    </EmptyTitle>
+                    <EmptyDescription>
+                      {error ||
+                        dictionary.marketCharts.empty.loadErrorDescription}
+                    </EmptyDescription>
+                  </EmptyHeader>
+                  {selectedAsset ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        resetVolumeIndicator()
+                        onRetry()
+                      }}
+                    >
+                      <RefreshCw data-icon="inline-start" />
+                      {dictionary.marketCharts.controls.refreshLatestData}
+                    </Button>
+                  ) : null}
+                </Empty>
+              ) : phase === "success" && data && !hasCandles ? (
+                <Empty className="h-full min-h-[32rem] border-0 bg-transparent">
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <DatabaseZap />
+                    </EmptyMedia>
+                    <EmptyTitle>
+                      {dictionary.marketCharts.empty.noCandlesTitle}
+                    </EmptyTitle>
+                    <EmptyDescription>
+                      {formatMessage(
+                        dictionary.marketCharts.empty.noCandlesDescription,
+                        {
+                          symbol: getDisplayAssetSymbol(
+                            data,
+                            selectedAsset,
+                            dictionary
+                          ),
+                        }
+                      )}
+                      <span className="mt-1 flex flex-wrap justify-center gap-3">
+                        <AppTimeMetadata icon={CalendarClock}>
+                          {formatMessage(dictionary.marketCharts.format.from, {
+                            time: formatMarketChartDateTime(
+                              data.from,
+                              localization
+                            ),
+                          })}
+                        </AppTimeMetadata>
+                        <AppTimeMetadata icon={CalendarClock}>
+                          {formatMessage(dictionary.marketCharts.format.to, {
+                            time: formatMarketChartDateTime(
+                              data.to,
+                              localization
+                            ),
+                          })}
+                        </AppTimeMetadata>
+                      </span>
+                    </EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
+              ) : null}
+            </div>
+          ) : null}
         </div>
-      ) : null}
+
+        <MarketChartAnnotationLegend
+          annotationLayerEnabled={annotationLayerEnabled}
+          calendarEventCount={calendarEvents.length}
+          calendarLayerEnabled={calendarLayerEnabled}
+          groups={annotationGroups}
+        />
+
+        <MarketChartAnnotationControls
+          annotationLayerEnabled={annotationLayerEnabled}
+          calendarEvents={calendarEvents}
+          calendarLayerEnabled={calendarLayerEnabled}
+          calendarLoadError={calendarLoadError}
+          freshnessLabel={freshnessLabel}
+          groups={annotationGroups}
+          isLoading={phase === "loading"}
+          liveStatusLabel={liveStatusLabel}
+          liveStatusTone={liveStatusTone}
+        />
+
+        {selectedAnnotationGroup ? (
+          <div className="border-t bg-muted/10 p-3 sm:hidden">
+            <div className="overflow-hidden rounded-xl border bg-popover">
+              <div className="flex items-center justify-between gap-3 border-b px-3 py-2.5">
+                <div className="flex items-center gap-2">
+                  {(() => {
+                    const warmEpisode =
+                      selectedAnnotationGroup.annotations[0]?.warmEpisode
+                    const eventCountLabel = formatMessage(
+                      dictionary.marketCharts.annotations.eventCount,
+                      {
+                        count: localization.formatNumber(
+                          warmEpisode?.events.length ??
+                            selectedAnnotationGroup.annotations.length
+                        ),
+                      }
+                    )
+
+                    return (
+                      <>
+                        <span
+                          className={cn(
+                            "rounded-full px-2 py-0.5 text-xs font-semibold",
+                            getMarketChartAnnotationColorClassNames(
+                              selectedAnnotationGroup.direction
+                            ).dot,
+                            getMarketChartAnnotationColorClassNames(
+                              selectedAnnotationGroup.direction
+                            ).foreground
+                          )}
+                        >
+                          {warmEpisode
+                            ? dictionary.marketCharts.annotations
+                                .warmEpisodeLabel
+                            : eventCountLabel}
+                        </span>
+                        {warmEpisode ? (
+                          <span className="text-xs font-medium text-muted-foreground">
+                            {eventCountLabel}
+                          </span>
+                        ) : null}
+                      </>
+                    )
+                  })()}
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={handleAnnotationClose}
+                  aria-label={
+                    dictionary.marketCharts.annotations.closeEventDetails
+                  }
+                >
+                  <X />
+                </Button>
+              </div>
+              <ScrollArea className="h-[min(24rem,calc(100vh-11rem))] p-3">
+                <MarketChartAnnotationDetail
+                  group={selectedAnnotationGroup}
+                  onEventOpen={onAnnotationEventOpen}
+                  onOutcomeRangeHover={handleOutcomeRangeHover}
+                  onOutcomeRangeLeave={handleOutcomeRangeLeave}
+                />
+              </ScrollArea>
+            </div>
+          </div>
+        ) : null}
+
+        <LocalEntityQuickDetailDrawer
+          entity={quickDetailEntity}
+          onClose={onQuickDetailClose}
+        />
+      </OverlayPortalContainerProvider>
     </section>
   )
 }
@@ -1721,7 +1799,9 @@ function MarketChartSelectedDrawingToolbar({
                     aria-hidden="true"
                     className={cn(
                       "size-3 rounded-full ring-1 ring-foreground/20",
-                      selected ? "ring-2 ring-ring ring-offset-1 ring-offset-popover" : null
+                      selected
+                        ? "ring-2 ring-ring ring-offset-1 ring-offset-popover"
+                        : null
                     )}
                     style={{ backgroundColor: color }}
                   />
@@ -1860,7 +1940,10 @@ function MarketChartAnnotationLegend({
                 getMarketChartAnnotationColorClassNames(direction)
 
               return (
-                <span key={direction} className="inline-flex items-center gap-2">
+                <span
+                  key={direction}
+                  className="inline-flex items-center gap-2"
+                >
                   <span
                     className={cn("size-2 rounded-full", colorClassNames.dot)}
                   />
@@ -1948,17 +2031,19 @@ function MarketChartHotAnnotationDetail({
 
           return (
             <article key={annotation.id} className="flex flex-col gap-1.5">
-              <AppTimeMetadata icon={CalendarClock}>{eventTime}</AppTimeMetadata>
+              <AppTimeMetadata icon={CalendarClock}>
+                {eventTime}
+              </AppTimeMetadata>
               {title ? (
                 <h3 className="line-clamp-2 text-sm font-semibold text-foreground">
                   {eventId ? (
-                  <button
-                    type="button"
-                    className="text-left rounded-sm underline-offset-4 transition-colors outline-none hover:text-primary hover:underline focus-visible:ring-2 focus-visible:ring-ring/50"
-                    onClick={() => onEventOpen(eventId)}
-                  >
-                    {title}
-                  </button>
+                    <button
+                      type="button"
+                      className="rounded-sm text-left underline-offset-4 transition-colors outline-none hover:text-primary hover:underline focus-visible:ring-2 focus-visible:ring-ring/50"
+                      onClick={() => onEventOpen(eventId)}
+                    >
+                      {title}
+                    </button>
                   ) : (
                     title
                   )}
@@ -2046,7 +2131,7 @@ function MarketChartWarmEpisodeAnnotationDetail({
               )
               const title = event.title || event.summary || ""
               const relationLabel = event.relationType
-                ? relationTypeLabels[event.relationType] ?? event.relationType
+                ? (relationTypeLabels[event.relationType] ?? event.relationType)
                 : null
               const direction = event.reaction?.direction
                 ? getDirectionLabel(event.reaction.direction, dictionary)
@@ -2062,9 +2147,14 @@ function MarketChartWarmEpisodeAnnotationDetail({
                   : null
 
               return (
-                <article key={event.warmEpisodeEventId} className="flex flex-col gap-1">
+                <article
+                  key={event.warmEpisodeEventId}
+                  className="flex flex-col gap-1"
+                >
                   {eventTime ? (
-                    <AppTimeMetadata icon={CalendarClock}>{eventTime}</AppTimeMetadata>
+                    <AppTimeMetadata icon={CalendarClock}>
+                      {eventTime}
+                    </AppTimeMetadata>
                   ) : null}
                   {title ? (
                     <h4 className="text-sm font-semibold text-foreground">
@@ -2076,18 +2166,31 @@ function MarketChartWarmEpisodeAnnotationDetail({
                       {event.summary}
                     </p>
                   ) : null}
-                  {relationLabel || direction || event.reaction?.timeHorizon || confidence ? (
+                  {relationLabel ||
+                  direction ||
+                  event.reaction?.timeHorizon ||
+                  confidence ? (
                     <div className="flex flex-wrap gap-1">
-                      {relationLabel ? <Badge variant="secondary">{relationLabel}</Badge> : null}
+                      {relationLabel ? (
+                        <Badge variant="secondary">{relationLabel}</Badge>
+                      ) : null}
                       {direction ? (
-                        <Badge className={getPredictionBadgeClassName(event.reaction?.direction)}>
+                        <Badge
+                          className={getPredictionBadgeClassName(
+                            event.reaction?.direction
+                          )}
+                        >
                           {direction}
                         </Badge>
                       ) : null}
                       {event.reaction?.timeHorizon ? (
-                        <Badge variant="outline">{event.reaction.timeHorizon}</Badge>
+                        <Badge variant="outline">
+                          {event.reaction.timeHorizon}
+                        </Badge>
                       ) : null}
-                      {confidence ? <Badge variant="outline">{confidence}</Badge> : null}
+                      {confidence ? (
+                        <Badge variant="outline">{confidence}</Badge>
+                      ) : null}
                     </div>
                   ) : null}
                 </article>
@@ -2131,7 +2234,10 @@ function MarketChartAnnotationReactionSection({
   const predictedDirectionBadgeClassName = getPredictionBadgeClassName(
     reaction.direction
   )
-  const realizedReturn = formatOutcomeReturn(outcome?.realizedReturn, localization)
+  const realizedReturn = formatOutcomeReturn(
+    outcome?.realizedReturn,
+    localization
+  )
   const actualDirection = outcome?.actualDirection
     ? getDirectionLabel(outcome.actualDirection, dictionary)
     : null
@@ -2234,9 +2340,7 @@ function MarketChartAnnotationReactionSection({
             ) : null}
           </span>
         ) : null}
-        {evaluationWindow ? (
-          <span>{evaluationWindow}</span>
-        ) : null}
+        {evaluationWindow ? <span>{evaluationWindow}</span> : null}
       </div>
       {outcomeSummary ? (
         <p className="text-xs leading-relaxed text-muted-foreground">
@@ -2246,8 +2350,6 @@ function MarketChartAnnotationReactionSection({
     </section>
   )
 }
-
-
 
 function MarketChartAnnotationControls({
   annotationLayerEnabled,
@@ -2407,8 +2509,9 @@ export function MarketChartWorkbench({
   const [errors, setErrors] = useState<FormErrors>({})
   const [phase, setPhase] = useState<WorkbenchPhase>("idle")
   const [data, setData] = useState<MarketChartDisplayData | null>(null)
-  const [loadedData, setLoadedData] =
-    useState<MarketChartDisplayData | null>(null)
+  const [loadedData, setLoadedData] = useState<MarketChartDisplayData | null>(
+    null
+  )
   const [loadError, setLoadError] = useState<string | null>(null)
   const [liveState, setLiveState] = useState<MarketChartLiveRuntimeState>(
     DEFAULT_MARKET_CHART_LIVE_STATE
@@ -2420,7 +2523,9 @@ export function MarketChartWorkbench({
   const [selectedCalendarImpacts, setSelectedCalendarImpacts] = useState<
     EconomicCalendarImpactLevel[]
   >(() => ["HIGH"])
-  const [calendarLoadError, setCalendarLoadError] = useState<string | null>(null)
+  const [calendarLoadError, setCalendarLoadError] = useState<string | null>(
+    null
+  )
   const annotationLayerEnabledRef = useRef(annotationLayerEnabled)
   const calendarLayerEnabledRef = useRef(calendarLayerEnabled)
   const selectedCalendarImpactsRef = useRef(selectedCalendarImpacts)
@@ -2475,7 +2580,11 @@ export function MarketChartWorkbench({
     )
   }, [calendarLayerEnabled, chartData, visibleCalendarEvents])
   const warmAnnotationGroups = useMemo(() => {
-    if (!annotationLayerEnabled || !chartData) {
+    if (
+      !annotationLayerEnabled ||
+      !chartData ||
+      !isMarketChartWarmBandTimeframe(selection.timeframe)
+    ) {
       return []
     }
 
@@ -2483,12 +2592,11 @@ export function MarketChartWorkbench({
       chartData.annotations,
       chartData.candles
     )
-  }, [annotationLayerEnabled, chartData])
+  }, [annotationLayerEnabled, chartData, selection.timeframe])
   const selectedAnnotationGroup =
     [...annotationGroups, ...warmAnnotationGroups].find(
       (group) => group.id === selectedAnnotationGroupId
-    ) ??
-    null
+    ) ?? null
 
   useEffect(() => {
     annotationLayerEnabledRef.current = annotationLayerEnabled
@@ -2724,7 +2832,8 @@ export function MarketChartWorkbench({
 
         setLiveState((current) => ({
           ...current,
-          error: value.state === "ERROR" ? value.message ?? current.error : null,
+          error:
+            value.state === "ERROR" ? (value.message ?? current.error) : null,
           status: value,
           transportState: value.state,
         }))
@@ -3104,6 +3213,7 @@ export function MarketChartWorkbench({
         phase={phase}
         selection={selection}
         selectedAsset={selectedAsset}
+        quickDetailEntity={quickDetailEntity}
         selectedAnnotationGroup={selectedAnnotationGroup}
         timeframeLabels={timeframeLabels}
         watchlistAssets={watchlistAssets}
@@ -3113,6 +3223,7 @@ export function MarketChartWorkbench({
         onAnnotationEventOpen={handleAnnotationEventOpen}
         onAnnotationLayerChange={handleAnnotationLayerChange}
         onAnnotationSelect={handleAnnotationSelect}
+        onQuickDetailClose={() => setQuickDetailEntity(null)}
         onCalendarLayerChange={handleCalendarLayerChange}
         onCalendarImpactChange={handleCalendarImpactChange}
         onAssetChange={handleAssetChange}
@@ -3120,11 +3231,6 @@ export function MarketChartWorkbench({
         onLoadOlderCandles={handleLoadOlderCandles}
         onRetry={handleRefresh}
         onTimeframeChange={handleTimeframeChange}
-      />
-
-      <LocalEntityQuickDetailDrawer
-        entity={quickDetailEntity}
-        onClose={() => setQuickDetailEntity(null)}
       />
 
       <div

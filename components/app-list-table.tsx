@@ -2,20 +2,11 @@
 
 import * as React from "react"
 
-import {
-  Empty,
-} from "@/components/ui/empty"
-import {
-  TableCell,
-  TableHead,
-  TableRow,
-} from "@/components/ui/table"
+import { Empty } from "@/components/ui/empty"
+import { TableCell, TableHead, TableRow } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 
-function AppListTable({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+function AppListTable({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="app-list-table"
@@ -71,7 +62,10 @@ function AppListTableEmptyState({
     <TableRow data-slot="app-list-table-empty-row">
       <TableCell colSpan={colSpan} className={cn("p-0", cellClassName)}>
         <Empty
-          className={cn("min-h-[240px] rounded-none border-0 px-6 py-16", className)}
+          className={cn(
+            "min-h-[240px] rounded-none border-0 px-6 py-16",
+            className
+          )}
         >
           {children}
         </Empty>

@@ -39,7 +39,9 @@ export async function getMe(): Promise<BackendMeResponse> {
 export async function getUsers(
   request: UserSearchRequest = {}
 ): Promise<UserSearchResponse> {
-  return fetchAuthenticated<UserSearchResponse>(`/users${buildUserSearchQuery(request)}`)
+  return fetchAuthenticated<UserSearchResponse>(
+    `/users${buildUserSearchQuery(request)}`
+  )
 }
 
 export async function createUser(
@@ -118,7 +120,9 @@ export async function updateMyProfile(
   } catch (error: unknown) {
     const dictionary = await getDictionary(await getRequestLocale())
     const errorMessage =
-      error instanceof Error ? error.message : dictionary.accountProfile.updateError
+      error instanceof Error
+        ? error.message
+        : dictionary.accountProfile.updateError
 
     return { success: false, error: errorMessage }
   }

@@ -17,7 +17,8 @@ export function getProviderOptionLabel(
   dictionary?: Dictionary
 ) {
   return (
-    providerOptions.find((provider) => provider.value === providerType)?.label ??
+    providerOptions.find((provider) => provider.value === providerType)
+      ?.label ??
     providerType ??
     dictionary?.aiProviderConfigs.unknownProvider ??
     "AI provider"

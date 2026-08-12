@@ -184,7 +184,9 @@ interface MarketChartCanvasProps {
   onAnnotationSelect?: (groupId: string) => void
   onAnnotationClose?: () => void
   renderAnnotationPopup?: (group: MarketChartAnnotationGroup) => React.ReactNode
-  onDrawingSelectionChange?: (selection: MarketChartDrawingSelection | null) => void
+  onDrawingSelectionChange?: (
+    selection: MarketChartDrawingSelection | null
+  ) => void
   onDrawingToolComplete?: () => void
   onLoadedDataChange?: (data: MarketChartLoadedData) => void
   onLoadOlderCandles: (
@@ -270,7 +272,11 @@ export function MarketChartCalendarEventList({
                   <Badge
                     variant={getEconomicCalendarStatusVariant(event.status)}
                   >
-                    {dictionary.marketCharts.calendar.statusLabels[event.status]}
+                    {
+                      dictionary.marketCharts.calendar.statusLabels[
+                        event.status
+                      ]
+                    }
                   </Badge>
                 </div>
                 {releaseValues.length > 0 ? (
@@ -297,7 +303,9 @@ export function MarketChartCalendarEventList({
                 {event.revision?.trim() ? (
                   <p className="text-xs text-muted-foreground">
                     {dictionary.marketCharts.calendar.revision}:{" "}
-                    <span className="tabular-nums">{event.revision.trim()}</span>
+                    <span className="tabular-nums">
+                      {event.revision.trim()}
+                    </span>
                   </p>
                 ) : null}
                 {event.description ? (
@@ -400,7 +408,11 @@ function isFiniteCoordinate(
 }
 
 function getFiniteXCoordinate(coordinate: unknown): number | null {
-  if (!coordinate || Array.isArray(coordinate) || typeof coordinate !== "object") {
+  if (
+    !coordinate ||
+    Array.isArray(coordinate) ||
+    typeof coordinate !== "object"
+  ) {
     return null
   }
 
@@ -410,7 +422,11 @@ function getFiniteXCoordinate(coordinate: unknown): number | null {
 }
 
 function getFiniteYCoordinate(coordinate: unknown): number | null {
-  if (!coordinate || Array.isArray(coordinate) || typeof coordinate !== "object") {
+  if (
+    !coordinate ||
+    Array.isArray(coordinate) ||
+    typeof coordinate !== "object"
+  ) {
     return null
   }
 
@@ -435,7 +451,10 @@ function getTimeRangeBand({
   const anchorTimestamp = Date.parse(startTime)
   const evaluationTimestamp = Date.parse(endTime)
 
-  if (!Number.isFinite(anchorTimestamp) || !Number.isFinite(evaluationTimestamp)) {
+  if (
+    !Number.isFinite(anchorTimestamp) ||
+    !Number.isFinite(evaluationTimestamp)
+  ) {
     return null
   }
 
@@ -572,7 +591,9 @@ function getOutcomeHoverBand({
     : null
 }
 
-function getWarmBandClassName(direction: MarketChartAnnotationDirection | null) {
+function getWarmBandClassName(
+  direction: MarketChartAnnotationDirection | null
+) {
   switch (direction) {
     case "BULLISH":
       return "bg-emerald-500/10 ring-emerald-500/30 hover:bg-emerald-500/15"
@@ -626,7 +647,9 @@ function getDrawingSelectionAnchor({
     absolute: true,
     paneId: overlay.paneId || CANDLE_PANE_ID,
   })
-  const coordinateList = Array.isArray(coordinates) ? coordinates : [coordinates]
+  const coordinateList = Array.isArray(coordinates)
+    ? coordinates
+    : [coordinates]
   const finiteCoordinates = coordinateList.filter(isFiniteCoordinate)
 
   if (finiteCoordinates.length === 0) {
@@ -770,9 +793,8 @@ export const MarketChartCanvas = forwardRef<
   const calendarEventGroupsRef = useRef(calendarEventGroups)
   const calendarEventsRef = useRef(calendarEvents)
   const warmAnnotationGroupsRef = useRef(warmAnnotationGroups)
-  const activeOutcomeHoverRangeRef = useRef<MarketChartOutcomeHoverRange | null>(
-    activeOutcomeHoverRange
-  )
+  const activeOutcomeHoverRangeRef =
+    useRef<MarketChartOutcomeHoverRange | null>(activeOutcomeHoverRange)
   const candlesRef = useRef(candles)
   const drawingGroupIdRef = useRef(
     createMarketChartDrawingGroupId({ assetId, timeframe })
@@ -807,12 +829,12 @@ export const MarketChartCanvas = forwardRef<
   const [calendarMarkerPositions, setCalendarMarkerPositions] = useState<
     CalendarMarkerPosition[]
   >([])
-  const [activeCalendarGuideX, setActiveCalendarGuideX] = useState<number | null>(
-    null
-  )
-  const [warmBandPositions, setWarmBandPositions] = useState<WarmBandPosition[]>(
-    []
-  )
+  const [activeCalendarGuideX, setActiveCalendarGuideX] = useState<
+    number | null
+  >(null)
+  const [warmBandPositions, setWarmBandPositions] = useState<
+    WarmBandPosition[]
+  >([])
   const [outcomeHoverBand, setOutcomeHoverBand] =
     useState<OutcomeHoverBand | null>(null)
   const { resolvedTheme } = useTheme()
@@ -899,8 +921,6 @@ export const MarketChartCanvas = forwardRef<
   useEffect(() => {
     onLoadOlderCandlesRef.current = onLoadOlderCandles
   }, [onLoadOlderCandles])
-
-
 
   function getOverlayById(
     id: string
@@ -1037,7 +1057,10 @@ export const MarketChartCanvas = forwardRef<
     const overlays = chart.getOverlays({ groupId: drawingGroupIdRef.current })
 
     if (overlays.length > 0) {
-      chart.overrideOverlay({ groupId: drawingGroupIdRef.current, lock: locked })
+      chart.overrideOverlay({
+        groupId: drawingGroupIdRef.current,
+        lock: locked,
+      })
     }
 
     return true
@@ -1147,34 +1170,31 @@ export const MarketChartCanvas = forwardRef<
     return true
   }
 
-  useImperativeHandle(
-    ref,
-    () => ({
-      clearDrawings,
-      captureScreenshot() {
-        return chartRef.current?.getConvertPictureUrl(true, "png") ?? null
-      },
-      deleteSelectedDrawing,
-      resize() {
-        chartRef.current?.resize()
-      },
-      setDrawingMagnet: setDrawingGroupMagnet,
-      setDrawingsLocked: setDrawingGroupLock,
-      setDrawingsVisible: setDrawingGroupVisibility,
-      setDrawingTool: setActiveDrawingTool,
-      setIndicators(indicators) {
-        const chart = chartRef.current
+  useImperativeHandle(ref, () => ({
+    clearDrawings,
+    captureScreenshot() {
+      return chartRef.current?.getConvertPictureUrl(true, "png") ?? null
+    },
+    deleteSelectedDrawing,
+    resize() {
+      chartRef.current?.resize()
+    },
+    setDrawingMagnet: setDrawingGroupMagnet,
+    setDrawingsLocked: setDrawingGroupLock,
+    setDrawingsVisible: setDrawingGroupVisibility,
+    setDrawingTool: setActiveDrawingTool,
+    setIndicators(indicators) {
+      const chart = chartRef.current
 
-        if (!chart) {
-          return false
-        }
+      if (!chart) {
+        return false
+      }
 
-        syncChartIndicators(chart, indicators)
-        return true
-      },
-      updateSelectedDrawingStyle,
-    })
-  )
+      syncChartIndicators(chart, indicators)
+      return true
+    },
+    updateSelectedDrawingStyle,
+  }))
 
   // ── Mount effect: init chart once, plus stable subscriptions ──
   useEffect(() => {
@@ -1310,7 +1330,10 @@ export const MarketChartCanvas = forwardRef<
 
     return () => {
       window.cancelAnimationFrame(frameId)
-      chart.unsubscribeAction("onVisibleRangeChange", scheduleMarkerPositionUpdate)
+      chart.unsubscribeAction(
+        "onVisibleRangeChange",
+        scheduleMarkerPositionUpdate
+      )
       chart.unsubscribeAction("onScroll", scheduleMarkerPositionUpdate)
       chart.unsubscribeAction("onZoom", scheduleMarkerPositionUpdate)
       resizeObserver.disconnect()
@@ -1436,7 +1459,9 @@ export const MarketChartCanvas = forwardRef<
     setChartLoadId(loadId)
     historyExhaustedRef.current = false
     clearDrawingSelection()
-    loadedAnnotationsRef.current = annotationLayerEnabledRef.current ? annotationsRef.current : []
+    loadedAnnotationsRef.current = annotationLayerEnabledRef.current
+      ? annotationsRef.current
+      : []
     loadedCalendarEventsRef.current = calendarLayerEnabledRef.current
       ? calendarEventsRef.current
       : []
@@ -1471,10 +1496,20 @@ export const MarketChartCanvas = forwardRef<
       drawingCacheRef.current.delete(newKey)
     }
 
-    async function loadBars({ callback, timestamp, type }: DataLoaderGetBarsParams) {
+    async function loadBars({
+      callback,
+      timestamp,
+      type,
+    }: DataLoaderGetBarsParams) {
       if (type === "init") {
-        const displayed = mergeLiveCandleItem(loadedCandlesRef.current, liveCandleRef.current)
-        callback(createKLineData(displayed), { backward: false, forward: displayed.length > 0 })
+        const displayed = mergeLiveCandleItem(
+          loadedCandlesRef.current,
+          liveCandleRef.current
+        )
+        callback(createKLineData(displayed), {
+          backward: false,
+          forward: displayed.length > 0,
+        })
         scheduleMarkerPositionUpdateRef.current()
         return
       }
@@ -1489,10 +1524,12 @@ export const MarketChartCanvas = forwardRef<
         return
       }
 
-      const oldestTimestamp = timestamp ?? getOldestLoadedTimestamp(loadedCandlesRef.current)
-      const request = oldestTimestamp !== null
-        ? createOlderHistoryRequest({ assetId, oldestTimestamp, timeframe })
-        : null
+      const oldestTimestamp =
+        timestamp ?? getOldestLoadedTimestamp(loadedCandlesRef.current)
+      const request =
+        oldestTimestamp !== null
+          ? createOlderHistoryRequest({ assetId, oldestTimestamp, timeframe })
+          : null
 
       if (oldestTimestamp === null || !request) {
         historyExhaustedRef.current = true
@@ -1511,7 +1548,11 @@ export const MarketChartCanvas = forwardRef<
         return
       }
 
-      const olderCandles = getNewOlderCandles(loadedCandlesRef.current, result.data.candles, oldestTimestamp)
+      const olderCandles = getNewOlderCandles(
+        loadedCandlesRef.current,
+        result.data.candles,
+        oldestTimestamp
+      )
       const olderData = createKLineData(olderCandles)
 
       if (!olderData.length) {
@@ -1521,17 +1562,24 @@ export const MarketChartCanvas = forwardRef<
         return
       }
 
-      loadedCandlesRef.current = mergeCandleItems(loadedCandlesRef.current, olderCandles)
+      loadedCandlesRef.current = mergeCandleItems(
+        loadedCandlesRef.current,
+        olderCandles
+      )
 
       if (annotationLayerEnabledRef.current) {
-        loadedAnnotationsRef.current = mergeMarketChartAnnotations(loadedAnnotationsRef.current, result.data.annotations)
+        loadedAnnotationsRef.current = mergeMarketChartAnnotations(
+          loadedAnnotationsRef.current,
+          result.data.annotations
+        )
       }
 
       if (calendarLayerEnabledRef.current) {
-        loadedCalendarEventsRef.current = mergeMarketChartEconomicCalendarEvents(
-          loadedCalendarEventsRef.current,
-          result.data.economicCalendarEvents
-        )
+        loadedCalendarEventsRef.current =
+          mergeMarketChartEconomicCalendarEvents(
+            loadedCalendarEventsRef.current,
+            result.data.economicCalendarEvents
+          )
       }
 
       onLoadedDataChangeRef.current?.({
@@ -1546,11 +1594,15 @@ export const MarketChartCanvas = forwardRef<
     }
 
     chart.setDataLoader({
-      getBars(params) { void loadBars(params) },
+      getBars(params) {
+        void loadBars(params)
+      },
       subscribeBar(params) {
         liveCandleSubscriberRef.current = params.callback
         liveCandleSubscriberLoadIdRef.current = loadId
-        const [liveData] = createKLineData(liveCandleRef.current ? [liveCandleRef.current] : [])
+        const [liveData] = createKLineData(
+          liveCandleRef.current ? [liveCandleRef.current] : []
+        )
         if (liveData) params.callback(liveData)
       },
       unsubscribeBar() {
@@ -1558,7 +1610,6 @@ export const MarketChartCanvas = forwardRef<
         liveCandleSubscriberLoadIdRef.current = null
       },
     })
-
   }, [assetId, timeframe])
 
   useEffect(() => {
@@ -1600,13 +1651,17 @@ export const MarketChartCanvas = forwardRef<
     )
   }
 
-  const showCalendarLane = calendarLayerEnabled && calendarEventGroups.length > 0
+  const showCalendarLane =
+    calendarLayerEnabled && calendarEventGroups.length > 0
 
   return (
     <div className={cn("relative h-full min-h-0 w-full", className)}>
       <div
         ref={containerRef}
-        className={cn("absolute inset-x-0 top-0", showCalendarLane ? "bottom-8" : "bottom-0")}
+        className={cn(
+          "absolute inset-x-0 top-0",
+          showCalendarLane ? "bottom-8" : "bottom-0"
+        )}
       />
       {activeCalendarGuideX !== null ? (
         <div
@@ -1688,6 +1743,9 @@ export const MarketChartCanvas = forwardRef<
       {warmBandPositions.map(({ group, height, left, top, width }) => {
         const selected = selectedAnnotationGroupId === group.id
         const annotation = group.annotations[0]
+        const colorClassNames = getMarketChartAnnotationColorClassNames(
+          group.direction
+        )
 
         return (
           <Popover
@@ -1701,6 +1759,15 @@ export const MarketChartCanvas = forwardRef<
               }
             }}
           >
+            <div
+              aria-hidden="true"
+              className={cn(
+                "pointer-events-none absolute z-[1] rounded-sm ring-1 transition-colors",
+                getWarmBandClassName(group.direction),
+                selected ? "ring-2" : null
+              )}
+              style={{ height, left, top, width }}
+            />
             <PopoverTrigger asChild>
               <button
                 type="button"
@@ -1709,13 +1776,15 @@ export const MarketChartCanvas = forwardRef<
                   { title: annotation?.warmEpisode?.summary || "" }
                 )}
                 aria-pressed={selected}
+                disabled={drawingToolActive}
                 className={cn(
-                  "absolute z-[1] rounded-sm ring-1 transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+                  "absolute z-[2] flex size-11 items-center justify-center rounded-full border-2 border-background shadow-sm outline-none transition-transform focus-visible:ring-3 focus-visible:ring-ring/50 sm:size-6",
                   drawingToolActive ? "pointer-events-none" : null,
-                  getWarmBandClassName(group.direction),
-                  selected ? "ring-2" : null
+                  colorClassNames.dot,
+                  colorClassNames.ring,
+                  selected ? "ring-4" : "ring-1"
                 )}
-                style={{ height, left, top, width }}
+                style={{ left: left + 4, top: top + 4 }}
               />
             </PopoverTrigger>
             <PopoverContent
@@ -1775,20 +1844,26 @@ export const MarketChartCanvas = forwardRef<
                 type="button"
                 aria-label={
                   count > 1
-                    ? formatMessage(dictionary.marketCharts.annotations.openMany, {
-                        count: formatNumber(count),
-                        time: formatDateTime(
-                          group.annotations[0]?.time,
-                          MARKER_DATE_TIME_OPTIONS,
-                          dictionary.marketCharts.format.notAvailable
-                        ),
-                      })
-                    : formatMessage(dictionary.marketCharts.annotations.openOne, {
-                        title:
-                          group.annotations[0]?.hotEvent?.title ||
-                          group.annotations[0]?.hotEvent?.summary ||
-                          "",
-                      })
+                    ? formatMessage(
+                        dictionary.marketCharts.annotations.openMany,
+                        {
+                          count: formatNumber(count),
+                          time: formatDateTime(
+                            group.annotations[0]?.time,
+                            MARKER_DATE_TIME_OPTIONS,
+                            dictionary.marketCharts.format.notAvailable
+                          ),
+                        }
+                      )
+                    : formatMessage(
+                        dictionary.marketCharts.annotations.openOne,
+                        {
+                          title:
+                            group.annotations[0]?.hotEvent?.title ||
+                            group.annotations[0]?.hotEvent?.summary ||
+                            "",
+                        }
+                      )
                 }
                 aria-pressed={selected}
                 className={cn(

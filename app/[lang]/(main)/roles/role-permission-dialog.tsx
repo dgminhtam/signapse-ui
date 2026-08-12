@@ -244,9 +244,7 @@ export function RolePermissionDialog({
             </div>
 
             <div className="flex flex-col gap-1">
-              <DialogTitle>
-                {role?.name || t.dialogTitle}
-              </DialogTitle>
+              <DialogTitle>{role?.name || t.dialogTitle}</DialogTitle>
               <DialogDescription className="max-w-3xl">
                 {role?.description || t.dialogDescription}
               </DialogDescription>
@@ -409,7 +407,9 @@ export function RolePermissionDialog({
                     <Search />
                   </EmptyMedia>
                   <EmptyTitle>
-                    {normalizedQuery ? t.noMatchesTitle : t.emptyPermissionsTitle}
+                    {normalizedQuery
+                      ? t.noMatchesTitle
+                      : t.emptyPermissionsTitle}
                   </EmptyTitle>
                   <EmptyDescription>
                     {normalizedQuery
@@ -451,9 +451,7 @@ export function RolePermissionDialog({
                               "rotate-180"
                           )}
                         />
-                        {normalizedQuery
-                          ? t.legacySearchOpen
-                          : t.viewDetails}
+                        {normalizedQuery ? t.legacySearchOpen : t.viewDetails}
                       </Button>
                     </CollapsibleTrigger>
                   </div>

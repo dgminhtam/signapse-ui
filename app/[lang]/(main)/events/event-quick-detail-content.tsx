@@ -1,5 +1,11 @@
 import type { ReactNode } from "react"
-import { Calendar, ExternalLink, FileText, GitBranch, Layers3 } from "lucide-react"
+import {
+  Calendar,
+  ExternalLink,
+  FileText,
+  GitBranch,
+  Layers3,
+} from "lucide-react"
 import { LocalizedLink as Link } from "@/components/localized-link"
 
 import { AppLocale } from "@/app/lib/i18n/config"
@@ -9,9 +15,7 @@ import {
   formatDateTime as formatLocalizedDateTime,
   formatPercent,
 } from "@/app/lib/i18n/format"
-import {
-  EventResponse,
-} from "@/app/lib/events/definitions"
+import { EventResponse } from "@/app/lib/events/definitions"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { AppTimeMetadata } from "@/components/app-time-metadata"
@@ -69,7 +73,7 @@ function QuickFact({
 }) {
   return (
     <div className="rounded-lg border bg-muted/20 p-3">
-      <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+      <dt className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
         {label}
       </dt>
       <dd className="mt-1">
@@ -141,7 +145,11 @@ export function EventQuickDetailContent({
                 <div className="flex flex-wrap items-center gap-2">
                   {evidence.evidenceRole ? (
                     <Badge variant="secondary">
-                      {dictionary.events.evidenceRoleLabels[evidence.evidenceRole]}
+                      {
+                        dictionary.events.evidenceRoleLabels[
+                          evidence.evidenceRole
+                        ]
+                      }
                     </Badge>
                   ) : null}
                   <Badge variant="outline">
@@ -156,10 +164,13 @@ export function EventQuickDetailContent({
                 </div>
 
                 <h3 className="mt-2 line-clamp-2 text-sm font-medium">
-                  {evidence.newsArticleTitle || dictionary.events.evidenceUntitled}
+                  {evidence.newsArticleTitle ||
+                    dictionary.events.evidenceUntitled}
                 </h3>
                 <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                  <span>{evidence.sourceName || dictionary.newsArticles.noOutlet}</span>
+                  <span>
+                    {evidence.sourceName || dictionary.newsArticles.noOutlet}
+                  </span>
                   <AppTimeMetadata icon={Calendar}>
                     {formatDateTime(evidence.publishedAt, locale, dictionary)}
                   </AppTimeMetadata>
@@ -187,7 +198,10 @@ export function EventQuickDetailContent({
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        <ExternalLink aria-hidden="true" data-icon="inline-start" />
+                        <ExternalLink
+                          aria-hidden="true"
+                          data-icon="inline-start"
+                        />
                         {dictionary.events.openOriginal}
                       </a>
                     </Button>
@@ -232,7 +246,9 @@ export function EventQuickDetailContent({
                   ) : null}
                 </div>
                 <div className="mt-2 text-sm font-medium">
-                  {asset.assetSymbol || asset.assetName || dictionary.events.noAssetName}
+                  {asset.assetSymbol ||
+                    asset.assetName ||
+                    dictionary.events.noAssetName}
                 </div>
                 {asset.assetName ? (
                   <div className="mt-1 text-xs text-muted-foreground">

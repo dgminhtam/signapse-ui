@@ -65,9 +65,9 @@ export function formatJsonValue(value: JsonValue | undefined) {
   return JSON.stringify(value ?? createMinimalResponseSchema(), null, 2)
 }
 
-export function parseJsonValue(text: string):
-  | { success: true; value: JsonValue }
-  | { success: false; error: string } {
+export function parseJsonValue(
+  text: string
+): { success: true; value: JsonValue } | { success: false; error: string } {
   try {
     return { success: true, value: JSON.parse(text) as JsonValue }
   } catch (error) {
@@ -78,12 +78,10 @@ export function parseJsonValue(text: string):
   }
 }
 
-export function isJsonObject(value: JsonValue | undefined): value is JsonObject {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    !Array.isArray(value)
-  )
+export function isJsonObject(
+  value: JsonValue | undefined
+): value is JsonObject {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
 }
 
 export function getSchemaType(
@@ -103,7 +101,9 @@ export function getSchemaType(
     return null
   }
 
-  const stringTypes = type.filter((item): item is string => typeof item === "string")
+  const stringTypes = type.filter(
+    (item): item is string => typeof item === "string"
+  )
   const uniqueTypes = [...new Set(stringTypes)]
   const nonNullTypes = uniqueTypes.filter((item) => item !== NULL_SCHEMA_TYPE)
 
@@ -131,7 +131,9 @@ export function getSchemaNullable(schema: JsonObject): boolean {
   return Array.isArray(type) && type.includes(NULL_SCHEMA_TYPE)
 }
 
-export function getSchemaProperties(schema: JsonObject): Record<string, JsonValue> {
+export function getSchemaProperties(
+  schema: JsonObject
+): Record<string, JsonValue> {
   const properties = schema.properties
 
   if (!isJsonObject(properties)) {
@@ -186,7 +188,9 @@ export function jsonValuesEqual(
   return JSON.stringify(first ?? null) === JSON.stringify(second ?? null)
 }
 
-export function isSupportedBuilderSchema(schema: JsonValue | undefined): boolean {
+export function isSupportedBuilderSchema(
+  schema: JsonValue | undefined
+): boolean {
   if (!isJsonObject(schema)) {
     return false
   }
@@ -220,7 +224,9 @@ function hasOnlyKeys(schema: JsonObject, keys: Set<string>) {
   return Object.keys(schema).every((key) => keys.has(key))
 }
 
-function isSystemPromptSchemaType(value: string): value is SystemPromptSchemaType {
+function isSystemPromptSchemaType(
+  value: string
+): value is SystemPromptSchemaType {
   return SYSTEM_PROMPT_SCHEMA_TYPES.includes(value as SystemPromptSchemaType)
 }
 

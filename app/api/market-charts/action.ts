@@ -32,7 +32,9 @@ function createMarketChartCandleQuery(request: MarketChartCandleRequest) {
   return query.toString()
 }
 
-function createMarketChartAnnotationQuery(request: MarketChartAnnotationRequest) {
+function createMarketChartAnnotationQuery(
+  request: MarketChartAnnotationRequest
+) {
   const query = new URLSearchParams()
 
   query.set("assetId", String(request.assetId))
@@ -59,7 +61,8 @@ export async function getMarketChartCandles(
   request: MarketChartCandleRequest
 ): Promise<ActionResult<MarketChartCandleResponse>> {
   const dictionary = await getDictionary(await getRequestLocale())
-  const parsedRequest = getMarketChartCandleRequestSchema(dictionary).safeParse(request)
+  const parsedRequest =
+    getMarketChartCandleRequestSchema(dictionary).safeParse(request)
 
   if (!parsedRequest.success) {
     return {
@@ -77,7 +80,10 @@ export async function getMarketChartCandles(
     const parsedResponse = marketChartCandleResponseSchema.safeParse(response)
 
     if (!parsedResponse.success) {
-      console.error("Market chart candle response validation failed", parsedResponse.error.issues)
+      console.error(
+        "Market chart candle response validation failed",
+        parsedResponse.error.issues
+      )
       return {
         success: false,
         error: dictionary.marketCharts.responseInvalid,
@@ -103,7 +109,8 @@ export async function getMarketChartAnnotations(
   request: MarketChartAnnotationRequest
 ): Promise<ActionResult<MarketChartAnnotationResponse[]>> {
   const dictionary = await getDictionary(await getRequestLocale())
-  const parsedRequest = getMarketChartAnnotationRequestSchema(dictionary).safeParse(request)
+  const parsedRequest =
+    getMarketChartAnnotationRequestSchema(dictionary).safeParse(request)
 
   if (!parsedRequest.success) {
     return {
@@ -118,10 +125,15 @@ export async function getMarketChartAnnotations(
     const response = await fetchAuthenticated<unknown>(
       `/market-charts/annotations?${createMarketChartAnnotationQuery(parsedRequest.data)}`
     )
-    const parsedResponse = z.array(marketChartAnnotationResponseSchema).safeParse(response)
+    const parsedResponse = z
+      .array(marketChartAnnotationResponseSchema)
+      .safeParse(response)
 
     if (!parsedResponse.success) {
-      console.error("Market chart annotation response validation failed", parsedResponse.error.issues)
+      console.error(
+        "Market chart annotation response validation failed",
+        parsedResponse.error.issues
+      )
       return {
         success: false,
         error: dictionary.marketCharts.responseInvalid,
@@ -148,7 +160,9 @@ export async function getMarketChartEconomicCalendarEvents(
 ): Promise<ActionResult<MarketChartEconomicCalendarEventResponse[]>> {
   const dictionary = await getDictionary(await getRequestLocale())
   const parsedRequest =
-    getMarketChartEconomicCalendarEventRequestSchema(dictionary).safeParse(request)
+    getMarketChartEconomicCalendarEventRequestSchema(dictionary).safeParse(
+      request
+    )
 
   if (!parsedRequest.success) {
     return {

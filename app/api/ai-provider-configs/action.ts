@@ -39,7 +39,9 @@ export async function getAiProviderConfigs(
   )
 }
 
-export async function getAiProviderConfigById(id: number): Promise<AiProviderConfigResponse> {
+export async function getAiProviderConfigById(
+  id: number
+): Promise<AiProviderConfigResponse> {
   return fetchAuthenticated<AiProviderConfigResponse>(
     `/ai-provider-configs/${id}`
   )
@@ -82,10 +84,13 @@ export async function createAiProviderConfig(
   request: AiProviderConfigCreateRequest
 ): Promise<ActionResult<AiProviderConfigResponse>> {
   try {
-    const data = await fetchAuthenticated<AiProviderConfigResponse>("/ai-provider-configs", {
-      method: "POST",
-      body: JSON.stringify(request),
-    })
+    const data = await fetchAuthenticated<AiProviderConfigResponse>(
+      "/ai-provider-configs",
+      {
+        method: "POST",
+        body: JSON.stringify(request),
+      }
+    )
     revalidateAiProviderConfig(data.id)
     return { success: true, data }
   } catch (error: unknown) {
@@ -153,7 +158,9 @@ export async function setAiProviderConfigDefault(
   }
 }
 
-export async function deleteAiProviderConfig(id: number): Promise<ActionResult> {
+export async function deleteAiProviderConfig(
+  id: number
+): Promise<ActionResult> {
   try {
     await fetchAuthenticated<void>(`/ai-provider-configs/${id}`, {
       method: "DELETE",

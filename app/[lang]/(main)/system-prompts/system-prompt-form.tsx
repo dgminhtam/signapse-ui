@@ -99,7 +99,9 @@ function createLocalizedNameDefaults(
 }
 
 function createInitialResponseSchema(initialData?: SystemPromptResponse) {
-  return cloneJsonValue(initialData?.responseSchema) ?? createMinimalResponseSchema()
+  return (
+    cloneJsonValue(initialData?.responseSchema) ?? createMinimalResponseSchema()
+  )
 }
 
 export function SystemPromptForm({ initialData }: SystemPromptFormProps) {
@@ -112,8 +114,9 @@ export function SystemPromptForm({ initialData }: SystemPromptFormProps) {
   const initialLocalizedNames = createLocalizedNameDefaults(initialData)
   const initialResponseSchema = createInitialResponseSchema(initialData)
   const promptTypeOptions = getSystemPromptTypeOptions(dictionary)
-  const [responseSchema, setResponseSchema] =
-    useFormResponseSchema(initialResponseSchema)
+  const [responseSchema, setResponseSchema] = useFormResponseSchema(
+    initialResponseSchema
+  )
   const [schemaError, setSchemaError] = useFormSchemaError()
 
   const systemPromptFormSchema = z.object({
@@ -240,7 +243,7 @@ export function SystemPromptForm({ initialData }: SystemPromptFormProps) {
                       )}
                     </Badge>
                   </div>
-                  <p className="mt-3 break-all font-mono text-sm text-muted-foreground">
+                  <p className="mt-3 font-mono text-sm break-all text-muted-foreground">
                     {initialData.promptType}
                   </p>
                 </div>
@@ -292,9 +295,7 @@ export function SystemPromptForm({ initialData }: SystemPromptFormProps) {
 
             <FieldSet>
               <FieldLegend>{t.localizedNames}</FieldLegend>
-              <FieldDescription>
-                {t.localizedNameDescription}
-              </FieldDescription>
+              <FieldDescription>{t.localizedNameDescription}</FieldDescription>
               <div className="grid gap-4 sm:grid-cols-2">
                 {SUPPORTED_APP_LOCALES.map((appLocale) => (
                   <Controller
@@ -339,7 +340,7 @@ export function SystemPromptForm({ initialData }: SystemPromptFormProps) {
                       <InputGroupText
                         className={
                           isOverLimit
-                            ? "text-xs tabular-nums text-destructive"
+                            ? "text-xs text-destructive tabular-nums"
                             : "text-xs tabular-nums"
                         }
                       >
@@ -350,9 +351,7 @@ export function SystemPromptForm({ initialData }: SystemPromptFormProps) {
                       </InputGroupText>
                     </InputGroupAddon>
                   </InputGroup>
-                  <FieldDescription>
-                    {t.contentDescription}
-                  </FieldDescription>
+                  <FieldDescription>{t.contentDescription}</FieldDescription>
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
                   )}

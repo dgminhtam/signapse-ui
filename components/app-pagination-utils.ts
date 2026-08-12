@@ -47,7 +47,10 @@ export function getPaginationRange({
 
   if (shouldShowLeftDots && !shouldShowRightDots) {
     const rightItemCount = 3 + 2 * siblingCount
-    const rightRange = range(totalPageCount - rightItemCount + 1, totalPageCount)
+    const rightRange = range(
+      totalPageCount - rightItemCount + 1,
+      totalPageCount
+    )
 
     return [firstPageIndex, DOTS, ...rightRange]
   }

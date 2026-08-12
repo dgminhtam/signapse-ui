@@ -56,8 +56,12 @@ export function RoleListPage({ roles, permissions }: RoleListPageProps) {
         <Table>
           <TableHeader>
             <AppListTableHeaderRow>
-              <AppListTableHead className="w-56">{t.roleColumn}</AppListTableHead>
-              <AppListTableHead className="w-48">{t.keyColumn}</AppListTableHead>
+              <AppListTableHead className="w-56">
+                {t.roleColumn}
+              </AppListTableHead>
+              <AppListTableHead className="w-48">
+                {t.keyColumn}
+              </AppListTableHead>
               <AppListTableHead className="w-[40%]">
                 {t.descriptionColumn}
               </AppListTableHead>

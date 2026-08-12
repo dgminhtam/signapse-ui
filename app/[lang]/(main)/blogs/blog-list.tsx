@@ -1,6 +1,14 @@
 "use client"
 
-import { Clock3, Edit2, Eye, EyeOff, FileText, Plus, Trash2 } from "lucide-react"
+import {
+  Clock3,
+  Edit2,
+  Eye,
+  EyeOff,
+  FileText,
+  Plus,
+  Trash2,
+} from "lucide-react"
 import { LocalizedLink as Link } from "@/components/localized-link"
 import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
@@ -155,16 +163,16 @@ export function BlogListPage({ blogPage }: BlogListProps) {
                     <AppTimeMetadata icon={Clock3}>
                       {blog.createdDate
                         ? formatDateTime(
-                          blog.createdDate,
-                          {
-                            year: "numeric",
-                            month: "2-digit",
-                            day: "2-digit",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          },
-                          "-"
-                        )
+                            blog.createdDate,
+                            {
+                              year: "numeric",
+                              month: "2-digit",
+                              day: "2-digit",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            },
+                            "-"
+                          )
                         : "-"}
                     </AppTimeMetadata>
                   </TableCell>
@@ -180,7 +188,9 @@ export function BlogListPage({ blogPage }: BlogListProps) {
                         >
                           <Link href={`/blogs/${blog.id}`}>
                             <Edit2 />
-                            <span className="sr-only">{dictionary.blogs.edit}</span>
+                            <span className="sr-only">
+                              {dictionary.blogs.edit}
+                            </span>
                           </Link>
                         </Button>
                       ) : null}
@@ -262,7 +272,9 @@ function DeleteBlogButton({ id }: { id: number }) {
             disabled={isPending}
             className="bg-red-500 hover:bg-red-600"
           >
-            {isPending ? dictionary.blogs.deletePending : dictionary.blogs.delete}
+            {isPending
+              ? dictionary.blogs.deletePending
+              : dictionary.blogs.delete}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

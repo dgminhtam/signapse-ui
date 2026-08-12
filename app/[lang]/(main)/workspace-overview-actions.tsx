@@ -37,7 +37,11 @@ export function WorkspaceOverviewActions({
 
   return (
     <>
-      <Button type="button" variant={variant} onClick={() => setIsWatchlistOpen(true)}>
+      <Button
+        type="button"
+        variant={variant}
+        onClick={() => setIsWatchlistOpen(true)}
+      >
         <ListPlusIcon data-icon="inline-start" />
         {dictionary.workspaceOverview.manageTrackedAssets}
       </Button>

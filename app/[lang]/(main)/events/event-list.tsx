@@ -115,7 +115,8 @@ export function EventList({ eventPage }: EventListProps) {
                         {event.title}
                       </Link>
                       <span className="line-clamp-2 text-xs break-words text-muted-foreground">
-                        {event.description?.trim() || dictionary.events.noDescription}
+                        {event.description?.trim() ||
+                          dictionary.events.noDescription}
                       </span>
                       {event.canonicalKey ? (
                         <span className="line-clamp-1 text-xs break-all text-muted-foreground">

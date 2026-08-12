@@ -24,10 +24,13 @@ export async function createWorkspace(
   request: WorkspaceCreateRequest
 ): Promise<ActionResult<WorkspaceResponse>> {
   try {
-    const workspace = await fetchAuthenticated<WorkspaceResponse>("/me/workspaces", {
-      method: "POST",
-      body: JSON.stringify(request),
-    })
+    const workspace = await fetchAuthenticated<WorkspaceResponse>(
+      "/me/workspaces",
+      {
+        method: "POST",
+        body: JSON.stringify(request),
+      }
+    )
     revalidatePath("/", "layout")
     return { success: true, data: workspace }
   } catch (error: unknown) {
@@ -43,10 +46,13 @@ export async function updateWorkspace(
   request: WorkspaceUpdateRequest
 ): Promise<ActionResult<WorkspaceResponse>> {
   try {
-    const workspace = await fetchAuthenticated<WorkspaceResponse>(`/me/workspaces/${id}`, {
-      method: "PUT",
-      body: JSON.stringify(request),
-    })
+    const workspace = await fetchAuthenticated<WorkspaceResponse>(
+      `/me/workspaces/${id}`,
+      {
+        method: "PUT",
+        body: JSON.stringify(request),
+      }
+    )
     revalidatePath("/", "layout")
     return { success: true, data: workspace }
   } catch (error: unknown) {
@@ -57,7 +63,9 @@ export async function updateWorkspace(
   }
 }
 
-export async function setCurrentWorkspace(id: number): Promise<ActionResult<WorkspaceResponse>> {
+export async function setCurrentWorkspace(
+  id: number
+): Promise<ActionResult<WorkspaceResponse>> {
   try {
     const workspace = await fetchAuthenticated<WorkspaceResponse>(
       `/me/workspaces/${id}/set-current`,

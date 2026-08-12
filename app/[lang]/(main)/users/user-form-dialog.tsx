@@ -111,9 +111,11 @@ function getInitialRoleId(user: UserResponse | null, roles: RoleResponse[]) {
   }
 
   return (
-    roles.find(
-      (role) => role.key === user.role_name || role.name === user.role_name
-    )?.id.toString() ?? ""
+    roles
+      .find(
+        (role) => role.key === user.role_name || role.name === user.role_name
+      )
+      ?.id.toString() ?? ""
   )
 }
 
@@ -128,7 +130,10 @@ function getInitialValues(
       email: user.email || "",
       firstName: user.firstName || "",
       lastName: user.lastName || "",
-      phone: user.phone === null || user.phone === undefined ? "" : String(user.phone),
+      phone:
+        user.phone === null || user.phone === undefined
+          ? ""
+          : String(user.phone),
       roleId: getInitialRoleId(user, roles),
     }
   }
@@ -202,17 +207,18 @@ export function UserFormDialog({
       firstName: values.firstName.trim(),
       lastName: values.lastName.trim(),
     }
-    const result = isUpdate && user
-      ? await updateManagedUser(user.id, {
-          ...names,
-          birthday: values.birthday.trim(),
-          phone: values.phone.trim(),
-          roleId: Number(values.roleId),
-        } satisfies UpdateManagedUserRequest)
-      : await createUser({
-          ...names,
-          email: values.email.trim(),
-        } satisfies CreateUserRequest)
+    const result =
+      isUpdate && user
+        ? await updateManagedUser(user.id, {
+            ...names,
+            birthday: values.birthday.trim(),
+            phone: values.phone.trim(),
+            roleId: Number(values.roleId),
+          } satisfies UpdateManagedUserRequest)
+        : await createUser({
+            ...names,
+            email: values.email.trim(),
+          } satisfies CreateUserRequest)
 
     if (result.success) {
       toast.success(isUpdate ? t.updateSuccess : t.createSuccess)

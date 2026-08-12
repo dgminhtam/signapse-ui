@@ -65,10 +65,7 @@ export function getSystemPromptTypeLabel(
 }
 
 export function getSystemPromptDisplayName(
-  prompt: Pick<
-    SystemPromptResponse,
-    "promptType" | "name" | "localizedNames"
-  >,
+  prompt: Pick<SystemPromptResponse, "promptType" | "name" | "localizedNames">,
   dictionary: Dictionary,
   locale?: string
 ) {

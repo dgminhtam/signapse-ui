@@ -110,10 +110,16 @@ function LandingHeader({
         </Link>
 
         <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
-          <a href="#product" className="transition-colors hover:text-foreground">
+          <a
+            href="#product"
+            className="transition-colors hover:text-foreground"
+          >
             {dictionary.landing.nav.product}
           </a>
-          <a href="#pipeline" className="transition-colors hover:text-foreground">
+          <a
+            href="#pipeline"
+            className="transition-colors hover:text-foreground"
+          >
             {dictionary.landing.nav.pipeline}
           </a>
           <a href="#trust" className="transition-colors hover:text-foreground">
@@ -175,11 +181,13 @@ function HeroSection({
         <div className="flex max-w-3xl flex-col gap-7">
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary">{dictionary.landing.hero.eyebrow}</Badge>
-            <Badge variant="outline">{dictionary.landing.hero.intelligenceFlow}</Badge>
+            <Badge variant="outline">
+              {dictionary.landing.hero.intelligenceFlow}
+            </Badge>
           </div>
 
           <div className="flex flex-col gap-5">
-            <h1 className="max-w-4xl text-4xl font-semibold leading-tight tracking-normal text-foreground sm:text-5xl lg:text-6xl">
+            <h1 className="max-w-4xl text-4xl leading-tight font-semibold tracking-normal text-foreground sm:text-5xl lg:text-6xl">
               {dictionary.landing.hero.title}
             </h1>
             <p className="max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
@@ -221,7 +229,12 @@ function LandingCtas({
             <ArrowRightIcon data-icon="inline-end" />
           </Link>
         </Button>
-        <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
+        <Button
+          asChild
+          size="lg"
+          variant="outline"
+          className="w-full sm:w-auto"
+        >
           <a href="#product">{dictionary.landing.cta.exploreProduct}</a>
         </Button>
       </div>
@@ -272,16 +285,16 @@ function ProductPreview({ dictionary }: { dictionary: Dictionary }) {
       </div>
 
       <div className="grid gap-0 xl:grid-cols-[9rem_1fr_15rem]">
-        <aside className="border-b p-4 xl:border-b-0 xl:border-r">
+        <aside className="border-b p-4 xl:border-r xl:border-b-0">
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-1">
-              <div className="text-xs font-medium uppercase text-muted-foreground">
+              <div className="text-xs font-medium text-muted-foreground uppercase">
                 {t.workspace}
               </div>
               <div className="text-sm font-semibold">{t.workspaceName}</div>
             </div>
             <div className="flex flex-col gap-2">
-              <div className="text-xs font-medium uppercase text-muted-foreground">
+              <div className="text-xs font-medium text-muted-foreground uppercase">
                 {t.watchlist}
               </div>
               {watchlist.map((asset) => (
@@ -299,7 +312,7 @@ function ProductPreview({ dictionary }: { dictionary: Dictionary }) {
           </div>
         </aside>
 
-        <div className="border-b p-4 xl:border-b-0 xl:border-r">
+        <div className="border-b p-4 xl:border-r xl:border-b-0">
           <div className="flex min-h-[440px] flex-col gap-4">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
@@ -329,7 +342,7 @@ function ProductPreview({ dictionary }: { dictionary: Dictionary }) {
                   )
                 )}
               </div>
-              <div className="absolute right-5 top-16 max-w-64 rounded-xl border bg-card p-4 shadow-xl shadow-foreground/10">
+              <div className="absolute top-16 right-5 max-w-64 rounded-xl border bg-card p-4 shadow-xl shadow-foreground/10">
                 <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
                   <CalendarClockIcon className="text-muted-foreground" />
                   {t.eventPopupTitle}
@@ -550,7 +563,12 @@ function PipelineSection({ dictionary }: { dictionary: Dictionary }) {
     },
     {
       title: t.knowledgeTitle,
-      items: [t.knowledgeOne, t.knowledgeTwo, t.knowledgeThree, t.knowledgeFour],
+      items: [
+        t.knowledgeOne,
+        t.knowledgeTwo,
+        t.knowledgeThree,
+        t.knowledgeFour,
+      ],
       icon: NetworkIcon,
     },
     {
@@ -601,7 +619,7 @@ function PipelineColumn({
   return (
     <article className="relative rounded-xl border bg-card p-6">
       {showConnector ? (
-        <div className="absolute right-0 top-1/2 hidden translate-x-1/2 lg:block">
+        <div className="absolute top-1/2 right-0 hidden translate-x-1/2 lg:block">
           <div className="flex size-8 items-center justify-center rounded-full border bg-background">
             <ArrowRightIcon className="text-muted-foreground" />
           </div>
@@ -615,7 +633,10 @@ function PipelineColumn({
       </div>
       <div className="flex flex-col gap-2">
         {items.map((item) => (
-          <div key={item} className="rounded-lg border bg-background px-3 py-2 text-sm">
+          <div
+            key={item}
+            className="rounded-lg border bg-background px-3 py-2 text-sm"
+          >
             {item}
           </div>
         ))}

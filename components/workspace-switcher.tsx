@@ -205,7 +205,9 @@ export function WorkspaceSwitcher({
           align="end"
           aria-labelledby={WORKSPACE_SWITCHER_TRIGGER_ID}
         >
-          <DropdownMenuLabel>{dictionary.workspace.switcherLabel}</DropdownMenuLabel>
+          <DropdownMenuLabel>
+            {dictionary.workspace.switcherLabel}
+          </DropdownMenuLabel>
           <DropdownMenuGroup>
             {workspaces.length > 0 ? (
               workspaces.map((workspace) => {

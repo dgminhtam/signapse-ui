@@ -29,7 +29,10 @@ export default function Error({
   return (
     <Empty className="min-h-[420px] rounded-[28px] border border-dashed border-destructive/20 bg-destructive/5">
       <EmptyHeader>
-        <EmptyMedia variant="icon" className="bg-destructive/10 text-destructive">
+        <EmptyMedia
+          variant="icon"
+          className="bg-destructive/10 text-destructive"
+        >
           <ChartCandlestick />
         </EmptyMedia>
         <EmptyTitle>{dictionary.marketCharts.errorTitle}</EmptyTitle>

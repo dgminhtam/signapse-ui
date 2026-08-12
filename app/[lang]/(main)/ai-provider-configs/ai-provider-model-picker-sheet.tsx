@@ -66,61 +66,69 @@ function ModelPickerSheetContent({
 
   return (
     <SheetContent side="right" className="w-full sm:max-w-xl">
-        <SheetHeader>
-          <SheetTitle>{t.modelPickerSheetTitle}</SheetTitle>
-          <SheetDescription>
-            {t.modelPickerDescription}
-          </SheetDescription>
-        </SheetHeader>
+      <SheetHeader>
+        <SheetTitle>{t.modelPickerSheetTitle}</SheetTitle>
+        <SheetDescription>{t.modelPickerDescription}</SheetDescription>
+      </SheetHeader>
 
-        <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 pb-4">
-          {models.length === 0 ? (
-            <Empty className="min-h-[280px] border">
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <Bot />
-                </EmptyMedia>
-                <EmptyTitle>{t.modelPickerEmptyTitle}</EmptyTitle>
-                <EmptyDescription>{t.modelPickerEmptyDescription}</EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          ) : (
-            <div className="flex flex-col gap-3">
-              {models.map((model) => {
-                const isSelected = selectedModel === model.id
+      <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 pb-4">
+        {models.length === 0 ? (
+          <Empty className="min-h-[280px] border">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Bot />
+              </EmptyMedia>
+              <EmptyTitle>{t.modelPickerEmptyTitle}</EmptyTitle>
+              <EmptyDescription>
+                {t.modelPickerEmptyDescription}
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {models.map((model) => {
+              const isSelected = selectedModel === model.id
 
-                return (
-                  <button
-                    key={model.id}
-                    type="button"
-                    onClick={() => setSelectedModel(model.id)}
-                    className="flex w-full items-start justify-between gap-4 rounded-lg border px-4 py-3 text-left transition-colors hover:border-primary/60 hover:bg-muted/40"
-                    aria-pressed={isSelected}
-                  >
-                    <div className="flex min-w-0 flex-col gap-1">
-                      <span className="font-medium text-foreground">{model.label || model.id}</span>
-                      <span className="truncate text-sm text-muted-foreground">{model.id}</span>
-                    </div>
-                    {isSelected ? <Check className="text-primary" /> : null}
-                  </button>
-                )
-              })}
-            </div>
-          )}
-        </div>
+              return (
+                <button
+                  key={model.id}
+                  type="button"
+                  onClick={() => setSelectedModel(model.id)}
+                  className="flex w-full items-start justify-between gap-4 rounded-lg border px-4 py-3 text-left transition-colors hover:border-primary/60 hover:bg-muted/40"
+                  aria-pressed={isSelected}
+                >
+                  <div className="flex min-w-0 flex-col gap-1">
+                    <span className="font-medium text-foreground">
+                      {model.label || model.id}
+                    </span>
+                    <span className="truncate text-sm text-muted-foreground">
+                      {model.id}
+                    </span>
+                  </div>
+                  {isSelected ? <Check className="text-primary" /> : null}
+                </button>
+              )
+            })}
+          </div>
+        )}
+      </div>
 
-        <SheetFooter>
-          <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
-            {dictionary.common.close}
-          </Button>
-          <Button
-            type="button"
-            onClick={() => onConfirm(selectedModel)}
-            disabled={!selectedModel || models.length === 0}
-          >
-            {t.confirmModel}
-          </Button>
-        </SheetFooter>
-      </SheetContent>
+      <SheetFooter>
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() => onOpenChange(false)}
+        >
+          {dictionary.common.close}
+        </Button>
+        <Button
+          type="button"
+          onClick={() => onConfirm(selectedModel)}
+          disabled={!selectedModel || models.length === 0}
+        >
+          {t.confirmModel}
+        </Button>
+      </SheetFooter>
+    </SheetContent>
   )
 }

@@ -1,68 +1,89 @@
 "use server"
 
-import { fetchAuthenticated } from '@/app/api/auth/action';
-import { SearchParams, Page, ActionResult } from '@/app/lib/definitions';
-import { getDictionary } from '@/app/lib/i18n/dictionaries';
-import { getRequestLocale } from '@/app/lib/i18n/server';
-import { queryParamsToString } from '@/app/lib/utils';
-import { BlogPost, BlogPostListResponse, CreateBlogPostRequest, UpdateBlogPostRequest } from '@/app/lib/blogs/definitions';
-import { revalidatePath } from 'next/cache';
+import { fetchAuthenticated } from "@/app/api/auth/action"
+import { SearchParams, Page, ActionResult } from "@/app/lib/definitions"
+import { getDictionary } from "@/app/lib/i18n/dictionaries"
+import { getRequestLocale } from "@/app/lib/i18n/server"
+import { queryParamsToString } from "@/app/lib/utils"
+import {
+  BlogPost,
+  BlogPostListResponse,
+  CreateBlogPostRequest,
+  UpdateBlogPostRequest,
+} from "@/app/lib/blogs/definitions"
+import { revalidatePath } from "next/cache"
 
-export async function getBlogs(searchParams: SearchParams): Promise<Page<BlogPostListResponse>> {
-    return fetchAuthenticated<Page<BlogPostListResponse>>(`/blogs?${queryParamsToString(searchParams)}`);
+export async function getBlogs(
+  searchParams: SearchParams
+): Promise<Page<BlogPostListResponse>> {
+  return fetchAuthenticated<Page<BlogPostListResponse>>(
+    `/blogs?${queryParamsToString(searchParams)}`
+  )
 }
 
 export async function getBlogById(id: number): Promise<BlogPost> {
-    return fetchAuthenticated<BlogPost>(`/blogs/${id}`);
+  return fetchAuthenticated<BlogPost>(`/blogs/${id}`)
 }
 
-export async function createBlog(request: CreateBlogPostRequest): Promise<ActionResult<BlogPost>> {
-    try {
-        const blog = await fetchAuthenticated<BlogPost>("/blogs", {
-            method: "POST",
-            body: JSON.stringify(request),
-        });
-        revalidatePath("/blogs");
-        return { success: true, data: blog };
-    } catch (error: unknown) {
-        const dictionary = await getDictionary(await getRequestLocale());
-        return {
-            success: false,
-            error: error instanceof Error ? error.message : dictionary.blogs.unexpectedError,
-        };
+export async function createBlog(
+  request: CreateBlogPostRequest
+): Promise<ActionResult<BlogPost>> {
+  try {
+    const blog = await fetchAuthenticated<BlogPost>("/blogs", {
+      method: "POST",
+      body: JSON.stringify(request),
+    })
+    revalidatePath("/blogs")
+    return { success: true, data: blog }
+  } catch (error: unknown) {
+    const dictionary = await getDictionary(await getRequestLocale())
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : dictionary.blogs.unexpectedError,
     }
+  }
 }
 
-export async function updateBlog(id: number, request: UpdateBlogPostRequest): Promise<ActionResult<BlogPost>> {
-    try {
-        const blog = await fetchAuthenticated<BlogPost>(`/blogs/${id}`, {
-            method: "PUT",
-            body: JSON.stringify(request),
-        });
-        revalidatePath("/blogs");
-        revalidatePath(`/blogs/${id}`);
-        return { success: true, data: blog };
-    } catch (error: unknown) {
-        const dictionary = await getDictionary(await getRequestLocale());
-        return {
-            success: false,
-            error: error instanceof Error ? error.message : dictionary.blogs.unexpectedError,
-        };
+export async function updateBlog(
+  id: number,
+  request: UpdateBlogPostRequest
+): Promise<ActionResult<BlogPost>> {
+  try {
+    const blog = await fetchAuthenticated<BlogPost>(`/blogs/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(request),
+    })
+    revalidatePath("/blogs")
+    revalidatePath(`/blogs/${id}`)
+    return { success: true, data: blog }
+  } catch (error: unknown) {
+    const dictionary = await getDictionary(await getRequestLocale())
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : dictionary.blogs.unexpectedError,
     }
+  }
 }
 
 export async function deleteBlog(id: number): Promise<ActionResult> {
-    try {
-        await fetchAuthenticated<void>(`/blogs/${id}`, {
-            method: "DELETE",
-        });
-        revalidatePath("/blogs");
-        return { success: true, data: undefined };
-    } catch (error: unknown) {
-        const dictionary = await getDictionary(await getRequestLocale());
-        return {
-            success: false,
-            error: error instanceof Error ? error.message : dictionary.blogs.deleteError,
-        };
+  try {
+    await fetchAuthenticated<void>(`/blogs/${id}`, {
+      method: "DELETE",
+    })
+    revalidatePath("/blogs")
+    return { success: true, data: undefined }
+  } catch (error: unknown) {
+    const dictionary = await getDictionary(await getRequestLocale())
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : dictionary.blogs.deleteError,
     }
+  }
 }

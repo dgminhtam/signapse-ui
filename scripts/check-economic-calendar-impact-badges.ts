@@ -77,7 +77,10 @@ assert.equal(
   true
 )
 assert.equal(isEconomicCalendarImpactSelected("high", ["MEDIUM", "LOW"]), false)
-assert.equal(isEconomicCalendarImpactSelected("unknown", ["HIGH", "MEDIUM", "LOW"]), false)
+assert.equal(
+  isEconomicCalendarImpactSelected("unknown", ["HIGH", "MEDIUM", "LOW"]),
+  false
+)
 assert.equal(isEconomicCalendarImpactSelected("low", []), false)
 
 console.log("Economic calendar impact checks passed")

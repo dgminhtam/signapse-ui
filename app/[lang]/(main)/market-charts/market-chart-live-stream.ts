@@ -57,7 +57,11 @@ export function openMarketChartLiveStream({
 
   function handleEvent<T>(
     event: MessageEvent,
-    parse: { safeParse: (value: unknown) => { success: true; data: T } | { success: false } },
+    parse: {
+      safeParse: (
+        value: unknown
+      ) => { success: true; data: T } | { success: false }
+    },
     onValid: (value: T) => void
   ) {
     try {

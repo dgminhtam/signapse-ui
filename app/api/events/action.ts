@@ -58,9 +58,7 @@ export async function enrichEventAssetsAndThemes(
     return {
       success: false,
       error:
-        error instanceof Error
-          ? error.message
-          : dictionary.events.enrichError,
+        error instanceof Error ? error.message : dictionary.events.enrichError,
     }
   }
 }

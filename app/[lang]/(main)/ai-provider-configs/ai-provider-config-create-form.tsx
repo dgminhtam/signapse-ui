@@ -56,9 +56,7 @@ import {
 import { AI_PROVIDER_TYPES, providerOptions } from "./ai-provider-config-shared"
 import { AiProviderModelPickerDialog } from "./ai-provider-model-picker-dialog"
 
-function getAiProviderConfigCreateSchema(
-  t: Dictionary["aiProviderConfigs"]
-) {
+function getAiProviderConfigCreateSchema(t: Dictionary["aiProviderConfigs"]) {
   const credentialCreateSchema = z.object({
     apiKey: z.string().trim().min(1, t.apiKeyRequired),
     model: z.string().trim().min(1, t.modelRequired),
@@ -72,11 +70,7 @@ function getAiProviderConfigCreateSchema(
       .optional()
       .or(z.literal("")),
     credentials: z.array(credentialCreateSchema).min(1, t.credentialRequired),
-    baseUrl: z
-      .string()
-      .max(500, t.baseUrlTooLong)
-      .optional()
-      .or(z.literal("")),
+    baseUrl: z.string().max(500, t.baseUrlTooLong).optional().or(z.literal("")),
     defaultProvider: z.boolean().default(false),
   })
 }
@@ -316,9 +310,7 @@ export function AiProviderConfigCreateForm() {
               <FieldSet className="gap-4">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="flex flex-col gap-1">
-                    <FieldLabel>
-                      {t.credentialSetup}
-                    </FieldLabel>
+                    <FieldLabel>{t.credentialSetup}</FieldLabel>
                     <FieldDescription>
                       {t.credentialSetupDescription}
                     </FieldDescription>
@@ -462,9 +454,7 @@ export function AiProviderConfigCreateForm() {
                       }}
                       placeholder="https://api.example.com/v1"
                     />
-                    <FieldDescription>
-                      {t.baseUrlDescription}
-                    </FieldDescription>
+                    <FieldDescription>{t.baseUrlDescription}</FieldDescription>
                     {fieldState.invalid ? (
                       <FieldError errors={[fieldState.error]} />
                     ) : null}
@@ -477,7 +467,9 @@ export function AiProviderConfigCreateForm() {
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="description">{t.description}</FieldLabel>
+                    <FieldLabel htmlFor="description">
+                      {t.description}
+                    </FieldLabel>
                     <Textarea
                       {...field}
                       id="description"

@@ -1,13 +1,13 @@
-import * as React from 'react';
+import * as React from "react"
 
-import { getDateDisplayLabel } from '@platejs/date';
-import type { TDateElement } from 'platejs';
-import type { SlateElementProps } from 'platejs/static';
+import { getDateDisplayLabel } from "@platejs/date"
+import type { TDateElement } from "platejs"
+import type { SlateElementProps } from "platejs/static"
 
-import { SlateElement } from 'platejs/static';
+import { SlateElement } from "platejs/static"
 
 export function DateElementStatic(props: SlateElementProps<TDateElement>) {
-  const { element } = props;
+  const { element } = props
 
   return (
     <SlateElement as="span" className="inline-block" {...props}>
@@ -20,5 +20,5 @@ export function DateElementStatic(props: SlateElementProps<TDateElement>) {
       </span>
       {props.children}
     </SlateElement>
-  );
+  )
 }

@@ -104,7 +104,12 @@ function getDateInputValue(...values: unknown[]) {
 
 export default async function AccountPage({ searchParams }: PageProps) {
   const [dictionary, profile, clerkUser, resolvedSearchParams] =
-    await Promise.all([getServerDictionary(), getMe(), currentUser(), searchParams])
+    await Promise.all([
+      getServerDictionary(),
+      getMe(),
+      currentUser(),
+      searchParams,
+    ])
   const nameParts = getNameParts(
     profile.firstName,
     profile.lastName,
@@ -136,7 +141,8 @@ export default async function AccountPage({ searchParams }: PageProps) {
     ),
     roleName: profile.role_name ?? "",
   }
-  const activeTab = resolvedSearchParams.tab === "billing" ? "billing" : "personal"
+  const activeTab =
+    resolvedSearchParams.tab === "billing" ? "billing" : "personal"
 
   return (
     <Tabs defaultValue={activeTab} className="mx-auto w-full max-w-3xl">

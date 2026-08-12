@@ -1,10 +1,10 @@
-'use client';
+"use client"
 
-import * as React from 'react';
+import * as React from "react"
 
-import { LineHeightPlugin } from '@platejs/basic-styles/react';
-import { WrapText } from 'lucide-react';
-import { useEditorRef, useSelectionFragmentProp } from 'platejs/react';
+import { LineHeightPlugin } from "@platejs/basic-styles/react"
+import { WrapText } from "lucide-react"
+import { useEditorRef, useSelectionFragmentProp } from "platejs/react"
 
 import {
   DropdownMenu,
@@ -12,23 +12,23 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu"
 
-import { ToolbarButton } from './toolbar';
+import { ToolbarButton } from "./toolbar"
 
 export function LineHeightToolbarButton(
   props: React.ComponentProps<typeof DropdownMenu>
 ) {
-  const editor = useEditorRef();
+  const editor = useEditorRef()
   const { defaultNodeValue, validNodeValues: values = [] } =
-    editor.getInjectProps(LineHeightPlugin);
+    editor.getInjectProps(LineHeightPlugin)
 
   const value = useSelectionFragmentProp({
     defaultValue: defaultNodeValue,
     getProp: (node) => node.lineHeight,
-  });
+  })
 
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(false)
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
@@ -44,8 +44,8 @@ export function LineHeightToolbarButton(
           onValueChange={(newValue) => {
             editor
               .getTransforms(LineHeightPlugin)
-              .lineHeight.setNodes(Number(newValue));
-            editor.tf.focus();
+              .lineHeight.setNodes(Number(newValue))
+            editor.tf.focus()
           }}
         >
           {values.map((value) => (
@@ -56,5 +56,5 @@ export function LineHeightToolbarButton(
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>
-  );
+  )
 }

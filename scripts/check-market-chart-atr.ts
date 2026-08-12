@@ -15,7 +15,10 @@ const flatCandles = Array.from({ length: 14 }, () => ({
 }))
 const flatAtr = calculateAtr(flatCandles)
 
-assert.deepEqual(flatAtr.slice(0, 13), Array.from({ length: 13 }, () => ({})))
+assert.deepEqual(
+  flatAtr.slice(0, 13),
+  Array.from({ length: 13 }, () => ({}))
+)
 assert.equal(flatAtr[13]?.atr, 0)
 
 const gapAtr = calculateAtr(

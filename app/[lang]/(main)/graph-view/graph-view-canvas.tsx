@@ -129,7 +129,7 @@ function GraphHudCountChip({
   return (
     <span
       className={cn(
-        "inline-flex min-w-0 max-w-full items-center gap-1.5 rounded-full border font-medium backdrop-blur",
+        "inline-flex max-w-full min-w-0 items-center gap-1.5 rounded-full border font-medium backdrop-blur",
         priority === "normal"
           ? "h-7 px-2.5 text-[11px] shadow-sm"
           : "h-6 px-2 text-[10px] opacity-75 shadow-none",
@@ -140,7 +140,9 @@ function GraphHudCountChip({
       <span
         className={cn(
           "rounded-full bg-background/60 font-semibold",
-          priority === "normal" ? "px-1.5 py-0.5 text-[10px]" : "px-1 text-[9px]"
+          priority === "normal"
+            ? "px-1.5 py-0.5 text-[10px]"
+            : "px-1 text-[9px]"
         )}
       >
         {count}
@@ -239,8 +241,11 @@ function getThemeMetadataItems(
       .filter(
         (
           theme
-        ): theme is { key: string; relationLabel: string | null; title: string } =>
-          theme !== null
+        ): theme is {
+          key: string
+          relationLabel: string | null
+          title: string
+        } => theme !== null
       ) ?? []
   )
 }
@@ -250,7 +255,9 @@ function formatThemeMetadataValue(
 ) {
   return themes
     .map((theme) =>
-      theme.relationLabel ? `${theme.title} (${theme.relationLabel})` : theme.title
+      theme.relationLabel
+        ? `${theme.title} (${theme.relationLabel})`
+        : theme.title
     )
     .join(", ")
 }
@@ -344,7 +351,7 @@ function GraphNodeInspectorField({
 
   return (
     <div className="min-w-0 rounded-lg border border-border/60 bg-background/55 px-2.5 py-2">
-      <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+      <dt className="text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
         {label}
       </dt>
       <dd className="mt-1 min-w-0" title={value ?? undefined}>
@@ -525,7 +532,10 @@ function GraphNodeDetailInspector({
       : null
   const occurredAt = formatInspectorDate(metadata.occurredAt, localization)
   const publishedAt = formatInspectorDate(metadata.publishedAt, localization)
-  const confidence = formatInspectorConfidence(metadata.confidence, localization)
+  const confidence = formatInspectorConfidence(
+    metadata.confidence,
+    localization
+  )
   const relationSummary = formatMessage(
     dictionary.graphView.inspector.relationSummary,
     {
@@ -543,7 +553,7 @@ function GraphNodeDetailInspector({
   })
 
   return (
-    <aside className="pointer-events-auto absolute inset-x-3 bottom-14 z-20 max-h-[26rem] overflow-hidden rounded-2xl border border-border/80 bg-popover/95 text-popover-foreground shadow-2xl backdrop-blur-md md:inset-x-auto md:bottom-auto md:right-4 md:top-16 md:max-h-[calc(100%-5rem)] md:w-[22rem]">
+    <aside className="pointer-events-auto absolute inset-x-3 bottom-14 z-20 max-h-[26rem] overflow-hidden rounded-2xl border border-border/80 bg-popover/95 text-popover-foreground shadow-2xl backdrop-blur-md md:inset-x-auto md:top-16 md:right-4 md:bottom-auto md:max-h-[calc(100%-5rem)] md:w-[22rem]">
       <div className="flex items-start gap-3 border-b border-border/70 px-3.5 py-3">
         <span
           aria-hidden="true"
@@ -551,10 +561,10 @@ function GraphNodeDetailInspector({
           style={{ backgroundColor: visual.color }}
         />
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+          <p className="text-[11px] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
             {visual.label}
           </p>
-          <h2 className="mt-1 line-clamp-3 text-sm font-semibold leading-snug">
+          <h2 className="mt-1 line-clamp-3 text-sm leading-snug font-semibold">
             {node.label}
           </h2>
           {node.secondaryLabel ? (
@@ -619,7 +629,9 @@ function GraphNodeDetailInspector({
                     className="size-4"
                     data-icon="inline-start"
                   />
-                  <span>{dictionary.graphView.inspector.openOriginalSource}</span>
+                  <span>
+                    {dictionary.graphView.inspector.openOriginalSource}
+                  </span>
                 </a>
               </Button>
             ) : null}
@@ -881,7 +893,11 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
       direction === "in"
         ? currentZoom * GRAPH_ZOOM_STEP_RATIO
         : currentZoom / GRAPH_ZOOM_STEP_RATIO
-    const nextZoom = clampValue(nextRawZoom, GRAPH_ZOOM_RANGE[0], GRAPH_ZOOM_RANGE[1])
+    const nextZoom = clampValue(
+      nextRawZoom,
+      GRAPH_ZOOM_RANGE[0],
+      GRAPH_ZOOM_RANGE[1]
+    )
 
     void graph.zoomTo(nextZoom, GRAPH_ZOOM_ANIMATION).catch((error) => {
       if (!graph.destroyed) {
@@ -970,7 +986,7 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
         },
         {
           state: "drag-selected",
-          type: "drag-element-force"
+          type: "drag-element-force",
         },
       ],
       container,
@@ -1094,7 +1110,7 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
       <TooltipProvider>
         <ButtonGroup
           orientation="vertical"
-          className="pointer-events-auto absolute right-3 top-14 z-10 sm:right-4 sm:top-16"
+          className="pointer-events-auto absolute top-14 right-3 z-10 sm:top-16 sm:right-4"
         >
           <GraphToolButton
             label={dictionary.graphView.controls.zoomOut}

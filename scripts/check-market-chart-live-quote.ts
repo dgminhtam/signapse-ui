@@ -118,7 +118,10 @@ assert.match(
   workbenchSource,
   /status: null,\s+transportState: value\.stale \? "STALE" : "CONNECTED"/
 )
-assert.match(workbenchSource, /status: quoteConfirmsLive \? null : value\.status/)
+assert.match(
+  workbenchSource,
+  /status: quoteConfirmsLive \? null : value\.status/
+)
 assert.match(workbenchSource, /onCandle\(value\)[\s\S]*?candle: value,/)
 
 console.log("Market chart live quote checks passed")

@@ -466,7 +466,8 @@ export const en: Dictionary = {
     },
     assetsInFocus: {
       title: "Assets in focus",
-      description: "Ranked assets with the latest market context in this scope.",
+      description:
+        "Ranked assets with the latest market context in this scope.",
       graphView: "Open Graph View",
       marketCharts: "Open Market Charts",
       emptyTitle: "No assets in focus yet",
@@ -489,8 +490,7 @@ export const en: Dictionary = {
     },
     marketNarratives: {
       title: "Market narratives",
-      description:
-        "Ranked narratives in the current workspace tracking scope.",
+      description: "Ranked narratives in the current workspace tracking scope.",
       graphView: "Open Graph View",
       theme: "Theme",
       affectedAssets: "Related assets",

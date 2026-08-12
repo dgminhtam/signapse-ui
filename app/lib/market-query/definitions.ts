@@ -1,6 +1,9 @@
 import { z } from "zod"
 
-import { artifactTypes, type ArtifactType } from "@/app/lib/artifacts/definitions"
+import {
+  artifactTypes,
+  type ArtifactType,
+} from "@/app/lib/artifacts/definitions"
 import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
 
 export type MarketQueryEvidenceRole =
@@ -85,8 +88,7 @@ export interface MarketChatMessageResponse {
   createdDate: string
 }
 
-export interface MarketConversationDetailResponse
-  extends MarketConversationSummaryResponse {
+export interface MarketConversationDetailResponse extends MarketConversationSummaryResponse {
   messages: MarketChatMessageResponse[]
 }
 
@@ -121,7 +123,9 @@ export const marketQueryEvidenceResponseSchema = z.object({
   sourceName: z.string().optional(),
   publishedAt: z.string().nullish(),
   artifactType: z.enum(artifactTypes).optional(),
-  evidenceRole: z.enum(["PRIMARY", "SUPPORTING", "UPDATE", "CONTRADICTING", "CONTEXT"]).optional(),
+  evidenceRole: z
+    .enum(["PRIMARY", "SUPPORTING", "UPDATE", "CONTRADICTING", "CONTEXT"])
+    .optional(),
   evidenceConfidence: z.number().optional(),
   evidenceNote: z.string().optional(),
 }) satisfies z.ZodType<MarketQueryEvidenceResponse>
@@ -163,13 +167,21 @@ const nullableNumberSchema = z.number().int().nullable()
 
 export function getCreateMarketConversationSchema(dictionary: Dictionary) {
   return z.object({
-    title: z.string().trim().min(1, dictionary.marketConversations.titleRequired),
+    title: z
+      .string()
+      .trim()
+      .min(1, dictionary.marketConversations.titleRequired),
   }) satisfies z.ZodType<CreateMarketConversationRequest>
 }
 
-export function getSubmitMarketConversationMessageSchema(dictionary: Dictionary) {
+export function getSubmitMarketConversationMessageSchema(
+  dictionary: Dictionary
+) {
   return z.object({
-    message: z.string().trim().min(1, dictionary.marketConversations.messageRequired),
+    message: z
+      .string()
+      .trim()
+      .min(1, dictionary.marketConversations.messageRequired),
   }) satisfies z.ZodType<SubmitMarketConversationMessageRequest>
 }
 

@@ -20,6 +20,16 @@ export const MARKET_CHART_TIMEFRAMES = [
 
 export type MarketChartTimeframe = (typeof MARKET_CHART_TIMEFRAMES)[number]
 
+export const MARKET_CHART_WARM_BAND_TIMEFRAMES = ["1d", "1w"] as const
+
+export function isMarketChartWarmBandTimeframe(
+  timeframe: MarketChartTimeframe
+): boolean {
+  return MARKET_CHART_WARM_BAND_TIMEFRAMES.some(
+    (candidate) => candidate === timeframe
+  )
+}
+
 export function getMarketChartTimeframeLabels(
   dictionary: Dictionary
 ): Record<MarketChartTimeframe, string> {
@@ -28,7 +38,12 @@ export function getMarketChartTimeframeLabels(
 
 export const DEFAULT_MARKET_CHART_TIMEFRAME: MarketChartTimeframe = "1h"
 
-export type MarketChartAssetType = "COMMODITY" | "CRYPTO" | "FX" | "INDEX" | string
+export type MarketChartAssetType =
+  | "COMMODITY"
+  | "CRYPTO"
+  | "FX"
+  | "INDEX"
+  | string
 
 export interface MarketChartCandleRequest {
   assetId: number
@@ -74,10 +89,7 @@ export type MarketChartAnnotationDirection =
   | "NEUTRAL"
   | string
 
-export type MarketChartAnnotationType =
-  | "HOT_EVENT"
-  | "WARM_EPISODE"
-  | string
+export type MarketChartAnnotationType = "HOT_EVENT" | "WARM_EPISODE" | string
 
 export interface MarketChartAnnotationEvidenceResponse {
   newsArticleId?: number | null
@@ -288,7 +300,11 @@ export function getMarketChartCandleRequestSchema(dictionary: Dictionary) {
       const fromTime = Date.parse(value.from)
       const toTime = Date.parse(value.to)
 
-      if (!Number.isNaN(fromTime) && !Number.isNaN(toTime) && fromTime >= toTime) {
+      if (
+        !Number.isNaN(fromTime) &&
+        !Number.isNaN(toTime) &&
+        fromTime >= toTime
+      ) {
         context.addIssue({
           code: "custom",
           path: ["to"],
@@ -322,7 +338,11 @@ export function getMarketChartAnnotationRequestSchema(dictionary: Dictionary) {
       const fromTime = Date.parse(value.from)
       const toTime = Date.parse(value.to)
 
-      if (!Number.isNaN(fromTime) && !Number.isNaN(toTime) && fromTime >= toTime) {
+      if (
+        !Number.isNaN(fromTime) &&
+        !Number.isNaN(toTime) &&
+        fromTime >= toTime
+      ) {
         context.addIssue({
           code: "custom",
           path: ["to"],
@@ -365,7 +385,11 @@ export function getMarketChartEconomicCalendarEventRequestSchema(
       const fromTime = Date.parse(value.from)
       const toTime = Date.parse(value.to)
 
-      if (!Number.isNaN(fromTime) && !Number.isNaN(toTime) && fromTime >= toTime) {
+      if (
+        !Number.isNaN(fromTime) &&
+        !Number.isNaN(toTime) &&
+        fromTime >= toTime
+      ) {
         context.addIssue({
           code: "custom",
           path: ["to"],
@@ -437,8 +461,12 @@ export const marketChartHotEventAnnotationResponseSchema = z.object({
   summary: z.string().nullable().optional(),
   confidence: z.number().nullable().optional(),
   outcome: marketChartAnnotationOutcomeResponseSchema.nullable().optional(),
-  topMarketReaction: marketChartAnnotationReactionResponseSchema.nullable().optional(),
-  marketReactions: z.array(marketChartAnnotationReactionResponseSchema).default([]),
+  topMarketReaction: marketChartAnnotationReactionResponseSchema
+    .nullable()
+    .optional(),
+  marketReactions: z
+    .array(marketChartAnnotationReactionResponseSchema)
+    .default([]),
   evidence: z.array(marketChartAnnotationEvidenceResponseSchema).default([]),
   links: marketChartAnnotationLinksResponseSchema.nullable().optional(),
 }) satisfies z.ZodType<MarketChartHotEventAnnotationResponse>
@@ -462,7 +490,9 @@ export const marketChartWarmEpisodeAnnotationResponseSchema = z.object({
   direction: z.string().nullable().optional(),
   summary: z.string().nullable().optional(),
   outcome: marketChartAnnotationOutcomeResponseSchema.nullable().optional(),
-  events: z.array(marketChartWarmEpisodeEventAnnotationResponseSchema).default([]),
+  events: z
+    .array(marketChartWarmEpisodeEventAnnotationResponseSchema)
+    .default([]),
 }) satisfies z.ZodType<MarketChartWarmEpisodeAnnotationResponse>
 
 export const marketChartAnnotationResponseSchema = z.object({
@@ -471,7 +501,9 @@ export const marketChartAnnotationResponseSchema = z.object({
   assetId: z.number(),
   time: z.string(),
   hotEvent: marketChartHotEventAnnotationResponseSchema.nullable().optional(),
-  warmEpisode: marketChartWarmEpisodeAnnotationResponseSchema.nullable().optional(),
+  warmEpisode: marketChartWarmEpisodeAnnotationResponseSchema
+    .nullable()
+    .optional(),
 }) satisfies z.ZodType<MarketChartAnnotationResponse>
 
 export const marketChartEconomicCalendarEventStatusSchema = z.enum([
@@ -574,6 +606,8 @@ export const marketChartLiveErrorResponseSchema = z.object({
   observedAt: z.string(),
 }) satisfies z.ZodType<MarketChartLiveErrorResponse>
 
-export function isMarketChartTimeframe(value: string): value is MarketChartTimeframe {
+export function isMarketChartTimeframe(
+  value: string
+): value is MarketChartTimeframe {
   return MARKET_CHART_TIMEFRAMES.includes(value as MarketChartTimeframe)
 }

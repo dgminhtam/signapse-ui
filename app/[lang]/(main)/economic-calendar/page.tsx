@@ -56,7 +56,9 @@ export default async function EconomicCalendarPage({
   const dateState = getEconomicCalendarDateState(params.date)
 
   return (
-    <Suspense fallback={<EconomicCalendarListSkeleton dictionary={dictionary} />}>
+    <Suspense
+      fallback={<EconomicCalendarListSkeleton dictionary={dictionary} />}
+    >
       <EconomicCalendarListContent
         sort={sort}
         searchParams={params}
@@ -176,10 +178,10 @@ function EconomicCalendarListSkeleton({
               </TableCell>
             </TableRow>
             <TableRow className="hover:bg-transparent">
-              <TableCell rowSpan={3} className="w-28 align-top bg-muted/10">
+              <TableCell rowSpan={3} className="w-28 bg-muted/10 align-top">
                 <Skeleton className="h-4 w-16" />
               </TableCell>
-              <TableCell rowSpan={3} className="w-24 align-top bg-muted/5">
+              <TableCell rowSpan={3} className="w-24 bg-muted/5 align-top">
                 <Skeleton className="h-4 w-20" />
               </TableCell>
               <TableCell className="w-28 align-top">
@@ -200,7 +202,7 @@ function EconomicCalendarListSkeleton({
               <TableCell className="w-28 align-top">
                 <Skeleton className="h-4 w-20" />
               </TableCell>
-              <TableCell className="w-20 align-top text-right">
+              <TableCell className="w-20 text-right align-top">
                 <div className="flex justify-end gap-1">
                   <Skeleton className="h-8 w-8 rounded" />
                   <Skeleton className="h-8 w-8 rounded" />
@@ -227,7 +229,7 @@ function EconomicCalendarListSkeleton({
                 <TableCell className="w-28 align-top">
                   <Skeleton className="h-4 w-20" />
                 </TableCell>
-                <TableCell className="w-20 align-top text-right">
+                <TableCell className="w-20 text-right align-top">
                   <div className="flex justify-end gap-1">
                     <Skeleton className="h-8 w-8 rounded" />
                     <Skeleton className="h-8 w-8 rounded" />

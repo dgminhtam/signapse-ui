@@ -13,7 +13,10 @@ import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
 
-import { buildEventEnrichmentSummary, isEventEnrichmentFailure } from "./event-presentation"
+import {
+  buildEventEnrichmentSummary,
+  isEventEnrichmentFailure,
+} from "./event-presentation"
 
 interface EventEnrichButtonProps {
   id: number
@@ -80,7 +83,9 @@ export function EventEnrichButton({
       )}
       {showText ? (
         <span>
-          {isPending ? dictionary.events.enrichPending : dictionary.events.enrich}
+          {isPending
+            ? dictionary.events.enrichPending
+            : dictionary.events.enrich}
         </span>
       ) : (
         <span className="sr-only">{dictionary.events.enrichAria}</span>

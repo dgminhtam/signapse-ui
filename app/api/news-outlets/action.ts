@@ -54,7 +54,9 @@ export async function createNewsOutlet(
   } catch (error: unknown) {
     const dictionary = await getDictionary(await getRequestLocale())
     const errorMessage =
-      error instanceof Error ? error.message : dictionary.newsOutlets.createError
+      error instanceof Error
+        ? error.message
+        : dictionary.newsOutlets.createError
 
     return { success: false, error: errorMessage }
   }
@@ -80,7 +82,9 @@ export async function updateNewsOutlet(
   } catch (error: unknown) {
     const dictionary = await getDictionary(await getRequestLocale())
     const errorMessage =
-      error instanceof Error ? error.message : dictionary.newsOutlets.updateError
+      error instanceof Error
+        ? error.message
+        : dictionary.newsOutlets.updateError
 
     return { success: false, error: errorMessage }
   }
@@ -124,7 +128,9 @@ export async function deleteNewsOutlet(id: number): Promise<ActionResult> {
   } catch (error: unknown) {
     const dictionary = await getDictionary(await getRequestLocale())
     const errorMessage =
-      error instanceof Error ? error.message : dictionary.newsOutlets.deleteError
+      error instanceof Error
+        ? error.message
+        : dictionary.newsOutlets.deleteError
 
     return { success: false, error: errorMessage }
   }

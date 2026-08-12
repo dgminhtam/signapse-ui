@@ -1,18 +1,18 @@
-'use client';
+"use client"
 
-import * as React from 'react';
+import * as React from "react"
 
 import {
   BLOCK_CONTEXT_MENU_ID,
   BlockMenuPlugin,
   BlockSelectionPlugin,
-} from '@platejs/selection/react';
-import { KEYS } from 'platejs';
+} from "@platejs/selection/react"
+import { KEYS } from "platejs"
 import {
   useEditorPlugin,
   useEditorReadOnly,
   usePluginOption,
-} from 'platejs/react';
+} from "platejs/react"
 
 import {
   ContextMenu,
@@ -23,16 +23,16 @@ import {
   ContextMenuSubContent,
   ContextMenuSubTrigger,
   ContextMenuTrigger,
-} from '@/components/ui/context-menu';
-import { setBlockType } from '@/components/editor/transforms';
-import { useIsTouchDevice } from '@/hooks/use-is-touch-device';
+} from "@/components/ui/context-menu"
+import { setBlockType } from "@/components/editor/transforms"
+import { useIsTouchDevice } from "@/hooks/use-is-touch-device"
 
 export function BlockContextMenu({ children }: { children: React.ReactNode }) {
-  const { api, editor } = useEditorPlugin(BlockMenuPlugin);
-  const isTouch = useIsTouchDevice();
-  const readOnly = useEditorReadOnly();
-  const openId = usePluginOption(BlockMenuPlugin, 'openId');
-  const isOpen = openId === BLOCK_CONTEXT_MENU_ID;
+  const { api, editor } = useEditorPlugin(BlockMenuPlugin)
+  const isTouch = useIsTouchDevice()
+  const readOnly = useEditorReadOnly()
+  const openId = usePluginOption(BlockMenuPlugin, "openId")
+  const isOpen = openId === BLOCK_CONTEXT_MENU_ID
 
   const handleTurnInto = React.useCallback(
     (type: string) => {
@@ -40,30 +40,30 @@ export function BlockContextMenu({ children }: { children: React.ReactNode }) {
         .getApi(BlockSelectionPlugin)
         .blockSelection.getNodes()
         .forEach(([, path]) => {
-          setBlockType(editor, type, { at: path });
-        });
+          setBlockType(editor, type, { at: path })
+        })
     },
     [editor]
-  );
+  )
 
   const handleAlign = React.useCallback(
-    (align: 'center' | 'left' | 'right') => {
+    (align: "center" | "left" | "right") => {
       editor
         .getTransforms(BlockSelectionPlugin)
-        .blockSelection.setNodes({ align });
+        .blockSelection.setNodes({ align })
     },
     [editor]
-  );
+  )
 
   if (isTouch) {
-    return children;
+    return children
   }
 
   return (
     <ContextMenu
       onOpenChange={(open) => {
         if (!open) {
-          api.blockMenu.hide();
+          api.blockMenu.hide()
         }
       }}
       modal={false}
@@ -71,20 +71,20 @@ export function BlockContextMenu({ children }: { children: React.ReactNode }) {
       <ContextMenuTrigger
         asChild
         onContextMenu={(event) => {
-          const dataset = (event.target as HTMLElement).dataset;
+          const dataset = (event.target as HTMLElement).dataset
           const disabled =
-            dataset?.slateEditor === 'true' ||
+            dataset?.slateEditor === "true" ||
             readOnly ||
-            dataset?.plateOpenContextMenu === 'false';
+            dataset?.plateOpenContextMenu === "false"
 
-          if (disabled) return event.preventDefault();
+          if (disabled) return event.preventDefault()
 
           setTimeout(() => {
             api.blockMenu.show(BLOCK_CONTEXT_MENU_ID, {
               x: event.clientX,
               y: event.clientY,
-            });
-          }, 0);
+            })
+          }, 0)
         }}
       >
         <div className="w-full">{children}</div>
@@ -93,8 +93,8 @@ export function BlockContextMenu({ children }: { children: React.ReactNode }) {
         <ContextMenuContent
           className="w-64"
           onCloseAutoFocus={(e) => {
-            e.preventDefault();
-            editor.getApi(BlockSelectionPlugin).blockSelection.focus();
+            e.preventDefault()
+            editor.getApi(BlockSelectionPlugin).blockSelection.focus()
           }}
         >
           <ContextMenuGroup>
@@ -102,8 +102,8 @@ export function BlockContextMenu({ children }: { children: React.ReactNode }) {
               onClick={() => {
                 editor
                   .getTransforms(BlockSelectionPlugin)
-                  .blockSelection.removeNodes();
-                editor.tf.focus();
+                  .blockSelection.removeNodes()
+                editor.tf.focus()
               }}
             >
               Delete
@@ -112,7 +112,7 @@ export function BlockContextMenu({ children }: { children: React.ReactNode }) {
               onClick={() => {
                 editor
                   .getTransforms(BlockSelectionPlugin)
-                  .blockSelection.duplicate();
+                  .blockSelection.duplicate()
               }}
             >
               Duplicate
@@ -170,13 +170,13 @@ export function BlockContextMenu({ children }: { children: React.ReactNode }) {
             <ContextMenuSub>
               <ContextMenuSubTrigger>Align</ContextMenuSubTrigger>
               <ContextMenuSubContent className="w-48">
-                <ContextMenuItem onClick={() => handleAlign('left')}>
+                <ContextMenuItem onClick={() => handleAlign("left")}>
                   Left
                 </ContextMenuItem>
-                <ContextMenuItem onClick={() => handleAlign('center')}>
+                <ContextMenuItem onClick={() => handleAlign("center")}>
                   Center
                 </ContextMenuItem>
-                <ContextMenuItem onClick={() => handleAlign('right')}>
+                <ContextMenuItem onClick={() => handleAlign("right")}>
                   Right
                 </ContextMenuItem>
               </ContextMenuSubContent>
@@ -185,5 +185,5 @@ export function BlockContextMenu({ children }: { children: React.ReactNode }) {
         </ContextMenuContent>
       )}
     </ContextMenu>
-  );
+  )
 }

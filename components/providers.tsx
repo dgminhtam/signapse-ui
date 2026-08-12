@@ -24,9 +24,7 @@ export function Providers({ locale, dictionary, children }: ProvidersProps) {
         disableTransitionOnChange
         enableColorScheme
       >
-        <TooltipProvider delayDuration={0}>
-          {children}
-        </TooltipProvider>
+        <TooltipProvider delayDuration={0}>{children}</TooltipProvider>
         <Toaster richColors position="top-right" />
       </NextThemesProvider>
     </LocalizationProvider>

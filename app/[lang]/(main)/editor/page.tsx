@@ -1,5 +1,5 @@
-import { Toaster } from 'sonner';
-import { PlateEditor } from '@/components/editor/plate-editor';
+import { Toaster } from "sonner"
+import { PlateEditor } from "@/components/editor/plate-editor"
 
 export default function Page() {
   return (
@@ -7,5 +7,5 @@ export default function Page() {
       <PlateEditor />
       <Toaster />
     </div>
-  );
+  )
 }

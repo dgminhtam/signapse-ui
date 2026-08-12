@@ -7,11 +7,7 @@ interface LogoProps {
   variant?: "icon" | "full"
 }
 
-export function Logo({
-  width = 40,
-  height = 40,
-  className = "",
-}: LogoProps) {
+export function Logo({ width = 40, height = 40, className = "" }: LogoProps) {
   return (
     <>
       <Image

@@ -72,25 +72,29 @@ function getStatusBadge(status: string | undefined, dictionary: Dictionary) {
     case "RUNNING":
       return (
         <Badge>
-          <Play data-icon="inline-start" /> {dictionary.cronjobs.statuses.RUNNING}
+          <Play data-icon="inline-start" />{" "}
+          {dictionary.cronjobs.statuses.RUNNING}
         </Badge>
       )
     case "PAUSED":
       return (
         <Badge variant="secondary">
-          <Pause data-icon="inline-start" /> {dictionary.cronjobs.statuses.PAUSED}
+          <Pause data-icon="inline-start" />{" "}
+          {dictionary.cronjobs.statuses.PAUSED}
         </Badge>
       )
     case "COMPLETE":
       return (
         <Badge variant="secondary">
-          <CheckCircle data-icon="inline-start" /> {dictionary.cronjobs.statuses.COMPLETE}
+          <CheckCircle data-icon="inline-start" />{" "}
+          {dictionary.cronjobs.statuses.COMPLETE}
         </Badge>
       )
     case "SCHEDULED":
       return (
         <Badge variant="secondary">
-          <Clock data-icon="inline-start" /> {dictionary.cronjobs.statuses.SCHEDULED}
+          <Clock data-icon="inline-start" />{" "}
+          {dictionary.cronjobs.statuses.SCHEDULED}
         </Badge>
       )
     default:

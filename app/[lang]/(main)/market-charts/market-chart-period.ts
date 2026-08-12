@@ -1,4 +1,9 @@
-import { registerLocale, getSupportedLocales, type Period, type Locales } from "klinecharts"
+import {
+  registerLocale,
+  getSupportedLocales,
+  type Period,
+  type Locales,
+} from "klinecharts"
 
 import type { MarketChartTimeframe } from "@/app/lib/market-charts/definitions"
 

@@ -1,8 +1,4 @@
-import {
-  ArrowRightIcon,
-  CircleSlashIcon,
-  NewspaperIcon,
-} from "lucide-react"
+import { ArrowRightIcon, CircleSlashIcon, NewspaperIcon } from "lucide-react"
 import Image from "next/image"
 
 import type { AppLocale } from "@/app/lib/i18n/config"
@@ -101,7 +97,9 @@ export function LatestNews({
               </EmptyHeader>
               <EmptyContent>
                 <Button asChild variant="outline">
-                  <LocalizedLink href="/news-articles">{t.viewAll}</LocalizedLink>
+                  <LocalizedLink href="/news-articles">
+                    {t.viewAll}
+                  </LocalizedLink>
                 </Button>
               </EmptyContent>
             </Empty>
@@ -162,7 +160,8 @@ function LatestNewsItems({
       {articles.map((article, index) => {
         const description =
           article.description?.trim() || dictionary.newsArticles.noDescription
-        const source = article.sourceName?.trim() || dictionary.newsArticles.noOutlet
+        const source =
+          article.sourceName?.trim() || dictionary.newsArticles.noOutlet
         const publishedAt = article.publishedAt
           ? formatDateTime(
               article.publishedAt,
@@ -199,7 +198,7 @@ function LatestNewsItems({
                 <ItemTitle>
                   <h3 className="line-clamp-2">
                     <DashboardQuickDetailButton
-                      className="cursor-pointer text-left font-medium underline-offset-4 outline-none transition-colors hover:text-primary hover:underline focus-visible:ring-2 focus-visible:ring-ring/50"
+                      className="cursor-pointer text-left font-medium underline-offset-4 transition-colors outline-none hover:text-primary hover:underline focus-visible:ring-2 focus-visible:ring-ring/50"
                       entity={{ id: article.id, kind: "news-article" }}
                       aria-label={`${t.openArticle}: ${article.title}`}
                     >

@@ -37,7 +37,9 @@ function AppFormShell({
           {title}
         </h1>
         {description ? (
-          <p className="text-sm leading-6 text-muted-foreground">{description}</p>
+          <p className="text-sm leading-6 text-muted-foreground">
+            {description}
+          </p>
         ) : null}
       </header>
       {children}

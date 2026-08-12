@@ -12,8 +12,7 @@ export const TELEGRAM_BOT_CONNECTION_READ_PERMISSION =
   "telegram-bot-connection:read"
 export const TELEGRAM_BOT_CONNECTION_MANAGE_PERMISSION =
   "telegram-bot-connection:manage"
-export const TELEGRAM_DESTINATION_READ_PERMISSION =
-  "telegram-destination:read"
+export const TELEGRAM_DESTINATION_READ_PERMISSION = "telegram-destination:read"
 export const TELEGRAM_DESTINATION_MANAGE_PERMISSION =
   "telegram-destination:manage"
 export const TELEGRAM_FEATURE_SETTING_READ_PERMISSION =
@@ -48,7 +47,10 @@ export function getTelegramSectionAccess(
       permissions,
       TELEGRAM_BOT_CONNECTION_READ_PERMISSION
     ),
-    destinations: hasPermission(permissions, TELEGRAM_DESTINATION_READ_PERMISSION),
+    destinations: hasPermission(
+      permissions,
+      TELEGRAM_DESTINATION_READ_PERMISSION
+    ),
     featureSettings: hasPermission(
       permissions,
       TELEGRAM_FEATURE_SETTING_READ_PERMISSION

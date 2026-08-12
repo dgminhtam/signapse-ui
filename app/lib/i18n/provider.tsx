@@ -42,9 +42,8 @@ interface LocalizationContextValue {
   formatCurrency: BoundCurrencyFormatter
 }
 
-const LocalizationContext = React.createContext<LocalizationContextValue | null>(
-  null
-)
+const LocalizationContext =
+  React.createContext<LocalizationContextValue | null>(null)
 
 interface LocalizationProviderProps {
   locale: AppLocale
@@ -57,46 +56,43 @@ export function LocalizationProvider({
   dictionary,
   children,
 }: LocalizationProviderProps) {
-  const value = React.useMemo<LocalizationContextValue>(
-    () => {
-      const boundFormatDate: BoundDateFormatter = (value, fallback) => {
-        return formatDate(value, locale, fallback)
-      }
-      const boundFormatDateTime: BoundDateTimeFormatter = (
-        value,
-        options,
-        fallback
-      ) => {
-        return formatDateTime(value, locale, options, fallback)
-      }
-      const boundFormatNumber: BoundNumberFormatter = (value, options) => {
-        return formatNumber(value, locale, options)
-      }
-      const boundFormatPercent: BoundNumberFormatter = (value, options) => {
-        return formatPercent(value, locale, options)
-      }
-      const boundFormatCurrency: BoundCurrencyFormatter = (
-        value,
-        currency,
-        options
-      ) => {
-        return formatCurrency(value, locale, currency, options)
-      }
+  const value = React.useMemo<LocalizationContextValue>(() => {
+    const boundFormatDate: BoundDateFormatter = (value, fallback) => {
+      return formatDate(value, locale, fallback)
+    }
+    const boundFormatDateTime: BoundDateTimeFormatter = (
+      value,
+      options,
+      fallback
+    ) => {
+      return formatDateTime(value, locale, options, fallback)
+    }
+    const boundFormatNumber: BoundNumberFormatter = (value, options) => {
+      return formatNumber(value, locale, options)
+    }
+    const boundFormatPercent: BoundNumberFormatter = (value, options) => {
+      return formatPercent(value, locale, options)
+    }
+    const boundFormatCurrency: BoundCurrencyFormatter = (
+      value,
+      currency,
+      options
+    ) => {
+      return formatCurrency(value, locale, currency, options)
+    }
 
-      return {
-        locale,
-        intlLocale: getIntlLocale(locale),
-        dictionary,
-        formatMessage,
-        formatDate: boundFormatDate,
-        formatDateTime: boundFormatDateTime,
-        formatNumber: boundFormatNumber,
-        formatPercent: boundFormatPercent,
-        formatCurrency: boundFormatCurrency,
-      }
-    },
-    [dictionary, locale]
-  )
+    return {
+      locale,
+      intlLocale: getIntlLocale(locale),
+      dictionary,
+      formatMessage,
+      formatDate: boundFormatDate,
+      formatDateTime: boundFormatDateTime,
+      formatNumber: boundFormatNumber,
+      formatPercent: boundFormatPercent,
+      formatCurrency: boundFormatCurrency,
+    }
+  }, [dictionary, locale])
 
   return (
     <LocalizationContext.Provider value={value}>

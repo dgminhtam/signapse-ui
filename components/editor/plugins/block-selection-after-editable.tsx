@@ -1,7 +1,7 @@
-'use client';
+"use client"
 
-import * as React from 'react';
-import { createPortal } from 'react-dom';
+import * as React from "react"
+import { createPortal } from "react-dom"
 
 import {
   BlockSelectionPlugin,
@@ -9,31 +9,31 @@ import {
   pasteSelectedBlocks,
   selectInsertedBlocks,
   useSelectionArea,
-} from '@platejs/selection/react';
-import { KEYS, PathApi, isHotkey } from 'platejs';
+} from "@platejs/selection/react"
+import { KEYS, PathApi, isHotkey } from "platejs"
 import {
   useEditorContainerRef,
   useEditorPlugin,
   useEditorRef,
   usePluginOption,
-} from 'platejs/react';
+} from "platejs/react"
 
-import { useOverlayPortalContainer } from '@/components/ui/overlay-portal-container';
+import { useOverlayPortalContainer } from "@/components/ui/overlay-portal-container"
 
 // Forked from @platejs/selection@53.1.6 BlockSelectionAfterEditable.
 // The intentional difference is the local portal host instead of document.body.
 // ponytail: re-sync this renderer when @platejs/selection changes; remove the
 // fork when Plate exposes a configurable shadow-input portal host.
 export function BlockSelectionAfterEditable() {
-  const editor = useEditorRef();
+  const editor = useEditorRef()
   const { api, getOption, getOptions, setOption } = useEditorPlugin({
     key: KEYS.blockSelection,
-  });
+  })
   const isSelectingSome = usePluginOption(
     BlockSelectionPlugin,
-    'isSelectingSome'
-  );
-  const selectedIds = usePluginOption(BlockSelectionPlugin, 'selectedIds');
+    "isSelectingSome"
+  )
+  const selectedIds = usePluginOption(BlockSelectionPlugin, "selectedIds")
 
   const removeSelectedBlocks = React.useCallback(
     (options: { selectPrevious?: boolean } = {}) => {
@@ -41,179 +41,179 @@ export function BlockSelectionAfterEditable() {
         ...editor.api.nodes({
           at: [],
           match: (node) => {
-            const id = (node as { id?: string }).id;
+            const id = (node as { id?: string }).id
 
-            return Boolean(id && selectedIds?.has(id));
+            return Boolean(id && selectedIds?.has(id))
           },
         }),
-      ];
+      ]
 
-      if (entries.length === 0) return null;
+      if (entries.length === 0) return null
 
-      const firstPath = entries[0][1];
+      const firstPath = entries[0][1]
 
       editor.tf.withoutNormalizing(() => {
         for (const [node, path] of [...entries].reverse()) {
-          const id = (node as { id?: string }).id;
+          const id = (node as { id?: string }).id
 
-          editor.tf.removeNodes({ at: path });
-          if (id) api.blockSelection.delete(id);
+          editor.tf.removeNodes({ at: path })
+          if (id) api.blockSelection.delete(id)
         }
 
         if (editor.children.length === 0) {
-          editor.meta._forceFocus = true;
-          editor.tf.focus();
-          editor.meta._forceFocus = false;
+          editor.meta._forceFocus = true
+          editor.tf.focus()
+          editor.meta._forceFocus = false
         } else if (options.selectPrevious) {
-          const prevPath = PathApi.previous(firstPath);
+          const prevPath = PathApi.previous(firstPath)
 
           if (prevPath) {
-            const prevEntry = editor.api.block({ at: prevPath });
-            const id = (prevEntry?.[0] as { id?: string } | undefined)?.id;
+            const prevEntry = editor.api.block({ at: prevPath })
+            const id = (prevEntry?.[0] as { id?: string } | undefined)?.id
 
-            if (id) setOption('selectedIds', new Set([id]));
+            if (id) setOption("selectedIds", new Set([id]))
           }
         }
-      });
+      })
 
-      return firstPath;
+      return firstPath
     },
     [editor, api.blockSelection, selectedIds, setOption]
-  );
+  )
 
-  useSelectionArea();
+  useSelectionArea()
 
-  const inputRef = React.useRef<HTMLInputElement>(null);
-  const editorContainerRef = useEditorContainerRef();
-  const overlayPortalContainer = useOverlayPortalContainer();
-  const [isMounted, setIsMounted] = React.useState(false);
+  const inputRef = React.useRef<HTMLInputElement>(null)
+  const editorContainerRef = useEditorContainerRef()
+  const overlayPortalContainer = useOverlayPortalContainer()
+  const [isMounted, setIsMounted] = React.useState(false)
   const [portalContainer, setPortalContainer] =
-    React.useState<HTMLElement | null>(null);
+    React.useState<HTMLElement | null>(null)
 
   React.useEffect(() => {
-    setIsMounted(true);
-    setOption('shadowInputRef', inputRef);
+    setIsMounted(true)
+    setOption("shadowInputRef", inputRef)
 
     return () => {
-      setIsMounted(false);
-    };
-  }, [setOption]);
+      setIsMounted(false)
+    }
+  }, [setOption])
 
   React.useEffect(() => {
     const host =
       overlayPortalContainer ??
       editorContainerRef.current?.parentElement ??
-      editorContainerRef.current;
+      editorContainerRef.current
 
-    setPortalContainer(host);
-  }, [editorContainerRef, overlayPortalContainer]);
+    setPortalContainer(host)
+  }, [editorContainerRef, overlayPortalContainer])
 
   React.useEffect(() => {
-    if (!isSelectingSome) setOption('anchorId', null);
-  }, [isSelectingSome, setOption]);
+    if (!isSelectingSome) setOption("anchorId", null)
+  }, [isSelectingSome, setOption])
 
   React.useEffect(() => {
     if (isSelectingSome && inputRef.current) {
-      inputRef.current.focus({ preventScroll: true });
+      inputRef.current.focus({ preventScroll: true })
     } else if (inputRef.current) {
-      inputRef.current.blur();
+      inputRef.current.blur()
     }
-  }, [isSelectingSome]);
+  }, [isSelectingSome])
 
   const handleKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
-      const isReadonly = editor.api.isReadOnly();
+      const isReadonly = editor.api.isReadOnly()
 
-      getOptions().onKeyDownSelecting?.(editor, event.nativeEvent);
+      getOptions().onKeyDownSelecting?.(editor, event.nativeEvent)
 
-      if (!getOption('isSelectingSome')) return;
+      if (!getOption("isSelectingSome")) return
 
-      if (isHotkey('shift+up')(event)) {
-        event.preventDefault();
-        event.stopPropagation();
-        api.blockSelection.shiftSelection('up');
-        return;
+      if (isHotkey("shift+up")(event)) {
+        event.preventDefault()
+        event.stopPropagation()
+        api.blockSelection.shiftSelection("up")
+        return
       }
 
-      if (isHotkey('shift+down')(event)) {
-        event.preventDefault();
-        event.stopPropagation();
-        api.blockSelection.shiftSelection('down');
-        return;
+      if (isHotkey("shift+down")(event)) {
+        event.preventDefault()
+        event.stopPropagation()
+        api.blockSelection.shiftSelection("down")
+        return
       }
 
-      if (isHotkey('escape')(event)) {
-        api.blockSelection.deselect();
-        return;
+      if (isHotkey("escape")(event)) {
+        api.blockSelection.deselect()
+        return
       }
 
-      if (isHotkey('mod+z')(event)) {
-        editor.undo();
-        selectInsertedBlocks(editor);
-        return;
+      if (isHotkey("mod+z")(event)) {
+        editor.undo()
+        selectInsertedBlocks(editor)
+        return
       }
 
-      if (isHotkey('mod+a')(event)) {
-        api.blockSelection.selectAll();
-        return;
+      if (isHotkey("mod+a")(event)) {
+        api.blockSelection.selectAll()
+        return
       }
 
-      if (isHotkey('mod+shift+z')(event)) {
-        editor.redo();
-        selectInsertedBlocks(editor);
-        return;
+      if (isHotkey("mod+shift+z")(event)) {
+        editor.redo()
+        selectInsertedBlocks(editor)
+        return
       }
 
-      if (isHotkey('mod+d')(event)) {
-        event.preventDefault();
-        editor.getTransforms(BlockSelectionPlugin).blockSelection.duplicate();
-        return;
+      if (isHotkey("mod+d")(event)) {
+        event.preventDefault()
+        editor.getTransforms(BlockSelectionPlugin).blockSelection.duplicate()
+        return
       }
 
-      if (!getOption('isSelectingSome')) return;
+      if (!getOption("isSelectingSome")) return
 
-      if (isHotkey('enter')(event)) {
+      if (isHotkey("enter")(event)) {
         const entry = editor.api.node({
           at: [],
           block: true,
           match: (node) => {
-            const id = (node as { id?: string }).id;
+            const id = (node as { id?: string }).id
 
-            return Boolean(id && selectedIds?.has(id));
+            return Boolean(id && selectedIds?.has(id))
           },
-        });
+        })
 
         if (entry) {
-          const [, path] = entry;
+          const [, path] = entry
 
           // eslint-disable-next-line react-hooks/immutability -- Preserve Plate's upstream focus sentinel.
-          editor.meta._forceFocus = true;
-          editor.tf.focus({ at: path, edge: 'end' });
-          editor.meta._forceFocus = undefined;
-          event.preventDefault();
+          editor.meta._forceFocus = true
+          editor.tf.focus({ at: path, edge: "end" })
+          editor.meta._forceFocus = undefined
+          event.preventDefault()
         }
 
-        return;
+        return
       }
 
-      if (isHotkey(['backspace', 'delete'])(event) && !isReadonly) {
-        event.preventDefault();
-        removeSelectedBlocks({ selectPrevious: isHotkey('backspace')(event) });
-        return;
+      if (isHotkey(["backspace", "delete"])(event) && !isReadonly) {
+        event.preventDefault()
+        removeSelectedBlocks({ selectPrevious: isHotkey("backspace")(event) })
+        return
       }
 
-      if (isHotkey('up')(event)) {
-        event.preventDefault();
-        event.stopPropagation();
-        api.blockSelection.moveSelection('up');
-        return;
+      if (isHotkey("up")(event)) {
+        event.preventDefault()
+        event.stopPropagation()
+        api.blockSelection.moveSelection("up")
+        return
       }
 
-      if (isHotkey('down')(event)) {
-        event.preventDefault();
-        event.stopPropagation();
-        api.blockSelection.moveSelection('down');
-        return;
+      if (isHotkey("down")(event)) {
+        event.preventDefault()
+        event.stopPropagation()
+        api.blockSelection.moveSelection("down")
+        return
       }
 
       if (
@@ -223,21 +223,21 @@ export function BlockSelectionAfterEditable() {
         !event.metaKey &&
         !event.altKey
       ) {
-        event.preventDefault();
-        const firstPath = removeSelectedBlocks();
+        event.preventDefault()
+        const firstPath = removeSelectedBlocks()
 
         if (firstPath) {
-          editor.meta._forceFocus = true;
+          editor.meta._forceFocus = true
           editor.tf.insertNodes(
             editor.api.create.block({ children: [{ text: event.key }] }),
             { at: firstPath }
-          );
-          editor.tf.select(firstPath, { edge: 'end' });
-          editor.meta._forceFocus = false;
-          editor.tf.focus();
+          )
+          editor.tf.select(firstPath, { edge: "end" })
+          editor.meta._forceFocus = false
+          editor.tf.focus()
         }
 
-        return;
+        return
       }
     },
     [
@@ -248,49 +248,45 @@ export function BlockSelectionAfterEditable() {
       removeSelectedBlocks,
       selectedIds,
     ]
-  );
+  )
 
   /** Handle copy / cut / paste in block selection. */
   const handleCopy = React.useCallback(
     (event: React.ClipboardEvent<HTMLInputElement>) => {
-      if (getOption('isSelectingSome')) {
+      if (getOption("isSelectingSome")) {
         if (copySelectedBlocks(editor, event.clipboardData)) {
-          event.preventDefault();
+          event.preventDefault()
         }
       }
     },
     [editor, getOption]
-  );
+  )
 
   const handleCut = React.useCallback(
     (event: React.ClipboardEvent<HTMLInputElement>) => {
-      if (getOption('isSelectingSome')) {
-        const copied = copySelectedBlocks(editor, event.clipboardData);
+      if (getOption("isSelectingSome")) {
+        const copied = copySelectedBlocks(editor, event.clipboardData)
 
-        if (copied) event.preventDefault();
-        if (copied && !editor.api.isReadOnly()) removeSelectedBlocks();
+        if (copied) event.preventDefault()
+        if (copied && !editor.api.isReadOnly()) removeSelectedBlocks()
       }
     },
     [editor, getOption, removeSelectedBlocks]
-  );
+  )
 
   const handlePaste = React.useCallback(
     (event: React.ClipboardEvent<HTMLInputElement>) => {
-      event.preventDefault();
+      event.preventDefault()
 
       if (!editor.api.isReadOnly()) {
-        pasteSelectedBlocks(editor, event.nativeEvent);
+        pasteSelectedBlocks(editor, event.nativeEvent)
       }
     },
     [editor]
-  );
+  )
 
-  if (
-    !isMounted ||
-    !portalContainer ||
-    typeof window === 'undefined'
-  ) {
-    return null;
+  if (!isMounted || !portalContainer || typeof window === "undefined") {
+    return null
   }
 
   return createPortal(
@@ -298,10 +294,10 @@ export function BlockSelectionAfterEditable() {
       ref={inputRef}
       className="slate-shadow-input"
       style={{
-        left: '-300px',
+        left: "-300px",
         opacity: 0,
-        position: 'fixed',
-        top: '-300px',
+        position: "fixed",
+        top: "-300px",
         zIndex: 999,
       }}
       onCopy={handleCopy}
@@ -310,5 +306,5 @@ export function BlockSelectionAfterEditable() {
       onPaste={handlePaste}
     />,
     portalContainer
-  );
+  )
 }

@@ -48,110 +48,110 @@ function hasPermissionMatch(
 
 export function createSiteConfig(dictionary: Dictionary) {
   return {
-  teams: [
-    {
+    teams: [
+      {
+        name: "Signapse",
+        logo: GalleryVerticalEnd,
+        plan: dictionary.common.adminDashboard,
+      },
+    ],
+    brand: {
       name: "Signapse",
       logo: GalleryVerticalEnd,
-      plan: dictionary.common.adminDashboard,
+      subtitle: dictionary.common.adminDashboard,
     },
-  ],
-  brand: {
-    name: "Signapse",
-    logo: GalleryVerticalEnd,
-    subtitle: dictionary.common.adminDashboard,
-  },
-  navMain: [
-    {
-      title: dictionary.navigation.dashboard,
-      url: "/dashboard",
-      icon: LayoutDashboard,
-    },
-    {
-      title: dictionary.navigation.knowledgeGraph,
-      url: "/graph-view",
-      icon: LayoutDashboard,
-      permission: GRAPH_VIEW_NAV_PERMISSIONS,
-    },
-    {
-      title: dictionary.navigation.marketCharts,
-      url: "/market-charts",
-      icon: ChartCandlestick,
-      permission: MARKET_CHART_NAV_PERMISSIONS,
-    },
-    {
-      title: dictionary.navigation.content,
-      url: "#",
-      icon: Newspaper,
-      items: [
-        {
-          title: dictionary.navigation.newsOutlets,
-          url: "/news-outlets",
-          permission: NEWS_OUTLET_NAV_PERMISSIONS,
-        },
-        {
-          title: dictionary.navigation.newsArticles,
-          url: "/news-articles",
-          permission: NEWS_ARTICLE_NAV_PERMISSIONS,
-        },
-        {
-          title: dictionary.navigation.events,
-          url: "/events",
-          permission: EVENT_NAV_PERMISSIONS,
-        },
-        {
-          title: dictionary.navigation.economicCalendar,
-          url: "/economic-calendar",
-          permission: ECONOMIC_CALENDAR_NAV_PERMISSIONS,
-        },
-        {
-          title: dictionary.navigation.blogs,
-          url: "/blogs",
-          permission: "blog:read",
-        },
-      ],
-    },
-    {
-      title: dictionary.navigation.settings,
-      url: "#",
-      icon: Settings2,
-      items: [
-        {
-          title: dictionary.navigation.telegram,
-          url: "/telegram",
-          permission: TELEGRAM_NAV_PERMISSIONS,
-        },
-        {
-          title: dictionary.navigation.aiProviders,
-          url: "/ai-provider-configs",
-          permission: "ai-provider-config:read",
-        },
-        {
-          title: dictionary.navigation.systemPrompts,
-          url: "/system-prompts",
-          permission: SYSTEM_PROMPT_NAV_PERMISSIONS,
-        },
-        {
-          title: dictionary.navigation.cronjobs,
-          url: "/cronjobs",
-          permission: "cronjob:read",
-        },
-        {
-          title: dictionary.navigation.roles,
-          url: "/roles",
-          permission: "role:update",
-        },
-        {
-          title: dictionary.navigation.users,
-          url: "/users",
-          permission: "user:update",
-        },
-        {
-          title: dictionary.navigation.developerToken,
-          url: "/developer-token",
-        },
-      ],
-    },
-  ] satisfies NavItem[],
+    navMain: [
+      {
+        title: dictionary.navigation.dashboard,
+        url: "/dashboard",
+        icon: LayoutDashboard,
+      },
+      {
+        title: dictionary.navigation.knowledgeGraph,
+        url: "/graph-view",
+        icon: LayoutDashboard,
+        permission: GRAPH_VIEW_NAV_PERMISSIONS,
+      },
+      {
+        title: dictionary.navigation.marketCharts,
+        url: "/market-charts",
+        icon: ChartCandlestick,
+        permission: MARKET_CHART_NAV_PERMISSIONS,
+      },
+      {
+        title: dictionary.navigation.content,
+        url: "#",
+        icon: Newspaper,
+        items: [
+          {
+            title: dictionary.navigation.newsOutlets,
+            url: "/news-outlets",
+            permission: NEWS_OUTLET_NAV_PERMISSIONS,
+          },
+          {
+            title: dictionary.navigation.newsArticles,
+            url: "/news-articles",
+            permission: NEWS_ARTICLE_NAV_PERMISSIONS,
+          },
+          {
+            title: dictionary.navigation.events,
+            url: "/events",
+            permission: EVENT_NAV_PERMISSIONS,
+          },
+          {
+            title: dictionary.navigation.economicCalendar,
+            url: "/economic-calendar",
+            permission: ECONOMIC_CALENDAR_NAV_PERMISSIONS,
+          },
+          {
+            title: dictionary.navigation.blogs,
+            url: "/blogs",
+            permission: "blog:read",
+          },
+        ],
+      },
+      {
+        title: dictionary.navigation.settings,
+        url: "#",
+        icon: Settings2,
+        items: [
+          {
+            title: dictionary.navigation.telegram,
+            url: "/telegram",
+            permission: TELEGRAM_NAV_PERMISSIONS,
+          },
+          {
+            title: dictionary.navigation.aiProviders,
+            url: "/ai-provider-configs",
+            permission: "ai-provider-config:read",
+          },
+          {
+            title: dictionary.navigation.systemPrompts,
+            url: "/system-prompts",
+            permission: SYSTEM_PROMPT_NAV_PERMISSIONS,
+          },
+          {
+            title: dictionary.navigation.cronjobs,
+            url: "/cronjobs",
+            permission: "cronjob:read",
+          },
+          {
+            title: dictionary.navigation.roles,
+            url: "/roles",
+            permission: "role:update",
+          },
+          {
+            title: dictionary.navigation.users,
+            url: "/users",
+            permission: "user:update",
+          },
+          {
+            title: dictionary.navigation.developerToken,
+            url: "/developer-token",
+          },
+        ],
+      },
+    ] satisfies NavItem[],
   }
 }
 
