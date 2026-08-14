@@ -2241,6 +2241,17 @@ export const en: Dictionary = {
       deleteAction: "Delete destination",
       deleteTrigger: "Delete Telegram destination",
       deleteSuccess: "Telegram destination deleted.",
+      testMessage: "Send test",
+      testMessagePending: "Sending test…",
+      testMessageSuccess: "Test message sent to {destination}.",
+      testMessageError: "Could not send the test message.",
+      testMessageTimeout:
+        "The send request timed out and the result is uncertain; check Telegram before trying again.",
+      testMessagePermissionRequired:
+        "Destination management permission is required to send a test message.",
+      testMessageInactive:
+        "Only active destinations can receive a test message.",
+      testMessageActions: "Destination actions",
       link: "Link destination",
       linkTitle: "Link destination",
       linkDescription:

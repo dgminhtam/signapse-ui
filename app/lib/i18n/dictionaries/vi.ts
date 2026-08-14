@@ -2229,6 +2229,17 @@ export const vi = {
       deleteAction: "Xóa điểm nhận",
       deleteTrigger: "Xóa điểm nhận Telegram",
       deleteSuccess: "Đã xóa điểm nhận Telegram.",
+      testMessage: "Gửi thử",
+      testMessagePending: "Đang gửi thử…",
+      testMessageSuccess: "Đã gửi tin nhắn thử tới {destination}.",
+      testMessageError: "Không thể gửi tin nhắn thử.",
+      testMessageTimeout:
+        "Yêu cầu gửi đã hết thời gian chờ và kết quả chưa rõ; hãy kiểm tra Telegram trước khi thử lại.",
+      testMessagePermissionRequired:
+        "Cần quyền quản lý điểm nhận để gửi tin nhắn thử.",
+      testMessageInactive:
+        "Chỉ điểm nhận đang hoạt động mới có thể gửi tin nhắn thử.",
+      testMessageActions: "Thao tác điểm nhận",
       link: "Liên kết điểm nhận",
       linkTitle: "Liên kết điểm nhận",
       linkDescription:

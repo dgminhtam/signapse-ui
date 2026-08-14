@@ -281,6 +281,35 @@ export async function disableTelegramDestination(
   }
 }
 
+export async function sendTelegramTestMessage(
+  id: number
+): Promise<ActionResult> {
+  const dictionary = await getTelegramDictionary()
+
+  if (!Number.isInteger(id) || id <= 0) {
+    return {
+      success: false,
+      error: dictionary.telegram.destination.invalidData,
+    }
+  }
+
+  try {
+    await fetchAuthenticated<void>(`/telegram/destinations/${id}/test-message`, {
+      method: "POST",
+    })
+
+    return { success: true, data: undefined }
+  } catch (error: unknown) {
+    return {
+      success: false,
+      error: getActionError(
+        error,
+        dictionary.telegram.destination.testMessageError
+      ),
+    }
+  }
+}
+
 export async function deleteTelegramDestination(
   id: number
 ): Promise<ActionResult> {

@@ -1,15 +1,15 @@
 # Tài liệu ánh xạ API
 
-Tài liệu này ánh xạ snapshot OpenAPI backend trong `docs/api_mapping.json` tới các điểm tích hợp frontend hiện tại của repo.
+Tài liệu này ánh xạ OpenAPI backend dev tại `https://dev-api.signapse.cloud/v3/api-docs` tới các điểm tích hợp frontend hiện tại của repo.
 
-Xác minh lần cuối: ngày 11 tháng 8 năm 2026
+Xác minh lần cuối: ngày 14 tháng 8 năm 2026
 
 ## Cấu hình cơ sở
 
 | Mục                  | Giá trị                                               |
 | -------------------- | ----------------------------------------------------- |
-| URL gốc API          | `http://dev-api.signapse.cloud`                       |
-| Nguồn chuẩn          | `docs/api_mapping.json`                               |
+| URL gốc API          | `https://dev-api.signapse.cloud`                      |
+| Nguồn chuẩn          | `https://dev-api.signapse.cloud/v3/api-docs`          |
 | Hàm auth chính       | `fetchAuthenticated()` trong `app/api/auth/action.ts` |
 | Hàm public           | `fetchPublic()` trong `app/api/auth/action.ts`        |
 | Kiểu mutation result | `ActionResult<T>` trong `app/lib/definitions.ts`      |
@@ -36,7 +36,7 @@ Xác minh lần cuối: ngày 11 tháng 8 năm 2026
 
 ## Tổng quan thay đổi lớn từ snapshot hiện tại
 
-- Snapshot backend hiện tại gồm `117` operation.
+- Snapshot backend hiện tại gồm `118` operation.
 - Snapshot ngày 11/8 mở rộng `GET /dashboard/summary` thêm hai metric bắt buộc `assetsInFocus` và `marketNarratives`. Backend trả tối đa sáu tài sản và ba luận điểm theo thứ tự authoritative; frontend đã parse/render `recentEvents` và `assetsInFocus`, nhưng chưa parse hoặc render `marketNarratives`.
 - Backend đã chuyển domain nội dung canon từ `sources` / `source-documents` sang `news-outlets` / `news-articles`.
 - Backend đã unlink `NewsArticle` khỏi `NewsOutlet`: bài viết snapshot tên nguồn vào `sourceName` khi ingest, nên việc đổi tên hoặc xóa outlet không làm thay đổi nguồn đã lưu trên bài viết. Snapshot OpenAPI và frontend hiện đã đồng bộ contract này.
@@ -51,6 +51,7 @@ Xác minh lần cuối: ngày 11 tháng 8 năm 2026
 - Surface workspace dùng chuẩn `set-current`, đồng thời `WorkspaceResponse` dùng field có nghĩa `currentWorkspace`.
 - `roles` và `permissions` hiện đã có action và UI frontend, không còn ở trạng thái "chưa triển khai".
 - Snapshot mới thêm surface `telegram` gồm bot connections, destinations, feature settings, market analysis schedules, và webhook Telegram.
+- Snapshot ngày 14/8 thêm `POST /telegram/destinations/{destinationId}/test-message` để gửi tin nhắn thử tới destination Telegram đã liên kết.
 - Snapshot mới thêm credential sub-resource cho `ai-provider-configs` để quản lý nhiều API key theo từng provider config mà không expose full key.
 - Snapshot mới tiếp tục giản lược `ai-provider-configs`: config request/response không còn `name` và top-level `model`; credential dùng field `model` thay cho `label`.
 - Snapshot mới giản lược `cronjobs`: không còn endpoint create/delete cronjob; update schedule chỉ nhận `expression`.
@@ -499,6 +500,7 @@ Ghi chu:
 | DELETE      | `/telegram/bot-connections/{id}`                   | `removeConnection`     | `deleteTelegramBotConnection(id)`                  | Da tich hop                           | Xoa bot connection qua `AlertDialog`; permission `telegram-bot-connection:manage`.                                                                |
 | GET         | `/telegram/destinations`                           | `getDestinations`      | `getTelegramDestinations()`                        | Da tich hop                           | Doc chat/channel da link; permission `telegram-destination:read`.                                                                                  |
 | POST        | `/telegram/destinations/link-token`                | `createLinkToken`      | `createTelegramLinkToken(request)`                 | Da tich hop                           | Tao link token tu `botConnectionId` de user link destination qua Telegram; permission `telegram-destination:manage`.                               |
+| POST        | `/telegram/destinations/{destinationId}/test-message` | `sendTestMessage`   | `sendTelegramTestMessage(id)`                     | Da tich hop                           | Gui tin nhan thu toi destination; khong co request body, response `204 No Content`; permission `telegram-destination:manage`.                       |
 | PATCH       | `/telegram/destinations/{id}`                      | `updateDestination`    | `updateTelegramDestination(id, request)`           | Da tich hop                           | Cap nhat `displayLabel`; permission `telegram-destination:manage`.                                                                                 |
 | PATCH       | `/telegram/destinations/{id}/disable`              | `disableDestination`   | `disableTelegramDestination(id)`                   | Da tich hop                           | Disable destination va tra ve `TelegramDestinationResponse`; permission `telegram-destination:manage`.                                             |
 | DELETE      | `/telegram/destinations/{id}`                      | `removeDestination`    | `deleteTelegramDestination(id)`                    | Da tich hop                           | Xoa destination qua `AlertDialog`; permission `telegram-destination:manage`.                                                                       |
@@ -513,6 +515,7 @@ Ghi chu:
 Ghi chu:
 
 - Frontend hien co route `/telegram`, action, definitions, permission helper, navigation, va UI quan tri bot/destination/routing/schedule.
+- Frontend co server action va UI action de gui test message cho destination; endpoint khong yeu cau DTO request/response rieng.
 - DTO chinh moi gom `TelegramBotConnectionResponse`, `TelegramDestinationResponse`, `TelegramFeatureSettingResponse`, `TelegramMarketAnalysisScheduleResponse`, `TelegramLinkTokenResponse`, va `ScheduledAssetResponse`.
 - Enum feature key cua Telegram gom `ECONOMIC_CALENDAR_ALERT`, `MARKET_NEWS_ALERT`, `SCHEDULED_MARKET_ANALYSIS`; day la enum cua feature setting, khong phai system prompt type.
 - Snapshot moi them `outputLanguageIsoCode` trong request feature setting/schedule va `outputLanguage` trong response; FE Telegram chua expose cau hinh output language.
@@ -667,7 +670,7 @@ type ActionResult<T = void> =
 - `news articles`: endpoint crawl full content da bi bo khoi snapshot, nhung FE van con action `crawlNewsArticleFullContent()` va menu crawl tren detail.
 - `events`: snapshot moi da bo `slug` va `confirmedAt`, va doi evidence sang `newsArticle*`; FE events da dong bo DTO, detail, quick detail, va action layout theo contract hien tai.
 - `dashboard summary`: FE da dong bo va render `recentEvents` cung `assetsInFocus`. Snapshot moi them required metric `marketNarratives` va ba schema `DashboardMarketNarrativesMetricResponse`, `DashboardMarketNarrativeItemResponse`, `DashboardMarketNarrativeThemeResponse`; FE can cap nhat definitions/action validation, dashboard data flow, UI states, action Graph View va i18n truoc khi apply section Luan diem thi truong.
-- `telegram`: frontend da co route/action/type/permission/navigation cho surface Telegram, nhung snapshot moi them `outputLanguageIsoCode` request va `outputLanguage` response cho feature setting/schedule ma FE chua expose.
+- `telegram`: frontend da co route/action/type/permission/navigation cho surface Telegram; snapshot cung them `outputLanguageIsoCode` request va `outputLanguage` response cho feature setting/schedule ma FE chua expose.
 - `ai-provider credentials`: snapshot moi doi credential `label` thanh `model` va bo top-level config `name`/`model`; FE hien van giu `name`, top-level `model`, va credential `label` trong definitions, form, list, detail, va credential panel.
 - `cronjobs`: FE da bo create/delete flow va doi update schedule sang inline list chi gui `expression`; endpoint `stop` duoc ghi nhan nhung khong tich hop co chu dich.
 - `personal notes`: FE render/copy response `title` voi fallback da localize, nhung editor va draft da freeform, khong ep H1 dau hay title placeholder. Create title la backend snapshot tu content; content update giu stored title. OpenAPI van chua encode required/nullable hoac lifecycle cua `title`; delete va explicit rename chua tich hop.

@@ -39,4 +39,4 @@ These instructions apply to `app/api/**` and extend the repository-level guidanc
 
 - Update the corresponding definitions in `app/lib/[feature]/` whenever the backend contract changes.
 - Remove obsolete frontend fields and compatibility mapping when the backend contract is simplified.
-- When `docs/api_mapping.json` or backend API mappings change, use the `api-mapping-sync` skill.
+- When the live dev OpenAPI contract or backend API mappings change, use the `api-mapping-sync` skill.

@@ -3,6 +3,7 @@
 import {
   Fragment,
   type FormEvent,
+  type ReactElement,
   type ReactNode,
   useState,
   useTransition,
@@ -16,6 +17,8 @@ import {
   ExternalLink,
   Link2,
   MessageCircle,
+  MoreHorizontal,
+  Pause,
   Pencil,
   Plus,
   RadioTower,
@@ -137,6 +140,14 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
 import { Switch } from "@/components/ui/switch"
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
   Table,
   TableBody,
   TableCell,
@@ -144,6 +155,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
+import { TelegramDestinationTestMessageButton } from "./telegram-destination-test-message-button"
 
 type RouteDefinition = {
   featureKey: TelegramFeatureKey
@@ -262,34 +274,45 @@ export function TelegramConfigurationSkeleton() {
           </Card>
         ))}
       </div>
-      {Array.from({ length: 2 }).map((_, index) => (
-        <AppListTable key={index} className="mt-0">
+      {[
+        {
+          headerWidths: ["w-24", "w-20", "w-28", "w-24", "w-20"],
+          cellWidths: ["w-44", "w-20", "w-32", "w-24", "w-20"],
+        },
+        {
+          headerWidths: [
+            "w-24",
+            "w-28",
+            "w-20",
+            "w-16",
+            "w-20",
+            "w-56",
+          ],
+          cellWidths: ["w-44", "w-32", "w-24", "w-20", "w-24", "w-56"],
+        },
+      ].map(({ headerWidths, cellWidths }, index) => (
+        <AppListTable
+          key={index}
+          className={cn("mt-0", index === 1 && "overflow-x-auto")}
+        >
           <Table>
             <TableHeader>
               <AppListTableHeaderRow>
-                <AppListTableHead>
-                  <Skeleton className="h-4 w-24" />
-                </AppListTableHead>
-                <AppListTableHead>
-                  <Skeleton className="h-4 w-28" />
-                </AppListTableHead>
-                <AppListTableHead>
-                  <Skeleton className="h-4 w-20" />
-                </AppListTableHead>
+                {headerWidths.map((width, columnIndex) => (
+                  <AppListTableHead key={columnIndex}>
+                    <Skeleton className={cn("h-4", width)} />
+                  </AppListTableHead>
+                ))}
               </AppListTableHeaderRow>
             </TableHeader>
             <TableBody>
               {Array.from({ length: 2 }).map((__, rowIndex) => (
                 <TableRow key={rowIndex}>
-                  <TableCell>
-                    <Skeleton className="h-5 w-44" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-5 w-32" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-5 w-24" />
-                  </TableCell>
+                  {cellWidths.map((width, columnIndex) => (
+                    <TableCell key={columnIndex}>
+                      <Skeleton className={cn("h-5", width)} />
+                    </TableCell>
+                  ))}
                 </TableRow>
               ))}
             </TableBody>
@@ -641,7 +664,7 @@ function DestinationSection({
           <Badge variant="outline">{t.common.verifiedViaTelegram}</Badge>
         </AppListToolbarTrailing>
       </AppListToolbar>
-      <AppListTable className="mt-0">
+      <AppListTable className="mt-0 overflow-x-auto">
         <Table>
           <TableHeader>
             <AppListTableHeaderRow>
@@ -660,7 +683,7 @@ function DestinationSection({
               <AppListTableHead className="w-36">
                 {t.destination.updatedColumn}
               </AppListTableHead>
-              <AppListTableHead className="w-28 text-right">
+              <AppListTableHead className="min-w-60 text-right">
                 {t.common.actions}
               </AppListTableHead>
             </AppListTableHeaderRow>
@@ -711,33 +734,11 @@ function DestinationSection({
                       {formatTime(destination.lastModifiedDate)}
                     </AppTimeMetadata>
                   </TableCell>
-                  <TableCell className="text-right align-top">
-                    <div className="flex justify-end gap-1">
-                      <DestinationUpdateSheet
-                        destination={destination}
-                        canManage={canManage}
-                      />
-                      <ActionConfirmDialog
-                        title={t.destination.pauseTitle}
-                        description={t.destination.pauseDescription}
-                        actionLabel={t.common.pause}
-                        triggerLabel={t.destination.pauseTrigger}
-                        disabled={!canManage || destination.status !== "ACTIVE"}
-                        action={() =>
-                          disableTelegramDestination(destination.id)
-                        }
-                        successMessage={t.destination.pauseSuccess}
-                      />
-                      <ActionConfirmDialog
-                        title={t.destination.deleteTitle}
-                        description={t.destination.deleteDescription}
-                        actionLabel={t.destination.deleteAction}
-                        triggerLabel={t.destination.deleteTrigger}
-                        disabled={!canManage}
-                        action={() => deleteTelegramDestination(destination.id)}
-                        successMessage={t.destination.deleteSuccess}
-                      />
-                    </div>
+                  <TableCell className="min-w-60 text-right align-top">
+                    <DestinationActions
+                      destination={destination}
+                      canManage={canManage}
+                    />
                   </TableCell>
                 </TableRow>
               ))
@@ -758,6 +759,94 @@ function DestinationSection({
         </Table>
       </AppListTable>
     </section>
+  )
+}
+
+function DestinationActions({
+  destination,
+  canManage,
+}: {
+  destination: TelegramDestinationResponse
+  canManage: boolean
+}) {
+  const { dictionary } = useLocalization()
+  const t = dictionary.telegram
+  const [confirmation, setConfirmation] = useState<"pause" | "delete" | null>(
+    null
+  )
+  const menuTriggerId = `telegram-destination-actions-${destination.id}`
+  const destinationLabel = getDestinationLabel(destination, dictionary)
+
+  return (
+    <div className="flex min-w-max justify-end gap-1">
+      <TelegramDestinationTestMessageButton
+        destinationId={destination.id}
+        destinationLabel={destinationLabel}
+        canManage={canManage}
+        isActive={destination.status === "ACTIVE"}
+      />
+      <DestinationUpdateSheet
+        destination={destination}
+        canManage={canManage}
+      />
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            id={menuTriggerId}
+            variant="ghost"
+            size="icon-sm"
+            aria-label={t.destination.testMessageActions}
+          >
+            <MoreHorizontal />
+            <span className="sr-only">{t.destination.testMessageActions}</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuGroup>
+            <DropdownMenuItem
+              disabled={!canManage || destination.status !== "ACTIVE"}
+              onSelect={() => setConfirmation("pause")}
+            >
+              <Pause />
+              {t.common.pause}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              disabled={!canManage}
+              variant="destructive"
+              onSelect={() => setConfirmation("delete")}
+            >
+              <Trash2 />
+              {t.destination.deleteAction}
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <ActionConfirmDialog
+        title={t.destination.pauseTitle}
+        description={t.destination.pauseDescription}
+        actionLabel={t.common.pause}
+        triggerLabel={t.destination.pauseTrigger}
+        action={() => disableTelegramDestination(destination.id)}
+        successMessage={t.destination.pauseSuccess}
+        open={confirmation === "pause"}
+        onOpenChange={(open) => setConfirmation(open ? "pause" : null)}
+        trigger={null}
+        restoreFocusId={menuTriggerId}
+      />
+      <ActionConfirmDialog
+        title={t.destination.deleteTitle}
+        description={t.destination.deleteDescription}
+        actionLabel={t.destination.deleteAction}
+        triggerLabel={t.destination.deleteTrigger}
+        action={() => deleteTelegramDestination(destination.id)}
+        successMessage={t.destination.deleteSuccess}
+        open={confirmation === "delete"}
+        onOpenChange={(open) => setConfirmation(open ? "delete" : null)}
+        trigger={null}
+        restoreFocusId={menuTriggerId}
+      />
+    </div>
   )
 }
 
@@ -1911,6 +2000,10 @@ function ActionConfirmDialog<T>({
   disabled,
   action,
   successMessage,
+  open: controlledOpen,
+  onOpenChange,
+  trigger,
+  restoreFocusId,
 }: {
   title: string
   description: string
@@ -1919,11 +2012,30 @@ function ActionConfirmDialog<T>({
   disabled?: boolean
   action: () => Promise<ActionResult<T>>
   successMessage: string
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  trigger?: ReactElement | null
+  restoreFocusId?: string
 }) {
   const router = useRouter()
-  const [open, setOpen] = useState(false)
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
   const { dictionary } = useLocalization()
+  const open = controlledOpen ?? uncontrolledOpen
+
+  function setOpen(nextOpen: boolean) {
+    if (onOpenChange) {
+      onOpenChange(nextOpen)
+    } else {
+      setUncontrolledOpen(nextOpen)
+    }
+
+    if (!nextOpen && restoreFocusId) {
+      requestAnimationFrame(() => {
+        document.getElementById(restoreFocusId)?.focus()
+      })
+    }
+  }
 
   function handleAction() {
     startTransition(async () => {
@@ -1941,17 +2053,21 @@ function ActionConfirmDialog<T>({
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-          disabled={disabled}
-        >
-          <Trash2 data-icon="inline-start" />
-          <span className="sr-only">{triggerLabel}</span>
-        </Button>
-      </AlertDialogTrigger>
+      {trigger === null ? null : (
+        <AlertDialogTrigger asChild>
+          {trigger ?? (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+              disabled={disabled}
+            >
+              <Trash2 data-icon="inline-start" />
+              <span className="sr-only">{triggerLabel}</span>
+            </Button>
+          )}
+        </AlertDialogTrigger>
+      )}
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>

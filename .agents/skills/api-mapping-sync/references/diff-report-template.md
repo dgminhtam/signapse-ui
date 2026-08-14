@@ -1,11 +1,11 @@
 # Diff Report Template
 
-Use this shape when the user asks to update `docs/APIMAPPING.md` from `docs/api_mapping.json` and wants diffs.
+Use this shape when the user asks to update `docs/APIMAPPING.md` from the live dev OpenAPI contract and wants diffs.
 
 ## Summary
 
 - State whether `docs/APIMAPPING.md` was already aligned or was updated.
-- Mention the backend snapshot source: `docs/api_mapping.json`.
+- Mention the backend contract source: `https://dev-api.signapse.cloud/v3/api-docs`.
 - Mention the comparison target: `docs/APIMAPPING.md`.
 
 ## Contract Diffs
@@ -45,7 +45,7 @@ Map the contract drift to likely frontend locations:
 
 Report what was checked:
 
-- JSON paths/schemas inspected
+- successful live fetch, OpenAPI version, and JSON paths/schemas inspected
 - `git diff -- docs/APIMAPPING.md`
 - optional typecheck/lint only if frontend code changed
 

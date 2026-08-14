@@ -76,6 +76,76 @@ The system SHALL support destination listing, link-token generation, Private and
 - **WHEN** the user updates, disables, or removes a destination
 - **THEN** the system calls the matching backend endpoint, shows mutation feedback, and refreshes the Telegram workspace
 
+### Requirement: Telegram destinations support test messages
+The system SHALL allow an authorized operator to send a backend-generated test message to an active Telegram destination through the documented destination test-message endpoint.
+
+#### Scenario: Active destination test message succeeds
+- **WHEN** a user with `telegram-destination:manage` activates `Gửi thử` for an `ACTIVE` Telegram destination
+- **THEN** the system sends an authenticated `POST` request to `/telegram/destinations/{destinationId}/test-message` without a request body
+- **AND** the system treats `204 No Content` as confirmation that the Telegram API accepted the send
+- **AND** the system shows localized success feedback naming the Telegram destination without claiming that a person received or read the message
+
+#### Scenario: Test message content remains backend-owned
+- **WHEN** the user sends a test message
+- **THEN** the system does not display a message composer, preview, or content customization control
+- **AND** the backend generates the fixed test-message content using the current UI locale supplied through `Accept-Language`
+
+#### Scenario: Backend validates the linked bot
+- **WHEN** an active Telegram destination refers to a bot that cannot send the test message
+- **THEN** the frontend submits only the destination identifier and relies on the backend to validate the linked bot
+- **AND** the system presents the resulting localized backend error or a localized fallback
+
+#### Scenario: Test message does not refresh workspace data
+- **WHEN** a test-message request succeeds
+- **THEN** the system does not refresh or revalidate the Telegram workspace
+- **AND** the system does not persist a last-test timestamp, receipt, message identifier, or delivery-history state
+
+### Requirement: Test-message action exposes accessible availability and feedback
+The system SHALL keep the destination test-message action discoverable, operable, and understandable across permission, status, pending, success, and failure states.
+
+#### Scenario: Read-only user can understand the unavailable action
+- **WHEN** a user can read Telegram destinations but lacks `telegram-destination:manage`
+- **THEN** the system keeps `Gửi thử` visible and focusable with `aria-disabled="true"`
+- **AND** the system blocks activation and associates a localized permission explanation through `aria-describedby`
+- **AND** the same explanation is visible on hover and focus without relying on hover alone
+
+#### Scenario: Inactive destination explains unavailable state
+- **WHEN** a user with manage permission views a destination whose status is not `ACTIVE`
+- **THEN** the system keeps `Gửi thử` visible and focusable but unavailable
+- **AND** the system associates a localized explanation that test messages can only be sent to active Telegram destinations
+
+#### Scenario: Pending state prevents duplicate activation
+- **WHEN** a test-message request is pending for a destination
+- **THEN** the system replaces the send icon with a spinner, shows localized pending text, and natively disables that destination's test action
+- **AND** the system does not disable test actions for other eligible destinations
+
+#### Scenario: Failed request preserves recovery
+- **WHEN** a test-message request fails
+- **THEN** the system re-enables the affected action and shows the localized backend error or a localized fallback
+- **AND** the system does not retry automatically or impose an undocumented client cooldown
+
+#### Scenario: Timeout outcome remains explicit
+- **WHEN** a test-message request times out without a known outcome
+- **THEN** the system tells the user that the result is uncertain and to check Telegram before manually retrying
+
+#### Scenario: Test action remains labeled at narrow widths
+- **WHEN** the Telegram destination table is rendered at any supported breakpoint
+- **THEN** the test action displays both a send icon and the localized `Gửi thử` label
+- **AND** any horizontal overflow remains within the table surface
+
+### Requirement: Telegram destination row actions preserve task hierarchy
+The system SHALL prioritize test and edit actions while placing destination lifecycle actions in a contextual overflow menu.
+
+#### Scenario: Destination action order is stable
+- **WHEN** an authorized user views a Telegram destination row
+- **THEN** the row presents `Gửi thử`, `Sửa`, and an overflow-menu trigger in that order
+
+#### Scenario: Pause and delete remain confirmed
+- **WHEN** the user opens the destination overflow menu
+- **THEN** the menu presents `Tạm dừng`, a separator, and `Xóa` in that order
+- **AND** selecting pause or delete opens the existing localized confirmation flow before invoking the mutation
+- **AND** focus returns to the overflow trigger after the confirmation flow closes
+
 ### Requirement: Telegram feature routing is API-backed
 The system SHALL support Telegram feature route display and update through `GET /telegram/feature-settings` and `PUT /telegram/feature-settings`.
 
@@ -180,59 +250,3 @@ The system SHALL present the Telegram setup dependency chain as bot connection, 
 #### Scenario: Readiness state summarizes setup progress
 - **WHEN** the Telegram configuration workspace is displayed
 - **THEN** the system shows a compact readiness summary that identifies which setup areas are ready, missing, or blocked
-
-### Requirement: Bot and destination management surfaces
-The system SHALL show UI-only list surfaces for Telegram bot connections and verified destinations without calling Telegram backend endpoints.
-
-#### Scenario: Bot connection list shell
-- **WHEN** the bot connection section is displayed
-- **THEN** the system shows a shared list table surface with bot label, bot username, status, webhook/validation metadata, and row actions
-
-#### Scenario: Destination list shell
-- **WHEN** the destination section is displayed
-- **THEN** the system shows a shared list table surface with destination label, chat type, bot relationship, status, and row actions
-
-#### Scenario: Link token review flow
-- **WHEN** the user opens the destination linking UI
-- **THEN** the system shows the intended flow for choosing an active bot and using a `/start <token>` command without requesting a real token
-
-### Requirement: Feature routing surface
-The system SHALL show a UI-only feature routing surface for the Telegram feature keys `ECONOMIC_CALENDAR_ALERT`, `MARKET_NEWS_ALERT`, and `SCHEDULED_MARKET_ANALYSIS`.
-
-#### Scenario: Feature routes are displayed with Vietnamese labels
-- **WHEN** the feature routing section is displayed
-- **THEN** the system labels the routes as calendar alerts, market news alerts, and scheduled market analysis in Vietnamese
-
-#### Scenario: Feature route switch is scoped to enabled setting
-- **WHEN** a feature routing row is displayed
-- **THEN** the system uses a compact switch only for the route `enabled` state and does not imply bot, destination, or schedule reactivation
-
-#### Scenario: Missing destination blocks route activation
-- **WHEN** no verified active destination is available
-- **THEN** the feature routing controls are disabled or shown as blocked with a clear explanation
-
-### Requirement: Scheduled market analysis surface
-The system SHALL show a UI-only schedule surface for scheduled market analysis configuration.
-
-#### Scenario: Schedule list shell
-- **WHEN** the scheduled market analysis section is displayed
-- **THEN** the system shows a shared list table surface with schedule name, workspace, destination, timezone, local times, assets, status, and row actions
-
-#### Scenario: Schedule form shell
-- **WHEN** the user opens the create or edit schedule UI
-- **THEN** the system uses the focused form shell pattern with fields for name, workspace, destination, timezone, local times, and assets
-
-### Requirement: UI-only boundary is preserved
-The system SHALL NOT integrate live Telegram API calls as part of this UI shell change.
-
-#### Scenario: No Telegram server action is added
-- **WHEN** the change is implemented
-- **THEN** the system does not add a Telegram server action file or call `fetchAuthenticated()` for `/telegram/**`
-
-#### Scenario: No live mutation feedback is shown
-- **WHEN** the user interacts with UI-only Telegram controls
-- **THEN** the system does not show success feedback that claims a backend create, update, disable, or delete mutation succeeded
-
-#### Scenario: Backend-only webhook remains excluded
-- **WHEN** the Telegram UI shell is implemented
-- **THEN** the system does not expose `/webhooks/telegram/{connectionId}` as a frontend action or user-callable control

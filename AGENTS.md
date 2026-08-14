@@ -22,7 +22,7 @@ This document is the active repo-wide instruction file for Codex when working in
 - `hydration-mismatch`: investigating hydration mismatch on Radix/shadcn overlays.
 - `frontend-design`: redesign, UI polish, dashboards/workbenches, or new layouts that need visual direction.
 - `accessibility`: keyboard, focus, screen reader, semantic markup, dialog/form accessibility.
-- `api-mapping-sync`: when `docs/api_mapping.json`, `docs/APIMAPPING.md`, or backend contracts change.
+- `api-mapping-sync`: when the live dev OpenAPI contract, `docs/APIMAPPING.md`, or backend APIs change.
 - OpenSpec flow: use `openspec-explore` → `openspec-grill-with-docs` → `openspec-to-spec` → `openspec-propose` → `openspec-sync-specs` → `openspec-apply-change` → `openspec-archive-change` in order.
 
 ## Commands

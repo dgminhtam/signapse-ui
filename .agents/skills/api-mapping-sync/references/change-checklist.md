@@ -1,6 +1,6 @@
 ﻿# Change Checklist
 
-Use this checklist when `docs/api_mapping.json` changes.
+Use this checklist when the live dev OpenAPI contract changes or before integrating a new or changed backend API.
 
 ## What Counts As Real Contract Drift
 
@@ -31,7 +31,7 @@ Check these places when the contract changes:
 
 ## Suggested Reading Order
 
-1. `docs/api_mapping.json`
+1. Fresh JSON from the authoritative OpenAPI endpoint declared in `SKILL.md`
 2. `docs/APIMAPPING.md`
 3. affected frontend files under `app/lib`, `app/api`, and `app/(main)`
 

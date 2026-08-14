@@ -1,20 +1,26 @@
 ---
 name: api-mapping-sync
-description: Update Signapse docs/APIMAPPING.md from docs/api_mapping.json and report exact API/documentation diffs. Use when api_mapping.json changes, when backend APIs are updated, when APIMAPPING.md must be refreshed, or when the user asks what changed between the backend contract and frontend mapping docs.
+description: Sync Signapse docs/APIMAPPING.md against the live dev OpenAPI contract and report exact API/documentation diffs. Use when backend APIs or the dev build change, when APIMAPPING.md must be refreshed, or when the user asks what changed between the backend contract and frontend mapping docs.
 ---
 
 # API Mapping Sync
 
-Keep Signapse frontend-facing API docs aligned with the latest backend snapshot in `docs/api_mapping.json`.
+Keep Signapse frontend-facing API docs aligned with the live dev OpenAPI contract.
+
+## Authoritative Contract
+
+- Source: `https://dev-api.signapse.cloud/v3/api-docs`
+- Backend publishes and builds dev before frontend integration, so fetch this endpoint fresh on every run.
+- Accept the response only after a successful HTTP request, valid JSON parsing, and confirmation that `openapi`, `paths`, and `components.schemas` are present.
+- An unavailable or invalid response is a blocking validation failure: report it and stop. No local snapshot is an acceptable fallback.
 
 ## Workflow
 
-1. Load the current mapping sources:
-- `docs/api_mapping.json`
+1. Fetch and validate the authoritative contract, then load the comparison targets:
 - `docs/APIMAPPING.md`
 - any user-mentioned frontend files if the request includes code sync
 
-2. Compare `api_mapping.json` against `APIMAPPING.md`, not just against git history:
+2. Compare the freshly fetched OpenAPI JSON against `APIMAPPING.md`, not just against git history:
 - endpoint surface: new or removed paths, methods, and operationIds
 - request and response contracts: field adds, removals, renames, enum changes, nullability, requiredness, and payload shape
 - implementation status already documented in `docs/APIMAPPING.md`
@@ -22,8 +28,8 @@ Keep Signapse frontend-facing API docs aligned with the latest backend snapshot 
 
 3. Update `docs/APIMAPPING.md`:
 - keep the current structure and tone
-- update the verification date when the snapshot changed materially
-- document only confirmed differences from `docs/api_mapping.json`
+- update the verification date when the live contract changed materially
+- document only differences confirmed from the freshly fetched OpenAPI JSON
 - write concise frontend-oriented notes: what changed, where it affects frontend, and whether docs or code already match
 - ignore pure property reorder unless it changes semantics
 
@@ -45,21 +51,23 @@ Use [references/diff-report-template.md](references/diff-report-template.md) for
 
 ## Repo Rules
 
-- Treat `docs/api_mapping.json` as the source of truth for the current backend snapshot.
+- Treat `https://dev-api.signapse.cloud/v3/api-docs` as the source of truth for the current backend contract.
 - Treat `docs/APIMAPPING.md` as the frontend integration ledger, not a full API spec.
 - Preserve Vietnamese wording in `docs/APIMAPPING.md`.
-- Verify exact field names, enums, and nullability directly from JSON before writing them.
+- Verify exact field names, enums, requiredness, and nullability directly from the freshly fetched JSON before writing them.
 - When new endpoints appear, note the route, method, purpose, and frontend ownership or status.
 - When fields are renamed or removed, inspect likely impact in `app/lib`, `app/(main)`, and `app/api`.
 - When reporting dates, prefer the current absolute date rather than relative wording.
-- Never claim frontend code is integrated only because an endpoint exists in `api_mapping.json`; confirm matching actions, definitions, routes, or UI first.
-- If a previous comparison only used git history, redo the comparison against `docs/APIMAPPING.md` before updating docs.
+- Never claim frontend code is integrated only because an endpoint exists in the live contract; confirm matching actions, definitions, routes, or UI first.
+- If a previous comparison used git history or a local snapshot, redo it against the live contract and `docs/APIMAPPING.md` before updating docs.
 
 ## Useful Commands
 
-- `rg -n "\"/query\"|operationId|enum|required|properties" docs/api_mapping.json`
+- `$apiSpec = Invoke-RestMethod -Uri "https://dev-api.signapse.cloud/v3/api-docs" -Method Get -ErrorAction Stop`
+- `if (-not $apiSpec.openapi -or -not $apiSpec.paths -or -not $apiSpec.components.schemas) { throw "Invalid OpenAPI response" }`
+- `@($apiSpec.paths.PSObject.Properties).Count`
+- `@($apiSpec.components.schemas.PSObject.Properties).Count`
 - `rg -n "query|source-document|event|system prompt" docs/APIMAPPING.md app`
-- `git diff -- docs/api_mapping.json docs/APIMAPPING.md`
 - `git diff -- docs/APIMAPPING.md`
 
 ## Output Expectations
