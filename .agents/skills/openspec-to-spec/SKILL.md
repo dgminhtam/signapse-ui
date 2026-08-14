@@ -1,12 +1,12 @@
 ---
-name: to-spec
-description: Turn the current conversation into a spec and publish it to the project issue tracker — no interview, just synthesis of what you've already discussed.
+name: openspec-to-spec
+description: Turn the current OpenSpec conversation into a proposal-ready spec — no interview or external ticket, just synthesis for openspec-propose.
 disable-model-invocation: true
 ---
 
-This skill takes the current conversation context and codebase understanding and produces a spec. Do NOT interview the user — just synthesize what you already know.
+This skill takes the current conversation context and codebase understanding and produces a proposal-ready spec. Do NOT interview the user — just synthesize what you already know.
 
-The issue tracker and triage label vocabulary should have been provided to you — run `/setup-matt-pocock-skills` if not.
+`openspec-to-spec` owns conversation synthesis. `openspec-propose` owns OpenSpec change creation and the official proposal, design, delta specs, and tasks artifacts.
 
 ## Process
 
@@ -16,7 +16,9 @@ The issue tracker and triage label vocabulary should have been provided to you �
 
 Check with the user that these seams match their expectations.
 
-3. Write the spec using the template below, then publish it to the project issue tracker. Apply the `ready-for-agent` triage label - no need for additional triage.
+3. Write the spec using the template below and present it in the current conversation. This conversation-level brief is the only output of this skill; leave change creation and artifact writing to `openspec-propose`.
+
+4. Once the user accepts the spec, state that the next step is `/openspec-propose`. Keep the full spec in conversation context so that skill can derive the change name and generate its official artifacts from the agreed brief.
 
 <spec-template>
 

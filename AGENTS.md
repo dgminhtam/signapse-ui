@@ -23,7 +23,7 @@ This document is the active repo-wide instruction file for Codex when working in
 - `frontend-design`: redesign, UI polish, dashboards/workbenches, or new layouts that need visual direction.
 - `accessibility`: keyboard, focus, screen reader, semantic markup, dialog/form accessibility.
 - `api-mapping-sync`: when `docs/api_mapping.json`, `docs/APIMAPPING.md`, or backend contracts change.
-- OpenSpec skills: use `openspec-propose`, `openspec-apply-change`, `openspec-archive-change`, and `openspec-explore` in the correct phase.
+- OpenSpec flow: use `openspec-explore` → `openspec-grill-with-docs` → `openspec-to-spec` → `openspec-propose` → `openspec-sync-specs` → `openspec-apply-change` → `openspec-archive-change` in order.
 
 ## Commands
 
@@ -91,3 +91,17 @@ app/[lang]/(main)/[feature]/
 - For UI reviews, use the detailed drift categories in DESIGN; also prioritize API contract hierarchy drift, unsafe destructive actions, and unchecked `any` where applicable.
 - For each finding, identify file/line, behavioral or UX risk, and the minimal recommended fix.
 - If there are no findings, say that clearly and mention residual risk or checks not run.
+
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked as local Markdown files under `.scratch/<feature>/`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+This repo uses the default canonical triage label vocabulary. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+This repo uses a single-context domain documentation layout. See `docs/agents/domain.md`.
