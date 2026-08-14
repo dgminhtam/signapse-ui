@@ -38,6 +38,7 @@ import {
   sortOperationalTelegramRecords,
   StatusBadge,
 } from "./telegram-configuration-shared"
+import { TelegramDestinationTestMessageButton } from "./telegram-destination-test-message-button"
 import {
   Card,
   CardAction,
@@ -251,8 +252,14 @@ function DestinationItem({
             </AppTimeMetadata>
           </div>
         </ItemContent>
-        {canManage ? (
-          <ItemActions className="ms-auto self-start">
+        <ItemActions className="ms-auto basis-full justify-end self-start sm:basis-auto">
+          <TelegramDestinationTestMessageButton
+            destinationId={destination.id}
+            destinationLabel={label}
+            canManage={canManage}
+            isActive={destination.status === "ACTIVE"}
+          />
+          {canManage ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -284,8 +291,8 @@ function DestinationItem({
                 </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
-          </ItemActions>
-        ) : null}
+          ) : null}
+        </ItemActions>
       </Item>
       <ActionConfirmDialog
         title={

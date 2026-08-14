@@ -256,7 +256,13 @@ export function TelegramConfigurationSkeleton() {
                     <Skeleton className="h-4 w-56 max-w-full" />
                     <Skeleton className="h-4 w-32" />
                   </ItemContent>
-                  <ItemActions>
+                  <ItemActions
+                    className={cn(
+                      "ms-auto self-start",
+                      cardIndex === 1 && "basis-full justify-end sm:basis-auto"
+                    )}
+                  >
+                    {cardIndex === 1 ? <Skeleton className="h-8 w-24" /> : null}
                     <Skeleton className="size-8" />
                   </ItemActions>
                 </Item>

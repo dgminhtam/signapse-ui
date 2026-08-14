@@ -2209,6 +2209,16 @@ export const vi = {
         "Tạo lệnh liên kết rồi gửi lệnh đó trong Telegram để xác minh chat, group hoặc channel.",
       actionMenu: "Thao tác điểm nhận",
       linkedBot: "Bot liên kết",
+      testMessage: "Gửi thử",
+      testMessagePending: "Đang gửi thử…",
+      testMessageSuccess: "Đã gửi tin nhắn thử tới {destination}.",
+      testMessageError: "Không thể gửi tin nhắn thử.",
+      testMessageTimeout:
+        "Yêu cầu gửi đã hết thời gian chờ và kết quả chưa rõ; hãy kiểm tra Telegram trước khi thử lại.",
+      testMessagePermissionRequired:
+        "Cần quyền quản lý điểm nhận để gửi tin nhắn thử.",
+      testMessageInactive:
+        "Chỉ điểm nhận đang hoạt động mới có thể gửi tin nhắn thử.",
       disableTitle: "Vô hiệu hóa điểm nhận Telegram?",
       disableDescription:
         "Điểm nhận bị vô hiệu hóa sẽ không còn nhận thông báo từ các luồng đang trỏ tới nó. Giao diện này không hỗ trợ bật lại.",
@@ -2248,6 +2258,7 @@ export const vi = {
       noActiveDestination: "Chưa có điểm nhận đang hoạt động.",
       placeholder: "Chọn điểm nhận",
       fallbackLabel: "Điểm nhận #{id}",
+      invalidData: "Dữ liệu điểm nhận không hợp lệ.",
       createLinkError: "Không thể tạo lệnh liên kết Telegram.",
       disableError: "Không thể vô hiệu hóa điểm nhận Telegram.",
       deleteError: "Không thể xóa điểm nhận Telegram.",

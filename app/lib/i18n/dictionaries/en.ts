@@ -2220,6 +2220,16 @@ export const en: Dictionary = {
         "Create a link command, then send it in Telegram to verify a chat, group, or channel.",
       actionMenu: "Destination actions",
       linkedBot: "Linked bot",
+      testMessage: "Send test",
+      testMessagePending: "Sending test…",
+      testMessageSuccess: "Test message sent to {destination}.",
+      testMessageError: "Could not send the test message.",
+      testMessageTimeout:
+        "The send request timed out and the result is uncertain; check Telegram before trying again.",
+      testMessagePermissionRequired:
+        "Destination management permission is required to send a test message.",
+      testMessageInactive:
+        "Only active destinations can receive a test message.",
       disableTitle: "Disable Telegram destination?",
       disableDescription:
         "A disabled destination will no longer receive notifications from routes pointing to it. This interface does not provide reactivation.",
@@ -2261,6 +2271,7 @@ export const en: Dictionary = {
       noActiveDestination: "No active destinations yet.",
       placeholder: "Choose destination",
       fallbackLabel: "Destination #{id}",
+      invalidData: "Destination data is invalid.",
       createLinkError: "Could not create the Telegram link command.",
       disableError: "Could not disable the Telegram destination.",
       deleteError: "Could not delete the Telegram destination.",
