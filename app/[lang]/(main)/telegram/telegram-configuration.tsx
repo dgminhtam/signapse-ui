@@ -1,46 +1,21 @@
 "use client"
 
-import {
-  Fragment,
-  type FormEvent,
-  type ReactElement,
-  type ReactNode,
-  useState,
-  useTransition,
-} from "react"
+import { Fragment, type FormEvent, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import {
   Bot,
   CalendarClock,
-  CheckCircle2,
-  Clipboard,
-  ExternalLink,
-  Link2,
   MessageCircle,
-  MoreHorizontal,
-  Pause,
   Pencil,
   Plus,
   RadioTower,
-  RefreshCw,
-  Send,
-  ShieldAlert,
-  Trash2,
 } from "lucide-react"
 import { toast } from "sonner"
 
 import {
-  createTelegramBotConnection,
-  createTelegramLinkToken,
   createTelegramMarketAnalysisSchedule,
-  deleteTelegramBotConnection,
-  deleteTelegramDestination,
   deleteTelegramMarketAnalysisSchedule,
-  disableTelegramBotConnection,
-  disableTelegramDestination,
   disableTelegramMarketAnalysisSchedule,
-  updateTelegramBotConnection,
-  updateTelegramDestination,
   updateTelegramFeatureSetting,
   updateTelegramMarketAnalysisSchedule,
 } from "@/app/api/telegram/action"
@@ -49,20 +24,12 @@ import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
 import { useLocalization } from "@/app/lib/i18n/provider"
 import {
   TELEGRAM_FEATURE_KEYS,
-  TelegramBotConnectionResponse,
-  TelegramChatType,
   TelegramConfigurationData,
-  TelegramConnectionStatus,
   TelegramDestinationResponse,
-  TelegramDestinationStatus,
   TelegramFeatureKey,
   TelegramFeatureSettingResponse,
-  TelegramLinkTokenResponse,
   TelegramMarketAnalysisScheduleResponse,
-  getCreateTelegramBotConnectionSchema,
   getSaveTelegramMarketAnalysisScheduleSchema,
-  getUpdateTelegramBotConnectionSchema,
-  getUpdateTelegramDestinationSchema,
   getUpdateTelegramFeatureSettingSchema,
 } from "@/app/lib/telegram/definitions"
 import {
@@ -81,18 +48,6 @@ import {
   AppListToolbarLeading,
   AppListToolbarTrailing,
 } from "@/components/app-list-toolbar"
-import { AppTimeMetadata } from "@/components/app-time-metadata"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -118,6 +73,7 @@ import {
   FieldSet,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { Item, ItemActions, ItemContent } from "@/components/ui/item"
 import {
   Select,
   SelectContent,
@@ -131,7 +87,6 @@ import {
   SheetClose,
   SheetContent,
   SheetDescription,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -140,14 +95,6 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
 import { Switch } from "@/components/ui/switch"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
   Table,
   TableBody,
   TableCell,
@@ -155,7 +102,16 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
-import { TelegramDestinationTestMessageButton } from "./telegram-destination-test-message-button"
+import { BotConnectionsCard } from "./telegram-bot-connections"
+import { DestinationsCard } from "./telegram-destinations"
+import {
+  ActionConfirmDialog,
+  AccessLimitedRow,
+  getDestinationLabel,
+  ReadinessBadge,
+  SectionHeader,
+  StatusBadge,
+} from "./telegram-configuration-shared"
 
 type RouteDefinition = {
   featureKey: TelegramFeatureKey
@@ -166,11 +122,6 @@ type RouteDefinition = {
 type FeatureRouteView = RouteDefinition & {
   setting?: TelegramFeatureSettingResponse
 }
-
-const TELEGRAM_DATE_TIME_OPTIONS = {
-  dateStyle: "short",
-  timeStyle: "short",
-} satisfies Intl.DateTimeFormatOptions
 
 function getRouteDefinitions(dictionary: Dictionary): RouteDefinition[] {
   const routes = dictionary.telegram.routeDefinitions
@@ -232,17 +183,30 @@ export function TelegramConfigurationPage({
         activeBotCount={activeBotConnections.length}
         activeDestinationCount={activeDestinations.length}
       />
-      <BotConnectionSection
-        botConnections={data.botConnections}
-        canRead={data.sectionAccess.botConnections}
-        canManage={data.manageAccess.botConnections}
-      />
-      <DestinationSection
-        destinations={data.destinations}
-        activeBotConnections={activeBotConnections}
-        canRead={data.sectionAccess.destinations}
-        canManage={data.manageAccess.destinations}
-      />
+      <section
+        className="flex min-w-0 flex-col gap-4"
+        aria-labelledby="telegram-infrastructure"
+      >
+        <SectionHeader
+          id="telegram-infrastructure"
+          title={dictionary.telegram.infrastructureTitle}
+          description={dictionary.telegram.infrastructureDescription}
+        />
+        <div className="grid min-w-0 gap-4 xl:grid-cols-2">
+          <BotConnectionsCard
+            botConnections={data.botConnections}
+            canRead={data.sectionAccess.botConnections}
+            canManage={data.manageAccess.botConnections}
+          />
+          <DestinationsCard
+            destinations={data.destinations}
+            activeBotConnections={activeBotConnections}
+            canRead={data.sectionAccess.destinations}
+            canReadBotConnections={data.sectionAccess.botConnections}
+            canManage={data.manageAccess.destinations}
+          />
+        </div>
+      </section>
       <FeatureRoutingSection
         routes={routes}
         schedules={schedules}
@@ -274,51 +238,33 @@ export function TelegramConfigurationSkeleton() {
           </Card>
         ))}
       </div>
-      {[
-        {
-          headerWidths: ["w-24", "w-20", "w-28", "w-24", "w-20"],
-          cellWidths: ["w-44", "w-20", "w-32", "w-24", "w-20"],
-        },
-        {
-          headerWidths: [
-            "w-24",
-            "w-28",
-            "w-20",
-            "w-16",
-            "w-20",
-            "w-56",
-          ],
-          cellWidths: ["w-44", "w-32", "w-24", "w-20", "w-24", "w-56"],
-        },
-      ].map(({ headerWidths, cellWidths }, index) => (
-        <AppListTable
-          key={index}
-          className={cn("mt-0", index === 1 && "overflow-x-auto")}
-        >
-          <Table>
-            <TableHeader>
-              <AppListTableHeaderRow>
-                {headerWidths.map((width, columnIndex) => (
-                  <AppListTableHead key={columnIndex}>
-                    <Skeleton className={cn("h-4", width)} />
-                  </AppListTableHead>
-                ))}
-              </AppListTableHeaderRow>
-            </TableHeader>
-            <TableBody>
-              {Array.from({ length: 2 }).map((__, rowIndex) => (
-                <TableRow key={rowIndex}>
-                  {cellWidths.map((width, columnIndex) => (
-                    <TableCell key={columnIndex}>
-                      <Skeleton className={cn("h-5", width)} />
-                    </TableCell>
-                  ))}
-                </TableRow>
+      <div className="grid min-w-0 gap-4 xl:grid-cols-2">
+        {Array.from({ length: 2 }).map((_, cardIndex) => (
+          <Card key={cardIndex} className="min-w-0">
+            <CardHeader>
+              <Skeleton className="h-5 w-32" />
+              <Skeleton className="h-4 w-full" />
+              <CardAction>
+                <Skeleton className="h-9 w-28" />
+              </CardAction>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-3">
+              {Array.from({ length: 2 }).map((__, itemIndex) => (
+                <Item key={itemIndex} variant="outline" className="items-start">
+                  <ItemContent className="min-w-0 gap-2">
+                    <Skeleton className="h-5 w-40" />
+                    <Skeleton className="h-4 w-56 max-w-full" />
+                    <Skeleton className="h-4 w-32" />
+                  </ItemContent>
+                  <ItemActions>
+                    <Skeleton className="size-8" />
+                  </ItemActions>
+                </Item>
               ))}
-            </TableBody>
-          </Table>
-        </AppListTable>
-      ))}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
       <AppListTable className="mt-0">
         <Table>
           <TableHeader>
@@ -477,375 +423,6 @@ function ReadinessSummary({
           </Card>
         )
       })}
-    </div>
-  )
-}
-
-function BotConnectionSection({
-  botConnections,
-  canRead,
-  canManage,
-}: {
-  botConnections: TelegramBotConnectionResponse[]
-  canRead: boolean
-  canManage: boolean
-}) {
-  const { dictionary, formatDateTime, formatMessage } = useLocalization()
-  const t = dictionary.telegram
-  const formatTime = (value?: string) =>
-    formatTelegramDateTime(value, formatDateTime, t.common.noData)
-
-  return (
-    <section className="flex flex-col gap-4" aria-labelledby="telegram-bots">
-      <SectionHeader
-        id="telegram-bots"
-        title={t.bot.sectionTitle}
-        description={t.bot.sectionDescription}
-      />
-      <AppListToolbar>
-        <AppListToolbarLeading>
-          <BotConnectionSheet canManage={canManage} />
-        </AppListToolbarLeading>
-        <AppListToolbarTrailing>
-          <Badge variant="outline">{t.common.dataFromApi}</Badge>
-        </AppListToolbarTrailing>
-      </AppListToolbar>
-      <AppListTable className="mt-0">
-        <Table>
-          <TableHeader>
-            <AppListTableHeaderRow>
-              <AppListTableHead className="w-[34%]">
-                {t.bot.botColumn}
-              </AppListTableHead>
-              <AppListTableHead className="w-40">
-                {t.common.status}
-              </AppListTableHead>
-              <AppListTableHead className="w-48">
-                {t.bot.webhookColumn}
-              </AppListTableHead>
-              <AppListTableHead className="w-44">
-                {t.bot.verifiedColumn}
-              </AppListTableHead>
-              <AppListTableHead className="w-28 text-right">
-                {t.common.actions}
-              </AppListTableHead>
-            </AppListTableHeaderRow>
-          </TableHeader>
-          <TableBody>
-            {!canRead ? (
-              <AccessLimitedRow colSpan={5} title={t.bot.accessLimited} />
-            ) : botConnections.length > 0 ? (
-              botConnections.map((connection) => (
-                <TableRow
-                  key={connection.id}
-                  className="border-border transition-colors hover:bg-muted/50"
-                >
-                  <TableCell className="align-top whitespace-normal">
-                    <div className="flex min-w-0 flex-col gap-1">
-                      <span className="font-medium text-foreground">
-                        {getBotLabel(connection, dictionary)}
-                      </span>
-                      <span className="truncate text-sm text-muted-foreground">
-                        {connection.botUsername
-                          ? `@${connection.botUsername}`
-                          : t.bot.noUsername}{" "}
-                        · {connection.botFirstName ?? t.bot.noBotName}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="align-top">
-                    <StatusBadge status={connection.status} />
-                  </TableCell>
-                  <TableCell className="align-top whitespace-normal">
-                    <AppTimeMetadata icon={CalendarClock}>
-                      {connection.lastWebhookRegisteredAt
-                        ? formatMessage(t.bot.webhookRegistered, {
-                            time: formatTime(
-                              connection.lastWebhookRegisteredAt
-                            ),
-                          })
-                        : t.bot.webhookNotRegistered}
-                    </AppTimeMetadata>
-                    {connection.failureReason ? (
-                      <span className="block text-destructive">
-                        {connection.failureReason}
-                      </span>
-                    ) : null}
-                  </TableCell>
-                  <TableCell className="align-top">
-                    <AppTimeMetadata icon={RefreshCw}>
-                      {formatTime(connection.lastValidatedAt)}
-                    </AppTimeMetadata>
-                  </TableCell>
-                  <TableCell className="text-right align-top">
-                    <div className="flex justify-end gap-1">
-                      <BotConnectionSheet
-                        canManage={canManage}
-                        connection={connection}
-                      />
-                      <ActionConfirmDialog
-                        title={t.bot.pauseTitle}
-                        description={t.bot.pauseDescription}
-                        actionLabel={t.common.pause}
-                        triggerLabel={t.bot.pauseTrigger}
-                        disabled={!canManage || connection.status !== "ACTIVE"}
-                        action={() =>
-                          disableTelegramBotConnection(connection.id)
-                        }
-                        successMessage={t.bot.pauseSuccess}
-                      />
-                      <ActionConfirmDialog
-                        title={t.bot.deleteTitle}
-                        description={t.bot.deleteDescription}
-                        actionLabel={t.bot.deleteAction}
-                        triggerLabel={t.bot.deleteTrigger}
-                        disabled={!canManage}
-                        action={() =>
-                          deleteTelegramBotConnection(connection.id)
-                        }
-                        successMessage={t.bot.deleteSuccess}
-                      />
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <AppListTableEmptyState colSpan={5}>
-                <EmptyHeader>
-                  <EmptyMedia variant="icon">
-                    <Bot />
-                  </EmptyMedia>
-                  <EmptyTitle>{t.bot.emptyTitle}</EmptyTitle>
-                  <EmptyDescription>{t.bot.emptyDescription}</EmptyDescription>
-                </EmptyHeader>
-              </AppListTableEmptyState>
-            )}
-          </TableBody>
-        </Table>
-      </AppListTable>
-    </section>
-  )
-}
-
-function DestinationSection({
-  destinations,
-  activeBotConnections,
-  canRead,
-  canManage,
-}: {
-  destinations: TelegramDestinationResponse[]
-  activeBotConnections: TelegramBotConnectionResponse[]
-  canRead: boolean
-  canManage: boolean
-}) {
-  const { dictionary, formatDateTime } = useLocalization()
-  const t = dictionary.telegram
-  const formatTime = (value?: string) =>
-    formatTelegramDateTime(value, formatDateTime, t.common.noData)
-
-  return (
-    <section
-      className="flex flex-col gap-4"
-      aria-labelledby="telegram-destinations"
-    >
-      <SectionHeader
-        id="telegram-destinations"
-        title={t.destination.sectionTitle}
-        description={t.destination.sectionDescription}
-      />
-      <AppListToolbar>
-        <AppListToolbarLeading>
-          <DestinationLinkSheet
-            activeBotConnections={activeBotConnections}
-            canManage={canManage}
-          />
-        </AppListToolbarLeading>
-        <AppListToolbarTrailing>
-          <Badge variant="outline">{t.common.verifiedViaTelegram}</Badge>
-        </AppListToolbarTrailing>
-      </AppListToolbar>
-      <AppListTable className="mt-0 overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <AppListTableHeaderRow>
-              <AppListTableHead className="w-[34%]">
-                {t.destination.destinationColumn}
-              </AppListTableHead>
-              <AppListTableHead className="w-32">
-                {t.destination.chatTypeColumn}
-              </AppListTableHead>
-              <AppListTableHead className="w-48">
-                {t.destination.botColumn}
-              </AppListTableHead>
-              <AppListTableHead className="w-36">
-                {t.common.status}
-              </AppListTableHead>
-              <AppListTableHead className="w-36">
-                {t.destination.updatedColumn}
-              </AppListTableHead>
-              <AppListTableHead className="min-w-60 text-right">
-                {t.common.actions}
-              </AppListTableHead>
-            </AppListTableHeaderRow>
-          </TableHeader>
-          <TableBody>
-            {!canRead ? (
-              <AccessLimitedRow
-                colSpan={6}
-                title={t.destination.accessLimited}
-              />
-            ) : destinations.length > 0 ? (
-              destinations.map((destination) => (
-                <TableRow
-                  key={destination.id}
-                  className="border-border transition-colors hover:bg-muted/50"
-                >
-                  <TableCell className="align-top whitespace-normal">
-                    <div className="flex min-w-0 flex-col gap-1">
-                      <span className="font-medium text-foreground">
-                        {getDestinationLabel(destination, dictionary)}
-                      </span>
-                      <span className="truncate text-sm text-muted-foreground">
-                        {destination.chatTitle ??
-                          destination.username ??
-                          destination.chatId ??
-                          t.destination.noChatMetadata}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="align-top">
-                    <Badge variant="outline">
-                      {formatChatType(destination.chatType, dictionary)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="align-top text-sm whitespace-normal text-muted-foreground">
-                    {destination.botDisplayLabel ??
-                      destination.botUsername ??
-                      formatLabel(
-                        t.bot.fallbackLabel,
-                        destination.botConnectionId
-                      )}
-                  </TableCell>
-                  <TableCell className="align-top">
-                    <StatusBadge status={destination.status} />
-                  </TableCell>
-                  <TableCell className="align-top">
-                    <AppTimeMetadata icon={RefreshCw}>
-                      {formatTime(destination.lastModifiedDate)}
-                    </AppTimeMetadata>
-                  </TableCell>
-                  <TableCell className="min-w-60 text-right align-top">
-                    <DestinationActions
-                      destination={destination}
-                      canManage={canManage}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <AppListTableEmptyState colSpan={6}>
-                <EmptyHeader>
-                  <EmptyMedia variant="icon">
-                    <MessageCircle />
-                  </EmptyMedia>
-                  <EmptyTitle>{t.destination.emptyTitle}</EmptyTitle>
-                  <EmptyDescription>
-                    {t.destination.emptyDescription}
-                  </EmptyDescription>
-                </EmptyHeader>
-              </AppListTableEmptyState>
-            )}
-          </TableBody>
-        </Table>
-      </AppListTable>
-    </section>
-  )
-}
-
-function DestinationActions({
-  destination,
-  canManage,
-}: {
-  destination: TelegramDestinationResponse
-  canManage: boolean
-}) {
-  const { dictionary } = useLocalization()
-  const t = dictionary.telegram
-  const [confirmation, setConfirmation] = useState<"pause" | "delete" | null>(
-    null
-  )
-  const menuTriggerId = `telegram-destination-actions-${destination.id}`
-  const destinationLabel = getDestinationLabel(destination, dictionary)
-
-  return (
-    <div className="flex min-w-max justify-end gap-1">
-      <TelegramDestinationTestMessageButton
-        destinationId={destination.id}
-        destinationLabel={destinationLabel}
-        canManage={canManage}
-        isActive={destination.status === "ACTIVE"}
-      />
-      <DestinationUpdateSheet
-        destination={destination}
-        canManage={canManage}
-      />
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            id={menuTriggerId}
-            variant="ghost"
-            size="icon-sm"
-            aria-label={t.destination.testMessageActions}
-          >
-            <MoreHorizontal />
-            <span className="sr-only">{t.destination.testMessageActions}</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuGroup>
-            <DropdownMenuItem
-              disabled={!canManage || destination.status !== "ACTIVE"}
-              onSelect={() => setConfirmation("pause")}
-            >
-              <Pause />
-              {t.common.pause}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              disabled={!canManage}
-              variant="destructive"
-              onSelect={() => setConfirmation("delete")}
-            >
-              <Trash2 />
-              {t.destination.deleteAction}
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
-      <ActionConfirmDialog
-        title={t.destination.pauseTitle}
-        description={t.destination.pauseDescription}
-        actionLabel={t.common.pause}
-        triggerLabel={t.destination.pauseTrigger}
-        action={() => disableTelegramDestination(destination.id)}
-        successMessage={t.destination.pauseSuccess}
-        open={confirmation === "pause"}
-        onOpenChange={(open) => setConfirmation(open ? "pause" : null)}
-        trigger={null}
-        restoreFocusId={menuTriggerId}
-      />
-      <ActionConfirmDialog
-        title={t.destination.deleteTitle}
-        description={t.destination.deleteDescription}
-        actionLabel={t.destination.deleteAction}
-        triggerLabel={t.destination.deleteTrigger}
-        action={() => deleteTelegramDestination(destination.id)}
-        successMessage={t.destination.deleteSuccess}
-        open={confirmation === "delete"}
-        onOpenChange={(open) => setConfirmation(open ? "delete" : null)}
-        trigger={null}
-        restoreFocusId={menuTriggerId}
-      />
     </div>
   )
 }
@@ -1131,459 +708,6 @@ function MarketAnalysisSchedulePanel({
         </Table>
       </AppListTable>
     </div>
-  )
-}
-
-function BotConnectionSheet({
-  canManage,
-  connection,
-}: {
-  canManage: boolean
-  connection?: TelegramBotConnectionResponse
-}) {
-  const router = useRouter()
-  const [open, setOpen] = useState(false)
-  const [isPending, startTransition] = useTransition()
-  const { dictionary } = useLocalization()
-  const t = dictionary.telegram
-  const isEdit = Boolean(connection)
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-
-    if (!canManage) return
-
-    const formData = new FormData(event.currentTarget)
-    if (isEdit) {
-      const request = getUpdateTelegramBotConnectionSchema().safeParse({
-        displayLabel: getOptionalFormString(formData, "displayLabel"),
-      })
-
-      if (!request.success) {
-        toast.error(request.error.issues[0]?.message ?? t.bot.invalidData)
-        return
-      }
-
-      startTransition(async () => {
-        const result = await updateTelegramBotConnection(
-          connection!.id,
-          request.data
-        )
-
-        if (result.success) {
-          toast.success(t.bot.updateSuccess)
-          setOpen(false)
-          router.refresh()
-        } else {
-          toast.error(result.error)
-        }
-      })
-      return
-    }
-
-    const request = getCreateTelegramBotConnectionSchema(dictionary).safeParse({
-      botToken: getFormString(formData, "botToken"),
-      displayLabel: getOptionalFormString(formData, "displayLabel"),
-    })
-
-    if (!request.success) {
-      toast.error(request.error.issues[0]?.message ?? t.bot.invalidData)
-      return
-    }
-
-    startTransition(async () => {
-      const result = await createTelegramBotConnection(request.data)
-
-      if (result.success) {
-        toast.success(t.bot.createSuccess)
-        setOpen(false)
-        router.refresh()
-      } else {
-        toast.error(result.error)
-      }
-    })
-  }
-
-  return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        {isEdit ? (
-          <Button variant="ghost" size="icon-sm" disabled={!canManage}>
-            <Pencil data-icon="inline-start" />
-            <span className="sr-only">{t.bot.editTrigger}</span>
-          </Button>
-        ) : (
-          <Button disabled={!canManage}>
-            <Plus data-icon="inline-start" />
-            {t.bot.connect}
-          </Button>
-        )}
-      </SheetTrigger>
-      <SheetContent className="overflow-y-auto sm:max-w-xl">
-        <SheetHeader>
-          <SheetTitle>
-            {isEdit ? t.bot.sheetEditTitle : t.bot.sheetCreateTitle}
-          </SheetTitle>
-          <SheetDescription>{t.bot.sheetDescription}</SheetDescription>
-        </SheetHeader>
-        <form onSubmit={handleSubmit} className="px-4">
-          <AppFormShell
-            title={isEdit ? t.bot.formEditTitle : t.bot.formCreateTitle}
-            description={
-              isEdit ? t.bot.formEditDescription : t.bot.formCreateDescription
-            }
-            width="sm"
-            className="max-w-none border-0 shadow-none"
-          >
-            <AppFormShellBody>
-              <FieldGroup>
-                {!isEdit ? (
-                  <Field>
-                    <FieldLabel htmlFor="telegram-bot-token">
-                      {t.bot.tokenLabel}
-                    </FieldLabel>
-                    <Input
-                      id="telegram-bot-token"
-                      name="botToken"
-                      type="password"
-                      placeholder={t.bot.tokenPlaceholder}
-                      disabled={isPending}
-                    />
-                    <FieldDescription>
-                      {t.bot.tokenDescription}
-                    </FieldDescription>
-                  </Field>
-                ) : null}
-                <Field>
-                  <FieldLabel htmlFor="telegram-bot-label">
-                    {t.bot.displayName}
-                  </FieldLabel>
-                  <Input
-                    id="telegram-bot-label"
-                    name="displayLabel"
-                    placeholder={t.bot.displayNamePlaceholder}
-                    defaultValue={connection?.displayLabel ?? ""}
-                    disabled={isPending}
-                  />
-                </Field>
-              </FieldGroup>
-            </AppFormShellBody>
-            <AppFormShellFooter>
-              <SheetClose asChild>
-                <Button type="button" variant="ghost" disabled={isPending}>
-                  {dictionary.common.close}
-                </Button>
-              </SheetClose>
-              <Button type="submit" disabled={isPending || !canManage}>
-                {isPending ? (
-                  <Spinner data-icon="inline-start" />
-                ) : (
-                  <Send data-icon="inline-start" />
-                )}
-                {isEdit ? t.bot.saveBot : t.bot.connectBot}
-              </Button>
-            </AppFormShellFooter>
-          </AppFormShell>
-        </form>
-      </SheetContent>
-    </Sheet>
-  )
-}
-
-function DestinationLinkSheet({
-  activeBotConnections,
-  canManage,
-}: {
-  activeBotConnections: TelegramBotConnectionResponse[]
-  canManage: boolean
-}) {
-  const router = useRouter()
-  const [open, setOpen] = useState(false)
-  const { dictionary, formatDateTime, formatMessage } = useLocalization()
-  const t = dictionary.telegram
-  const formatTime = (value?: string) =>
-    formatTelegramDateTime(value, formatDateTime, t.common.noData)
-  const [botConnectionId, setBotConnectionId] = useState(
-    activeBotConnections[0]?.id.toString() ?? ""
-  )
-  const [linkToken, setLinkToken] = useState<TelegramLinkTokenResponse | null>(
-    null
-  )
-  const [isPending, startTransition] = useTransition()
-  const canSubmit = canManage && botConnectionId
-  const linkedBotConnection = activeBotConnections.find(
-    (connection) => connection.id === linkToken?.botConnectionId
-  )
-  const botUsername = linkedBotConnection?.botUsername?.trim().replace(/^@/, "")
-
-  function buildDeepLink(parameter: "start" | "startgroup") {
-    if (!botUsername || !linkToken?.token) return null
-
-    const url = new URL(`https://t.me/${botUsername}`)
-    url.searchParams.set(parameter, linkToken.token)
-    return url.toString()
-  }
-
-  const privateLink = buildDeepLink("start")
-  const groupLink = buildDeepLink("startgroup")
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-
-    if (!canSubmit) return
-
-    startTransition(async () => {
-      const result = await createTelegramLinkToken({
-        botConnectionId: Number(botConnectionId),
-      })
-
-      if (result.success) {
-        setLinkToken(result.data)
-        toast.success(t.destination.linkCreated)
-      } else {
-        toast.error(result.error)
-      }
-    })
-  }
-
-  function handleRefresh() {
-    router.refresh()
-    toast.success(t.destination.refreshed)
-  }
-
-  async function handleCopy() {
-    if (!linkToken?.startCommand) return
-
-    try {
-      await navigator.clipboard.writeText(linkToken.startCommand)
-      toast.success(t.destination.copied)
-    } catch {
-      toast.error(t.destination.copyError)
-    }
-  }
-
-  return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button disabled={!canManage || activeBotConnections.length === 0}>
-          <Link2 data-icon="inline-start" />
-          {t.destination.link}
-        </Button>
-      </SheetTrigger>
-      <SheetContent className="overflow-y-auto sm:max-w-xl">
-        <SheetHeader>
-          <SheetTitle>{t.destination.linkTitle}</SheetTitle>
-          <SheetDescription>{t.destination.linkDescription}</SheetDescription>
-        </SheetHeader>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 px-4">
-          <FieldGroup>
-            <Field>
-              <FieldLabel>{t.destination.commandBot}</FieldLabel>
-              <Select
-                value={botConnectionId}
-                onValueChange={(value) => {
-                  setBotConnectionId(value)
-                  setLinkToken(null)
-                }}
-                disabled={isPending}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder={t.destination.botPlaceholder} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {activeBotConnections.map((botConnection) => (
-                      <SelectItem
-                        key={botConnection.id}
-                        value={botConnection.id.toString()}
-                      >
-                        {getBotLabel(botConnection, dictionary)}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              <FieldDescription>
-                {t.destination.botDescription}
-              </FieldDescription>
-            </Field>
-          </FieldGroup>
-          {linkToken ? (
-            <div className="flex flex-col gap-3 rounded-lg border bg-muted/20 p-4">
-              <div className="flex items-center gap-2 text-sm font-medium">
-                <Clipboard className="size-4 text-muted-foreground" />
-                {t.destination.linkCommand}
-              </div>
-              <code className="min-w-0 rounded-md bg-background px-3 py-2 text-sm break-all">
-                {linkToken.startCommand}
-              </code>
-              <AppTimeMetadata icon={CalendarClock}>
-                {formatMessage(t.destination.expiresAt, {
-                  time: formatTime(linkToken.expiresAt),
-                })}
-              </AppTimeMetadata>
-              {privateLink || groupLink ? (
-                <div className="flex flex-col gap-2 sm:flex-row">
-                  {privateLink ? (
-                    <Button asChild variant="outline">
-                      <a
-                        href={privateLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={handleRefresh}
-                      >
-                        <ExternalLink data-icon="inline-start" />
-                        {t.destination.openPrivate}
-                      </a>
-                    </Button>
-                  ) : null}
-                  {groupLink ? (
-                    <Button asChild variant="outline">
-                      <a
-                        href={groupLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={handleRefresh}
-                      >
-                        <ExternalLink data-icon="inline-start" />
-                        {t.destination.openGroup}
-                      </a>
-                    </Button>
-                  ) : null}
-                </div>
-              ) : null}
-              <div className="flex flex-col gap-2 sm:flex-row">
-                <Button type="button" variant="outline" onClick={handleCopy}>
-                  <Clipboard data-icon="inline-start" />
-                  {t.destination.copyCommand}
-                </Button>
-                <Button type="button" variant="outline" onClick={handleRefresh}>
-                  <RefreshCw data-icon="inline-start" />
-                  {t.destination.refreshDestinations}
-                </Button>
-              </div>
-            </div>
-          ) : null}
-          <SheetFooter>
-            <SheetClose asChild>
-              <Button type="button" variant="ghost" disabled={isPending}>
-                {dictionary.common.close}
-              </Button>
-            </SheetClose>
-            <Button type="submit" disabled={!canSubmit || isPending}>
-              {isPending ? (
-                <Spinner data-icon="inline-start" />
-              ) : (
-                <Link2 data-icon="inline-start" />
-              )}
-              {t.destination.createCommand}
-            </Button>
-          </SheetFooter>
-        </form>
-      </SheetContent>
-    </Sheet>
-  )
-}
-
-function DestinationUpdateSheet({
-  destination,
-  canManage,
-}: {
-  destination: TelegramDestinationResponse
-  canManage: boolean
-}) {
-  const router = useRouter()
-  const [open, setOpen] = useState(false)
-  const [isPending, startTransition] = useTransition()
-  const { dictionary } = useLocalization()
-  const t = dictionary.telegram
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-
-    if (!canManage) return
-
-    const formData = new FormData(event.currentTarget)
-    const request = getUpdateTelegramDestinationSchema().safeParse({
-      displayLabel: getOptionalFormString(formData, "displayLabel"),
-    })
-
-    if (!request.success) {
-      toast.error(request.error.issues[0]?.message ?? t.destination.invalidData)
-      return
-    }
-
-    startTransition(async () => {
-      const result = await updateTelegramDestination(
-        destination.id,
-        request.data
-      )
-
-      if (result.success) {
-        toast.success(t.destination.updateSuccess)
-        setOpen(false)
-        router.refresh()
-      } else {
-        toast.error(result.error)
-      }
-    })
-  }
-
-  return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button variant="ghost" size="icon-sm" disabled={!canManage}>
-          <Pencil data-icon="inline-start" />
-          <span className="sr-only">{t.destination.editTrigger}</span>
-        </Button>
-      </SheetTrigger>
-      <SheetContent className="overflow-y-auto sm:max-w-xl">
-        <SheetHeader>
-          <SheetTitle>{t.destination.editTitle}</SheetTitle>
-          <SheetDescription>{t.destination.editDescription}</SheetDescription>
-        </SheetHeader>
-        <form onSubmit={handleSubmit} className="px-4">
-          <AppFormShell
-            title={t.destination.formTitle}
-            width="sm"
-            className="max-w-none border-0 shadow-none"
-          >
-            <AppFormShellBody>
-              <FieldGroup>
-                <Field>
-                  <FieldLabel
-                    htmlFor={`telegram-destination-${destination.id}`}
-                  >
-                    {t.bot.displayName}
-                  </FieldLabel>
-                  <Input
-                    id={`telegram-destination-${destination.id}`}
-                    name="displayLabel"
-                    defaultValue={destination.displayLabel ?? ""}
-                    disabled={isPending}
-                  />
-                </Field>
-              </FieldGroup>
-            </AppFormShellBody>
-            <AppFormShellFooter>
-              <SheetClose asChild>
-                <Button type="button" variant="ghost" disabled={isPending}>
-                  {dictionary.common.close}
-                </Button>
-              </SheetClose>
-              <Button type="submit" disabled={isPending}>
-                {isPending ? (
-                  <Spinner data-icon="inline-start" />
-                ) : (
-                  <Send data-icon="inline-start" />
-                )}
-                {t.destination.saveDestination}
-              </Button>
-            </AppFormShellFooter>
-          </AppFormShell>
-        </form>
-      </SheetContent>
-    </Sheet>
   )
 }
 
@@ -1992,230 +1116,6 @@ function FeatureRouteSwitch({
   )
 }
 
-function ActionConfirmDialog<T>({
-  title,
-  description,
-  actionLabel,
-  triggerLabel,
-  disabled,
-  action,
-  successMessage,
-  open: controlledOpen,
-  onOpenChange,
-  trigger,
-  restoreFocusId,
-}: {
-  title: string
-  description: string
-  actionLabel: string
-  triggerLabel: string
-  disabled?: boolean
-  action: () => Promise<ActionResult<T>>
-  successMessage: string
-  open?: boolean
-  onOpenChange?: (open: boolean) => void
-  trigger?: ReactElement | null
-  restoreFocusId?: string
-}) {
-  const router = useRouter()
-  const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
-  const [isPending, startTransition] = useTransition()
-  const { dictionary } = useLocalization()
-  const open = controlledOpen ?? uncontrolledOpen
-
-  function setOpen(nextOpen: boolean) {
-    if (onOpenChange) {
-      onOpenChange(nextOpen)
-    } else {
-      setUncontrolledOpen(nextOpen)
-    }
-
-    if (!nextOpen && restoreFocusId) {
-      requestAnimationFrame(() => {
-        document.getElementById(restoreFocusId)?.focus()
-      })
-    }
-  }
-
-  function handleAction() {
-    startTransition(async () => {
-      const result = await action()
-
-      if (result.success) {
-        toast.success(successMessage)
-        setOpen(false)
-        router.refresh()
-      } else {
-        toast.error(result.error)
-      }
-    })
-  }
-
-  return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
-      {trigger === null ? null : (
-        <AlertDialogTrigger asChild>
-          {trigger ?? (
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-              disabled={disabled}
-            >
-              <Trash2 data-icon="inline-start" />
-              <span className="sr-only">{triggerLabel}</span>
-            </Button>
-          )}
-        </AlertDialogTrigger>
-      )}
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>{description}</AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>
-            {dictionary.common.close}
-          </AlertDialogCancel>
-          <AlertDialogAction
-            disabled={isPending}
-            onClick={(event) => {
-              event.preventDefault()
-              handleAction()
-            }}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-          >
-            {isPending ? <Spinner data-icon="inline-start" /> : null}
-            {actionLabel}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  )
-}
-
-function AccessLimitedRow({
-  colSpan,
-  title,
-}: {
-  colSpan: number
-  title: string
-}) {
-  const { dictionary } = useLocalization()
-
-  return (
-    <AppListTableEmptyState colSpan={colSpan}>
-      <EmptyHeader>
-        <EmptyMedia variant="icon">
-          <ShieldAlert />
-        </EmptyMedia>
-        <EmptyTitle>{title}</EmptyTitle>
-        <EmptyDescription>
-          {dictionary.telegram.common.accessLimitedDescription}
-        </EmptyDescription>
-      </EmptyHeader>
-    </AppListTableEmptyState>
-  )
-}
-
-function SectionHeader({
-  id,
-  title,
-  description,
-}: {
-  id: string
-  title: string
-  description: string
-}) {
-  return (
-    <div className="flex flex-col gap-1">
-      <h2 id={id} className="text-base font-semibold text-foreground">
-        {title}
-      </h2>
-      <p className="max-w-3xl text-sm text-muted-foreground">{description}</p>
-    </div>
-  )
-}
-
-function ReadinessBadge({
-  status,
-  children,
-}: {
-  status: "ready" | "attention"
-  children: ReactNode
-}) {
-  return status === "ready" ? (
-    <Badge variant="secondary">
-      <CheckCircle2 data-icon="inline-start" />
-      {children}
-    </Badge>
-  ) : (
-    <Badge variant="outline">
-      <ShieldAlert data-icon="inline-start" />
-      {children}
-    </Badge>
-  )
-}
-
-function StatusBadge({
-  status,
-}: {
-  status: TelegramConnectionStatus | TelegramDestinationStatus
-}) {
-  const { dictionary } = useLocalization()
-  const label = dictionary.telegram.statuses[status]
-
-  if (status === "ACTIVE") {
-    return <Badge variant="secondary">{label}</Badge>
-  }
-
-  if (status === "INVALID") {
-    return <Badge variant="destructive">{label}</Badge>
-  }
-
-  if (status === "REMOVED") {
-    return <Badge variant="outline">{label}</Badge>
-  }
-
-  return <Badge variant="outline">{label}</Badge>
-}
-
-function formatChatType(chatType: TelegramChatType, dictionary: Dictionary) {
-  return dictionary.telegram.chatTypes[chatType]
-}
-
-function getBotLabel(
-  connection: TelegramBotConnectionResponse,
-  dictionary: Dictionary
-) {
-  return (
-    connection.displayLabel ||
-    connection.botFirstName ||
-    connection.botUsername ||
-    formatLabel(dictionary.telegram.bot.fallbackLabel, connection.id)
-  )
-}
-
-function getDestinationLabel(
-  destination: TelegramDestinationResponse,
-  dictionary: Dictionary
-) {
-  return (
-    destination.displayLabel ||
-    destination.chatTitle ||
-    destination.username ||
-    formatLabel(dictionary.telegram.destination.fallbackLabel, destination.id)
-  )
-}
-
-function formatTelegramDateTime(
-  value: string | undefined,
-  formatDateTime: ReturnType<typeof useLocalization>["formatDateTime"],
-  fallback: string
-) {
-  return formatDateTime(value, TELEGRAM_DATE_TIME_OPTIONS, fallback)
-}
-
 function formatScheduledAssets(
   schedule: TelegramMarketAnalysisScheduleResponse,
   dictionary: Dictionary
@@ -2229,10 +1129,6 @@ function formatScheduledAssets(
   return assets
     .map((asset) => asset.assetSymbol ?? asset.assetName ?? asset.assetId)
     .join(", ")
-}
-
-function formatLabel(template: string, id: number) {
-  return template.replace("{id}", String(id))
 }
 
 function getFormString(formData: FormData, key: string) {

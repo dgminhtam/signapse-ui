@@ -99,25 +99,12 @@ export interface TelegramLinkTokenResponse {
 export function getCreateTelegramBotConnectionSchema(dictionary: Dictionary) {
   return z.object({
     botToken: z.string().trim().min(1, dictionary.telegram.botTokenRequired),
-    displayLabel: z.string().trim().optional(),
-  })
-}
-
-export function getUpdateTelegramBotConnectionSchema() {
-  return z.object({
-    displayLabel: z.string().trim().optional(),
   })
 }
 
 export function getCreateTelegramLinkTokenSchema() {
   return z.object({
     botConnectionId: z.coerce.number().int().positive(),
-  })
-}
-
-export function getUpdateTelegramDestinationSchema() {
-  return z.object({
-    displayLabel: z.string().trim().optional(),
   })
 }
 
@@ -148,14 +135,8 @@ export function getSaveTelegramMarketAnalysisScheduleSchema(
 export type CreateTelegramBotConnectionRequest = z.infer<
   ReturnType<typeof getCreateTelegramBotConnectionSchema>
 >
-export type UpdateTelegramBotConnectionRequest = z.infer<
-  ReturnType<typeof getUpdateTelegramBotConnectionSchema>
->
 export type CreateTelegramLinkTokenRequest = z.infer<
   ReturnType<typeof getCreateTelegramLinkTokenSchema>
->
-export type UpdateTelegramDestinationRequest = z.infer<
-  ReturnType<typeof getUpdateTelegramDestinationSchema>
 >
 export type UpdateTelegramFeatureSettingRequest = z.infer<
   ReturnType<typeof getUpdateTelegramFeatureSettingSchema>

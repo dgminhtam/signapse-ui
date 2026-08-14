@@ -2103,6 +2103,9 @@ export const en: Dictionary = {
     readDenied: "You do not have permission to access Telegram settings.",
     validationInvalid: "Telegram data is invalid.",
     botTokenRequired: "Enter the bot token.",
+    infrastructureTitle: "Telegram infrastructure",
+    infrastructureDescription:
+      "Connect Telegram bots and verify the destinations that receive workspace notifications.",
     scheduleNameRequired: "Enter the schedule name.",
     timezoneRequired: "Enter the timezone.",
     localTimeRequired: "Enter at least one send time.",
@@ -2148,6 +2151,7 @@ export const en: Dictionary = {
       actions: "Actions",
       close: "Close",
       pause: "Pause",
+      disable: "Disable",
       delete: "Delete",
       update: "Update",
       save: "Save",
@@ -2158,62 +2162,48 @@ export const en: Dictionary = {
       noData: "No data",
       accessLimitedDescription:
         "The current account does not have permission to read this section.",
-      dataFromApi: "Data from API",
-      verifiedViaTelegram: "Verified through Telegram",
       currentWorkspaceScope: "Current workspace",
     },
     bot: {
       sectionTitle: "Telegram bot",
       sectionDescription:
         "User-managed bots. Tokens are entered only when created and are not shown again in the interface.",
-      botColumn: "Bot",
-      webhookColumn: "Webhook",
-      verifiedColumn: "Verified",
       accessLimited: "No permission to view Telegram bots",
       noUsername: "No username yet",
       noBotName: "No bot name yet",
       webhookRegistered: "Registered {time}",
       webhookNotRegistered: "No registration time yet",
+      lastValidated: "Last validated {time}",
+      readOnlyDescription:
+        "You can view these bots, but bot management permission is required for changes.",
+      replacementGuidance:
+        "To replace this bot, connect a new token, relink dependent destinations, and review routing and schedules before removing this record.",
       emptyTitle: "No Telegram bots yet",
       emptyDescription:
         "Connect a bot you created in BotFather to start sending notifications.",
-      pauseTitle: "Pause Telegram bot?",
-      pauseDescription:
-        "A paused bot cannot send notifications through destinations using this bot.",
-      pauseTrigger: "Pause Telegram bot",
-      pauseSuccess: "Telegram bot paused.",
+      actionMenu: "Telegram bot actions",
+      disableTitle: "Disable Telegram bot?",
+      disableDescription:
+        "A disabled bot cannot send notifications through destinations using this bot. This interface does not provide reactivation.",
+      disableSuccess: "Telegram bot disabled.",
       deleteTitle: "Delete Telegram bot?",
       deleteDescription:
         "This action unlinks the bot from Signapse and may affect related destinations.",
       deleteAction: "Delete bot",
-      deleteTrigger: "Delete Telegram bot",
       deleteSuccess: "Telegram bot deleted.",
-      editTrigger: "Edit Telegram bot",
       connect: "Connect bot",
-      sheetEditTitle: "Edit Telegram bot",
-      sheetCreateTitle: "Connect Telegram bot",
-      sheetDescription:
-        "The token is only entered when creating and is not shown after saving.",
-      formEditTitle: "Bot information",
-      formCreateTitle: "New Telegram bot",
-      formEditDescription:
-        "Only update the display name for the connected bot.",
-      formCreateDescription:
+      createTitle: "Connect Telegram bot",
+      createDescription:
         "Paste the token issued by BotFather so Signapse can verify the bot and register a webhook.",
       tokenLabel: "Bot token",
       tokenPlaceholder: "123456:ABC...",
       tokenDescription:
         "The token is only sent once when creating the connection.",
-      displayName: "Display name",
-      displayNamePlaceholder: "Market alert bot",
-      saveBot: "Save bot",
       connectBot: "Connect bot",
       invalidData: "Bot data is invalid.",
-      updateSuccess: "Telegram bot updated.",
       createSuccess: "Telegram bot connected.",
       createError: "Could not connect the Telegram bot.",
-      updateError: "Could not update the Telegram bot.",
-      pauseError: "Could not pause the Telegram bot.",
+      disableError: "Could not disable the Telegram bot.",
       deleteError: "Could not delete the Telegram bot.",
       fallbackLabel: "Bot #{id}",
     },
@@ -2221,37 +2211,24 @@ export const en: Dictionary = {
       sectionTitle: "Destinations",
       sectionDescription:
         "Chats, groups, or channels verified by sending /start through the selected bot.",
-      destinationColumn: "Destination",
-      chatTypeColumn: "Chat type",
-      botColumn: "Bot",
-      updatedColumn: "Updated",
       accessLimited: "No permission to view destinations",
+      readOnlyDescription:
+        "You can view these destinations, but destination management permission is required for changes.",
       noChatMetadata: "No chat metadata yet",
       emptyTitle: "No destinations yet",
       emptyDescription:
         "Create a link command, then send it in Telegram to verify a chat, group, or channel.",
-      pauseTitle: "Pause Telegram destination?",
-      pauseDescription:
-        "A paused destination will no longer receive notifications from routes pointing to it.",
-      pauseTrigger: "Pause Telegram destination",
-      pauseSuccess: "Telegram destination paused.",
+      actionMenu: "Destination actions",
+      linkedBot: "Linked bot",
+      disableTitle: "Disable Telegram destination?",
+      disableDescription:
+        "A disabled destination will no longer receive notifications from routes pointing to it. This interface does not provide reactivation.",
+      disableSuccess: "Telegram destination disabled.",
       deleteTitle: "Delete Telegram destination?",
       deleteDescription:
         "This action removes the verified destination and cannot be undone from the interface.",
       deleteAction: "Delete destination",
-      deleteTrigger: "Delete Telegram destination",
       deleteSuccess: "Telegram destination deleted.",
-      testMessage: "Send test",
-      testMessagePending: "Sending test…",
-      testMessageSuccess: "Test message sent to {destination}.",
-      testMessageError: "Could not send the test message.",
-      testMessageTimeout:
-        "The send request timed out and the result is uncertain; check Telegram before trying again.",
-      testMessagePermissionRequired:
-        "Destination management permission is required to send a test message.",
-      testMessageInactive:
-        "Only active destinations can receive a test message.",
-      testMessageActions: "Destination actions",
       link: "Link destination",
       linkTitle: "Link destination",
       linkDescription:
@@ -2265,26 +2242,27 @@ export const en: Dictionary = {
       copyCommand: "Copy command",
       refreshDestinations: "Refresh destinations",
       createCommand: "Create link command",
+      regenerateCommand: "Generate a new link command",
       linkCreated: "Telegram link command created.",
       refreshed: "Destination list refreshed.",
       copied: "Link command copied.",
       copyError: "Could not copy the link command.",
+      linkExpired:
+        "This link command has expired. Generate a new command before opening or copying it.",
+      linkCompletionHint:
+        "After completing the Telegram handoff, return here and refresh the destination list to verify it.",
+      botReadPermissionRequired:
+        "Bot read permission is required to select a Telegram bot.",
+      noActiveBotToLink:
+        "Connect an active Telegram bot before linking a destination.",
+      botRequired: "Choose an active Telegram bot.",
       openPrivate: "Open private chat",
       openGroup: "Open group chat",
-      editTrigger: "Edit destination",
-      editTitle: "Edit destination",
-      editDescription:
-        "Update the display name to make the chat, group, or channel easier to identify.",
-      formTitle: "Destination information",
-      saveDestination: "Save destination",
-      invalidData: "Destination data is invalid.",
-      updateSuccess: "Telegram destination updated.",
       noActiveDestination: "No active destinations yet.",
       placeholder: "Choose destination",
       fallbackLabel: "Destination #{id}",
       createLinkError: "Could not create the Telegram link command.",
-      updateError: "Could not update the Telegram destination.",
-      pauseError: "Could not pause the Telegram destination.",
+      disableError: "Could not disable the Telegram destination.",
       deleteError: "Could not delete the Telegram destination.",
     },
     routing: {
@@ -2369,7 +2347,7 @@ export const en: Dictionary = {
       ACTIVE: "Active",
       INVALID: "Invalid",
       REMOVED: "Deleted",
-      DISABLED: "Paused",
+      DISABLED: "Disabled",
     },
     chatTypes: {
       PRIVATE: "Private chat",

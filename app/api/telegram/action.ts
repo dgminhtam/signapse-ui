@@ -14,8 +14,6 @@ import {
   getCreateTelegramBotConnectionSchema,
   getCreateTelegramLinkTokenSchema,
   getSaveTelegramMarketAnalysisScheduleSchema,
-  getUpdateTelegramBotConnectionSchema,
-  getUpdateTelegramDestinationSchema,
   getUpdateTelegramFeatureSettingSchema,
   SaveTelegramMarketAnalysisScheduleRequest,
   TelegramBotConnectionResponse,
@@ -23,8 +21,6 @@ import {
   TelegramFeatureSettingResponse,
   TelegramLinkTokenResponse,
   TelegramMarketAnalysisScheduleResponse,
-  UpdateTelegramBotConnectionRequest,
-  UpdateTelegramDestinationRequest,
   UpdateTelegramFeatureSettingRequest,
 } from "@/app/lib/telegram/definitions"
 
@@ -110,40 +106,6 @@ export async function createTelegramBotConnection(
   }
 }
 
-export async function updateTelegramBotConnection(
-  id: number,
-  request: UpdateTelegramBotConnectionRequest
-): Promise<ActionResult<TelegramBotConnectionResponse>> {
-  const dictionary = await getTelegramDictionary()
-  const parsed = getUpdateTelegramBotConnectionSchema().safeParse(request)
-
-  if (!parsed.success) {
-    return {
-      success: false,
-      error: getValidationError(parsed.error, dictionary),
-    }
-  }
-
-  try {
-    const data = await fetchAuthenticated<TelegramBotConnectionResponse>(
-      `/telegram/bot-connections/${id}`,
-      {
-        method: "PATCH",
-        body: JSON.stringify(parsed.data),
-      }
-    )
-
-    revalidateTelegramConfiguration()
-
-    return { success: true, data }
-  } catch (error: unknown) {
-    return {
-      success: false,
-      error: getActionError(error, dictionary.telegram.bot.updateError),
-    }
-  }
-}
-
 export async function disableTelegramBotConnection(
   id: number
 ): Promise<ActionResult<TelegramBotConnectionResponse>> {
@@ -163,7 +125,7 @@ export async function disableTelegramBotConnection(
   } catch (error: unknown) {
     return {
       success: false,
-      error: getActionError(error, dictionary.telegram.bot.pauseError),
+      error: getActionError(error, dictionary.telegram.bot.disableError),
     }
   }
 }
@@ -223,40 +185,6 @@ export async function createTelegramLinkToken(
   }
 }
 
-export async function updateTelegramDestination(
-  id: number,
-  request: UpdateTelegramDestinationRequest
-): Promise<ActionResult<TelegramDestinationResponse>> {
-  const dictionary = await getTelegramDictionary()
-  const parsed = getUpdateTelegramDestinationSchema().safeParse(request)
-
-  if (!parsed.success) {
-    return {
-      success: false,
-      error: getValidationError(parsed.error, dictionary),
-    }
-  }
-
-  try {
-    const data = await fetchAuthenticated<TelegramDestinationResponse>(
-      `/telegram/destinations/${id}`,
-      {
-        method: "PATCH",
-        body: JSON.stringify(parsed.data),
-      }
-    )
-
-    revalidateTelegramConfiguration()
-
-    return { success: true, data }
-  } catch (error: unknown) {
-    return {
-      success: false,
-      error: getActionError(error, dictionary.telegram.destination.updateError),
-    }
-  }
-}
-
 export async function disableTelegramDestination(
   id: number
 ): Promise<ActionResult<TelegramDestinationResponse>> {
@@ -276,35 +204,9 @@ export async function disableTelegramDestination(
   } catch (error: unknown) {
     return {
       success: false,
-      error: getActionError(error, dictionary.telegram.destination.pauseError),
-    }
-  }
-}
-
-export async function sendTelegramTestMessage(
-  id: number
-): Promise<ActionResult> {
-  const dictionary = await getTelegramDictionary()
-
-  if (!Number.isInteger(id) || id <= 0) {
-    return {
-      success: false,
-      error: dictionary.telegram.destination.invalidData,
-    }
-  }
-
-  try {
-    await fetchAuthenticated<void>(`/telegram/destinations/${id}/test-message`, {
-      method: "POST",
-    })
-
-    return { success: true, data: undefined }
-  } catch (error: unknown) {
-    return {
-      success: false,
       error: getActionError(
         error,
-        dictionary.telegram.destination.testMessageError
+        dictionary.telegram.destination.disableError
       ),
     }
   }
