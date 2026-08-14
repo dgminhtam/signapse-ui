@@ -1,6 +1,6 @@
 "use client"
 
-import { SquarePen, UserPlus, Users } from "lucide-react"
+import { SquarePen, Users } from "lucide-react"
 import { useState } from "react"
 
 import type { Page } from "@/app/lib/definitions"
@@ -86,19 +86,11 @@ export function UserListPage({
   userPage,
 }: UserListPageProps) {
   const { dictionary } = useLocalization()
-  const [dialogMode, setDialogMode] = useState<"create" | "update">("create")
   const [selectedUser, setSelectedUser] = useState<UserResponse | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
   const users = userPage.content ?? []
 
-  function openCreateDialog() {
-    setDialogMode("create")
-    setSelectedUser(null)
-    setDialogOpen(true)
-  }
-
   function openUpdateDialog(user: UserResponse) {
-    setDialogMode("update")
     setSelectedUser(user)
     setDialogOpen(true)
   }
@@ -107,10 +99,6 @@ export function UserListPage({
     <div className="w-full">
       <AppListToolbar>
         <AppListToolbarLeading className="lg:items-start">
-          <Button type="button" onClick={openCreateDialog}>
-            <UserPlus data-icon="inline-start" />
-            {dictionary.users.createAction}
-          </Button>
           <UserSearch />
         </AppListToolbarLeading>
         <AppListToolbarTrailing>
@@ -249,7 +237,6 @@ export function UserListPage({
       <AppPaginationControls page={userPage} className="mt-4" />
 
       <UserFormDialog
-        mode={dialogMode}
         open={dialogOpen}
         roles={roles}
         rolesAvailable={rolesAvailable}

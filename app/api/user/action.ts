@@ -1,18 +1,13 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { isClerkAPIResponseError } from "@clerk/nextjs/errors"
-import { clerkClient } from "@clerk/nextjs/server"
 
 import { fetchAuthenticated } from "@/app/api/auth/action"
 import { ActionResult, SearchParams } from "@/app/lib/definitions"
 import { getDictionary } from "@/app/lib/i18n/dictionaries"
 import { getRequestLocale } from "@/app/lib/i18n/server"
-import { hasPermission } from "@/app/lib/permissions"
-import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import {
   BackendMeResponse,
-  CreateUserRequest,
   UpdateManagedUserRequest,
   UpdateUserProfileRequest,
   UserResponse,
@@ -32,41 +27,6 @@ export async function getUsers(
   return fetchAuthenticated<UserSearchResponse>(
     `/users${query ? `?${query}` : ""}`
   )
-}
-
-export async function createUser(
-  request: CreateUserRequest
-): Promise<ActionResult<{ clerkUserId: string }>> {
-  try {
-    const permissions = await getCurrentPermissions()
-
-    if (!hasPermission(permissions, "user:update")) {
-      const dictionary = await getDictionary(await getRequestLocale())
-
-      return { success: false, error: dictionary.users.createError }
-    }
-
-    const client = await clerkClient()
-    const user = await client.users.createUser({
-      emailAddress: [request.email.trim()],
-      firstName: request.firstName.trim(),
-      lastName: request.lastName.trim(),
-    })
-
-    revalidatePath("/users")
-
-    return { success: true, data: { clerkUserId: user.id } }
-  } catch (error: unknown) {
-    const dictionary = await getDictionary(await getRequestLocale())
-    const errorMessage =
-      isClerkAPIResponseError(error) && error.status === 422
-        ? dictionary.users.emailInvalid
-        : error instanceof Error
-          ? error.message
-          : dictionary.users.createError
-
-    return { success: false, error: errorMessage }
-  }
 }
 
 export async function updateManagedUser(
