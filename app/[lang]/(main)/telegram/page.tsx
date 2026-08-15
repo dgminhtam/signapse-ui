@@ -1,5 +1,6 @@
 import { Suspense } from "react"
 
+import { getLanguages } from "@/app/api/languages/action"
 import {
   getTelegramBotConnections,
   getTelegramDestinations,
@@ -29,6 +30,7 @@ const WATCHLIST_ASSET_SEARCH = {
   size: 100,
   sort: [{ field: "assetSymbol", direction: "asc" as const }],
 }
+// ponytail: preload up to 100 workspace assets; add pagination/search if this ceiling is exceeded.
 
 export default async function TelegramPage() {
   const [permissions, dictionary] = await Promise.all([
@@ -71,20 +73,34 @@ async function TelegramConfigurationContent({
     ? await getActiveWorkspaceForCurrentUser()
     : null
 
+  const schedulesPromise = sectionAccess.schedules
+    ? getTelegramMarketAnalysisSchedules()
+        .then((data) => ({ data, error: false }))
+        .catch(() => ({ data: [], error: true }))
+    : Promise.resolve({ data: [], error: false })
+
+  const languagesPromise = sectionAccess.schedules
+    ? getLanguages()
+        .then((catalog) => ({ data: catalog.languages, error: false }))
+        .catch(() => ({ data: [], error: true }))
+    : Promise.resolve({ data: [], error: false })
+
   const [
     botConnections,
     destinations,
     featureSettings,
-    schedules,
+    schedulesResult,
     watchlistAssetsPage,
+    languagesResult,
   ] = await Promise.all([
     sectionAccess.botConnections ? getTelegramBotConnections() : [],
     sectionAccess.destinations ? getTelegramDestinations() : [],
     sectionAccess.featureSettings ? getTelegramFeatureSettings() : [],
-    sectionAccess.schedules ? getTelegramMarketAnalysisSchedules() : [],
+    schedulesPromise,
     sectionAccess.watchlistAssets && currentWorkspace
       ? getWorkspaceWatchlistAssets(WATCHLIST_ASSET_SEARCH)
       : null,
+    languagesPromise,
   ])
 
   return (
@@ -93,9 +109,12 @@ async function TelegramConfigurationContent({
         botConnections,
         destinations,
         featureSettings,
-        schedules,
+        schedules: schedulesResult.data,
         currentWorkspace,
         watchlistAssets: watchlistAssetsPage?.content ?? [],
+        languages: languagesResult.data,
+        languageCatalogError: languagesResult.error,
+        scheduleLoadError: schedulesResult.error,
         sectionAccess,
         manageAccess,
       }}

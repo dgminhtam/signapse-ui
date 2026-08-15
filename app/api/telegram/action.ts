@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache"
 import { z } from "zod"
 
 import { fetchAuthenticated } from "@/app/api/auth/action"
+import { getLanguages } from "@/app/api/languages/action"
 import { ActionResult } from "@/app/lib/definitions"
 import { getDictionary } from "@/app/lib/i18n/dictionaries"
 import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
@@ -15,6 +16,7 @@ import {
   getCreateTelegramLinkTokenSchema,
   getSaveTelegramMarketAnalysisScheduleSchema,
   getUpdateTelegramFeatureSettingSchema,
+  normalizeSaveTelegramMarketAnalysisScheduleRequest,
   SaveTelegramMarketAnalysisScheduleRequest,
   TelegramBotConnectionResponse,
   TelegramDestinationResponse,
@@ -34,6 +36,42 @@ function getValidationError(error: z.ZodError, dictionary: Dictionary): string {
 
 function getActionError(error: unknown, fallback: string): string {
   return error instanceof Error ? error.message : fallback
+}
+
+async function validateScheduleRequest(
+  request: SaveTelegramMarketAnalysisScheduleRequest,
+  dictionary: Dictionary
+) {
+  const normalized = normalizeSaveTelegramMarketAnalysisScheduleRequest(request)
+  let supportedLanguageIsoCodes: string[] | undefined
+
+  if (normalized.outputLanguageIsoCode) {
+    try {
+      const catalog = await getLanguages()
+      supportedLanguageIsoCodes = catalog.languages.map(
+        (language) => language.isoCode
+      )
+    } catch {
+      return {
+        success: false as const,
+        error: dictionary.telegram.schedule.languageCatalogError,
+      }
+    }
+  }
+
+  const parsed = getSaveTelegramMarketAnalysisScheduleSchema(
+    dictionary,
+    supportedLanguageIsoCodes
+  ).safeParse(normalized)
+
+  if (!parsed.success) {
+    return {
+      success: false as const,
+      error: getValidationError(parsed.error, dictionary),
+    }
+  }
+
+  return { success: true as const, data: parsed.data }
 }
 
 function revalidateTelegramConfiguration() {
@@ -302,15 +340,9 @@ export async function createTelegramMarketAnalysisSchedule(
   request: SaveTelegramMarketAnalysisScheduleRequest
 ): Promise<ActionResult<TelegramMarketAnalysisScheduleResponse>> {
   const dictionary = await getTelegramDictionary()
-  const parsed =
-    getSaveTelegramMarketAnalysisScheduleSchema(dictionary).safeParse(request)
+  const parsed = await validateScheduleRequest(request, dictionary)
 
-  if (!parsed.success) {
-    return {
-      success: false,
-      error: getValidationError(parsed.error, dictionary),
-    }
-  }
+  if (!parsed.success) return parsed
 
   try {
     const data =
@@ -338,15 +370,9 @@ export async function updateTelegramMarketAnalysisSchedule(
   request: SaveTelegramMarketAnalysisScheduleRequest
 ): Promise<ActionResult<TelegramMarketAnalysisScheduleResponse>> {
   const dictionary = await getTelegramDictionary()
-  const parsed =
-    getSaveTelegramMarketAnalysisScheduleSchema(dictionary).safeParse(request)
+  const parsed = await validateScheduleRequest(request, dictionary)
 
-  if (!parsed.success) {
-    return {
-      success: false,
-      error: getValidationError(parsed.error, dictionary),
-    }
-  }
+  if (!parsed.success) return parsed
 
   try {
     const data =
@@ -389,7 +415,7 @@ export async function disableTelegramMarketAnalysisSchedule(
   } catch (error: unknown) {
     return {
       success: false,
-      error: getActionError(error, dictionary.telegram.schedule.pauseError),
+      error: getActionError(error, dictionary.telegram.schedule.disableError),
     }
   }
 }

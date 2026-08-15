@@ -3,7 +3,7 @@
 import type { ReactElement, ReactNode } from "react"
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import { CheckCircle2, ShieldAlert, Trash2 } from "lucide-react"
+import { CheckCircle2, CircleAlert, ShieldAlert, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 
 import type { ActionResult } from "@/app/lib/definitions"
@@ -217,6 +217,7 @@ export function ActionConfirmDialog({
   disabled,
   action,
   successMessage,
+  intent = "destructive",
   open: controlledOpen,
   onOpenChange,
   trigger,
@@ -229,6 +230,7 @@ export function ActionConfirmDialog({
   disabled?: boolean
   action: () => Promise<ActionResult<unknown>>
   successMessage: string
+  intent?: "destructive" | "warning"
   open?: boolean
   onOpenChange?: (open: boolean) => void
   trigger?: ReactElement | null
@@ -258,6 +260,11 @@ export function ActionConfirmDialog({
     }
   }
 
+  function handleOpenChange(nextOpen: boolean) {
+    if (!nextOpen && isPending) return
+    setOpen(nextOpen)
+  }
+
   function handleAction() {
     setError(null)
     startTransition(async () => {
@@ -275,25 +282,36 @@ export function ActionConfirmDialog({
   }
 
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
+    <AlertDialog open={open} onOpenChange={handleOpenChange}>
       {trigger === null ? null : (
         <AlertDialogTrigger asChild>
           {trigger ?? (
             <Button
-              variant="ghost"
+              id={restoreFocusId}
+              variant={intent === "destructive" ? "destructive" : "ghost"}
               size="icon-sm"
               disabled={disabled}
               aria-label={triggerLabel}
             >
-              <Trash2 data-icon="inline-start" />
+              {intent === "destructive" ? (
+                <Trash2 data-icon="inline-start" />
+              ) : (
+                <CircleAlert data-icon="inline-start" />
+              )}
             </Button>
           )}
         </AlertDialogTrigger>
       )}
       <AlertDialogContent size="sm">
         <AlertDialogHeader>
-          <AlertDialogMedia className="bg-destructive/10 text-destructive">
-            <Trash2 />
+          <AlertDialogMedia
+            className={
+              intent === "destructive"
+                ? "bg-destructive/10 text-destructive"
+                : "bg-muted text-foreground"
+            }
+          >
+            {intent === "destructive" ? <Trash2 /> : <CircleAlert />}
           </AlertDialogMedia>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
@@ -305,10 +323,10 @@ export function ActionConfirmDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isPending}>
-            {dictionary.common.close}
+            {dictionary.common.cancel}
           </AlertDialogCancel>
           <AlertDialogAction
-            variant="destructive"
+            variant={intent === "destructive" ? "destructive" : "default"}
             disabled={isPending}
             onClick={(event) => {
               event.preventDefault()

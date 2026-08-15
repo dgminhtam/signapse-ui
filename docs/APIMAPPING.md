@@ -432,13 +432,13 @@ Ghi chú:
 
 | Phuong thuc | Endpoint backend          | operationId               | Tich hop frontend | Trang thai      | Ghi chu                                                                    |
 | ----------- | ------------------------- | ------------------------- | ----------------- | --------------- | -------------------------------------------------------------------------- |
-| GET         | `/languages`              | `getLanguages`            | `-`               | Chua trien khai | Tra ve `LanguageCatalogResponse`; auth type `active-user`.                 |
+| GET         | `/languages`              | `getLanguages`            | `getLanguages()`  | Da tich hop    | Tai catalog ngôn ngữ qua `fetchAuthenticated()` de giu lua chon output language cua schedule; auth type `active-user`. |
 | PATCH       | `/me/preferred-language`  | `updatePreferredLanguage` | `-`               | Chua trien khai | Luu preferred language bang `{ isoCode }` va tra ve `UserResponse`.        |
 
 Ghi chu:
 
 - `LanguageCatalogResponse` gom `currentLanguage`, `preferredLanguage`, `languages[]`; `LanguageResponse` gom `id`, `isoCode`, `name`.
-- Frontend hien da co URL locale prefix, `Accept-Language`, va language selector theo route local state, nhung chua goi `/languages` hay persist `/me/preferred-language`.
+- Frontend van dung URL locale prefix va `Accept-Language`; schedule configuration goi `/languages` de nap catalog output language, nhung chua persist `/me/preferred-language`.
 
 ### 18. API personal notes
 
@@ -504,9 +504,9 @@ Ghi chu:
 | DELETE      | `/telegram/destinations/{id}`                      | `removeDestination`    | `deleteTelegramDestination(id)`                    | Da tich hop                           | Xoa destination qua `AlertDialog`; permission `telegram-destination:manage`.                                                                       |
 | GET         | `/telegram/feature-settings`                       | `getFeatureSettings`   | `getTelegramFeatureSettings()`                     | Da tich hop nhung con lech contract | Response them `outputLanguage`; FE definitions/UI chua map field nay.                                                                              |
 | PUT         | `/telegram/feature-settings`                       | `updateFeatureSetting` | `updateTelegramFeatureSetting(request)`            | Da tich hop nhung con lech contract | Request them optional `outputLanguageIsoCode`; FE hien chua gui field nay.                                                                         |
-| GET         | `/telegram/market-analysis-schedules`              | `getSchedules`         | `getTelegramMarketAnalysisSchedules()`             | Da tich hop nhung con lech contract | Response them `outputLanguage`; FE definitions/UI chua map field nay.                                                                              |
-| POST        | `/telegram/market-analysis-schedules`              | `createSchedule`       | `createTelegramMarketAnalysisSchedule(request)`    | Da tich hop nhung con lech contract | Request them optional `outputLanguageIsoCode`; FE hien chua gui field nay.                                                                         |
-| PUT         | `/telegram/market-analysis-schedules/{id}`         | `updateSchedule`       | `updateTelegramMarketAnalysisSchedule(id, request)` | Da tich hop nhung con lech contract | Request them optional `outputLanguageIsoCode`; FE hien chua gui field nay.                                                                         |
+| GET         | `/telegram/market-analysis-schedules`              | `getSchedules`         | `getTelegramMarketAnalysisSchedules()`             | Da tich hop                           | Response map singular `asset`, optional `outputLanguage`, status-aware actions, and excludes `REMOVED` from operations.                            |
+| POST        | `/telegram/market-analysis-schedules`              | `createSchedule`       | `createTelegramMarketAnalysisSchedule(request)`    | Da tich hop                           | Request gui required `assetId`, 1-4 unique `HH:mm` local times, valid IANA `timezone`, va optional `outputLanguageIsoCode`; authenticated action validates before POST. |
+| PUT         | `/telegram/market-analysis-schedules/{id}`         | `updateSchedule`       | `updateTelegramMarketAnalysisSchedule(id, request)` | Da tich hop                           | Same request boundary as create; edit is exposed only for `ACTIVE` schedules because backend PUT reactivates disabled schedules.                    |
 | PATCH       | `/telegram/market-analysis-schedules/{id}/disable` | `disableSchedule`      | `disableTelegramMarketAnalysisSchedule(id)`        | Da tich hop                           | Disable schedule va tra ve `TelegramMarketAnalysisScheduleResponse`; permission `telegram-market-analysis-schedule:manage`.                        |
 | DELETE      | `/telegram/market-analysis-schedules/{id}`         | `removeSchedule`       | `deleteTelegramMarketAnalysisSchedule(id)`         | Da tich hop                           | Xoa schedule qua `AlertDialog`; permission `telegram-market-analysis-schedule:manage`.                                                            |
 
@@ -517,7 +517,7 @@ Ghi chu:
 - `TelegramBotConnectionResponse` va `TelegramDestinationResponse` van expose `displayLabel`, nhung snapshot khong con publish request schema/operation de frontend cap nhat field nay.
 - DTO chinh moi gom `TelegramBotConnectionResponse`, `TelegramDestinationResponse`, `TelegramFeatureSettingResponse`, `TelegramMarketAnalysisScheduleResponse`, `TelegramLinkTokenResponse`, va `ScheduledAssetResponse`.
 - Enum feature key cua Telegram gom `ECONOMIC_CALENDAR_ALERT`, `MARKET_NEWS_ALERT`, `SCHEDULED_MARKET_ANALYSIS`; day la enum cua feature setting, khong phai system prompt type.
-- Snapshot moi them `outputLanguageIsoCode` trong request feature setting/schedule va `outputLanguage` trong response; FE Telegram chua expose cau hinh output language.
+- Snapshot moi them `outputLanguageIsoCode` trong request feature setting/schedule va `outputLanguage` trong response; FE schedule da expose field nay qua catalog `/languages` va giu override khi edit.
 - Snapshot da bo 152 schema Telegram Bot API tong quat tung duoc import cho webhook va thay bang ba schema toi thieu `TelegramWebhookChat`, `TelegramWebhookMessage`, `TelegramWebhookUpdateRequest`. Day la contract backend-only, khong lam thay doi DTO cua man hinh quan tri Telegram.
 
 ### 24. Webhook
@@ -669,11 +669,11 @@ type ActionResult<T = void> =
 - `news articles`: endpoint crawl full content da bi bo khoi snapshot, nhung FE van con action `crawlNewsArticleFullContent()` va menu crawl tren detail.
 - `events`: snapshot moi da bo `slug` va `confirmedAt`, va doi evidence sang `newsArticle*`; FE events da dong bo DTO, detail, quick detail, va action layout theo contract hien tai.
 - `dashboard summary`: FE da dong bo va render `recentEvents` cung `assetsInFocus`. Snapshot moi them required metric `marketNarratives` va ba schema `DashboardMarketNarrativesMetricResponse`, `DashboardMarketNarrativeItemResponse`, `DashboardMarketNarrativeThemeResponse`; FE can cap nhat definitions/action validation, dashboard data flow, UI states, action Graph View va i18n truoc khi apply section Luan diem thi truong.
-- `telegram`: FE da dong bo bot create chi gui `botToken`, display label read-only, bo hai rename/update operation, va khoi phuc destination test-message theo live contract; `outputLanguageIsoCode` request va `outputLanguage` response cho feature setting/schedule van chua duoc expose.
+- `telegram`: FE da dong bo bot create chi gui `botToken`, display label read-only, bo hai rename/update operation, va khoi phuc destination test-message theo live contract; schedule da expose `outputLanguageIsoCode`/`outputLanguage` qua catalog `/languages`, trong khi feature setting van chua map cac field nay.
 - `ai-provider credentials`: snapshot moi doi credential `label` thanh `model` va bo top-level config `name`/`model`; FE hien van giu `name`, top-level `model`, va credential `label` trong definitions, form, list, detail, va credential panel.
 - `cronjobs`: FE da bo create/delete flow va doi update schedule sang inline list chi gui `expression`; endpoint `stop` duoc ghi nhan nhung khong tich hop co chu dich.
 - `personal notes`: FE render/copy response `title` voi fallback da localize, nhung editor va draft da freeform, khong ep H1 dau hay title placeholder. Create title la backend snapshot tu content; content update giu stored title. OpenAPI van chua encode required/nullable hoac lifecycle cua `title`; delete va explicit rename chua tich hop.
-- `languages`: frontend da co URL locale va `Accept-Language`, nhung chua co backend action cho `GET /languages` va `PATCH /me/preferred-language`; `LanguageSelector` hien chi doi route locale.
+- `languages`: schedule da co server action nap catalog tu `GET /languages`; `PATCH /me/preferred-language` van chua tich hop va `LanguageSelector` hien chi doi route locale.
 - `narratives`: snapshot moi them `/narratives*`, graph narrative node/edge, va market query `keyNarratives[]`; FE chua co module narratives rieng hoac market-query narrative panel, nhung Graph View da model/render narrative node/edge.
 - `market query`: spec van mo ta `asOfTime` la optional `date-time`; frontend conversation chu dong omit field nay de backend tu lay thoi diem hien tai va harden parse cho payload runtime co the tra `null` o `publishedAt` va `occurredAt`. Frontend khong con legacy `/market-query` route hay redirect compatibility; global assistant modal la UI primary surface.
 - `market conversation messages`: FE da dong bo `ChatMessageResponse` text-only, bo `kind`, `analysisId`, `PENDING`, analysis data part, va analysis detail actions; cursor history va synchronous submit van giu nguyen.

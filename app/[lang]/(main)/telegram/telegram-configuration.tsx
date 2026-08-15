@@ -1,25 +1,22 @@
 "use client"
 
-import { Fragment, type FormEvent, useState, useTransition } from "react"
+import { Fragment, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import {
   Bot,
   CalendarClock,
+  CircleAlert,
   MessageCircle,
-  Pencil,
-  Plus,
   RadioTower,
+  Trash2,
 } from "lucide-react"
 import { toast } from "sonner"
 
 import {
-  createTelegramMarketAnalysisSchedule,
   deleteTelegramMarketAnalysisSchedule,
   disableTelegramMarketAnalysisSchedule,
   updateTelegramFeatureSetting,
-  updateTelegramMarketAnalysisSchedule,
 } from "@/app/api/telegram/action"
-import { ActionResult } from "@/app/lib/definitions"
 import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
 import { useLocalization } from "@/app/lib/i18n/provider"
 import {
@@ -29,14 +26,8 @@ import {
   TelegramFeatureKey,
   TelegramFeatureSettingResponse,
   TelegramMarketAnalysisScheduleResponse,
-  getSaveTelegramMarketAnalysisScheduleSchema,
   getUpdateTelegramFeatureSettingSchema,
 } from "@/app/lib/telegram/definitions"
-import {
-  AppFormShell,
-  AppFormShellBody,
-  AppFormShellFooter,
-} from "@/components/app-form-shell"
 import {
   AppListTable,
   AppListTableEmptyState,
@@ -64,15 +55,6 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-  FieldLegend,
-  FieldSet,
-} from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
 import { Item, ItemActions, ItemContent } from "@/components/ui/item"
 import {
   Select,
@@ -82,17 +64,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Spinner } from "@/components/ui/spinner"
 import { Switch } from "@/components/ui/switch"
 import {
   Table,
@@ -104,6 +76,10 @@ import {
 import { cn } from "@/lib/utils"
 import { BotConnectionsCard } from "./telegram-bot-connections"
 import { DestinationsCard } from "./telegram-destinations"
+import {
+  CreateTelegramScheduleDialog,
+  UpdateTelegramScheduleDialog,
+} from "./telegram-schedule-form"
 import {
   ActionConfirmDialog,
   AccessLimitedRow,
@@ -213,6 +189,9 @@ export function TelegramConfigurationPage({
         activeDestinations={activeDestinations}
         currentWorkspace={data.currentWorkspace}
         watchlistAssets={data.watchlistAssets}
+        languages={data.languages}
+        languageCatalogError={data.languageCatalogError}
+        scheduleLoadError={data.scheduleLoadError}
         canReadFeatureSettings={data.sectionAccess.featureSettings}
         canUpdateFeatureSettings={data.manageAccess.featureSettings}
         canReadSchedules={data.sectionAccess.schedules}
@@ -313,10 +292,12 @@ export function TelegramConfigurationSkeleton() {
                     <Skeleton className="h-5 w-36" />
                     <Skeleton className="h-9 w-24" />
                   </div>
-                  <div className="grid gap-3 md:grid-cols-3">
-                    <Skeleton className="h-10 w-full" />
-                    <Skeleton className="h-10 w-full" />
-                    <Skeleton className="h-10 w-full" />
+                  <div className="overflow-x-auto">
+                    <div className="grid min-w-[72rem] grid-cols-8 gap-3">
+                      {Array.from({ length: 8 }).map((__, columnIndex) => (
+                        <Skeleton key={columnIndex} className="h-10 w-full" />
+                      ))}
+                    </div>
                   </div>
                 </div>
               </TableCell>
@@ -439,6 +420,9 @@ function FeatureRoutingSection({
   activeDestinations,
   currentWorkspace,
   watchlistAssets,
+  languages,
+  languageCatalogError,
+  scheduleLoadError,
   canReadFeatureSettings,
   canUpdateFeatureSettings,
   canReadSchedules,
@@ -449,6 +433,9 @@ function FeatureRoutingSection({
   activeDestinations: TelegramDestinationResponse[]
   currentWorkspace: TelegramConfigurationData["currentWorkspace"]
   watchlistAssets: TelegramConfigurationData["watchlistAssets"]
+  languages: TelegramConfigurationData["languages"]
+  languageCatalogError: boolean
+  scheduleLoadError: boolean
   canReadFeatureSettings: boolean
   canUpdateFeatureSettings: boolean
   canReadSchedules: boolean
@@ -537,6 +524,9 @@ function FeatureRoutingSection({
                             activeDestinations={activeDestinations}
                             currentWorkspace={currentWorkspace}
                             watchlistAssets={watchlistAssets}
+                            languages={languages}
+                            languageCatalogError={languageCatalogError}
+                            scheduleLoadError={scheduleLoadError}
                             canReadSchedules={canReadSchedules}
                             canManageSchedules={canManageSchedules}
                           />
@@ -559,6 +549,9 @@ function MarketAnalysisSchedulePanel({
   activeDestinations,
   currentWorkspace,
   watchlistAssets,
+  languages,
+  languageCatalogError,
+  scheduleLoadError,
   canReadSchedules,
   canManageSchedules,
 }: {
@@ -566,11 +559,18 @@ function MarketAnalysisSchedulePanel({
   activeDestinations: TelegramDestinationResponse[]
   currentWorkspace: TelegramConfigurationData["currentWorkspace"]
   watchlistAssets: TelegramConfigurationData["watchlistAssets"]
+  languages: TelegramConfigurationData["languages"]
+  languageCatalogError: boolean
+  scheduleLoadError: boolean
   canReadSchedules: boolean
   canManageSchedules: boolean
 }) {
+  const router = useRouter()
   const { dictionary } = useLocalization()
   const t = dictionary.telegram
+  const operationalSchedules = schedules.filter(
+    (schedule) => schedule.status !== "REMOVED"
+  )
 
   return (
     <div className="flex flex-col gap-4 rounded-lg border bg-background p-4">
@@ -584,393 +584,221 @@ function MarketAnalysisSchedulePanel({
               {t.schedule.panelDescription}
             </p>
           </div>
-          <ScheduleFormSheet
-            activeDestinations={activeDestinations}
-            currentWorkspace={currentWorkspace}
-            watchlistAssets={watchlistAssets}
-            canManage={canManageSchedules}
-          />
+          {!canReadSchedules ? null : canManageSchedules ? (
+            <CreateTelegramScheduleDialog
+              activeDestinations={activeDestinations}
+              currentWorkspace={currentWorkspace}
+              watchlistAssets={watchlistAssets}
+              languages={languages}
+              languageCatalogError={languageCatalogError}
+              canManage={canManageSchedules}
+            />
+          ) : (
+            <span className="text-sm text-muted-foreground">
+              {t.schedule.readOnlyDescription}
+            </span>
+          )}
         </AppListToolbarLeading>
         <AppListToolbarTrailing>
           <Badge variant="outline">{t.common.currentWorkspaceScope}</Badge>
         </AppListToolbarTrailing>
       </AppListToolbar>
       <AppListTable className="mt-0">
-        <Table>
-          <TableHeader>
-            <AppListTableHeaderRow>
-              <AppListTableHead className="w-[24%]">
-                {t.schedule.scheduleColumn}
-              </AppListTableHead>
-              <AppListTableHead className="w-44">
-                {t.schedule.workspaceColumn}
-              </AppListTableHead>
-              <AppListTableHead className="w-52">
-                {t.schedule.destinationColumn}
-              </AppListTableHead>
-              <AppListTableHead className="w-44">
-                {t.schedule.localTimesColumn}
-              </AppListTableHead>
-              <AppListTableHead className="w-44">
-                {t.schedule.assetsColumn}
-              </AppListTableHead>
-              <AppListTableHead className="w-32">
-                {t.schedule.statusColumn}
-              </AppListTableHead>
-              <AppListTableHead className="w-28 text-right">
-                {t.common.actions}
-              </AppListTableHead>
-            </AppListTableHeaderRow>
-          </TableHeader>
-          <TableBody>
-            {!canReadSchedules ? (
-              <AccessLimitedRow colSpan={7} title={t.schedule.accessLimited} />
-            ) : schedules.length > 0 ? (
-              schedules.map((schedule) => (
-                <TableRow
-                  key={schedule.id}
-                  className="border-border transition-colors hover:bg-muted/50"
-                >
-                  <TableCell className="align-top whitespace-normal">
-                    <div className="flex min-w-0 flex-col gap-1">
-                      <span className="font-medium text-foreground">
-                        {schedule.name}
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        {schedule.timezone}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="align-top text-sm text-muted-foreground">
-                    {schedule.workspaceName ??
-                      currentWorkspace?.name ??
-                      t.schedule.currentWorkspaceFallback}
-                  </TableCell>
-                  <TableCell className="align-top text-sm whitespace-normal text-muted-foreground">
-                    {schedule.destination
-                      ? getDestinationLabel(schedule.destination, dictionary)
-                      : t.schedule.noDestination}
-                  </TableCell>
-                  <TableCell className="align-top text-sm text-muted-foreground">
-                    {schedule.localTimes.join(", ")}
-                  </TableCell>
-                  <TableCell className="align-top text-sm whitespace-normal text-muted-foreground">
-                    {formatScheduledAssets(schedule, dictionary)}
-                  </TableCell>
-                  <TableCell className="align-top">
-                    <StatusBadge status={schedule.status} />
-                  </TableCell>
-                  <TableCell className="text-right align-top">
-                    <div className="flex justify-end gap-1">
-                      <ScheduleFormSheet
-                        schedule={schedule}
-                        activeDestinations={activeDestinations}
-                        currentWorkspace={currentWorkspace}
-                        watchlistAssets={watchlistAssets}
-                        canManage={canManageSchedules}
-                      />
-                      <ActionConfirmDialog
-                        title={t.schedule.pauseTitle}
-                        description={t.schedule.pauseDescription}
-                        actionLabel={t.common.pause}
-                        triggerLabel={t.schedule.pauseTrigger}
-                        disabled={
-                          !canManageSchedules || schedule.status !== "ACTIVE"
-                        }
-                        action={() =>
-                          disableTelegramMarketAnalysisSchedule(schedule.id)
-                        }
-                        successMessage={t.schedule.pauseSuccess}
-                      />
-                      <ActionConfirmDialog
-                        title={t.schedule.deleteTitle}
-                        description={t.schedule.deleteDescription}
-                        actionLabel={t.schedule.deleteAction}
-                        triggerLabel={t.schedule.deleteTrigger}
-                        disabled={!canManageSchedules}
-                        action={() =>
-                          deleteTelegramMarketAnalysisSchedule(schedule.id)
-                        }
-                        successMessage={t.schedule.deleteSuccess}
-                      />
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <AppListTableEmptyState colSpan={7}>
-                <EmptyHeader>
-                  <EmptyMedia variant="icon">
-                    <CalendarClock />
-                  </EmptyMedia>
-                  <EmptyTitle>{t.schedule.emptyTitle}</EmptyTitle>
-                  <EmptyDescription>
-                    {t.schedule.emptyDescription}
-                  </EmptyDescription>
-                </EmptyHeader>
-              </AppListTableEmptyState>
-            )}
-          </TableBody>
-        </Table>
+        <div className="overflow-x-auto">
+          <Table className="min-w-[72rem]">
+            <TableHeader>
+              <AppListTableHeaderRow>
+                <AppListTableHead className="w-[20%]">
+                  {t.schedule.scheduleColumn}
+                </AppListTableHead>
+                <AppListTableHead className="w-44">
+                  {t.schedule.workspaceColumn}
+                </AppListTableHead>
+                <AppListTableHead className="w-52">
+                  {t.schedule.destinationColumn}
+                </AppListTableHead>
+                <AppListTableHead className="w-44">
+                  {t.schedule.localTimesColumn}
+                </AppListTableHead>
+                <AppListTableHead className="w-44">
+                  {t.schedule.assetColumn}
+                </AppListTableHead>
+                <AppListTableHead className="w-44">
+                  {t.schedule.languageColumn}
+                </AppListTableHead>
+                <AppListTableHead className="w-32">
+                  {t.schedule.statusColumn}
+                </AppListTableHead>
+                <AppListTableHead className="w-32 text-right">
+                  {t.common.actions}
+                </AppListTableHead>
+              </AppListTableHeaderRow>
+            </TableHeader>
+            <TableBody>
+              {!canReadSchedules ? (
+                <AccessLimitedRow
+                  colSpan={8}
+                  title={t.schedule.accessLimited}
+                />
+              ) : scheduleLoadError ? (
+                <AppListTableEmptyState colSpan={8}>
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <CalendarClock />
+                    </EmptyMedia>
+                    <EmptyTitle>{t.schedule.loadError}</EmptyTitle>
+                    <EmptyDescription>
+                      {t.schedule.loadErrorDescription}
+                    </EmptyDescription>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => router.refresh()}
+                    >
+                      {t.schedule.retry}
+                    </Button>
+                  </EmptyHeader>
+                </AppListTableEmptyState>
+              ) : operationalSchedules.length > 0 ? (
+                operationalSchedules.map((schedule) => {
+                  const disableTriggerId = `telegram-schedule-disable-${schedule.id}`
+                  const deleteTriggerId = `telegram-schedule-delete-${schedule.id}`
+
+                  return (
+                    <TableRow
+                      key={schedule.id}
+                      className="border-border transition-colors hover:bg-muted/50"
+                    >
+                      <TableCell className="align-top break-words whitespace-normal">
+                        <div className="flex min-w-0 flex-col gap-1">
+                          <span className="font-medium text-foreground">
+                            {schedule.name}
+                          </span>
+                          <span className="text-sm text-muted-foreground">
+                            {schedule.timezone}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="align-top text-sm text-muted-foreground">
+                        {schedule.workspaceName ??
+                          currentWorkspace?.name ??
+                          t.schedule.currentWorkspaceFallback}
+                      </TableCell>
+                      <TableCell className="align-top text-sm break-words whitespace-normal text-muted-foreground">
+                        {schedule.destination
+                          ? getDestinationLabel(
+                              schedule.destination,
+                              dictionary
+                            )
+                          : t.schedule.noDestination}
+                      </TableCell>
+                      <TableCell className="align-top text-sm whitespace-normal text-muted-foreground">
+                        {schedule.localTimes.join(", ")}
+                      </TableCell>
+                      <TableCell className="align-top text-sm break-words whitespace-normal text-muted-foreground">
+                        {formatScheduledAsset(schedule, dictionary)}
+                      </TableCell>
+                      <TableCell className="align-top text-sm break-words whitespace-normal text-muted-foreground">
+                        {schedule.outputLanguage?.name ??
+                          schedule.outputLanguage?.isoCode ??
+                          t.schedule.defaultLanguage}
+                      </TableCell>
+                      <TableCell className="align-top">
+                        <StatusBadge status={schedule.status} />
+                      </TableCell>
+                      <TableCell className="align-top">
+                        <div className="flex flex-wrap justify-end gap-1">
+                          {canManageSchedules &&
+                          schedule.status === "ACTIVE" ? (
+                            <UpdateTelegramScheduleDialog
+                              schedule={schedule}
+                              activeDestinations={activeDestinations}
+                              currentWorkspace={currentWorkspace}
+                              watchlistAssets={watchlistAssets}
+                              languages={languages}
+                              languageCatalogError={languageCatalogError}
+                              canManage={canManageSchedules}
+                            />
+                          ) : null}
+                          {canManageSchedules &&
+                          schedule.status === "ACTIVE" ? (
+                            <ActionConfirmDialog
+                              intent="warning"
+                              title={t.schedule.disableTitle}
+                              description={t.schedule.disableDescription}
+                              actionLabel={t.common.disable}
+                              triggerLabel={t.schedule.disableTrigger}
+                              restoreFocusId={disableTriggerId}
+                              trigger={
+                                <Button
+                                  id={disableTriggerId}
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon-sm"
+                                  aria-label={t.schedule.disableTrigger}
+                                >
+                                  <CircleAlert data-icon="inline-start" />
+                                </Button>
+                              }
+                              action={() =>
+                                disableTelegramMarketAnalysisSchedule(
+                                  schedule.id
+                                )
+                              }
+                              successMessage={t.schedule.disableSuccess}
+                            />
+                          ) : null}
+                          {canManageSchedules ? (
+                            <ActionConfirmDialog
+                              title={t.schedule.deleteTitle}
+                              description={t.schedule.deleteDescription}
+                              actionLabel={t.schedule.deleteAction}
+                              triggerLabel={t.schedule.deleteTrigger}
+                              restoreFocusId={deleteTriggerId}
+                              trigger={
+                                <Button
+                                  id={deleteTriggerId}
+                                  type="button"
+                                  variant="destructive"
+                                  size="icon-sm"
+                                  aria-label={t.schedule.deleteTrigger}
+                                >
+                                  <Trash2 data-icon="inline-start" />
+                                </Button>
+                              }
+                              action={() =>
+                                deleteTelegramMarketAnalysisSchedule(
+                                  schedule.id
+                                )
+                              }
+                              successMessage={t.schedule.deleteSuccess}
+                            />
+                          ) : null}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })
+              ) : (
+                <AppListTableEmptyState colSpan={8}>
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <CalendarClock />
+                    </EmptyMedia>
+                    <EmptyTitle>{t.schedule.emptyTitle}</EmptyTitle>
+                    <EmptyDescription>
+                      {t.schedule.emptyDescription}
+                    </EmptyDescription>
+                  </EmptyHeader>
+                </AppListTableEmptyState>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </AppListTable>
     </div>
   )
 }
-
-function ScheduleFormSheet({
-  schedule,
-  activeDestinations,
-  currentWorkspace,
-  watchlistAssets,
-  canManage,
-}: {
-  schedule?: TelegramMarketAnalysisScheduleResponse
-  activeDestinations: TelegramDestinationResponse[]
-  currentWorkspace: TelegramConfigurationData["currentWorkspace"]
-  watchlistAssets: TelegramConfigurationData["watchlistAssets"]
-  canManage: boolean
-}) {
-  const router = useRouter()
-  const [open, setOpen] = useState(false)
-  const { dictionary, formatMessage } = useLocalization()
-  const t = dictionary.telegram
-  const [destinationId, setDestinationId] = useState(
-    schedule?.destination?.id.toString() ??
-      activeDestinations[0]?.id.toString() ??
-      ""
-  )
-  const [isPending, startTransition] = useTransition()
-  const isEdit = Boolean(schedule)
-  const canSubmit =
-    canManage && Boolean(currentWorkspace) && Boolean(destinationId)
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-
-    if (!canSubmit || !currentWorkspace) return
-
-    const formData = new FormData(event.currentTarget)
-    const assetIds = getAssetIdsFromInput(
-      getOptionalFormString(formData, "assetSymbols"),
-      watchlistAssets,
-      dictionary
-    )
-
-    if (!assetIds.success) {
-      toast.error(assetIds.error)
-      return
-    }
-
-    const request = getSaveTelegramMarketAnalysisScheduleSchema(
-      dictionary
-    ).safeParse({
-      name: getFormString(formData, "name"),
-      workspaceId: currentWorkspace.id,
-      destinationId: Number(destinationId),
-      timezone: getFormString(formData, "timezone"),
-      localTimes: splitCommaValues(getFormString(formData, "localTimes")),
-      assetIds: assetIds.data,
-    })
-
-    if (!request.success) {
-      toast.error(request.error.issues[0]?.message ?? t.schedule.invalidData)
-      return
-    }
-
-    startTransition(async () => {
-      const result = isEdit
-        ? await updateTelegramMarketAnalysisSchedule(schedule!.id, request.data)
-        : await createTelegramMarketAnalysisSchedule(request.data)
-
-      if (result.success) {
-        toast.success(
-          isEdit ? t.schedule.updateSuccess : t.schedule.createSuccess
-        )
-        setOpen(false)
-        router.refresh()
-      } else {
-        toast.error(result.error)
-      }
-    })
-  }
-
-  return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        {isEdit ? (
-          <Button variant="ghost" size="icon-sm" disabled={!canManage}>
-            <Pencil data-icon="inline-start" />
-            <span className="sr-only">{t.schedule.editTrigger}</span>
-          </Button>
-        ) : (
-          <Button
-            disabled={
-              !canManage || !currentWorkspace || activeDestinations.length === 0
-            }
-          >
-            <Plus data-icon="inline-start" />
-            {t.schedule.createSchedule}
-          </Button>
-        )}
-      </SheetTrigger>
-      <SheetContent className="overflow-y-auto sm:max-w-2xl">
-        <SheetHeader>
-          <SheetTitle>
-            {isEdit ? t.schedule.sheetEditTitle : t.schedule.sheetCreateTitle}
-          </SheetTitle>
-          <SheetDescription>{t.schedule.sheetDescription}</SheetDescription>
-        </SheetHeader>
-        <form onSubmit={handleSubmit} className="px-4">
-          <AppFormShell
-            title={
-              isEdit
-                ? formatMessage(t.schedule.formEditTitle, {
-                    name: schedule?.name ?? "",
-                  })
-                : t.schedule.formCreateTitle
-            }
-            description={
-              currentWorkspace
-                ? formatMessage(t.schedule.workspaceDescription, {
-                    workspace: currentWorkspace.name,
-                  })
-                : t.schedule.noWorkspaceDescription
-            }
-            width="lg"
-            className="max-w-none border-0 shadow-none"
-          >
-            <AppFormShellBody>
-              <FieldGroup>
-                <Field>
-                  <FieldLabel htmlFor="telegram-schedule-name">
-                    {t.schedule.nameLabel}
-                  </FieldLabel>
-                  <Input
-                    id="telegram-schedule-name"
-                    name="name"
-                    placeholder={t.schedule.namePlaceholder}
-                    defaultValue={schedule?.name ?? ""}
-                    disabled={isPending}
-                  />
-                </Field>
-                <FieldSet>
-                  <FieldLegend>{t.schedule.scopeLegend}</FieldLegend>
-                  <FieldGroup className="gap-4">
-                    <Field>
-                      <FieldLabel>{t.schedule.destinationColumn}</FieldLabel>
-                      <Select
-                        value={destinationId}
-                        onValueChange={setDestinationId}
-                        disabled={isPending}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue
-                            placeholder={t.destination.placeholder}
-                          />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            {activeDestinations.map((destination) => (
-                              <SelectItem
-                                key={destination.id}
-                                value={destination.id.toString()}
-                              >
-                                {getDestinationLabel(destination, dictionary)}
-                              </SelectItem>
-                            ))}
-                            {schedule?.destination &&
-                            !activeDestinations.some(
-                              (destination) =>
-                                destination.id === schedule.destination?.id
-                            ) ? (
-                              <SelectItem
-                                value={schedule.destination.id.toString()}
-                              >
-                                {getDestinationLabel(
-                                  schedule.destination,
-                                  dictionary
-                                )}
-                              </SelectItem>
-                            ) : null}
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                    </Field>
-                  </FieldGroup>
-                </FieldSet>
-                <FieldSet>
-                  <FieldLegend>{t.schedule.scheduleLegend}</FieldLegend>
-                  <FieldGroup className="gap-4">
-                    <Field>
-                      <FieldLabel htmlFor="telegram-schedule-timezone">
-                        {t.schedule.timezoneLabel}
-                      </FieldLabel>
-                      <Input
-                        id="telegram-schedule-timezone"
-                        name="timezone"
-                        defaultValue={schedule?.timezone ?? "Asia/Bangkok"}
-                        disabled={isPending}
-                      />
-                    </Field>
-                    <Field>
-                      <FieldLabel htmlFor="telegram-schedule-local-times">
-                        {t.schedule.localTimesLabel}
-                      </FieldLabel>
-                      <Input
-                        id="telegram-schedule-local-times"
-                        name="localTimes"
-                        defaultValue={schedule?.localTimes.join(", ") ?? ""}
-                        placeholder={t.schedule.localTimesPlaceholder}
-                        disabled={isPending}
-                      />
-                      <FieldDescription>
-                        {t.schedule.localTimesDescription}
-                      </FieldDescription>
-                    </Field>
-                    <Field>
-                      <FieldLabel htmlFor="telegram-schedule-assets">
-                        {t.schedule.assetsLabel}
-                      </FieldLabel>
-                      <Input
-                        id="telegram-schedule-assets"
-                        name="assetSymbols"
-                        defaultValue={schedule?.assets
-                          ?.map((asset) => asset.assetSymbol)
-                          .filter(Boolean)
-                          .join(", ")}
-                        placeholder={t.schedule.assetsPlaceholder}
-                        disabled={isPending}
-                      />
-                      <FieldDescription>
-                        {t.schedule.assetsDescription}
-                      </FieldDescription>
-                    </Field>
-                  </FieldGroup>
-                </FieldSet>
-              </FieldGroup>
-            </AppFormShellBody>
-            <AppFormShellFooter>
-              <SheetClose asChild>
-                <Button type="button" variant="ghost" disabled={isPending}>
-                  {dictionary.common.close}
-                </Button>
-              </SheetClose>
-              <Button type="submit" disabled={isPending || !canSubmit}>
-                {isPending ? (
-                  <Spinner data-icon="inline-start" />
-                ) : (
-                  <CalendarClock data-icon="inline-start" />
-                )}
-                {isEdit ? t.schedule.saveSchedule : t.schedule.createSchedule}
-              </Button>
-            </AppFormShellFooter>
-          </AppFormShell>
-        </form>
-      </SheetContent>
-    </Sheet>
-  )
-}
-
 function FeatureRouteDestinationSelect({
   route,
   activeDestinations,
@@ -1122,73 +950,16 @@ function FeatureRouteSwitch({
   )
 }
 
-function formatScheduledAssets(
+function formatScheduledAsset(
   schedule: TelegramMarketAnalysisScheduleResponse,
   dictionary: Dictionary
 ) {
-  const assets = schedule.assets ?? []
+  const asset = schedule.asset
 
-  if (assets.length === 0) {
-    return dictionary.telegram.schedule.backendScope
-  }
+  if (!asset) return dictionary.telegram.schedule.noAsset
 
-  return assets
-    .map((asset) => asset.assetSymbol ?? asset.assetName ?? asset.assetId)
-    .join(", ")
-}
-
-function getFormString(formData: FormData, key: string) {
-  const value = formData.get(key)
-  return typeof value === "string" ? value : ""
-}
-
-function getOptionalFormString(formData: FormData, key: string) {
-  const value = getFormString(formData, key).trim()
-  return value ? value : undefined
-}
-
-function splitCommaValues(value: string) {
-  return value
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean)
-}
-
-function getAssetIdsFromInput(
-  value: string | undefined,
-  assets: TelegramConfigurationData["watchlistAssets"],
-  dictionary: Dictionary
-): ActionResult<number[]> {
-  const symbols = splitCommaValues(value ?? "")
-
-  if (symbols.length === 0) {
-    return { success: true, data: [] }
-  }
-
-  const assetIds: number[] = []
-  const missingSymbols: string[] = []
-
-  symbols.forEach((symbol) => {
-    const asset = assets.find(
-      (item) => item.assetSymbol.toLowerCase() === symbol.toLowerCase()
-    )
-
-    if (asset) {
-      assetIds.push(asset.assetId)
-    } else {
-      missingSymbols.push(symbol)
-    }
-  })
-
-  if (missingSymbols.length > 0) {
-    return {
-      success: false,
-      error: dictionary.telegram.schedule.missingAssets.replace(
-        "{symbols}",
-        missingSymbols.join(", ")
-      ),
-    }
-  }
-
-  return { success: true, data: Array.from(new Set(assetIds)) }
+  return (
+    [asset.assetSymbol, asset.assetName].filter(Boolean).join(" — ") ||
+    String(asset.assetId)
+  )
 }

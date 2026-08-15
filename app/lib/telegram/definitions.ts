@@ -1,6 +1,7 @@
 import { z } from "zod"
 
 import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
+import type { LanguageResponse } from "@/app/lib/languages/definitions"
 import { WorkspaceWatchlistAssetListItemResponse } from "@/app/lib/watchlists/definitions"
 import { WorkspaceResponse } from "@/app/lib/workspaces/definitions"
 
@@ -19,6 +20,7 @@ export type TelegramConnectionStatus =
   | "INVALID"
 
 export type TelegramDestinationStatus = "ACTIVE" | "DISABLED" | "REMOVED"
+export type TelegramScheduleStatus = "ACTIVE" | "DISABLED" | "REMOVED"
 
 export type TelegramChatType =
   | "PRIVATE"
@@ -72,8 +74,9 @@ export interface TelegramMarketAnalysisScheduleResponse {
   destination?: TelegramDestinationResponse
   timezone: string
   localTimes: string[]
-  assets?: ScheduledAssetResponse[]
-  status: TelegramDestinationStatus
+  asset?: ScheduledAssetResponse
+  outputLanguage?: LanguageResponse
+  status: TelegramScheduleStatus
   createdDate?: string
   lastModifiedDate?: string
 }
@@ -118,18 +121,86 @@ export function getUpdateTelegramFeatureSettingSchema() {
 }
 
 export function getSaveTelegramMarketAnalysisScheduleSchema(
-  dictionary: Dictionary
+  dictionary: Dictionary,
+  supportedLanguageIsoCodes?: string[]
 ) {
-  return z.object({
-    name: z.string().trim().min(1, dictionary.telegram.scheduleNameRequired),
-    workspaceId: z.coerce.number().int().positive(),
-    destinationId: z.coerce.number().int().positive(),
-    timezone: z.string().trim().min(1, dictionary.telegram.timezoneRequired),
-    localTimes: z
-      .array(z.string().trim().min(1))
-      .min(1, dictionary.telegram.localTimeRequired),
-    assetIds: z.array(z.coerce.number().int().positive()).optional(),
-  })
+  const supportedLanguageCodes = supportedLanguageIsoCodes
+    ? new Set(supportedLanguageIsoCodes)
+    : null
+
+  const localTimeSchema = z
+    .string()
+    .trim()
+    .regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/, dictionary.telegram.localTimeInvalid)
+
+  const outputLanguageSchema = z
+    .string()
+    .trim()
+    .min(1, dictionary.telegram.outputLanguageRequired)
+    .refine(
+      (value) =>
+        supportedLanguageCodes === null || supportedLanguageCodes.has(value),
+      dictionary.telegram.outputLanguageUnsupported
+    )
+
+  return z
+    .object({
+      name: z.string().trim().min(1, dictionary.telegram.scheduleNameRequired),
+      workspaceId: z.coerce.number().int().positive(),
+      destinationId: z.coerce.number().int().positive(),
+      assetId: z.coerce.number().int().positive(),
+      timezone: z
+        .string()
+        .trim()
+        .min(1, dictionary.telegram.timezoneRequired)
+        .refine(isValidIanaTimezone, dictionary.telegram.timezoneInvalid),
+      localTimes: z
+        .array(localTimeSchema)
+        .min(1, dictionary.telegram.localTimeRequired)
+        .max(4, dictionary.telegram.localTimeLimit)
+        .superRefine((values, context) => {
+          const seen = new Set<string>()
+
+          values.forEach((value, index) => {
+            if (seen.has(value)) {
+              context.addIssue({
+                code: "custom",
+                message: dictionary.telegram.localTimeDuplicate,
+                path: [index],
+              })
+            }
+
+            seen.add(value)
+          })
+        }),
+      outputLanguageIsoCode: z.preprocess(
+        (value) =>
+          typeof value === "string" && value.trim() ? value.trim() : undefined,
+        outputLanguageSchema.optional()
+      ),
+    })
+    .strict()
+}
+
+export function normalizeSaveTelegramMarketAnalysisScheduleRequest(
+  request: SaveTelegramMarketAnalysisScheduleRequest
+): SaveTelegramMarketAnalysisScheduleRequest {
+  return {
+    ...request,
+    name: request.name.trim(),
+    timezone: request.timezone.trim(),
+    localTimes: [...request.localTimes].map((time) => time.trim()).sort(),
+    outputLanguageIsoCode: request.outputLanguageIsoCode?.trim() || undefined,
+  }
+}
+
+function isValidIanaTimezone(value: string) {
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: value }).format()
+    return true
+  } catch {
+    return false
+  }
 }
 
 export type CreateTelegramBotConnectionRequest = z.infer<
@@ -167,6 +238,9 @@ export interface TelegramConfigurationData {
   schedules: TelegramMarketAnalysisScheduleResponse[]
   currentWorkspace: WorkspaceResponse | null
   watchlistAssets: WorkspaceWatchlistAssetListItemResponse[]
+  languages: LanguageResponse[]
+  languageCatalogError: boolean
+  scheduleLoadError: boolean
   sectionAccess: TelegramSectionAccess
   manageAccess: TelegramManageAccess
 }
