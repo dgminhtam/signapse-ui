@@ -2,7 +2,7 @@
 
 Tài liệu này ánh xạ OpenAPI backend dev tại `https://dev-api.signapse.cloud/v3/api-docs` tới các điểm tích hợp frontend hiện tại của repo.
 
-Xác minh lần cuối: ngày 14 tháng 8 năm 2026
+Xác minh lần cuối: ngày 15 tháng 8 năm 2026
 
 ## Cấu hình cơ sở
 
@@ -37,6 +37,7 @@ Xác minh lần cuối: ngày 14 tháng 8 năm 2026
 ## Tổng quan thay đổi lớn từ snapshot hiện tại
 
 - Snapshot backend hiện tại gồm `116` operation.
+- Lần đồng bộ live ngày 15/8/2026 xác nhận mapping cần bao phủ thêm `PATCH /me`, `GET /users`, `PATCH /users/{id}`, và `POST /script`; `UserResponse.preferredLanguage` là object `LanguageResponse` nullable, không phải ISO string.
 - Snapshot ngày 11/8 mở rộng `GET /dashboard/summary` thêm hai metric bắt buộc `assetsInFocus` và `marketNarratives`. Backend trả tối đa sáu tài sản và ba luận điểm theo thứ tự authoritative; frontend đã parse/render `recentEvents` và `assetsInFocus`, nhưng chưa parse hoặc render `marketNarratives`.
 - Backend đã chuyển domain nội dung canon từ `sources` / `source-documents` sang `news-outlets` / `news-articles`.
 - Backend đã unlink `NewsArticle` khỏi `NewsOutlet`: bài viết snapshot tên nguồn vào `sourceName` khi ingest, nên việc đổi tên hoặc xóa outlet không làm thay đổi nguồn đã lưu trên bài viết. Snapshot OpenAPI và frontend hiện đã đồng bộ contract này.
@@ -302,7 +303,7 @@ Ghi chu:
 
 | Phuong thuc | Endpoint backend                      | operationId                 | Tich hop frontend | Trang thai      | Ghi chu                                                        |
 | ----------- | ------------------------------------- | --------------------------- | ----------------- | --------------- | -------------------------------------------------------------- |
-| GET         | `/narratives`                         | `getNarratives(searchParams)` | `app/api/narratives/action.ts` | Da tich hop data layer | Tra ve `PageNarrativeSummaryResponse`; permission `narrative:read`. Chua co route/list UI. |
+| GET         | `/narratives`                         | `getNarratives`              | `getNarratives(searchParams)` | Da tich hop data layer | Tra ve `PageNarrativeSummaryResponse`; permission `narrative:read`. Chua co route/list UI. |
 | GET         | `/narratives/{id}`                    | `getNarrative`              | `-`               | Chua trien khai | Detail gom core narrative, `assets[]`, va `events[]`; permission `narrative:read`. |
 | PUT         | `/narratives/{id}/status`             | `updateStatus`              | `-`               | Chua trien khai | Cap nhat status qua `UpdateNarrativeStatusRequest`; permission `narrative:manage`. |
 | POST        | `/narratives/{id}/archive`            | `archiveNarrative`          | `-`               | Chua trien khai | Archive narrative; permission `narrative:manage`.             |
@@ -424,9 +425,17 @@ Ghi chú:
 
 ### 16. API user
 
-| Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai  | Ghi chu                                                                                                                          |
-| ----------- | ---------------- | ----------- | ----------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| GET         | `/me`            | `me`        | `getMe()`         | Da tich hop nhung con lech contract | `UserResponse` co them `preferredLanguage`; `BackendMeResponse` hien chua map field nay, permission loader tiep tuc chi doc `permissions[]`. |
+| Phuong thuc | Endpoint backend  | operationId    | Tich hop frontend                | Trang thai                          | Ghi chu                                                                                                                                                                   |
+| ----------- | ----------------- | -------------- | -------------------------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET         | `/me`             | `me`           | `getMe()`                        | Da tich hop nhung con lech contract | `UserResponse.preferredLanguage` la `LanguageResponse` nullable va `permissions` la `string[]`; `BackendMeResponse` hien chua map preferred language. Auth `active-user`.         |
+| PATCH       | `/me`             | `updateProfile` | `updateMyProfile(request)`       | Da tich hop                        | Gui `UserProfileRequest` gom `firstName`, `lastName`, `birthday`, `phone`; response la `UserResponse`; auth `active-user`.                                               |
+| GET         | `/users`          | `search`       | `getUsers(searchParams)`         | Da tich hop                        | Tim kiem user theo `user:search`; OpenAPI tra ve `Page<UserSearchResponse>`, frontend van giu fallback cho payload array legacy.                                                 |
+| PATCH       | `/users/{id}`     | `updateUser`   | `updateManagedUser(id, request)` | Da tich hop nhung con lech contract | Request la `UserUpdateRequest`; permission `user:update`; OpenAPI response tham chieu `UserSearchResponse`, trong khi action frontend dang type ket qua la `UserResponse`. |
+
+Ghi chu:
+
+- `UserResponse.preferredLanguage` la object `LanguageResponse` (`id`, `isoCode`, `name`) nullable; day la khac biet voi `BackendMeResponse` frontend hien tai chua khai bao field nay.
+- `UserResponse.permissions` trong live contract la mang permission key `string[]`; frontend managed-user definition hien dang model field nay thanh `PermissionResponse[]`, can xem lai neu UI can doc permissions cua user.
 
 ### 17. API languages
 
@@ -532,6 +541,12 @@ Ghi chu:
 | Phuong thuc | Endpoint backend | operationId   | Tich hop frontend | Trang thai      | Ghi chu               |
 | ----------- | ---------------- | ------------- | ----------------- | --------------- | --------------------- |
 | GET         | `/health`        | `healthCheck` | `-`               | Chua trien khai | Chua co helper rieng. |
+
+### API script
+
+| Phuong thuc | Endpoint backend | operationId | Tich hop frontend | Trang thai  | Ghi chu                                                                                                      |
+| ----------- | ---------------- | ----------- | ----------------- | ----------- | ------------------------------------------------------------------------------------------------------------ |
+| POST        | `/script`        | `execute`   | `-`               | Chi backend | Auth `authenticated`, khong yeu cau permission; request `ScriptRequest` bat buoc `script` khong rong, response `ScriptResponse` gom `output[]` va `result`. |
 
 ### API dashboard summary
 
@@ -678,7 +693,7 @@ type ActionResult<T = void> =
 - `market query`: spec van mo ta `asOfTime` la optional `date-time`; frontend conversation chu dong omit field nay de backend tu lay thoi diem hien tai va harden parse cho payload runtime co the tra `null` o `publishedAt` va `occurredAt`. Frontend khong con legacy `/market-query` route hay redirect compatibility; global assistant modal la UI primary surface.
 - `market conversation messages`: FE da dong bo `ChatMessageResponse` text-only, bo `kind`, `analysisId`, `PENDING`, analysis data part, va analysis detail actions; cursor history va synchronous submit van giu nguyen.
 - `graph view`: snapshot moi bo node kind `theme` va `warm-episode`, bo edge kind `event-theme`, `asset-warm-episode`, va `warm-episode-event`, va them `metadata.themes[]` cho event/narrative node; FE Graph View da dong bo definitions, visuals, model build, inspector, va i18n theo contract moi.
-- `user profile`: `GET /me` da dong bo `currentWorkspace`, `mainImage` media object, va `permissions[]`, nhung snapshot moi them `preferredLanguage`; runtime hien van chi dung permission loader.
+- `user profile`: `GET /me` da dong bo `currentWorkspace`, `mainImage` media object, va `permissions[]`, nhung snapshot moi them `preferredLanguage` dang la `LanguageResponse` nullable; `BackendMeResponse` runtime hien van chua map field nay va permission loader chi doc `permissions[]`.
 - `blogs`: create va response dung `visible`, update dung `isVisible`; frontend van can tiep tuc xu ly ky de tranh drift.
 - `ai-provider-configs`: snapshot khong con expose full `apiKey` tren config response; frontend da doc `credentials[]` preview va ho tro provider enum `GROQ`, nhung can doi tiep UI/DTO theo contract khong con `name`/top-level `model`.
 - `media`: da co trong spec nhung frontend chua co module.

@@ -1,9 +1,16 @@
 "use client"
 
 import type { Dispatch, FormEvent, SetStateAction } from "react"
-import { useMemo, useState, useTransition } from "react"
+import { Fragment, useMemo, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import { CalendarClock, Pencil, Plus, X } from "lucide-react"
+import {
+  CalendarClock,
+  Check,
+  ChevronsUpDown,
+  Pencil,
+  Plus,
+  X,
+} from "lucide-react"
 import { toast } from "sonner"
 
 import {
@@ -33,17 +40,14 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import {
-  Combobox,
-  ComboboxCollection,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxGroup,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxLabel,
-  ComboboxList,
-  ComboboxSeparator,
-} from "@/components/ui/combobox"
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from "@/components/ui/command"
 import {
   Dialog,
   DialogContent,
@@ -64,6 +68,11 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
   Select,
   SelectContent,
   SelectGroup,
@@ -72,6 +81,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Spinner } from "@/components/ui/spinner"
+import { cn } from "@/lib/utils"
 import { getDestinationLabel } from "./telegram-configuration-shared"
 
 const DEFAULT_LANGUAGE_VALUE = "__default__"
@@ -417,6 +427,7 @@ function ScheduleFormFields({
   onChange,
 }: ScheduleFormFieldsProps) {
   const t = dictionary.telegram
+  const [timezoneOpen, setTimezoneOpen] = useState(false)
   const timezoneGroups = useMemo(
     () => getTimezoneGroups(dictionary),
     [dictionary]
@@ -594,44 +605,69 @@ function ScheduleFormFields({
             <FieldLabel htmlFor={getScheduleFieldId(idPrefix, "timezone")}>
               {t.schedule.timezoneLabel}
             </FieldLabel>
-            <Combobox
-              items={timezoneGroups}
-              value={selectedTimezone}
-              itemToStringLabel={(item: TimezoneItem) => item.label}
-              itemToStringValue={(item: TimezoneItem) => item.value}
-              isItemEqualToValue={(item: TimezoneItem, value: TimezoneItem) =>
-                item.value === value.value
-              }
-              onValueChange={(value) => onChange("timezone", value?.value ?? "")}
-            >
-              <ComboboxInput
-                id={getScheduleFieldId(idPrefix, "timezone")}
-                placeholder={t.schedule.timezonePlaceholder}
-                disabled={disabled}
-                aria-invalid={Boolean(errors.timezone)}
-                aria-describedby={describedBy("timezone")}
-              />
-              <ComboboxContent>
-                <ComboboxEmpty>{t.schedule.timezoneEmpty}</ComboboxEmpty>
-                <ComboboxList>
-                  {(group: TimezoneGroup, index: number) => (
-                    <ComboboxGroup key={group.value} items={group.items}>
-                      <ComboboxLabel>{group.label}</ComboboxLabel>
-                      <ComboboxCollection>
-                        {(item: TimezoneItem) => (
-                          <ComboboxItem key={item.value} value={item}>
-                            {item.label}
-                          </ComboboxItem>
-                        )}
-                      </ComboboxCollection>
-                      {index < timezoneGroups.length - 1 ? (
-                        <ComboboxSeparator />
-                      ) : null}
-                    </ComboboxGroup>
-                  )}
-                </ComboboxList>
-              </ComboboxContent>
-            </Combobox>
+            <Popover open={timezoneOpen} onOpenChange={setTimezoneOpen} modal>
+              <PopoverTrigger asChild>
+                <Button
+                  id={getScheduleFieldId(idPrefix, "timezone")}
+                  type="button"
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={timezoneOpen}
+                  aria-invalid={Boolean(errors.timezone)}
+                  aria-describedby={describedBy("timezone")}
+                  disabled={disabled}
+                  className="w-full justify-between font-normal"
+                >
+                  <span className="min-w-0 truncate">
+                    {selectedTimezone?.label ?? t.schedule.timezonePlaceholder}
+                  </span>
+                  <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                align="start"
+                className="w-[var(--radix-popover-trigger-width)] p-0"
+              >
+                <Command>
+                  <CommandInput
+                    placeholder={t.schedule.timezonePlaceholder}
+                    aria-label={t.schedule.timezoneLabel}
+                  />
+                  <CommandList>
+                    <CommandEmpty>{t.schedule.timezoneEmpty}</CommandEmpty>
+                    {timezoneGroups.map((group, index) => (
+                      <Fragment key={group.value}>
+                        <CommandGroup heading={group.label}>
+                          {group.items.map((item) => (
+                            <CommandItem
+                              key={item.value}
+                              value={`${item.label} ${item.value}`}
+                              onSelect={() => {
+                                onChange("timezone", item.value)
+                                setTimezoneOpen(false)
+                              }}
+                            >
+                              {item.label}
+                              <Check
+                                className={cn(
+                                  "ml-auto size-4",
+                                  selectedTimezone?.value === item.value
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                )}
+                              />
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                        {index < timezoneGroups.length - 1 ? (
+                          <CommandSeparator />
+                        ) : null}
+                      </Fragment>
+                    ))}
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
             <FieldDescription id={descriptionId("timezone")}>
               {t.schedule.timezoneDescription}
             </FieldDescription>
@@ -967,7 +1003,7 @@ export function CreateTelegramScheduleDialog({
             const target = event.detail.originalEvent.target
             if (
               target instanceof Element &&
-              target.closest('[data-slot="combobox-content"]')
+              target.closest('[data-slot="popover-content"]')
             ) {
               event.preventDefault()
               return
@@ -1194,7 +1230,7 @@ export function UpdateTelegramScheduleDialog({
             const target = event.detail.originalEvent.target
             if (
               target instanceof Element &&
-              target.closest('[data-slot="combobox-content"]')
+              target.closest('[data-slot="popover-content"]')
             ) {
               event.preventDefault()
               return
