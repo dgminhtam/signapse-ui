@@ -456,16 +456,18 @@ function DestinationLinkDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <Button
-          disabled={!canManage || linkUnavailable}
-          aria-describedby={
-            unavailableReason ? "telegram-link-unavailable" : undefined
-          }
-        >
-          <Link2 data-icon="inline-start" />
-          {t.destination.link}
-        </Button>
+      <DialogTrigger
+        render={
+          <Button
+            disabled={!canManage || linkUnavailable}
+            aria-describedby={
+              unavailableReason ? "telegram-link-unavailable" : undefined
+            }
+          />
+        }
+      >
+        <Link2 data-icon="inline-start" />
+        {t.destination.link}
       </DialogTrigger>
       {unavailableReason ? (
         <span id="telegram-link-unavailable" className="sr-only">
@@ -593,10 +595,12 @@ function DestinationLinkDialog({
             </FieldGroup>
           ) : null}
           <DialogFooter>
-            <DialogClose asChild>
-              <Button type="button" variant="outline" disabled={isPending}>
-                {dictionary.common.close}
-              </Button>
+            <DialogClose
+              render={
+                <Button type="button" variant="outline" disabled={isPending} />
+              }
+            >
+              {dictionary.common.close}
             </DialogClose>
             <Button
               type="submit"

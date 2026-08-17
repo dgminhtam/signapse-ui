@@ -1007,37 +1007,40 @@ export function CreateTelegramScheduleDialog({
 
   return (
     <div className="flex min-w-0 flex-col items-start gap-1">
-      <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogTrigger asChild>
-          <Button disabled={!canOpen}>
-            <Plus data-icon="inline-start" />
-            {dictionary.telegram.schedule.createSchedule}
-          </Button>
+      <Dialog
+        open={open}
+        onOpenChange={(nextOpen, eventDetails) => {
+          if (
+            !nextOpen &&
+            eventDetails.reason === "outside-press" &&
+            eventDetails.event.target instanceof Element &&
+            eventDetails.event.target.closest('[data-slot="popover-content"]')
+          ) {
+            eventDetails.cancel()
+            return
+          }
+
+          if (
+            !nextOpen &&
+            (eventDetails.reason === "escape-key" ||
+              eventDetails.reason === "outside-press") &&
+            (isPending || isDirty)
+          ) {
+            eventDetails.cancel()
+            if (isDirty) setDiscardOpen(true)
+            return
+          }
+
+          handleOpenChange(nextOpen)
+        }}
+      >
+        <DialogTrigger render={<Button disabled={!canOpen} />}>
+          <Plus data-icon="inline-start" />
+          {dictionary.telegram.schedule.createSchedule}
         </DialogTrigger>
         <DialogContent
           showCloseButton={false}
           className="max-h-[min(90vh,48rem)] overflow-y-auto sm:max-w-2xl"
-          onEscapeKeyDown={(event) => {
-            if (isPending || isDirty) {
-              event.preventDefault()
-              if (isDirty) setDiscardOpen(true)
-            }
-          }}
-          onPointerDownOutside={(event) => {
-            const target = event.detail.originalEvent.target
-            if (
-              target instanceof Element &&
-              target.closest('[data-slot="popover-content"]')
-            ) {
-              event.preventDefault()
-              return
-            }
-
-            if (isPending || isDirty) {
-              event.preventDefault()
-              if (isDirty) setDiscardOpen(true)
-            }
-          }}
         >
           <DialogHeader>
             <DialogTitle>
@@ -1230,41 +1233,48 @@ export function UpdateTelegramScheduleDialog({
 
   return (
     <>
-      <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogTrigger asChild>
-          <Button
-            id={`${idPrefix}-trigger`}
-            variant="ghost"
-            size="icon-sm"
-            aria-label={dictionary.telegram.schedule.editTrigger}
-          >
-            <Pencil data-icon="inline-start" />
-          </Button>
+      <Dialog
+        open={open}
+        onOpenChange={(nextOpen, eventDetails) => {
+          if (
+            !nextOpen &&
+            eventDetails.reason === "outside-press" &&
+            eventDetails.event.target instanceof Element &&
+            eventDetails.event.target.closest('[data-slot="popover-content"]')
+          ) {
+            eventDetails.cancel()
+            return
+          }
+
+          if (
+            !nextOpen &&
+            (eventDetails.reason === "escape-key" ||
+              eventDetails.reason === "outside-press") &&
+            (isPending || isDirty)
+          ) {
+            eventDetails.cancel()
+            if (isDirty) setDiscardOpen(true)
+            return
+          }
+
+          handleOpenChange(nextOpen)
+        }}
+      >
+        <DialogTrigger
+          render={
+            <Button
+              id={`${idPrefix}-trigger`}
+              variant="ghost"
+              size="icon-sm"
+              aria-label={dictionary.telegram.schedule.editTrigger}
+            />
+          }
+        >
+          <Pencil data-icon="inline-start" />
         </DialogTrigger>
         <DialogContent
           showCloseButton={false}
           className="max-h-[min(90vh,48rem)] overflow-y-auto sm:max-w-2xl"
-          onEscapeKeyDown={(event) => {
-            if (isPending || isDirty) {
-              event.preventDefault()
-              if (isDirty) setDiscardOpen(true)
-            }
-          }}
-          onPointerDownOutside={(event) => {
-            const target = event.detail.originalEvent.target
-            if (
-              target instanceof Element &&
-              target.closest('[data-slot="popover-content"]')
-            ) {
-              event.preventDefault()
-              return
-            }
-
-            if (isPending || isDirty) {
-              event.preventDefault()
-              if (isDirty) setDiscardOpen(true)
-            }
-          }}
         >
           <DialogHeader>
             <DialogTitle>

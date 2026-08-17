@@ -452,9 +452,7 @@ export function RolePermissionDialog({
                                 "rotate-180"
                             )}
                           />
-                          {normalizedQuery
-                            ? t.legacySearchOpen
-                            : t.viewDetails}
+                          {normalizedQuery ? t.legacySearchOpen : t.viewDetails}
                         </Button>
                       }
                     />
@@ -505,10 +503,8 @@ export function RolePermissionDialog({
         </p>
 
         <DialogFooter>
-          <DialogClose asChild>
-            <Button type="button" variant="ghost">
-              {dictionary.common.cancel}
-            </Button>
+          <DialogClose render={<Button type="button" variant="ghost" />}>
+            {dictionary.common.cancel}
           </DialogClose>
           <Button
             type="button"

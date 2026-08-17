@@ -30,7 +30,7 @@
 ## 5. Select and overlay wrappers
 
 - [x] 5.1 Migrate Select to the official Base UI wrapper and update dynamic consumers to the `items` and nullable-value contract.
-- [ ] 5.2 Migrate Dialog and DialogClose, replacing Radix composition with the official Base UI `render` contract while preserving controlled workflows.
+- [x] 5.2 Migrate Dialog and DialogClose, replacing Radix composition with the official Base UI `render` contract while preserving controlled workflows.
 - [ ] 5.3 Preserve required portal-container composition through an external app extension and verify focus restoration, Escape, outside-click, and SSR behavior.
 - [ ] 5.4 Migrate AlertDialog and update destructive confirmation consumers without losing pending, error, cancel, or delete state.
 - [ ] 5.5 Migrate Popover, Tooltip, and HoverCard using the official Base UI positioning and delay contracts.

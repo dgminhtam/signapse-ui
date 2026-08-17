@@ -338,11 +338,9 @@ function ConnectBotDialog({ canManage }: { canManage: boolean }) {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <Button disabled={!canManage}>
-          <Bot data-icon="inline-start" />
-          {t.bot.connect}
-        </Button>
+      <DialogTrigger render={<Button disabled={!canManage} />}>
+        <Bot data-icon="inline-start" />
+        {t.bot.connect}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -375,10 +373,12 @@ function ConnectBotDialog({ canManage }: { canManage: boolean }) {
             </Field>
           </FieldGroup>
           <DialogFooter>
-            <DialogClose asChild>
-              <Button type="button" variant="outline" disabled={isPending}>
-                {dictionary.common.close}
-              </Button>
+            <DialogClose
+              render={
+                <Button type="button" variant="outline" disabled={isPending} />
+              }
+            >
+              {dictionary.common.close}
             </DialogClose>
             <Button type="submit" disabled={isPending || !canManage}>
               {isPending ? (

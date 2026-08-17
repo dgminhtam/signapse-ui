@@ -301,12 +301,14 @@ export function WorkspaceWatchlistEditor({
         </p>
 
         <DialogFooter>
-          <DialogClose asChild>
-            <Button type="button" variant="ghost" disabled={isPending}>
-              {canShowEditorBody
-                ? dictionary.common.cancel
-                : dictionary.common.close}
-            </Button>
+          <DialogClose
+            render={
+              <Button type="button" variant="ghost" disabled={isPending} />
+            }
+          >
+            {canShowEditorBody
+              ? dictionary.common.cancel
+              : dictionary.common.close}
           </DialogClose>
           {canManageWorkspaceWatchlist ? (
             <Button

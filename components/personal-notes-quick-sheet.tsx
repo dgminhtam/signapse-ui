@@ -847,12 +847,11 @@ function PersonalNotesQuickSheet() {
       >
         <DialogContent
           showCloseButton={!isRenamePending}
-          onCloseAutoFocus={(event) => {
-            if (lastActionTriggerRef.current?.isConnected) {
-              event.preventDefault()
-              lastActionTriggerRef.current.focus()
-            }
-          }}
+          finalFocus={() =>
+            lastActionTriggerRef.current?.isConnected
+              ? lastActionTriggerRef.current
+              : true
+          }
         >
           <form className="contents" onSubmit={handleRenameSubmit}>
             <DialogHeader>

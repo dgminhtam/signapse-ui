@@ -373,10 +373,12 @@ function WorkspaceFormDialog({
         </div>
 
         <DialogFooter>
-          <DialogClose asChild>
-            <Button type="button" variant="ghost" disabled={isPending}>
-              {dictionary.common.cancel}
-            </Button>
+          <DialogClose
+            render={
+              <Button type="button" variant="ghost" disabled={isPending} />
+            }
+          >
+            {dictionary.common.cancel}
           </DialogClose>
           <Button type="button" disabled={isPending} onClick={onSubmit}>
             {isPending ? <Spinner data-icon="inline-start" /> : null}
