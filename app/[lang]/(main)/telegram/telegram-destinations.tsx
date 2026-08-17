@@ -552,27 +552,33 @@ function DestinationLinkDialog({
               {!linkExpired && (privateLink || groupLink) ? (
                 <div className="flex flex-col gap-2 sm:flex-row">
                   {privateLink ? (
-                    <Button asChild variant="outline">
-                      <a
-                        href={privateLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <ExternalLink data-icon="inline-start" />
-                        {t.destination.openPrivate}
-                      </a>
+                    <Button
+                      variant="outline"
+                      render={
+                        <a
+                          href={privateLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        />
+                      }
+                    >
+                      <ExternalLink data-icon="inline-start" />
+                      {t.destination.openPrivate}
                     </Button>
                   ) : null}
                   {groupLink ? (
-                    <Button asChild variant="outline">
-                      <a
-                        href={groupLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <ExternalLink data-icon="inline-start" />
-                        {t.destination.openGroup}
-                      </a>
+                    <Button
+                      variant="outline"
+                      render={
+                        <a
+                          href={groupLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        />
+                      }
+                    >
+                      <ExternalLink data-icon="inline-start" />
+                      {t.destination.openGroup}
                     </Button>
                   ) : null}
                 </div>

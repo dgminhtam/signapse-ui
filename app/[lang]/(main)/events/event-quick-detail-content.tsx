@@ -184,26 +184,36 @@ export function EventQuickDetailContent({
                 <div className="mt-3 flex flex-wrap gap-2">
                   {typeof evidence.newsArticleId === "number" &&
                   canReadNewsArticles ? (
-                    <Button asChild size="sm" variant="outline">
-                      <Link href={`/news-articles/${evidence.newsArticleId}`}>
-                        <FileText aria-hidden="true" data-icon="inline-start" />
-                        {dictionary.events.viewArticle}
-                      </Link>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      render={
+                        <Link
+                          href={`/news-articles/${evidence.newsArticleId}`}
+                        />
+                      }
+                    >
+                      <FileText aria-hidden="true" data-icon="inline-start" />
+                      {dictionary.events.viewArticle}
                     </Button>
                   ) : null}
                   {evidence.newsArticleUrl ? (
-                    <Button asChild size="sm" variant="outline">
-                      <a
-                        href={evidence.newsArticleUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <ExternalLink
-                          aria-hidden="true"
-                          data-icon="inline-start"
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      render={
+                        <a
+                          href={evidence.newsArticleUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
                         />
-                        {dictionary.events.openOriginal}
-                      </a>
+                      }
+                    >
+                      <ExternalLink
+                        aria-hidden="true"
+                        data-icon="inline-start"
+                      />
+                      {dictionary.events.openOriginal}
                     </Button>
                   ) : null}
                 </div>

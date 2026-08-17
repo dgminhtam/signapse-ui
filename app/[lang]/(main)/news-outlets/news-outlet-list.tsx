@@ -114,11 +114,9 @@ export function NewsOutletListPage({ newsOutletPage }: NewsOutletListProps) {
       <AppListToolbar>
         <AppListToolbarLeading>
           {canCreateNewsOutlet ? (
-            <Button asChild>
-              <Link href="/news-outlets/create">
-                <Plus data-icon="inline-start" />
-                {dictionary.newsOutlets.createAction}
-              </Link>
+            <Button render={<Link href="/news-outlets/create" />}>
+              <Plus data-icon="inline-start" />
+              {dictionary.newsOutlets.createAction}
             </Button>
           ) : null}
           <NewsOutletSearch />
@@ -258,17 +256,17 @@ export function NewsOutletListPage({ newsOutletPage }: NewsOutletListProps) {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button
-                              asChild
                               variant="ghost"
                               size="icon-sm"
                               className="text-muted-foreground hover:text-foreground"
+                              render={
+                                <Link href={`/news-outlets/${newsOutlet.id}`} />
+                              }
                             >
-                              <Link href={`/news-outlets/${newsOutlet.id}`}>
-                                <Edit2 data-icon="inline-start" />
-                                <span className="sr-only">
-                                  {dictionary.newsOutlets.edit}
-                                </span>
-                              </Link>
+                              <Edit2 data-icon="inline-start" />
+                              <span className="sr-only">
+                                {dictionary.newsOutlets.edit}
+                              </span>
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>

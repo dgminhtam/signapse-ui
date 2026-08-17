@@ -102,11 +102,9 @@ export function SystemPromptList({ promptPage }: SystemPromptListProps) {
       <AppListToolbar>
         <AppListToolbarLeading>
           {canCreate ? (
-            <Button asChild>
-              <Link href="/system-prompts/create">
-                <Plus data-icon="inline-start" />
-                {t.addPrompt}
-              </Link>
+            <Button render={<Link href="/system-prompts/create" />}>
+              <Plus data-icon="inline-start" />
+              {t.addPrompt}
             </Button>
           ) : null}
           <SystemPromptSearch />
@@ -221,15 +219,15 @@ export function SystemPromptList({ promptPage }: SystemPromptListProps) {
                     <div className="flex justify-end gap-1">
                       {canUpdate ? (
                         <Button
-                          asChild
                           variant="ghost"
                           size="icon-sm"
                           className="text-muted-foreground hover:text-foreground"
+                          render={
+                            <Link href={getPromptHref(prompt.promptType)} />
+                          }
                         >
-                          <Link href={getPromptHref(prompt.promptType)}>
-                            <Edit2 data-icon="inline-start" />
-                            <span className="sr-only">{t.editPrompt}</span>
-                          </Link>
+                          <Edit2 data-icon="inline-start" />
+                          <span className="sr-only">{t.editPrompt}</span>
                         </Button>
                       ) : null}
                       {canDelete ? (

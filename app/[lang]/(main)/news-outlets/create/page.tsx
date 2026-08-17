@@ -26,11 +26,13 @@ export default async function CreateNewsOutletPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center">
-        <Button asChild variant="secondary" size="sm">
-          <Link href="/news-outlets">
-            <ArrowLeft data-icon="inline-start" />
-            {dictionary.common.back}
-          </Link>
+        <Button
+          variant="secondary"
+          size="sm"
+          render={<Link href="/news-outlets" />}
+        >
+          <ArrowLeft data-icon="inline-start" />
+          {dictionary.common.back}
         </Button>
       </div>
 

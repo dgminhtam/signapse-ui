@@ -74,11 +74,12 @@ export function EventTimeline({
           <CardDescription>{t.description}</CardDescription>
           {showViewAll ? (
             <CardAction>
-              <Button asChild variant="ghost">
-                <LocalizedLink href="/events" aria-label={t.viewAll}>
-                  <span className="hidden sm:inline">{t.viewAll}</span>
-                  <ArrowRightIcon data-icon="inline-end" />
-                </LocalizedLink>
+              <Button
+                variant="ghost"
+                render={<LocalizedLink href="/events" aria-label={t.viewAll} />}
+              >
+                <span className="hidden sm:inline">{t.viewAll}</span>
+                <ArrowRightIcon data-icon="inline-end" />
               </Button>
             </CardAction>
           ) : null}
@@ -283,11 +284,13 @@ function EmptyEventTimeline({ dictionary }: { dictionary: Dictionary }) {
         <EmptyDescription>{t.emptyDescription}</EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <Button asChild variant="outline" size="sm">
-          <LocalizedLink href="/events">
-            {t.viewAll}
-            <ArrowRightIcon data-icon="inline-end" />
-          </LocalizedLink>
+        <Button
+          variant="outline"
+          size="sm"
+          render={<LocalizedLink href="/events" />}
+        >
+          {t.viewAll}
+          <ArrowRightIcon data-icon="inline-end" />
         </Button>
       </EmptyContent>
     </Empty>

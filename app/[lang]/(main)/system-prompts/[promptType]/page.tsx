@@ -54,11 +54,13 @@ export default async function EditSystemPromptPage({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center">
-        <Button asChild variant="secondary" size="sm">
-          <Link href="/system-prompts">
-            <ArrowLeft data-icon="inline-start" />
-            {dictionary.common.back}
-          </Link>
+        <Button
+          variant="secondary"
+          size="sm"
+          render={<Link href="/system-prompts" />}
+        >
+          <ArrowLeft data-icon="inline-start" />
+          {dictionary.common.back}
         </Button>
       </div>
 

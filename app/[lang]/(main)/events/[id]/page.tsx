@@ -305,11 +305,14 @@ export default async function EventDetailPage({ params }: PageProps) {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center">
-        <Button asChild variant="secondary" size="sm" className="gap-2">
-          <Link href="/events">
-            <ArrowLeft data-icon="inline-start" />
-            {dictionary.common.back}
-          </Link>
+        <Button
+          variant="secondary"
+          size="sm"
+          className="gap-2"
+          render={<Link href="/events" />}
+        >
+          <ArrowLeft data-icon="inline-start" />
+          {dictionary.common.back}
         </Button>
       </div>
 
@@ -467,14 +470,14 @@ async function FetchEventData({
                           variant="outline"
                           size="sm"
                           className="gap-2"
-                          asChild
+                          render={
+                            <Link
+                              href={`/news-articles/${evidence.newsArticleId}`}
+                            />
+                          }
                         >
-                          <Link
-                            href={`/news-articles/${evidence.newsArticleId}`}
-                          >
-                            <FileText data-icon="inline-start" />
-                            {dictionary.events.viewArticle}
-                          </Link>
+                          <FileText data-icon="inline-start" />
+                          {dictionary.events.viewArticle}
                         </Button>
                       ) : null}
                       {evidence.newsArticleUrl ? (
@@ -482,16 +485,16 @@ async function FetchEventData({
                           variant="outline"
                           size="sm"
                           className="gap-2"
-                          asChild
+                          render={
+                            <a
+                              href={evidence.newsArticleUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            />
+                          }
                         >
-                          <a
-                            href={evidence.newsArticleUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <ExternalLink data-icon="inline-start" />
-                            {dictionary.events.openOriginalLink}
-                          </a>
+                          <ExternalLink data-icon="inline-start" />
+                          {dictionary.events.openOriginalLink}
                         </Button>
                       ) : null}
                     </div>

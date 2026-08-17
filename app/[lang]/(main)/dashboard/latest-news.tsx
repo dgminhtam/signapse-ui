@@ -60,11 +60,14 @@ export function LatestNews({
           <CardDescription>{t.description}</CardDescription>
           {hasArticles || error ? (
             <CardAction>
-              <Button asChild variant="ghost">
-                <LocalizedLink href="/news-articles" aria-label={t.viewAll}>
-                  <span className="hidden sm:inline">{t.viewAll}</span>
-                  <ArrowRightIcon data-icon="inline-end" />
-                </LocalizedLink>
+              <Button
+                variant="ghost"
+                render={
+                  <LocalizedLink href="/news-articles" aria-label={t.viewAll} />
+                }
+              >
+                <span className="hidden sm:inline">{t.viewAll}</span>
+                <ArrowRightIcon data-icon="inline-end" />
               </Button>
             </CardAction>
           ) : null}
@@ -96,10 +99,11 @@ export function LatestNews({
                 <EmptyDescription>{t.emptyDescription}</EmptyDescription>
               </EmptyHeader>
               <EmptyContent>
-                <Button asChild variant="outline">
-                  <LocalizedLink href="/news-articles">
-                    {t.viewAll}
-                  </LocalizedLink>
+                <Button
+                  variant="outline"
+                  render={<LocalizedLink href="/news-articles" />}
+                >
+                  {t.viewAll}
                 </Button>
               </EmptyContent>
             </Empty>

@@ -89,11 +89,13 @@ export default async function NewsArticleDetailPage({ params }: PageProps) {
   return (
     <div className="mx-auto flex w-full max-w-[72ch] flex-col gap-6">
       <div className="flex items-center">
-        <Button asChild variant="secondary" size="sm">
-          <Link href="/news-articles">
-            <ArrowLeft data-icon="inline-start" />
-            {dictionary.common.back}
-          </Link>
+        <Button
+          variant="secondary"
+          size="sm"
+          render={<Link href="/news-articles" />}
+        >
+          <ArrowLeft data-icon="inline-start" />
+          {dictionary.common.back}
         </Button>
       </div>
 

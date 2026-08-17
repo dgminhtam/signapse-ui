@@ -133,11 +133,14 @@ export default async function EconomicCalendarDetailPage({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center">
-        <Button asChild variant="secondary" size="sm" className="gap-2">
-          <Link href="/economic-calendar">
-            <ArrowLeft data-icon="inline-start" />
-            {dictionary.common.back}
-          </Link>
+        <Button
+          variant="secondary"
+          size="sm"
+          className="gap-2"
+          render={<Link href="/economic-calendar" />}
+        >
+          <ArrowLeft data-icon="inline-start" />
+          {dictionary.common.back}
         </Button>
       </div>
 

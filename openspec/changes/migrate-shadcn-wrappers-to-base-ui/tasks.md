@@ -22,8 +22,8 @@
 
 ## 4. Button and state-control consumers
 
-- [ ] 4.1 Migrate Button to the official Base UI Button implementation and validate one representative consumer before the broad repoint.
-- [ ] 4.2 Replace Button and related `asChild` consumers with the Base UI `render` contract, preserving link semantics and keyboard behavior.
+- [x] 4.1 Migrate Button to the official Base UI Button implementation and validate one representative consumer before the broad repoint.
+- [x] 4.2 Replace Button and related `asChild` consumers with the Base UI `render` contract, preserving link semantics and keyboard behavior.
 - [ ] 4.3 Migrate ToggleGroup, Collapsible, Tabs, and ScrollArea, including `multiple`, activation, and panel/content contract changes.
 - [ ] 4.4 Run typecheck after each state-control group and stop dependent work on any regression.
 

@@ -147,32 +147,30 @@ export function NewsArticleList({ newsArticlePage }: NewsArticleListProps) {
                       <Button
                         variant="ghost"
                         size="icon-sm"
-                        asChild
                         className="text-muted-foreground hover:text-foreground"
+                        render={<Link href={`/news-articles/${article.id}`} />}
                       >
-                        <Link href={`/news-articles/${article.id}`}>
-                          <Eye data-icon="inline-start" />
-                          <span className="sr-only">
-                            {dictionary.newsArticles.viewDetail}
-                          </span>
-                        </Link>
+                        <Eye data-icon="inline-start" />
+                        <span className="sr-only">
+                          {dictionary.newsArticles.viewDetail}
+                        </span>
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon-sm"
-                        asChild
                         className="text-muted-foreground hover:text-foreground"
+                        render={
+                          <a
+                            href={article.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          />
+                        }
                       >
-                        <a
-                          href={article.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <ExternalLink data-icon="inline-start" />
-                          <span className="sr-only">
-                            {dictionary.newsArticles.openOriginalLink}
-                          </span>
-                        </a>
+                        <ExternalLink data-icon="inline-start" />
+                        <span className="sr-only">
+                          {dictionary.newsArticles.openOriginalLink}
+                        </span>
                       </Button>
                       <NewsArticleDeleteButton
                         id={article.id}

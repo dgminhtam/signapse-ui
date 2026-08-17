@@ -152,15 +152,13 @@ export function EventList({ eventPage }: EventListProps) {
                       <Button
                         variant="ghost"
                         size="icon-sm"
-                        asChild
                         className="text-muted-foreground hover:text-foreground"
+                        render={<Link href={`/events/${event.id}`} />}
                       >
-                        <Link href={`/events/${event.id}`}>
-                          <Eye data-icon="inline-start" />
-                          <span className="sr-only">
-                            {dictionary.events.viewDetail}
-                          </span>
-                        </Link>
+                        <Eye data-icon="inline-start" />
+                        <span className="sr-only">
+                          {dictionary.events.viewDetail}
+                        </span>
                       </Button>
                     </div>
                   </TableCell>

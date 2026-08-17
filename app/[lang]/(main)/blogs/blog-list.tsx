@@ -79,11 +79,9 @@ export function BlogListPage({ blogPage }: BlogListProps) {
       <AppListToolbar>
         <AppListToolbarLeading>
           {canCreateBlog ? (
-            <Button asChild>
-              <Link href="/blogs/create">
-                <Plus data-icon="inline-start" />
-                {dictionary.blogs.createAction}
-              </Link>
+            <Button render={<Link href="/blogs/create" />}>
+              <Plus data-icon="inline-start" />
+              {dictionary.blogs.createAction}
             </Button>
           ) : null}
           <BlogSearch />
@@ -180,18 +178,16 @@ export function BlogListPage({ blogPage }: BlogListProps) {
                     <div className="flex items-center justify-center gap-2">
                       {canUpdateBlog ? (
                         <Button
-                          asChild
                           variant="ghost"
                           size="icon"
                           className="text-muted-foreground hover:text-foreground"
                           title={dictionary.blogs.edit}
+                          render={<Link href={`/blogs/${blog.id}`} />}
                         >
-                          <Link href={`/blogs/${blog.id}`}>
-                            <Edit2 />
-                            <span className="sr-only">
-                              {dictionary.blogs.edit}
-                            </span>
-                          </Link>
+                          <Edit2 />
+                          <span className="sr-only">
+                            {dictionary.blogs.edit}
+                          </span>
                         </Button>
                       ) : null}
                       {canDeleteBlog ? <DeleteBlogButton id={blog.id} /> : null}

@@ -175,19 +175,16 @@ function PrototypeControls({
 
               return (
                 <Button
-                  asChild
                   key={option.value}
                   variant={isActive ? "secondary" : "ghost"}
-                >
-                  <LocalizedLink
+                  render={<LocalizedLink
                     href={{
                       pathname: "/dashboard-prototype",
                       query: { scenario: option.value },
                     }}
-                    aria-current={isActive ? "page" : undefined}
-                  >
-                    {option.label}
-                  </LocalizedLink>
+                    aria-current={isActive ? "page" : undefined} />}
+                >
+                  {option.label}
                 </Button>
               )
             })}
@@ -217,11 +214,11 @@ function CurrentWorkspace({
         </CardTitle>
         <CardDescription>{t.context.workspaceDescription}</CardDescription>
         <CardAction>
-          <Button asChild variant="outline">
-            <LocalizedLink href="/dashboard">
-              <TargetIcon data-icon="inline-start" />
-              {t.context.manageAssets}
-            </LocalizedLink>
+          <Button variant="outline"
+            render={<LocalizedLink href="/dashboard" />}
+          >
+            <TargetIcon data-icon="inline-start" />
+                          {t.context.manageAssets}
           </Button>
         </CardAction>
       </CardHeader>
@@ -457,11 +454,11 @@ function EventTimeline({
         <CardDescription>{t.events.description}</CardDescription>
         {!isEmpty ? (
           <CardAction>
-            <Button asChild variant="ghost">
-              <LocalizedLink href="/events" aria-label={t.events.viewAll}>
-                <span className="hidden sm:inline">{t.events.viewAll}</span>
-                <ArrowRightIcon data-icon="inline-end" />
-              </LocalizedLink>
+            <Button variant="ghost"
+              render={<LocalizedLink href="/events" aria-label={t.events.viewAll} />}
+            >
+              <span className="hidden sm:inline">{t.events.viewAll}</span>
+                              <ArrowRightIcon data-icon="inline-end" />
             </Button>
           </CardAction>
         ) : null}
@@ -595,14 +592,13 @@ function LatestArticles({
         <CardDescription>{t.articles.description}</CardDescription>
         {!isEmpty ? (
           <CardAction>
-            <Button asChild variant="ghost">
-              <LocalizedLink
+            <Button variant="ghost"
+              render={<LocalizedLink
                 href="/news-articles"
-                aria-label={t.articles.viewAll}
-              >
-                <span className="hidden sm:inline">{t.articles.viewAll}</span>
-                <ArrowRightIcon data-icon="inline-end" />
-              </LocalizedLink>
+                aria-label={t.articles.viewAll} />}
+            >
+              <span className="hidden sm:inline">{t.articles.viewAll}</span>
+                              <ArrowRightIcon data-icon="inline-end" />
             </Button>
           </CardAction>
         ) : null}
@@ -701,16 +697,15 @@ function AssetsInFocus({
         <CardDescription>{t.watchlist.description}</CardDescription>
         {!isEmpty ? (
           <CardAction>
-            <Button asChild variant="ghost">
-              <LocalizedLink
+            <Button variant="ghost"
+              render={<LocalizedLink
                 href="/graph-view"
-                aria-label={t.watchlist.graphView}
-              >
-                <WaypointsIcon data-icon="inline-start" />
-                <span className="hidden sm:inline">
-                  {t.watchlist.graphView}
-                </span>
-              </LocalizedLink>
+                aria-label={t.watchlist.graphView} />}
+            >
+              <WaypointsIcon data-icon="inline-start" />
+                              <span className="hidden sm:inline">
+                                {t.watchlist.graphView}
+                              </span>
             </Button>
           </CardAction>
         ) : null}
@@ -745,11 +740,11 @@ function AssetsInFocus({
                     <Badge variant="secondary">{asset.type}</Badge>
                   </ItemActions>
                   <ItemFooter>
-                    <Button asChild size="sm" variant="ghost">
-                      <LocalizedLink href="/market-charts">
-                        <ActivityIcon data-icon="inline-start" />
-                        {t.watchlist.marketCharts}
-                      </LocalizedLink>
+                    <Button size="sm" variant="ghost"
+                      render={<LocalizedLink href="/market-charts" />}
+                    >
+                      <ActivityIcon data-icon="inline-start" />
+                                              {t.watchlist.marketCharts}
                     </Button>
                   </ItemFooter>
                 </Item>
@@ -818,16 +813,15 @@ function MarketNarratives({
         <CardDescription>{t.narratives.description}</CardDescription>
         {!isError && !isEmpty ? (
           <CardAction>
-            <Button asChild variant="ghost">
-              <LocalizedLink
+            <Button variant="ghost"
+              render={<LocalizedLink
                 href="/graph-view"
-                aria-label={t.narratives.viewGraph}
-              >
-                <WaypointsIcon data-icon="inline-start" />
-                <span className="hidden sm:inline">
-                  {t.narratives.viewGraph}
-                </span>
-              </LocalizedLink>
+                aria-label={t.narratives.viewGraph} />}
+            >
+              <WaypointsIcon data-icon="inline-start" />
+                              <span className="hidden sm:inline">
+                                {t.narratives.viewGraph}
+                              </span>
             </Button>
           </CardAction>
         ) : null}
@@ -845,15 +839,14 @@ function MarketNarratives({
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
-              <Button asChild variant="outline">
-                <LocalizedLink
+              <Button variant="outline"
+                render={<LocalizedLink
                   href={{
                     pathname: "/dashboard-prototype",
                     query: { scenario: "default" },
-                  }}
-                >
-                  {t.error.retry}
-                </LocalizedLink>
+                  }} />}
+              >
+                {t.error.retry}
               </Button>
             </EmptyContent>
           </Empty>
@@ -954,11 +947,11 @@ function ModuleEmpty({
         <EmptyDescription>{description}</EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <Button asChild variant="outline">
-          <LocalizedLink href={actionHref}>
-            {actionLabel}
-            <ArrowRightIcon data-icon="inline-end" />
-          </LocalizedLink>
+        <Button variant="outline"
+          render={<LocalizedLink href={actionHref} />}
+        >
+          {actionLabel}
+                      <ArrowRightIcon data-icon="inline-end" />
         </Button>
       </EmptyContent>
     </Empty>

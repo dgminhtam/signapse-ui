@@ -744,20 +744,20 @@ export function EconomicCalendarList({
                                                 <Button
                                                   variant="ghost"
                                                   size="icon-sm"
-                                                  asChild
+                                                  render={
+                                                    <Link
+                                                      href={`/economic-calendar/${entry.id}`}
+                                                    />
+                                                  }
                                                 >
-                                                  <Link
-                                                    href={`/economic-calendar/${entry.id}`}
-                                                  >
-                                                    <Eye data-icon="inline-start" />
-                                                    <span className="sr-only">
-                                                      {
-                                                        dictionary
-                                                          .economicCalendar
-                                                          .viewDetail
-                                                      }
-                                                    </span>
-                                                  </Link>
+                                                  <Eye data-icon="inline-start" />
+                                                  <span className="sr-only">
+                                                    {
+                                                      dictionary
+                                                        .economicCalendar
+                                                        .viewDetail
+                                                    }
+                                                  </span>
                                                 </Button>
                                               </div>
                                             </TableCell>

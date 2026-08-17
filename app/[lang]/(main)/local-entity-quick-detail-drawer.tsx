@@ -206,11 +206,12 @@ export function LocalEntityQuickDetailDrawer({
         <DrawerFooter className="border-t bg-muted/20 px-5 py-3">
           <div className="mx-auto flex w-full max-w-5xl flex-col gap-2 sm:flex-row sm:justify-end">
             {fullDetailHref ? (
-              <Button asChild variant="outline">
-                <LocalizedLink href={fullDetailHref}>
-                  <ExternalLink aria-hidden="true" data-icon="inline-start" />
-                  {dictionary.common.openFullPage}
-                </LocalizedLink>
+              <Button
+                variant="outline"
+                render={<LocalizedLink href={fullDetailHref} />}
+              >
+                <ExternalLink aria-hidden="true" data-icon="inline-start" />
+                {dictionary.common.openFullPage}
               </Button>
             ) : null}
             <Button type="button" onClick={onClose}>

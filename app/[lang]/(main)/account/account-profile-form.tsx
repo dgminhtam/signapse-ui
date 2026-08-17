@@ -338,11 +338,12 @@ export function AccountProfileForm({
                     {initialData.roleName || t.noPackage}
                   </Badge>
                 </div>
-                <Button variant="outline" asChild>
-                  <LocalizedLink href={upgradeHref}>
-                    <CreditCard data-icon="inline-start" />
-                    {t.upgradeAccount}
-                  </LocalizedLink>
+                <Button
+                  variant="outline"
+                  render={<LocalizedLink href={upgradeHref} />}
+                >
+                  <CreditCard data-icon="inline-start" />
+                  {t.upgradeAccount}
                 </Button>
               </div>
             </Field>

@@ -74,11 +74,14 @@ export function MarketNarratives({
           <CardDescription>{t.description}</CardDescription>
           {showGraphView ? (
             <CardAction>
-              <Button asChild variant="ghost">
-                <LocalizedLink href="/graph-view" aria-label={t.graphView}>
-                  <WaypointsIcon data-icon="inline-start" />
-                  <span className="hidden sm:inline">{t.graphView}</span>
-                </LocalizedLink>
+              <Button
+                variant="ghost"
+                render={
+                  <LocalizedLink href="/graph-view" aria-label={t.graphView} />
+                }
+              >
+                <WaypointsIcon data-icon="inline-start" />
+                <span className="hidden sm:inline">{t.graphView}</span>
               </Button>
             </CardAction>
           ) : null}

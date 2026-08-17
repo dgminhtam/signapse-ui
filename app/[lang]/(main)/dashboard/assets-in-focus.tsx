@@ -77,11 +77,14 @@ export function AssetsInFocus({
           <CardDescription>{t.description}</CardDescription>
           {showGraphView ? (
             <CardAction>
-              <Button asChild variant="ghost">
-                <LocalizedLink href="/graph-view" aria-label={t.graphView}>
-                  <WaypointsIcon data-icon="inline-start" />
-                  <span className="hidden sm:inline">{t.graphView}</span>
-                </LocalizedLink>
+              <Button
+                variant="ghost"
+                render={
+                  <LocalizedLink href="/graph-view" aria-label={t.graphView} />
+                }
+              >
+                <WaypointsIcon data-icon="inline-start" />
+                <span className="hidden sm:inline">{t.graphView}</span>
               </Button>
             </CardAction>
           ) : null}
@@ -226,14 +229,18 @@ function AssetsInFocusItems({
                   )}
                 </AppTimeMetadata>
                 {canAccessMarketCharts ? (
-                  <Button asChild size="sm" variant="ghost">
-                    <LocalizedLink
-                      href={`/market-charts?assetId=${item.assetId}&timeframe=1h`}
-                      aria-label={`${t.marketCharts}: ${item.assetSymbol}`}
-                    >
-                      <ActivityIcon data-icon="inline-start" />
-                      {t.marketCharts}
-                    </LocalizedLink>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    render={
+                      <LocalizedLink
+                        href={`/market-charts?assetId=${item.assetId}&timeframe=1h`}
+                        aria-label={`${t.marketCharts}: ${item.assetSymbol}`}
+                      />
+                    }
+                  >
+                    <ActivityIcon data-icon="inline-start" />
+                    {t.marketCharts}
                   </Button>
                 ) : null}
               </ItemFooter>

@@ -99,11 +99,9 @@ export function AiProviderConfigListPage({
       <AppListToolbar>
         <AppListToolbarLeading>
           {canCreateProvider ? (
-            <Button asChild>
-              <Link href="/ai-provider-configs/create">
-                <Plus data-icon="inline-start" />
-                {t.addConfig}
-              </Link>
+            <Button render={<Link href="/ai-provider-configs/create" />}>
+              <Plus data-icon="inline-start" />
+              {t.addConfig}
             </Button>
           ) : null}
         </AppListToolbarLeading>
@@ -206,15 +204,17 @@ export function AiProviderConfigListPage({
                       <div className="flex justify-end gap-1">
                         {canUpdateProvider ? (
                           <Button
-                            asChild
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                            render={
+                              <Link
+                                href={`/ai-provider-configs/${provider.id}`}
+                              />
+                            }
                           >
-                            <Link href={`/ai-provider-configs/${provider.id}`}>
-                              <Edit2 />
-                              <span className="sr-only">{t.editConfig}</span>
-                            </Link>
+                            <Edit2 />
+                            <span className="sr-only">{t.editConfig}</span>
                           </Button>
                         ) : null}
                         {canDeleteProvider ? (

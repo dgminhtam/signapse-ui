@@ -622,17 +622,23 @@ function GraphNodeDetailInspector({
               </Button>
             ) : null}
             {sourceUrl ? (
-              <Button asChild size="sm" variant="outline">
-                <a href={sourceUrl} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink
-                    aria-hidden="true"
-                    className="size-4"
-                    data-icon="inline-start"
+              <Button
+                size="sm"
+                variant="outline"
+                render={
+                  <a
+                    href={sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
                   />
-                  <span>
-                    {dictionary.graphView.inspector.openOriginalSource}
-                  </span>
-                </a>
+                }
+              >
+                <ExternalLink
+                  aria-hidden="true"
+                  className="size-4"
+                  data-icon="inline-start"
+                />
+                <span>{dictionary.graphView.inspector.openOriginalSource}</span>
               </Button>
             ) : null}
           </div>
