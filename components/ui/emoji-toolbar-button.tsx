@@ -31,17 +31,14 @@ import {
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+import { Popover, PopoverTrigger } from "@/components/ui/popover"
+import { PopoverContentInOverlay } from "@/components/ui/popover-content-in-overlay"
 import {
   Tooltip,
-  TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { TooltipContentInOverlay } from "@/components/ui/tooltip-content-in-overlay"
 import { cn } from "@/lib/utils"
 import { ToolbarButton } from "@/components/ui/toolbar"
 
@@ -81,15 +78,17 @@ export function EmojiPopover({
   setIsOpen,
 }: {
   children: React.ReactNode
-  control: React.ReactNode
+  control: React.ReactElement
   isOpen: boolean
   setIsOpen: (open: boolean) => void
 }) {
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>{control}</PopoverTrigger>
+      <PopoverTrigger render={control} />
 
-      <PopoverContent className="w-auto">{children}</PopoverContent>
+      <PopoverContentInOverlay className="w-auto">
+        {children}
+      </PopoverContentInOverlay>
     </Popover>
   )
 }
@@ -487,7 +486,7 @@ function EmojiPickerNavigation({
   "emojiLibrary" | "focusedCategory" | "i18n" | "icons"
 >) {
   return (
-    <TooltipProvider delayDuration={500}>
+    <TooltipProvider delay={500}>
       <nav
         id="emoji-nav"
         className="mb-2.5 border-0 border-b border-solid border-b-border p-1.5"
@@ -498,29 +497,31 @@ function EmojiPickerNavigation({
             .sections()
             .map(({ id }) => (
               <Tooltip key={id}>
-                <TooltipTrigger asChild>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className={cn(
-                      "h-fit rounded-full fill-current p-1.5 text-muted-foreground hover:bg-muted hover:text-muted-foreground",
-                      id === focusedCategory &&
-                        "pointer-events-none bg-accent fill-current text-accent-foreground"
-                    )}
-                    onClick={() => {
-                      onClick(id)
-                    }}
-                    aria-label={i18n.categories[id]}
-                    type="button"
-                  >
-                    <span className="inline-flex size-5 items-center justify-center">
-                      {icons.categories[id].outline}
-                    </span>
-                  </Button>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className={cn(
+                        "h-fit rounded-full fill-current p-1.5 text-muted-foreground hover:bg-muted hover:text-muted-foreground",
+                        id === focusedCategory &&
+                          "pointer-events-none bg-accent fill-current text-accent-foreground"
+                      )}
+                      onClick={() => {
+                        onClick(id)
+                      }}
+                      aria-label={i18n.categories[id]}
+                      type="button"
+                    />
+                  }
+                >
+                  <span className="inline-flex size-5 items-center justify-center">
+                    {icons.categories[id].outline}
+                  </span>
                 </TooltipTrigger>
-                <TooltipContent side="bottom">
+                <TooltipContentInOverlay side="bottom">
                   {i18n.categories[id]}
-                </TooltipContent>
+                </TooltipContentInOverlay>
               </Tooltip>
             ))}
         </div>

@@ -22,11 +22,8 @@ import {
 } from "platejs/react"
 
 import { Button } from "@/components/ui/button"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+import { Popover, PopoverTrigger } from "@/components/ui/popover"
+import { PopoverContentInOverlay } from "@/components/ui/popover-content-in-overlay"
 import { cn } from "@/lib/utils"
 
 export function EquationElement(props: PlateElementProps<TEquationElement>) {
@@ -57,30 +54,43 @@ export function EquationElement(props: PlateElementProps<TEquationElement>) {
 
   return (
     <PlateElement className="my-1" {...props}>
-      <Popover open={open} onOpenChange={setOpen} modal={false}>
-        <PopoverTrigger asChild>
-          <div
-            className={cn(
-              "group flex cursor-pointer items-center justify-center rounded-sm select-none hover:bg-primary/10 data-[selected=true]:bg-primary/10",
-              props.element.texExpression.length === 0
-                ? "bg-muted p-3 pr-9"
-                : "px-2 py-1"
-            )}
-            data-selected={selected}
-            contentEditable={false}
-            role="button"
-          >
-            {props.element.texExpression.length > 0 ? (
-              <span ref={katexRef} />
-            ) : (
-              <div className="flex h-7 w-full items-center gap-2 text-sm whitespace-nowrap text-muted-foreground">
-                <RadicalIcon className="size-6 text-muted-foreground/80" />
-                <div>Add a Tex equation</div>
-              </div>
-            )}
-            {lineBreakBadge}
-          </div>
-        </PopoverTrigger>
+      <Popover
+        open={open}
+        onOpenChange={(nextOpen, eventDetails) => {
+          if (!nextOpen && eventDetails.reason === "escape-key") {
+            eventDetails.cancel()
+            return
+          }
+
+          setOpen(nextOpen)
+        }}
+        modal={false}
+      >
+        <PopoverTrigger
+          render={
+            <div
+              className={cn(
+                "group flex cursor-pointer items-center justify-center rounded-sm select-none hover:bg-primary/10 data-[selected=true]:bg-primary/10",
+                props.element.texExpression.length === 0
+                  ? "bg-muted p-3 pr-9"
+                  : "px-2 py-1"
+              )}
+              data-selected={selected}
+              contentEditable={false}
+              role="button"
+            >
+              {props.element.texExpression.length > 0 ? (
+                <span ref={katexRef} />
+              ) : (
+                <div className="flex h-7 w-full items-center gap-2 text-sm whitespace-nowrap text-muted-foreground">
+                  <RadicalIcon className="size-6 text-muted-foreground/80" />
+                  <div>Add a Tex equation</div>
+                </div>
+              )}
+              {lineBreakBadge}
+            </div>
+          }
+        />
 
         <EquationPopoverContent
           open={open}
@@ -139,34 +149,47 @@ export function InlineEquationElement(
         "mx-1 inline-block rounded-sm select-none [&_.katex-display]:my-0!"
       )}
     >
-      <Popover open={open} onOpenChange={setOpen} modal={false}>
-        <PopoverTrigger asChild>
-          <div
-            className={cn(
-              'after:absolute after:inset-0 after:-top-0.5 after:-left-1 after:z-1 after:h-[calc(100%)+4px] after:w-[calc(100%+8px)] after:rounded-sm after:content-[""]',
-              "h-6",
-              ((element.texExpression.length > 0 && open) || selected) &&
-                "after:bg-brand/15",
-              element.texExpression.length === 0 &&
-                "text-muted-foreground after:bg-neutral-500/10"
-            )}
-            contentEditable={false}
-          >
-            <span
-              ref={katexRef}
+      <Popover
+        open={open}
+        onOpenChange={(nextOpen, eventDetails) => {
+          if (!nextOpen && eventDetails.reason === "escape-key") {
+            eventDetails.cancel()
+            return
+          }
+
+          setOpen(nextOpen)
+        }}
+        modal={false}
+      >
+        <PopoverTrigger
+          render={
+            <div
               className={cn(
-                element.texExpression.length === 0 && "hidden",
-                "font-mono leading-none"
+                'after:absolute after:inset-0 after:-top-0.5 after:-left-1 after:z-1 after:h-[calc(100%)+4px] after:w-[calc(100%+8px)] after:rounded-sm after:content-[""]',
+                "h-6",
+                ((element.texExpression.length > 0 && open) || selected) &&
+                  "after:bg-brand/15",
+                element.texExpression.length === 0 &&
+                  "text-muted-foreground after:bg-neutral-500/10"
               )}
-            />
-            {element.texExpression.length === 0 && (
-              <span>
-                <RadicalIcon className="mr-1 inline-block h-[19px] w-4 py-[1.5px] align-text-bottom" />
-                New equation
-              </span>
-            )}
-          </div>
-        </PopoverTrigger>
+              contentEditable={false}
+            >
+              <span
+                ref={katexRef}
+                className={cn(
+                  element.texExpression.length === 0 && "hidden",
+                  "font-mono leading-none"
+                )}
+              />
+              {element.texExpression.length === 0 && (
+                <span>
+                  <RadicalIcon className="mr-1 inline-block h-[19px] w-4 py-[1.5px] align-text-bottom" />
+                  New equation
+                </span>
+              )}
+            </div>
+          }
+        />
 
         <EquationPopoverContent
           className="my-auto"
@@ -222,13 +245,7 @@ const EquationPopoverContent = ({
   }
 
   return (
-    <PopoverContent
-      className="flex gap-2"
-      onEscapeKeyDown={(e) => {
-        e.preventDefault()
-      }}
-      contentEditable={false}
-    >
+    <PopoverContentInOverlay className="flex gap-2" contentEditable={false}>
       <EquationInput
         className={cn("max-h-[50vh] grow resize-none p-2 text-sm", className)}
         state={{ isInline, open, onClose }}
@@ -239,6 +256,6 @@ const EquationPopoverContent = ({
       <Button variant="secondary" className="px-3" onClick={onClose}>
         Done <CornerDownLeftIcon className="size-3.5" />
       </Button>
-    </PopoverContent>
+    </PopoverContentInOverlay>
   )
 }

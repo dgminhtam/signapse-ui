@@ -67,11 +67,8 @@ import {
   FieldSet,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+import { Popover, PopoverTrigger } from "@/components/ui/popover"
+import { PopoverContentInOverlay } from "@/components/ui/popover-content-in-overlay"
 import {
   Select,
   SelectContent,
@@ -616,27 +613,29 @@ function ScheduleFormFields({
               {t.schedule.timezoneLabel}
             </FieldLabel>
             <Popover open={timezoneOpen} onOpenChange={setTimezoneOpen} modal>
-              <PopoverTrigger asChild>
-                <Button
-                  id={getScheduleFieldId(idPrefix, "timezone")}
-                  type="button"
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={timezoneOpen}
-                  aria-invalid={Boolean(errors.timezone)}
-                  aria-describedby={describedBy("timezone")}
-                  disabled={disabled}
-                  className="w-full justify-between font-normal"
-                >
-                  <span className="min-w-0 truncate">
-                    {selectedTimezone?.label ?? t.schedule.timezonePlaceholder}
-                  </span>
-                  <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
-                </Button>
+              <PopoverTrigger
+                render={
+                  <Button
+                    id={getScheduleFieldId(idPrefix, "timezone")}
+                    type="button"
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={timezoneOpen}
+                    aria-invalid={Boolean(errors.timezone)}
+                    aria-describedby={describedBy("timezone")}
+                    disabled={disabled}
+                    className="w-full justify-between font-normal"
+                  />
+                }
+              >
+                <span className="min-w-0 truncate">
+                  {selectedTimezone?.label ?? t.schedule.timezonePlaceholder}
+                </span>
+                <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
               </PopoverTrigger>
-              <PopoverContent
+              <PopoverContentInOverlay
                 align="start"
-                className="w-[var(--radix-popover-trigger-width)] p-0"
+                className="w-[var(--anchor-width)] p-0"
               >
                 <Command>
                   <CommandInput
@@ -676,7 +675,7 @@ function ScheduleFormFields({
                     ))}
                   </CommandList>
                 </Command>
-              </PopoverContent>
+              </PopoverContentInOverlay>
             </Popover>
             <FieldDescription id={descriptionId("timezone")}>
               {t.schedule.timezoneDescription}

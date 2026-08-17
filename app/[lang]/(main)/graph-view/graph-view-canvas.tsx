@@ -35,10 +35,10 @@ import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
 import {
   Tooltip,
-  TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { TooltipContentInOverlay } from "@/components/ui/tooltip-content-in-overlay"
 import { cn } from "@/lib/utils"
 
 import {
@@ -162,21 +162,23 @@ function GraphToolButton({
 }) {
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          aria-label={label}
-          type="button"
-          size="icon-sm"
-          variant="outline"
-          className="pointer-events-auto"
-          onClick={onClick}
-        >
-          {children}
-        </Button>
+      <TooltipTrigger
+        render={
+          <Button
+            aria-label={label}
+            type="button"
+            size="icon-sm"
+            variant="outline"
+            className="pointer-events-auto"
+            onClick={onClick}
+          />
+        }
+      >
+        {children}
       </TooltipTrigger>
-      <TooltipContent side="left" sideOffset={8}>
+      <TooltipContentInOverlay side="left" sideOffset={8}>
         {label}
-      </TooltipContent>
+      </TooltipContentInOverlay>
     </Tooltip>
   )
 }

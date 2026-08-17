@@ -42,11 +42,8 @@ import type {
 import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { LocalizedLink } from "@/components/localized-link"
 import { Badge } from "@/components/ui/badge"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+import { Popover, PopoverTrigger } from "@/components/ui/popover"
+import { PopoverContentInOverlay } from "@/components/ui/popover-content-in-overlay"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Spinner } from "@/components/ui/spinner"
@@ -1691,50 +1688,52 @@ export const MarketChartCanvas = forwardRef<
 
             return (
               <Popover key={group.id}>
-                <PopoverTrigger asChild>
-                  <button
-                    type="button"
-                    aria-label={
-                      count > 1
-                        ? formatMessage(
-                            dictionary.marketCharts.calendar.openMany,
-                            { count: formatNumber(count) }
-                          )
-                        : formatMessage(
-                            dictionary.marketCharts.calendar.openOne,
-                            {
-                              title: group.events[0]
-                                ? getCalendarEventTitle(group.events[0])
-                                : "",
-                            }
-                          )
-                    }
-                    className="absolute top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-                    style={{ left: x }}
-                    onBlur={() => setActiveCalendarGuideX(null)}
-                    onFocus={() => setActiveCalendarGuideX(x)}
-                    onMouseEnter={() => setActiveCalendarGuideX(x)}
-                    onMouseLeave={() => setActiveCalendarGuideX(null)}
-                  >
-                    <span
-                      className={cn(
+                <PopoverTrigger
+                  render={
+                    <button
+                      type="button"
+                      aria-label={
                         count > 1
-                          ? "relative flex size-6 items-center justify-center rounded-full border-2 border-background bg-sky-500 text-[11px] font-semibold text-white shadow-sm ring-2 ring-sky-500/30"
-                          : "relative block rounded-full border-2 border-background bg-sky-500 shadow-sm ring-2 ring-sky-500/30",
-                        count > 1 ? null : emphasized ? "size-5" : "size-4"
-                      )}
-                    >
-                      {count > 1 ? formatNumber(count) : null}
-                    </span>
-                  </button>
+                          ? formatMessage(
+                              dictionary.marketCharts.calendar.openMany,
+                              { count: formatNumber(count) }
+                            )
+                          : formatMessage(
+                              dictionary.marketCharts.calendar.openOne,
+                              {
+                                title: group.events[0]
+                                  ? getCalendarEventTitle(group.events[0])
+                                  : "",
+                              }
+                            )
+                      }
+                      className="absolute top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                      style={{ left: x }}
+                      onBlur={() => setActiveCalendarGuideX(null)}
+                      onFocus={() => setActiveCalendarGuideX(x)}
+                      onMouseEnter={() => setActiveCalendarGuideX(x)}
+                      onMouseLeave={() => setActiveCalendarGuideX(null)}
+                    />
+                  }
+                >
+                  <span
+                    className={cn(
+                      count > 1
+                        ? "relative flex size-6 items-center justify-center rounded-full border-2 border-background bg-sky-500 text-[11px] font-semibold text-white shadow-sm ring-2 ring-sky-500/30"
+                        : "relative block rounded-full border-2 border-background bg-sky-500 shadow-sm ring-2 ring-sky-500/30",
+                      count > 1 ? null : emphasized ? "size-5" : "size-4"
+                    )}
+                  >
+                    {count > 1 ? formatNumber(count) : null}
+                  </span>
                 </PopoverTrigger>
-                <PopoverContent
+                <PopoverContentInOverlay
                   align="start"
                   side="top"
                   className="w-[min(24rem,calc(100vw_-_1.5rem))]"
                 >
                   <MarketChartCalendarEventList events={group.events} />
-                </PopoverContent>
+                </PopoverContentInOverlay>
               </Popover>
             )
           })}
@@ -1768,32 +1767,34 @@ export const MarketChartCanvas = forwardRef<
               )}
               style={{ height, left, top, width }}
             />
-            <PopoverTrigger asChild>
-              <button
-                type="button"
-                aria-label={formatMessage(
-                  dictionary.marketCharts.annotations.openOne,
-                  { title: annotation?.warmEpisode?.summary || "" }
-                )}
-                aria-pressed={selected}
-                disabled={drawingToolActive}
-                className={cn(
-                  "absolute z-[2] flex size-11 items-center justify-center rounded-full border-2 border-background shadow-sm outline-none transition-transform focus-visible:ring-3 focus-visible:ring-ring/50 sm:size-6",
-                  drawingToolActive ? "pointer-events-none" : null,
-                  colorClassNames.dot,
-                  colorClassNames.ring,
-                  selected ? "ring-4" : "ring-1"
-                )}
-                style={{ left: left + 4, top: top + 4 }}
-              />
-            </PopoverTrigger>
-            <PopoverContent
+            <PopoverTrigger
+              render={
+                <button
+                  type="button"
+                  aria-label={formatMessage(
+                    dictionary.marketCharts.annotations.openOne,
+                    { title: annotation?.warmEpisode?.summary || "" }
+                  )}
+                  aria-pressed={selected}
+                  disabled={drawingToolActive}
+                  className={cn(
+                    "absolute z-[2] flex size-11 items-center justify-center rounded-full border-2 border-background shadow-sm transition-transform outline-none focus-visible:ring-3 focus-visible:ring-ring/50 sm:size-6",
+                    drawingToolActive ? "pointer-events-none" : null,
+                    colorClassNames.dot,
+                    colorClassNames.ring,
+                    selected ? "ring-4" : "ring-1"
+                  )}
+                  style={{ left: left + 4, top: top + 4 }}
+                />
+              }
+            />
+            <PopoverContentInOverlay
               align="start"
               side="top"
               className="w-[min(22rem,calc(100vw_-_1.5rem))] sm:block"
             >
               {renderAnnotationPopup?.(group)}
-            </PopoverContent>
+            </PopoverContentInOverlay>
           </Popover>
         )
       })}
@@ -1839,67 +1840,69 @@ export const MarketChartCanvas = forwardRef<
               }
             }}
           >
-            <PopoverTrigger asChild>
-              <button
-                type="button"
-                aria-label={
-                  count > 1
-                    ? formatMessage(
-                        dictionary.marketCharts.annotations.openMany,
-                        {
-                          count: formatNumber(count),
-                          time: formatDateTime(
-                            group.annotations[0]?.time,
-                            MARKER_DATE_TIME_OPTIONS,
-                            dictionary.marketCharts.format.notAvailable
-                          ),
-                        }
-                      )
-                    : formatMessage(
-                        dictionary.marketCharts.annotations.openOne,
-                        {
-                          title:
-                            group.annotations[0]?.hotEvent?.title ||
-                            group.annotations[0]?.hotEvent?.summary ||
-                            "",
-                        }
-                      )
-                }
-                aria-pressed={selected}
-                className={cn(
-                  "group absolute z-10 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
-                  drawingToolActive ? "pointer-events-none" : null
-                )}
-                style={{ left: x, top: y }}
-              >
-                <span
-                  className={cn(
-                    "market-chart-annotation-pulse absolute rounded-full",
-                    emphasized ? "size-9" : "size-7",
-                    colorClassNames.pulse
-                  )}
-                />
-                <span
-                  className={cn(
+            <PopoverTrigger
+              render={
+                <button
+                  type="button"
+                  aria-label={
                     count > 1
-                      ? "relative flex size-6 items-center justify-center rounded-full border-2 border-background text-[11px] font-semibold shadow-lg ring-2"
-                      : "relative block size-4 rounded-full border-2 border-background shadow-lg ring-2 group-data-[state=open]:ring-4",
-                    colorClassNames.dot,
-                    colorClassNames.ring,
-                    count > 1 ? colorClassNames.foreground : null
+                      ? formatMessage(
+                          dictionary.marketCharts.annotations.openMany,
+                          {
+                            count: formatNumber(count),
+                            time: formatDateTime(
+                              group.annotations[0]?.time,
+                              MARKER_DATE_TIME_OPTIONS,
+                              dictionary.marketCharts.format.notAvailable
+                            ),
+                          }
+                        )
+                      : formatMessage(
+                          dictionary.marketCharts.annotations.openOne,
+                          {
+                            title:
+                              group.annotations[0]?.hotEvent?.title ||
+                              group.annotations[0]?.hotEvent?.summary ||
+                              "",
+                          }
+                        )
+                  }
+                  aria-pressed={selected}
+                  className={cn(
+                    "group absolute z-10 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+                    drawingToolActive ? "pointer-events-none" : null
                   )}
+                  style={{ left: x, top: y }}
                 >
-                  {count > 1 ? formatNumber(count) : null}
-                </span>
-              </button>
-            </PopoverTrigger>
-            <PopoverContent
+                  <span
+                    className={cn(
+                      "market-chart-annotation-pulse absolute rounded-full",
+                      emphasized ? "size-9" : "size-7",
+                      colorClassNames.pulse
+                    )}
+                  />
+                  <span
+                    className={cn(
+                      count > 1
+                        ? "relative flex size-6 items-center justify-center rounded-full border-2 border-background text-[11px] font-semibold shadow-lg ring-2"
+                        : "relative block size-4 rounded-full border-2 border-background shadow-lg ring-2 group-data-[state=open]:ring-4",
+                      colorClassNames.dot,
+                      colorClassNames.ring,
+                      count > 1 ? colorClassNames.foreground : null
+                    )}
+                  >
+                    {count > 1 ? formatNumber(count) : null}
+                  </span>
+                </button>
+              }
+            />
+            <PopoverContentInOverlay
               align="start"
               side="right"
               className="w-[min(22rem,calc(100vw_-_1.5rem))] sm:block"
             >
               {renderAnnotationPopup?.(group)}
-            </PopoverContent>
+            </PopoverContentInOverlay>
           </Popover>
         )
       })}

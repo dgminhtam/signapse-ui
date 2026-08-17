@@ -27,14 +27,18 @@ import {
 } from "platejs/react"
 
 import { Button } from "@/components/ui/button"
-import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover"
+import {
+  PopoverAnchor,
+  PopoverContentWithAnchor,
+  PopoverWithAnchor,
+} from "@/components/ui/popover-anchor"
 import { Separator } from "@/components/ui/separator"
 import {
   Tooltip,
-  TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { TooltipContentInOverlay } from "@/components/ui/tooltip-content-in-overlay"
 import { cn } from "@/lib/utils"
 
 export const ColumnElement = withHOC(
@@ -99,19 +103,19 @@ const ColumnDragHandle = React.memo(function ColumnDragHandle() {
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <Button variant="ghost" className="h-5 !px-1">
-            <GripHorizontal
-              className="text-muted-foreground"
-              onClick={(event) => {
-                event.stopPropagation()
-                event.preventDefault()
-              }}
-            />
-          </Button>
+        <TooltipTrigger
+          render={<Button variant="ghost" className="h-5 !px-1" />}
+        >
+          <GripHorizontal
+            className="text-muted-foreground"
+            onClick={(event) => {
+              event.stopPropagation()
+              event.preventDefault()
+            }}
+          />
         </TooltipTrigger>
 
-        <TooltipContent>Drag to move column</TooltipContent>
+        <TooltipContentInOverlay>Drag to move column</TooltipContentInOverlay>
       </Tooltip>
     </TooltipProvider>
   )
@@ -168,11 +172,11 @@ function ColumnFloatingToolbar({ children }: React.PropsWithChildren) {
   }
 
   return (
-    <Popover open={open} modal={false}>
+    <PopoverWithAnchor open={open} modal={false}>
       <PopoverAnchor>{children}</PopoverAnchor>
-      <PopoverContent
+      <PopoverContentWithAnchor
         className="w-auto p-1"
-        onOpenAutoFocus={(e) => e.preventDefault()}
+        initialFocus={false}
         align="center"
         side="top"
         sideOffset={10}
@@ -219,8 +223,8 @@ function ColumnFloatingToolbar({ children }: React.PropsWithChildren) {
             <Trash2Icon />
           </Button>
         </div>
-      </PopoverContent>
-    </Popover>
+      </PopoverContentWithAnchor>
+    </PopoverWithAnchor>
   )
 }
 

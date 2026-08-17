@@ -92,19 +92,16 @@ import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Switch } from "@/components/ui/switch"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip"
+import { TooltipContentInOverlay } from "@/components/ui/tooltip-content-in-overlay"
 import {
   Popover,
-  PopoverContent,
   PopoverDescription,
   PopoverHeader,
   PopoverTitle,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { PopoverContentInOverlay } from "@/components/ui/popover-content-in-overlay"
 import { cn } from "@/lib/utils"
 
 import {
@@ -823,21 +820,23 @@ function MarketChartTopToolbar({
 
           <div className="flex flex-wrap items-center gap-1">
             <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  disabled={isBusy || !!watchlistError || !selectedAsset}
-                  aria-label={
-                    dictionary.marketCharts.controls.eventSettingsAria
-                  }
-                >
-                  <CalendarCog data-icon="inline-start" />
-                  {dictionary.marketCharts.controls.annotationsLabel}
-                </Button>
+              <PopoverTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={isBusy || !!watchlistError || !selectedAsset}
+                    aria-label={
+                      dictionary.marketCharts.controls.eventSettingsAria
+                    }
+                  />
+                }
+              >
+                <CalendarCog data-icon="inline-start" />
+                {dictionary.marketCharts.controls.annotationsLabel}
               </PopoverTrigger>
-              <PopoverContent
+              <PopoverContentInOverlay
                 align="start"
                 className="w-[min(18rem,calc(100vw_-_1.5rem))]"
               >
@@ -933,36 +932,38 @@ function MarketChartTopToolbar({
                     </div>
                   </FieldSet>
                 </Item>
-              </PopoverContent>
+              </PopoverContentInOverlay>
             </Popover>
 
             <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  disabled={chartCommandsDisabled}
-                >
-                  {activeIndicators.length > 0 ? (
-                    <span
-                      data-icon="inline-start"
-                      className="inline-flex size-3.5 items-center justify-center tabular-nums"
-                    >
-                      {activeIndicators.length > 9
-                        ? "9+"
-                        : activeIndicators.length}
-                    </span>
-                  ) : (
-                    <SlidersHorizontal data-icon="inline-start" />
-                  )}
-                  {dictionary.marketCharts.controls.indicatorLabel}
-                </Button>
+              <PopoverTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={chartCommandsDisabled}
+                  />
+                }
+              >
+                {activeIndicators.length > 0 ? (
+                  <span
+                    data-icon="inline-start"
+                    className="inline-flex size-3.5 items-center justify-center tabular-nums"
+                  >
+                    {activeIndicators.length > 9
+                      ? "9+"
+                      : activeIndicators.length}
+                  </span>
+                ) : (
+                  <SlidersHorizontal data-icon="inline-start" />
+                )}
+                {dictionary.marketCharts.controls.indicatorLabel}
               </PopoverTrigger>
 
-              <PopoverContent
+              <PopoverContentInOverlay
                 align="end"
-                className="max-h-[var(--radix-popover-content-available-height)] w-[min(18rem,calc(100vw_-_1.5rem))] overflow-y-auto"
+                className="max-h-[var(--available-height)] w-[min(18rem,calc(100vw_-_1.5rem))] overflow-y-auto"
               >
                 <PopoverHeader>
                   <PopoverTitle>
@@ -1008,47 +1009,51 @@ function MarketChartTopToolbar({
                     })}
                   </FieldGroup>
                 </FieldSet>
-              </PopoverContent>
+              </PopoverContentInOverlay>
             </Popover>
 
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon-sm"
-                  disabled={chartCommandsDisabled}
-                  onClick={onScreenshot}
-                  aria-label={dictionary.marketCharts.controls.screenshotAria}
-                >
-                  <Camera />
-                </Button>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="outline"
+                    size="icon-sm"
+                    disabled={chartCommandsDisabled}
+                    onClick={onScreenshot}
+                    aria-label={dictionary.marketCharts.controls.screenshotAria}
+                  />
+                }
+              >
+                <Camera />
               </TooltipTrigger>
-              <TooltipContent>
+              <TooltipContentInOverlay>
                 {dictionary.marketCharts.controls.screenshotLabel}
-              </TooltipContent>
+              </TooltipContentInOverlay>
             </Tooltip>
 
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon-sm"
-                  onClick={onFullscreenToggle}
-                  disabled={!!watchlistError}
-                  aria-label={
-                    isFullscreen
-                      ? dictionary.marketCharts.controls.exitFullscreenAria
-                      : dictionary.marketCharts.controls.fullscreenAria
-                  }
-                >
-                  {isFullscreen ? <Minimize /> : <Maximize />}
-                </Button>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="outline"
+                    size="icon-sm"
+                    onClick={onFullscreenToggle}
+                    disabled={!!watchlistError}
+                    aria-label={
+                      isFullscreen
+                        ? dictionary.marketCharts.controls.exitFullscreenAria
+                        : dictionary.marketCharts.controls.fullscreenAria
+                    }
+                  />
+                }
+              >
+                {isFullscreen ? <Minimize /> : <Maximize />}
               </TooltipTrigger>
-              <TooltipContent>
+              <TooltipContentInOverlay>
                 {isFullscreen
                   ? dictionary.marketCharts.controls.exitFullscreenLabel
                   : dictionary.marketCharts.controls.fullscreenLabel}
-              </TooltipContent>
+              </TooltipContentInOverlay>
             </Tooltip>
           </div>
         </div>
@@ -1771,21 +1776,23 @@ function MarketChartSelectedDrawingToolbar({
       aria-label={labels.selectedToolbarLabel}
     >
       <Popover open={colorPopoverOpen} onOpenChange={setColorPopoverOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-xs"
-            aria-label={labels.openColorPalette}
-          >
-            <span
-              aria-hidden="true"
-              className="size-3 rounded-full ring-1 ring-foreground/20"
-              style={{ backgroundColor: selectedColor }}
+        <PopoverTrigger
+          render={
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-xs"
+              aria-label={labels.openColorPalette}
             />
-          </Button>
+          }
+        >
+          <span
+            aria-hidden="true"
+            className="size-3 rounded-full ring-1 ring-foreground/20"
+            style={{ backgroundColor: selectedColor }}
+          />
         </PopoverTrigger>
-        <PopoverContent align="start" side="top" className="w-auto">
+        <PopoverContentInOverlay align="start" side="top" className="w-auto">
           <div
             className="grid grid-cols-4 gap-1"
             role="group"
@@ -1819,29 +1826,31 @@ function MarketChartSelectedDrawingToolbar({
               )
             })}
           </div>
-        </PopoverContent>
+        </PopoverContentInOverlay>
       </Popover>
 
       <Separator orientation="vertical" />
 
       <Popover open={sizePopoverOpen} onOpenChange={setSizePopoverOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-xs"
-            aria-label={formatMessage(labels.selectedSize, {
-              size: `${selection.style.size}px`,
-            })}
-          >
-            <MarketChartDrawingSizePreview
-              compact
-              color={selectedColor}
-              size={selection.style.size}
+        <PopoverTrigger
+          render={
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-xs"
+              aria-label={formatMessage(labels.selectedSize, {
+                size: `${selection.style.size}px`,
+              })}
             />
-          </Button>
+          }
+        >
+          <MarketChartDrawingSizePreview
+            compact
+            color={selectedColor}
+            size={selection.style.size}
+          />
         </PopoverTrigger>
-        <PopoverContent align="start" side="top" className="w-auto">
+        <PopoverContentInOverlay align="start" side="top" className="w-auto">
           <div
             className="flex flex-col gap-1"
             role="group"
@@ -1873,7 +1882,7 @@ function MarketChartSelectedDrawingToolbar({
               )
             })}
           </div>
-        </PopoverContent>
+        </PopoverContentInOverlay>
       </Popover>
 
       <Separator orientation="vertical" />
@@ -2428,19 +2437,19 @@ function MarketChartAnnotationControls({
             ) : null}
             {calendarLabel && calendarEventCount > 0 ? (
               <Popover>
-                <PopoverTrigger asChild>
-                  <Button type="button" variant="ghost" size="xs">
-                    <span
-                      aria-hidden="true"
-                      className={cn(
-                        "size-2 rounded-full",
-                        calendarLoadError ? "bg-destructive" : "bg-sky-500"
-                      )}
-                    />
-                    {calendarLabel}
-                  </Button>
+                <PopoverTrigger
+                  render={<Button type="button" variant="ghost" size="xs" />}
+                >
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      "size-2 rounded-full",
+                      calendarLoadError ? "bg-destructive" : "bg-sky-500"
+                    )}
+                  />
+                  {calendarLabel}
                 </PopoverTrigger>
-                <PopoverContent
+                <PopoverContentInOverlay
                   align="start"
                   side="top"
                   className="w-[min(24rem,calc(100vw_-_1.5rem))]"
@@ -2451,7 +2460,7 @@ function MarketChartAnnotationControls({
                     </PopoverTitle>
                   </PopoverHeader>
                   <MarketChartCalendarEventList events={calendarEvents} />
-                </PopoverContent>
+                </PopoverContentInOverlay>
               </Popover>
             ) : calendarLabel ? (
               <span className="flex items-center gap-2">

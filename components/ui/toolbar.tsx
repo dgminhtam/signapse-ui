@@ -11,11 +11,8 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip"
+import { TooltipContentInOverlay } from "@/components/ui/tooltip-content-in-overlay"
 import { cn } from "@/lib/utils"
 
 export function Toolbar({
@@ -284,7 +281,7 @@ export function ToolbarGroup({
 type TooltipProps<T extends React.ElementType> = {
   tooltip?: React.ReactNode
   tooltipContentProps?: Omit<
-    React.ComponentPropsWithoutRef<typeof TooltipContent>,
+    React.ComponentPropsWithoutRef<typeof TooltipContentInOverlay>,
     "children"
   >
   tooltipProps?: Omit<
@@ -313,13 +310,11 @@ function withTooltip<T extends React.ElementType>(Component: T) {
     if (tooltip && mounted) {
       return (
         <Tooltip {...tooltipProps}>
-          <TooltipTrigger asChild {...tooltipTriggerProps}>
-            {component}
-          </TooltipTrigger>
+          <TooltipTrigger render={component} {...tooltipTriggerProps} />
 
-          <TooltipContent sideOffset={4} {...tooltipContentProps}>
+          <TooltipContentInOverlay sideOffset={4} {...tooltipContentProps}>
             {tooltip}
-          </TooltipContent>
+          </TooltipContentInOverlay>
         </Tooltip>
       )
     }

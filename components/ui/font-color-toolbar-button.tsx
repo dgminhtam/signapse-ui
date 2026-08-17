@@ -20,10 +20,10 @@ import {
 } from "@/components/ui/dropdown-menu"
 import {
   Tooltip,
-  TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { TooltipContentInOverlay } from "@/components/ui/tooltip-content-in-overlay"
 import { cn } from "@/lib/utils"
 
 import { ToolbarButton, ToolbarMenuGroup } from "./toolbar"
@@ -493,7 +493,9 @@ function ColorDropdownMenuItem({
   return name ? (
     <Tooltip>
       <TooltipTrigger>{content}</TooltipTrigger>
-      <TooltipContent className="mb-1 capitalize">{name}</TooltipContent>
+      <TooltipContentInOverlay className="mb-1 capitalize">
+        {name}
+      </TooltipContentInOverlay>
     </Tooltip>
   ) : (
     content

@@ -29,11 +29,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Spinner } from "@/components/ui/spinner"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip"
+import { TooltipContentInOverlay } from "@/components/ui/tooltip-content-in-overlay"
 
 interface NewsArticleDetailActionsProps {
   id: number
@@ -75,20 +72,22 @@ export function NewsArticleDetailActions({
     <>
       <DropdownMenu>
         <Tooltip>
-          <TooltipTrigger asChild>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon-sm"
-                aria-label={dictionary.newsArticles.actionsLabel}
-              >
-                <MoreHorizontal data-icon="inline-start" />
-              </Button>
-            </DropdownMenuTrigger>
-          </TooltipTrigger>
-          <TooltipContent>
+          <TooltipTrigger
+            render={
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  aria-label={dictionary.newsArticles.actionsLabel}
+                >
+                  <MoreHorizontal data-icon="inline-start" />
+                </Button>
+              </DropdownMenuTrigger>
+            }
+          />
+          <TooltipContentInOverlay>
             {dictionary.newsArticles.actionsTooltip}
-          </TooltipContent>
+          </TooltipContentInOverlay>
         </Tooltip>
         <DropdownMenuContent align="end" className="w-52">
           <DropdownMenuGroup>

@@ -70,11 +70,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip"
+import { TooltipContentInOverlay } from "@/components/ui/tooltip-content-in-overlay"
 import { cn } from "@/lib/utils"
 
 import { NewsOutletSearch } from "./news-outlet-search"
@@ -254,24 +251,28 @@ export function NewsOutletListPage({ newsOutletPage }: NewsOutletListProps) {
                     <div className="flex items-center justify-center gap-1">
                       {canUpdateNewsOutlet ? (
                         <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon-sm"
-                              className="text-muted-foreground hover:text-foreground"
-                              render={
-                                <Link href={`/news-outlets/${newsOutlet.id}`} />
-                              }
-                            >
-                              <Edit2 data-icon="inline-start" />
-                              <span className="sr-only">
-                                {dictionary.newsOutlets.edit}
-                              </span>
-                            </Button>
+                          <TooltipTrigger
+                            render={
+                              <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                className="text-muted-foreground hover:text-foreground"
+                                render={
+                                  <Link
+                                    href={`/news-outlets/${newsOutlet.id}`}
+                                  />
+                                }
+                              />
+                            }
+                          >
+                            <Edit2 data-icon="inline-start" />
+                            <span className="sr-only">
+                              {dictionary.newsOutlets.edit}
+                            </span>
                           </TooltipTrigger>
-                          <TooltipContent>
+                          <TooltipContentInOverlay>
                             {dictionary.newsOutlets.editTooltip}
-                          </TooltipContent>
+                          </TooltipContentInOverlay>
                         </Tooltip>
                       ) : null}
 
@@ -398,21 +399,25 @@ function DeleteNewsOutletButton({ id, name }: { id: number; name: string }) {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <AlertDialogTrigger
-            render={
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-              />
-            }
-          >
-            <Trash2 data-icon="inline-start" />
-            <span className="sr-only">{dictionary.newsOutlets.delete}</span>
-          </AlertDialogTrigger>
+        <TooltipTrigger
+          render={
+            <AlertDialogTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                />
+              }
+            />
+          }
+        >
+          <Trash2 data-icon="inline-start" />
+          <span className="sr-only">{dictionary.newsOutlets.delete}</span>
         </TooltipTrigger>
-        <TooltipContent>{dictionary.newsOutlets.delete}</TooltipContent>
+        <TooltipContentInOverlay>
+          {dictionary.newsOutlets.delete}
+        </TooltipContentInOverlay>
       </Tooltip>
       <AlertDialogContent>
         <AlertDialogHeader>
