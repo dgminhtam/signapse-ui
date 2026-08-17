@@ -282,15 +282,17 @@ function DeletePromptButton({ prompt }: { prompt: SystemPromptResponse }) {
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-        >
-          <Trash2 data-icon="inline-start" />
-          <span className="sr-only">{t.deletePrompt}</span>
-        </Button>
+      <AlertDialogTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+          />
+        }
+      >
+        <Trash2 data-icon="inline-start" />
+        <span className="sr-only">{t.deletePrompt}</span>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>

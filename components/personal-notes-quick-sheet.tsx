@@ -907,12 +907,11 @@ function PersonalNotesQuickSheet() {
         }}
       >
         <AlertDialogContent
-          onCloseAutoFocus={(event) => {
-            if (lastActionTriggerRef.current?.isConnected) {
-              event.preventDefault()
-              lastActionTriggerRef.current.focus()
-            }
-          }}
+          finalFocus={() =>
+            lastActionTriggerRef.current?.isConnected
+              ? lastActionTriggerRef.current
+              : true
+          }
         >
           <AlertDialogHeader>
             <AlertDialogTitle>{personalNotes.deleteTitle}</AlertDialogTitle>

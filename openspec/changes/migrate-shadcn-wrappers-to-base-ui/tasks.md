@@ -31,8 +31,8 @@
 
 - [x] 5.1 Migrate Select to the official Base UI wrapper and update dynamic consumers to the `items` and nullable-value contract.
 - [x] 5.2 Migrate Dialog and DialogClose, replacing Radix composition with the official Base UI `render` contract while preserving controlled workflows.
-- [ ] 5.3 Preserve required portal-container composition through an external app extension and verify focus restoration, Escape, outside-click, and SSR behavior.
-- [ ] 5.4 Migrate AlertDialog and update destructive confirmation consumers without losing pending, error, cancel, or delete state.
+- [x] 5.3 Preserve required portal-container composition through an external app extension and verify focus restoration, Escape, outside-click, and SSR behavior.
+- [x] 5.4 Migrate AlertDialog and update destructive confirmation consumers without losing pending, error, cancel, or delete state.
 - [ ] 5.5 Migrate Popover, Tooltip, and HoverCard using the official Base UI positioning and delay contracts.
 - [ ] 5.6 Migrate DropdownMenu and ContextMenu, including menu checkbox/radio behavior and the official Portal/Positioner/Popup structure.
 - [ ] 5.7 Migrate Sheet after Dialog and overlay dependencies are stable, preserving side/layout composition through external extensions only.

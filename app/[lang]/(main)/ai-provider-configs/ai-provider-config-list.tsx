@@ -385,15 +385,17 @@ function DeleteProviderButton({
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
-        >
-          <Trash2 />
-          <span className="sr-only">{t.deleteConfig}</span>
-        </Button>
+      <AlertDialogTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+          />
+        }
+      >
+        <Trash2 />
+        <span className="sr-only">{t.deleteConfig}</span>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>

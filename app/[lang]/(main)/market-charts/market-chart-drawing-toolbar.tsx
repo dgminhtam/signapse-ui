@@ -38,13 +38,13 @@ import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
-  AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { AlertDialogContentInOverlay } from "@/components/ui/alert-dialog-content-in-overlay"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -261,18 +261,20 @@ export function MarketChartDrawingToolbar({
       </Button>
 
       <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            disabled={disabled}
-            aria-label={labels.clearAll}
-          >
-            <Trash2 />
-          </Button>
+        <AlertDialogTrigger
+          render={
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              disabled={disabled}
+              aria-label={labels.clearAll}
+            />
+          }
+        >
+          <Trash2 />
         </AlertDialogTrigger>
-        <AlertDialogContent>
+        <AlertDialogContentInOverlay>
           <AlertDialogHeader>
             <AlertDialogTitle>{labels.clearAllTitle}</AlertDialogTitle>
             <AlertDialogDescription>
@@ -285,7 +287,7 @@ export function MarketChartDrawingToolbar({
               {labels.clearAllConfirm}
             </AlertDialogAction>
           </AlertDialogFooter>
-        </AlertDialogContent>
+        </AlertDialogContentInOverlay>
       </AlertDialog>
     </div>
   )

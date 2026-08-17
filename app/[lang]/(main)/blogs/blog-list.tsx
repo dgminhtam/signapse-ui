@@ -238,16 +238,18 @@ function DeleteBlogButton({ id }: { id: number }) {
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-          title={dictionary.blogs.delete}
-        >
-          <Trash2 />
-          <span className="sr-only">{dictionary.blogs.delete}</span>
-        </Button>
+      <AlertDialogTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+            title={dictionary.blogs.delete}
+          />
+        }
+      >
+        <Trash2 />
+        <span className="sr-only">{dictionary.blogs.delete}</span>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>

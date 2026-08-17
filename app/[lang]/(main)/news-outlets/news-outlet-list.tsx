@@ -399,15 +399,17 @@ function DeleteNewsOutletButton({ id, name }: { id: number; name: string }) {
     <AlertDialog open={open} onOpenChange={setOpen}>
       <Tooltip>
         <TooltipTrigger asChild>
-          <AlertDialogTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-            >
-              <Trash2 data-icon="inline-start" />
-              <span className="sr-only">{dictionary.newsOutlets.delete}</span>
-            </Button>
+          <AlertDialogTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+              />
+            }
+          >
+            <Trash2 data-icon="inline-start" />
+            <span className="sr-only">{dictionary.newsOutlets.delete}</span>
           </AlertDialogTrigger>
         </TooltipTrigger>
         <TooltipContent>{dictionary.newsOutlets.delete}</TooltipContent>
