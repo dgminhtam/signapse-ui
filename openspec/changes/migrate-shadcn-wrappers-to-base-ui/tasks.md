@@ -16,9 +16,9 @@
 ## 3. Native and low-level wrappers
 
 - [x] 3.1 Replace Label and other no-counterpart wrappers with the official native/CSS mappings without introducing new primitives.
-- [ ] 3.2 Migrate Separator, Avatar, Checkbox, Switch, RadioGroup, and Toggle to the official Base UI shadcn wrappers.
-- [ ] 3.3 Update the affected consumers to Base UI contracts and preserve existing accessibility, form, and visual behavior.
-- [ ] 3.4 Run typecheck and the relevant focused verification before starting the Button migration.
+- [x] 3.2 Migrate Separator, Avatar, Checkbox, Switch, RadioGroup, and Toggle to the official Base UI shadcn wrappers.
+- [x] 3.3 Update the affected consumers to Base UI contracts and preserve existing accessibility, form, and visual behavior.
+- [x] 3.4 Run typecheck and the relevant focused verification before starting the Button migration.
 
 ## 4. Button and state-control consumers
 
