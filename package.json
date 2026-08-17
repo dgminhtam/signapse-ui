@@ -14,6 +14,7 @@
   "dependencies": {
     "@antv/g6": "^5.1.1",
     "@ariakit/react": "^0.4.34",
+    "@base-ui/react": "^1.7.0",
     "@clerk/localizations": "^4.6.6",
     "@clerk/nextjs": "^7.0.11",
     "@emoji-mart/data": "1.2.1",
@@ -83,7 +84,7 @@
     "remark-emoji": "^5.0.2",
     "remark-gfm": "^4.0.1",
     "remark-math": "^6.0.0",
-    "shadcn": "^4.13.0",
+    "shadcn": "^4.18.0",
     "sigma": "^3.0.2",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.5.0",
