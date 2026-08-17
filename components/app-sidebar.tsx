@@ -178,15 +178,13 @@ export function NavMain({ items }: { items: NavItem[] }) {
             return (
               <Collapsible
                 key={item.title}
-                asChild
                 defaultOpen={item.isActive ?? isActive}
                 className="group/collapsible"
+                render={<SidebarMenuItem />}
               >
-                <SidebarMenuItem>
-                  <CollapsibleTrigger
-                    asChild
-                    aria-controls={collapsibleContentId}
-                  >
+                <CollapsibleTrigger
+                  aria-controls={collapsibleContentId}
+                  render={
                     <SidebarMenuButton
                       tooltip={item.title}
                       isActive={false}
@@ -196,8 +194,9 @@ export function NavMain({ items }: { items: NavItem[] }) {
                       <span>{item.title}</span>
                       <ChevronRightIcon className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                     </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent id={collapsibleContentId}>
+                  }
+                />
+                <CollapsibleContent id={collapsibleContentId}>
                     <SidebarMenuSub className="mr-0 ml-3.5 py-1 pr-0">
                       {item.items?.map((subItem) => {
                         const isSubItemActive = matchesPath(subItem.url)
@@ -217,8 +216,7 @@ export function NavMain({ items }: { items: NavItem[] }) {
                         )
                       })}
                     </SidebarMenuSub>
-                  </CollapsibleContent>
-                </SidebarMenuItem>
+                </CollapsibleContent>
               </Collapsible>
             )
           })}

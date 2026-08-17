@@ -441,19 +441,23 @@ export function RolePermissionDialog({
                       </div>
                     </div>
 
-                    <CollapsibleTrigger asChild>
-                      <Button type="button" variant="ghost" size="sm">
-                        <ChevronDown
-                          data-icon="inline-end"
-                          className={cn(
-                            "transition-transform",
-                            (normalizedQuery ? true : legacyOpen) &&
-                              "rotate-180"
-                          )}
-                        />
-                        {normalizedQuery ? t.legacySearchOpen : t.viewDetails}
-                      </Button>
-                    </CollapsibleTrigger>
+                    <CollapsibleTrigger
+                      render={
+                        <Button type="button" variant="ghost" size="sm">
+                          <ChevronDown
+                            data-icon="inline-end"
+                            className={cn(
+                              "transition-transform",
+                              (normalizedQuery ? true : legacyOpen) &&
+                                "rotate-180"
+                            )}
+                          />
+                          {normalizedQuery
+                            ? t.legacySearchOpen
+                            : t.viewDetails}
+                        </Button>
+                      }
+                    />
                   </div>
 
                   <CollapsibleContent>

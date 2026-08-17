@@ -426,12 +426,14 @@ function ObjectSchemaEditor({
       {hasMapSchema ? (
         <Collapsible defaultOpen>
           <div className="flex items-center justify-between gap-3">
-            <CollapsibleTrigger asChild>
-              <Button type="button" variant="ghost">
-                <ChevronDown data-icon="inline-start" />
-                {t.schemaMapItems}
-              </Button>
-            </CollapsibleTrigger>
+            <CollapsibleTrigger
+              render={
+                <Button type="button" variant="ghost">
+                  <ChevronDown data-icon="inline-start" />
+                  {t.schemaMapItems}
+                </Button>
+              }
+            />
             <Button
               type="button"
               variant="ghost"
@@ -516,12 +518,14 @@ function SchemaPropertyEditor({
             </FieldLabel>
           </Field>
           <div className="flex gap-2">
-            <CollapsibleTrigger asChild>
-              <Button type="button" variant="ghost" size="icon">
-                <ChevronDown data-icon="inline-start" />
-                <span className="sr-only">{name}</span>
-              </Button>
-            </CollapsibleTrigger>
+            <CollapsibleTrigger
+              render={
+                <Button type="button" variant="ghost" size="icon">
+                  <ChevronDown data-icon="inline-start" />
+                  <span className="sr-only">{name}</span>
+                </Button>
+              }
+            />
             <Button
               type="button"
               variant="ghost"
