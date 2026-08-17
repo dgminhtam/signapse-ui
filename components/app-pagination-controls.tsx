@@ -76,8 +76,18 @@ export function PaginationPageSizeSelect({
         <span className="text-sm text-muted-foreground">{resolvedLabel}</span>
       ) : null}
       <Select
+        items={options.map((option) => ({
+          value: option.toString(),
+          label: formatMessage(dictionary.pagination.perPage, {
+            count: option,
+          }),
+        }))}
         value={value.toString()}
-        onValueChange={(nextValue) => onValueChange(Number(nextValue))}
+        onValueChange={(nextValue) => {
+          if (nextValue !== null) {
+            onValueChange(Number(nextValue))
+          }
+        }}
         disabled={isPending}
       >
         <SelectTrigger

@@ -124,7 +124,11 @@ export function AiProviderConfigUpdateForm({
                   <FieldLabel htmlFor="providerType">
                     {t.provider} <span className="text-destructive">*</span>
                   </FieldLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
+                  <Select
+                    items={providerOptions}
+                    value={field.value}
+                    onValueChange={(value) => field.onChange(value ?? "")}
+                  >
                     <SelectTrigger
                       id="providerType"
                       aria-invalid={fieldState.invalid}

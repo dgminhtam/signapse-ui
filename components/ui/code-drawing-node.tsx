@@ -389,8 +389,13 @@ function CodeDrawingToolbar({
     >
       {!readOnly && (
         <Select
+          items={CODE_DRAWING_TYPE_ARRAY}
           value={drawingType}
-          onValueChange={onDrawingTypeChange}
+          onValueChange={(value) => {
+            if (value !== null) {
+              onDrawingTypeChange(value)
+            }
+          }}
           open={languageSelectOpen}
           onOpenChange={setLanguageSelectOpen}
         >
@@ -413,8 +418,13 @@ function CodeDrawingToolbar({
 
       {!readOnly && (
         <Select
+          items={VIEW_MODE_ARRAY}
           value={viewMode}
-          onValueChange={onDrawingModeChange}
+          onValueChange={(value) => {
+            if (value !== null) {
+              onDrawingModeChange(value)
+            }
+          }}
           open={viewModeSelectOpen}
           onOpenChange={setViewModeSelectOpen}
         >

@@ -236,7 +236,18 @@ function SchemaNodeEditor({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <Field className="sm:max-w-56">
           <FieldLabel>{t.schemaType}</FieldLabel>
-          <Select value={type} onValueChange={handleTypeChange}>
+          <Select
+            items={SYSTEM_PROMPT_SCHEMA_TYPES.map((schemaType) => ({
+              value: schemaType,
+              label: t.schemaTypeLabels[schemaType],
+            }))}
+            value={type}
+            onValueChange={(value) => {
+              if (value !== null) {
+                handleTypeChange(value)
+              }
+            }}
+          >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>

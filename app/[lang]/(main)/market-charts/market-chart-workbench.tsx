@@ -80,9 +80,9 @@ import {
   FieldSet,
 } from "@/components/ui/field"
 import { Item } from "@/components/ui/item"
+import { SelectContentInOverlay } from "@/components/ui/select-content-in-overlay"
 import {
   Select,
-  SelectContent,
   SelectGroup,
   SelectItem,
   SelectTrigger,
@@ -745,8 +745,16 @@ function MarketChartTopToolbar({
             {dictionary.marketCharts.controls.assetLabel}
           </FieldLabel>
           <Select
+            items={watchlistAssets.map((asset) => ({
+              value: String(asset.assetId),
+              label: `${asset.assetSymbol} - ${asset.assetName}`,
+            }))}
             value={selection.assetId}
-            onValueChange={onAssetChange}
+            onValueChange={(value) => {
+              if (value !== null) {
+                onAssetChange(value)
+              }
+            }}
             disabled={controlsDisabled}
           >
             <SelectTrigger
@@ -759,7 +767,7 @@ function MarketChartTopToolbar({
                 placeholder={dictionary.marketCharts.controls.assetPlaceholder}
               />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContentInOverlay>
               <SelectGroup>
                 {watchlistAssets.map((asset) => (
                   <SelectItem key={asset.assetId} value={String(asset.assetId)}>
@@ -767,7 +775,7 @@ function MarketChartTopToolbar({
                   </SelectItem>
                 ))}
               </SelectGroup>
-            </SelectContent>
+            </SelectContentInOverlay>
           </Select>
           <FieldError>{errors.assetId}</FieldError>
         </Field>

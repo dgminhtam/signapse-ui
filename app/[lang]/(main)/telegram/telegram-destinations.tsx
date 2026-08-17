@@ -484,9 +484,13 @@ function DestinationLinkDialog({
                 {t.destination.commandBot}
               </FieldLabel>
               <Select
+                items={activeBotConnections.map((connection) => ({
+                  value: connection.id.toString(),
+                  label: getBotLabel(connection, dictionary),
+                }))}
                 value={botConnectionId}
                 onValueChange={(value) => {
-                  setBotConnectionId(value)
+                  setBotConnectionId(value ?? "")
                   setLinkToken(null)
                   setCurrentTime(null)
                   setError(null)

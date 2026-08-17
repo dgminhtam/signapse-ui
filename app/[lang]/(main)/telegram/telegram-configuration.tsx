@@ -819,7 +819,9 @@ function FeatureRouteDestinationSelect({
   const t = dictionary.telegram
   const disabled = !canUpdate || !currentWorkspaceId || isPending
 
-  function handleDestinationChange(value: string) {
+  function handleDestinationChange(value: string | null) {
+    if (value === null) return
+
     setDestinationId(value)
 
     if (!currentWorkspaceId) return
@@ -858,6 +860,10 @@ function FeatureRouteDestinationSelect({
 
   return (
     <Select
+      items={activeDestinations.map((destination) => ({
+        value: destination.id.toString(),
+        label: getDestinationLabel(destination, dictionary),
+      }))}
       value={destinationId || undefined}
       onValueChange={handleDestinationChange}
       disabled={disabled}

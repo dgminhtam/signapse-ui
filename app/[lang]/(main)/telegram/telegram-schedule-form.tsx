@@ -524,8 +524,14 @@ function ScheduleFormFields({
               {t.schedule.destinationLabel}
             </FieldLabel>
             <Select
+              items={destinationOptions.map(({ destination, unavailable }) => ({
+                value: destination.id.toString(),
+                label: `${getDestinationLabel(destination, dictionary)}${
+                  unavailable ? ` — ${t.schedule.destinationUnavailable}` : ""
+                }`,
+              }))}
               value={values.destinationId || undefined}
-              onValueChange={(value) => onChange("destinationId", value)}
+              onValueChange={(value) => onChange("destinationId", value ?? "")}
               disabled={disabled}
             >
               <SelectTrigger
@@ -565,8 +571,12 @@ function ScheduleFormFields({
               {t.schedule.assetLabel}
             </FieldLabel>
             <Select
+              items={assetOptions.map((asset) => ({
+                value: asset.assetId.toString(),
+                label: formatAssetOption(asset, t.schedule.assetUnavailable),
+              }))}
               value={values.assetId || undefined}
-              onValueChange={(value) => onChange("assetId", value)}
+              onValueChange={(value) => onChange("assetId", value ?? "")}
               disabled={disabled}
             >
               <SelectTrigger
@@ -761,11 +771,25 @@ function ScheduleFormFields({
               {t.schedule.outputLanguageLabel}
             </FieldLabel>
             <Select
+              items={[
+                {
+                  value: DEFAULT_LANGUAGE_VALUE,
+                  label: t.schedule.defaultLanguage,
+                },
+                ...languageOptions.map((language) => ({
+                  value: language.isoCode,
+                  label: `${language.name} (${language.isoCode})${
+                    language.unavailable
+                      ? ` — ${t.schedule.languageUnavailable}`
+                      : ""
+                  }`,
+                })),
+              ]}
               value={values.outputLanguageIsoCode || DEFAULT_LANGUAGE_VALUE}
               onValueChange={(value) =>
                 onChange(
                   "outputLanguageIsoCode",
-                  value === DEFAULT_LANGUAGE_VALUE ? "" : value
+                  value === DEFAULT_LANGUAGE_VALUE ? "" : (value ?? "")
                 )
               }
               disabled={disabled}
