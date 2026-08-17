@@ -8,10 +8,10 @@
 
 ## 2. Registry mapping and migration records
 
-- [ ] 2.1 Compare every in-scope shadcn wrapper with the latest Base UI Nova registry output using the shadcn dry-run and diff workflow; in progressive mode, never use `--overwrite` while the original wrapper has consumers.
+- [x] 2.1 Compare every in-scope shadcn wrapper with the latest Base UI Nova registry output using the shadcn dry-run and diff workflow; in progressive mode, never use `--overwrite` while the original wrapper has consumers.
 - [ ] 2.2 Create one exact-format `.migration/<component>.md` report per migrated wrapper, including changed files, intentionally untouched files, behavior changes, manual QA, and the leftover Radix import scan.
-- [ ] 2.3 Identify wrappers with no direct Base UI primitive and record the approved native/CSS mapping or an implementation blocker before changing consumers.
-- [ ] 2.4 Keep migration status derived from the wrapper files and reports; do not create a manually maintained migration index.
+- [x] 2.3 Identify wrappers with no direct Base UI primitive and record the approved native/CSS mapping or an implementation blocker before changing consumers.
+- [x] 2.4 Keep migration status derived from the wrapper files and reports; do not create a manually maintained migration index.
 
 ## 3. Native and low-level wrappers
 
