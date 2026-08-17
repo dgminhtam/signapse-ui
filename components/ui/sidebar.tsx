@@ -11,11 +11,11 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import {
   Sheet,
-  SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
+import { SheetContentInOverlay as SheetContent } from "@/components/ui/sheet-content-in-overlay"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip"
 import { TooltipContentInOverlay } from "@/components/ui/tooltip-content-in-overlay"

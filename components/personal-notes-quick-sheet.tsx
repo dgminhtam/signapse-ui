@@ -93,12 +93,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Item, ItemActions, ItemContent, ItemGroup } from "@/components/ui/item"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import {
-  Sheet,
-  SheetContent,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet"
+import { Sheet, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { SheetContentInOverlay as SheetContent } from "@/components/ui/sheet-content-in-overlay"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
@@ -485,11 +481,12 @@ function PersonalNotesQuickSheet() {
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetTrigger asChild aria-controls={PERSONAL_NOTES_SHEET_CONTENT_ID}>
-        <Button type="button" variant="outline">
-          <NotebookPenIcon data-icon="inline-start" />
-          {personalNotes.trigger}
-        </Button>
+      <SheetTrigger
+        render={<Button type="button" variant="outline" />}
+        aria-controls={PERSONAL_NOTES_SHEET_CONTENT_ID}
+      >
+        <NotebookPenIcon data-icon="inline-start" />
+        {personalNotes.trigger}
       </SheetTrigger>
       <SheetContent
         ref={sheetContentRef}
