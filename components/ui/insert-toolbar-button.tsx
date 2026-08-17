@@ -36,10 +36,10 @@ import { useLocalization } from "@/app/lib/i18n/provider"
 
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DropdownMenuContentInOverlay as DropdownMenuContent } from "@/components/ui/dropdown-menu-content-in-overlay"
 import {
   insertBlock,
   insertInlineElement,
@@ -266,15 +266,17 @@ export function InsertToolbarButton(
   return (
     <>
       <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
-        <DropdownMenuTrigger asChild>
-          <ToolbarButton
-            aria-label={dictionary.editor.insert.insert}
-            pressed={open}
-            tooltip={dictionary.editor.insert.insert}
-            isDropdown
-          >
-            <PlusIcon />
-          </ToolbarButton>
+        <DropdownMenuTrigger
+          render={
+            <ToolbarButton
+              aria-label={dictionary.editor.insert.insert}
+              pressed={open}
+              tooltip={dictionary.editor.insert.insert}
+              isDropdown
+            />
+          }
+        >
+          <PlusIcon />
         </DropdownMenuTrigger>
 
         <DropdownMenuContent
@@ -286,7 +288,7 @@ export function InsertToolbarButton(
               {nestedItems.map(({ icon, label, value, onSelect }) => (
                 <DropdownMenuItem
                   key={value}
-                  onSelect={() => {
+                  onClick={() => {
                     if (Object.hasOwn(mediaConfig, value)) {
                       setOpen(false)
                       setMediaNodeType(value as MediaNodeType)

@@ -78,12 +78,12 @@ import {
 import { Spinner } from "@/components/ui/spinner"
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DropdownMenuContentInOverlay as DropdownMenuContent } from "@/components/ui/dropdown-menu-content-in-overlay"
 import { Button } from "@/components/ui/button"
 
 export function BotConnectionsCard({
@@ -224,21 +224,23 @@ function BotConnectionItem({
         {canManage ? (
           <ItemActions className="ms-auto self-start">
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  id={menuTriggerId}
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label={t.bot.actionMenu}
-                >
-                  <MoreHorizontal />
-                </Button>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    id={menuTriggerId}
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label={t.bot.actionMenu}
+                  />
+                }
+              >
+                <MoreHorizontal />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuGroup>
                   <DropdownMenuItem
                     disabled={connection.status !== "ACTIVE"}
-                    onSelect={() => setConfirmation("disable")}
+                    onClick={() => setConfirmation("disable")}
                   >
                     <PowerOff />
                     {t.common.disable}
@@ -246,7 +248,7 @@ function BotConnectionItem({
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     variant="destructive"
-                    onSelect={() => setConfirmation("delete")}
+                    onClick={() => setConfirmation("delete")}
                   >
                     <Trash2 />
                     {t.bot.deleteAction}

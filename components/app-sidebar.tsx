@@ -31,13 +31,13 @@ import {
 } from "./ui/collapsible"
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu"
+import { DropdownMenuContentInOverlay as DropdownMenuContent } from "./ui/dropdown-menu-content-in-overlay"
 import {
   Sidebar,
   SidebarContent,
@@ -197,25 +197,25 @@ export function NavMain({ items }: { items: NavItem[] }) {
                   }
                 />
                 <CollapsibleContent id={collapsibleContentId}>
-                    <SidebarMenuSub className="mr-0 ml-3.5 py-1 pr-0">
-                      {item.items?.map((subItem) => {
-                        const isSubItemActive = matchesPath(subItem.url)
+                  <SidebarMenuSub className="mr-0 ml-3.5 py-1 pr-0">
+                    {item.items?.map((subItem) => {
+                      const isSubItemActive = matchesPath(subItem.url)
 
-                        return (
-                          <SidebarMenuSubItem key={subItem.title}>
-                            <SidebarMenuSubButton
-                              isActive={isSubItemActive}
-                              asChild
-                              className="h-8 rounded-lg font-medium data-active:bg-sidebar-primary data-active:text-sidebar-primary-foreground data-active:hover:bg-sidebar-primary data-active:hover:text-sidebar-primary-foreground"
-                            >
-                              <Link href={subItem.url}>
-                                <span>{subItem.title}</span>
-                              </Link>
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                        )
-                      })}
-                    </SidebarMenuSub>
+                      return (
+                        <SidebarMenuSubItem key={subItem.title}>
+                          <SidebarMenuSubButton
+                            isActive={isSubItemActive}
+                            asChild
+                            className="h-8 rounded-lg font-medium data-active:bg-sidebar-primary data-active:text-sidebar-primary-foreground data-active:hover:bg-sidebar-primary data-active:hover:text-sidebar-primary-foreground"
+                          >
+                            <Link href={subItem.url}>
+                              <span>{subItem.title}</span>
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      )
+                    })}
+                  </SidebarMenuSub>
                 </CollapsibleContent>
               </Collapsible>
             )
@@ -238,29 +238,32 @@ function NavUser({ user }: NavUserProps) {
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
-          <DropdownMenuTrigger asChild id={USER_MENU_TRIGGER_ID}>
-            <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-            >
-              <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage
-                  src={user?.imageUrl ?? ""}
-                  alt={user?.fullName ?? ""}
-                />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
-              </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">
-                  {user?.fullName ?? ""}
-                </span>
-                <span className="truncate text-xs">{user?.username ?? ""}</span>
-              </div>
-              <ChevronsUpDownIcon className="ml-auto size-4" />
-            </SidebarMenuButton>
+          <DropdownMenuTrigger
+            render={
+              <SidebarMenuButton
+                size="lg"
+                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              />
+            }
+            id={USER_MENU_TRIGGER_ID}
+          >
+            <Avatar className="h-8 w-8 rounded-lg">
+              <AvatarImage
+                src={user?.imageUrl ?? ""}
+                alt={user?.fullName ?? ""}
+              />
+              <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+            </Avatar>
+            <div className="grid flex-1 text-left text-sm leading-tight">
+              <span className="truncate font-medium">
+                {user?.fullName ?? ""}
+              </span>
+              <span className="truncate text-xs">{user?.username ?? ""}</span>
+            </div>
+            <ChevronsUpDownIcon className="ml-auto size-4" />
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+            className="w-(--anchor-width) min-w-56 rounded-lg"
             side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={4}
@@ -294,11 +297,9 @@ function NavUser({ user }: NavUserProps) {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem asChild>
-                <Link href="/account">
-                  <BadgeCheckIcon />
-                  {dictionary.auth.account}
-                </Link>
+              <DropdownMenuItem render={<Link href="/account" />}>
+                <BadgeCheckIcon />
+                {dictionary.auth.account}
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <CreditCardIcon />

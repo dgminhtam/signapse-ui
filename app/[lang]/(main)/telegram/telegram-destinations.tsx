@@ -88,12 +88,12 @@ import {
 import { Spinner } from "@/components/ui/spinner"
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DropdownMenuContentInOverlay as DropdownMenuContent } from "@/components/ui/dropdown-menu-content-in-overlay"
 import {
   Select,
   SelectContent,
@@ -261,21 +261,23 @@ function DestinationItem({
           />
           {canManage ? (
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  id={menuTriggerId}
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label={t.destination.actionMenu}
-                >
-                  <MoreHorizontal />
-                </Button>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    id={menuTriggerId}
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label={t.destination.actionMenu}
+                  />
+                }
+              >
+                <MoreHorizontal />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuGroup>
                   <DropdownMenuItem
                     disabled={destination.status !== "ACTIVE"}
-                    onSelect={() => setConfirmation("disable")}
+                    onClick={() => setConfirmation("disable")}
                   >
                     <PowerOff />
                     {t.common.disable}
@@ -283,7 +285,7 @@ function DestinationItem({
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     variant="destructive"
-                    onSelect={() => setConfirmation("delete")}
+                    onClick={() => setConfirmation("delete")}
                   >
                     <Trash2 />
                     {t.destination.deleteAction}

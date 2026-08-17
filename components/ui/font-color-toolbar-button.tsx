@@ -14,10 +14,10 @@ import {
 import { buttonVariants } from "@/components/ui/button"
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DropdownMenuContentInOverlay as DropdownMenuContent } from "@/components/ui/dropdown-menu-content-in-overlay"
 import {
   Tooltip,
   TooltipProvider,
@@ -181,10 +181,10 @@ export function FontColorToolbarButton({
 
   return (
     <DropdownMenu modal onOpenChange={onToggle} open={open}>
-      <DropdownMenuTrigger asChild>
-        <ToolbarButton pressed={open} tooltip={tooltip}>
-          {children}
-        </ToolbarButton>
+      <DropdownMenuTrigger
+        render={<ToolbarButton pressed={open} tooltip={tooltip} />}
+      >
+        {children}
       </DropdownMenuTrigger>
 
       <DropdownMenuContent className="min-w-80" align="start">
@@ -399,9 +399,7 @@ function ColorCustom({
               }),
               "flex size-8 items-center justify-center rounded-full"
             )}
-            onSelect={(e) => {
-              e.preventDefault()
-            }}
+            closeOnClick={false}
           >
             <span className="sr-only">Custom</span>
             <PlusIcon />
@@ -480,8 +478,8 @@ function ColorDropdownMenuItem({
         className
       )}
       style={{ backgroundColor: value }}
-      onSelect={(e) => {
-        e.preventDefault()
+      closeOnClick={false}
+      onClick={() => {
         updateColor(value)
       }}
       {...props}

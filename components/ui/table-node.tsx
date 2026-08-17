@@ -74,12 +74,11 @@ import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
-  DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuPortal,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DropdownMenuContentInOverlay as DropdownMenuContent } from "@/components/ui/dropdown-menu-content-in-overlay"
 import {
   PopoverAnchor,
   PopoverContentWithAnchor,
@@ -942,15 +941,13 @@ function TableFloatingToolbarContent({
           )}
 
           <DropdownMenu modal={false}>
-            <DropdownMenuTrigger asChild>
-              <ToolbarButton tooltip="Cell borders">
-                <Grid2X2Icon />
-              </ToolbarButton>
+            <DropdownMenuTrigger
+              render={<ToolbarButton tooltip="Cell borders" />}
+            >
+              <Grid2X2Icon />
             </DropdownMenuTrigger>
 
-            <DropdownMenuPortal>
-              <TableBordersDropdownMenuContent />
-            </DropdownMenuPortal>
+            <TableBordersDropdownMenuContent />
           </DropdownMenu>
 
           {singleCellMode && (
@@ -1035,9 +1032,9 @@ function TableBordersDropdownMenuContent(
   return (
     <DropdownMenuContent
       className="min-w-[220px]"
-      onCloseAutoFocus={(e) => {
-        e.preventDefault()
+      finalFocus={() => {
         editor.tf.focus()
+        return false
       }}
       align="start"
       side="right"
@@ -1128,8 +1125,8 @@ function ColorDropdownMenu({
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
-      <DropdownMenuTrigger asChild>
-        <ToolbarButton tooltip={tooltip}>{children}</ToolbarButton>
+      <DropdownMenuTrigger render={<ToolbarButton tooltip={tooltip} />}>
+        {children}
       </DropdownMenuTrigger>
 
       <DropdownMenuContent className="min-w-80" align="start">

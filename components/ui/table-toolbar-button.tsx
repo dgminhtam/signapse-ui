@@ -20,14 +20,16 @@ import { useEditorPlugin, useEditorSelector } from "platejs/react"
 
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuSub,
-  DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  DropdownMenuContentInOverlay as DropdownMenuContent,
+  DropdownMenuSubContentInOverlay as DropdownMenuSubContent,
+} from "@/components/ui/dropdown-menu-content-in-overlay"
 import { cn } from "@/lib/utils"
 
 import { ToolbarButton } from "./toolbar"
@@ -46,10 +48,10 @@ export function TableToolbarButton(
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
-      <DropdownMenuTrigger asChild>
-        <ToolbarButton pressed={open} tooltip="Table" isDropdown>
-          <Table />
-        </ToolbarButton>
+      <DropdownMenuTrigger
+        render={<ToolbarButton pressed={open} tooltip="Table" isDropdown />}
+      >
+        <Table />
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
@@ -79,7 +81,7 @@ export function TableToolbarButton(
               <DropdownMenuItem
                 className="min-w-[180px]"
                 disabled={!mergeState.canMerge}
-                onSelect={() => {
+                onClick={() => {
                   tf.table.merge()
                   editor.tf.focus()
                 }}
@@ -90,7 +92,7 @@ export function TableToolbarButton(
               <DropdownMenuItem
                 className="min-w-[180px]"
                 disabled={!mergeState.canSplit}
-                onSelect={() => {
+                onClick={() => {
                   tf.table.split()
                   editor.tf.focus()
                 }}
@@ -113,7 +115,7 @@ export function TableToolbarButton(
               <DropdownMenuItem
                 className="min-w-[180px]"
                 disabled={!tableSelected}
-                onSelect={() => {
+                onClick={() => {
                   tf.insert.tableRow({ before: true })
                   editor.tf.focus()
                 }}
@@ -124,7 +126,7 @@ export function TableToolbarButton(
               <DropdownMenuItem
                 className="min-w-[180px]"
                 disabled={!tableSelected}
-                onSelect={() => {
+                onClick={() => {
                   tf.insert.tableRow()
                   editor.tf.focus()
                 }}
@@ -135,7 +137,7 @@ export function TableToolbarButton(
               <DropdownMenuItem
                 className="min-w-[180px]"
                 disabled={!tableSelected}
-                onSelect={() => {
+                onClick={() => {
                   tf.remove.tableRow()
                   editor.tf.focus()
                 }}
@@ -158,7 +160,7 @@ export function TableToolbarButton(
               <DropdownMenuItem
                 className="min-w-[180px]"
                 disabled={!tableSelected}
-                onSelect={() => {
+                onClick={() => {
                   tf.insert.tableColumn({ before: true })
                   editor.tf.focus()
                 }}
@@ -169,7 +171,7 @@ export function TableToolbarButton(
               <DropdownMenuItem
                 className="min-w-[180px]"
                 disabled={!tableSelected}
-                onSelect={() => {
+                onClick={() => {
                   tf.insert.tableColumn()
                   editor.tf.focus()
                 }}
@@ -180,7 +182,7 @@ export function TableToolbarButton(
               <DropdownMenuItem
                 className="min-w-[180px]"
                 disabled={!tableSelected}
-                onSelect={() => {
+                onClick={() => {
                   tf.remove.tableColumn()
                   editor.tf.focus()
                 }}
@@ -194,7 +196,7 @@ export function TableToolbarButton(
           <DropdownMenuItem
             className="min-w-[180px]"
             disabled={!tableSelected}
-            onSelect={() => {
+            onClick={() => {
               tf.remove.table()
               editor.tf.focus()
             }}

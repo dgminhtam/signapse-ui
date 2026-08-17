@@ -71,11 +71,11 @@ import {
 } from "@/components/ui/dialog"
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DropdownMenuContentInOverlay as DropdownMenuContent } from "@/components/ui/dropdown-menu-content-in-overlay"
 import {
   Empty,
   EmptyContent,
@@ -624,30 +624,32 @@ function PersonalNotesQuickSheet() {
                               onClick={(event) => event.stopPropagation()}
                             >
                               <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon-sm"
-                                    disabled={actionsDisabled}
-                                    aria-label={formatMessage(
-                                      personalNotes.actionsLabel,
-                                      { title: displayTitle }
-                                    )}
-                                    onFocus={(event) => {
-                                      lastActionTriggerRef.current =
-                                        event.currentTarget
-                                    }}
-                                  >
-                                    <EllipsisIcon />
-                                  </Button>
+                                <DropdownMenuTrigger
+                                  render={
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon-sm"
+                                      disabled={actionsDisabled}
+                                      aria-label={formatMessage(
+                                        personalNotes.actionsLabel,
+                                        { title: displayTitle }
+                                      )}
+                                      onFocus={(event) => {
+                                        lastActionTriggerRef.current =
+                                          event.currentTarget
+                                      }}
+                                    />
+                                  }
+                                >
+                                  <EllipsisIcon />
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                   <DropdownMenuGroup>
                                     {canUpdate ? (
                                       <DropdownMenuItem
                                         disabled={actionsDisabled}
-                                        onSelect={() =>
+                                        onClick={() =>
                                           void handleRenameSelect(note)
                                         }
                                       >
@@ -659,9 +661,7 @@ function PersonalNotesQuickSheet() {
                                       <DropdownMenuItem
                                         variant="destructive"
                                         disabled={actionsDisabled}
-                                        onSelect={() =>
-                                          handleDeleteSelect(note)
-                                        }
+                                        onClick={() => handleDeleteSelect(note)}
                                       >
                                         <Trash2Icon />
                                         {personalNotes.delete}

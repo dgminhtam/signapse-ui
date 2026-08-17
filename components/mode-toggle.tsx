@@ -8,11 +8,11 @@ import { useLocalization } from "@/app/lib/i18n/provider"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DropdownMenuContentInOverlay as DropdownMenuContent } from "@/components/ui/dropdown-menu-content-in-overlay"
 
 const MODE_TOGGLE_TRIGGER_ID = "mode-toggle-trigger"
 
@@ -22,16 +22,19 @@ export function ModeToggle() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild id={MODE_TOGGLE_TRIGGER_ID}>
-        <Button
-          variant="outline"
-          size="icon"
-          aria-label={dictionary.theme.toggle}
-        >
-          <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
-          <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
-          <span className="sr-only">{dictionary.theme.toggle}</span>
-        </Button>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            variant="outline"
+            size="icon"
+            aria-label={dictionary.theme.toggle}
+          />
+        }
+        id={MODE_TOGGLE_TRIGGER_ID}
+      >
+        <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
+        <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
+        <span className="sr-only">{dictionary.theme.toggle}</span>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" aria-labelledby={MODE_TOGGLE_TRIGGER_ID}>
         <DropdownMenuGroup>

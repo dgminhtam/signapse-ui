@@ -12,11 +12,11 @@ import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
-  DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DropdownMenuContentInOverlay as DropdownMenuContent } from "@/components/ui/dropdown-menu-content-in-overlay"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 
@@ -115,26 +115,28 @@ export function AssetMultiSelectCombobox({
   return (
     <div className="flex flex-col gap-3">
       <DropdownMenu open={open} onOpenChange={setOpen}>
-        <DropdownMenuTrigger asChild>
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full justify-between"
-            disabled={disabled}
-          >
-            <span className="truncate">
-              {selectedAssets.length > 0
-                ? formatMessage(dictionary.assets.selectedCount, {
-                    count: formatNumber(selectedAssets.length),
-                  })
-                : dictionary.assets.chooseTracked}
-            </span>
-            {isLoading ? (
-              <Spinner className="size-4" />
-            ) : (
-              <ChevronsUpDownIcon className="size-4" />
-            )}
-          </Button>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full justify-between"
+              disabled={disabled}
+            />
+          }
+        >
+          <span className="truncate">
+            {selectedAssets.length > 0
+              ? formatMessage(dictionary.assets.selectedCount, {
+                  count: formatNumber(selectedAssets.length),
+                })
+              : dictionary.assets.chooseTracked}
+          </span>
+          {isLoading ? (
+            <Spinner className="size-4" />
+          ) : (
+            <ChevronsUpDownIcon className="size-4" />
+          )}
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="start"
@@ -178,7 +180,7 @@ export function AssetMultiSelectCombobox({
                     onCheckedChange={(checked) =>
                       toggleAsset(asset, checked === true)
                     }
-                    onSelect={(event) => event.preventDefault()}
+                    closeOnClick={false}
                   >
                     <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
                       <div className="min-w-0">

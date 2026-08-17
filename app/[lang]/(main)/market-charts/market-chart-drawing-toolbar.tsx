@@ -48,11 +48,11 @@ import { AlertDialogContentInOverlay } from "@/components/ui/alert-dialog-conten
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DropdownMenuContentInOverlay as DropdownMenuContent } from "@/components/ui/dropdown-menu-content-in-overlay"
 import { Separator } from "@/components/ui/separator"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
@@ -167,17 +167,19 @@ export function MarketChartDrawingToolbar({
 
           return (
             <DropdownMenu key={palette}>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  type="button"
-                  variant={selectedToolIsActive ? "secondary" : "ghost"}
-                  size="sm"
-                  disabled={disabled}
-                  aria-label={`${labels.palettes[palette]}: ${labels.tools[selectedTool]}`}
-                  aria-pressed={selectedToolIsActive}
-                >
-                  <TriggerIcon />
-                </Button>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant={selectedToolIsActive ? "secondary" : "ghost"}
+                    size="sm"
+                    disabled={disabled}
+                    aria-label={`${labels.palettes[palette]}: ${labels.tools[selectedTool]}`}
+                    aria-pressed={selectedToolIsActive}
+                  />
+                }
+              >
+                <TriggerIcon />
               </DropdownMenuTrigger>
               <DropdownMenuContent side="right" align="start" className="w-56">
                 <DropdownMenuGroup>
@@ -187,7 +189,7 @@ export function MarketChartDrawingToolbar({
                     return (
                       <DropdownMenuItem
                         key={tool}
-                        onSelect={() => {
+                        onClick={() => {
                           onToolChange(tool)
                         }}
                       >

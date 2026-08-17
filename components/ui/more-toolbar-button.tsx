@@ -14,11 +14,11 @@ import { useEditorRef } from "platejs/react"
 import { useLocalization } from "@/app/lib/i18n/provider"
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DropdownMenuContentInOverlay as DropdownMenuContent } from "@/components/ui/dropdown-menu-content-in-overlay"
 
 import { ToolbarButton } from "./toolbar"
 
@@ -31,14 +31,16 @@ export function MoreToolbarButton(
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
-      <DropdownMenuTrigger asChild>
-        <ToolbarButton
-          aria-label={dictionary.editor.moreFormatting}
-          pressed={open}
-          tooltip={dictionary.editor.moreFormatting}
-        >
-          <MoreHorizontalIcon />
-        </ToolbarButton>
+      <DropdownMenuTrigger
+        render={
+          <ToolbarButton
+            aria-label={dictionary.editor.moreFormatting}
+            pressed={open}
+            tooltip={dictionary.editor.moreFormatting}
+          />
+        }
+      >
+        <MoreHorizontalIcon />
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
@@ -47,7 +49,7 @@ export function MoreToolbarButton(
       >
         <DropdownMenuGroup>
           <DropdownMenuItem
-            onSelect={() => {
+            onClick={() => {
               editor.tf.toggleMark(KEYS.kbd)
               editor.tf.collapse({ edge: "end" })
               editor.tf.focus()
@@ -58,7 +60,7 @@ export function MoreToolbarButton(
           </DropdownMenuItem>
 
           <DropdownMenuItem
-            onSelect={() => {
+            onClick={() => {
               editor.tf.toggleMark(KEYS.sup, {
                 remove: KEYS.sub,
               })
@@ -70,7 +72,7 @@ export function MoreToolbarButton(
             {/* (⌘+,) */}
           </DropdownMenuItem>
           <DropdownMenuItem
-            onSelect={() => {
+            onClick={() => {
               editor.tf.toggleMark(KEYS.sub, {
                 remove: KEYS.sup,
               })

@@ -11,11 +11,11 @@ import { useFilePicker } from "use-file-picker"
 
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DropdownMenuContentInOverlay as DropdownMenuContent } from "@/components/ui/dropdown-menu-content-in-overlay"
 
 import { ToolbarButton } from "./toolbar"
 
@@ -81,16 +81,16 @@ export function ImportToolbarButton(
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
-      <DropdownMenuTrigger asChild>
-        <ToolbarButton pressed={open} tooltip="Import" isDropdown>
-          <ArrowUpToLineIcon className="size-4" />
-        </ToolbarButton>
+      <DropdownMenuTrigger
+        render={<ToolbarButton pressed={open} tooltip="Import" isDropdown />}
+      >
+        <ArrowUpToLineIcon className="size-4" />
       </DropdownMenuTrigger>
 
       <DropdownMenuContent className="min-w-[180px]" align="start">
         <DropdownMenuGroup>
           <DropdownMenuItem
-            onSelect={() => {
+            onClick={() => {
               openHtmlFilePicker()
             }}
           >
@@ -98,7 +98,7 @@ export function ImportToolbarButton(
           </DropdownMenuItem>
 
           <DropdownMenuItem
-            onSelect={() => {
+            onClick={() => {
               openMdFilePicker()
             }}
           >
@@ -106,7 +106,7 @@ export function ImportToolbarButton(
           </DropdownMenuItem>
 
           <DropdownMenuItem
-            onSelect={() => {
+            onClick={() => {
               openDocxFilePicker()
             }}
           >
