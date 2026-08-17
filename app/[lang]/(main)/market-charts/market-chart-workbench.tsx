@@ -783,13 +783,15 @@ function MarketChartTopToolbar({
               {dictionary.marketCharts.controls.timeframeLabel}
             </FieldLabel>
             <ToggleGroup
-              type="single"
+              multiple={false}
               variant="outline"
               size="sm"
               spacing={1}
-              value={selection.timeframe}
+              value={[selection.timeframe]}
               aria-labelledby="market-chart-timeframe-label"
-              onValueChange={(value) => {
+              onValueChange={(values) => {
+                const value = values[0]
+
                 if (isMarketChartTimeframe(value)) {
                   onTimeframeChange(value)
                 }

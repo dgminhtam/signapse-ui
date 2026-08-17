@@ -205,7 +205,7 @@ export function MarketChartDrawingToolbar({
 
       <Separator />
       <ToggleGroup
-        type="multiple"
+        multiple
         orientation="vertical"
         spacing={1}
         value={getDrawingStateToggleValues(state)}
