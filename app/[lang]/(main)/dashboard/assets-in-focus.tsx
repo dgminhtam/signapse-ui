@@ -19,7 +19,7 @@ import { formatDateTime } from "@/app/lib/i18n/format"
 import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { LocalizedLink } from "@/components/localized-link"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import {
   Card,
   CardAction,
@@ -77,12 +77,14 @@ export function AssetsInFocus({
           <CardDescription>{t.description}</CardDescription>
           {showGraphView ? (
             <CardAction>
-              <Button asChild variant="ghost">
-                <LocalizedLink href="/graph-view" aria-label={t.graphView}>
-                  <WaypointsIcon data-icon="inline-start" />
-                  <span className="hidden sm:inline">{t.graphView}</span>
-                </LocalizedLink>
-              </Button>
+              <LocalizedLink
+                href="/graph-view"
+                aria-label={t.graphView}
+                className={buttonVariants({ variant: "ghost" })}
+              >
+                <WaypointsIcon data-icon="inline-start" />
+                <span className="hidden sm:inline">{t.graphView}</span>
+              </LocalizedLink>
             </CardAction>
           ) : null}
         </CardHeader>
@@ -190,7 +192,7 @@ function AssetsInFocusItems({
         const summary = item.context.summary?.trim()
 
         return (
-          <div key={item.assetId}>
+          <div key={item.assetId} role="listitem">
             {index > 0 ? <ItemSeparator /> : null}
             <Item>
               <ItemMedia variant="icon">
@@ -226,15 +228,17 @@ function AssetsInFocusItems({
                   )}
                 </AppTimeMetadata>
                 {canAccessMarketCharts ? (
-                  <Button asChild size="sm" variant="ghost">
-                    <LocalizedLink
-                      href={`/market-charts?assetId=${item.assetId}&timeframe=1h`}
-                      aria-label={`${t.marketCharts}: ${item.assetSymbol}`}
-                    >
-                      <ActivityIcon data-icon="inline-start" />
-                      {t.marketCharts}
-                    </LocalizedLink>
-                  </Button>
+                  <LocalizedLink
+                    href={`/market-charts?assetId=${item.assetId}&timeframe=1h`}
+                    aria-label={`${t.marketCharts}: ${item.assetSymbol}`}
+                    className={buttonVariants({
+                      size: "sm",
+                      variant: "ghost",
+                    })}
+                  >
+                    <ActivityIcon data-icon="inline-start" />
+                    {t.marketCharts}
+                  </LocalizedLink>
                 ) : null}
               </ItemFooter>
             </Item>

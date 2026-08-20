@@ -26,10 +26,10 @@ import { useEditorRef, useSelectionFragmentProp } from "platejs/react"
 
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DropdownMenuContentInOverlay as DropdownMenuContent } from "@/components/ui/dropdown-menu-content-in-overlay"
 import { getBlockType, setBlockType } from "@/components/editor/transforms"
 
 import { ToolbarButton, ToolbarMenuGroup } from "./toolbar"
@@ -152,22 +152,21 @@ export function TurnIntoToolbarButton(
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
-      <DropdownMenuTrigger asChild>
-        <ToolbarButton
-          className="min-w-[125px]"
-          pressed={open}
-          tooltip="Turn into"
-          isDropdown
-        >
-          {selectedItem.label}
-        </ToolbarButton>
-      </DropdownMenuTrigger>
+      <ToolbarButton
+        render={<DropdownMenuTrigger />}
+        className="min-w-[125px]"
+        pressed={open}
+        tooltip="Turn into"
+        isDropdown
+      >
+        {selectedItem.label}
+      </ToolbarButton>
 
       <DropdownMenuContent
         className="ignore-click-outside/toolbar min-w-[180px]"
-        onCloseAutoFocus={(e) => {
-          e.preventDefault()
+        finalFocus={() => {
           editor.tf.focus()
+          return false
         }}
         align="start"
       >

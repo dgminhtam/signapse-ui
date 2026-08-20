@@ -20,7 +20,7 @@ import {
   AppListTableHeaderRow,
 } from "@/components/app-list-table"
 import { AppSelectPageSize } from "@/components/app-select-page-size"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import {
   EmptyDescription,
   EmptyHeader,
@@ -144,36 +144,36 @@ export function NewsArticleList({ newsArticlePage }: NewsArticleListProps) {
                   </TableCell>
                   <TableCell className="w-28 text-right">
                     <div className="flex justify-end gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        asChild
-                        className="text-muted-foreground hover:text-foreground"
+                      <Link
+                        href={`/news-articles/${article.id}`}
+                        className={buttonVariants({
+                          variant: "ghost",
+                          size: "icon-sm",
+                          className:
+                            "text-muted-foreground hover:text-foreground",
+                        })}
                       >
-                        <Link href={`/news-articles/${article.id}`}>
-                          <Eye data-icon="inline-start" />
-                          <span className="sr-only">
-                            {dictionary.newsArticles.viewDetail}
-                          </span>
-                        </Link>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        asChild
-                        className="text-muted-foreground hover:text-foreground"
+                        <Eye data-icon="inline-start" />
+                        <span className="sr-only">
+                          {dictionary.newsArticles.viewDetail}
+                        </span>
+                      </Link>
+                      <a
+                        href={article.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={buttonVariants({
+                          variant: "ghost",
+                          size: "icon-sm",
+                          className:
+                            "text-muted-foreground hover:text-foreground",
+                        })}
                       >
-                        <a
-                          href={article.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <ExternalLink data-icon="inline-start" />
-                          <span className="sr-only">
-                            {dictionary.newsArticles.openOriginalLink}
-                          </span>
-                        </a>
-                      </Button>
+                        <ExternalLink data-icon="inline-start" />
+                        <span className="sr-only">
+                          {dictionary.newsArticles.openOriginalLink}
+                        </span>
+                      </a>
                       <NewsArticleDeleteButton
                         id={article.id}
                         title={article.title}

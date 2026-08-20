@@ -71,11 +71,11 @@ import {
 } from "@/components/ui/dialog"
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DropdownMenuContentInOverlay as DropdownMenuContent } from "@/components/ui/dropdown-menu-content-in-overlay"
 import {
   Empty,
   EmptyContent,
@@ -93,12 +93,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Item, ItemActions, ItemContent, ItemGroup } from "@/components/ui/item"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import {
-  Sheet,
-  SheetContent,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet"
+import { Sheet, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { SheetContentInOverlay as SheetContent } from "@/components/ui/sheet-content-in-overlay"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
@@ -485,11 +481,12 @@ function PersonalNotesQuickSheet() {
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetTrigger asChild aria-controls={PERSONAL_NOTES_SHEET_CONTENT_ID}>
-        <Button type="button" variant="outline">
-          <NotebookPenIcon data-icon="inline-start" />
-          {personalNotes.trigger}
-        </Button>
+      <SheetTrigger
+        render={<Button type="button" variant="outline" />}
+        aria-controls={PERSONAL_NOTES_SHEET_CONTENT_ID}
+      >
+        <NotebookPenIcon data-icon="inline-start" />
+        {personalNotes.trigger}
       </SheetTrigger>
       <SheetContent
         ref={sheetContentRef}
@@ -624,30 +621,32 @@ function PersonalNotesQuickSheet() {
                               onClick={(event) => event.stopPropagation()}
                             >
                               <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon-sm"
-                                    disabled={actionsDisabled}
-                                    aria-label={formatMessage(
-                                      personalNotes.actionsLabel,
-                                      { title: displayTitle }
-                                    )}
-                                    onFocus={(event) => {
-                                      lastActionTriggerRef.current =
-                                        event.currentTarget
-                                    }}
-                                  >
-                                    <EllipsisIcon />
-                                  </Button>
+                                <DropdownMenuTrigger
+                                  render={
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon-sm"
+                                      disabled={actionsDisabled}
+                                      aria-label={formatMessage(
+                                        personalNotes.actionsLabel,
+                                        { title: displayTitle }
+                                      )}
+                                      onFocus={(event) => {
+                                        lastActionTriggerRef.current =
+                                          event.currentTarget
+                                      }}
+                                    />
+                                  }
+                                >
+                                  <EllipsisIcon />
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                   <DropdownMenuGroup>
                                     {canUpdate ? (
                                       <DropdownMenuItem
                                         disabled={actionsDisabled}
-                                        onSelect={() =>
+                                        onClick={() =>
                                           void handleRenameSelect(note)
                                         }
                                       >
@@ -659,9 +658,7 @@ function PersonalNotesQuickSheet() {
                                       <DropdownMenuItem
                                         variant="destructive"
                                         disabled={actionsDisabled}
-                                        onSelect={() =>
-                                          handleDeleteSelect(note)
-                                        }
+                                        onClick={() => handleDeleteSelect(note)}
                                       >
                                         <Trash2Icon />
                                         {personalNotes.delete}
@@ -847,12 +844,11 @@ function PersonalNotesQuickSheet() {
       >
         <DialogContent
           showCloseButton={!isRenamePending}
-          onCloseAutoFocus={(event) => {
-            if (lastActionTriggerRef.current?.isConnected) {
-              event.preventDefault()
-              lastActionTriggerRef.current.focus()
-            }
-          }}
+          finalFocus={() =>
+            lastActionTriggerRef.current?.isConnected
+              ? lastActionTriggerRef.current
+              : true
+          }
         >
           <form className="contents" onSubmit={handleRenameSubmit}>
             <DialogHeader>
@@ -908,12 +904,11 @@ function PersonalNotesQuickSheet() {
         }}
       >
         <AlertDialogContent
-          onCloseAutoFocus={(event) => {
-            if (lastActionTriggerRef.current?.isConnected) {
-              event.preventDefault()
-              lastActionTriggerRef.current.focus()
-            }
-          }}
+          finalFocus={() =>
+            lastActionTriggerRef.current?.isConnected
+              ? lastActionTriggerRef.current
+              : true
+          }
         >
           <AlertDialogHeader>
             <AlertDialogTitle>{personalNotes.deleteTitle}</AlertDialogTitle>

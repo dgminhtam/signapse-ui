@@ -1,5 +1,8 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
-import { NextResponse } from "next/server"
+import {
+  clerkMiddleware,
+  createRouteMatcher,
+} from "@clerk/nextjs/server"
+import { NextRequest, NextResponse } from "next/server"
 
 import {
   getPathLocale,
@@ -7,16 +10,15 @@ import {
   negotiateLocale,
   withLocalePath,
 } from "@/app/lib/i18n/routing"
-import { isDevAuthModeEnabled } from "@/app/lib/dev-auth-mode"
+import {
+  isDevAuthModeEnabled,
+  isP0FixtureModeEnabled,
+} from "@/app/lib/dev-auth-mode"
 
-const isPublicRoute = createRouteMatcher(["/vi/sign-in(.*)", "/en/sign-in(.*)"])
-
-const isApiRoute = createRouteMatcher(["/api(.*)", "/trpc(.*)"])
-
-export default clerkMiddleware(async (auth, req) => {
+function getLocaleRedirect(req: NextRequest): NextResponse | null {
   const { pathname } = req.nextUrl
   const pathLocale = getPathLocale(pathname)
-  const isApi = isApiRoute(req)
+  const isApi = pathname.startsWith("/api") || pathname.startsWith("/trpc")
 
   if (!isApi && !pathLocale) {
     const locale = negotiateLocale(req.headers.get("accept-language"))
@@ -25,19 +27,12 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.redirect(url)
   }
 
-  if (!isDevAuthModeEnabled() && !isPublicRoute(req)) {
-    await auth.protect(
-      isApi
-        ? undefined
-        : {
-            unauthenticatedUrl: new URL(
-              `/${pathLocale}/sign-in`,
-              req.url
-            ).toString(),
-          }
-    )
-  }
+  return null
+}
 
+function withLocaleHeaders(req: NextRequest): NextResponse {
+  const { pathname } = req.nextUrl
+  const pathLocale = getPathLocale(pathname)
   const requestHeaders = new Headers(req.headers)
   requestHeaders.set(
     LOCALE_HEADER,
@@ -49,7 +44,43 @@ export default clerkMiddleware(async (auth, req) => {
       headers: requestHeaders,
     },
   })
-})
+}
+
+async function fixtureProxy(req: NextRequest) {
+  return getLocaleRedirect(req) ?? withLocaleHeaders(req)
+}
+
+function createAuthenticatedProxy() {
+  const isPublicRoute = createRouteMatcher(["/vi/sign-in(.*)", "/en/sign-in(.*)"])
+
+  return clerkMiddleware(async (auth, req) => {
+    const localeRedirect = getLocaleRedirect(req)
+    if (localeRedirect) {
+      return localeRedirect
+    }
+
+    const { pathname } = req.nextUrl
+    const pathLocale = getPathLocale(pathname)
+    const isApi = req.nextUrl.pathname.startsWith("/api") || req.nextUrl.pathname.startsWith("/trpc")
+
+    if (!isDevAuthModeEnabled() && !isPublicRoute(req)) {
+      await auth.protect(
+        isApi
+          ? undefined
+          : {
+              unauthenticatedUrl: new URL(
+                `/${pathLocale}/sign-in`,
+                req.url
+              ).toString(),
+            }
+      )
+    }
+
+    return withLocaleHeaders(req)
+  })
+}
+
+export default isP0FixtureModeEnabled() ? fixtureProxy : createAuthenticatedProxy()
 
 export const config = {
   matcher: [

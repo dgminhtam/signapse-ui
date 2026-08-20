@@ -14,16 +14,16 @@ import {
 import { buttonVariants } from "@/components/ui/button"
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DropdownMenuContentInOverlay as DropdownMenuContent } from "@/components/ui/dropdown-menu-content-in-overlay"
 import {
   Tooltip,
-  TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { TooltipContentInOverlay } from "@/components/ui/tooltip-content-in-overlay"
 import { cn } from "@/lib/utils"
 
 import { ToolbarButton, ToolbarMenuGroup } from "./toolbar"
@@ -73,7 +73,8 @@ export function FontColorToolbarButton({
 }: {
   nodeType: string
   tooltip?: string
-} & React.ComponentProps<typeof DropdownMenu>) {
+  children?: React.ReactNode
+} & Omit<React.ComponentProps<typeof DropdownMenu>, "children">) {
   const editor = useEditorRef()
 
   const selectionDefined = useEditorSelector((editor) => !!editor.selection, [])
@@ -181,11 +182,9 @@ export function FontColorToolbarButton({
 
   return (
     <DropdownMenu modal onOpenChange={onToggle} open={open}>
-      <DropdownMenuTrigger asChild>
-        <ToolbarButton pressed={open} tooltip={tooltip}>
-          {children}
-        </ToolbarButton>
-      </DropdownMenuTrigger>
+      <ToolbarButton render={<DropdownMenuTrigger />} pressed={open} tooltip={tooltip}>
+        {children}
+      </ToolbarButton>
 
       <DropdownMenuContent className="min-w-80" align="start">
         <ColorPicker
@@ -399,9 +398,7 @@ function ColorCustom({
               }),
               "flex size-8 items-center justify-center rounded-full"
             )}
-            onSelect={(e) => {
-              e.preventDefault()
-            }}
+            closeOnClick={false}
           >
             <span className="sr-only">Custom</span>
             <PlusIcon />
@@ -480,8 +477,8 @@ function ColorDropdownMenuItem({
         className
       )}
       style={{ backgroundColor: value }}
-      onSelect={(e) => {
-        e.preventDefault()
+      closeOnClick={false}
+      onClick={() => {
         updateColor(value)
       }}
       {...props}
@@ -493,7 +490,9 @@ function ColorDropdownMenuItem({
   return name ? (
     <Tooltip>
       <TooltipTrigger>{content}</TooltipTrigger>
-      <TooltipContent className="mb-1 capitalize">{name}</TooltipContent>
+      <TooltipContentInOverlay className="mb-1 capitalize">
+        {name}
+      </TooltipContentInOverlay>
     </Tooltip>
   ) : (
     content

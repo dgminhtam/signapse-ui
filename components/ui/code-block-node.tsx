@@ -22,11 +22,8 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+import { Popover, PopoverTrigger } from "@/components/ui/popover"
+import { PopoverContentInOverlay } from "@/components/ui/popover-content-in-overlay"
 import { cn } from "@/lib/utils"
 
 type CodeBlockElementProps = PlateElementProps<TCodeBlockElement> & {
@@ -211,22 +208,27 @@ function CodeBlockCombobox({
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          size="sm"
-          variant="ghost"
-          className="h-6 justify-between gap-1 px-2 text-xs text-muted-foreground select-none"
-          aria-expanded={open}
-          role="combobox"
-        >
-          {getCodeBlockLanguageLabel(value) ?? "Plain Text"}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent
-        className="w-[200px] p-0"
-        onCloseAutoFocus={() => setSearchValue("")}
+    <Popover
+      open={open}
+      onOpenChange={(nextOpen) => {
+        setOpen(nextOpen)
+        if (!nextOpen) setSearchValue("")
+      }}
+    >
+      <PopoverTrigger
+        render={
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-6 justify-between gap-1 px-2 text-xs text-muted-foreground select-none"
+            aria-expanded={open}
+            role="combobox"
+          />
+        }
       >
+        {getCodeBlockLanguageLabel(value) ?? "Plain Text"}
+      </PopoverTrigger>
+      <PopoverContentInOverlay className="w-[200px] p-0">
         <Command shouldFilter={false}>
           <CommandInput
             className="h-9"
@@ -263,7 +265,7 @@ function CodeBlockCombobox({
             </CommandGroup>
           </CommandList>
         </Command>
-      </PopoverContent>
+      </PopoverContentInOverlay>
     </Popover>
   )
 }

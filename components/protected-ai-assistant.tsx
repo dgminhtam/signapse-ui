@@ -60,7 +60,8 @@ function AssistantLoadingTrigger() {
       <Button
         type="button"
         variant="default"
-        size="icon-xl"
+        size="icon-lg"
+        className="size-11 [&_svg:not([class*='size-'])]:size-5"
         disabled
         aria-label={dictionary.aiAssistant.loading}
       >
@@ -76,7 +77,8 @@ function AssistantLoadError({ label }: { label: string }) {
       <Button
         type="button"
         variant="destructive"
-        size="icon-xl"
+        size="icon-lg"
+        className="size-11 [&_svg:not([class*='size-'])]:size-5"
         disabled
         aria-label={label}
       >

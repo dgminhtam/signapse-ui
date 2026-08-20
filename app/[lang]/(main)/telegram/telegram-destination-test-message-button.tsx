@@ -8,11 +8,8 @@ import { sendTelegramTestMessage } from "@/app/api/telegram/action"
 import { useLocalization } from "@/app/lib/i18n/provider"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip"
+import { TooltipContentInOverlay } from "@/components/ui/tooltip-content-in-overlay"
 import { cn } from "@/lib/utils"
 
 type TelegramDestinationTestMessageButtonProps = {
@@ -93,8 +90,8 @@ export function TelegramDestinationTestMessageButton({
         {unavailableReason}
       </span>
       <Tooltip>
-        <TooltipTrigger asChild>{button}</TooltipTrigger>
-        <TooltipContent>{unavailableReason}</TooltipContent>
+        <TooltipTrigger render={button} />
+        <TooltipContentInOverlay>{unavailableReason}</TooltipContentInOverlay>
       </Tooltip>
     </>
   )

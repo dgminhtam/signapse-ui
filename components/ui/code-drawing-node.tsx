@@ -32,7 +32,11 @@ import { Trash2, DownloadIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { useIsMobile } from "@/hooks/use-mobile"
-import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover"
+import {
+  PopoverAnchor,
+  PopoverContentWithAnchor,
+  PopoverWithAnchor,
+} from "@/components/ui/popover-anchor"
 import {
   Select,
   SelectContent,
@@ -234,12 +238,12 @@ export function CodeDrawingElement(
   }
 
   return (
-    <Popover open={open} modal={false}>
-      <PopoverAnchor asChild>{content}</PopoverAnchor>
-      <PopoverContent
+    <PopoverWithAnchor open={open} modal={false}>
+      <PopoverAnchor render={content} />
+      <PopoverContentWithAnchor
         className="w-auto p-1"
         contentEditable={false}
-        onOpenAutoFocus={(e) => e.preventDefault()}
+        initialFocus={false}
       >
         <div className="flex items-center gap-1">
           {image && (
@@ -263,8 +267,8 @@ export function CodeDrawingElement(
             <Trash2 className="size-4" />
           </Button>
         </div>
-      </PopoverContent>
-    </Popover>
+      </PopoverContentWithAnchor>
+    </PopoverWithAnchor>
   )
 }
 
@@ -389,8 +393,13 @@ function CodeDrawingToolbar({
     >
       {!readOnly && (
         <Select
+          items={CODE_DRAWING_TYPE_ARRAY}
           value={drawingType}
-          onValueChange={onDrawingTypeChange}
+          onValueChange={(value) => {
+            if (value !== null) {
+              onDrawingTypeChange(value)
+            }
+          }}
           open={languageSelectOpen}
           onOpenChange={setLanguageSelectOpen}
         >
@@ -413,8 +422,13 @@ function CodeDrawingToolbar({
 
       {!readOnly && (
         <Select
+          items={VIEW_MODE_ARRAY}
           value={viewMode}
-          onValueChange={onDrawingModeChange}
+          onValueChange={(value) => {
+            if (value !== null) {
+              onDrawingModeChange(value)
+            }
+          }}
           open={viewModeSelectOpen}
           onOpenChange={setViewModeSelectOpen}
         >

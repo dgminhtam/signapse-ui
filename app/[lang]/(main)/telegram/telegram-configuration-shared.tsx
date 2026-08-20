@@ -284,23 +284,25 @@ export function ActionConfirmDialog({
   return (
     <AlertDialog open={open} onOpenChange={handleOpenChange}>
       {trigger === null ? null : (
-        <AlertDialogTrigger asChild>
-          {trigger ?? (
-            <Button
-              id={restoreFocusId}
-              variant={intent === "destructive" ? "destructive" : "ghost"}
-              size="icon-sm"
-              disabled={disabled}
-              aria-label={triggerLabel}
-            >
-              {intent === "destructive" ? (
-                <Trash2 data-icon="inline-start" />
-              ) : (
-                <CircleAlert data-icon="inline-start" />
-              )}
-            </Button>
-          )}
-        </AlertDialogTrigger>
+        <AlertDialogTrigger
+          render={
+            trigger ?? (
+              <Button
+                id={restoreFocusId}
+                variant={intent === "destructive" ? "destructive" : "ghost"}
+                size="icon-sm"
+                disabled={disabled}
+                aria-label={triggerLabel}
+              >
+                {intent === "destructive" ? (
+                  <Trash2 data-icon="inline-start" />
+                ) : (
+                  <CircleAlert data-icon="inline-start" />
+                )}
+              </Button>
+            )
+          }
+        />
       )}
       <AlertDialogContent size="sm">
         <AlertDialogHeader>

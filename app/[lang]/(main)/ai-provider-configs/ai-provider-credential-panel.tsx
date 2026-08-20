@@ -536,16 +536,18 @@ function DeleteCredentialButton({
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
-        >
-          <Trash2 />
-          <span className="sr-only">{t.credentialDelete}</span>
-        </Button>
+      <AlertDialogTrigger
+        render={
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+          />
+        }
+      >
+        <Trash2 />
+        <span className="sr-only">{t.credentialDelete}</span>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>

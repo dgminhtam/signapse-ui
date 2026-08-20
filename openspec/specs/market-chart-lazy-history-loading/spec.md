@@ -4,21 +4,22 @@
 TBD - created by archiving change add-market-chart-lazy-history-loading. Update Purpose after archive.
 ## Requirements
 ### Requirement: Lazy older candle loading
-The system SHALL load older market chart candles when users navigate toward the oldest currently loaded candle range.
+The system SHALL load older available market chart candles when users navigate toward the oldest currently loaded candle range.
 
 #### Scenario: Trigger older history load
 - **WHEN** an authorized user pans the market chart toward the oldest loaded candles
-- **THEN** the system requests an older candle window for the selected watchlist asset and timeframe
+- **THEN** the system requests an older count-back page for the selected watchlist asset and timeframe
 
 #### Scenario: Use existing candle endpoint
-- **WHEN** the system requests an older candle window
+- **WHEN** the system requests an older candle page
 - **THEN** it calls `GET /market-charts/candles` through the authenticated market chart action
-- **AND** it sends the selected watchlist asset `assetId`, current `timeframe`, computed `from`, computed `to`, and current `includeAnnotations` value
+- **AND** it sends the selected watchlist asset `assetId`, current `timeframe`, the oldest loaded candle timestamp as exclusive `to`, and the configured older `countBack`
+- **AND** it does not send `from` or `includeAnnotations`
 
-#### Scenario: Compute older range from loaded data
+#### Scenario: Compute older count-back page from loaded data
 - **WHEN** the system builds an older candle request
-- **THEN** `to` is before the oldest loaded candle time
-- **AND** `from` is computed from `to` using this older-history lookback mapping: `1m=1 day`, `5m=1 day`, `15m=1 day`, `30m=2 days`, `1h=4 days`, `1d=75 days`, `1w=385 days`, `1mo=1825 days`
+- **THEN** `to` equals the oldest loaded candle time as an exclusive boundary
+- **AND** `countBack` uses this older-page mapping: `1m=1000`, `5m=288`, `15m=96`, `30m=96`, `1h=336`, `4h=84`, `1d=75`, `1w=55`, `1mo=60`
 
 #### Scenario: Preserve route state
 - **WHEN** lazy historical loading occurs
@@ -58,16 +59,30 @@ The system SHALL prepend older loaded candles without resetting the visible char
 - **AND** the chart does not crash with a runtime `.time` read error
 
 ### Requirement: Older history exhaustion
-The system SHALL stop requesting older candle windows when no older data remains available from the backend response stream.
+The system SHALL stop requesting older count-back pages only when exhausted candle history is confirmed for the active chart identity.
+
+#### Scenario: Short successful older page
+- **WHEN** an older count-back request succeeds with fewer valid returned candles than its requested `countBack`
+- **THEN** the system merges the returned valid candles in chronological order
+- **AND** it keeps older history pageable for the active chart identity
+- **AND** the next user-triggered older request uses the returned page's oldest candle time as exclusive `to`
+- **AND** it does not automatically issue another request solely because the page is short
 
 #### Scenario: Empty older response
-- **WHEN** an older candle request succeeds with an empty `candles[]`
+- **WHEN** an older count-back request succeeds with an empty `candles[]`
+- **AND** the response `from` and `to` both equal the request's exclusive anchor
 - **THEN** the system marks older history as exhausted for the active chart identity
-- **AND** the system stops requesting older windows until the chart identity resets
+- **AND** the system stops requesting older pages until the chart identity resets
 
-#### Scenario: No new candles after de-duplication
-- **WHEN** an older candle request returns only candles that are already loaded
-- **THEN** the system treats that older request as exhausted for the active chart identity
+#### Scenario: No strictly older candles after de-duplication
+- **WHEN** a non-empty older count-back response yields no valid candle timestamp strictly before the existing oldest candle after normalization and de-duplication
+- **THEN** the system treats that response as a retryable response-contract error
+- **AND** it does not mark history as exhausted or automatically issue another older request
+
+#### Scenario: Older-page failure remains retryable
+- **WHEN** an older count-back request fails or returns invalid data
+- **THEN** the system does not mark history as exhausted
+- **AND** a later navigation to the older-history boundary can retry the request for the active chart identity
 
 #### Scenario: Reset exhaustion
 - **WHEN** the user changes asset, timeframe, annotation layer state, refreshes the chart, or the workspace watchlist context changes
@@ -76,9 +91,14 @@ The system SHALL stop requesting older candle windows when no older data remains
 ### Requirement: Lazy annotation history
 The system SHALL keep annotation markers and controls aligned with lazily loaded candle history when the annotation layer is enabled.
 
-#### Scenario: Request annotations for older windows
-- **WHEN** the system successfully requests an older candle window and the annotation layer is enabled
-- **THEN** the system requests annotations from `GET /market-charts/annotations` for the same `assetId`, `from`, and `to` window
+#### Scenario: Request annotations for older available candles
+- **WHEN** an older count-back request returns one or more valid candles and the annotation layer is enabled
+- **THEN** the system derives that page's displayed candle interval from the returned candles
+- **AND** it requests annotations from `GET /market-charts/annotations` for that interval's `assetId`, `from`, and exclusive `to`
+
+#### Scenario: Do not request annotations for an empty page
+- **WHEN** an older count-back request succeeds without valid candles
+- **THEN** the system does not request annotations for that page
 
 #### Scenario: Merge older annotations
 - **WHEN** an older annotation response includes annotation items
@@ -120,7 +140,7 @@ The system SHALL keep lazy historical loading scoped to older candles only.
 
 #### Scenario: Refresh still loads latest window
 - **WHEN** the user activates the chart refresh action
-- **THEN** the system reloads the latest rolling window using the current time
+- **THEN** the system reloads the latest count-back page using a fresh aligned current-time anchor
 - **AND** previously lazy-loaded older history is cleared for the refreshed chart identity
 
 #### Scenario: No toolbar expansion
@@ -128,13 +148,13 @@ The system SHALL keep lazy historical loading scoped to older candles only.
 - **THEN** the system does not add indicator, drawing, screenshot, fullscreen, or TradingView-like toolbar controls as part of this capability
 
 ### Requirement: Four-hour charts load older history
-The system SHALL build older candle requests for timeframe `4h` using a four-hour interval and a 14-day lookback window.
+The system SHALL build older candle requests for timeframe `4h` using an exclusive count-back page.
 
 #### Scenario: User reaches the oldest four-hour candles
 - **WHEN** lazy history is triggered for an active `4h` chart
 - **THEN** the older request retains timeframe `4h`
-- **AND** its `to` boundary is one four-hour interval before the oldest loaded candle
-- **AND** its `from` boundary is 14 days before that `to` boundary
+- **AND** its exclusive `to` boundary equals the oldest loaded candle timestamp
+- **AND** it requests `countBack=84`
 
 #### Scenario: Four-hour older candles are returned
 - **WHEN** an older `4h` request succeeds

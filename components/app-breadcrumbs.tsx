@@ -83,8 +83,8 @@ export function AppBreadcrumb() {
             {segments.length === 0 || isDashboardRoute ? (
               <BreadcrumbPage>{overviewLabel}</BreadcrumbPage>
             ) : (
-              <BreadcrumbLink asChild>
-                <Link href="/dashboard">{overviewLabel}</Link>
+              <BreadcrumbLink render={<Link href="/dashboard" />}>
+                {overviewLabel}
               </BreadcrumbLink>
             )}
           </BreadcrumbItem>
@@ -109,8 +109,8 @@ export function AppBreadcrumb() {
                     {title}
                   </BreadcrumbPage>
                 ) : (
-                  <BreadcrumbLink asChild>
-                    <Link href={href}>{title}</Link>
+                  <BreadcrumbLink render={<Link href={href} />}>
+                    {title}
                   </BreadcrumbLink>
                 )}
               </BreadcrumbItem>

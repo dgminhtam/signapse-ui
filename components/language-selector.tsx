@@ -15,13 +15,13 @@ import { replacePathLocale } from "@/app/lib/i18n/routing"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DropdownMenuContentInOverlay as DropdownMenuContent } from "@/components/ui/dropdown-menu-content-in-overlay"
 
 const LANGUAGE_SELECTOR_TRIGGER_ID = "language-selector-trigger"
 
@@ -52,25 +52,28 @@ export function LanguageSelector() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild id={LANGUAGE_SELECTOR_TRIGGER_ID}>
-        <Button
-          variant="outline"
-          disabled={isPending}
-          aria-label={dictionary.locale.selectorLabel}
-        >
-          <LanguagesIcon data-icon="inline-start" />
-          {APP_LOCALE_SHORT_LABELS[locale]}
-        </Button>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            variant="outline"
+            disabled={isPending}
+            aria-label={dictionary.locale.selectorLabel}
+          />
+        }
+        id={LANGUAGE_SELECTOR_TRIGGER_ID}
+      >
+        <LanguagesIcon data-icon="inline-start" />
+        {APP_LOCALE_SHORT_LABELS[locale]}
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
         aria-labelledby={LANGUAGE_SELECTOR_TRIGGER_ID}
         className="min-w-40"
       >
-        <DropdownMenuLabel>
-          {dictionary.locale.currentLanguage}
-        </DropdownMenuLabel>
         <DropdownMenuGroup>
+          <DropdownMenuLabel>
+            {dictionary.locale.currentLanguage}
+          </DropdownMenuLabel>
           <DropdownMenuRadioGroup
             value={locale}
             onValueChange={handleLocaleChange}

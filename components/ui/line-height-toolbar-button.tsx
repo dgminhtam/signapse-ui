@@ -8,11 +8,11 @@ import { useEditorRef, useSelectionFragmentProp } from "platejs/react"
 
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DropdownMenuContentInOverlay as DropdownMenuContent } from "@/components/ui/dropdown-menu-content-in-overlay"
 
 import { ToolbarButton } from "./toolbar"
 
@@ -32,11 +32,14 @@ export function LineHeightToolbarButton(
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
-      <DropdownMenuTrigger asChild>
-        <ToolbarButton pressed={open} tooltip="Line height" isDropdown>
-          <WrapText />
-        </ToolbarButton>
-      </DropdownMenuTrigger>
+      <ToolbarButton
+        render={<DropdownMenuTrigger />}
+        pressed={open}
+        tooltip="Line height"
+        isDropdown
+      >
+        <WrapText />
+      </ToolbarButton>
 
       <DropdownMenuContent className="min-w-[180px]" align="start">
         <DropdownMenuRadioGroup

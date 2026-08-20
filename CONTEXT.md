@@ -39,3 +39,25 @@ _Avoid_: Ngôn ngữ giao diện, ngôn ngữ của Telegram
 **Disabled schedule (Lịch đã vô hiệu hóa)**:
 A scheduled asset analysis that no longer runs and cannot be reactivated through the UI.
 _Avoid_: Lịch tạm dừng, lịch có thể tiếp tục
+
+## Market Charts
+
+**Available candle (Nến khả dụng)**:
+An actual OHLCV candle available for an asset and timeframe; a gap in provider history is not a candle.
+_Avoid_: Time slot, missing candle
+
+**Count-back request (Yêu cầu nến lùi)**:
+A candle request that asks for up to a positive count of available candles immediately before its exclusive anchor, ignoring gaps. A short non-empty result can still have older available candles.
+_Avoid_: Time-range backfill, slot count
+
+**Candle boundary (Mốc nến)**:
+An aligned UTC boundary between consecutive timeframe buckets. Initial chart history uses the end boundary of the current bucket, while older history uses the oldest returned candle boundary.
+_Avoid_: Current wall-clock time, rounded timestamp
+
+**Exhausted candle history (Lịch sử nến đã hết)**:
+The terminal state in which a valid count-back request finds no older available candles at its requested anchor. A short non-empty response and a loading failure do not indicate exhaustion.
+_Avoid_: Fetch error, empty state
+
+**Displayed candle interval (Khoảng nến hiển thị)**:
+The time span covered by the available candles rendered in the chart, rather than the requested calendar-time range.
+_Avoid_: Requested range, provider gap

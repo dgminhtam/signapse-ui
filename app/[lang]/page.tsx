@@ -25,7 +25,7 @@ import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
 import { withLocalePath } from "@/app/lib/i18n/routing"
 import { Logo } from "@/components/logo"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 
 const REQUEST_ACCESS_HREF =
   "mailto:request-access@signapse.ai?subject=Signapse%20access%20request"
@@ -129,34 +129,34 @@ function LandingHeader({
 
         <div className="flex items-center gap-2">
           {isAuthenticated ? (
-            <Button asChild>
-              <Link
-                href={withLocalePath("/dashboard", locale)}
-                aria-label={dictionary.landing.cta.openDashboardAria}
-              >
-                {dictionary.landing.nav.openDashboard}
-                <ArrowRightIcon data-icon="inline-end" />
-              </Link>
-            </Button>
+            <Link
+              href={withLocalePath("/dashboard", locale)}
+              aria-label={dictionary.landing.cta.openDashboardAria}
+              className={buttonVariants()}
+            >
+              {dictionary.landing.nav.openDashboard}
+              <ArrowRightIcon data-icon="inline-end" />
+            </Link>
           ) : (
             <>
-              <Button asChild variant="ghost" className="hidden sm:inline-flex">
-                <Link
-                  href={withLocalePath("/sign-in", locale)}
-                  aria-label={dictionary.landing.cta.signInAria}
-                >
-                  {dictionary.landing.nav.signIn}
-                </Link>
-              </Button>
-              <Button asChild>
-                <a
-                  href={REQUEST_ACCESS_HREF}
-                  aria-label={dictionary.landing.cta.requestAccessAria}
-                >
-                  {dictionary.landing.nav.requestAccess}
-                  <ArrowRightIcon data-icon="inline-end" />
-                </a>
-              </Button>
+              <Link
+                href={withLocalePath("/sign-in", locale)}
+                aria-label={dictionary.landing.cta.signInAria}
+                className={buttonVariants({
+                  variant: "ghost",
+                  className: "hidden sm:inline-flex",
+                })}
+              >
+                {dictionary.landing.nav.signIn}
+              </Link>
+              <a
+                href={REQUEST_ACCESS_HREF}
+                aria-label={dictionary.landing.cta.requestAccessAria}
+                className={buttonVariants()}
+              >
+                {dictionary.landing.nav.requestAccess}
+                <ArrowRightIcon data-icon="inline-end" />
+              </a>
             </>
           )}
         </div>
@@ -220,46 +220,55 @@ function LandingCtas({
   if (isAuthenticated) {
     return (
       <div className="flex flex-col gap-3 sm:flex-row">
-        <Button asChild size="lg" className="w-full sm:w-auto">
-          <Link
-            href={withLocalePath("/dashboard", locale)}
-            aria-label={dictionary.landing.cta.openDashboardAria}
-          >
-            {dictionary.landing.cta.openDashboard}
-            <ArrowRightIcon data-icon="inline-end" />
-          </Link>
-        </Button>
-        <Button
-          asChild
-          size="lg"
-          variant="outline"
-          className="w-full sm:w-auto"
+        <Link
+          href={withLocalePath("/dashboard", locale)}
+          aria-label={dictionary.landing.cta.openDashboardAria}
+          className={buttonVariants({
+            size: "lg",
+            className: "w-full sm:w-auto",
+          })}
         >
-          <a href="#product">{dictionary.landing.cta.exploreProduct}</a>
-        </Button>
+          {dictionary.landing.cta.openDashboard}
+          <ArrowRightIcon data-icon="inline-end" />
+        </Link>
+        <a
+          href="#product"
+          className={buttonVariants({
+            size: "lg",
+            variant: "outline",
+            className: "w-full sm:w-auto",
+          })}
+        >
+          {dictionary.landing.cta.exploreProduct}
+        </a>
       </div>
     )
   }
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row">
-      <Button asChild size="lg" className="w-full sm:w-auto">
-        <a
-          href={REQUEST_ACCESS_HREF}
-          aria-label={dictionary.landing.cta.requestAccessAria}
-        >
-          {dictionary.landing.cta.requestAccess}
-          <ArrowRightIcon data-icon="inline-end" />
-        </a>
-      </Button>
-      <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
-        <Link
-          href={withLocalePath("/sign-in", locale)}
-          aria-label={dictionary.landing.cta.signInAria}
-        >
-          {dictionary.landing.cta.signIn}
-        </Link>
-      </Button>
+      <a
+        href={REQUEST_ACCESS_HREF}
+        aria-label={dictionary.landing.cta.requestAccessAria}
+        className={buttonVariants({
+          size: "lg",
+          className: "w-full sm:w-auto",
+        })}
+      >
+        {dictionary.landing.cta.requestAccess}
+        <ArrowRightIcon data-icon="inline-end" />
+      </a>
+      <Link
+        href={withLocalePath("/sign-in", locale)}
+        aria-label={dictionary.landing.cta.signInAria}
+        className={buttonVariants({
+          size: "lg",
+          variant: "outline",
+          className: "w-full sm:w-auto",
+        })}
+      >
+        {dictionary.landing.cta.signIn}
+      </Link>
     </div>
   )
 }
@@ -721,25 +730,25 @@ function FinalCtaSection({
             {dictionary.landing.finalCta.body}
           </p>
         </div>
-        <Button asChild size="lg">
-          {isAuthenticated ? (
-            <Link
-              href={withLocalePath("/dashboard", locale)}
-              aria-label={dictionary.landing.cta.openDashboardAria}
-            >
-              {dictionary.landing.finalCta.openDashboard}
-              <ArrowRightIcon data-icon="inline-end" />
-            </Link>
-          ) : (
-            <a
-              href={REQUEST_ACCESS_HREF}
-              aria-label={dictionary.landing.cta.requestAccessAria}
-            >
-              {dictionary.landing.finalCta.requestAccess}
-              <ArrowRightIcon data-icon="inline-end" />
-            </a>
-          )}
-        </Button>
+        {isAuthenticated ? (
+          <Link
+            href={withLocalePath("/dashboard", locale)}
+            aria-label={dictionary.landing.cta.openDashboardAria}
+            className={buttonVariants({ size: "lg" })}
+          >
+            {dictionary.landing.finalCta.openDashboard}
+            <ArrowRightIcon data-icon="inline-end" />
+          </Link>
+        ) : (
+          <a
+            href={REQUEST_ACCESS_HREF}
+            aria-label={dictionary.landing.cta.requestAccessAria}
+            className={buttonVariants({ size: "lg" })}
+          >
+            {dictionary.landing.finalCta.requestAccess}
+            <ArrowRightIcon data-icon="inline-end" />
+          </a>
+        )}
       </div>
     </section>
   )

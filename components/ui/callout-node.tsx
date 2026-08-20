@@ -48,8 +48,9 @@ export function CalloutElement({
       <div className="flex w-full gap-2 rounded-md">
         <EmojiPopover
           {...emojiToolbarDropdownProps}
-          control={
+          trigger={(render) => (
             <Button
+              render={render}
               variant="ghost"
               className="size-6 p-1 text-[18px] select-none hover:bg-muted-foreground/15"
               style={{
@@ -60,7 +61,7 @@ export function CalloutElement({
             >
               {icon || "💡"}
             </Button>
-          }
+          )}
         >
           <EmojiPicker {...emojiPickerState} {...calloutProps} />
         </EmojiPopover>

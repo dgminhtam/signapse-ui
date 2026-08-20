@@ -48,7 +48,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import {
   EmptyDescription,
   EmptyHeader,
@@ -102,12 +102,10 @@ export function SystemPromptList({ promptPage }: SystemPromptListProps) {
       <AppListToolbar>
         <AppListToolbarLeading>
           {canCreate ? (
-            <Button asChild>
-              <Link href="/system-prompts/create">
-                <Plus data-icon="inline-start" />
-                {t.addPrompt}
-              </Link>
-            </Button>
+            <Link href="/system-prompts/create" className={buttonVariants()}>
+              <Plus data-icon="inline-start" />
+              {t.addPrompt}
+            </Link>
           ) : null}
           <SystemPromptSearch />
         </AppListToolbarLeading>
@@ -220,17 +218,18 @@ export function SystemPromptList({ promptPage }: SystemPromptListProps) {
                   <TableCell className="w-28">
                     <div className="flex justify-end gap-1">
                       {canUpdate ? (
-                        <Button
-                          asChild
-                          variant="ghost"
-                          size="icon-sm"
-                          className="text-muted-foreground hover:text-foreground"
+                        <Link
+                          href={getPromptHref(prompt.promptType)}
+                          className={buttonVariants({
+                            variant: "ghost",
+                            size: "icon-sm",
+                            className:
+                              "text-muted-foreground hover:text-foreground",
+                          })}
                         >
-                          <Link href={getPromptHref(prompt.promptType)}>
-                            <Edit2 data-icon="inline-start" />
-                            <span className="sr-only">{t.editPrompt}</span>
-                          </Link>
-                        </Button>
+                          <Edit2 data-icon="inline-start" />
+                          <span className="sr-only">{t.editPrompt}</span>
+                        </Link>
                       ) : null}
                       {canDelete ? (
                         <DeletePromptButton prompt={prompt} />
@@ -284,15 +283,17 @@ function DeletePromptButton({ prompt }: { prompt: SystemPromptResponse }) {
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-        >
-          <Trash2 data-icon="inline-start" />
-          <span className="sr-only">{t.deletePrompt}</span>
-        </Button>
+      <AlertDialogTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+          />
+        }
+      >
+        <Trash2 data-icon="inline-start" />
+        <span className="sr-only">{t.deletePrompt}</span>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>

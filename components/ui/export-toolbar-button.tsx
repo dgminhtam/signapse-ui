@@ -12,11 +12,11 @@ import { serializeHtml } from "platejs/static"
 
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DropdownMenuContentInOverlay as DropdownMenuContent } from "@/components/ui/dropdown-menu-content-in-overlay"
 import { BaseEditorKit } from "@/components/editor/editor-base-kit"
 
 import { EditorStatic } from "./editor-static"
@@ -165,27 +165,30 @@ export function ExportToolbarButton(
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
-      <DropdownMenuTrigger asChild>
-        <ToolbarButton pressed={open} tooltip="Export" isDropdown>
-          <ArrowDownToLineIcon className="size-4" />
-        </ToolbarButton>
-      </DropdownMenuTrigger>
+      <ToolbarButton
+        render={<DropdownMenuTrigger />}
+        pressed={open}
+        tooltip="Export"
+        isDropdown
+      >
+        <ArrowDownToLineIcon className="size-4" />
+      </ToolbarButton>
 
       <DropdownMenuContent className="min-w-[180px]" align="start">
         <DropdownMenuGroup>
-          <DropdownMenuItem onSelect={exportToHtml}>
+          <DropdownMenuItem onClick={exportToHtml}>
             Export as HTML
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={exportToPdf}>
+          <DropdownMenuItem onClick={exportToPdf}>
             Export as PDF
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={exportToImage}>
+          <DropdownMenuItem onClick={exportToImage}>
             Export as Image
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={exportToMarkdown}>
+          <DropdownMenuItem onClick={exportToMarkdown}>
             Export as Markdown
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={exportToWord}>
+          <DropdownMenuItem onClick={exportToWord}>
             Export as Word
           </DropdownMenuItem>
         </DropdownMenuGroup>

@@ -16,10 +16,7 @@ const markdownComponents: Components = {
   h4: ({ children }) => <h5>{children}</h5>,
   h5: ({ children }) => <h6>{children}</h6>,
   hr: () => (
-    <Separator
-      decorative={false}
-      className="mt-[calc(var(--typeset-flow)*2.4)]"
-    />
+    <Separator className="mt-[calc(var(--typeset-flow)*2.4)]" />
   ),
   table: ({ children }) => (
     <div className="typeset-scroll">

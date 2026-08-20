@@ -354,8 +354,12 @@ export function UserFormDialog({
                     {t.roleLabel} <span className="text-destructive">*</span>
                   </FieldLabel>
                   <Select
+                    items={roles.map((role) => ({
+                      value: role.id.toString(),
+                      label: role.name,
+                    }))}
                     value={field.value}
-                    onValueChange={field.onChange}
+                    onValueChange={(value) => field.onChange(value ?? "")}
                     disabled={isSubmitting || !rolesAvailable}
                   >
                     <SelectTrigger

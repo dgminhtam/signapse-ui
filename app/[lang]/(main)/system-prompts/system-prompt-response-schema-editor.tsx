@@ -236,7 +236,18 @@ function SchemaNodeEditor({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <Field className="sm:max-w-56">
           <FieldLabel>{t.schemaType}</FieldLabel>
-          <Select value={type} onValueChange={handleTypeChange}>
+          <Select
+            items={SYSTEM_PROMPT_SCHEMA_TYPES.map((schemaType) => ({
+              value: schemaType,
+              label: t.schemaTypeLabels[schemaType],
+            }))}
+            value={type}
+            onValueChange={(value) => {
+              if (value !== null) {
+                handleTypeChange(value)
+              }
+            }}
+          >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -426,12 +437,14 @@ function ObjectSchemaEditor({
       {hasMapSchema ? (
         <Collapsible defaultOpen>
           <div className="flex items-center justify-between gap-3">
-            <CollapsibleTrigger asChild>
-              <Button type="button" variant="ghost">
-                <ChevronDown data-icon="inline-start" />
-                {t.schemaMapItems}
-              </Button>
-            </CollapsibleTrigger>
+            <CollapsibleTrigger
+              render={
+                <Button type="button" variant="ghost">
+                  <ChevronDown data-icon="inline-start" />
+                  {t.schemaMapItems}
+                </Button>
+              }
+            />
             <Button
               type="button"
               variant="ghost"
@@ -516,12 +529,14 @@ function SchemaPropertyEditor({
             </FieldLabel>
           </Field>
           <div className="flex gap-2">
-            <CollapsibleTrigger asChild>
-              <Button type="button" variant="ghost" size="icon">
-                <ChevronDown data-icon="inline-start" />
-                <span className="sr-only">{name}</span>
-              </Button>
-            </CollapsibleTrigger>
+            <CollapsibleTrigger
+              render={
+                <Button type="button" variant="ghost" size="icon">
+                  <ChevronDown data-icon="inline-start" />
+                  <span className="sr-only">{name}</span>
+                </Button>
+              }
+            />
             <Button
               type="button"
               variant="ghost"

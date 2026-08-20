@@ -23,17 +23,14 @@ import {
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DropdownMenuContentInOverlay as DropdownMenuContent } from "@/components/ui/dropdown-menu-content-in-overlay"
 import { Spinner } from "@/components/ui/spinner"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip"
+import { TooltipContentInOverlay } from "@/components/ui/tooltip-content-in-overlay"
 
 interface NewsArticleDetailActionsProps {
   id: number
@@ -75,27 +72,31 @@ export function NewsArticleDetailActions({
     <>
       <DropdownMenu>
         <Tooltip>
-          <TooltipTrigger asChild>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon-sm"
-                aria-label={dictionary.newsArticles.actionsLabel}
+          <TooltipTrigger
+            render={
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    variant="outline"
+                    size="icon-sm"
+                    aria-label={dictionary.newsArticles.actionsLabel}
+                  />
+                }
               >
                 <MoreHorizontal data-icon="inline-start" />
-              </Button>
-            </DropdownMenuTrigger>
-          </TooltipTrigger>
-          <TooltipContent>
+              </DropdownMenuTrigger>
+            }
+          />
+          <TooltipContentInOverlay>
             {dictionary.newsArticles.actionsTooltip}
-          </TooltipContent>
+          </TooltipContentInOverlay>
         </Tooltip>
         <DropdownMenuContent align="end" className="w-52">
           <DropdownMenuGroup>
             <DropdownMenuItem
               variant="destructive"
               disabled={isDeletePending}
-              onSelect={() => setDeleteOpen(true)}
+              onClick={() => setDeleteOpen(true)}
             >
               {isDeletePending ? <Spinner /> : <Trash2 />}
               {dictionary.newsArticles.deleteShort}

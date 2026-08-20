@@ -27,7 +27,7 @@ import {
 } from "@/components/app-list-table"
 import { SortSelect } from "@/components/sort-select"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import {
   Table,
   TableBody,
@@ -741,24 +741,22 @@ export function EconomicCalendarList({
                                             </TableCell>
                                             <TableCell className="w-20 text-right align-top">
                                               <div className="flex justify-end gap-1">
-                                                <Button
-                                                  variant="ghost"
-                                                  size="icon-sm"
-                                                  asChild
+                                                <Link
+                                                  href={`/economic-calendar/${entry.id}`}
+                                                  className={buttonVariants({
+                                                    variant: "ghost",
+                                                    size: "icon-sm",
+                                                  })}
                                                 >
-                                                  <Link
-                                                    href={`/economic-calendar/${entry.id}`}
-                                                  >
-                                                    <Eye data-icon="inline-start" />
-                                                    <span className="sr-only">
-                                                      {
-                                                        dictionary
-                                                          .economicCalendar
-                                                          .viewDetail
-                                                      }
-                                                    </span>
-                                                  </Link>
-                                                </Button>
+                                                  <Eye data-icon="inline-start" />
+                                                  <span className="sr-only">
+                                                    {
+                                                      dictionary
+                                                        .economicCalendar
+                                                        .viewDetail
+                                                    }
+                                                  </span>
+                                                </Link>
                                               </div>
                                             </TableCell>
                                           </TableRow>

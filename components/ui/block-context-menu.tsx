@@ -16,14 +16,16 @@ import {
 
 import {
   ContextMenu,
-  ContextMenuContent,
   ContextMenuGroup,
   ContextMenuItem,
   ContextMenuSub,
-  ContextMenuSubContent,
   ContextMenuSubTrigger,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu"
+import {
+  ContextMenuContentInOverlay as ContextMenuContent,
+  ContextMenuSubContentInOverlay as ContextMenuSubContent,
+} from "@/components/ui/context-menu-content-in-overlay"
 import { setBlockType } from "@/components/editor/transforms"
 import { useIsTouchDevice } from "@/hooks/use-is-touch-device"
 
@@ -66,10 +68,9 @@ export function BlockContextMenu({ children }: { children: React.ReactNode }) {
           api.blockMenu.hide()
         }
       }}
-      modal={false}
     >
       <ContextMenuTrigger
-        asChild
+        render={<div className="w-full" />}
         onContextMenu={(event) => {
           const dataset = (event.target as HTMLElement).dataset
           const disabled =
@@ -87,14 +88,14 @@ export function BlockContextMenu({ children }: { children: React.ReactNode }) {
           }, 0)
         }}
       >
-        <div className="w-full">{children}</div>
+        {children}
       </ContextMenuTrigger>
       {isOpen && (
         <ContextMenuContent
           className="w-64"
-          onCloseAutoFocus={(e) => {
-            e.preventDefault()
+          finalFocus={() => {
             editor.getApi(BlockSelectionPlugin).blockSelection.focus()
+            return false
           }}
         >
           <ContextMenuGroup>

@@ -3,7 +3,11 @@ import { cookies } from "next/headers"
 import type { ReactNode } from "react"
 
 import { getMyWorkspaces } from "@/app/api/workspaces/action"
-import { getDevAuthUser, isDevAuthModeEnabled } from "@/app/lib/dev-auth-mode"
+import {
+  getDevAuthUser,
+  isDevAuthModeEnabled,
+  isP0FixtureModeEnabled,
+} from "@/app/lib/dev-auth-mode"
 import { getServerDictionary } from "@/app/lib/i18n/server"
 import { PERSONAL_NOTE_READ_PERMISSION } from "@/app/lib/personal-notes/permissions"
 import { hasPermission } from "@/app/lib/permissions"
@@ -31,6 +35,7 @@ export default async function Layout({
   children: ReactNode
 }>) {
   const devAuthMode = isDevAuthModeEnabled()
+  const p0FixtureMode = isP0FixtureModeEnabled()
   const { isAuthenticated } = devAuthMode
     ? { isAuthenticated: true }
     : await auth()
@@ -83,6 +88,7 @@ export default async function Layout({
           user={simpleUser}
           isAuthenticated={isAuthenticated}
           permissions={permissions}
+          isP0FixtureMode={p0FixtureMode}
         />
         <SidebarInset>
           <header className="flex min-h-16 shrink-0 items-center border-b px-4 py-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:min-h-12">

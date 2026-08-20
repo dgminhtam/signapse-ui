@@ -278,9 +278,10 @@ export function AiProviderConfigCreateForm() {
                       {t.provider} <span className="text-destructive">*</span>
                     </FieldLabel>
                     <Select
+                      items={providerOptions}
                       value={field.value}
                       onValueChange={(value) => {
-                        field.onChange(value)
+                        field.onChange(value ?? "")
                         clearAllCredentialModels()
                       }}
                     >

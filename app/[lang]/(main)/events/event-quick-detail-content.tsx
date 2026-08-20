@@ -17,7 +17,7 @@ import {
 } from "@/app/lib/i18n/format"
 import { EventResponse } from "@/app/lib/events/definitions"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import { AppTimeMetadata } from "@/components/app-time-metadata"
 
 import {
@@ -184,27 +184,33 @@ export function EventQuickDetailContent({
                 <div className="mt-3 flex flex-wrap gap-2">
                   {typeof evidence.newsArticleId === "number" &&
                   canReadNewsArticles ? (
-                    <Button asChild size="sm" variant="outline">
-                      <Link href={`/news-articles/${evidence.newsArticleId}`}>
-                        <FileText aria-hidden="true" data-icon="inline-start" />
-                        {dictionary.events.viewArticle}
-                      </Link>
-                    </Button>
+                    <Link
+                      href={`/news-articles/${evidence.newsArticleId}`}
+                      className={buttonVariants({
+                        size: "sm",
+                        variant: "outline",
+                      })}
+                    >
+                      <FileText aria-hidden="true" data-icon="inline-start" />
+                      {dictionary.events.viewArticle}
+                    </Link>
                   ) : null}
                   {evidence.newsArticleUrl ? (
-                    <Button asChild size="sm" variant="outline">
-                      <a
-                        href={evidence.newsArticleUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <ExternalLink
-                          aria-hidden="true"
-                          data-icon="inline-start"
-                        />
-                        {dictionary.events.openOriginal}
-                      </a>
-                    </Button>
+                    <a
+                      href={evidence.newsArticleUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={buttonVariants({
+                        size: "sm",
+                        variant: "outline",
+                      })}
+                    >
+                      <ExternalLink
+                        aria-hidden="true"
+                        data-icon="inline-start"
+                      />
+                      {dictionary.events.openOriginal}
+                    </a>
                   ) : null}
                 </div>
               </article>
