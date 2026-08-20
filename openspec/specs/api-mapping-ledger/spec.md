@@ -25,6 +25,11 @@ The system SHALL distinguish backend endpoint availability from frontend integra
 - **WHEN** `docs/APIMAPPING.md` lists frontend files related to Telegram before integration exists
 - **THEN** it records no frontend ownership paths for Telegram
 
+#### Scenario: News article linked-event rendering is documented accurately
+- **WHEN** `docs/APIMAPPING.md` documents the `linkedEvents` field on a News article detail response
+- **THEN** it records that the frontend receives the field but does not render linked-event UI in canonical News article detail or News article Quick detail
+- **AND** it does not imply that event links or event-read permission behavior exist on either article-reading surface
+
 ### Requirement: API mapping ledger documents Telegram permissions from auth metadata
 The system SHALL document Telegram endpoint permission requirements using the `x-signapse-auth` metadata from `docs/api_mapping.json`.
 
@@ -52,4 +57,3 @@ The system SHALL document the split market chart candle and annotation endpoints
 #### Scenario: Frontend integration status is accurate
 - **WHEN** frontend code is updated to call the annotation endpoint
 - **THEN** `docs/APIMAPPING.md` records the market chart frontend action and affected market chart UI files as integrated
-

@@ -293,7 +293,7 @@ Delete confirmation tuân theo pattern sau:
 - Quick detail trong Graph View, Market Charts hoặc dense workbench là local overlay do workspace sở hữu qua local state.
 - Open/close overlay không đổi URL và không dùng `router.back()`, `router.push()` hoặc `router.replace()` chỉ để quản lý drawer state.
 - Canonical routes như `/events/{id}` và `/news-articles/{id}` vẫn là full detail pages cho normal link, reload, copied URL, direct navigation và list/detail CRUD.
-- Drawer chứa loading, error/access-denied state bên trong overlay, focused content không embed full page shell và action rõ để mở canonical full detail page.
+- Drawer chứa loading, error/access-denied state bên trong overlay và focused content không embed full page shell. Với entity cần escalation như Event, drawer có action rõ để mở canonical full detail page; News article Quick detail là ngoại lệ reader-first: body đồng bộ với baseline đọc hiện tại và không có full-page action.
 
 ## Content And Language
 

@@ -49,9 +49,10 @@ The documentation SHALL distinguish lightweight local summaries from the richer 
 - **WHEN** the document discusses graph node inspectors or market-chart annotation popups
 - **THEN** it describes them as summary or decision surfaces rather than places to embed full event or article detail
 
-#### Scenario: Quick detail has a clear escalation path
+#### Scenario: Quick detail has entity-appropriate escalation guidance
 - **WHEN** the document describes quick detail content
-- **THEN** it requires an obvious way to open the canonical full detail page when users need the complete workspace or actions
+- **THEN** it requires an obvious way to open the canonical full detail page when users need the complete workspace or actions for entity types that expose escalation
+- **AND** it documents that News article Quick detail intentionally omits a canonical-detail action while retaining canonical-route behavior outside the drawer
 
 ### Requirement: Documentation defines scope boundaries
 The documentation SHALL define supported entity types, non-goals, and validation checks for future local quick-detail implementation proposals.
@@ -62,7 +63,7 @@ The documentation SHALL define supported entity types, non-goals, and validation
 
 #### Scenario: Future implementation checks are listed
 - **WHEN** the document provides rollout guidance
-- **THEN** it includes checks for local open and close behavior, unchanged workspace URL, full detail escalation, focus handling, scroll containment, loading, error, and permission states
+- **THEN** it includes checks for local open and close behavior, unchanged workspace URL, entity-appropriate full detail escalation or its documented absence, focus handling, scroll containment, loading, error, and permission states
 
 #### Scenario: Global route cleanup is verifiable
 - **WHEN** a developer implements local quick detail

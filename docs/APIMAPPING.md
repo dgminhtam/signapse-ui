@@ -157,8 +157,8 @@ Ghi chu:
 - `sourceName` la snapshot bat buoc tren entity: ingestion trim ten outlet khi tao article; rename/delete outlet va ingest lai cung URL khong mutate gia tri da snapshot.
 - OpenAPI khai bao `sourceName` la `string`, khong danh dau nullable va khong dua vao mang `required`; FE giu field optional de khop contract generate.
 - Enum `status` hien tai la `INGESTED`, `DERIVATION_PENDING`, `EVENT_RESOLVED`, `NO_PRIMARY_EVENT`, `CONTENT_FAILED`, `DERIVATION_FAILED`.
-- `LinkedEventSummaryResponse` hien chi con `eventStatus`, `evidenceRole`, `evidenceConfidence`, `evidenceNote`; `eventStatus` da dung enum `ENRICHMENT_PENDING`, `ENRICHED`, `ENRICHMENT_NO_MATCH`, `ENRICHMENT_FAILED`, `ARCHIVED`, va khong con `eventEnrichmentStatus`.
-- FE `app/lib/news-articles/definitions.ts`, detail, va quick detail da map `linkedEvents[]` theo `eventStatus` moi va khong con render badge `eventEnrichmentStatus`.
+- `LinkedEventSummaryResponse` gom `eventId`, `eventTitle`, `eventCanonicalKey`, `eventStatus`, `evidenceRole`, `evidenceConfidence`, va `evidenceNote`; `eventStatus` dung enum `ENRICHMENT_PENDING`, `ENRICHED`, `ENRICHMENT_NO_MATCH`, `ENRICHMENT_FAILED`, `ARCHIVED`, va khong con `eventEnrichmentStatus`.
+- Live OpenAPI v3.1.0 van khai bao `linkedEvents[]` voi `eventId`, `eventTitle`, `eventCanonicalKey`, `eventStatus`, `evidenceRole`, `evidenceConfidence`, va `evidenceNote`; FE giu field nay trong DTO, nhung detail va quick detail khong render linked-event UI hoac event navigation.
 - FE `app/lib/news-articles/definitions.ts`, list, detail, va quick detail da dong bo sang `sourceName` ma khong giu compatibility alias.
 - Navigation "Noi dung" da tro ve `/news-articles`; route `/source-documents*` chi con redirect sang surface canon moi.
 - Snapshot backend khong con `lifecycleStatus`, `readinessStatus`, `eventDerivationStatus`, `documentType`, hoac endpoint canon `/source-documents*`.
@@ -673,7 +673,7 @@ type ActionResult<T = void> =
 
 - List/search runtime cua frontend dang dung `$filter/page/size/sort`, trong khi OpenAPI tiep tuc mo ta `specification/pageable` o nhieu list endpoint.
 - Frontend da migrate route canon sang `/news-outlets*` va `/news-articles*`; `/sources*`, `/news-sources*`, va `/source-documents*` chi con redirect compatibility.
-- `news articles`: `linkedEvents[]` da co `eventStatus` enum moi theo enrichment lifecycle va khong con `eventEnrichmentStatus`; FE detail va quick detail da map theo contract moi.
+- `news articles`: `linkedEvents[]` da co `eventStatus` enum moi theo enrichment lifecycle va khong con `eventEnrichmentStatus`; FE giu field trong DTO nhung detail va quick detail khong render linked-event UI hoac event navigation.
 - `events`: backend gate enrich/market reaction operators bang `news-article:analyze`; FE events da gate bang permission canon nay truoc va chi giu `source-document:analyze` nhu alias compatibility tam thoi.
 - `permission scan`: cac literal FE-only `source-document:*` con lai deu la alias compatibility sau permission canon `news-article:*`; cac permission BE chua co FE literal gom `cronjob:stop`, `media:*`, va `narrative:manage`; frontend hien chi co helper cho `narrative:read`.
 - `asset type enum`: snapshot moi them `EQUITY` va `ETF` cho asset/watchlist/event/narrative/graph/market-chart payload. FE assets, watchlists, narratives, graph view, market charts dang string-compatible; rieng events van hard-code `EventAssetType` va `dictionary.events.assetTypeLabels` voi 4 gia tri cu, nen co nguy co render label `undefined` cho event assets/reactions moi.

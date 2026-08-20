@@ -41,7 +41,7 @@ The bottom Drawer SHALL provide a stable readable layout while preserving enough
 - **THEN** the Drawer keeps the current focused content model and does not add mutation-heavy full-page actions
 
 ### Requirement: Navigation behavior remains canonical
-The Drawer refinement SHALL remove route-history ownership from quick detail while preserving canonical full detail page navigation as an explicit escalation action.
+The Drawer refinement SHALL remove route-history ownership from quick detail while preserving canonical full detail page navigation as an explicit escalation action for entity types that provide it.
 
 #### Scenario: Closing drawer returns to Graph View without navigation
 - **WHEN** a user closes the Drawer after opening quick detail from Graph View
@@ -52,6 +52,11 @@ The Drawer refinement SHALL remove route-history ownership from quick detail whi
 - **WHEN** a user opens `/events/{id}` or `/news-articles/{id}` directly, clicks a normal detail link, or reloads the URL
 - **THEN** the canonical full detail page renders instead of the quick detail Drawer
 
-#### Scenario: Full page escalation remains available
-- **WHEN** a user needs the complete detail workspace
-- **THEN** the Drawer provides an action to open the canonical full detail page
+#### Scenario: Event full-page escalation remains available
+- **WHEN** a user needs the complete Event detail workspace
+- **THEN** the Event Drawer provides an action to open the canonical full detail page
+
+#### Scenario: News article Quick detail remains focused
+- **WHEN** a user opens a News article in Quick detail from Graph View
+- **THEN** the Drawer does not provide a canonical full-page action
+- **AND** the canonical News article route remains available outside the drawer
