@@ -70,10 +70,10 @@ export function LanguageSelector() {
         aria-labelledby={LANGUAGE_SELECTOR_TRIGGER_ID}
         className="min-w-40"
       >
-        <DropdownMenuLabel>
-          {dictionary.locale.currentLanguage}
-        </DropdownMenuLabel>
         <DropdownMenuGroup>
+          <DropdownMenuLabel>
+            {dictionary.locale.currentLanguage}
+          </DropdownMenuLabel>
           <DropdownMenuRadioGroup
             value={locale}
             onValueChange={handleLocaleChange}

@@ -1,5 +1,7 @@
 # checkbox
 
+2026-08-18 — official Base Nova `@base-ui/react/checkbox` wrapper via shadcn CLI dry-run/diff; verdict: migrated and typechecked.
+
 ## Changed
 
 - Replaced the Radix Checkbox primitive with the official Base Nova `@base-ui/react/checkbox` root and indicator parts.
@@ -8,7 +10,7 @@
 
 ## Left alone
 
-- Existing Nova classes, data slots, focus affordance, field-disabled styling, and all form/table/chart consumers.
+- Current Nova classes, data slots, field-label focus affordance, field-disabled styling, and all form/table/chart consumers.
 - Boolean checked state handling in consumers.
 
 ## Behavior changes

@@ -20,7 +20,7 @@ import {
 } from "@/components/app-form-shell"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import {
   Field,
   FieldDescription,
@@ -338,13 +338,13 @@ export function AccountProfileForm({
                     {initialData.roleName || t.noPackage}
                   </Badge>
                 </div>
-                <Button
-                  variant="outline"
-                  render={<LocalizedLink href={upgradeHref} />}
+                <LocalizedLink
+                  href={upgradeHref}
+                  className={buttonVariants({ variant: "outline" })}
                 >
                   <CreditCard data-icon="inline-start" />
                   {t.upgradeAccount}
-                </Button>
+                </LocalizedLink>
               </div>
             </Field>
           </FieldGroup>

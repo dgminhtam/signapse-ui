@@ -73,7 +73,8 @@ export function FontColorToolbarButton({
 }: {
   nodeType: string
   tooltip?: string
-} & React.ComponentProps<typeof DropdownMenu>) {
+  children?: React.ReactNode
+} & Omit<React.ComponentProps<typeof DropdownMenu>, "children">) {
   const editor = useEditorRef()
 
   const selectionDefined = useEditorSelector((editor) => !!editor.selection, [])
@@ -181,11 +182,9 @@ export function FontColorToolbarButton({
 
   return (
     <DropdownMenu modal onOpenChange={onToggle} open={open}>
-      <DropdownMenuTrigger
-        render={<ToolbarButton pressed={open} tooltip={tooltip} />}
-      >
+      <ToolbarButton render={<DropdownMenuTrigger />} pressed={open} tooltip={tooltip}>
         {children}
-      </DropdownMenuTrigger>
+      </ToolbarButton>
 
       <DropdownMenuContent className="min-w-80" align="start">
         <ColorPicker

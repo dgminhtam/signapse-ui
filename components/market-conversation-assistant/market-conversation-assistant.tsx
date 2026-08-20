@@ -593,8 +593,8 @@ export function MarketConversationAssistant({
         render={
           <Button
             type="button"
-            size="icon-xl"
-            className="fixed end-4 bottom-4"
+            size="icon-lg"
+            className="fixed end-4 bottom-4 size-11 [&_svg:not([class*='size-'])]:size-5"
             aria-label={dictionary.aiAssistant.open}
           />
         }

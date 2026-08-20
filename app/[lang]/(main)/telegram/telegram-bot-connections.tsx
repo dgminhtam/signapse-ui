@@ -178,7 +178,7 @@ function BotConnectionItem({
 
   return (
     <>
-      <Item variant="outline" className="items-start">
+      <Item role="listitem" variant="outline" className="items-start">
         <ItemContent className="min-w-0">
           <ItemHeader className="flex-col items-start sm:flex-row sm:items-center">
             <ItemTitle className="max-w-full min-w-0 truncate">

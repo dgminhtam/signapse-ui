@@ -11,7 +11,7 @@ import { getServerDictionary } from "@/app/lib/i18n/server"
 import { canUpdateSystemPrompts } from "@/app/lib/system-prompts/permissions"
 import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { AccessDenied } from "@/components/access-denied"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 
 import { SystemPromptForm } from "../system-prompt-form"
 
@@ -54,14 +54,13 @@ export default async function EditSystemPromptPage({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center">
-        <Button
-          variant="secondary"
-          size="sm"
-          render={<Link href="/system-prompts" />}
+        <Link
+          href="/system-prompts"
+          className={buttonVariants({ variant: "secondary", size: "sm" })}
         >
           <ArrowLeft data-icon="inline-start" />
           {dictionary.common.back}
-        </Button>
+        </Link>
       </div>
 
       <SystemPromptForm initialData={prompt} />

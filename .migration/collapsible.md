@@ -1,5 +1,7 @@
 # collapsible
 
+2026-08-18 — official Base Nova `@base-ui/react/collapsible` wrapper via shadcn CLI dry-run/diff; verdict: migrated and typechecked.
+
 ## Changed
 
 - Replaced the Radix Collapsible parts with the matching official Base Nova `@base-ui/react/collapsible` root, trigger, and panel parts.

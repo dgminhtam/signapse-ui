@@ -1,5 +1,7 @@
 # label
 
+2026-08-18 — official native-label Base Nova mapping via shadcn CLI dry-run/diff; verdict: migrated and typechecked.
+
 ## Changed
 
 - Replaced the Radix Label primitive with the official Base Nova native `<label>` wrapper.

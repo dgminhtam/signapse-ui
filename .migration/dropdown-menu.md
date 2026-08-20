@@ -9,6 +9,7 @@
 - Added `components/ui/dropdown-menu-content-in-overlay.tsx` with `DropdownMenuContentInOverlay` and `DropdownMenuSubContentInOverlay`; consumers use it so the existing `OverlayPortalContainerProvider` behavior remains available without adding app logic to the default wrapper.
 - Replaced Radix positioning variables with Base UI `--available-height`, `--anchor-width`, and `--transform-origin` variables.
 - Removed the explicit nested menu portal around the table border menu because the Base UI content extension owns its portal.
+- Reconciled the remaining Base UI group-label consumer contract: workspace, user, asset, and language menu labels are now nested inside `DropdownMenuGroup` or `DropdownMenuRadioGroup` instead of being direct `DropdownMenuContent` children.
 - Leftover scan is clean for the migrated menu surface:
   `rg -n 'DropdownMenu(Trigger|Item|SubTrigger|CheckboxItem|RadioItem|SubContent|Content)\\s+asChild|radix-dropdown-menu|onCloseAutoFocus|onOpenAutoFocus|onEscapeKeyDown' app components -g '*.tsx'`
 
@@ -22,6 +23,7 @@
 
 - Menu actions now use Base UI `onClick`; items that previously prevented Radix selection closing use `closeOnClick={false}` explicitly.
 - Base UI's native menu keyboard navigation, typeahead, submenu, checkbox/radio, Escape, and focus behavior are used without Radix compatibility aliases.
+- Menu labels now receive the required Base UI group context while preserving localized copy, separators, item behavior, radio selection, asset search/scrolling, permissions, and focus behavior.
 - The wrapper no longer owns `useOverlayPortalContainer`; the app-specific extension owns that composition and falls back to the document body when no local container exists.
 
 ## Verify by hand
@@ -29,4 +31,5 @@
 - Open representative menus in the sidebar, workspace switcher, language/theme controls, Telegram cards, news actions, asset multi-select, and editor toolbars.
 - Confirm arrow-key navigation, typeahead, Enter/Space activation, Escape, outside click, disabled items, checkbox/radio state, and submenu placement.
 - Confirm workspace create/rename/watchlist dialogs remain usable while their menu action is activated.
+- Confirm workspace, account, language, and asset menus open without `MenuGroupContext` errors and retain their labels, separators, keyboard navigation, selection, and focus restoration.
 - Confirm table/editor menus and personal-notes menus mount inside the Sheet/fullscreen surface, while normal menus still mount through the default body portal.

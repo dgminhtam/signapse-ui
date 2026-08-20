@@ -50,7 +50,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import {
   EmptyDescription,
   EmptyHeader,
@@ -99,10 +99,13 @@ export function AiProviderConfigListPage({
       <AppListToolbar>
         <AppListToolbarLeading>
           {canCreateProvider ? (
-            <Button render={<Link href="/ai-provider-configs/create" />}>
+            <Link
+              href="/ai-provider-configs/create"
+              className={buttonVariants()}
+            >
               <Plus data-icon="inline-start" />
               {t.addConfig}
-            </Button>
+            </Link>
           ) : null}
         </AppListToolbarLeading>
         <AppListToolbarTrailing>
@@ -203,19 +206,18 @@ export function AiProviderConfigListPage({
                     <TableCell className="w-28">
                       <div className="flex justify-end gap-1">
                         {canUpdateProvider ? (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                            render={
-                              <Link
-                                href={`/ai-provider-configs/${provider.id}`}
-                              />
-                            }
+                          <Link
+                            href={`/ai-provider-configs/${provider.id}`}
+                            className={buttonVariants({
+                              variant: "ghost",
+                              size: "icon",
+                              className:
+                                "h-8 w-8 text-muted-foreground hover:text-foreground",
+                            })}
                           >
                             <Edit2 />
                             <span className="sr-only">{t.editConfig}</span>
-                          </Button>
+                          </Link>
                         ) : null}
                         {canDeleteProvider ? (
                           <DeleteProviderButton provider={provider} />

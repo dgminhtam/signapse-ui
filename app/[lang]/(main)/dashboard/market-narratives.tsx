@@ -18,7 +18,7 @@ import { formatMessage } from "@/app/lib/i18n/messages"
 import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { LocalizedLink } from "@/components/localized-link"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import {
   Card,
   CardAction,
@@ -74,15 +74,14 @@ export function MarketNarratives({
           <CardDescription>{t.description}</CardDescription>
           {showGraphView ? (
             <CardAction>
-              <Button
-                variant="ghost"
-                render={
-                  <LocalizedLink href="/graph-view" aria-label={t.graphView} />
-                }
+              <LocalizedLink
+                href="/graph-view"
+                aria-label={t.graphView}
+                className={buttonVariants({ variant: "ghost" })}
               >
                 <WaypointsIcon data-icon="inline-start" />
                 <span className="hidden sm:inline">{t.graphView}</span>
-              </Button>
+              </LocalizedLink>
             </CardAction>
           ) : null}
         </CardHeader>
@@ -185,7 +184,7 @@ function MarketNarrativeItems({
   return (
     <ItemGroup className="gap-0">
       {items.map((item, index) => (
-        <div key={item.id}>
+        <div key={item.id} role="listitem">
           {index > 0 ? <ItemSeparator /> : null}
           <MarketNarrativeItem
             dictionary={dictionary}

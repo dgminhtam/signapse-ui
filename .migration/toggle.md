@@ -1,5 +1,7 @@
 # toggle
 
+2026-08-18 — official Base Nova `@base-ui/react/toggle` wrapper via shadcn CLI dry-run/diff; verdict: migrated and typechecked.
+
 ## Changed
 
 - Replaced the Radix Toggle primitive with the official Base Nova `@base-ui/react/toggle` component.

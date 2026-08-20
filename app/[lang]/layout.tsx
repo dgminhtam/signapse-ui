@@ -9,6 +9,7 @@ import "../globals.css"
 
 import { getDictionary, hasLocale } from "@/app/lib/i18n/dictionaries"
 import { AppLocale, SUPPORTED_APP_LOCALES } from "@/app/lib/i18n/config"
+import { isP0FixtureModeEnabled } from "@/app/lib/dev-auth-mode"
 import { cn } from "@/lib/utils"
 import { Providers } from "@/components/providers"
 import { SpeedInsights } from "@vercel/speed-insights/next"
@@ -55,6 +56,12 @@ export default async function RootLayout({
   }
 
   const dictionary = await getDictionary(lang)
+  const p0FixtureMode = isP0FixtureModeEnabled()
+  const appProviders = (
+    <Providers locale={lang} dictionary={dictionary}>
+      {children}
+    </Providers>
+  )
 
   return (
     <html
@@ -69,13 +76,15 @@ export default async function RootLayout({
     >
       <body className="flex h-screen flex-col">
         <NextTopLoader color="var(--primary)" showSpinner={false} height={3} />
-        <ClerkProvider localization={clerkLocalizations[lang]}>
-          <Providers locale={lang} dictionary={dictionary}>
-            {children}
-          </Providers>
-        </ClerkProvider>
-        <SpeedInsights />
-        <Analytics />
+        {p0FixtureMode ? (
+          appProviders
+        ) : (
+          <ClerkProvider localization={clerkLocalizations[lang]}>
+            {appProviders}
+          </ClerkProvider>
+        )}
+        {p0FixtureMode ? null : <SpeedInsights />}
+        {p0FixtureMode ? null : <Analytics />}
       </body>
     </html>
   )

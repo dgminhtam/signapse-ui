@@ -3,8 +3,10 @@ import type {
   MarketChartCandleRequest,
   MarketChartTimeframe,
 } from "@/app/lib/market-charts/definitions"
-import { MINUTE_MS, HOUR_MS, DAY_MS } from "./market-chart-period"
 import {
+  DAY_MS,
+  HOUR_MS,
+  MINUTE_MS,
   getCandleTimestamp,
   normalizeCandleItems,
 } from "./market-chart-candle-helpers"

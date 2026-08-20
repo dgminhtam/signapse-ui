@@ -32,13 +32,14 @@ export function LineHeightToolbarButton(
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
-      <DropdownMenuTrigger
-        render={
-          <ToolbarButton pressed={open} tooltip="Line height" isDropdown />
-        }
+      <ToolbarButton
+        render={<DropdownMenuTrigger />}
+        pressed={open}
+        tooltip="Line height"
+        isDropdown
       >
         <WrapText />
-      </DropdownMenuTrigger>
+      </ToolbarButton>
 
       <DropdownMenuContent className="min-w-[180px]" align="start">
         <DropdownMenuRadioGroup

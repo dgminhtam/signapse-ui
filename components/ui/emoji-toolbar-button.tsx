@@ -53,11 +53,17 @@ export function EmojiToolbarButton({
 
   return (
     <EmojiPopover
-      control={
-        <ToolbarButton pressed={isOpen} tooltip="Emoji" isDropdown {...props}>
+      trigger={(render) => (
+        <ToolbarButton
+          render={render}
+          pressed={isOpen}
+          tooltip="Emoji"
+          isDropdown
+          {...props}
+        >
           <SmileIcon />
         </ToolbarButton>
-      }
+      )}
       isOpen={isOpen}
       setIsOpen={setIsOpen}
     >
@@ -73,18 +79,18 @@ export function EmojiToolbarButton({
 
 export function EmojiPopover({
   children,
-  control,
+  trigger,
   isOpen,
   setIsOpen,
 }: {
   children: React.ReactNode
-  control: React.ReactElement
+  trigger: (render: React.ReactElement) => React.ReactElement
   isOpen: boolean
   setIsOpen: (open: boolean) => void
 }) {
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger render={control} />
+      {trigger(<PopoverTrigger />)}
 
       <PopoverContentInOverlay className="w-auto">
         {children}

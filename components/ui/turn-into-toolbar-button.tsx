@@ -152,18 +152,15 @@ export function TurnIntoToolbarButton(
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
-      <DropdownMenuTrigger
-        render={
-          <ToolbarButton
-            className="min-w-[125px]"
-            pressed={open}
-            tooltip="Turn into"
-            isDropdown
-          />
-        }
+      <ToolbarButton
+        render={<DropdownMenuTrigger />}
+        className="min-w-[125px]"
+        pressed={open}
+        tooltip="Turn into"
+        isDropdown
       >
         {selectedItem.label}
-      </DropdownMenuTrigger>
+      </ToolbarButton>
 
       <DropdownMenuContent
         className="ignore-click-outside/toolbar min-w-[180px]"

@@ -910,12 +910,14 @@ function TableFloatingToolbarContent({
         <Toolbar
           className="scrollbar-hide flex w-auto max-w-[80vw] flex-row overflow-x-auto rounded-md border bg-popover p-1 shadow-md print:hidden"
           contentEditable={false}
+          orientation="horizontal"
         />
       }
     >
       <Toolbar
         className="scrollbar-hide flex w-auto max-w-[80vw] flex-row overflow-x-auto rounded-md border bg-popover p-1 shadow-md print:hidden"
         contentEditable={false}
+        orientation="horizontal"
       >
         <ToolbarGroup>
           <ColorDropdownMenu tooltip="Background color">
@@ -941,11 +943,9 @@ function TableFloatingToolbarContent({
           )}
 
           <DropdownMenu modal={false}>
-            <DropdownMenuTrigger
-              render={<ToolbarButton tooltip="Cell borders" />}
-            >
+            <ToolbarButton render={<DropdownMenuTrigger />} tooltip="Cell borders">
               <Grid2X2Icon />
-            </DropdownMenuTrigger>
+            </ToolbarButton>
 
             <TableBordersDropdownMenuContent />
           </DropdownMenu>
@@ -1125,9 +1125,9 @@ function ColorDropdownMenu({
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
-      <DropdownMenuTrigger render={<ToolbarButton tooltip={tooltip} />}>
+      <ToolbarButton render={<DropdownMenuTrigger />} tooltip={tooltip}>
         {children}
-      </DropdownMenuTrigger>
+      </ToolbarButton>
 
       <DropdownMenuContent className="min-w-80" align="start">
         <ToolbarMenuGroup label="Colors">

@@ -72,12 +72,14 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   user: SimpleUser
   isAuthenticated: boolean
   permissions: string[]
+  isP0FixtureMode?: boolean
 }
 
 export function AppSidebar({
   user,
   isAuthenticated,
   permissions,
+  isP0FixtureMode = false,
   ...props
 }: AppSidebarProps) {
   const { dictionary } = useLocalization()
@@ -96,7 +98,9 @@ export function AppSidebar({
         <NavMain items={visibleNavItems} />
       </SidebarContent>
       <SidebarFooter>
-        {isAuthenticated && <NavUser user={user} />}
+        {isAuthenticated && (
+          <NavUser user={user} isP0FixtureMode={isP0FixtureMode} />
+        )}
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
@@ -111,21 +115,19 @@ function SidebarBrand() {
     <SidebarMenu>
       <SidebarMenuItem>
         <SidebarMenuButton
-          asChild
+          render={<Link href="/dashboard" />}
           size="lg"
           tooltip={localizedSiteConfig.brand.name}
         >
-          <Link href="/dashboard">
-            <Logo width={32} height={32} />
-            <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
-              <span className="truncate font-medium">
-                {localizedSiteConfig.brand.name}
-              </span>
-              <span className="truncate text-xs text-muted-foreground">
-                {localizedSiteConfig.brand.subtitle}
-              </span>
-            </div>
-          </Link>
+          <Logo width={32} height={32} />
+          <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
+            <span className="truncate font-medium">
+              {localizedSiteConfig.brand.name}
+            </span>
+            <span className="truncate text-xs text-muted-foreground">
+              {localizedSiteConfig.brand.subtitle}
+            </span>
+          </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
     </SidebarMenu>
@@ -161,15 +163,13 @@ export function NavMain({ items }: { items: NavItem[] }) {
               return (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
-                    asChild
+                    render={<Link href={item.url} />}
                     tooltip={item.title}
                     isActive={isActive}
                     className="h-8 rounded-lg font-medium data-active:bg-sidebar-primary data-active:text-sidebar-primary-foreground data-active:hover:bg-sidebar-primary data-active:hover:text-sidebar-primary-foreground"
                   >
-                    <Link href={item.url}>
-                      {item.icon && <item.icon />}
-                      <span>{item.title}</span>
-                    </Link>
+                    {item.icon && <item.icon />}
+                    <span>{item.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )
@@ -205,12 +205,10 @@ export function NavMain({ items }: { items: NavItem[] }) {
                         <SidebarMenuSubItem key={subItem.title}>
                           <SidebarMenuSubButton
                             isActive={isSubItemActive}
-                            asChild
+                            render={<Link href={subItem.url} />}
                             className="h-8 rounded-lg font-medium data-active:bg-sidebar-primary data-active:text-sidebar-primary-foreground data-active:hover:bg-sidebar-primary data-active:hover:text-sidebar-primary-foreground"
                           >
-                            <Link href={subItem.url}>
-                              <span>{subItem.title}</span>
-                            </Link>
+                            <span>{subItem.title}</span>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       )
@@ -228,9 +226,10 @@ export function NavMain({ items }: { items: NavItem[] }) {
 
 interface NavUserProps {
   user: SimpleUser
+  isP0FixtureMode: boolean
 }
 
-function NavUser({ user }: NavUserProps) {
+function NavUser({ user, isP0FixtureMode }: NavUserProps) {
   const { isMobile } = useSidebar()
   const { dictionary } = useLocalization()
 
@@ -252,7 +251,7 @@ function NavUser({ user }: NavUserProps) {
                 src={user?.imageUrl ?? ""}
                 alt={user?.fullName ?? ""}
               />
-              <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+              <AvatarFallback className="rounded-lg text-foreground">CN</AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-medium">
@@ -269,25 +268,27 @@ function NavUser({ user }: NavUserProps) {
             sideOffset={4}
             aria-labelledby={USER_MENU_TRIGGER_ID}
           >
-            <DropdownMenuLabel className="p-0 font-normal">
-              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage
-                    src={user?.imageUrl ?? ""}
-                    alt={user?.fullName ?? ""}
-                  />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
-                </Avatar>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">
-                    {user?.fullName ?? ""}
-                  </span>
-                  <span className="truncate text-xs">
-                    {user?.username ?? ""}
-                  </span>
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="p-0 font-normal">
+                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                  <Avatar className="h-8 w-8 rounded-lg">
+                    <AvatarImage
+                      src={user?.imageUrl ?? ""}
+                      alt={user?.fullName ?? ""}
+                    />
+                    <AvatarFallback className="rounded-lg text-foreground">CN</AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-medium">
+                      {user?.fullName ?? ""}
+                    </span>
+                    <span className="truncate text-xs">
+                      {user?.username ?? ""}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </DropdownMenuLabel>
+              </DropdownMenuLabel>
+            </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
@@ -310,17 +311,21 @@ function NavUser({ user }: NavUserProps) {
                 {dictionary.auth.notifications}
               </DropdownMenuItem>
             </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <SignOutButton>
-                  <div className="flex w-full items-center gap-2 px-1 py-1.5">
-                    <LogOutIcon />
-                    <span>{dictionary.auth.signOut}</span>
-                  </div>
-                </SignOutButton>
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
+            {isP0FixtureMode ? null : (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem>
+                    <SignOutButton>
+                      <div className="flex w-full items-center gap-2 px-1 py-1.5">
+                        <LogOutIcon />
+                        <span>{dictionary.auth.signOut}</span>
+                      </div>
+                    </SignOutButton>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

@@ -7,6 +7,17 @@ export function isDevAuthModeEnabled(): boolean {
   )
 }
 
+/**
+ * P0 browser tests use a stricter sub-mode so normal local dev-auth keeps its
+ * existing Clerk-backed developer tools while the fixture browser can boot
+ * without any Clerk client or middleware initialization.
+ */
+export function isP0FixtureModeEnabled(): boolean {
+  return (
+    isDevAuthModeEnabled() && process.env.SIGNAPSE_E2E_MODE === "fixture"
+  )
+}
+
 export function getDevAuthPermissions(): string[] {
   return [DEV_AUTH_PERMISSION]
 }

@@ -1,13 +1,38 @@
 "use server"
 
 import { auth } from "@clerk/nextjs/server"
+import { cookies, headers } from "next/headers"
 
-import { isDevAuthModeEnabled } from "@/app/lib/dev-auth-mode"
+import {
+  isDevAuthModeEnabled,
+  isP0FixtureModeEnabled,
+} from "@/app/lib/dev-auth-mode"
 import { getDictionary } from "@/app/lib/i18n/dictionaries"
 import { getRequestLocale } from "@/app/lib/i18n/server"
 
 const API_TIMEOUT_MS = 60000
+const TEST_RUN_ID_COOKIE = "signapse_test_run_id"
+const TEST_RUN_ID_HEADER = "x-signapse-test-run-id"
 type ApiFetchError = Error & { status?: number }
+
+async function getFixtureTestRunHeaders(): Promise<Record<string, string>> {
+  if (!isP0FixtureModeEnabled()) {
+    return {}
+  }
+
+  try {
+    const testRunId =
+      (await cookies()).get(TEST_RUN_ID_COOKIE)?.value ??
+      (await headers()).get(TEST_RUN_ID_HEADER)
+    if (!testRunId || !/^[A-Za-z0-9._:-]+$/.test(testRunId)) {
+      return {}
+    }
+
+    return { [TEST_RUN_ID_HEADER]: testRunId }
+  } catch {
+    return {}
+  }
+}
 
 async function apiFetch<T>(
   urlPath: string,
@@ -28,6 +53,7 @@ async function apiFetch<T>(
   const defaultHeaders: Record<string, string> = {
     Accept: "application/json",
     "Accept-Language": locale,
+    ...(await getFixtureTestRunHeaders()),
   }
 
   if (hasBody && !isFormData) {
@@ -63,7 +89,7 @@ async function apiFetch<T>(
           const errorJson = JSON.parse(errorText)
           errorMessage = errorJson.message || errorMessage
         }
-      } catch (e) {
+      } catch {
         errorMessage = errorText || errorMessage
       }
       const apiError = new Error(errorMessage) as ApiFetchError
@@ -110,12 +136,14 @@ export async function getClerkToken(): Promise<string> {
 }
 
 export async function getBackendAuthHeaders(): Promise<Record<string, string>> {
+  const fixtureHeaders = await getFixtureTestRunHeaders()
   if (isDevAuthModeEnabled()) {
-    return {}
+    return fixtureHeaders
   }
 
   const token = await getClerkToken()
   return {
+    ...fixtureHeaders,
     Authorization: `Bearer ${token}`,
   }
 }

@@ -1,5 +1,7 @@
 # dialog
 
+2026-08-18 — official Base Nova `@base-ui/react/dialog` wrapper via shadcn CLI dry-run/diff; verdict: migrated and typechecked.
+
 ## Changed
 
 - Replaced the Radix Dialog root, trigger, portal, close, overlay, content, title, and description parts with the official Base Nova `@base-ui/react/dialog` implementation.

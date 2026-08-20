@@ -20,7 +20,7 @@ import {
   AppListTableHeaderRow,
 } from "@/components/app-list-table"
 import { AppSelectPageSize } from "@/components/app-select-page-size"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import {
   EmptyDescription,
   EmptyHeader,
@@ -149,17 +149,20 @@ export function EventList({ eventPage }: EventListProps) {
                   </TableCell>
                   <TableCell className="w-20 text-right">
                     <div className="flex justify-end gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        className="text-muted-foreground hover:text-foreground"
-                        render={<Link href={`/events/${event.id}`} />}
+                      <Link
+                        href={`/events/${event.id}`}
+                        className={buttonVariants({
+                          variant: "ghost",
+                          size: "icon-sm",
+                          className:
+                            "text-muted-foreground hover:text-foreground",
+                        })}
                       >
                         <Eye data-icon="inline-start" />
                         <span className="sr-only">
                           {dictionary.events.viewDetail}
                         </span>
-                      </Button>
+                      </Link>
                     </div>
                   </TableCell>
                 </TableRow>

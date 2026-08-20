@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useRender } from "@base-ui/react/use-render"
 
 import { Popover } from "@/components/ui/popover"
 import {
@@ -36,24 +37,15 @@ function PopoverAnchor({
   render?: React.ReactElement
 }) {
   const anchorRef = React.useContext(PopoverAnchorContext)
+  const childElement = React.isValidElement(children) ? children : undefined
+  const renderElement = anchorRef ? (render ?? childElement) : render
 
-  if (!anchorRef) {
-    return render ?? <span>{children}</span>
-  }
-
-  if (render) {
-    return React.cloneElement(render, {
-      ref: anchorRef,
-    } as React.Attributes & { ref: React.Ref<HTMLElement> })
-  }
-
-  if (React.isValidElement(children)) {
-    return React.cloneElement(children, {
-      ref: anchorRef,
-    } as React.Attributes & { ref: React.Ref<HTMLElement> })
-  }
-
-  return <span ref={anchorRef}>{children}</span>
+  return useRender({
+    render: renderElement,
+    ref: anchorRef ?? undefined,
+    props: renderElement ? undefined : { children },
+    defaultTagName: "span",
+  })
 }
 
 function PopoverContentWithAnchor({

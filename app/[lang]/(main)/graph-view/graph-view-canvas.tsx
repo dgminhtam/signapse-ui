@@ -31,7 +31,7 @@ import type {
   GraphViewNodeKind,
 } from "@/app/lib/graph-view/definitions"
 import { AppTimeMetadata } from "@/components/app-time-metadata"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
 import {
   Tooltip,
@@ -624,16 +624,11 @@ function GraphNodeDetailInspector({
               </Button>
             ) : null}
             {sourceUrl ? (
-              <Button
-                size="sm"
-                variant="outline"
-                render={
-                  <a
-                    href={sourceUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  />
-                }
+              <a
+                href={sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={buttonVariants({ size: "sm", variant: "outline" })}
               >
                 <ExternalLink
                   aria-hidden="true"
@@ -641,7 +636,7 @@ function GraphNodeDetailInspector({
                   data-icon="inline-start"
                 />
                 <span>{dictionary.graphView.inspector.openOriginalSource}</span>
-              </Button>
+              </a>
             ) : null}
           </div>
         ) : null}

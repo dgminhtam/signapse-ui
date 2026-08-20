@@ -1,5 +1,7 @@
 # alert-dialog
 
+2026-08-18 — official Base Nova registry wrapper via shadcn CLI dry-run/diff; verdict: migrated and typechecked.
+
 ## Changed
 
 - Replaced the Radix AlertDialog root, trigger, portal, overlay, content, title, and description parts with the official Base Nova `@base-ui/react/alert-dialog` wrapper.

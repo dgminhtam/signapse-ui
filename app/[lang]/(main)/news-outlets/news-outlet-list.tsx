@@ -54,7 +54,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import {
   EmptyDescription,
   EmptyHeader,
@@ -111,10 +111,13 @@ export function NewsOutletListPage({ newsOutletPage }: NewsOutletListProps) {
       <AppListToolbar>
         <AppListToolbarLeading>
           {canCreateNewsOutlet ? (
-            <Button render={<Link href="/news-outlets/create" />}>
+            <Link
+              href="/news-outlets/create"
+              className={buttonVariants()}
+            >
               <Plus data-icon="inline-start" />
               {dictionary.newsOutlets.createAction}
-            </Button>
+            </Link>
           ) : null}
           <NewsOutletSearch />
         </AppListToolbarLeading>
@@ -253,15 +256,14 @@ export function NewsOutletListPage({ newsOutletPage }: NewsOutletListProps) {
                         <Tooltip>
                           <TooltipTrigger
                             render={
-                              <Button
-                                variant="ghost"
-                                size="icon-sm"
-                                className="text-muted-foreground hover:text-foreground"
-                                render={
-                                  <Link
-                                    href={`/news-outlets/${newsOutlet.id}`}
-                                  />
-                                }
+                              <Link
+                                href={`/news-outlets/${newsOutlet.id}`}
+                                className={buttonVariants({
+                                  variant: "ghost",
+                                  size: "icon-sm",
+                                  className:
+                                    "text-muted-foreground hover:text-foreground",
+                                })}
                               />
                             }
                           >

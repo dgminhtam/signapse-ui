@@ -1,5 +1,7 @@
 # switch
 
+2026-08-18 — official Base Nova `@base-ui/react/switch` wrapper via shadcn CLI dry-run/diff; verdict: migrated and typechecked.
+
 ## Changed
 
 - Replaced the Radix Switch primitive with the official Base Nova `@base-ui/react/switch` root and thumb parts.
@@ -8,7 +10,7 @@
 
 ## Left alone
 
-- Existing Nova dimensions, thumb movement, state colors, focus ring, and disabled styling.
+- Existing Nova dimensions, thumb movement, state colors, current field-label focus ring, and disabled styling.
 - Form, permissions, chart, Telegram, and news-outlet consumers.
 
 ## Behavior changes

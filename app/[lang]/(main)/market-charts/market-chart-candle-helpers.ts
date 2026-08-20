@@ -4,9 +4,9 @@ import type {
   MarketChartTimeframe,
 } from "@/app/lib/market-charts/definitions"
 
-const MINUTE_MS = 60 * 1000
-const HOUR_MS = 60 * MINUTE_MS
-const DAY_MS = 24 * HOUR_MS
+export const MINUTE_MS = 60 * 1000
+export const HOUR_MS = 60 * MINUTE_MS
+export const DAY_MS = 24 * HOUR_MS
 const QUOTE_BUCKET_INTERVAL_MS: Record<MarketChartTimeframe, number> = {
   "1m": MINUTE_MS,
   "5m": 5 * MINUTE_MS,

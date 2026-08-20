@@ -266,18 +266,15 @@ export function InsertToolbarButton(
   return (
     <>
       <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
-        <DropdownMenuTrigger
-          render={
-            <ToolbarButton
-              aria-label={dictionary.editor.insert.insert}
-              pressed={open}
-              tooltip={dictionary.editor.insert.insert}
-              isDropdown
-            />
-          }
+        <ToolbarButton
+          render={<DropdownMenuTrigger />}
+          aria-label={dictionary.editor.insert.insert}
+          pressed={open}
+          tooltip={dictionary.editor.insert.insert}
+          isDropdown
         >
           <PlusIcon />
-        </DropdownMenuTrigger>
+        </ToolbarButton>
 
         <DropdownMenuContent
           className="flex max-h-[500px] min-w-[180px] flex-col overflow-y-auto"

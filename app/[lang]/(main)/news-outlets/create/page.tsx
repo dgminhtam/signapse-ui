@@ -6,7 +6,7 @@ import { hasPermission } from "@/app/lib/permissions"
 import { NEWS_OUTLET_CREATE_PERMISSION } from "@/app/lib/news-outlets/permissions"
 import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { AccessDenied } from "@/components/access-denied"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 
 import { NewsOutletCreateForm } from "../news-outlet-create-form"
 
@@ -26,14 +26,13 @@ export default async function CreateNewsOutletPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center">
-        <Button
-          variant="secondary"
-          size="sm"
-          render={<Link href="/news-outlets" />}
+        <Link
+          href="/news-outlets"
+          className={buttonVariants({ variant: "secondary", size: "sm" })}
         >
           <ArrowLeft data-icon="inline-start" />
           {dictionary.common.back}
-        </Button>
+        </Link>
       </div>
 
       <NewsOutletCreateForm />

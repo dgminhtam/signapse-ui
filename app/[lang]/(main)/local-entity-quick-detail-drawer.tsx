@@ -1,6 +1,6 @@
 "use client"
 
-import { AlertTriangle, ExternalLink } from "lucide-react"
+import { AlertTriangle } from "lucide-react"
 import { useEffect, useState } from "react"
 
 import { getEventById } from "@/app/api/events/action"
@@ -11,15 +11,14 @@ import { useLocalization } from "@/app/lib/i18n/provider"
 import { NEWS_ARTICLE_READ_PERMISSIONS } from "@/app/lib/news-articles/permissions"
 import type { NewsArticleResponse } from "@/app/lib/news-articles/definitions"
 import { AccessDenied } from "@/components/access-denied"
-import { LocalizedLink } from "@/components/localized-link"
-import { Button } from "@/components/ui/button"
 import {
-  Drawer,
-  DrawerContent,
-  DrawerFooter,
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer"
+import {
+  DrawerContentInOverlay,
+  DrawerInOverlay,
+} from "@/components/ui/drawer-content-in-overlay"
 import {
   Empty,
   EmptyDescription,
@@ -46,12 +45,6 @@ type DetailState =
 interface LocalEntityQuickDetailDrawerProps {
   entity: LocalQuickDetailEntity | null
   onClose: () => void
-}
-
-function getEntityFullDetailHref(entity: LocalQuickDetailEntity) {
-  return entity.kind === "event"
-    ? `/events/${entity.id}`
-    : `/news-articles/${entity.id}`
 }
 
 function getErrorMessage(error: unknown) {
@@ -88,8 +81,6 @@ export function LocalEntityQuickDetailDrawer({
             : currentState?.phase === "error"
               ? dictionary.quickDetail.errorTitle
               : dictionary.common.loading
-  const fullDetailHref = entity ? getEntityFullDetailHref(entity) : null
-
   useEffect(() => {
     if (!entity || !entityKey || !canReadSelectedEntity) {
       return
@@ -140,86 +131,61 @@ export function LocalEntityQuickDetailDrawer({
   ])
 
   return (
-    <Drawer open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
-      <DrawerContent
-        className="gap-0 overflow-hidden"
-        style={{
-          height: "min(90svh, 960px)",
-          maxHeight: "min(90svh, 960px)",
-        }}
-      >
-        <DrawerHeader className="border-b px-5 py-4 text-left">
-          <div className="mx-auto flex w-full max-w-5xl flex-col gap-1.5">
-            <DrawerTitle className="line-clamp-2 leading-snug">
-              {title}
-            </DrawerTitle>
-          </div>
+    <DrawerInOverlay
+      open={open}
+      onOpenChange={(nextOpen) => !nextOpen && onClose()}
+      showSwipeHandle
+    >
+      <DrawerContentInOverlay>
+        <DrawerHeader>
+          <DrawerTitle>{title}</DrawerTitle>
         </DrawerHeader>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
-          <div className="mx-auto w-full max-w-5xl">
-            {!entity ? null : !canReadSelectedEntity ? (
-              <AccessDenied
-                description={
-                  entity.kind === "event"
-                    ? dictionary.events.detailDenied
-                    : dictionary.newsArticles.detailDenied
-                }
-                permission={
-                  entity.kind === "event"
-                    ? EVENT_READ_PERMISSIONS[0]
-                    : NEWS_ARTICLE_READ_PERMISSIONS[0]
-                }
-              />
-            ) : !currentState ? (
-              <div className="flex min-h-[320px] items-center justify-center text-sm text-muted-foreground">
-                <Spinner className="size-4" />
-                <span className="ml-2">{dictionary.common.loading}</span>
-              </div>
-            ) : currentState.phase === "error" ? (
-              <Empty className="min-h-[320px] rounded-lg border border-dashed">
-                <EmptyHeader>
-                  <EmptyMedia variant="icon">
-                    <AlertTriangle />
-                  </EmptyMedia>
-                  <EmptyTitle>{dictionary.quickDetail.errorTitle}</EmptyTitle>
-                  <EmptyDescription>{currentState.error}</EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            ) : currentState.phase === "event" ? (
-              <EventQuickDetailContent
-                canReadNewsArticles={canReadNewsArticles}
-                dictionary={dictionary}
-                event={currentState.event}
-                locale={locale}
-              />
-            ) : currentState.phase === "news-article" ? (
-              <NewsArticleQuickDetailContent
-                article={currentState.article}
-                dictionary={dictionary}
-                locale={locale}
-              />
-            ) : null}
-          </div>
+        <div className="flex-1 overflow-y-auto p-4">
+          {!entity ? null : !canReadSelectedEntity ? (
+            <AccessDenied
+              description={
+                entity.kind === "event"
+                  ? dictionary.events.detailDenied
+                  : dictionary.newsArticles.detailDenied
+              }
+              permission={
+                entity.kind === "event"
+                  ? EVENT_READ_PERMISSIONS[0]
+                  : NEWS_ARTICLE_READ_PERMISSIONS[0]
+              }
+            />
+          ) : !currentState ? (
+            <div className="flex min-h-[320px] items-center justify-center text-sm text-muted-foreground">
+              <Spinner className="size-4" />
+              <span className="ml-2">{dictionary.common.loading}</span>
+            </div>
+          ) : currentState.phase === "error" ? (
+            <Empty className="min-h-[320px] rounded-lg border border-dashed">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <AlertTriangle />
+                </EmptyMedia>
+                <EmptyTitle>{dictionary.quickDetail.errorTitle}</EmptyTitle>
+                <EmptyDescription>{currentState.error}</EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          ) : currentState.phase === "event" ? (
+            <EventQuickDetailContent
+              canReadNewsArticles={canReadNewsArticles}
+              dictionary={dictionary}
+              event={currentState.event}
+              locale={locale}
+            />
+          ) : currentState.phase === "news-article" ? (
+            <NewsArticleQuickDetailContent
+              article={currentState.article}
+              dictionary={dictionary}
+              locale={locale}
+            />
+          ) : null}
         </div>
-
-        <DrawerFooter className="border-t bg-muted/20 px-5 py-3">
-          <div className="mx-auto flex w-full max-w-5xl flex-col gap-2 sm:flex-row sm:justify-end">
-            {fullDetailHref ? (
-              <Button
-                variant="outline"
-                render={<LocalizedLink href={fullDetailHref} />}
-              >
-                <ExternalLink aria-hidden="true" data-icon="inline-start" />
-                {dictionary.common.openFullPage}
-              </Button>
-            ) : null}
-            <Button type="button" onClick={onClose}>
-              {dictionary.common.close}
-            </Button>
-          </div>
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
+      </DrawerContentInOverlay>
+    </DrawerInOverlay>
   )
 }

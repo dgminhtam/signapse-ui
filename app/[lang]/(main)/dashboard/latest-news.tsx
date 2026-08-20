@@ -6,7 +6,7 @@ import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
 import { formatDateTime } from "@/app/lib/i18n/format"
 import type { NewsArticleListResponse } from "@/app/lib/news-articles/definitions"
 import { LocalizedLink } from "@/components/localized-link"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import {
   Card,
   CardAction,
@@ -60,15 +60,14 @@ export function LatestNews({
           <CardDescription>{t.description}</CardDescription>
           {hasArticles || error ? (
             <CardAction>
-              <Button
-                variant="ghost"
-                render={
-                  <LocalizedLink href="/news-articles" aria-label={t.viewAll} />
-                }
+              <LocalizedLink
+                href="/news-articles"
+                aria-label={t.viewAll}
+                className={buttonVariants({ variant: "ghost" })}
               >
                 <span className="hidden sm:inline">{t.viewAll}</span>
                 <ArrowRightIcon data-icon="inline-end" />
-              </Button>
+              </LocalizedLink>
             </CardAction>
           ) : null}
         </CardHeader>
@@ -99,12 +98,12 @@ export function LatestNews({
                 <EmptyDescription>{t.emptyDescription}</EmptyDescription>
               </EmptyHeader>
               <EmptyContent>
-                <Button
-                  variant="outline"
-                  render={<LocalizedLink href="/news-articles" />}
+                <LocalizedLink
+                  href="/news-articles"
+                  className={buttonVariants({ variant: "outline" })}
                 >
                   {t.viewAll}
-                </Button>
+                </LocalizedLink>
               </EmptyContent>
             </Empty>
           )}
@@ -181,7 +180,7 @@ function LatestNewsItems({
           article.featureImage?.urlOriginal
 
         return (
-          <div key={article.id}>
+          <div key={article.id} role="listitem">
             {index > 0 ? <ItemSeparator /> : null}
             <Item>
               <ItemMedia variant={imageUrl ? "image" : "icon"}>

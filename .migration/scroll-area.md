@@ -1,5 +1,7 @@
 # scroll-area
 
+2026-08-18 — official Base Nova `@base-ui/react/scroll-area` wrapper via shadcn CLI dry-run/diff; verdict: migrated and typechecked.
+
 ## Changed
 
 - Replaced the Radix ScrollArea parts with the official Base Nova `@base-ui/react/scroll-area` root, viewport, scrollbar, thumb, and corner parts.

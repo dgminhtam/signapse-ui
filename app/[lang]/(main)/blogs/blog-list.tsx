@@ -46,7 +46,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import {
   EmptyDescription,
   EmptyHeader,
@@ -79,10 +79,10 @@ export function BlogListPage({ blogPage }: BlogListProps) {
       <AppListToolbar>
         <AppListToolbarLeading>
           {canCreateBlog ? (
-            <Button render={<Link href="/blogs/create" />}>
+            <Link href="/blogs/create" className={buttonVariants()}>
               <Plus data-icon="inline-start" />
               {dictionary.blogs.createAction}
-            </Button>
+            </Link>
           ) : null}
           <BlogSearch />
         </AppListToolbarLeading>
@@ -177,18 +177,21 @@ export function BlogListPage({ blogPage }: BlogListProps) {
                   <TableCell className="w-28 text-center">
                     <div className="flex items-center justify-center gap-2">
                       {canUpdateBlog ? (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-muted-foreground hover:text-foreground"
+                        <Link
+                          href={`/blogs/${blog.id}`}
+                          className={buttonVariants({
+                            variant: "ghost",
+                            size: "icon",
+                            className:
+                              "text-muted-foreground hover:text-foreground",
+                          })}
                           title={dictionary.blogs.edit}
-                          render={<Link href={`/blogs/${blog.id}`} />}
                         >
                           <Edit2 />
                           <span className="sr-only">
                             {dictionary.blogs.edit}
                           </span>
-                        </Button>
+                        </Link>
                       ) : null}
                       {canDeleteBlog ? <DeleteBlogButton id={blog.id} /> : null}
                     </div>

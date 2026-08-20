@@ -1,5 +1,7 @@
 # toggle-group
 
+2026-08-18 — official Base Nova `@base-ui/react/toggle-group` and `@base-ui/react/toggle` wrappers via shadcn CLI dry-run/diff; verdict: migrated and typechecked.
+
 ## Changed
 
 - Replaced the Radix ToggleGroup root and item parts with the official Base Nova `@base-ui/react/toggle-group` and `@base-ui/react/toggle` primitives.

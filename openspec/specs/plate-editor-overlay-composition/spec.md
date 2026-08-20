@@ -32,11 +32,11 @@ Plate line-height, mode, and turn-into dropdown radio items SHALL use the select
 - **THEN** the menu retains the wrapper's Radix-backed roles, arrow-key navigation, selection behavior, Escape handling, and focus restoration
 
 ### Requirement: Shared Plate toolbar tooltips use the shadcn wrapper
-The shared Plate toolbar SHALL compose `Tooltip`, `TooltipTrigger`, and `TooltipContent` from `@/components/ui/tooltip` without directly composing `@radix-ui/react-tooltip` primitives.
+The shared Plate toolbar SHALL compose `Tooltip`, `TooltipTrigger`, and `TooltipContent` from `@/components/ui/tooltip` without directly composing `@radix-ui/react-tooltip` primitives. When a Toolbar button opts into tooltip rendering, the Tooltip trigger SHALL render that Base UI Toolbar button through `render`.
 
 #### Scenario: Tooltip is enabled for a toolbar button
 - **WHEN** a mounted toolbar button opts into tooltip rendering and provides tooltip content
-- **THEN** the existing button remains the tooltip trigger through `asChild`
+- **THEN** the existing Base UI Toolbar button remains the tooltip trigger through `render`
 - **AND** the tooltip content uses the standard wrapper surface and arrow
 
 #### Scenario: Tooltip placement props are resolved
@@ -48,13 +48,14 @@ The shared Plate toolbar SHALL compose `Tooltip`, `TooltipTrigger`, and `Tooltip
 - **WHEN** the toolbar button is not mounted, disables tooltip rendering, or has no tooltip content
 - **THEN** it renders without creating the tooltip overlay composition
 
-### Requirement: Overlay adoption does not mutate wrapper or dependency sources
-The Plate overlay migration SHALL reuse the installed `radix-nova` dropdown-menu and tooltip wrappers without changing their generated source or adding direct Radix overlay dependencies.
+### Requirement: Overlay adoption preserves wrapper boundaries during the Toolbar migration
+The Plate editor SHALL reuse the installed dropdown-menu, popover, and tooltip wrappers without changing their generated source. The Toolbar migration MAY update package manifests and lockfiles only to remove the direct `@radix-ui/react-toolbar` dependency and SHALL preserve existing Plate overlay portal, surface, and focus behavior.
 
-#### Scenario: Migration source is reviewed
-- **WHEN** the Plate overlay migration is complete
-- **THEN** `components/ui/dropdown-menu.tsx`, `components/ui/tooltip.tsx`, package manifests, and lockfiles remain unchanged by the migration
-- **AND** `@radix-ui/react-toolbar` and the excluded date-node focus handling remain outside the change scope
+#### Scenario: Review Toolbar overlay migration sources
+- **WHEN** the Toolbar migration source is reviewed
+- **THEN** the local dropdown-menu, popover, and tooltip wrapper sources remain unchanged by this work
+- **AND** package manifests and lockfiles remove only the direct Radix Toolbar dependency required by the migration
+- **AND** existing Plate overlay portal placement, keyboard interaction, and focus restoration remain available
 
 ### Requirement: Plate dropdown menus remain scrollable inside modal Sheets
 The shared overlay composition SHALL portal Plate dropdown content opened within a modal Sheet into that Sheet's content boundary, while preserving the default portal behavior outside a Sheet.

@@ -1,12 +1,11 @@
 "use client"
 
 import type { Dispatch, FormEvent, SetStateAction } from "react"
-import { Fragment, useMemo, useState, useTransition } from "react"
+import { useMemo, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import {
   CalendarClock,
-  Check,
-  ChevronsUpDown,
+  GlobeIcon,
   Pencil,
   Plus,
   X,
@@ -40,14 +39,16 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-} from "@/components/ui/command"
+  Combobox,
+  ComboboxCollection,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxGroup,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxLabel,
+  ComboboxList,
+} from "@/components/ui/combobox"
 import {
   Dialog,
   DialogContent,
@@ -67,8 +68,7 @@ import {
   FieldSet,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Popover, PopoverTrigger } from "@/components/ui/popover"
-import { PopoverContentInOverlay } from "@/components/ui/popover-content-in-overlay"
+import { InputGroupAddon } from "@/components/ui/input-group"
 import {
   Select,
   SelectContent,
@@ -78,7 +78,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Spinner } from "@/components/ui/spinner"
-import { cn } from "@/lib/utils"
 import { getDestinationLabel } from "./telegram-configuration-shared"
 
 const DEFAULT_LANGUAGE_VALUE = "__default__"
@@ -424,7 +423,6 @@ function ScheduleFormFields({
   onChange,
 }: ScheduleFormFieldsProps) {
   const t = dictionary.telegram
-  const [timezoneOpen, setTimezoneOpen] = useState(false)
   const timezoneGroups = useMemo(
     () => getTimezoneGroups(dictionary),
     [dictionary]
@@ -527,7 +525,7 @@ function ScheduleFormFields({
                   unavailable ? ` — ${t.schedule.destinationUnavailable}` : ""
                 }`,
               }))}
-              value={values.destinationId || undefined}
+              value={values.destinationId || null}
               onValueChange={(value) => onChange("destinationId", value ?? "")}
               disabled={disabled}
             >
@@ -572,7 +570,7 @@ function ScheduleFormFields({
                 value: asset.assetId.toString(),
                 label: formatAssetOption(asset, t.schedule.assetUnavailable),
               }))}
-              value={values.assetId || undefined}
+              value={values.assetId || null}
               onValueChange={(value) => onChange("assetId", value ?? "")}
               disabled={disabled}
             >
@@ -612,71 +610,40 @@ function ScheduleFormFields({
             <FieldLabel htmlFor={getScheduleFieldId(idPrefix, "timezone")}>
               {t.schedule.timezoneLabel}
             </FieldLabel>
-            <Popover open={timezoneOpen} onOpenChange={setTimezoneOpen} modal>
-              <PopoverTrigger
-                render={
-                  <Button
-                    id={getScheduleFieldId(idPrefix, "timezone")}
-                    type="button"
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={timezoneOpen}
-                    aria-invalid={Boolean(errors.timezone)}
-                    aria-describedby={describedBy("timezone")}
-                    disabled={disabled}
-                    className="w-full justify-between font-normal"
-                  />
-                }
+            <Combobox
+              items={timezoneGroups}
+              value={selectedTimezone}
+              onValueChange={(item) => onChange("timezone", item?.value ?? "")}
+              disabled={disabled}
+            >
+              <ComboboxInput
+                id={getScheduleFieldId(idPrefix, "timezone")}
+                placeholder={t.schedule.timezonePlaceholder}
+                aria-invalid={Boolean(errors.timezone)}
+                aria-describedby={describedBy("timezone")}
               >
-                <span className="min-w-0 truncate">
-                  {selectedTimezone?.label ?? t.schedule.timezonePlaceholder}
-                </span>
-                <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
-              </PopoverTrigger>
-              <PopoverContentInOverlay
-                align="start"
-                className="w-[var(--anchor-width)] p-0"
-              >
-                <Command>
-                  <CommandInput
-                    placeholder={t.schedule.timezonePlaceholder}
-                    aria-label={t.schedule.timezoneLabel}
-                  />
-                  <CommandList>
-                    <CommandEmpty>{t.schedule.timezoneEmpty}</CommandEmpty>
-                    {timezoneGroups.map((group, index) => (
-                      <Fragment key={group.value}>
-                        <CommandGroup heading={group.label}>
-                          {group.items.map((item) => (
-                            <CommandItem
-                              key={item.value}
-                              value={`${item.label} ${item.value}`}
-                              onSelect={() => {
-                                onChange("timezone", item.value)
-                                setTimezoneOpen(false)
-                              }}
-                            >
-                              {item.label}
-                              <Check
-                                className={cn(
-                                  "ml-auto size-4",
-                                  selectedTimezone?.value === item.value
-                                    ? "opacity-100"
-                                    : "opacity-0"
-                                )}
-                              />
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                        {index < timezoneGroups.length - 1 ? (
-                          <CommandSeparator />
-                        ) : null}
-                      </Fragment>
-                    ))}
-                  </CommandList>
-                </Command>
-              </PopoverContentInOverlay>
-            </Popover>
+                <InputGroupAddon>
+                  <GlobeIcon />
+                </InputGroupAddon>
+              </ComboboxInput>
+              <ComboboxContent alignOffset={-28} className="w-60">
+                <ComboboxEmpty>{t.schedule.timezoneEmpty}</ComboboxEmpty>
+                <ComboboxList>
+                  {(group) => (
+                    <ComboboxGroup key={group.value} items={group.items}>
+                      <ComboboxLabel>{group.label}</ComboboxLabel>
+                      <ComboboxCollection>
+                        {(item) => (
+                          <ComboboxItem key={item.value} value={item}>
+                            {item.label}
+                          </ComboboxItem>
+                        )}
+                      </ComboboxCollection>
+                    </ComboboxGroup>
+                  )}
+                </ComboboxList>
+              </ComboboxContent>
+            </Combobox>
             <FieldDescription id={descriptionId("timezone")}>
               {t.schedule.timezoneDescription}
             </FieldDescription>

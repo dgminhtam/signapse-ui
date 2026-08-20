@@ -33,7 +33,7 @@ import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { AccessDenied } from "@/components/access-denied"
 import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 
 interface PageProps {
@@ -133,15 +133,17 @@ export default async function EconomicCalendarDetailPage({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center">
-        <Button
-          variant="secondary"
-          size="sm"
-          className="gap-2"
-          render={<Link href="/economic-calendar" />}
+        <Link
+          href="/economic-calendar"
+          className={buttonVariants({
+            variant: "secondary",
+            size: "sm",
+            className: "gap-2",
+          })}
         >
           <ArrowLeft data-icon="inline-start" />
           {dictionary.common.back}
-        </Button>
+        </Link>
       </div>
 
       <Suspense fallback={<EconomicCalendarDetailSkeleton />}>

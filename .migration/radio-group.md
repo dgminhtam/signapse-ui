@@ -1,5 +1,7 @@
 # radio-group
 
+2026-08-18 — official Base Nova `@base-ui/react/radio-group` and `@base-ui/react/radio` wrappers via shadcn CLI dry-run/diff; verdict: migrated and typechecked.
+
 ## Changed
 
 - Replaced the Radix RadioGroup and item primitives with the official Base Nova `@base-ui/react/radio-group` and `@base-ui/react/radio` parts.
@@ -8,7 +10,7 @@
 
 ## Left alone
 
-- Nova radio visuals, focus ring, disabled styling, and field composition.
+- Nova radio visuals, current field-label focus ring, disabled styling, and field composition.
 - The AI provider model picker consumer and its controlled `value`/`onValueChange` flow.
 
 ## Behavior changes

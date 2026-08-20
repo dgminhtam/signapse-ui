@@ -488,7 +488,7 @@ function FeatureRoutingSection({
                           <span className="text-sm text-muted-foreground">
                             {route.description}
                           </span>
-                          <code className="w-fit rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
+                            <code className="w-fit rounded bg-muted px-1.5 py-0.5 text-xs text-foreground">
                             {route.featureKey}
                           </code>
                         </div>
@@ -864,11 +864,11 @@ function FeatureRouteDestinationSelect({
         value: destination.id.toString(),
         label: getDestinationLabel(destination, dictionary),
       }))}
-      value={destinationId || undefined}
+      value={destinationId || null}
       onValueChange={handleDestinationChange}
       disabled={disabled}
     >
-      <SelectTrigger className="w-full">
+      <SelectTrigger aria-label={route.label} className="w-full">
         <SelectValue placeholder={t.destination.placeholder} />
       </SelectTrigger>
       <SelectContent>

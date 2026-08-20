@@ -16,7 +16,7 @@ import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { AccessDenied } from "@/components/access-denied"
 import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import Image from "next/image"
 
@@ -89,14 +89,13 @@ export default async function NewsArticleDetailPage({ params }: PageProps) {
   return (
     <div className="mx-auto flex w-full max-w-[72ch] flex-col gap-6">
       <div className="flex items-center">
-        <Button
-          variant="secondary"
-          size="sm"
-          render={<Link href="/news-articles" />}
+        <Link
+          href="/news-articles"
+          className={buttonVariants({ variant: "secondary", size: "sm" })}
         >
           <ArrowLeft data-icon="inline-start" />
           {dictionary.common.back}
-        </Button>
+        </Link>
       </div>
 
       <Suspense fallback={<NewsArticleDetailSkeleton />}>
@@ -155,11 +154,18 @@ async function FetchNewsArticleData({
               {formatDateTime(article.publishedAt, locale, dictionary)}
             </AppTimeMetadata>
             {article.url ? (
-              <Badge asChild className="min-h-6">
-                <a href={article.url} target="_blank" rel="noopener noreferrer">
-                  {dictionary.newsArticles.openOriginalLink}
-                  <ArrowUpRightIcon aria-hidden="true" data-icon="inline-end" />
-                </a>
+              <Badge
+                className="min-h-6"
+                render={
+                  <a
+                    href={article.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  />
+                }
+              >
+                {dictionary.newsArticles.openOriginalLink}
+                <ArrowUpRightIcon aria-hidden="true" data-icon="inline-end" />
               </Badge>
             ) : null}
           </div>

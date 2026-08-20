@@ -208,10 +208,10 @@ export function WorkspaceSwitcher({
           align="end"
           aria-labelledby={WORKSPACE_SWITCHER_TRIGGER_ID}
         >
-          <DropdownMenuLabel>
-            {dictionary.workspace.switcherLabel}
-          </DropdownMenuLabel>
           <DropdownMenuGroup>
+            <DropdownMenuLabel>
+              {dictionary.workspace.switcherLabel}
+            </DropdownMenuLabel>
             {workspaces.length > 0 ? (
               workspaces.map((workspace) => {
                 const isSelected = currentWorkspace?.id === workspace.id

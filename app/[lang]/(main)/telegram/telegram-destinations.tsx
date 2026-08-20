@@ -102,7 +102,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 
 export function DestinationsCard({
   destinations,
@@ -225,7 +225,7 @@ function DestinationItem({
 
   return (
     <>
-      <Item variant="outline" className="items-start">
+      <Item role="listitem" variant="outline" className="items-start">
         <ItemContent className="min-w-0">
           <ItemHeader className="flex-col items-start sm:flex-row sm:items-center">
             <ItemTitle className="max-w-full min-w-0 truncate">
@@ -560,34 +560,26 @@ function DestinationLinkDialog({
               {!linkExpired && (privateLink || groupLink) ? (
                 <div className="flex flex-col gap-2 sm:flex-row">
                   {privateLink ? (
-                    <Button
-                      variant="outline"
-                      render={
-                        <a
-                          href={privateLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        />
-                      }
+                    <a
+                      href={privateLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={buttonVariants({ variant: "outline" })}
                     >
                       <ExternalLink data-icon="inline-start" />
                       {t.destination.openPrivate}
-                    </Button>
+                    </a>
                   ) : null}
                   {groupLink ? (
-                    <Button
-                      variant="outline"
-                      render={
-                        <a
-                          href={groupLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        />
-                      }
+                    <a
+                      href={groupLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={buttonVariants({ variant: "outline" })}
                     >
                       <ExternalLink data-icon="inline-start" />
                       {t.destination.openGroup}
-                    </Button>
+                    </a>
                   ) : null}
                 </div>
               ) : null}

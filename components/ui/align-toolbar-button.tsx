@@ -58,11 +58,14 @@ export function AlignToolbarButton(
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
-      <DropdownMenuTrigger
-        render={<ToolbarButton pressed={open} tooltip="Align" isDropdown />}
+      <ToolbarButton
+        render={<DropdownMenuTrigger />}
+        pressed={open}
+        tooltip="Align"
+        isDropdown
       >
         <IconValue />
-      </DropdownMenuTrigger>
+      </ToolbarButton>
 
       <DropdownMenuContent className="min-w-0" align="start">
         <DropdownMenuRadioGroup

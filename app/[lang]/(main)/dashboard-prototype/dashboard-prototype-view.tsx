@@ -32,7 +32,7 @@ import { formatMessage } from "@/app/lib/i18n/messages"
 import { LocalizedLink } from "@/components/localized-link"
 import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import {
   Card,
   CardAction,
@@ -174,18 +174,19 @@ function PrototypeControls({
               const isActive = option.value === scenario
 
               return (
-                <Button
+                <LocalizedLink
                   key={option.value}
-                  variant={isActive ? "secondary" : "ghost"}
-                  render={<LocalizedLink
-                    href={{
-                      pathname: "/dashboard-prototype",
-                      query: { scenario: option.value },
-                    }}
-                    aria-current={isActive ? "page" : undefined} />}
+                  href={{
+                    pathname: "/dashboard-prototype",
+                    query: { scenario: option.value },
+                  }}
+                  aria-current={isActive ? "page" : undefined}
+                  className={buttonVariants({
+                    variant: isActive ? "secondary" : "ghost",
+                  })}
                 >
                   {option.label}
-                </Button>
+                </LocalizedLink>
               )
             })}
           </div>
@@ -214,12 +215,13 @@ function CurrentWorkspace({
         </CardTitle>
         <CardDescription>{t.context.workspaceDescription}</CardDescription>
         <CardAction>
-          <Button variant="outline"
-            render={<LocalizedLink href="/dashboard" />}
+          <LocalizedLink
+            href="/dashboard"
+            className={buttonVariants({ variant: "outline" })}
           >
             <TargetIcon data-icon="inline-start" />
                           {t.context.manageAssets}
-          </Button>
+          </LocalizedLink>
         </CardAction>
       </CardHeader>
       <CardContent>
@@ -454,12 +456,14 @@ function EventTimeline({
         <CardDescription>{t.events.description}</CardDescription>
         {!isEmpty ? (
           <CardAction>
-            <Button variant="ghost"
-              render={<LocalizedLink href="/events" aria-label={t.events.viewAll} />}
+            <LocalizedLink
+              href="/events"
+              aria-label={t.events.viewAll}
+              className={buttonVariants({ variant: "ghost" })}
             >
               <span className="hidden sm:inline">{t.events.viewAll}</span>
                               <ArrowRightIcon data-icon="inline-end" />
-            </Button>
+            </LocalizedLink>
           </CardAction>
         ) : null}
       </CardHeader>
@@ -477,62 +481,64 @@ function EventTimeline({
             {items.map((item, index) => (
               <Fragment key={item.title}>
                 {index > 0 ? <ItemSeparator /> : null}
-                <Item asChild>
-                  <LocalizedLink
-                    href="/events"
-                    aria-label={`${t.events.openEvent}: ${item.title}`}
-                  >
-                    <ItemMedia className="self-start" variant="icon">
-                      <ActivityIcon aria-hidden="true" />
-                    </ItemMedia>
-                    <ItemContent>
-                      <ItemTitle>
-                        <h3>{item.title}</h3>
-                      </ItemTitle>
-                      <ItemDescription className="line-clamp-2">
-                        {item.description}
-                      </ItemDescription>
-                    </ItemContent>
-                    <ItemFooter className="flex-col items-start gap-2">
-                      <div className="flex w-full flex-wrap items-center gap-x-4 gap-y-2">
-                        <div className="flex min-w-0 flex-wrap items-center gap-1 text-xs">
-                          <span className="text-muted-foreground">
-                            {t.events.themes}:
-                          </span>
-                          <span>{item.themes.join(" · ")}</span>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-1">
-                          <span className="text-xs text-muted-foreground">
-                            {t.events.affectedAssets}:
-                          </span>
-                          {item.affectedAssets.map((asset) => (
-                            <Badge key={asset} variant="outline">
-                              {asset}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="flex w-full flex-wrap justify-between gap-2">
-                        <AppTimeMetadata icon={CalendarClockIcon}>
-                          {formatDateTime(
-                            item.occurredAt,
-                            locale,
-                            {
-                              dateStyle: "medium",
-                              timeStyle: "short",
-                            },
-                            dictionary.common.notAvailable
-                          )}
-                        </AppTimeMetadata>
-                        <span className="text-xs text-muted-foreground">
-                          {dictionary.events.confidenceColumn}:{" "}
-                          {formatPercent(item.confidence, locale, {
-                            maximumFractionDigits: 0,
-                          })}
+                <Item
+                  render={
+                    <LocalizedLink
+                      href="/events"
+                      aria-label={`${t.events.openEvent}: ${item.title}`}
+                    />
+                  }
+                >
+                  <ItemMedia className="self-start" variant="icon">
+                    <ActivityIcon aria-hidden="true" />
+                  </ItemMedia>
+                  <ItemContent>
+                    <ItemTitle>
+                      <h3>{item.title}</h3>
+                    </ItemTitle>
+                    <ItemDescription className="line-clamp-2">
+                      {item.description}
+                    </ItemDescription>
+                  </ItemContent>
+                  <ItemFooter className="flex-col items-start gap-2">
+                    <div className="flex w-full flex-wrap items-center gap-x-4 gap-y-2">
+                      <div className="flex min-w-0 flex-wrap items-center gap-1 text-xs">
+                        <span className="text-muted-foreground">
+                          {t.events.themes}:
                         </span>
+                        <span>{item.themes.join(" · ")}</span>
                       </div>
-                    </ItemFooter>
-                  </LocalizedLink>
+                      <div className="flex flex-wrap items-center gap-1">
+                        <span className="text-xs text-muted-foreground">
+                          {t.events.affectedAssets}:
+                        </span>
+                        {item.affectedAssets.map((asset) => (
+                          <Badge key={asset} variant="outline">
+                            {asset}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex w-full flex-wrap justify-between gap-2">
+                      <AppTimeMetadata icon={CalendarClockIcon}>
+                        {formatDateTime(
+                          item.occurredAt,
+                          locale,
+                          {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          },
+                          dictionary.common.notAvailable
+                        )}
+                      </AppTimeMetadata>
+                      <span className="text-xs text-muted-foreground">
+                        {dictionary.events.confidenceColumn}:{" "}
+                        {formatPercent(item.confidence, locale, {
+                          maximumFractionDigits: 0,
+                        })}
+                      </span>
+                    </div>
+                  </ItemFooter>
                 </Item>
               </Fragment>
             ))}
@@ -592,14 +598,14 @@ function LatestArticles({
         <CardDescription>{t.articles.description}</CardDescription>
         {!isEmpty ? (
           <CardAction>
-            <Button variant="ghost"
-              render={<LocalizedLink
-                href="/news-articles"
-                aria-label={t.articles.viewAll} />}
+            <LocalizedLink
+              href="/news-articles"
+              aria-label={t.articles.viewAll}
+              className={buttonVariants({ variant: "ghost" })}
             >
               <span className="hidden sm:inline">{t.articles.viewAll}</span>
                               <ArrowRightIcon data-icon="inline-end" />
-            </Button>
+            </LocalizedLink>
           </CardAction>
         ) : null}
       </CardHeader>
@@ -697,16 +703,16 @@ function AssetsInFocus({
         <CardDescription>{t.watchlist.description}</CardDescription>
         {!isEmpty ? (
           <CardAction>
-            <Button variant="ghost"
-              render={<LocalizedLink
-                href="/graph-view"
-                aria-label={t.watchlist.graphView} />}
+            <LocalizedLink
+              href="/graph-view"
+              aria-label={t.watchlist.graphView}
+              className={buttonVariants({ variant: "ghost" })}
             >
               <WaypointsIcon data-icon="inline-start" />
                               <span className="hidden sm:inline">
                                 {t.watchlist.graphView}
                               </span>
-            </Button>
+            </LocalizedLink>
           </CardAction>
         ) : null}
       </CardHeader>
@@ -740,12 +746,16 @@ function AssetsInFocus({
                     <Badge variant="secondary">{asset.type}</Badge>
                   </ItemActions>
                   <ItemFooter>
-                    <Button size="sm" variant="ghost"
-                      render={<LocalizedLink href="/market-charts" />}
+                    <LocalizedLink
+                      href="/market-charts"
+                      className={buttonVariants({
+                        size: "sm",
+                        variant: "ghost",
+                      })}
                     >
                       <ActivityIcon data-icon="inline-start" />
                                               {t.watchlist.marketCharts}
-                    </Button>
+                    </LocalizedLink>
                   </ItemFooter>
                 </Item>
               </Fragment>
@@ -813,16 +823,16 @@ function MarketNarratives({
         <CardDescription>{t.narratives.description}</CardDescription>
         {!isError && !isEmpty ? (
           <CardAction>
-            <Button variant="ghost"
-              render={<LocalizedLink
-                href="/graph-view"
-                aria-label={t.narratives.viewGraph} />}
+            <LocalizedLink
+              href="/graph-view"
+              aria-label={t.narratives.viewGraph}
+              className={buttonVariants({ variant: "ghost" })}
             >
               <WaypointsIcon data-icon="inline-start" />
                               <span className="hidden sm:inline">
                                 {t.narratives.viewGraph}
                               </span>
-            </Button>
+            </LocalizedLink>
           </CardAction>
         ) : null}
       </CardHeader>
@@ -839,15 +849,15 @@ function MarketNarratives({
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
-              <Button variant="outline"
-                render={<LocalizedLink
-                  href={{
-                    pathname: "/dashboard-prototype",
-                    query: { scenario: "default" },
-                  }} />}
+              <LocalizedLink
+                href={{
+                  pathname: "/dashboard-prototype",
+                  query: { scenario: "default" },
+                }}
+                className={buttonVariants({ variant: "outline" })}
               >
                 {t.error.retry}
-              </Button>
+              </LocalizedLink>
             </EmptyContent>
           </Empty>
         ) : isEmpty ? (
@@ -947,12 +957,13 @@ function ModuleEmpty({
         <EmptyDescription>{description}</EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <Button variant="outline"
-          render={<LocalizedLink href={actionHref} />}
+        <LocalizedLink
+          href={actionHref}
+          className={buttonVariants({ variant: "outline" })}
         >
           {actionLabel}
                       <ArrowRightIcon data-icon="inline-end" />
-        </Button>
+        </LocalizedLink>
       </EmptyContent>
     </Empty>
   )

@@ -48,11 +48,14 @@ export function TableToolbarButton(
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
-      <DropdownMenuTrigger
-        render={<ToolbarButton pressed={open} tooltip="Table" isDropdown />}
+      <ToolbarButton
+        render={<DropdownMenuTrigger />}
+        pressed={open}
+        tooltip="Table"
+        isDropdown
       >
         <Table />
-      </DropdownMenuTrigger>
+      </ToolbarButton>
 
       <DropdownMenuContent
         className="flex w-[180px] min-w-0 flex-col"

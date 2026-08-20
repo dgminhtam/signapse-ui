@@ -1,5 +1,5 @@
-import { cva, type VariantProps } from "class-variance-authority"
 import { Button as ButtonPrimitive } from "@base-ui/react/button"
+import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
@@ -31,7 +31,6 @@ const buttonVariants = cva(
         "icon-sm":
           "size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg",
         "icon-lg": "size-9",
-        "icon-xl": "size-11 [&_svg:not([class*='size-'])]:size-5",
       },
     },
     defaultVariants: {
@@ -50,8 +49,6 @@ function Button({
   return (
     <ButtonPrimitive
       data-slot="button"
-      data-variant={variant}
-      data-size={size}
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
     />

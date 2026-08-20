@@ -156,23 +156,23 @@ export function AssetMultiSelectCombobox({
             </div>
           </div>
 
-          <DropdownMenuLabel>{dictionary.assets.library}</DropdownMenuLabel>
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>{dictionary.assets.library}</DropdownMenuLabel>
 
-          {loadError ? (
-            <div className="px-2 pb-2 text-sm text-destructive">
-              {loadError}
-            </div>
-          ) : null}
+            {loadError ? (
+              <div className="px-2 pb-2 text-sm text-destructive">
+                {loadError}
+              </div>
+            ) : null}
 
-          {!loadError && !isLoading && options.length === 0 ? (
-            <div className="px-2 pb-2 text-sm text-muted-foreground">
-              {dictionary.assets.emptySearch}
-            </div>
-          ) : null}
+            {!loadError && !isLoading && options.length === 0 ? (
+              <div className="px-2 pb-2 text-sm text-muted-foreground">
+                {dictionary.assets.emptySearch}
+              </div>
+            ) : null}
 
-          {options.length > 0 ? (
-            <div className="max-h-72 overflow-y-auto">
-              <DropdownMenuGroup>
+            {options.length > 0 ? (
+              <div className="max-h-72 overflow-y-auto">
                 {options.map((asset) => (
                   <DropdownMenuCheckboxItem
                     key={asset.id}
@@ -193,9 +193,9 @@ export function AssetMultiSelectCombobox({
                     </div>
                   </DropdownMenuCheckboxItem>
                 ))}
-              </DropdownMenuGroup>
-            </div>
-          ) : null}
+              </div>
+            ) : null}
+          </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
 

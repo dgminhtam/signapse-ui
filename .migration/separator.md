@@ -1,5 +1,7 @@
 # separator
 
+2026-08-18 — official Base Nova `@base-ui/react/separator` wrapper via shadcn CLI dry-run/diff; verdict: migrated and typechecked.
+
 ## Changed
 
 - Replaced the Radix Separator primitive with the official Base Nova `@base-ui/react/separator` wrapper.
