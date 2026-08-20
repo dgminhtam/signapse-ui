@@ -26,8 +26,8 @@ function createMarketChartCandleQuery(request: MarketChartCandleRequest) {
 
   query.set("assetId", String(request.assetId))
   query.set("timeframe", request.timeframe)
-  query.set("from", request.from)
   query.set("to", request.to)
+  query.set("countBack", String(request.countBack))
 
   return query.toString()
 }
@@ -83,6 +83,46 @@ export async function getMarketChartCandles(
       console.error(
         "Market chart candle response validation failed",
         parsedResponse.error.issues
+      )
+      return {
+        success: false,
+        error: dictionary.marketCharts.responseInvalid,
+      }
+    }
+
+    if (
+      parsedResponse.data.asset.id !== parsedRequest.data.assetId ||
+      parsedResponse.data.timeframe !== parsedRequest.data.timeframe
+    ) {
+      console.error(
+        "Market chart candle response identity validation failed",
+        {
+          requestedAssetId: parsedRequest.data.assetId,
+          responseAssetId: parsedResponse.data.asset.id,
+          requestedTimeframe: parsedRequest.data.timeframe,
+          responseTimeframe: parsedResponse.data.timeframe,
+        }
+      )
+      return {
+        success: false,
+        error: dictionary.marketCharts.responseInvalid,
+      }
+    }
+
+    if (
+      parsedResponse.data.candles.length === 0 &&
+      (Date.parse(parsedResponse.data.from) !==
+        Date.parse(parsedRequest.data.to) ||
+        Date.parse(parsedResponse.data.to) !==
+          Date.parse(parsedRequest.data.to))
+    ) {
+      console.error(
+        "Market chart candle empty response anchor validation failed",
+        {
+          requestedTo: parsedRequest.data.to,
+          responseFrom: parsedResponse.data.from,
+          responseTo: parsedResponse.data.to,
+        }
       )
       return {
         success: false,

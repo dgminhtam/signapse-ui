@@ -1529,8 +1529,12 @@ export const MarketChartCanvas = forwardRef<
           : null
 
       if (oldestTimestamp === null || !request) {
-        historyExhaustedRef.current = true
-        callback([], { backward: false, forward: false })
+        setHistoryFeedback({
+          error: dictionary.marketCharts.responseInvalid,
+          loadId,
+          state: "error",
+        })
+        callback([], { backward: false, forward: true })
         return
       }
 
@@ -1545,6 +1549,13 @@ export const MarketChartCanvas = forwardRef<
         return
       }
 
+      if (result.data.candles.length === 0) {
+        historyExhaustedRef.current = true
+        setHistoryFeedback({ error: null, loadId, state: "idle" })
+        callback([], { backward: false, forward: false })
+        return
+      }
+
       const olderCandles = getNewOlderCandles(
         loadedCandlesRef.current,
         result.data.candles,
@@ -1553,9 +1564,12 @@ export const MarketChartCanvas = forwardRef<
       const olderData = createKLineData(olderCandles)
 
       if (!olderData.length) {
-        historyExhaustedRef.current = true
-        setHistoryFeedback({ error: null, loadId, state: "idle" })
-        callback([], { backward: false, forward: false })
+        setHistoryFeedback({
+          error: dictionary.marketCharts.responseInvalid,
+          loadId,
+          state: "error",
+        })
+        callback([], { backward: false, forward: true })
         return
       }
 
@@ -1607,7 +1621,7 @@ export const MarketChartCanvas = forwardRef<
         liveCandleSubscriberLoadIdRef.current = null
       },
     })
-  }, [assetId, timeframe])
+  }, [assetId, dataVersion, dictionary.marketCharts.responseInvalid, timeframe])
 
   useEffect(() => {
     const chart = chartRef.current
