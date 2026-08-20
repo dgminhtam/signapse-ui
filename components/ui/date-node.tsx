@@ -13,11 +13,8 @@ import type { PlateElementProps } from "platejs/react"
 import { PlateElement, useReadOnly } from "platejs/react"
 
 import { Calendar } from "@/components/ui/calendar"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+import { Popover, PopoverTrigger } from "@/components/ui/popover"
+import { PopoverContentInOverlay } from "@/components/ui/popover-content-in-overlay"
 
 export function DateElement(props: PlateElementProps<TDateElement>) {
   const { editor, element } = props
@@ -50,8 +47,8 @@ export function DateElement(props: PlateElementProps<TDateElement>) {
         trigger
       ) : (
         <Popover>
-          <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-          <PopoverContent className="w-auto p-0">
+          <PopoverTrigger render={trigger} />
+          <PopoverContentInOverlay className="w-auto p-0">
             <Calendar
               selected={parseCanonicalDateValue(element.date ?? "")}
               onSelect={(date) => {
@@ -65,7 +62,7 @@ export function DateElement(props: PlateElementProps<TDateElement>) {
               mode="single"
               autoFocus
             />
-          </PopoverContent>
+          </PopoverContentInOverlay>
         </Popover>
       )}
       {props.children}

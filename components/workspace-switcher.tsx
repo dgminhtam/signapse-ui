@@ -31,13 +31,13 @@ import {
 } from "@/components/ui/dialog"
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DropdownMenuContentInOverlay as DropdownMenuContent } from "@/components/ui/dropdown-menu-content-in-overlay"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
@@ -176,39 +176,42 @@ export function WorkspaceSwitcher({
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild id={WORKSPACE_SWITCHER_TRIGGER_ID}>
-          <Button
-            type="button"
-            variant="outline"
-            className={cn(
-              "max-w-full justify-between gap-2 px-3 md:min-w-56",
-              className
-            )}
-          >
-            <span className="flex min-w-0 items-center gap-2">
-              <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
-                <BriefcaseBusinessIcon className="size-4" />
-              </span>
-              <span className="max-w-44 truncate text-sm font-medium md:max-w-52">
-                {currentWorkspace?.name ?? dictionary.workspace.noneSelected}
-              </span>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              type="button"
+              variant="outline"
+              className={cn(
+                "max-w-full justify-between gap-2 px-3 md:min-w-56",
+                className
+              )}
+            />
+          }
+          id={WORKSPACE_SWITCHER_TRIGGER_ID}
+        >
+          <span className="flex min-w-0 items-center gap-2">
+            <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+              <BriefcaseBusinessIcon className="size-4" />
             </span>
-            {isPending ? (
-              <Spinner className="size-4" />
-            ) : (
-              <ChevronsUpDownIcon className="size-4 text-muted-foreground" />
-            )}
-          </Button>
+            <span className="max-w-44 truncate text-sm font-medium md:max-w-52">
+              {currentWorkspace?.name ?? dictionary.workspace.noneSelected}
+            </span>
+          </span>
+          {isPending ? (
+            <Spinner className="size-4" />
+          ) : (
+            <ChevronsUpDownIcon className="size-4 text-muted-foreground" />
+          )}
         </DropdownMenuTrigger>
         <DropdownMenuContent
           className="w-72"
           align="end"
           aria-labelledby={WORKSPACE_SWITCHER_TRIGGER_ID}
         >
-          <DropdownMenuLabel>
-            {dictionary.workspace.switcherLabel}
-          </DropdownMenuLabel>
           <DropdownMenuGroup>
+            <DropdownMenuLabel>
+              {dictionary.workspace.switcherLabel}
+            </DropdownMenuLabel>
             {workspaces.length > 0 ? (
               workspaces.map((workspace) => {
                 const isSelected = currentWorkspace?.id === workspace.id
@@ -219,7 +222,7 @@ export function WorkspaceSwitcher({
                     disabled={
                       isPending || !canSetCurrentWorkspace || isSelected
                     }
-                    onSelect={() => void handleSwitchWorkspace(workspace)}
+                    onClick={() => void handleSwitchWorkspace(workspace)}
                     className="gap-2 p-2"
                   >
                     <div className="flex size-8 items-center justify-center rounded-md border bg-muted/40">
@@ -259,8 +262,8 @@ export function WorkspaceSwitcher({
           <DropdownMenuGroup>
             <DropdownMenuItem
               className={canCreateWorkspace ? "gap-2 p-2" : "hidden"}
-              onSelect={(event) => {
-                event.preventDefault()
+              closeOnClick={false}
+              onClick={() => {
                 setIsCreateOpen(true)
               }}
             >
@@ -270,8 +273,8 @@ export function WorkspaceSwitcher({
             <DropdownMenuItem
               className={canRenameWorkspace ? "gap-2 p-2" : "hidden"}
               disabled={!canRenameWorkspace || !currentWorkspace}
-              onSelect={(event) => {
-                event.preventDefault()
+              closeOnClick={false}
+              onClick={() => {
                 openRenameDialog()
               }}
             >
@@ -281,8 +284,8 @@ export function WorkspaceSwitcher({
             <DropdownMenuItem
               className={canManageWatchlist ? "gap-2 p-2" : "hidden"}
               disabled={!canManageWatchlist}
-              onSelect={(event) => {
-                event.preventDefault()
+              closeOnClick={false}
+              onClick={() => {
                 setIsWatchlistOpen(true)
               }}
             >
@@ -373,10 +376,12 @@ function WorkspaceFormDialog({
         </div>
 
         <DialogFooter>
-          <DialogClose asChild>
-            <Button type="button" variant="ghost" disabled={isPending}>
-              {dictionary.common.cancel}
-            </Button>
+          <DialogClose
+            render={
+              <Button type="button" variant="ghost" disabled={isPending} />
+            }
+          >
+            {dictionary.common.cancel}
           </DialogClose>
           <Button type="button" disabled={isPending} onClick={onSubmit}>
             {isPending ? <Spinner data-icon="inline-start" /> : null}

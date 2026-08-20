@@ -72,6 +72,7 @@ export function FloatingToolbar({
       <Toolbar
         {...props}
         {...rootProps}
+        orientation="horizontal"
         ref={ref}
         className={cn(
           "absolute z-50 scrollbar-hide overflow-x-auto rounded-md border bg-popover p-1 whitespace-nowrap opacity-100 shadow-md print:hidden",

@@ -37,7 +37,7 @@ import { NEWS_ARTICLE_READ_PERMISSIONS } from "@/app/lib/news-articles/permissio
 import { AccessDenied } from "@/components/access-denied"
 import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import {
   Card,
   CardAction,
@@ -305,12 +305,17 @@ export default async function EventDetailPage({ params }: PageProps) {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center">
-        <Button asChild variant="secondary" size="sm" className="gap-2">
-          <Link href="/events">
-            <ArrowLeft data-icon="inline-start" />
-            {dictionary.common.back}
-          </Link>
-        </Button>
+        <Link
+          href="/events"
+          className={buttonVariants({
+            variant: "secondary",
+            size: "sm",
+            className: "gap-2",
+          })}
+        >
+          <ArrowLeft data-icon="inline-start" />
+          {dictionary.common.back}
+        </Link>
       </div>
 
       <Suspense fallback={<EventDetailSkeleton />}>
@@ -463,36 +468,32 @@ async function FetchEventData({
                     <div className="flex flex-wrap items-center gap-2">
                       {typeof evidence.newsArticleId === "number" &&
                       canReadNewsArticles ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="gap-2"
-                          asChild
+                        <Link
+                          href={`/news-articles/${evidence.newsArticleId}`}
+                          className={buttonVariants({
+                            variant: "outline",
+                            size: "sm",
+                            className: "gap-2",
+                          })}
                         >
-                          <Link
-                            href={`/news-articles/${evidence.newsArticleId}`}
-                          >
-                            <FileText data-icon="inline-start" />
-                            {dictionary.events.viewArticle}
-                          </Link>
-                        </Button>
+                          <FileText data-icon="inline-start" />
+                          {dictionary.events.viewArticle}
+                        </Link>
                       ) : null}
                       {evidence.newsArticleUrl ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="gap-2"
-                          asChild
+                        <a
+                          href={evidence.newsArticleUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={buttonVariants({
+                            variant: "outline",
+                            size: "sm",
+                            className: "gap-2",
+                          })}
                         >
-                          <a
-                            href={evidence.newsArticleUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <ExternalLink data-icon="inline-start" />
-                            {dictionary.events.openOriginalLink}
-                          </a>
-                        </Button>
+                          <ExternalLink data-icon="inline-start" />
+                          {dictionary.events.openOriginalLink}
+                        </a>
                       ) : null}
                     </div>
                   </div>

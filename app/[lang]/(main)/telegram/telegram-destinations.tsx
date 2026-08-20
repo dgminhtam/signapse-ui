@@ -88,12 +88,12 @@ import {
 import { Spinner } from "@/components/ui/spinner"
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DropdownMenuContentInOverlay as DropdownMenuContent } from "@/components/ui/dropdown-menu-content-in-overlay"
 import {
   Select,
   SelectContent,
@@ -102,7 +102,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 
 export function DestinationsCard({
   destinations,
@@ -225,7 +225,7 @@ function DestinationItem({
 
   return (
     <>
-      <Item variant="outline" className="items-start">
+      <Item role="listitem" variant="outline" className="items-start">
         <ItemContent className="min-w-0">
           <ItemHeader className="flex-col items-start sm:flex-row sm:items-center">
             <ItemTitle className="max-w-full min-w-0 truncate">
@@ -261,21 +261,23 @@ function DestinationItem({
           />
           {canManage ? (
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  id={menuTriggerId}
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label={t.destination.actionMenu}
-                >
-                  <MoreHorizontal />
-                </Button>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    id={menuTriggerId}
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label={t.destination.actionMenu}
+                  />
+                }
+              >
+                <MoreHorizontal />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuGroup>
                   <DropdownMenuItem
                     disabled={destination.status !== "ACTIVE"}
-                    onSelect={() => setConfirmation("disable")}
+                    onClick={() => setConfirmation("disable")}
                   >
                     <PowerOff />
                     {t.common.disable}
@@ -283,7 +285,7 @@ function DestinationItem({
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     variant="destructive"
-                    onSelect={() => setConfirmation("delete")}
+                    onClick={() => setConfirmation("delete")}
                   >
                     <Trash2 />
                     {t.destination.deleteAction}
@@ -456,16 +458,18 @@ function DestinationLinkDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <Button
-          disabled={!canManage || linkUnavailable}
-          aria-describedby={
-            unavailableReason ? "telegram-link-unavailable" : undefined
-          }
-        >
-          <Link2 data-icon="inline-start" />
-          {t.destination.link}
-        </Button>
+      <DialogTrigger
+        render={
+          <Button
+            disabled={!canManage || linkUnavailable}
+            aria-describedby={
+              unavailableReason ? "telegram-link-unavailable" : undefined
+            }
+          />
+        }
+      >
+        <Link2 data-icon="inline-start" />
+        {t.destination.link}
       </DialogTrigger>
       {unavailableReason ? (
         <span id="telegram-link-unavailable" className="sr-only">
@@ -484,9 +488,13 @@ function DestinationLinkDialog({
                 {t.destination.commandBot}
               </FieldLabel>
               <Select
+                items={activeBotConnections.map((connection) => ({
+                  value: connection.id.toString(),
+                  label: getBotLabel(connection, dictionary),
+                }))}
                 value={botConnectionId}
                 onValueChange={(value) => {
-                  setBotConnectionId(value)
+                  setBotConnectionId(value ?? "")
                   setLinkToken(null)
                   setCurrentTime(null)
                   setError(null)
@@ -552,28 +560,26 @@ function DestinationLinkDialog({
               {!linkExpired && (privateLink || groupLink) ? (
                 <div className="flex flex-col gap-2 sm:flex-row">
                   {privateLink ? (
-                    <Button asChild variant="outline">
-                      <a
-                        href={privateLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <ExternalLink data-icon="inline-start" />
-                        {t.destination.openPrivate}
-                      </a>
-                    </Button>
+                    <a
+                      href={privateLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={buttonVariants({ variant: "outline" })}
+                    >
+                      <ExternalLink data-icon="inline-start" />
+                      {t.destination.openPrivate}
+                    </a>
                   ) : null}
                   {groupLink ? (
-                    <Button asChild variant="outline">
-                      <a
-                        href={groupLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <ExternalLink data-icon="inline-start" />
-                        {t.destination.openGroup}
-                      </a>
-                    </Button>
+                    <a
+                      href={groupLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={buttonVariants({ variant: "outline" })}
+                    >
+                      <ExternalLink data-icon="inline-start" />
+                      {t.destination.openGroup}
+                    </a>
                   ) : null}
                 </div>
               ) : null}
@@ -583,10 +589,12 @@ function DestinationLinkDialog({
             </FieldGroup>
           ) : null}
           <DialogFooter>
-            <DialogClose asChild>
-              <Button type="button" variant="outline" disabled={isPending}>
-                {dictionary.common.close}
-              </Button>
+            <DialogClose
+              render={
+                <Button type="button" variant="outline" disabled={isPending} />
+              }
+            >
+              {dictionary.common.close}
             </DialogClose>
             <Button
               type="submit"

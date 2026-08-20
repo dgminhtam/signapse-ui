@@ -15,12 +15,12 @@ import {
 } from "@/components/ui/empty"
 import {
   Sheet,
-  SheetContent,
   SheetDescription,
   SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
+import { SheetContentInOverlay as SheetContent } from "@/components/ui/sheet-content-in-overlay"
 
 interface AiProviderModelPickerSheetProps {
   currentModel: string

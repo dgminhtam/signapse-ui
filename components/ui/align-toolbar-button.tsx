@@ -15,11 +15,11 @@ import { useEditorPlugin, useSelectionFragmentProp } from "platejs/react"
 
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DropdownMenuContentInOverlay as DropdownMenuContent } from "@/components/ui/dropdown-menu-content-in-overlay"
 
 import { ToolbarButton } from "./toolbar"
 
@@ -58,11 +58,14 @@ export function AlignToolbarButton(
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
-      <DropdownMenuTrigger asChild>
-        <ToolbarButton pressed={open} tooltip="Align" isDropdown>
-          <IconValue />
-        </ToolbarButton>
-      </DropdownMenuTrigger>
+      <ToolbarButton
+        render={<DropdownMenuTrigger />}
+        pressed={open}
+        tooltip="Align"
+        isDropdown
+      >
+        <IconValue />
+      </ToolbarButton>
 
       <DropdownMenuContent className="min-w-0" align="start">
         <DropdownMenuRadioGroup

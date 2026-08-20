@@ -261,10 +261,16 @@ export function SystemPromptForm({ initialData }: SystemPromptFormProps) {
                       {t.promptType} <span className="text-destructive">*</span>
                     </FieldLabel>
                     <Select
+                      items={promptTypeOptions.map((option) => ({
+                        value: option.value,
+                        label: `${option.label} - ${option.group}`,
+                      }))}
                       value={field.value}
-                      onValueChange={(value) =>
-                        field.onChange(value as SystemPromptType)
-                      }
+                      onValueChange={(value) => {
+                        if (value !== null) {
+                          field.onChange(value as SystemPromptType)
+                        }
+                      }}
                     >
                       <SelectTrigger
                         id="promptType"

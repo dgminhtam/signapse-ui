@@ -46,7 +46,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import {
   EmptyDescription,
   EmptyHeader,
@@ -79,12 +79,10 @@ export function BlogListPage({ blogPage }: BlogListProps) {
       <AppListToolbar>
         <AppListToolbarLeading>
           {canCreateBlog ? (
-            <Button asChild>
-              <Link href="/blogs/create">
-                <Plus data-icon="inline-start" />
-                {dictionary.blogs.createAction}
-              </Link>
-            </Button>
+            <Link href="/blogs/create" className={buttonVariants()}>
+              <Plus data-icon="inline-start" />
+              {dictionary.blogs.createAction}
+            </Link>
           ) : null}
           <BlogSearch />
         </AppListToolbarLeading>
@@ -179,20 +177,21 @@ export function BlogListPage({ blogPage }: BlogListProps) {
                   <TableCell className="w-28 text-center">
                     <div className="flex items-center justify-center gap-2">
                       {canUpdateBlog ? (
-                        <Button
-                          asChild
-                          variant="ghost"
-                          size="icon"
-                          className="text-muted-foreground hover:text-foreground"
+                        <Link
+                          href={`/blogs/${blog.id}`}
+                          className={buttonVariants({
+                            variant: "ghost",
+                            size: "icon",
+                            className:
+                              "text-muted-foreground hover:text-foreground",
+                          })}
                           title={dictionary.blogs.edit}
                         >
-                          <Link href={`/blogs/${blog.id}`}>
-                            <Edit2 />
-                            <span className="sr-only">
-                              {dictionary.blogs.edit}
-                            </span>
-                          </Link>
-                        </Button>
+                          <Edit2 />
+                          <span className="sr-only">
+                            {dictionary.blogs.edit}
+                          </span>
+                        </Link>
                       ) : null}
                       {canDeleteBlog ? <DeleteBlogButton id={blog.id} /> : null}
                     </div>
@@ -242,16 +241,18 @@ function DeleteBlogButton({ id }: { id: number }) {
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-          title={dictionary.blogs.delete}
-        >
-          <Trash2 />
-          <span className="sr-only">{dictionary.blogs.delete}</span>
-        </Button>
+      <AlertDialogTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+            title={dictionary.blogs.delete}
+          />
+        }
+      >
+        <Trash2 />
+        <span className="sr-only">{dictionary.blogs.delete}</span>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>

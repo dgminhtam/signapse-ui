@@ -74,13 +74,16 @@ import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
-  DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuPortal,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover"
+import { DropdownMenuContentInOverlay as DropdownMenuContent } from "@/components/ui/dropdown-menu-content-in-overlay"
+import {
+  PopoverAnchor,
+  PopoverContentWithAnchor,
+  PopoverWithAnchor,
+} from "@/components/ui/popover-anchor"
 import { cn } from "@/lib/utils"
 
 import { blockSelectionVariants } from "./block-selection"
@@ -755,7 +758,7 @@ export const TableElement = withHOC(
 function TableFloatingToolbar({
   children,
   ...props
-}: React.ComponentProps<typeof PopoverContent>) {
+}: React.ComponentProps<typeof PopoverContentWithAnchor>) {
   const selectedCellCount = useEditorSelector(
     (editor) =>
       editor.getApi(TablePlugin).table.getSelectedCellIds()?.length ?? 0,
@@ -798,20 +801,24 @@ function TableFloatingToolbar({
     isSingleCellToolbarOpen || shouldRenderExpandedSelectionToolbar
 
   return (
-    <Popover open={isToolbarOpen} modal={false}>
-      <PopoverAnchor asChild>{children}</PopoverAnchor>
+    <PopoverWithAnchor open={isToolbarOpen} modal={false}>
+      <PopoverAnchor
+        render={React.isValidElement(children) ? children : undefined}
+      >
+        {React.isValidElement(children) ? null : children}
+      </PopoverAnchor>
       {isSingleCellToolbarOpen && (
         <SingleCellTableFloatingToolbarContent {...props} />
       )}
       {shouldRenderExpandedSelectionToolbar && (
         <ExpandedSelectionTableFloatingToolbarContent {...props} />
       )}
-    </Popover>
+    </PopoverWithAnchor>
   )
 }
 
 function ExpandedSelectionTableFloatingToolbarContent(
-  props: React.ComponentProps<typeof PopoverContent>
+  props: React.ComponentProps<typeof PopoverContentWithAnchor>
 ) {
   const { tf } = useEditorPlugin(TablePlugin)
   const { canMerge, canSplit } = useTableMergeState()
@@ -830,7 +837,7 @@ function ExpandedSelectionTableFloatingToolbarContent(
 }
 
 function SingleCellTableFloatingToolbarContent(
-  props: React.ComponentProps<typeof PopoverContent>
+  props: React.ComponentProps<typeof PopoverContentWithAnchor>
 ) {
   const { tf } = useEditorPlugin(TablePlugin)
   const element = useElement<TTableElement>()
@@ -880,7 +887,7 @@ function TableFloatingToolbarContent({
   onMerge,
   onSplit,
   ...props
-}: React.ComponentProps<typeof PopoverContent> & {
+}: React.ComponentProps<typeof PopoverContentWithAnchor> & {
   buttonProps?: React.ComponentProps<typeof ToolbarButton>
   canMerge?: boolean
   canSplit?: boolean
@@ -895,15 +902,22 @@ function TableFloatingToolbarContent({
   onSplit?: () => void
 }) {
   return (
-    <PopoverContent
-      asChild
-      onOpenAutoFocus={(e) => e.preventDefault()}
-      contentEditable={false}
+    <PopoverContentWithAnchor
       {...props}
+      initialFocus={false}
+      contentEditable={false}
+      render={
+        <Toolbar
+          className="scrollbar-hide flex w-auto max-w-[80vw] flex-row overflow-x-auto rounded-md border bg-popover p-1 shadow-md print:hidden"
+          contentEditable={false}
+          orientation="horizontal"
+        />
+      }
     >
       <Toolbar
         className="scrollbar-hide flex w-auto max-w-[80vw] flex-row overflow-x-auto rounded-md border bg-popover p-1 shadow-md print:hidden"
         contentEditable={false}
+        orientation="horizontal"
       >
         <ToolbarGroup>
           <ColorDropdownMenu tooltip="Background color">
@@ -929,15 +943,11 @@ function TableFloatingToolbarContent({
           )}
 
           <DropdownMenu modal={false}>
-            <DropdownMenuTrigger asChild>
-              <ToolbarButton tooltip="Cell borders">
-                <Grid2X2Icon />
-              </ToolbarButton>
-            </DropdownMenuTrigger>
+            <ToolbarButton render={<DropdownMenuTrigger />} tooltip="Cell borders">
+              <Grid2X2Icon />
+            </ToolbarButton>
 
-            <DropdownMenuPortal>
-              <TableBordersDropdownMenuContent />
-            </DropdownMenuPortal>
+            <TableBordersDropdownMenuContent />
           </DropdownMenu>
 
           {singleCellMode && (
@@ -1001,7 +1011,7 @@ function TableFloatingToolbarContent({
           </ToolbarGroup>
         )}
       </Toolbar>
-    </PopoverContent>
+    </PopoverContentWithAnchor>
   )
 }
 
@@ -1022,9 +1032,9 @@ function TableBordersDropdownMenuContent(
   return (
     <DropdownMenuContent
       className="min-w-[220px]"
-      onCloseAutoFocus={(e) => {
-        e.preventDefault()
+      finalFocus={() => {
         editor.tf.focus()
+        return false
       }}
       align="start"
       side="right"
@@ -1115,9 +1125,9 @@ function ColorDropdownMenu({
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
-      <DropdownMenuTrigger asChild>
-        <ToolbarButton tooltip={tooltip}>{children}</ToolbarButton>
-      </DropdownMenuTrigger>
+      <ToolbarButton render={<DropdownMenuTrigger />} tooltip={tooltip}>
+        {children}
+      </ToolbarButton>
 
       <DropdownMenuContent className="min-w-80" align="start">
         <ToolbarMenuGroup label="Colors">

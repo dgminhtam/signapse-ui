@@ -8,7 +8,7 @@ import { hasPermission } from "@/app/lib/permissions"
 import { NEWS_OUTLET_UPDATE_PERMISSION } from "@/app/lib/news-outlets/permissions"
 import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { AccessDenied } from "@/components/access-denied"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 
 import { NewsOutletUpdateForm } from "../news-outlet-update-form"
 
@@ -41,12 +41,13 @@ export default async function EditNewsOutletPage({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center">
-        <Button asChild variant="secondary" size="sm">
-          <Link href="/news-outlets">
-            <ArrowLeft data-icon="inline-start" />
-            {dictionary.common.back}
-          </Link>
-        </Button>
+        <Link
+          href="/news-outlets"
+          className={buttonVariants({ variant: "secondary", size: "sm" })}
+        >
+          <ArrowLeft data-icon="inline-start" />
+          {dictionary.common.back}
+        </Link>
       </div>
 
       <NewsOutletUpdateForm newsOutlet={newsOutlet} />

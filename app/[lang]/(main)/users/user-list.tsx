@@ -36,11 +36,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip"
+import { TooltipContentInOverlay } from "@/components/ui/tooltip-content-in-overlay"
 
 import { UserFormDialog } from "./user-form-dialog"
 import { UserSearch } from "./user-search"
@@ -194,23 +191,25 @@ export function UserListPage({
                     <TableCell className="w-28 text-center">
                       <div className="flex justify-center">
                         <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon-sm"
-                              onClick={() => openUpdateDialog(user)}
-                              aria-label={dictionary.users.edit}
-                            >
-                              <SquarePen data-icon="inline-start" />
-                              <span className="sr-only">
-                                {dictionary.users.edit}
-                              </span>
-                            </Button>
+                          <TooltipTrigger
+                            render={
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon-sm"
+                                onClick={() => openUpdateDialog(user)}
+                                aria-label={dictionary.users.edit}
+                              />
+                            }
+                          >
+                            <SquarePen data-icon="inline-start" />
+                            <span className="sr-only">
+                              {dictionary.users.edit}
+                            </span>
                           </TooltipTrigger>
-                          <TooltipContent>
+                          <TooltipContentInOverlay>
                             {dictionary.users.editTooltip}
-                          </TooltipContent>
+                          </TooltipContentInOverlay>
                         </Tooltip>
                       </div>
                     </TableCell>

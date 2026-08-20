@@ -78,12 +78,12 @@ import {
 import { Spinner } from "@/components/ui/spinner"
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DropdownMenuContentInOverlay as DropdownMenuContent } from "@/components/ui/dropdown-menu-content-in-overlay"
 import { Button } from "@/components/ui/button"
 
 export function BotConnectionsCard({
@@ -178,7 +178,7 @@ function BotConnectionItem({
 
   return (
     <>
-      <Item variant="outline" className="items-start">
+      <Item role="listitem" variant="outline" className="items-start">
         <ItemContent className="min-w-0">
           <ItemHeader className="flex-col items-start sm:flex-row sm:items-center">
             <ItemTitle className="max-w-full min-w-0 truncate">
@@ -224,21 +224,23 @@ function BotConnectionItem({
         {canManage ? (
           <ItemActions className="ms-auto self-start">
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  id={menuTriggerId}
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label={t.bot.actionMenu}
-                >
-                  <MoreHorizontal />
-                </Button>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    id={menuTriggerId}
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label={t.bot.actionMenu}
+                  />
+                }
+              >
+                <MoreHorizontal />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuGroup>
                   <DropdownMenuItem
                     disabled={connection.status !== "ACTIVE"}
-                    onSelect={() => setConfirmation("disable")}
+                    onClick={() => setConfirmation("disable")}
                   >
                     <PowerOff />
                     {t.common.disable}
@@ -246,7 +248,7 @@ function BotConnectionItem({
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     variant="destructive"
-                    onSelect={() => setConfirmation("delete")}
+                    onClick={() => setConfirmation("delete")}
                   >
                     <Trash2 />
                     {t.bot.deleteAction}
@@ -338,11 +340,9 @@ function ConnectBotDialog({ canManage }: { canManage: boolean }) {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <Button disabled={!canManage}>
-          <Bot data-icon="inline-start" />
-          {t.bot.connect}
-        </Button>
+      <DialogTrigger render={<Button disabled={!canManage} />}>
+        <Bot data-icon="inline-start" />
+        {t.bot.connect}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -375,10 +375,12 @@ function ConnectBotDialog({ canManage }: { canManage: boolean }) {
             </Field>
           </FieldGroup>
           <DialogFooter>
-            <DialogClose asChild>
-              <Button type="button" variant="outline" disabled={isPending}>
-                {dictionary.common.close}
-              </Button>
+            <DialogClose
+              render={
+                <Button type="button" variant="outline" disabled={isPending} />
+              }
+            >
+              {dictionary.common.close}
             </DialogClose>
             <Button type="submit" disabled={isPending || !canManage}>
               {isPending ? (

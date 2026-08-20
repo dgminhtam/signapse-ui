@@ -18,7 +18,7 @@ import { formatDateTime, formatPercent } from "@/app/lib/i18n/format"
 import { LocalizedLink } from "@/components/localized-link"
 import { AppTimeMetadata } from "@/components/app-time-metadata"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import {
   Card,
   CardAction,
@@ -74,12 +74,14 @@ export function EventTimeline({
           <CardDescription>{t.description}</CardDescription>
           {showViewAll ? (
             <CardAction>
-              <Button asChild variant="ghost">
-                <LocalizedLink href="/events" aria-label={t.viewAll}>
-                  <span className="hidden sm:inline">{t.viewAll}</span>
-                  <ArrowRightIcon data-icon="inline-end" />
-                </LocalizedLink>
-              </Button>
+              <LocalizedLink
+                href="/events"
+                aria-label={t.viewAll}
+                className={buttonVariants({ variant: "ghost" })}
+              >
+                <span className="hidden sm:inline">{t.viewAll}</span>
+                <ArrowRightIcon data-icon="inline-end" />
+              </LocalizedLink>
             </CardAction>
           ) : null}
         </CardHeader>
@@ -173,7 +175,7 @@ function EventTimelineItems({
   return (
     <ItemGroup className="gap-0">
       {items.map((item, index) => (
-        <div key={item.id}>
+        <div key={item.id} role="listitem">
           {index > 0 ? <ItemSeparator /> : null}
           <Item>
             <ItemMedia className="self-start" variant="icon">
@@ -283,12 +285,13 @@ function EmptyEventTimeline({ dictionary }: { dictionary: Dictionary }) {
         <EmptyDescription>{t.emptyDescription}</EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <Button asChild variant="outline" size="sm">
-          <LocalizedLink href="/events">
-            {t.viewAll}
-            <ArrowRightIcon data-icon="inline-end" />
-          </LocalizedLink>
-        </Button>
+        <LocalizedLink
+          href="/events"
+          className={buttonVariants({ variant: "outline", size: "sm" })}
+        >
+          {t.viewAll}
+          <ArrowRightIcon data-icon="inline-end" />
+        </LocalizedLink>
       </EmptyContent>
     </Empty>
   )

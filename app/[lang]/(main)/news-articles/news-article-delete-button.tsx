@@ -79,23 +79,25 @@ export function NewsArticleDeleteButton({
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>
-        <Button
-          variant={variant}
-          size={size}
-          className={cn(
-            "text-destructive hover:bg-destructive/10 hover:text-destructive",
-            showText ? "gap-2 px-3" : undefined,
-            className
-          )}
-        >
-          <Trash2 data-icon="inline-start" />
-          {showText ? (
-            <span>{dictionary.newsArticles.deleteShort}</span>
-          ) : (
-            <span className="sr-only">{dictionary.newsArticles.delete}</span>
-          )}
-        </Button>
+      <AlertDialogTrigger
+        render={
+          <Button
+            variant={variant}
+            size={size}
+            className={cn(
+              "text-destructive hover:bg-destructive/10 hover:text-destructive",
+              showText ? "gap-2 px-3" : undefined,
+              className
+            )}
+          />
+        }
+      >
+        <Trash2 data-icon="inline-start" />
+        {showText ? (
+          <span>{dictionary.newsArticles.deleteShort}</span>
+        ) : (
+          <span className="sr-only">{dictionary.newsArticles.delete}</span>
+        )}
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>

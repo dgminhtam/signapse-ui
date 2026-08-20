@@ -488,7 +488,7 @@ function FeatureRoutingSection({
                           <span className="text-sm text-muted-foreground">
                             {route.description}
                           </span>
-                          <code className="w-fit rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
+                            <code className="w-fit rounded bg-muted px-1.5 py-0.5 text-xs text-foreground">
                             {route.featureKey}
                           </code>
                         </div>
@@ -819,7 +819,9 @@ function FeatureRouteDestinationSelect({
   const t = dictionary.telegram
   const disabled = !canUpdate || !currentWorkspaceId || isPending
 
-  function handleDestinationChange(value: string) {
+  function handleDestinationChange(value: string | null) {
+    if (value === null) return
+
     setDestinationId(value)
 
     if (!currentWorkspaceId) return
@@ -858,11 +860,15 @@ function FeatureRouteDestinationSelect({
 
   return (
     <Select
-      value={destinationId || undefined}
+      items={activeDestinations.map((destination) => ({
+        value: destination.id.toString(),
+        label: getDestinationLabel(destination, dictionary),
+      }))}
+      value={destinationId || null}
       onValueChange={handleDestinationChange}
       disabled={disabled}
     >
-      <SelectTrigger className="w-full">
+      <SelectTrigger aria-label={route.label} className="w-full">
         <SelectValue placeholder={t.destination.placeholder} />
       </SelectTrigger>
       <SelectContent>

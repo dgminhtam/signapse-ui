@@ -21,7 +21,11 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card"
-import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover"
+import {
+  PopoverAnchor,
+  PopoverContentWithAnchor,
+  PopoverWithAnchor,
+} from "@/components/ui/popover-anchor"
 import {
   Command,
   CommandGroup,
@@ -149,36 +153,39 @@ export function FootnoteReferenceElement(
       }}
     >
       {props.children}
-      <HoverCard open={hoverOpen} onOpenChange={setHoverOpen} openDelay={150}>
-        <HoverCardTrigger asChild>
-          <button
-            type="button"
-            className={cn(
-              "cursor-pointer rounded-xs text-xs font-medium text-primary group-data-[nav-target=true]/footnote-ref:bg-(--color-highlight) focus:ring-2 focus:ring-ring focus:ring-offset-1",
-              (selected && focused) || isSelectionInsideAtom
-                ? "ring-2 ring-ring ring-offset-1"
-                : null
-            )}
-            onClick={(event) => {
-              event.preventDefault()
-              event.stopPropagation()
-            }}
-            onMouseDown={(event) => {
-              if (event.metaKey || event.ctrlKey) {
+      <HoverCard open={hoverOpen} onOpenChange={setHoverOpen}>
+        <HoverCardTrigger
+          delay={150}
+          render={
+            <button
+              type="button"
+              className={cn(
+                "cursor-pointer rounded-xs text-xs font-medium text-primary group-data-[nav-target=true]/footnote-ref:bg-(--color-highlight) focus:ring-2 focus:ring-ring focus:ring-offset-1",
+                (selected && focused) || isSelectionInsideAtom
+                  ? "ring-2 ring-ring ring-offset-1"
+                  : null
+              )}
+              onClick={(event) => {
                 event.preventDefault()
                 event.stopPropagation()
-                if (isResolved) {
-                  footnoteTransforms.focusDefinition({ identifier })
+              }}
+              onMouseDown={(event) => {
+                if (event.metaKey || event.ctrlKey) {
+                  event.preventDefault()
+                  event.stopPropagation()
+                  if (isResolved) {
+                    footnoteTransforms.focusDefinition({ identifier })
 
-                  return
+                    return
+                  }
+
+                  footnoteTransforms.createDefinition({ identifier })
                 }
-
-                footnoteTransforms.createDefinition({ identifier })
-              }
-            }}
-          >
-            [{identifier}]
-          </button>
+              }}
+            />
+          }
+        >
+          [{identifier}]
         </HoverCardTrigger>
         {previewText ? (
           <HoverCardContent className="w-80">
@@ -278,47 +285,49 @@ export function FootnoteDefinitionElement(
             {identifier}
           </div>
         ) : (
-          <Popover
+          <PopoverWithAnchor
             open={referencePickerOpen}
             onOpenChange={setReferencePickerOpen}
           >
-            <PopoverAnchor asChild>
-              <button
-                type="button"
-                aria-expanded={
-                  hasMultipleReferences ? referencePickerOpen : undefined
-                }
-                aria-haspopup={hasMultipleReferences ? "dialog" : undefined}
-                aria-label={`Back to reference ${identifier}`}
-                className="min-w-3 cursor-pointer rounded-xs text-xs text-muted-foreground tabular-nums underline-offset-2 hover:text-foreground focus:ring-2 focus:ring-ring focus:ring-offset-1"
-                onClick={(event) => {
-                  event.preventDefault()
-                  event.stopPropagation()
-                }}
-                onMouseDown={(event) => {
-                  event.preventDefault()
-                  event.stopPropagation()
-
-                  if (hasMultipleReferences) {
-                    setReferencePickerOpen((open) => !open)
-
-                    return
+            <PopoverAnchor
+              render={
+                <button
+                  type="button"
+                  aria-expanded={
+                    hasMultipleReferences ? referencePickerOpen : undefined
                   }
+                  aria-haspopup={hasMultipleReferences ? "dialog" : undefined}
+                  aria-label={`Back to reference ${identifier}`}
+                  className="min-w-3 cursor-pointer rounded-xs text-xs text-muted-foreground tabular-nums underline-offset-2 hover:text-foreground focus:ring-2 focus:ring-ring focus:ring-offset-1"
+                  onClick={(event) => {
+                    event.preventDefault()
+                    event.stopPropagation()
+                  }}
+                  onMouseDown={(event) => {
+                    event.preventDefault()
+                    event.stopPropagation()
 
-                  footnoteTransforms.focusReference({ identifier })
-                }}
-              >
-                {identifier}
-              </button>
-            </PopoverAnchor>
+                    if (hasMultipleReferences) {
+                      setReferencePickerOpen((open) => !open)
+
+                      return
+                    }
+
+                    footnoteTransforms.focusReference({ identifier })
+                  }}
+                >
+                  {identifier}
+                </button>
+              }
+            />
 
             {hasMultipleReferences && referencePickerOpen ? (
-              <PopoverContent
+              <PopoverContentWithAnchor
                 className="w-72 p-0"
                 align="start"
                 sideOffset={8}
-                onCloseAutoFocus={(event) => event.preventDefault()}
-                onOpenAutoFocus={(event) => event.preventDefault()}
+                finalFocus={false}
+                initialFocus={false}
               >
                 <Command>
                   <CommandList>
@@ -347,9 +356,9 @@ export function FootnoteDefinitionElement(
                     </CommandGroup>
                   </CommandList>
                 </Command>
-              </PopoverContent>
+              </PopoverContentWithAnchor>
             ) : null}
-          </Popover>
+          </PopoverWithAnchor>
         )}
       </div>
       <div className="min-w-0 flex-1">

@@ -31,14 +31,14 @@ import type {
   GraphViewNodeKind,
 } from "@/app/lib/graph-view/definitions"
 import { AppTimeMetadata } from "@/components/app-time-metadata"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
 import {
   Tooltip,
-  TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { TooltipContentInOverlay } from "@/components/ui/tooltip-content-in-overlay"
 import { cn } from "@/lib/utils"
 
 import {
@@ -162,21 +162,23 @@ function GraphToolButton({
 }) {
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          aria-label={label}
-          type="button"
-          size="icon-sm"
-          variant="outline"
-          className="pointer-events-auto"
-          onClick={onClick}
-        >
-          {children}
-        </Button>
+      <TooltipTrigger
+        render={
+          <Button
+            aria-label={label}
+            type="button"
+            size="icon-sm"
+            variant="outline"
+            className="pointer-events-auto"
+            onClick={onClick}
+          />
+        }
+      >
+        {children}
       </TooltipTrigger>
-      <TooltipContent side="left" sideOffset={8}>
+      <TooltipContentInOverlay side="left" sideOffset={8}>
         {label}
-      </TooltipContent>
+      </TooltipContentInOverlay>
     </Tooltip>
   )
 }
@@ -622,18 +624,19 @@ function GraphNodeDetailInspector({
               </Button>
             ) : null}
             {sourceUrl ? (
-              <Button asChild size="sm" variant="outline">
-                <a href={sourceUrl} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink
-                    aria-hidden="true"
-                    className="size-4"
-                    data-icon="inline-start"
-                  />
-                  <span>
-                    {dictionary.graphView.inspector.openOriginalSource}
-                  </span>
-                </a>
-              </Button>
+              <a
+                href={sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={buttonVariants({ size: "sm", variant: "outline" })}
+              >
+                <ExternalLink
+                  aria-hidden="true"
+                  className="size-4"
+                  data-icon="inline-start"
+                />
+                <span>{dictionary.graphView.inspector.openOriginalSource}</span>
+              </a>
             ) : null}
           </div>
         ) : null}

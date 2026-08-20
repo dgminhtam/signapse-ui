@@ -50,7 +50,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import {
   EmptyDescription,
   EmptyHeader,
@@ -99,12 +99,13 @@ export function AiProviderConfigListPage({
       <AppListToolbar>
         <AppListToolbarLeading>
           {canCreateProvider ? (
-            <Button asChild>
-              <Link href="/ai-provider-configs/create">
-                <Plus data-icon="inline-start" />
-                {t.addConfig}
-              </Link>
-            </Button>
+            <Link
+              href="/ai-provider-configs/create"
+              className={buttonVariants()}
+            >
+              <Plus data-icon="inline-start" />
+              {t.addConfig}
+            </Link>
           ) : null}
         </AppListToolbarLeading>
         <AppListToolbarTrailing>
@@ -205,17 +206,18 @@ export function AiProviderConfigListPage({
                     <TableCell className="w-28">
                       <div className="flex justify-end gap-1">
                         {canUpdateProvider ? (
-                          <Button
-                            asChild
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                          <Link
+                            href={`/ai-provider-configs/${provider.id}`}
+                            className={buttonVariants({
+                              variant: "ghost",
+                              size: "icon",
+                              className:
+                                "h-8 w-8 text-muted-foreground hover:text-foreground",
+                            })}
                           >
-                            <Link href={`/ai-provider-configs/${provider.id}`}>
-                              <Edit2 />
-                              <span className="sr-only">{t.editConfig}</span>
-                            </Link>
-                          </Button>
+                            <Edit2 />
+                            <span className="sr-only">{t.editConfig}</span>
+                          </Link>
                         ) : null}
                         {canDeleteProvider ? (
                           <DeleteProviderButton provider={provider} />
@@ -385,15 +387,17 @@ function DeleteProviderButton({
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
-        >
-          <Trash2 />
-          <span className="sr-only">{t.deleteConfig}</span>
-        </Button>
+      <AlertDialogTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+          />
+        }
+      >
+        <Trash2 />
+        <span className="sr-only">{t.deleteConfig}</span>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>

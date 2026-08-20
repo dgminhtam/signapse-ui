@@ -1,12 +1,11 @@
 "use client"
 
 import type { Dispatch, FormEvent, SetStateAction } from "react"
-import { Fragment, useMemo, useState, useTransition } from "react"
+import { useMemo, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import {
   CalendarClock,
-  Check,
-  ChevronsUpDown,
+  GlobeIcon,
   Pencil,
   Plus,
   X,
@@ -40,14 +39,16 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-} from "@/components/ui/command"
+  Combobox,
+  ComboboxCollection,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxGroup,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxLabel,
+  ComboboxList,
+} from "@/components/ui/combobox"
 import {
   Dialog,
   DialogContent,
@@ -67,11 +68,7 @@ import {
   FieldSet,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+import { InputGroupAddon } from "@/components/ui/input-group"
 import {
   Select,
   SelectContent,
@@ -81,7 +78,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Spinner } from "@/components/ui/spinner"
-import { cn } from "@/lib/utils"
 import { getDestinationLabel } from "./telegram-configuration-shared"
 
 const DEFAULT_LANGUAGE_VALUE = "__default__"
@@ -427,7 +423,6 @@ function ScheduleFormFields({
   onChange,
 }: ScheduleFormFieldsProps) {
   const t = dictionary.telegram
-  const [timezoneOpen, setTimezoneOpen] = useState(false)
   const timezoneGroups = useMemo(
     () => getTimezoneGroups(dictionary),
     [dictionary]
@@ -524,8 +519,14 @@ function ScheduleFormFields({
               {t.schedule.destinationLabel}
             </FieldLabel>
             <Select
-              value={values.destinationId || undefined}
-              onValueChange={(value) => onChange("destinationId", value)}
+              items={destinationOptions.map(({ destination, unavailable }) => ({
+                value: destination.id.toString(),
+                label: `${getDestinationLabel(destination, dictionary)}${
+                  unavailable ? ` — ${t.schedule.destinationUnavailable}` : ""
+                }`,
+              }))}
+              value={values.destinationId || null}
+              onValueChange={(value) => onChange("destinationId", value ?? "")}
               disabled={disabled}
             >
               <SelectTrigger
@@ -565,8 +566,12 @@ function ScheduleFormFields({
               {t.schedule.assetLabel}
             </FieldLabel>
             <Select
-              value={values.assetId || undefined}
-              onValueChange={(value) => onChange("assetId", value)}
+              items={assetOptions.map((asset) => ({
+                value: asset.assetId.toString(),
+                label: formatAssetOption(asset, t.schedule.assetUnavailable),
+              }))}
+              value={values.assetId || null}
+              onValueChange={(value) => onChange("assetId", value ?? "")}
               disabled={disabled}
             >
               <SelectTrigger
@@ -605,69 +610,40 @@ function ScheduleFormFields({
             <FieldLabel htmlFor={getScheduleFieldId(idPrefix, "timezone")}>
               {t.schedule.timezoneLabel}
             </FieldLabel>
-            <Popover open={timezoneOpen} onOpenChange={setTimezoneOpen} modal>
-              <PopoverTrigger asChild>
-                <Button
-                  id={getScheduleFieldId(idPrefix, "timezone")}
-                  type="button"
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={timezoneOpen}
-                  aria-invalid={Boolean(errors.timezone)}
-                  aria-describedby={describedBy("timezone")}
-                  disabled={disabled}
-                  className="w-full justify-between font-normal"
-                >
-                  <span className="min-w-0 truncate">
-                    {selectedTimezone?.label ?? t.schedule.timezonePlaceholder}
-                  </span>
-                  <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent
-                align="start"
-                className="w-[var(--radix-popover-trigger-width)] p-0"
+            <Combobox
+              items={timezoneGroups}
+              value={selectedTimezone}
+              onValueChange={(item) => onChange("timezone", item?.value ?? "")}
+              disabled={disabled}
+            >
+              <ComboboxInput
+                id={getScheduleFieldId(idPrefix, "timezone")}
+                placeholder={t.schedule.timezonePlaceholder}
+                aria-invalid={Boolean(errors.timezone)}
+                aria-describedby={describedBy("timezone")}
               >
-                <Command>
-                  <CommandInput
-                    placeholder={t.schedule.timezonePlaceholder}
-                    aria-label={t.schedule.timezoneLabel}
-                  />
-                  <CommandList>
-                    <CommandEmpty>{t.schedule.timezoneEmpty}</CommandEmpty>
-                    {timezoneGroups.map((group, index) => (
-                      <Fragment key={group.value}>
-                        <CommandGroup heading={group.label}>
-                          {group.items.map((item) => (
-                            <CommandItem
-                              key={item.value}
-                              value={`${item.label} ${item.value}`}
-                              onSelect={() => {
-                                onChange("timezone", item.value)
-                                setTimezoneOpen(false)
-                              }}
-                            >
-                              {item.label}
-                              <Check
-                                className={cn(
-                                  "ml-auto size-4",
-                                  selectedTimezone?.value === item.value
-                                    ? "opacity-100"
-                                    : "opacity-0"
-                                )}
-                              />
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                        {index < timezoneGroups.length - 1 ? (
-                          <CommandSeparator />
-                        ) : null}
-                      </Fragment>
-                    ))}
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
+                <InputGroupAddon>
+                  <GlobeIcon />
+                </InputGroupAddon>
+              </ComboboxInput>
+              <ComboboxContent alignOffset={-28} className="w-60">
+                <ComboboxEmpty>{t.schedule.timezoneEmpty}</ComboboxEmpty>
+                <ComboboxList>
+                  {(group) => (
+                    <ComboboxGroup key={group.value} items={group.items}>
+                      <ComboboxLabel>{group.label}</ComboboxLabel>
+                      <ComboboxCollection>
+                        {(item) => (
+                          <ComboboxItem key={item.value} value={item}>
+                            {item.label}
+                          </ComboboxItem>
+                        )}
+                      </ComboboxCollection>
+                    </ComboboxGroup>
+                  )}
+                </ComboboxList>
+              </ComboboxContent>
+            </Combobox>
             <FieldDescription id={descriptionId("timezone")}>
               {t.schedule.timezoneDescription}
             </FieldDescription>
@@ -761,11 +737,25 @@ function ScheduleFormFields({
               {t.schedule.outputLanguageLabel}
             </FieldLabel>
             <Select
+              items={[
+                {
+                  value: DEFAULT_LANGUAGE_VALUE,
+                  label: t.schedule.defaultLanguage,
+                },
+                ...languageOptions.map((language) => ({
+                  value: language.isoCode,
+                  label: `${language.name} (${language.isoCode})${
+                    language.unavailable
+                      ? ` — ${t.schedule.languageUnavailable}`
+                      : ""
+                  }`,
+                })),
+              ]}
               value={values.outputLanguageIsoCode || DEFAULT_LANGUAGE_VALUE}
               onValueChange={(value) =>
                 onChange(
                   "outputLanguageIsoCode",
-                  value === DEFAULT_LANGUAGE_VALUE ? "" : value
+                  value === DEFAULT_LANGUAGE_VALUE ? "" : (value ?? "")
                 )
               }
               disabled={disabled}
@@ -983,37 +973,40 @@ export function CreateTelegramScheduleDialog({
 
   return (
     <div className="flex min-w-0 flex-col items-start gap-1">
-      <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogTrigger asChild>
-          <Button disabled={!canOpen}>
-            <Plus data-icon="inline-start" />
-            {dictionary.telegram.schedule.createSchedule}
-          </Button>
+      <Dialog
+        open={open}
+        onOpenChange={(nextOpen, eventDetails) => {
+          if (
+            !nextOpen &&
+            eventDetails.reason === "outside-press" &&
+            eventDetails.event.target instanceof Element &&
+            eventDetails.event.target.closest('[data-slot="popover-content"]')
+          ) {
+            eventDetails.cancel()
+            return
+          }
+
+          if (
+            !nextOpen &&
+            (eventDetails.reason === "escape-key" ||
+              eventDetails.reason === "outside-press") &&
+            (isPending || isDirty)
+          ) {
+            eventDetails.cancel()
+            if (isDirty) setDiscardOpen(true)
+            return
+          }
+
+          handleOpenChange(nextOpen)
+        }}
+      >
+        <DialogTrigger render={<Button disabled={!canOpen} />}>
+          <Plus data-icon="inline-start" />
+          {dictionary.telegram.schedule.createSchedule}
         </DialogTrigger>
         <DialogContent
           showCloseButton={false}
           className="max-h-[min(90vh,48rem)] overflow-y-auto sm:max-w-2xl"
-          onEscapeKeyDown={(event) => {
-            if (isPending || isDirty) {
-              event.preventDefault()
-              if (isDirty) setDiscardOpen(true)
-            }
-          }}
-          onPointerDownOutside={(event) => {
-            const target = event.detail.originalEvent.target
-            if (
-              target instanceof Element &&
-              target.closest('[data-slot="popover-content"]')
-            ) {
-              event.preventDefault()
-              return
-            }
-
-            if (isPending || isDirty) {
-              event.preventDefault()
-              if (isDirty) setDiscardOpen(true)
-            }
-          }}
         >
           <DialogHeader>
             <DialogTitle>
@@ -1206,41 +1199,48 @@ export function UpdateTelegramScheduleDialog({
 
   return (
     <>
-      <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogTrigger asChild>
-          <Button
-            id={`${idPrefix}-trigger`}
-            variant="ghost"
-            size="icon-sm"
-            aria-label={dictionary.telegram.schedule.editTrigger}
-          >
-            <Pencil data-icon="inline-start" />
-          </Button>
+      <Dialog
+        open={open}
+        onOpenChange={(nextOpen, eventDetails) => {
+          if (
+            !nextOpen &&
+            eventDetails.reason === "outside-press" &&
+            eventDetails.event.target instanceof Element &&
+            eventDetails.event.target.closest('[data-slot="popover-content"]')
+          ) {
+            eventDetails.cancel()
+            return
+          }
+
+          if (
+            !nextOpen &&
+            (eventDetails.reason === "escape-key" ||
+              eventDetails.reason === "outside-press") &&
+            (isPending || isDirty)
+          ) {
+            eventDetails.cancel()
+            if (isDirty) setDiscardOpen(true)
+            return
+          }
+
+          handleOpenChange(nextOpen)
+        }}
+      >
+        <DialogTrigger
+          render={
+            <Button
+              id={`${idPrefix}-trigger`}
+              variant="ghost"
+              size="icon-sm"
+              aria-label={dictionary.telegram.schedule.editTrigger}
+            />
+          }
+        >
+          <Pencil data-icon="inline-start" />
         </DialogTrigger>
         <DialogContent
           showCloseButton={false}
           className="max-h-[min(90vh,48rem)] overflow-y-auto sm:max-w-2xl"
-          onEscapeKeyDown={(event) => {
-            if (isPending || isDirty) {
-              event.preventDefault()
-              if (isDirty) setDiscardOpen(true)
-            }
-          }}
-          onPointerDownOutside={(event) => {
-            const target = event.detail.originalEvent.target
-            if (
-              target instanceof Element &&
-              target.closest('[data-slot="popover-content"]')
-            ) {
-              event.preventDefault()
-              return
-            }
-
-            if (isPending || isDirty) {
-              event.preventDefault()
-              if (isDirty) setDiscardOpen(true)
-            }
-          }}
         >
           <DialogHeader>
             <DialogTitle>

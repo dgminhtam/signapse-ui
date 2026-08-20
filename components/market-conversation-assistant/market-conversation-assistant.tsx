@@ -82,18 +82,15 @@ import {
 } from "@/components/ui/message-scroller"
 import {
   Popover,
-  PopoverContent,
   PopoverHeader,
   PopoverTitle,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { PopoverContentInOverlay } from "@/components/ui/popover-content-in-overlay"
 import { Separator } from "@/components/ui/separator"
 import { Spinner } from "@/components/ui/spinner"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip"
+import { TooltipContentInOverlay } from "@/components/ui/tooltip-content-in-overlay"
 import { cn } from "@/lib/utils"
 
 import styles from "./market-conversation-assistant.module.css"
@@ -592,26 +589,28 @@ export function MarketConversationAssistant({
 
   return (
     <Popover modal={false} open={open} onOpenChange={setAssistantOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          size="icon-xl"
-          className="fixed end-4 bottom-4"
-          aria-label={dictionary.aiAssistant.open}
-        >
-          <BotMessageSquareIcon data-icon="inline-start" />
-        </Button>
+      <PopoverTrigger
+        render={
+          <Button
+            type="button"
+            size="icon-lg"
+            className="fixed end-4 bottom-4 size-11 [&_svg:not([class*='size-'])]:size-5"
+            aria-label={dictionary.aiAssistant.open}
+          />
+        }
+      >
+        <BotMessageSquareIcon data-icon="inline-start" />
       </PopoverTrigger>
-      <PopoverContent
+      <PopoverContentInOverlay
         side="top"
         align="end"
         sideOffset={12}
         collisionPadding={16}
         aria-label={currentTitle}
         className={cn(
-          "max-h-[var(--radix-popover-content-available-height)] w-[calc(100vw-2rem)] gap-0 overflow-hidden rounded-2xl",
+          "max-h-[var(--available-height)] w-[calc(100vw-2rem)] gap-0 overflow-hidden rounded-2xl",
           isExpanded
-            ? "max-w-[min(64rem,var(--radix-popover-content-available-width))]"
+            ? "max-w-[min(64rem,var(--available-width))]"
             : "max-w-xl sm:max-w-xl"
         )}
       >
@@ -620,8 +619,8 @@ export function MarketConversationAssistant({
             className={cn(
               "relative flex min-h-0 flex-col",
               isExpanded
-                ? "h-[min(48rem,calc(var(--radix-popover-content-available-height)-1.25rem))]"
-                : "h-[min(36rem,calc(var(--radix-popover-content-available-height)-1.25rem))]"
+                ? "h-[min(48rem,calc(var(--available-height)-1.25rem))]"
+                : "h-[min(36rem,calc(var(--available-height)-1.25rem))]"
             )}
           >
             <div
@@ -638,21 +637,23 @@ export function MarketConversationAssistant({
                         open={historyOpen}
                         onOpenChange={setHistoryPopoverOpen}
                       >
-                        <PopoverTrigger asChild>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            className="max-w-full justify-start"
-                            aria-label={`${labels.historyTitle}: ${currentTitle}`}
-                            disabled={isMessagesLoading || isBusy}
-                          >
-                            <span className="min-w-0 truncate">
-                              {currentTitle}
-                            </span>
-                            <ChevronDownIcon data-icon="inline-end" />
-                          </Button>
+                        <PopoverTrigger
+                          render={
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              className="max-w-full justify-start"
+                              aria-label={`${labels.historyTitle}: ${currentTitle}`}
+                              disabled={isMessagesLoading || isBusy}
+                            />
+                          }
+                        >
+                          <span className="min-w-0 truncate">
+                            {currentTitle}
+                          </span>
+                          <ChevronDownIcon data-icon="inline-end" />
                         </PopoverTrigger>
-                        <PopoverContent
+                        <PopoverContentInOverlay
                           align="start"
                           className="w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl p-0"
                         >
@@ -757,7 +758,7 @@ export function MarketConversationAssistant({
                               </CommandGroup>
                             </CommandList>
                           </Command>
-                        </PopoverContent>
+                        </PopoverContentInOverlay>
                       </Popover>
                     ) : (
                       <span className="block truncate">{currentTitle}</span>
@@ -1028,7 +1029,7 @@ export function MarketConversationAssistant({
             </div>
           </div>
         </MessageScrollerProvider>
-      </PopoverContent>
+      </PopoverContentInOverlay>
     </Popover>
   )
 }
@@ -1166,34 +1167,38 @@ function MessageTrackingRail({
             )
 
             return (
-              <HoverCard key={turn.user.id} openDelay={150} closeDelay={100}>
-                <HoverCardTrigger asChild>
-                  <button
-                    type="button"
-                    data-message-id={messageId}
-                    aria-label={`${labels.jumpToTurn} ${index + 1}`}
-                    aria-current={isActive ? "step" : undefined}
-                    className="flex h-2.5 w-8 shrink-0 items-center justify-end rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    onPointerEnter={() => setHoveredIndex(index)}
-                    onPointerLeave={() => setHoveredIndex(null)}
-                    onClick={() => {
-                      void scrollToMessage(messageId)
-                    }}
-                  >
-                    <span aria-hidden="true" className="relative h-0.5 w-1.5">
-                      <span
-                        className={cn(
-                          "absolute inset-y-0 right-0 rounded-full transition-[width] duration-150 ease-out motion-reduce:transition-none",
-                          railState.tone === "active"
-                            ? "bg-foreground"
-                            : railState.tone === "visible"
-                              ? "bg-muted-foreground"
-                              : "bg-muted-foreground/40"
-                        )}
-                        style={{ width: railState.width }}
-                      />
-                    </span>
-                  </button>
+              <HoverCard key={turn.user.id}>
+                <HoverCardTrigger
+                  delay={150}
+                  closeDelay={100}
+                  render={
+                    <button
+                      type="button"
+                      data-message-id={messageId}
+                      aria-label={`${labels.jumpToTurn} ${index + 1}`}
+                      aria-current={isActive ? "step" : undefined}
+                      className="flex h-2.5 w-8 shrink-0 items-center justify-end rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      onPointerEnter={() => setHoveredIndex(index)}
+                      onPointerLeave={() => setHoveredIndex(null)}
+                      onClick={() => {
+                        void scrollToMessage(messageId)
+                      }}
+                    />
+                  }
+                >
+                  <span aria-hidden="true" className="relative h-0.5 w-1.5">
+                    <span
+                      className={cn(
+                        "absolute inset-y-0 right-0 rounded-full transition-[width] duration-150 ease-out motion-reduce:transition-none",
+                        railState.tone === "active"
+                          ? "bg-foreground"
+                          : railState.tone === "visible"
+                            ? "bg-muted-foreground"
+                            : "bg-muted-foreground/40"
+                      )}
+                      style={{ width: railState.width }}
+                    />
+                  </span>
                 </HoverCardTrigger>
                 <HoverCardContent
                   side="left"
@@ -1280,33 +1285,39 @@ function DemoMessage({
   const messageActions = canCopy ? (
     <div className="flex items-center gap-0.5">
       <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-xs"
-            aria-label={labels.copy}
-            onClick={() => void handleCopy()}
-          >
-            <CopyIcon />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>{labels.copy}</TooltipContent>
-      </Tooltip>
-      {hasStableAssistantContent ? (
-        <Tooltip>
-          <TooltipTrigger asChild>
+        <TooltipTrigger
+          render={
             <Button
               type="button"
               variant="ghost"
               size="icon-xs"
-              aria-label={labels.sendToTelegram}
-              onClick={() => toast.info(labels.telegramUnavailable)}
-            >
-              <SendIcon />
-            </Button>
+              aria-label={labels.copy}
+              onClick={() => void handleCopy()}
+            />
+          }
+        >
+          <CopyIcon />
+        </TooltipTrigger>
+        <TooltipContentInOverlay>{labels.copy}</TooltipContentInOverlay>
+      </Tooltip>
+      {hasStableAssistantContent ? (
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                aria-label={labels.sendToTelegram}
+                onClick={() => toast.info(labels.telegramUnavailable)}
+              />
+            }
+          >
+            <SendIcon />
           </TooltipTrigger>
-          <TooltipContent>{labels.sendToTelegram}</TooltipContent>
+          <TooltipContentInOverlay>
+            {labels.sendToTelegram}
+          </TooltipContentInOverlay>
         </Tooltip>
       ) : null}
     </div>

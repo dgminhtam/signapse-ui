@@ -82,8 +82,9 @@ export function SortSelect({
         <span className="text-sm text-muted-foreground">{resolvedLabel}</span>
       ) : null}
       <Select
+        items={options}
         value={currentSort}
-        onValueChange={onSortChange}
+        onValueChange={(value) => onSortChange(value ?? "")}
         disabled={isPending}
       >
         <SelectTrigger

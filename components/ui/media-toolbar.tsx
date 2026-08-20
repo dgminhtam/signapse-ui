@@ -23,7 +23,11 @@ import {
 } from "platejs/react"
 
 import { Button, buttonVariants } from "@/components/ui/button"
-import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover"
+import {
+  PopoverAnchor,
+  PopoverContentWithAnchor,
+  PopoverWithAnchor,
+} from "@/components/ui/popover-anchor"
 import { Separator } from "@/components/ui/separator"
 
 import { CaptionButton } from "./caption"
@@ -67,13 +71,10 @@ export function MediaToolbar({
   const { props: buttonProps } = useRemoveNodeButton({ element })
 
   return (
-    <Popover open={open} modal={false}>
+    <PopoverWithAnchor open={open} modal={false}>
       <PopoverAnchor>{children}</PopoverAnchor>
 
-      <PopoverContent
-        className="w-auto p-1"
-        onOpenAutoFocus={(e) => e.preventDefault()}
-      >
+      <PopoverContentWithAnchor className="w-auto p-1" initialFocus={false}>
         {isEditing ? (
           <div className="flex w-[330px] flex-col">
             <div className="flex items-center">
@@ -107,7 +108,7 @@ export function MediaToolbar({
             </Button>
           </div>
         )}
-      </PopoverContent>
-    </Popover>
+      </PopoverContentWithAnchor>
+    </PopoverWithAnchor>
   )
 }

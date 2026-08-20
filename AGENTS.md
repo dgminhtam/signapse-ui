@@ -75,9 +75,11 @@ app/[lang]/(main)/[feature]/
 
 ## UI Change Guardrails
 
+- Shadcn wrapper chrome is owned by the selected Nova preset in `components.json` and `components/ui`; fix feature behavior at the usage site or through a documented narrow extension instead of mutating default wrapper internals. Treat visual overrides that change primitive chrome as review findings; layout-only classes remain allowed.
 - If route interception is desired for quick detail, create a separate proposal covering route scope, affected links, Back/Forward behavior, how to avoid reloading the workspace behind it, and source cleanup; do not add global `@quickDetail` under `(main)` as the default pattern.
 - Vendor/license attribution must not be silently removed; if it leaves the main surface, replace it with a notice/link in a user-accessible location.
 - When a UI change involves focus, keyboard navigation, dialogs, forms, or screen-reader behavior, read the `accessibility` skill.
+- For a hydration mismatch on a Base UI/Radix-backed shadcn overlay, investigate server/client divergence first, keep SSR enabled by default, and do not use `suppressHydrationWarning` or mount-only/no-SSR escape hatches as a first fix. Prefer deterministic content IDs at the affected app composition, derive repeated IDs from stable keys, and avoid patching the default shadcn wrapper for a local issue.
 
 ## Validation And Typing
 
