@@ -61,3 +61,9 @@ _Avoid_: Fetch error, empty state
 **Displayed candle interval (Khoảng nến hiển thị)**:
 The time span covered by the available candles rendered in the chart, rather than the requested calendar-time range.
 _Avoid_: Requested range, provider gap
+
+## Quick Detail Overlays
+
+**Quick detail drawer (Drawer xem nhanh)**:
+A workspace-owned local reading overlay for an event or news article that keeps the current analytical workspace and URL in place while showing focused detail content.
+_Avoid_: Quick view, full detail page, global intercepted drawer

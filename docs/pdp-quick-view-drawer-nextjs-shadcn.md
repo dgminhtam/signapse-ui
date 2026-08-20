@@ -7,7 +7,7 @@ Tài liệu này mô tả pattern quick detail hiện hành cho Signapse. Mục 
 - `/events/{id}` và `/news-articles/{id}` luôn là full detail page khi user mở link bình thường, reload, paste URL, copy link hoặc đi từ các trang list/detail CRUD.
 - Quick detail trong analytical workspace phải là local overlay do chính workspace sở hữu bằng state cục bộ.
 - Đóng quick detail chỉ clear state cục bộ; không dùng `router.back()`, `router.push()` hoặc `router.replace()` chỉ để đóng drawer.
-- Drawer local có thể cung cấp action "Mở trang đầy đủ" trỏ tới canonical detail URL.
+- Drawer local có thể cung cấp action "Mở trang đầy đủ" trỏ tới canonical detail URL khi entity cần escalation; News article quick detail là ngoại lệ reader-first và không thêm action này.
 - Không dùng global intercepted route làm default pattern cho quick detail trong repo này.
 
 ```text
@@ -69,7 +69,7 @@ Lý do: route transition có thể remount hoặc reload Server/Client Component
 
 ## Dashboard Row Trigger
 
-Khi một row trên dashboard chỉ có nhiệm vụ mở local quick detail và không cần điều hướng trực tiếp, row nên là container thường; native `<button type="button">` chỉ nên bọc title và được style như một link. Icon, description và metadata không nên là vùng action. Row không giữ canonical `href`; drawer cung cấp action rõ ràng để mở full detail page khi user cần.
+Khi một row trên dashboard chỉ có nhiệm vụ mở local quick detail và không cần điều hướng trực tiếp, row nên là container thường; native `<button type="button">` chỉ nên bọc title và được style như một link. Icon, description và metadata không nên là vùng action. Row không giữ canonical `href`; Event drawer cung cấp action rõ ràng để mở full detail page khi user cần, còn News article drawer là reading surface hoàn chỉnh và không cần action này.
 
 Với Latest News, nếu article có `featureImage`, dùng `ItemMedia variant="image"` với URL ưu tiên `urlThumbnail`, `urlMedium`, `urlLarge`, rồi `urlOriginal`; nếu thiếu ảnh thì giữ newspaper icon làm fallback.
 
@@ -84,7 +84,7 @@ Local drawer cần có:
 - Access denied state trong drawer body.
 - Error/not-found state gọn trong drawer body.
 - Nội dung focused, không embed full page shell.
-- Footer action mở full detail page bằng canonical link.
+- Với entity cần escalation như Event, footer action mở full detail page bằng canonical link; News article quick detail không có footer action này.
 - Nút đóng chỉ clear local state.
 
 ## Nội Dung
@@ -101,9 +101,9 @@ Event quick detail nên ưu tiên:
 News article quick detail nên ưu tiên:
 
 - Tiêu đề, nguồn tin, thời gian publish.
-- Mô tả, nội dung/excerpt hoặc source context.
-- Linked events nếu user có quyền.
-- Action mở full news article detail page.
+- Mô tả, nội dung Markdown và source context.
+- Link tới nguồn bài viết nếu có.
+- Không thêm linked-event list hoặc action mở full news article detail page; canonical `/news-articles/{id}` vẫn dành cho điều hướng trực tiếp bên ngoài drawer.
 
 Không nên đưa vào quick detail:
 
@@ -118,7 +118,7 @@ Khi implement local quick detail, cần kiểm tra:
 
 - Mở drawer không đổi URL workspace hiện tại.
 - Đóng drawer không gọi `router.back()` và không làm reload graph/chart.
-- Full detail action mở đúng `/events/{id}` hoặc `/news-articles/{id}`.
+- Event full detail action mở đúng `/events/{id}`; News article quick detail không có full-page action vì nội dung đọc đã đủ trong drawer.
 - Link bình thường tới canonical detail page không bị intercept thành drawer.
 - Loading, error, access-denied và missing-entity state nằm trong drawer.
 - Focus, ESC, scroll containment và mobile layout vẫn đúng với shadcn primitive.
