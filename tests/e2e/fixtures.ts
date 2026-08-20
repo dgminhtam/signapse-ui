@@ -10,7 +10,7 @@ type FixtureController = {
   reset(): Promise<void>
   setScenario(
     route: string,
-    scenario: "success" | "empty" | "validation-error" | "timeout" | "outage" | "mutation-failure" | "reconnect",
+    scenario: "success" | "empty" | "short" | "short-then-empty" | "validation-error" | "timeout" | "outage" | "mutation-failure" | "reconnect",
     method?: string
   ): Promise<void>
   state(): Promise<{

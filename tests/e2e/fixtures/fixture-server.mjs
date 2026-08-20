@@ -420,14 +420,46 @@ function dashboardSummary(workspaceId) {
 function candles(url) {
   const timeframe = url.searchParams.get("timeframe") ?? "1h"
   const assetId = Number(url.searchParams.get("assetId") ?? 101)
-  const from = url.searchParams.get("from") ?? "2026-01-14T08:00:00.000Z"
+  const countBack = Math.max(1, Number(url.searchParams.get("countBack") ?? 4))
   const to = url.searchParams.get("to") ?? NOW
+  const anchorTimestamp = Date.parse(to)
+  const intervalMinutes = {
+    "1m": 1,
+    "5m": 5,
+    "15m": 15,
+    "30m": 30,
+    "1h": 60,
+    "4h": 240,
+    "1d": 1440,
+    "1w": 10080,
+    "1mo": 43200,
+  }[timeframe] ?? 60
+  const intervalMs = intervalMinutes * 60 * 1000
   const values = [
     [100, 104, 98, 102],
     [102, 108, 101, 107],
     [107, 109, 103, 105],
     [105, 111, 104, 110],
   ]
+  const offsets = assetId === 102 ? [10, 7, 1] : [4, 3, 2, 1]
+  const selectedOffsets = offsets.slice(-Math.min(countBack, offsets.length))
+  const times = selectedOffsets.map(
+    (offset) => {
+      if (timeframe === "1mo") {
+        const anchorDate = new Date(anchorTimestamp)
+        return new Date(
+          Date.UTC(
+            anchorDate.getUTCFullYear(),
+            anchorDate.getUTCMonth() - offset,
+            1
+          )
+        ).toISOString()
+      }
+
+      return new Date(anchorTimestamp - offset * intervalMs).toISOString()
+    }
+  )
+  const from = times[0] ?? to
 
   return {
     provider: "fixture",
@@ -442,14 +474,19 @@ function candles(url) {
     timeframe,
     from,
     to,
-    candles: values.map((value, index) => ({
-      time: `2026-01-14T0${8 + index}:00:00.000Z`,
-      open: value[0],
-      high: value[1],
-      low: value[2],
-      close: value[3],
-      volume: 1000 + index,
-    })),
+    candles: times.map((time, index) => {
+      const value = values[index % values.length]
+
+      return {
+        time,
+        open: value[0],
+        high: value[1],
+        low: value[2],
+        close: value[3],
+        volume: 1000 + index,
+        partial: index === times.length - 1,
+      }
+    }),
   }
 }
 
@@ -870,8 +907,46 @@ const server = createServer(async (request, response) => {
       sendJson(response, 200, [])
     } else if (result && Array.isArray(result.content)) {
       sendJson(response, 200, page([], result.number, result.size))
+    } else if (result && Array.isArray(result.candles)) {
+      const anchor = url.searchParams.get("to") ?? result.to
+      sendJson(response, 200, {
+        ...result,
+        from: anchor,
+        to: anchor,
+        candles: [],
+      })
     } else {
       sendJson(response, 200, result)
+    }
+    return
+  }
+
+  if (scenario === "short" && method === "GET" && result && Array.isArray(result.candles)) {
+    sendJson(response, 200, {
+      ...result,
+      candles: result.candles.slice(-1),
+    })
+    return
+  }
+
+  if (scenario === "short-then-empty" && method === "GET" && result && Array.isArray(result.candles)) {
+    const candleRequestCount = state.requests.filter(
+      (request) => request.path === "/market-charts/candles"
+    ).length
+
+    if (candleRequestCount > 1) {
+      const anchor = url.searchParams.get("to") ?? result.to
+      sendJson(response, 200, {
+        ...result,
+        from: anchor,
+        to: anchor,
+        candles: [],
+      })
+    } else {
+      sendJson(response, 200, {
+        ...result,
+        candles: result.candles.slice(-1),
+      })
     }
     return
   }

@@ -5,6 +5,7 @@ import {
   type EconomicCalendarImpactLevel,
 } from "@/app/lib/economic-calendar/definitions"
 import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
+import { isMarketChartCandleBoundary } from "./candle-boundaries"
 
 export const MARKET_CHART_TIMEFRAMES = [
   "1m",
@@ -48,8 +49,8 @@ export type MarketChartAssetType =
 export interface MarketChartCandleRequest {
   assetId: number
   timeframe: MarketChartTimeframe
-  from: string
   to: string
+  countBack: number
 }
 
 export interface MarketChartAnnotationRequest {
@@ -80,6 +81,7 @@ export interface MarketChartCandleItemResponse {
   low: number
   close: number
   volume?: number | null
+  partial?: boolean
 }
 
 export type MarketChartAnnotationDirection =
@@ -285,30 +287,24 @@ export function getMarketChartCandleRequestSchema(dictionary: Dictionary) {
       timeframe: z.enum(MARKET_CHART_TIMEFRAMES, {
         message: dictionary.marketCharts.unsupportedTimeframe,
       }),
-      from: z
-        .string()
-        .trim()
-        .min(1, dictionary.marketCharts.fromRequired)
-        .refine(isValidDateTime, dictionary.marketCharts.fromInvalid),
       to: z
         .string()
         .trim()
         .min(1, dictionary.marketCharts.toRequired)
         .refine(isValidDateTime, dictionary.marketCharts.toInvalid),
+      countBack: z
+        .number({ message: dictionary.marketCharts.validationInvalid })
+        .int(dictionary.marketCharts.validationInvalid)
+        .min(1, dictionary.marketCharts.validationInvalid)
+        .max(1000, dictionary.marketCharts.validationInvalid),
     })
+    .strict()
     .superRefine((value, context) => {
-      const fromTime = Date.parse(value.from)
-      const toTime = Date.parse(value.to)
-
-      if (
-        !Number.isNaN(fromTime) &&
-        !Number.isNaN(toTime) &&
-        fromTime >= toTime
-      ) {
+      if (!isMarketChartCandleBoundary(value.timeframe, value.to)) {
         context.addIssue({
           code: "custom",
           path: ["to"],
-          message: dictionary.marketCharts.toAfterFrom,
+          message: dictionary.marketCharts.toInvalid,
         })
       }
     }) satisfies z.ZodType<MarketChartCandleRequest>
@@ -414,6 +410,7 @@ export const marketChartCandleItemResponseSchema = z.object({
   low: z.number(),
   close: z.number(),
   volume: z.number().nullable().optional(),
+  partial: z.boolean().optional(),
 }) satisfies z.ZodType<MarketChartCandleItemResponse>
 
 export const marketChartAnnotationEvidenceResponseSchema = z.object({
@@ -535,9 +532,9 @@ export const marketChartCandleResponseSchema = z.object({
   symbol: z.string().nullable().optional(),
   asset: marketChartAssetResponseSchema,
   timeframe: z.enum(MARKET_CHART_TIMEFRAMES),
-  from: z.string(),
-  to: z.string(),
-  candles: z.array(marketChartCandleItemResponseSchema).default([]),
+  from: z.string().refine(isValidDateTime),
+  to: z.string().refine(isValidDateTime),
+  candles: z.array(marketChartCandleItemResponseSchema),
 }) satisfies z.ZodType<MarketChartCandleResponse>
 
 export const marketChartLiveStreamStateSchema = z.enum([

@@ -41,4 +41,33 @@ test.describe("P0 market chart workbench", () => {
       .toBeGreaterThan(initialStreamConnections)
     await expect(page.getByText("Giá trực tiếp", { exact: true })).toBeVisible()
   })
+
+  test("retries exact empty history and loads sparse count-back candles", async ({
+    page,
+    fixture,
+  }) => {
+    await fixture.setScenario("/market-charts/candles", "empty", "GET")
+    await page.goto("/vi/market-charts?assetId=102&timeframe=1h")
+
+    await expect(
+      page.getByText("Không có dữ liệu nến cho tài sản đã chọn", {
+        exact: true,
+      })
+    ).toBeVisible()
+
+    await fixture.setScenario("/market-charts/candles", "success", "GET")
+    await page
+      .getByRole("button", { name: "Tải lại dữ liệu mới nhất" })
+      .click()
+    await expect(page.locator("#market-chart-asset")).toBeVisible()
+
+    const state = await fixture.state()
+    const candleRequests = state.requests.filter(
+      (request) => request.path === "/market-charts/candles"
+    )
+    const latestCandleRequest = candleRequests.at(-1)
+
+    expect(String(latestCandleRequest?.query)).toContain("countBack=")
+    expect(String(latestCandleRequest?.query)).not.toContain("from=")
+  })
 })
