@@ -91,7 +91,7 @@ export default async function Layout({
           isP0FixtureMode={p0FixtureMode}
         />
         <SidebarInset>
-          <header className="flex min-h-16 shrink-0 items-center border-b px-4 py-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:min-h-12">
+          <header className="flex min-h-12 shrink-0 items-center border-b px-4 py-2 transition-[width,height] ease-linear">
             <div className="flex w-full flex-col gap-2 md:flex-row md:items-center md:justify-between">
               <div className="flex min-w-0 items-center gap-2">
                 <SidebarTrigger
