@@ -1,15 +1,14 @@
-import { Calendar, ExternalLink, Globe2 } from "lucide-react"
-import dynamic from "next/dynamic"
+import { ArrowUpRightIcon, Calendar, Globe2 } from "lucide-react"
+import Image from "next/image"
 
 import { AppLocale } from "@/app/lib/i18n/config"
 import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
 import { formatDateTime as formatLocalizedDateTime } from "@/app/lib/i18n/format"
-import { NewsArticleResponse } from "@/app/lib/news-articles/definitions"
+import type { NewsArticleResponse } from "@/app/lib/news-articles/definitions"
 import { AppTimeMetadata } from "@/components/app-time-metadata"
+import { Badge } from "@/components/ui/badge"
 
-const NewsArticleMarkdown = dynamic(() =>
-  import("./news-article-markdown").then((module) => module.NewsArticleMarkdown)
-)
+import { NewsArticleMarkdown } from "./news-article-markdown"
 
 function formatDateTime(
   value: string | null | undefined,
@@ -24,11 +23,11 @@ function formatDateTime(
     value,
     locale,
     {
+      year: "numeric",
+      month: "2-digit",
       day: "2-digit",
       hour: "2-digit",
       minute: "2-digit",
-      month: "2-digit",
-      year: "numeric",
     },
     dictionary.common.notAvailable
   )
@@ -55,9 +54,9 @@ export function NewsArticleQuickDetailContent({
   const description = article.description?.trim()
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       {description ? (
-        <p className="text-sm leading-6 whitespace-pre-wrap text-muted-foreground">
+        <p className="whitespace-pre-wrap text-muted-foreground">
           {description}
         </p>
       ) : null}
@@ -69,33 +68,40 @@ export function NewsArticleQuickDetailContent({
         <AppTimeMetadata icon={Calendar}>
           {formatDateTime(article.publishedAt, locale, dictionary)}
         </AppTimeMetadata>
-        <AppTimeMetadata icon={ExternalLink}>
-          <a
-            href={article.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline-offset-4 hover:text-foreground hover:underline"
+        {article.url ? (
+          <Badge
+            className="min-h-6"
+            render={
+              <a
+                href={article.url}
+                target="_blank"
+                rel="noopener noreferrer"
+              />
+            }
           >
             {dictionary.newsArticles.openOriginalLink}
-          </a>
-        </AppTimeMetadata>
+            <ArrowUpRightIcon aria-hidden="true" data-icon="inline-end" />
+          </Badge>
+        ) : null}
       </div>
 
-      {imageUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={imageUrl}
-          alt={article.featureImage?.altText?.trim() || article.title}
-          className="aspect-video max-h-56 w-full rounded-lg object-cover"
-        />
-      ) : null}
+      <div className="flex flex-col gap-4">
+        {imageUrl ? (
+          <Image
+            src={imageUrl}
+            alt={article.featureImage?.altText?.trim() || article.title}
+            width={800}
+            height={450}
+          />
+        ) : null}
 
-      <NewsArticleMarkdown
-        className="max-w-none"
-        content={
-          article.content?.trim() || dictionary.newsArticles.contentEmpty
-        }
-      />
+        <NewsArticleMarkdown
+          className="max-w-none"
+          content={
+            article.content?.trim() || dictionary.newsArticles.contentEmpty
+          }
+        />
+      </div>
     </div>
   )
 }

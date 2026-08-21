@@ -16,7 +16,7 @@ The Latest News module SHALL use the existing authenticated `GET /news-articles`
 
 ### Requirement: Latest News presents article information without internal metadata
 
-The Latest News module SHALL render each returned article using its title, description, source name, publication time, and optional `featureImage` when available. Missing optional values SHALL use localized fallbacks. When an article has an image, the row SHALL render it through `ItemMedia variant="image"` using the best available media URL in thumbnail-to-original order; when no usable image exists, it SHALL render the existing newspaper icon. The module SHALL provide a localized header action to the existing `/news-articles` route. Each article row SHALL be a regular shadcn `Item` container with a native button around the visible title only, opening the shared dashboard news-article quick-detail drawer on pointer or keyboard activation. Descriptions, source, publication time, and media SHALL remain non-interactive. Rows SHALL NOT expose a per-row canonical `/news-articles/{id}` `href`; the drawer SHALL provide the explicit full-page action. The module SHALL NOT expose internal derivation status, event/calendar relationships, or other unsupported metadata.
+The Latest News module SHALL render each returned article using its title, description, source name, publication time, and optional `featureImage` when available. Missing optional values SHALL use localized fallbacks. When an article has an image, the row SHALL render it through `ItemMedia variant="image"` using the best available media URL in thumbnail-to-original order; when no usable image exists, it SHALL render the existing newspaper icon. The module SHALL provide a localized header action to the existing `/news-articles` route. Each article row SHALL be a regular shadcn `Item` container with a native button around the visible title only, opening the shared dashboard News article Quick detail drawer on pointer or keyboard activation. Descriptions, source, publication time, and media SHALL remain non-interactive. Rows SHALL NOT expose a per-row canonical `/news-articles/{id}` `href`; the Article reader sticky header SHALL expose the canonical full-page action. The module SHALL NOT expose internal derivation status, event/calendar relationships, or other unsupported metadata.
 
 #### Scenario: Latest News has articles
 
@@ -29,10 +29,11 @@ The Latest News module SHALL render each returned article using its title, descr
 - **AND** the module header links to the localized `/news-articles` list route
 - **AND** no row presents derivation status, event relationship, calendar metadata, or unsupported internal metadata
 
-#### Scenario: User opens the canonical article page
+#### Scenario: User reads an article in Quick detail
 
-- **WHEN** a user activates the drawer's full-page action on an article row
-- **THEN** the application navigates to the current-locale `/news-articles/{id}` route
+- **WHEN** a user opens an article from a Latest News row
+- **THEN** the drawer provides the focused News article reading body with a sticky-header canonical full-page action
+- **AND** activating that action navigates in the same tab to the canonical article route
 
 #### Scenario: An article omits optional display fields
 

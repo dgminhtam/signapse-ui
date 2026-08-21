@@ -7,7 +7,7 @@ Tài liệu này mô tả pattern quick detail hiện hành cho Signapse. Mục 
 - `/events/{id}` và `/news-articles/{id}` luôn là full detail page khi user mở link bình thường, reload, paste URL, copy link hoặc đi từ các trang list/detail CRUD.
 - Quick detail trong approved owner surface phải là local overlay do chính owner sở hữu bằng state cục bộ.
 - Đóng quick detail chỉ clear state cục bộ; không dùng `router.back()`, `router.push()` hoặc `router.replace()` chỉ để đóng drawer.
-- Drawer local có thể cung cấp action "Mở trang đầy đủ" trỏ tới canonical detail URL.
+- Drawer local cung cấp action "Mở trang đầy đủ" trỏ tới canonical detail URL cho cả Event inspection và Article reader.
 - Không dùng global intercepted route làm default pattern cho quick detail trong repo này.
 
 ```text
@@ -69,7 +69,7 @@ Lý do: route transition có thể remount hoặc reload Server/Client Component
 
 ## Dashboard Row Trigger
 
-Khi một row trên dashboard chỉ có nhiệm vụ mở local quick detail và không cần điều hướng trực tiếp, row nên là container thường; native `<button type="button">` chỉ nên bọc title và được style như một link. Icon, description và metadata không nên là vùng action. Row không giữ canonical `href`; drawer cung cấp action rõ ràng để mở full detail page khi user cần.
+Khi một row trên dashboard chỉ có nhiệm vụ mở local quick detail và không cần điều hướng trực tiếp, row nên là container thường; native `<button type="button">` chỉ nên bọc title và được style như một link. Icon, description và metadata không nên là vùng action. Row không giữ canonical `href`; sticky header của mỗi profile cung cấp action rõ ràng để mở full detail page khi user cần.
 
 Với Latest News, nếu article có `featureImage`, dùng `ItemMedia variant="image"` với URL ưu tiên `urlThumbnail`, `urlMedium`, `urlLarge`, rồi `urlOriginal`; nếu thiếu ảnh thì giữ newspaper icon làm fallback.
 
@@ -111,6 +111,7 @@ News article quick detail nên ưu tiên:
 - Tiêu đề, nguồn tin, thời gian publish.
 - Mô tả, nội dung đầy đủ và source context.
 - Action mở full news article detail page.
+- Link tới nguồn bài viết nếu có.
 
 Article prose luôn có `max-width: 72ch`. Image/media có thể rộng theo panel; table, code hoặc content intrinsically wide chỉ scroll trong surface chủ đích. Original source là link provenance thứ cấp, không thay thế canonical action. Không đưa linked-event review vào Article reader.
 
@@ -127,7 +128,7 @@ Khi implement local quick detail, cần kiểm tra:
 
 - Mở drawer không đổi URL workspace hiện tại.
 - Đóng drawer không gọi `router.back()` và không làm reload graph/chart.
-- Full detail action mở đúng `/events/{id}` hoặc `/news-articles/{id}`.
+- Canonical action mở đúng `/events/{id}` hoặc `/news-articles/{id}` theo entity.
 - Link bình thường tới canonical detail page không bị intercept thành drawer.
 - Loading, error, access-denied và missing-entity state nằm trong drawer.
 - Focus, ESC, scroll containment và mobile layout vẫn đúng với shadcn primitive.

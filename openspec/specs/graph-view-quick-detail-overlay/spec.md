@@ -45,8 +45,8 @@ The quick detail overlay SHALL use the shared local shadcn Drawer policy with fo
 
 #### Scenario: News article quick detail is focused
 - **WHEN** a news article quick detail Drawer is open
-- **THEN** it shows the Article reader with title, publisher/source context, publish time, full article content, original-source link, and an action to open the full detail page
-- **AND** it does not embed linked-event review context
+- **THEN** it shows the title in drawer chrome and the Article reader with publisher/source context, publish time, complete article content, optional original-source access, feature media, canonical safe Markdown, and an action to open the full detail page
+- **AND** it does not show status, linked-event context, breadcrumb, list back button, or page-level shell chrome
 
 #### Scenario: Page shell chrome is not duplicated
 - **WHEN** quick detail renders event or news article content

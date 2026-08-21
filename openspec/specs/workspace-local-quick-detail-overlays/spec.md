@@ -152,6 +152,16 @@ Quick detail SHALL use a modal overlay with a sticky header containing a visible
 - **THEN** the overlay closes without navigation
 - **AND** focus is restored safely to the activating trigger
 
+### Requirement: Article reader retains a focused content hierarchy
+
+Article reader SHALL render article information in a focused single-column reading order without operational or linked-event review UI. Apart from the shared header's canonical action, it SHALL NOT add full-page shell chrome.
+
+#### Scenario: Article reader renders focused content
+
+- **WHEN** an authorized user opens a news article in local quick detail
+- **THEN** the drawer shows the article description when available, the article-owned outlet and publication time, one original-article access control only when an original URL exists, an uncropped feature image when available, and complete article content rendered with the canonical safe Typeset Markdown behavior
+- **AND** the drawer does not show processing status, linked-event cards or empty states, redundant content headings, dashboard-style content borders, page breadcrumb, list back button, or full-page shell chrome
+
 ### Requirement: Local states keep the resolved presentation stable
 
 Loading, missing, error, and access-denied states SHALL render inside the same resolved overlay profile and placement as the target entity. They SHALL provide accessible state feedback and SHALL NOT remount a second overlay when data resolves.
@@ -161,6 +171,15 @@ Loading, missing, error, and access-denied states SHALL render inside the same r
 - **WHEN** quick detail is loading
 - **THEN** the overlay reports a busy state with an accessible title and description
 - **AND** its skeleton mirrors the resolved profile geometry and preserves a single body scroll region
+
+#### Scenario: Original article URL is absent
+
+- **WHEN** the selected news article has no original URL
+- **THEN** the drawer does not render an empty, disabled, or unusable original-article control
+
+#### Scenario: Optional article regions are missing
+- **WHEN** the selected news article has no description or feature image
+- **THEN** the drawer omits the missing region without reserving an empty labeled surface
 
 #### Scenario: Content cannot be read
 

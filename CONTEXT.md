@@ -61,3 +61,9 @@ _Avoid_: Fetch error, empty state
 **Displayed candle interval (Khoảng nến hiển thị)**:
 The time span covered by the available candles rendered in the chart, rather than the requested calendar-time range.
 _Avoid_: Requested range, provider gap
+
+## Quick Detail Overlays
+
+**Signapse entity quick detail (Quick detail)**:
+A local modal reading overlay, owned by Dashboard, Graph View, or Market Charts, for an event or news article that keeps the owner context and URL in place while showing focused detail content.
+_Avoid_: Quick view, full detail page, global intercepted drawer, Inspector

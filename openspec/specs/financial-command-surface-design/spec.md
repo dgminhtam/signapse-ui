@@ -26,3 +26,13 @@ The system SHALL maintain `docs/design/DESIGN.md` as the authoritative source fo
 
 - **WHEN** the design source is maintained after this change
 - **THEN** pilot routes, rollout order, deferred rollout targets, first-pass restrictions, and rollback history are not required sections of the persistent UI convention source
+
+### Requirement: Quick detail escalation is documented in design policy
+
+The authoritative UI design policy SHALL describe Event inspection and Article reader as focused local overlays with a canonical-detail navigation action in their sticky headers. The Article reader SHALL remain a complete reading surface without full-page shell chrome.
+
+#### Scenario: Developer reviews Quick detail guidance
+
+- **WHEN** a developer implements or reviews an Event inspection or Article reader drawer
+- **THEN** the design policy requires a canonical full-detail escalation action for that entity
+- **AND** it continues to require that neither drawer embed full-page shell chrome

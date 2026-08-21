@@ -43,10 +43,10 @@ The bottom Drawer SHALL provide stable profile-specific reading layout while pre
 - **WHEN** event or news article quick detail is displayed
 - **THEN** Event inspection keeps its structured content within a centered `64rem` maximum cluster
 - **AND** Article reader keeps Markdown prose within a `72ch` maximum measure
-- **AND** neither profile adds mutation-heavy full-page actions
+- **AND** neither profile adds mutation-heavy actions from a full detail page
 
 ### Requirement: Navigation behavior remains canonical
-The Drawer refinement SHALL remove route-history ownership from quick detail while preserving canonical full detail page navigation as an explicit escalation action.
+The Drawer refinement SHALL remove route-history ownership from quick detail while preserving canonical full detail page navigation as an explicit sticky-header escalation action for both entity profiles.
 
 #### Scenario: Closing drawer returns to Graph View without navigation
 - **WHEN** a user closes the Drawer after opening quick detail from Graph View
@@ -57,6 +57,10 @@ The Drawer refinement SHALL remove route-history ownership from quick detail whi
 - **WHEN** a user opens `/events/{id}` or `/news-articles/{id}` directly, clicks a normal detail link, or reloads the URL
 - **THEN** the canonical full detail page renders instead of the quick detail Drawer
 
-#### Scenario: Full page escalation remains available
-- **WHEN** a user needs the complete detail workspace
-- **THEN** the Drawer provides an action to open the canonical full detail page
+#### Scenario: Event full-page escalation remains available
+- **WHEN** a user needs the complete Event detail workspace
+- **THEN** the Event Drawer provides an action to open the canonical full detail page
+
+#### Scenario: News article full-page escalation remains available
+- **WHEN** a user needs the complete News article detail page from Quick detail
+- **THEN** the Article reader provides an action to open the canonical full detail page
