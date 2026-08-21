@@ -1054,6 +1054,7 @@ function ChartSurface({
   onAnnotationClose,
   onAnnotationLayerChange,
   onAnnotationSelect,
+  onQuickDetailBeforeClose,
   onQuickDetailClose,
   onCalendarLayerChange,
   onCalendarImpactChange,
@@ -1084,7 +1085,7 @@ function ChartSurface({
   selection: MarketChartSelectionState
   selectedAsset: WorkspaceWatchlistAssetListItemResponse | null
   quickDetailEntity: LocalQuickDetailEntity | null
-  onAnnotationEventOpen: (eventId: number) => void
+  onAnnotationEventOpen: (eventId: number, triggerKey: string) => void
   selectedAnnotationGroup: MarketChartAnnotationGroup | null
   timeframeLabels: Record<MarketChartTimeframe, string>
   watchlistAssets: WorkspaceWatchlistAssetListItemResponse[]
@@ -1093,6 +1094,7 @@ function ChartSurface({
   onAnnotationClose: () => void
   onAnnotationLayerChange: (checked: boolean) => void
   onAnnotationSelect: (groupId: string) => void
+  onQuickDetailBeforeClose: () => void
   onQuickDetailClose: () => void
   onCalendarLayerChange: (checked: boolean) => void
   onCalendarImpactChange: (
@@ -1707,7 +1709,9 @@ function ChartSurface({
 
         <LocalEntityQuickDetailDrawer
           entity={quickDetailEntity}
+          onBeforeClose={onQuickDetailBeforeClose}
           onClose={onQuickDetailClose}
+          owner="market-charts"
         />
       </OverlayPortalContainerProvider>
     </section>
@@ -1961,7 +1965,7 @@ function MarketChartAnnotationDetail({
   onOutcomeRangeLeave,
 }: {
   group: MarketChartAnnotationGroup
-  onEventOpen: (eventId: number) => void
+  onEventOpen: (eventId: number, triggerKey: string) => void
   onOutcomeRangeHover: (range: MarketChartOutcomeHoverRange) => void
   onOutcomeRangeLeave: () => void
 }) {
@@ -1998,7 +2002,7 @@ function MarketChartHotAnnotationDetail({
 }: {
   group: MarketChartAnnotationGroup
   localization: LocalizationContext
-  onEventOpen: (eventId: number) => void
+  onEventOpen: (eventId: number, triggerKey: string) => void
   onOutcomeRangeHover: (range: MarketChartOutcomeHoverRange) => void
   onOutcomeRangeLeave: () => void
 }) {
@@ -2013,6 +2017,7 @@ function MarketChartHotAnnotationDetail({
           }
 
           const eventId = getAnnotationEventId(annotation)
+          const triggerKey = `${group.id}:${annotation.id}`
           const eventTime = formatMarketChartDateTime(
             annotation.time,
             localization
@@ -2030,8 +2035,9 @@ function MarketChartHotAnnotationDetail({
                   {eventId ? (
                     <button
                       type="button"
+                      data-quick-detail-trigger={triggerKey}
                       className="rounded-sm text-left underline-offset-4 transition-colors outline-none hover:text-primary hover:underline focus-visible:ring-2 focus-visible:ring-ring/50"
-                      onClick={() => onEventOpen(eventId)}
+                      onClick={() => onEventOpen(eventId, triggerKey)}
                     >
                       {title}
                     </button>
@@ -2526,6 +2532,10 @@ export function MarketChartWorkbench({
   >(null)
   const [quickDetailEntity, setQuickDetailEntity] =
     useState<LocalQuickDetailEntity | null>(null)
+  const quickDetailReturnTargetRef = useRef<{
+    groupId: string
+    triggerKey: string
+  } | null>(null)
   const [isPending, startTransition] = useTransition()
   const hasWatchlistAssets = watchlistAssets.length > 0
   const selectedAsset = findWatchlistAsset(watchlistAssets, selection.assetId)
@@ -2589,6 +2599,60 @@ export function MarketChartWorkbench({
     [...annotationGroups, ...warmAnnotationGroups].find(
       (group) => group.id === selectedAnnotationGroupId
     ) ?? null
+
+  useEffect(() => {
+    const target = quickDetailReturnTargetRef.current
+
+    if (quickDetailEntity || !target) {
+      return
+    }
+
+    const returnTarget = target
+
+    if (selectedAnnotationGroupId !== returnTarget.groupId) {
+      setSelectedAnnotationGroupId(returnTarget.groupId)
+      return
+    }
+
+    let frameId = 0
+    let attempts = 0
+
+    function restoreTriggerFocus() {
+      const trigger = Array.from(
+        document.querySelectorAll<HTMLElement>("[data-quick-detail-trigger]")
+      ).find((element) => {
+        if (
+          element.getAttribute("data-quick-detail-trigger") !==
+            returnTarget.triggerKey ||
+          element.getAttribute("aria-hidden") === "true" ||
+          element.hidden ||
+          element.getClientRects().length === 0
+        ) {
+          return false
+        }
+
+        const style = window.getComputedStyle(element)
+        return style.display !== "none" && style.visibility !== "hidden"
+      })
+
+      if (trigger) {
+        trigger.focus()
+        if (document.activeElement === trigger) {
+          quickDetailReturnTargetRef.current = null
+          return
+        }
+      }
+
+      attempts += 1
+      if (attempts < 30) {
+        frameId = window.requestAnimationFrame(restoreTriggerFocus)
+      }
+    }
+
+    frameId = window.requestAnimationFrame(restoreTriggerFocus)
+
+    return () => window.cancelAnimationFrame(frameId)
+  }, [quickDetailEntity, selectedAnnotationGroupId])
 
   useEffect(() => {
     annotationLayerEnabledRef.current = annotationLayerEnabled
@@ -3175,9 +3239,25 @@ export function MarketChartWorkbench({
     setSelectedAnnotationGroupId(null)
   }
 
-  function handleAnnotationEventOpen(eventId: number) {
+  function handleAnnotationEventOpen(eventId: number, triggerKey: string) {
+    if (!selectedAnnotationGroupId) {
+      return
+    }
+
+    quickDetailReturnTargetRef.current = {
+      groupId: selectedAnnotationGroupId,
+      triggerKey,
+    }
     setSelectedAnnotationGroupId(null)
     setQuickDetailEntity({ id: eventId, kind: "event" })
+  }
+
+  function handleQuickDetailBeforeClose() {
+    const target = quickDetailReturnTargetRef.current
+
+    if (target) {
+      setSelectedAnnotationGroupId(target.groupId)
+    }
   }
 
   function handleLoadedDataChange(nextData: MarketChartLoadedData) {
@@ -3314,6 +3394,7 @@ export function MarketChartWorkbench({
         onAnnotationEventOpen={handleAnnotationEventOpen}
         onAnnotationLayerChange={handleAnnotationLayerChange}
         onAnnotationSelect={handleAnnotationSelect}
+        onQuickDetailBeforeClose={handleQuickDetailBeforeClose}
         onQuickDetailClose={() => setQuickDetailEntity(null)}
         onCalendarLayerChange={handleCalendarLayerChange}
         onCalendarImpactChange={handleCalendarImpactChange}

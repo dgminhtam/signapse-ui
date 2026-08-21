@@ -727,6 +727,9 @@ export const en: Dictionary = {
     loadMore: "Load more",
   },
   quickDetail: {
+    eventProfile: "Event inspection",
+    articleProfile: "Article reader",
+    loadingDescription: "Loading a stable detail snapshot.",
     notFoundTitle: "Detail not found",
     notFoundDescription:
       "The selected content no longer exists or you cannot access it.",

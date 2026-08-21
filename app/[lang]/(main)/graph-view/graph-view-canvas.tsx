@@ -512,7 +512,10 @@ function GraphNodeDetailInspector({
 }: {
   node: GraphViewNode
   onClose: () => void
-  onOpenQuickDetail: (entity: LocalQuickDetailEntity) => void
+  onOpenQuickDetail: (
+    entity: LocalQuickDetailEntity,
+    trigger: HTMLElement
+  ) => void
   relatedEdgeCount: number
   relatedNodeCount: number
 }) {
@@ -613,7 +616,12 @@ function GraphNodeDetailInspector({
                 size="sm"
                 type="button"
                 variant="secondary"
-                onClick={() => onOpenQuickDetail(quickDetailAction.entity)}
+                onClick={(event) =>
+                  onOpenQuickDetail(
+                    quickDetailAction.entity,
+                    event.currentTarget
+                  )
+                }
               >
                 <ArrowUpRight
                   aria-hidden="true"
@@ -819,6 +827,7 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
   const selectedNodeIdRef = useRef<string | null>(null)
   const [quickDetailEntity, setQuickDetailEntity] =
     useState<LocalQuickDetailEntity | null>(null)
+  const quickDetailReturnFocusRef = useRef<HTMLElement | null>(null)
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const graphThemeMode: GraphThemeMode =
     resolvedTheme === "dark" ? "dark" : "light"
@@ -855,6 +864,14 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
   const selectedRelatedEdgeCount = selectedGraphNodeId
     ? (graphModel.relatedEdgesByNodeId.get(selectedGraphNodeId)?.size ?? 0)
     : 0
+
+  function handleOpenQuickDetail(
+    entity: LocalQuickDetailEntity,
+    trigger: HTMLElement
+  ) {
+    quickDetailReturnFocusRef.current = trigger
+    setQuickDetailEntity(entity)
+  }
 
   const clearSelectedNode = () => {
     selectedNodeIdRef.current = null
@@ -1080,7 +1097,7 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
         <GraphNodeDetailInspector
           node={selectedNode}
           onClose={clearSelectedNode}
-          onOpenQuickDetail={setQuickDetailEntity}
+          onOpenQuickDetail={handleOpenQuickDetail}
           relatedEdgeCount={selectedRelatedEdgeCount}
           relatedNodeCount={selectedRelatedNodeCount}
         />
@@ -1089,6 +1106,8 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
       <LocalEntityQuickDetailDrawer
         entity={quickDetailEntity}
         onClose={() => setQuickDetailEntity(null)}
+        owner="graph-view"
+        returnFocusRef={quickDetailReturnFocusRef}
       />
 
       <div className="pointer-events-none absolute inset-x-3 top-3 z-10 flex flex-wrap items-start justify-between gap-2 sm:inset-x-4 sm:top-4">

@@ -65,5 +65,5 @@ _Avoid_: Requested range, provider gap
 ## Quick Detail Overlays
 
 **Signapse entity quick detail (Quick detail)**:
-A local modal reading overlay, owned by Dashboard, Graph View, or Market Charts, for an event or news article that keeps the owner context and URL in place while showing focused detail content.
+A local modal reading overlay that keeps the owner context and URL in place while showing focused detail content. Dashboard and Graph View can open Event inspection or Article reader; Market Charts opens Event inspection only.
 _Avoid_: Quick view, full detail page, global intercepted drawer, Inspector

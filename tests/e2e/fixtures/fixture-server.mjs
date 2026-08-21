@@ -618,6 +618,27 @@ function responseForRoute(state, method, pathname, url, body) {
     return slicePage(state.events, url)
   }
 
+  const eventDetailMatch = pathname.match(/^\/events\/(\d+)$/)
+  if (method === "GET" && eventDetailMatch) {
+    const id = Number(eventDetailMatch[1])
+    const event = state.events.find((item) => item.id === id)
+
+    if (!event) {
+      return {
+        __status: 404,
+        payload: errorPayload("Event not found", "NOT_FOUND"),
+      }
+    }
+
+    return {
+      ...event,
+      assets: [],
+      themes: [],
+      evidence: [],
+      marketReactions: [],
+    }
+  }
+
   if (method === "GET" && pathname === "/me/notes") {
     return slicePage(state.notes.map((item) => ({ ...item, content: undefined })), url)
   }

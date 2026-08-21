@@ -1,6 +1,12 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen, waitFor } from "@testing-library/react"
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import {
   cloneElement,
@@ -33,9 +39,10 @@ vi.mock("@/components/ui/drawer", () => ({
   DrawerHeader: ({ children }: { children: ReactNode }) => (
     <header>{children}</header>
   ),
-  DrawerTitle: ({ children }: { children: ReactNode }) => (
-    <h2>{children}</h2>
+  DrawerDescription: ({ children }: { children: ReactNode }) => (
+    <p>{children}</p>
   ),
+  DrawerTitle: ({ children }: { children: ReactNode }) => <h2>{children}</h2>,
 }))
 
 vi.mock("@/components/ui/drawer-content-in-overlay", () => ({
@@ -106,6 +113,7 @@ function renderDrawer(selectedArticle: NewsArticleResponse = article) {
       <LocalEntityQuickDetailDrawer
         entity={{ id: selectedArticle.id, kind: "news-article" }}
         onClose={vi.fn()}
+        owner="dashboard"
       />
     </LocalizationProvider>
   )
@@ -115,6 +123,7 @@ describe("LocalEntityQuickDetailDrawer news article reading surface", () => {
   afterEach(() => {
     cleanup()
     vi.clearAllMocks()
+    useHasAnyPermission.mockImplementation(() => true)
   })
 
   it("renders the current reader hierarchy without linked-event content", async () => {
@@ -122,7 +131,10 @@ describe("LocalEntityQuickDetailDrawer news article reading surface", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByRole("heading", { level: 2, name: article.title })
+        screen.getByRole("heading", {
+          level: 2,
+          name: new RegExp(article.title),
+        })
       ).toBeInTheDocument()
     })
 
@@ -160,7 +172,7 @@ describe("LocalEntityQuickDetailDrawer news article reading surface", () => {
       expect(
         screen.getByRole("heading", {
           level: 2,
-          name: articleWithoutOptionalRegions.title,
+          name: new RegExp(articleWithoutOptionalRegions.title),
         })
       ).toBeInTheDocument()
     })
@@ -173,6 +185,153 @@ describe("LocalEntityQuickDetailDrawer news article reading surface", () => {
     expect(screen.queryByRole("img")).not.toBeInTheDocument()
     expect(
       screen.queryByText("Sự kiện liên quan không hiển thị")
+    ).not.toBeInTheDocument()
+  })
+
+  it("keeps the canonical action during transient errors and retries the snapshot", async () => {
+    getNewsArticleById
+      .mockRejectedValueOnce(new Error("temporary failure"))
+      .mockResolvedValueOnce({
+        ...article,
+        title: "Bài viết sau khi thử lại",
+      })
+
+    render(
+      <LocalizationProvider locale="vi" dictionary={viDictionary}>
+        <LocalEntityQuickDetailDrawer
+          entity={{ id: article.id, kind: "news-article" }}
+          onClose={vi.fn()}
+          owner="dashboard"
+        />
+      </LocalizationProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toBeInTheDocument()
+    })
+    expect(
+      screen.getByRole("link", { name: viDictionary.common.openFullPage })
+    ).toBeInTheDocument()
+
+    fireEvent.click(
+      screen.getByRole("button", { name: viDictionary.common.retry })
+    )
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("heading", {
+          level: 2,
+          name: /Bài viết sau khi thử lại/,
+        })
+      ).toBeInTheDocument()
+    })
+    expect(getNewsArticleById).toHaveBeenCalledTimes(2)
+  })
+
+  it("does not show a previous snapshot while another entity opens", async () => {
+    const nextArticle: NewsArticleResponse = {
+      ...article,
+      id: 43,
+      title: "Bài viết thứ hai",
+    }
+    let resolveNextArticle: ((value: NewsArticleResponse) => void) | undefined
+
+    getNewsArticleById.mockResolvedValueOnce(article).mockImplementationOnce(
+      () =>
+        new Promise<NewsArticleResponse>((resolve) => {
+          resolveNextArticle = resolve
+        })
+    )
+
+    const view = render(
+      <LocalizationProvider locale="vi" dictionary={viDictionary}>
+        <LocalEntityQuickDetailDrawer
+          entity={{ id: article.id, kind: "news-article" }}
+          onClose={vi.fn()}
+          owner="dashboard"
+        />
+      </LocalizationProvider>
+    )
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("heading", { name: new RegExp(article.title) })
+      ).toBeInTheDocument()
+    })
+
+    view.rerender(
+      <LocalizationProvider locale="vi" dictionary={viDictionary}>
+        <LocalEntityQuickDetailDrawer
+          entity={{ id: nextArticle.id, kind: "news-article" }}
+          onClose={vi.fn()}
+          owner="dashboard"
+        />
+      </LocalizationProvider>
+    )
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(viDictionary.quickDetail.loadingDescription)
+      ).toBeInTheDocument()
+    })
+    expect(
+      screen.queryByRole("heading", { name: new RegExp(article.title) })
+    ).not.toBeInTheDocument()
+
+    resolveNextArticle?.(nextArticle)
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("heading", { name: new RegExp(nextArticle.title) })
+      ).toBeInTheDocument()
+    })
+  })
+
+  it("omits recovery and canonical actions for missing content", async () => {
+    const error = Object.assign(new Error("missing"), { status: 404 })
+    getNewsArticleById.mockRejectedValueOnce(error)
+
+    render(
+      <LocalizationProvider locale="vi" dictionary={viDictionary}>
+        <LocalEntityQuickDetailDrawer
+          entity={{ id: article.id, kind: "news-article" }}
+          onClose={vi.fn()}
+          owner="dashboard"
+        />
+      </LocalizationProvider>
+    )
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("heading", {
+          level: 2,
+          name: /Không tìm thấy chi tiết/,
+        })
+      ).toBeInTheDocument()
+    })
+    expect(
+      screen.queryByRole("button", { name: viDictionary.common.retry })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("link", { name: viDictionary.common.openFullPage })
+    ).not.toBeInTheDocument()
+  })
+
+  it("renders access denial without a retry or canonical action", async () => {
+    useHasAnyPermission.mockReturnValue(false)
+
+    renderDrawer()
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(viDictionary.newsArticles.quickAccessDeniedDescription)
+      ).toBeInTheDocument()
+    })
+    expect(
+      screen.queryByRole("button", { name: viDictionary.common.retry })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("link", { name: viDictionary.common.openFullPage })
     ).not.toBeInTheDocument()
   })
 })

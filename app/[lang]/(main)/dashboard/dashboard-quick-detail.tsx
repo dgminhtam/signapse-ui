@@ -3,6 +3,7 @@
 import {
   createContext,
   useContext,
+  useRef,
   useState,
   type ComponentProps,
   type MouseEvent,
@@ -14,7 +15,10 @@ import {
   type LocalQuickDetailEntity,
 } from "../local-entity-quick-detail-drawer"
 
-type OpenQuickDetail = (entity: LocalQuickDetailEntity) => void
+type OpenQuickDetail = (
+  entity: LocalQuickDetailEntity,
+  trigger: HTMLElement
+) => void
 
 const DashboardQuickDetailContext = createContext<OpenQuickDetail | null>(null)
 
@@ -24,13 +28,24 @@ export function DashboardQuickDetailProvider({
   children: ReactNode
 }) {
   const [entity, setEntity] = useState<LocalQuickDetailEntity | null>(null)
+  const returnFocusRef = useRef<HTMLElement | null>(null)
+
+  function openQuickDetail(
+    nextEntity: LocalQuickDetailEntity,
+    trigger: HTMLElement
+  ) {
+    returnFocusRef.current = trigger
+    setEntity(nextEntity)
+  }
 
   return (
-    <DashboardQuickDetailContext.Provider value={setEntity}>
+    <DashboardQuickDetailContext.Provider value={openQuickDetail}>
       {children}
       <LocalEntityQuickDetailDrawer
         entity={entity}
         onClose={() => setEntity(null)}
+        owner="dashboard"
+        returnFocusRef={returnFocusRef}
       />
     </DashboardQuickDetailContext.Provider>
   )
@@ -55,13 +70,14 @@ export function DashboardQuickDetailButton({
   const open = openQuickDetail
 
   function handleClick(event: MouseEvent<HTMLButtonElement>) {
+    const trigger = event.currentTarget
     onClick?.(event)
 
     if (event.defaultPrevented) {
       return
     }
 
-    open(entity)
+    open(entity, trigger)
   }
 
   return (

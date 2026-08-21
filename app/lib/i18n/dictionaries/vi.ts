@@ -730,6 +730,9 @@ export const vi = {
     loadMore: "Xem thêm",
   },
   quickDetail: {
+    eventProfile: "Kiểm tra sự kiện",
+    articleProfile: "Trình đọc bài viết",
+    loadingDescription: "Đang tải bản chụp chi tiết ổn định.",
     notFoundTitle: "Không tìm thấy chi tiết",
     notFoundDescription:
       "Nội dung được chọn không còn tồn tại hoặc bạn không thể truy cập.",

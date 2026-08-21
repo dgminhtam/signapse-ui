@@ -96,7 +96,6 @@ export function NewsArticleQuickDetailContent({
         ) : null}
 
         <NewsArticleMarkdown
-          className="max-w-none"
           content={
             article.content?.trim() || dictionary.newsArticles.contentEmpty
           }

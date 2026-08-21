@@ -10,6 +10,7 @@ export const fixtureContracts = [
   { method: "DELETE", path: "/watchlists/assets/{assetId}", mapping: "removeAssetFromWorkspaceWatchlist", status: 204 },
   { method: "GET", path: "/news-articles", mapping: "getNewsArticles", status: 200 },
   { method: "GET", path: "/events", mapping: "getEvents", status: 200 },
+  { method: "GET", path: "/events/{id}", mapping: "getEventById", status: 200 },
   { method: "GET", path: "/me/notes", mapping: "getPersonalNotes", status: 200 },
   { method: "GET", path: "/me/notes/{id}", mapping: "getPersonalNote", status: 200 },
   { method: "POST", path: "/me/notes", mapping: "createPersonalNote", status: 200 },

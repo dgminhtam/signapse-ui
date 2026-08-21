@@ -8,7 +8,7 @@ Defines the shared Signapse entity quick-detail policy for approved local owner 
 
 ### Requirement: Approved owner surfaces own local quick detail explicitly
 
-Dashboard, Graph View, and Market Charts SHALL own entity quick detail through local state. The owner SHALL mount at most one modal quick-detail overlay at a time and SHALL NOT use a generic global Drawer mode, nested quick details, or an internal quick-detail history stack. A new owner surface requires an explicit design proposal showing why preserving its background context is valuable.
+Dashboard, Graph View, and Market Charts SHALL own entity quick detail through local state. Dashboard and Graph View SHALL support Event inspection and Article reader; Market Charts SHALL support Event inspection only. An owner SHALL mount at most one modal quick-detail overlay at a time and SHALL NOT use a generic global Drawer mode, nested quick details, or an internal quick-detail history stack. A new owner surface requires an explicit design proposal showing why preserving its background context is valuable.
 
 #### Scenario: Dashboard opens local quick detail
 
@@ -16,10 +16,16 @@ Dashboard, Graph View, and Market Charts SHALL own entity quick detail through l
 - **THEN** Dashboard opens one local entity quick-detail overlay without changing the dashboard URL
 - **AND** Dashboard state remains mounted behind the modal
 
-#### Scenario: Analytical workbench opens local quick detail
+#### Scenario: Graph View opens local quick detail
 
-- **WHEN** a user activates a supported event or news-article action in Graph View or Market Charts
-- **THEN** that workbench opens one local entity quick-detail overlay without resetting its route or analytical state
+- **WHEN** a user activates a supported event or news-article action in Graph View
+- **THEN** Graph View opens one local entity quick-detail overlay without resetting its route or analytical state
+
+#### Scenario: Market Charts opens Event inspection only
+
+- **WHEN** a user activates a supported event action in Market Charts
+- **THEN** Market Charts opens one local Event inspection overlay without resetting its route or analytical state
+- **AND** Market Charts does not expose an Article reader quick-detail action
 
 #### Scenario: Closing quick detail does not navigate
 
@@ -136,9 +142,15 @@ The system SHALL treat canonical event and news article detail URLs as full-page
 - **THEN** the app renders the corresponding full detail page
 - **AND** no global quick-detail overlay route handles the navigation
 
+#### Scenario: Browser Back does not reopen quick detail
+
+- **WHEN** a user navigates back from a canonical full-detail page to its owner surface
+- **THEN** the owner surface renders without automatically reopening the prior quick-detail overlay
+- **AND** no quick-detail history stack is reconstructed
+
 ### Requirement: Quick detail is an accessible, single-scroll modal
 
-Quick detail SHALL use a modal overlay with a sticky header containing a visible Close control, localized accessible title, concise entity/state description, and canonical full-detail action. The body SHALL be the only scrolling region. A sticky footer SHALL NOT duplicate the canonical action.
+Quick detail SHALL use a modal overlay with a sticky header containing a visible Close control, a localized profile-plus-entity accessible title, a concise entity or state description, and a canonical full-detail action when the selected target is actionable. The canonical action SHALL be available for loading, ready, and transient-error states with a known permitted target, and SHALL be absent for missing and access-denied states. The body SHALL be the only scrolling region. A sticky footer SHALL NOT duplicate the canonical action.
 
 #### Scenario: Modal opens and closes with keyboard support
 
@@ -152,6 +164,12 @@ Quick detail SHALL use a modal overlay with a sticky header containing a visible
 - **THEN** the overlay closes without navigation
 - **AND** focus is restored safely to the activating trigger
 
+#### Scenario: Header action follows recovery state
+
+- **WHEN** quick detail is loading or shows a transient error for a permitted entity
+- **THEN** its sticky header retains the canonical full-detail action
+- **AND** the header does not expose that action for a missing or access-denied entity
+
 ### Requirement: Article reader retains a focused content hierarchy
 
 Article reader SHALL render article information in a focused single-column reading order without operational or linked-event review UI. Apart from the shared header's canonical action, it SHALL NOT add full-page shell chrome.
@@ -164,7 +182,7 @@ Article reader SHALL render article information in a focused single-column readi
 
 ### Requirement: Local states keep the resolved presentation stable
 
-Loading, missing, error, and access-denied states SHALL render inside the same resolved overlay profile and placement as the target entity. They SHALL provide accessible state feedback and SHALL NOT remount a second overlay when data resolves.
+Loading, missing, error, and access-denied states SHALL render inside the same resolved overlay profile and placement as the target entity. They SHALL provide accessible state feedback and SHALL NOT remount a second overlay when data resolves. Each opening SHALL use one stable data snapshot, reset the body scroll position to the top, and only obtain new data through a later open or explicit retry.
 
 #### Scenario: Content is loading
 
@@ -186,6 +204,25 @@ Loading, missing, error, and access-denied states SHALL render inside the same r
 - **WHEN** the entity is missing, access is denied, or the request fails
 - **THEN** the overlay renders a concise local state with clearly announced error or access feedback
 - **AND** the owner surface remains mounted behind the modal
+
+#### Scenario: Transient request failure can retry
+
+- **WHEN** a permitted entity request fails for a reason other than missing content
+- **THEN** quick detail renders a concise announced error state with Retry and Close controls
+- **AND** Retry starts a new snapshot request without changing the selected entity or resolved placement
+
+#### Scenario: Content is missing or access is denied
+
+- **WHEN** the entity is missing or access is denied
+- **THEN** the overlay renders a concise local state with clearly announced feedback and a Close control
+- **AND** it does not render Retry or a canonical full-detail action
+- **AND** the owner surface remains mounted behind the modal
+
+#### Scenario: A later open starts at the beginning
+
+- **WHEN** a user dismisses quick detail after scrolling and later opens an entity quick detail again
+- **THEN** the new opening starts at the top of the body scroll region
+- **AND** it creates a new snapshot request even when the entity kind and ID are unchanged
 
 #### Scenario: Open-session content remains stable
 
