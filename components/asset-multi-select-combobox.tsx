@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ChevronsUpDownIcon, SearchIcon, XIcon } from "lucide-react"
+import { LoaderCircleIcon, RotateCwIcon, XIcon } from "lucide-react"
 
 import { getAssets } from "@/app/api/assets/action"
 import { AssetListResponse } from "@/app/lib/assets/definitions"
@@ -10,14 +10,17 @@ import { buildFilterQuery } from "@/app/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuGroup,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { DropdownMenuContentInOverlay as DropdownMenuContent } from "@/components/ui/dropdown-menu-content-in-overlay"
-import { Input } from "@/components/ui/input"
+  Combobox,
+  ComboboxChip,
+  ComboboxChips,
+  ComboboxChipsInput,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxValue,
+  useComboboxAnchor,
+} from "@/components/ui/combobox"
 import { Spinner } from "@/components/ui/spinner"
 
 interface AssetMultiSelectComboboxProps {
@@ -26,203 +29,348 @@ interface AssetMultiSelectComboboxProps {
   disabled?: boolean
 }
 
+const ASSET_PAGE_SIZE = 20
+const SEARCH_DEBOUNCE_MS = 250
+const ASSET_SEARCH_INPUT_ID = "workspace-watchlist-asset-search"
+
+function mergeUniqueAssets(
+  currentAssets: AssetListResponse[],
+  nextAssets: AssetListResponse[]
+) {
+  const assetsById = new Map(
+    currentAssets.map((asset) => [asset.id, asset] as const)
+  )
+
+  nextAssets.forEach((asset) => {
+    assetsById.set(asset.id, asset)
+  })
+
+  return Array.from(assetsById.values())
+}
+
 export function AssetMultiSelectCombobox({
   selectedAssets,
   onSelectedAssetsChange,
   disabled = false,
 }: AssetMultiSelectComboboxProps) {
   const { dictionary, formatMessage, formatNumber } = useLocalization()
+  const anchor = useComboboxAnchor()
   const [open, setOpen] = React.useState(false)
   const [searchTerm, setSearchTerm] = React.useState("")
-  const deferredSearchTerm = React.useDeferredValue(searchTerm)
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = React.useState("")
   const [options, setOptions] = React.useState<AssetListResponse[]>([])
+  const [page, setPage] = React.useState(0)
+  const [hasMore, setHasMore] = React.useState(false)
   const [isLoading, setIsLoading] = React.useState(false)
+  const [isLoadingMore, setIsLoadingMore] = React.useState(false)
   const [loadError, setLoadError] = React.useState<string | null>(null)
+  const [failedPage, setFailedPage] = React.useState<number | null>(null)
+  const requestIdRef = React.useRef(0)
+  const assetLoadErrorFallback = dictionary.assets.loadError
+
+  React.useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm)
+    }, SEARCH_DEBOUNCE_MS)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [searchTerm])
+
+  const loadAssetsPage = React.useCallback(
+    async (nextPage: number, query: string, append: boolean) => {
+      const requestId = ++requestIdRef.current
+
+      setLoadError(null)
+      setFailedPage(null)
+      if (append) {
+        setIsLoadingMore(true)
+      } else {
+        setIsLoading(true)
+        setOptions([])
+        setPage(0)
+        setHasMore(false)
+      }
+
+      try {
+        const response = await getAssets({
+          filter: buildFilterQuery({
+            "name[containsIgnoreCase],symbol[containsIgnoreCase]": query,
+          }),
+          page: nextPage,
+          size: ASSET_PAGE_SIZE,
+          sort: [{ field: "name", direction: "asc" }],
+        })
+
+        if (requestId !== requestIdRef.current) {
+          return
+        }
+
+        setOptions((currentOptions) =>
+          append
+            ? mergeUniqueAssets(currentOptions, response.content)
+            : mergeUniqueAssets([], response.content)
+        )
+        setPage(response.number)
+        setHasMore(
+          !response.last && response.number + 1 < response.totalPages
+        )
+      } catch (error: unknown) {
+        if (requestId !== requestIdRef.current) {
+          return
+        }
+
+        const errorMessage =
+          error instanceof Error ? error.message : assetLoadErrorFallback
+        setLoadError(errorMessage)
+        setFailedPage(nextPage)
+      } finally {
+        if (requestId !== requestIdRef.current) {
+          return
+        }
+
+        setIsLoading(false)
+        setIsLoadingMore(false)
+      }
+    },
+    [assetLoadErrorFallback]
+  )
 
   React.useEffect(() => {
     if (!open || disabled) {
       return
     }
 
-    let cancelled = false
+    const timeoutId = window.setTimeout(() => {
+      void loadAssetsPage(0, debouncedSearchTerm.trim(), false)
+    })
 
-    async function loadAssets() {
-      setIsLoading(true)
-      setLoadError(null)
+    return () => window.clearTimeout(timeoutId)
+  }, [debouncedSearchTerm, disabled, loadAssetsPage, open])
 
-      try {
-        const response = await getAssets({
-          filter: buildFilterQuery({
-            "name[containsIgnoreCase],symbol[containsIgnoreCase]":
-              deferredSearchTerm.trim(),
-          }),
-          page: 0,
-          size: 20,
-          sort: [{ field: "name", direction: "asc" }],
-        })
-
-        if (cancelled) {
-          return
-        }
-
-        setOptions(response.content)
-      } catch (error: unknown) {
-        if (cancelled) {
-          return
-        }
-
-        const errorMessage =
-          error instanceof Error ? error.message : dictionary.assets.loadError
-        setLoadError(errorMessage)
-        setOptions([])
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false)
-        }
-      }
-    }
-
-    void loadAssets()
-
-    return () => {
-      cancelled = true
-    }
-  }, [deferredSearchTerm, disabled, open])
-
-  function isSelected(assetId: number) {
-    return selectedAssets.some((asset) => asset.id === assetId)
-  }
-
-  function toggleAsset(asset: AssetListResponse, checked: boolean) {
-    if (checked) {
-      if (isSelected(asset.id)) {
-        return
-      }
-
-      onSelectedAssetsChange([...selectedAssets, asset])
+  React.useEffect(() => {
+    if (!open || disabled || isLoading || isLoadingMore) {
       return
     }
 
-    onSelectedAssetsChange(
-      selectedAssets.filter((item) => item.id !== asset.id)
+    const animationFrame = window.requestAnimationFrame(() => {
+      document.getElementById(ASSET_SEARCH_INPUT_ID)?.focus()
+    })
+
+    return () => window.cancelAnimationFrame(animationFrame)
+  }, [disabled, isLoading, isLoadingMore, open])
+
+  function handleOpenChange(nextOpen: boolean) {
+    if (disabled) {
+      return
+    }
+
+    setOpen(nextOpen)
+    if (!nextOpen) {
+      requestIdRef.current += 1
+      setSearchTerm("")
+      setDebouncedSearchTerm("")
+      setOptions([])
+      setPage(0)
+      setHasMore(false)
+      setLoadError(null)
+      setFailedPage(null)
+    }
+  }
+
+  function handleRetry() {
+    if (failedPage === null || isLoading || isLoadingMore) {
+      return
+    }
+
+    void loadAssetsPage(
+      failedPage,
+      debouncedSearchTerm.trim(),
+      failedPage > 0
     )
   }
 
-  function removeAsset(assetId: number) {
-    onSelectedAssetsChange(selectedAssets.filter((item) => item.id !== assetId))
+  function handleLoadMore() {
+    if (!hasMore || isLoading || isLoadingMore) {
+      return
+    }
+
+    void loadAssetsPage(page + 1, debouncedSearchTerm.trim(), true)
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      <DropdownMenu open={open} onOpenChange={setOpen}>
-        <DropdownMenuTrigger
-          render={
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full justify-between"
-              disabled={disabled}
-            />
+    <div className="flex min-w-0 flex-col gap-2">
+      <label
+        htmlFor={ASSET_SEARCH_INPUT_ID}
+        className="text-sm font-medium"
+      >
+        {dictionary.assets.searchLabel}
+      </label>
+      <p
+        id={`${ASSET_SEARCH_INPUT_ID}-description`}
+        className="text-sm text-muted-foreground"
+      >
+        {dictionary.watchlist.helper}
+      </p>
+
+      <Combobox
+        multiple
+        autoHighlight
+        items={options}
+        filter={null}
+        open={open}
+        onOpenChange={(nextOpen, eventDetails) => {
+          if (!nextOpen && eventDetails.reason === "item-press") {
+            eventDetails.cancel()
+            return
           }
+
+          handleOpenChange(nextOpen)
+        }}
+        value={selectedAssets}
+        onValueChange={(value) => {
+          onSelectedAssetsChange(value)
+        }}
+        disabled={disabled}
+        isItemEqualToValue={(item, value) => item.id === value.id}
+        itemToStringLabel={(item) => item.symbol}
+      >
+        <ComboboxChips
+          ref={anchor}
+          className="max-h-32 min-h-12 items-start overflow-y-auto"
+          aria-describedby={`${ASSET_SEARCH_INPUT_ID}-description`}
         >
-          <span className="truncate">
-            {selectedAssets.length > 0
-              ? formatMessage(dictionary.assets.selectedCount, {
-                  count: formatNumber(selectedAssets.length),
-                })
-              : dictionary.assets.chooseTracked}
-          </span>
-          {isLoading ? (
-            <Spinner className="size-4" />
-          ) : (
-            <ChevronsUpDownIcon className="size-4" />
-          )}
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="start"
-          className="w-[min(36rem,calc(100vw-2rem))] p-0"
-          sideOffset={8}
-        >
-          <div className="border-b p-2">
-            <div className="relative">
-              <SearchIcon className="pointer-events-none absolute top-2.5 left-2.5 size-4 text-muted-foreground" />
-              <Input
-                value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
-                onKeyDown={(event) => event.stopPropagation()}
-                placeholder={dictionary.assets.searchPlaceholder}
-                className="pl-8"
-              />
-            </div>
-          </div>
-
-          <DropdownMenuGroup>
-            <DropdownMenuLabel>{dictionary.assets.library}</DropdownMenuLabel>
-
-            {loadError ? (
-              <div className="px-2 pb-2 text-sm text-destructive">
-                {loadError}
-              </div>
-            ) : null}
-
-            {!loadError && !isLoading && options.length === 0 ? (
-              <div className="px-2 pb-2 text-sm text-muted-foreground">
-                {dictionary.assets.emptySearch}
-              </div>
-            ) : null}
-
-            {options.length > 0 ? (
-              <div className="max-h-72 overflow-y-auto">
-                {options.map((asset) => (
-                  <DropdownMenuCheckboxItem
+          <ComboboxValue>
+            {(values) => (
+              <React.Fragment>
+                {values.map((asset: AssetListResponse) => (
+                  <ComboboxChip
                     key={asset.id}
-                    checked={isSelected(asset.id)}
-                    onCheckedChange={(checked) =>
-                      toggleAsset(asset, checked === true)
-                    }
-                    closeOnClick={false}
+                    showRemove={false}
                   >
-                    <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="truncate font-medium">{asset.name}</div>
-                        <div className="truncate text-xs text-muted-foreground">
-                          {asset.symbol}
-                        </div>
-                      </div>
-                      <Badge variant="outline">{asset.type}</Badge>
-                    </div>
-                  </DropdownMenuCheckboxItem>
+                    {asset.symbol}
+                    <button
+                      type="button"
+                      aria-label={formatMessage(
+                        dictionary.assets.removeSelected,
+                        { symbol: asset.symbol }
+                      )}
+                      disabled={disabled}
+                      className="inline-flex size-5 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        onSelectedAssetsChange(
+                          selectedAssets.filter((item) => item.id !== asset.id)
+                        )
+                      }}
+                    >
+                      <XIcon className="size-3" aria-hidden="true" />
+                    </button>
+                  </ComboboxChip>
                 ))}
-              </div>
-            ) : null}
-          </DropdownMenuGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
+                <ComboboxChipsInput
+                  id={ASSET_SEARCH_INPUT_ID}
+                  placeholder={dictionary.assets.searchPlaceholder}
+                  aria-label={dictionary.assets.searchLabel}
+                  aria-describedby={`${ASSET_SEARCH_INPUT_ID}-description`}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                />
+              </React.Fragment>
+            )}
+          </ComboboxValue>
+        </ComboboxChips>
 
-      <div className="h-px bg-border" />
-
-      {selectedAssets.length > 0 ? (
-        <div className="flex flex-wrap gap-2">
-          {selectedAssets.map((asset) => (
-            <button
-              key={asset.id}
-              type="button"
-              onClick={() => removeAsset(asset.id)}
-              className="inline-flex"
-              disabled={disabled}
+        <ComboboxContent
+          anchor={anchor}
+          align="start"
+          className="w-[min(36rem,calc(100vw-2rem))]"
+        >
+          {isLoading && options.length > 0 ? (
+            <div
+              role="status"
+              aria-live="polite"
+              className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground"
             >
-              <Badge variant="secondary" className="gap-1">
-                <span>{asset.symbol}</span>
-                <XIcon className="size-3" />
-              </Badge>
-            </button>
-          ))}
-        </div>
-      ) : (
-        <p className="text-sm text-muted-foreground">
-          {dictionary.assets.emptyTracked}
-        </p>
-      )}
+              <Spinner />
+              {dictionary.assets.searchLoading}
+            </div>
+          ) : null}
+
+          {loadError ? (
+            <div
+              role="alert"
+              className="flex items-center justify-between gap-3 border-b px-3 py-2 text-sm text-destructive"
+            >
+              <span>{loadError}</span>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={isLoading || isLoadingMore}
+                onClick={handleRetry}
+              >
+                <RotateCwIcon data-icon="inline-start" />
+                {dictionary.assets.retrySearch}
+              </Button>
+            </div>
+          ) : null}
+
+          <ComboboxEmpty>
+            {isLoading
+              ? dictionary.assets.searchLoading
+              : loadError
+                ? null
+                : dictionary.assets.emptySearch}
+          </ComboboxEmpty>
+
+          <ComboboxList>
+            {(asset: AssetListResponse) => (
+              <ComboboxItem key={asset.id} value={asset}>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate font-medium">{asset.name}</div>
+                  <div className="truncate text-xs text-muted-foreground">
+                    {asset.symbol}
+                  </div>
+                </div>
+                <Badge variant="outline" className="shrink-0">
+                  {asset.type}
+                </Badge>
+              </ComboboxItem>
+            )}
+          </ComboboxList>
+
+          {hasMore ? (
+            <div className="border-t p-2">
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full"
+                disabled={isLoading || isLoadingMore}
+                onClick={handleLoadMore}
+              >
+                {isLoadingMore ? (
+                  <LoaderCircleIcon
+                    className="animate-spin"
+                    data-icon="inline-start"
+                  />
+                ) : null}
+                {isLoadingMore
+                  ? dictionary.assets.loadingMore
+                  : dictionary.assets.loadMore}
+              </Button>
+            </div>
+          ) : null}
+        </ComboboxContent>
+      </Combobox>
+
+      <p
+        role="status"
+        aria-live="polite"
+        className="text-sm text-muted-foreground"
+      >
+        {formatMessage(dictionary.watchlist.selectedCount, {
+          count: formatNumber(selectedAssets.length),
+        })}
+      </p>
     </div>
   )
 }

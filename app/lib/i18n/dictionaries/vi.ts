@@ -394,7 +394,7 @@ export const vi = {
     removeError: "Không thể gỡ tài sản khỏi danh sách theo dõi.",
     noChanges: "Không có thay đổi để lưu.",
     partialFailure:
-      "Không thể đồng bộ đầy đủ tài sản theo dõi. Dữ liệu mới nhất đã được tải lại.",
+      "Một số thay đổi tài sản theo dõi chưa được lưu. Hãy kiểm tra bản nháp và thử lại.",
     updated: 'Đã cập nhật tài sản theo dõi cho "{name}".',
     loading: "Đang tải tài sản theo dõi...",
     selectedCount: "Đã chọn {count} tài sản cho không gian làm việc này.",
@@ -402,6 +402,11 @@ export const vi = {
       "Chỉ có thể quản lý tài sản theo dõi khi đã chọn không gian làm việc phù hợp.",
     saveList: "Lưu danh sách",
     saving: "Đang lưu...",
+    discardTitle: "Bỏ thay đổi chưa lưu?",
+    discardDescription:
+      "Các thay đổi tài sản theo dõi chưa được lưu. Bạn có thể tiếp tục chỉnh sửa hoặc bỏ thay đổi.",
+    keepEditing: "Tiếp tục chỉnh sửa",
+    discardChanges: "Bỏ thay đổi",
   },
   workspaceOverview: {
     noReadTitle: "Bạn chưa có quyền xem không gian làm việc",
@@ -744,9 +749,15 @@ export const vi = {
   assets: {
     selectedCount: "Đã chọn {count} tài sản",
     chooseTracked: "Chọn tài sản theo dõi",
+    searchLabel: "Tìm và chọn tài sản theo dõi",
     searchPlaceholder: "Tìm theo tên hoặc mã tài sản",
     library: "Kho tài sản",
     loadError: "Không thể tải danh sách tài sản",
+    searchLoading: "Đang tìm tài sản...",
+    retrySearch: "Thử lại tìm kiếm",
+    loadMore: "Tải thêm tài sản",
+    loadingMore: "Đang tải thêm...",
+    removeSelected: "Gỡ {symbol} khỏi các tài sản đã chọn",
     emptySearch: "Không tìm thấy tài sản phù hợp.",
     emptyTracked: "Workspace này chưa có tài sản nào trong danh sách theo dõi.",
   },

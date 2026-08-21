@@ -417,6 +417,76 @@ function dashboardSummary(workspaceId) {
   }
 }
 
+function graphView(state) {
+  const event = state.events[0]
+  const asset = state.assets[0]
+
+  return {
+    nodes: [
+      {
+        id: `event:${event.id}`,
+        kind: "event",
+        label: event.title,
+        secondaryLabel: event.canonicalKey,
+        metadata: {
+          canonicalKey: event.canonicalKey,
+          occurredAt: event.occurredAt,
+          status: event.status,
+          confidence: event.confidence,
+        },
+      },
+      {
+        id: `asset:${asset.assetId}`,
+        kind: "asset",
+        label: asset.assetName,
+        secondaryLabel: asset.assetSymbol,
+        metadata: {
+          symbol: asset.assetSymbol,
+          assetType: asset.assetType,
+        },
+      },
+    ],
+    edges: [
+      {
+        id: `event-${event.id}-asset-${asset.assetId}`,
+        kind: "event-asset",
+        sourceNodeId: `event:${event.id}`,
+        targetNodeId: `asset:${asset.assetId}`,
+        relationType: "AFFECTED_ASSET",
+        confidence: event.confidence,
+      },
+    ],
+  }
+}
+
+function marketChartAnnotations(url) {
+  const assetId = Number(url.searchParams.get("assetId") ?? 101)
+  const anchorTime = url.searchParams.get("to") ?? NOW
+  const annotationTime = new Date(
+    Date.parse(anchorTime) - 2 * 60 * 60 * 1000
+  )
+
+  return [
+    {
+      id: "fixture-hot-event-61",
+      annotationType: "HOT_EVENT",
+      assetId,
+      time: annotationTime.toISOString(),
+      hotEvent: {
+        eventId: 61,
+        severity: "HIGH",
+        direction: "UP",
+        title: "Central bank signals a slower easing path",
+        summary: "Synthetic chart annotation for the browser quality gate.",
+        confidence: 0.92,
+        marketReactions: [],
+        evidence: [],
+        links: { eventDetail: "/events/61" },
+      },
+    },
+  ]
+}
+
 function candles(url) {
   const timeframe = url.searchParams.get("timeframe") ?? "1h"
   const assetId = Number(url.searchParams.get("assetId") ?? 101)
@@ -596,6 +666,8 @@ function responseForRoute(state, method, pathname, url, body) {
     return dashboardSummary(current?.id ?? 1)
   }
 
+  if (method === "GET" && pathname === "/graph-view") return graphView(state)
+
   if (method === "GET" && (pathname === "/watchlists" || pathname === "/watchlists/assets")) {
     return slicePage(state.assets.map((item) => ({ ...item, lastModifiedDate: undefined })), url)
   }
@@ -763,7 +835,7 @@ function responseForRoute(state, method, pathname, url, body) {
   }
 
   if (method === "GET" && pathname === "/market-charts/candles") return candles(url)
-  if (method === "GET" && pathname === "/market-charts/annotations") return []
+  if (method === "GET" && pathname === "/market-charts/annotations") return marketChartAnnotations(url)
   if (method === "GET" && pathname === "/market-charts/economic-calendar-events") return []
 
   return { __status: 404, payload: errorPayload(`Unhandled fixture route: ${method} ${pathname}`, "UNHANDLED_ROUTE") }

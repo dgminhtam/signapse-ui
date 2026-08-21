@@ -35,7 +35,7 @@ Dashboard, Graph View, and Market Charts SHALL own entity quick detail through l
 
 ### Requirement: Entity kind resolves the content profile
 
-The shared quick-detail resolver SHALL derive content profile from entity kind and placement from owner surface plus effective CSS viewport. Callers SHALL NOT select arbitrary mode, swipe direction, or dimensions.
+The shared quick-detail resolver SHALL derive content profile from entity kind and placement from the effective CSS viewport plus the resolved content profile. Owner surfaces SHALL retain local state, approved-entity scope, and host-specific portal or focus restoration behavior, but SHALL NOT select arbitrary Quick Detail mode, swipe direction, or dimensions.
 
 #### Scenario: Event resolves Event inspection
 
@@ -51,29 +51,31 @@ The shared quick-detail resolver SHALL derive content profile from entity kind a
 
 ### Requirement: Placement follows the approved host and responsive geometry
 
-The resolver SHALL use the following placement and geometry policy. The `1440px` threshold is based on effective CSS viewport and SHALL NOT change with sidebar state.
+The resolver SHALL use the following shared placement and geometry policy for every approved owner. The `1440px` threshold is based on effective CSS viewport and SHALL NOT change with sidebar state.
 
-| Host and effective CSS viewport | Event inspection | Article reader |
+| Effective CSS viewport | Event inspection | Article reader |
 | --- | --- | --- |
-| Dashboard at `1440px` or wider | right-side sheet, maximum `32rem`, `100dvh` | right-side sheet, maximum `44rem`, `100dvh` |
-| Dashboard from `768px` to below `1440px`; Graph View and Market Charts from `768px` | bottom sheet, content-fit, `max-height: min(60dvh, 36rem)` | bottom sheet, `height: min(72dvh, 48rem)` |
+| Every approved owner at `1440px` or wider | viewport-right sheet, maximum `32rem`, `100dvh` | viewport-right sheet, maximum `44rem`, `100dvh` |
+| Every approved owner from `768px` to below `1440px` | bottom sheet, content-fit, `max-height: min(60dvh, 36rem)` | bottom sheet, `height: min(72dvh, 48rem)` |
 | Every approved owner below `768px` | bottom sheet, content-fit, maximum `90dvh` | bottom sheet, `90dvh` |
 
-#### Scenario: Large Dashboard uses a viewport side sheet
+#### Scenario: Large approved owner uses a viewport side sheet
 
-- **WHEN** Dashboard opens quick detail at an effective CSS viewport of at least `1440px`
-- **THEN** the sheet is anchored to the viewport's right edge rather than constrained by a Dashboard grid module
+- **WHEN** Dashboard, Graph View, or Market Charts opens a supported quick detail at an effective CSS viewport of at least `1440px`
+- **THEN** the sheet is anchored to the right edge of its active overlay viewport or fullscreen container
 - **AND** Event inspection and Article reader use their respective side-sheet widths
 
-#### Scenario: Dashboard falls back without sidebar-driven mode changes
+#### Scenario: Shared bottom-sheet fallback ignores sidebar state
 
-- **WHEN** Dashboard opens quick detail below `1440px`, regardless of whether its sidebar is expanded or collapsed
-- **THEN** it uses the defined bottom-sheet geometry
+- **WHEN** any approved owner opens a supported quick detail below `1440px`
+- **THEN** it uses the defined bottom-sheet geometry for that entity profile
+- **AND** toggling the Dashboard sidebar does not change the selected placement policy
 
-#### Scenario: Workbench keeps its canvas-oriented placement
+#### Scenario: Workbench shares the desktop reading surface
 
-- **WHEN** Graph View or Market Charts opens quick detail at `768px` or wider
-- **THEN** it uses the defined bottom-sheet geometry while preserving visible canvas context behind the modal
+- **WHEN** Graph View or Market Charts opens quick detail at `1440px` or wider
+- **THEN** it uses the same right-side sheet geometry as Dashboard
+- **AND** its owner-local graph or chart context remains mounted behind the modal
 
 #### Scenario: Responsive re-resolution preserves the reading session
 
@@ -85,7 +87,7 @@ The resolver SHALL use the following placement and geometry policy. The `1440px`
 #### Scenario: Fullscreen market chart keeps fullscreen ownership
 
 - **WHEN** Market Charts is fullscreen and opens quick detail
-- **THEN** the overlay renders in the fullscreen portal container
+- **THEN** the overlay renders in the fullscreen portal container using the resolved shared geometry
 - **AND** opening quick detail does not exit fullscreen
 
 ### Requirement: Event inspection stays a bounded scan surface

@@ -323,13 +323,13 @@ Signapse entity quick detail là local, modal reading overlay cho một entity �
 
 #### Placement And Geometry
 
-| Host và effective CSS viewport | Event inspection | Article reader |
+| Effective CSS viewport | Event inspection | Article reader |
 | --- | --- | --- |
-| Dashboard từ `1440px` | right-side sheet, tối đa `32rem`, cao `100dvh` | right-side sheet, tối đa `44rem`, cao `100dvh` |
-| Dashboard từ `768px` đến dưới `1440px`; Graph View và Market Charts từ `768px` | bottom sheet, content-fit, `max-height: min(60dvh, 36rem)` | bottom sheet, `height: min(72dvh, 48rem)` |
+| Mọi owner được chấp thuận từ `1440px` | right-side sheet bám viewport, tối đa `32rem`, cao `100dvh` | right-side sheet bám viewport, tối đa `44rem`, cao `100dvh` |
+| Mọi owner được chấp thuận từ `768px` đến dưới `1440px` | bottom sheet, content-fit, `max-height: min(60dvh, 36rem)` | bottom sheet, `height: min(72dvh, 48rem)` |
 | Mọi owner dưới `768px` | bottom sheet, content-fit, tối đa `90dvh` | bottom sheet, cao `90dvh` |
 
-- Dashboard right-side sheet bám cạnh phải viewport và không bị giới hạn bởi grid 12 cột hoặc module Latest News/Event Timeline. Ngưỡng `1440px` dựa trên viewport, không đổi theo trạng thái sidebar.
+- Quick Detail side sheet ở wide desktop bám cạnh phải của viewport overlay đang hoạt động; không owner nào tự chọn placement hoặc bị giới hạn bởi grid 12 cột/module. Ngưỡng `1440px` dựa trên effective CSS viewport, không đổi theo trạng thái sidebar.
 - Fullscreen Market Charts giữ fullscreen và render overlay trong fullscreen portal container; đây là exception theo host, không phải profile mới.
 - Resize hoặc browser zoom re-resolve placement theo effective CSS viewport, giữ entity, modal focus và vị trí cuộn. Transition không phát lại opening animation và phải tôn trọng `prefers-reduced-motion`.
 
@@ -373,7 +373,7 @@ Khi implement hoặc review UI, kiểm tra các state và breakpoint liên quan:
 - Content-width mode khớp primary task của route: `bounded` chỉ cho overview/decision surface, `fluid` cho list/table/data surface và `canvas` cho interactive workbench.
 - Desktop, tablet và mobile width, bao gồm sidebar mở rộng/collapsed tại 1440, 1920 và 2560px.
 - Entity quick detail: resolver `event`/`news-article`, approved owner, một modal duy nhất, canonical URL không đổi khi mở/đóng, đúng profile content và không nested/back-stack.
-- Entity quick detail placement tại `767px`, `768px`, `1439px`, `1440px`, desktop rộng và zoom `200%`; Dashboard side sheet không phụ thuộc grid/sidebar, Graph/Market giữ canvas-oriented bottom sheet và fullscreen giữ portal cục bộ.
+- Entity quick detail placement tại `767px`, `768px`, `1439px`, `1440px`, desktop rộng và zoom `200%`; mọi owner dùng side sheet chung từ `1440px`, bottom-sheet fallback dưới ngưỡng và fullscreen giữ portal cục bộ.
 - Entity quick detail accessibility: sticky header có entity/state title/Close/canonical action, không có profile prefix hoặc generic header description, body là scroll region duy nhất, focus vào Close rồi quay về trigger, dismissal keyboard/pointer/touch, state busy/error/denied được công bố và reduced motion không replay opening animation.
 - List normal state.
 - List empty state.

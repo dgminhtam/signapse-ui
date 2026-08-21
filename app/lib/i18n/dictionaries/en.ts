@@ -396,7 +396,7 @@ export const en: Dictionary = {
     removeError: "Could not remove asset from the watchlist.",
     noChanges: "There are no changes to save.",
     partialFailure:
-      "Could not fully sync tracked assets. The latest data has been reloaded.",
+      "Some tracked-asset changes could not be saved. Review the draft and try again.",
     updated: 'Updated tracked assets for "{name}".',
     loading: "Loading tracked assets...",
     selectedCount: "{count} assets selected for this workspace.",
@@ -404,6 +404,11 @@ export const en: Dictionary = {
       "Tracked assets can only be managed after a suitable workspace is selected.",
     saveList: "Save list",
     saving: "Saving...",
+    discardTitle: "Discard unsaved changes?",
+    discardDescription:
+      "Your tracked-asset changes have not been saved. Continue editing or discard them.",
+    keepEditing: "Continue editing",
+    discardChanges: "Discard changes",
   },
   workspaceOverview: {
     noReadTitle: "You do not have permission to view workspaces",
@@ -742,9 +747,15 @@ export const en: Dictionary = {
   assets: {
     selectedCount: "{count} assets selected",
     chooseTracked: "Choose tracked assets",
+    searchLabel: "Search and select tracked assets",
     searchPlaceholder: "Search by asset name or symbol",
     library: "Asset library",
     loadError: "Could not load assets",
+    searchLoading: "Searching assets...",
+    retrySearch: "Retry search",
+    loadMore: "Load more assets",
+    loadingMore: "Loading more...",
+    removeSelected: "Remove {symbol} from selected assets",
     emptySearch: "No matching assets found.",
     emptyTracked: "This workspace has no assets in the tracked list yet.",
   },

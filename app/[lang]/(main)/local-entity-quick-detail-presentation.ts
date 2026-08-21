@@ -13,24 +13,22 @@ export interface LocalQuickDetailPresentation {
 }
 
 export const LOCAL_QUICK_DETAIL_BREAKPOINTS = {
-  dashboardSideSheet: 1440,
+  wideDesktopSideSheet: 1440,
   bottomSheet: 768,
 } as const
 
 export function resolveLocalQuickDetailPresentation({
   kind,
-  owner,
   viewportWidth,
 }: {
   kind: LocalQuickDetailKind
   owner: LocalQuickDetailOwner
   viewportWidth: number
 }): LocalQuickDetailPresentation {
-  const isDashboardSideSheet =
-    owner === "dashboard" &&
-    viewportWidth >= LOCAL_QUICK_DETAIL_BREAKPOINTS.dashboardSideSheet
+  const isWideDesktopSideSheet =
+    viewportWidth >= LOCAL_QUICK_DETAIL_BREAKPOINTS.wideDesktopSideSheet
 
-  if (isDashboardSideSheet) {
+  if (isWideDesktopSideSheet) {
     return {
       contentHeight: "100dvh",
       contentMaxHeight: "100dvh",

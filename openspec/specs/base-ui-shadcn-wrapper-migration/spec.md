@@ -109,7 +109,8 @@ The system SHALL preserve the official Base UI Drawer primitive and Nova wrapper
 
 #### Scenario: Quick-detail header exposes the required local actions
 - **WHEN** the local entity quick-detail shell is rendered
-- **THEN** its sticky header contains the localized title, concise accessible description, visible Close control, and canonical full-detail action
+- **THEN** its sticky header contains the localized entity-or-state title, visible Close control, and canonical full-detail action
+- **AND** it does not render a generic description that repeats the entity context
 - **AND** it SHALL NOT use a sticky `DrawerFooter` to duplicate the canonical action
 
 #### Scenario: Quick-detail closes through controlled dismissal

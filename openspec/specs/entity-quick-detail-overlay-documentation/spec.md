@@ -4,7 +4,7 @@
 Documents the shared Signapse entity quick-detail policy for approved local owner surfaces.
 ## Requirements
 ### Requirement: Documentation uses Signapse quick detail framing
-The documentation SHALL describe the pattern as a Signapse entity quick detail overlay for approved owner surfaces, not as an ecommerce PDP or product quick-view pattern.
+The documentation SHALL describe the pattern as a Signapse entity quick detail overlay for approved owner surfaces, not as an ecommerce PDP or product quick-view pattern. The canonical guide SHALL use the same Quick Detail terminology in both its name and content.
 
 #### Scenario: Ecommerce language is removed from the primary pattern
 - **WHEN** the quick detail documentation is updated
@@ -55,7 +55,7 @@ The documentation SHALL distinguish lightweight local summaries from the richer 
 
 ### Requirement: Documentation defines profiles and host-responsive placement
 
-The documentation SHALL define Event inspection and Article reader as the only supported quick-detail profiles, derive those profiles from entity kind, and describe host/viewport placement separately from profile selection.
+The documentation SHALL define Event inspection and Article reader as the only supported quick-detail profiles, derive those profiles from entity kind, and describe the shared effective-viewport placement policy separately from owner-local state and restoration behavior.
 
 #### Scenario: Profile terminology is unambiguous
 
@@ -66,8 +66,9 @@ The documentation SHALL define Event inspection and Article reader as the only s
 #### Scenario: Placement policy is explicit
 
 - **WHEN** a developer implements an approved owner surface
-- **THEN** the documentation identifies Dashboard's large-viewport right-sheet behavior, Dashboard's bottom-sheet fallback, Graph View and Market Charts' bottom-sheet placement, and the shared mobile policy
+- **THEN** the documentation identifies the `1440px`-and-wider right-sheet geometry for Dashboard, Graph View, and Market Charts, the shared bottom-sheet fallback below `1440px`, and the shared mobile policy
 - **AND** it states that callers do not choose arbitrary quick-detail direction or dimensions
+- **AND** it preserves host-specific Graph inspector context and Market Chart fullscreen/annotation restoration behavior without treating them as separate placement policies
 
 ### Requirement: Documentation defines scope boundaries
 The documentation SHALL define supported entity types, non-goals, and validation checks for future local quick-detail implementation proposals.

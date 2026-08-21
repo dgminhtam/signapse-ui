@@ -77,17 +77,17 @@ Với Latest News, nếu article có `featureImage`, dùng `ItemMedia variant="i
 
 Quick detail overlay dùng shadcn primitive đã wrap trong `@/components/ui`; policy thuộc composition dùng chung, không thêm mode hoặc chrome vào primitive. `event` luôn resolve thành **Event inspection**; `news-article` luôn resolve thành **Article reader**. Caller không tự chọn mode, direction hay width.
 
-| Host và effective CSS viewport | Event inspection | Article reader |
+| Effective CSS viewport | Event inspection | Article reader |
 | --- | --- | --- |
-| Dashboard từ `1440px` | right-side sheet, tối đa `32rem`, cao `100dvh` | right-side sheet, tối đa `44rem`, cao `100dvh` |
-| Dashboard từ `768px` đến dưới `1440px`; Graph View/Market Charts từ `768px` | bottom sheet, content-fit, `max-height: min(60dvh, 36rem)` | bottom sheet, `height: min(72dvh, 48rem)` |
+| Mọi owner được chấp thuận từ `1440px` | right-side sheet bám viewport, tối đa `32rem`, cao `100dvh` | right-side sheet bám viewport, tối đa `44rem`, cao `100dvh` |
+| Mọi owner được chấp thuận từ `768px` đến dưới `1440px` | bottom sheet, content-fit, `max-height: min(60dvh, 36rem)` | bottom sheet, `height: min(72dvh, 48rem)` |
 | Mọi owner dưới `768px` | bottom sheet, content-fit, tối đa `90dvh` | bottom sheet, cao `90dvh` |
 
-Dashboard side sheet bám cạnh phải viewport, không bị giới hạn bởi cột Latest News/Event Timeline và không đổi mode khi sidebar mở/thu gọn. Graph View và Market Charts giữ bottom sheet để bảo toàn chiều ngang canvas. Market Charts fullscreen phải portal overlay vào fullscreen container mà không tự thoát fullscreen.
+Wide-desktop side sheet của mọi owner được chấp thuận bám cạnh phải viewport overlay đang hoạt động, không bị giới hạn bởi cột Latest News/Event Timeline hay canvas grid và không đổi mode khi sidebar mở/thu gọn. Graph View và Market Charts vẫn giữ context nền; Market Charts fullscreen phải portal overlay vào fullscreen container mà không tự thoát fullscreen.
 
 Local quick detail cần có:
 
-- Modal sticky header: localized title, mô tả ngắn về entity/state, Close thấy được và canonical action “Mở trang đầy đủ” trong cùng tab. Không dùng sticky footer để lặp action.
+- Modal sticky header: localized entity/state title, Close thấy được và canonical action “Mở trang đầy đủ” trong cùng tab. Không thêm profile prefix hoặc generic description chỉ để lặp context; không dùng sticky footer để lặp action.
 - Một body scroll duy nhất; loading, access denied, error/not-found nằm trong cùng profile/placement và skeleton mirror layout resolved.
 - Khi mở, focus vào Close; Close, Escape, backdrop desktop hoặc swipe-down bottom sheet mobile đóng bằng cách clear local state và trả focus về trigger.
 - Resize/zoom re-resolve placement theo effective CSS viewport, giữ entity/focus/scroll, không replay opening motion và tôn trọng `prefers-reduced-motion`.
@@ -133,7 +133,7 @@ Khi implement local quick detail, cần kiểm tra:
 - Loading, error, access-denied và missing-entity state nằm trong drawer.
 - Focus, ESC, scroll containment và mobile layout vẫn đúng với shadcn primitive.
 - Profile resolver đúng (`event` → Event inspection, `news-article` → Article reader), placement đúng tại `767px`, `768px`, `1439px`, `1440px`, desktop rộng và zoom `200%`.
-- Header có accessible title/description, Close thấy được, canonical action; state loading công bố busy và error/access denied được thông báo rõ.
+- Header có accessible entity/state title, Close thấy được, canonical action và không có generic description; state loading công bố busy và error/access denied được thông báo rõ.
 - Không có nested quick detail, quick-detail back-stack hoặc auto refresh thay nội dung trong một lần đọc.
 - Static search không còn active global quick-detail route slot hoặc intercepted quick-detail route nếu không có proposal riêng.
 
