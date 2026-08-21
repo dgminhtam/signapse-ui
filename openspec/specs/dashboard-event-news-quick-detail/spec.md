@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Define the shared quick-detail interaction for Event Timeline and Latest News rows on the dashboard.
+Define the shared quick-detail interaction and responsive presentation for Event Timeline and Latest News rows on Dashboard.
 ## Requirements
 ### Requirement: Dashboard owns one shared quick-detail drawer
 
@@ -19,6 +19,28 @@ The dashboard SHALL own one local quick-detail state boundary for Event Timeline
 - **WHEN** a user closes an event or news-article quick-detail drawer
 - **THEN** the dashboard remains mounted at the same URL
 - **AND** the selected entity state is cleared
+
+### Requirement: Dashboard resolves the shared quick-detail presentation responsively
+
+Dashboard SHALL use the shared entity quick-detail resolver without allowing a row trigger to select a mode, direction, or size. At an effective CSS viewport of `1440px` or wider, Dashboard SHALL render Event inspection as a viewport-right sheet with a maximum width of `32rem` and Article reader as a viewport-right sheet with a maximum width of `44rem`; both side sheets are `100dvh`. Below `1440px`, Dashboard SHALL use the shared bottom-sheet geometry. The threshold SHALL NOT change when the sidebar is expanded or collapsed.
+
+#### Scenario: Large Dashboard opens Event inspection
+
+- **WHEN** a user opens an event quick detail on Dashboard at an effective CSS viewport of at least `1440px`
+- **THEN** Event inspection opens as a right-side sheet with the documented maximum `32rem` width
+- **AND** the sheet is not constrained by the Event Timeline grid column
+
+#### Scenario: Large Dashboard opens Article reader
+
+- **WHEN** a user opens a news-article quick detail on Dashboard at an effective CSS viewport of at least `1440px`
+- **THEN** Article reader opens as a right-side sheet with the documented maximum `44rem` width
+- **AND** the sheet is not constrained by the Latest News grid column
+
+#### Scenario: Dashboard uses the stable bottom-sheet fallback
+
+- **WHEN** a user opens either quick-detail entity below `1440px`
+- **THEN** Dashboard uses the documented bottom-sheet geometry for that entity profile
+- **AND** toggling the sidebar does not change the selected placement policy
 
 ### Requirement: Event and news rows use the same title-only button interaction
 
@@ -55,7 +77,7 @@ The shared dashboard title trigger SHALL open local quick detail for every norma
 
 ### Requirement: Dashboard quick-detail triggers remain accessible
 
-Event and news title buttons SHALL remain keyboard reachable, expose an accessible localized name, identify the dialog relationship with `aria-haspopup="dialog"`, and preserve the existing drawer's focus, Escape, loading, permission, error, and scroll behavior. Other row content SHALL remain non-interactive.
+Event and news title buttons SHALL remain keyboard reachable, expose an accessible localized name, identify the dialog relationship with `aria-haspopup="dialog"`, and preserve the shared quick-detail modal's focus, Escape, loading, permission, error, and scroll behavior. Other row content SHALL remain non-interactive.
 
 #### Scenario: User opens and closes with the keyboard
 
@@ -67,4 +89,4 @@ Event and news title buttons SHALL remain keyboard reachable, expose an accessib
 
 - **WHEN** the selected event or article is loading, missing, denied, or fails to fetch
 - **THEN** the existing drawer renders its local state
-- **AND** the dashboard remains mounted and usable behind the drawer
+- **AND** Dashboard remains mounted with its state preserved behind the modal

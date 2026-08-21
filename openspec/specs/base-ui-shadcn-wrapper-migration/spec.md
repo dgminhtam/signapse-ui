@@ -97,27 +97,30 @@ The system SHALL use the official Base Nova Combobox composition for the Telegra
 - **AND** the input SHALL use the default Base Nova Combobox input and popup behavior, including keyboard navigation, focus management, search, empty state, and standard positioning
 - **AND** the implementation SHALL not add feature-specific chrome or mutate the canonical Combobox wrapper
 
-### Requirement: Drawer quick-detail uses the default Base UI composition
-The system SHALL render the local entity quick-detail Drawer with the official Base UI sizing and consumer composition while preserving the named fullscreen portal extension.
+### Requirement: Entity quick detail keeps Base UI primitive chrome while owning presentation policy
+The system SHALL preserve the official Base UI Drawer primitive and Nova wrapper chrome while allowing the entity quick-detail composition to own its documented profile, placement, sizing, header, and scroll policy. The shared primitive SHALL NOT receive entity-specific variants or chrome changes.
 
-#### Scenario: Quick-detail Drawer uses default sizing and shell
-- **WHEN** the local entity quick-detail Drawer is rendered
-- **THEN** it SHALL omit consumer-provided height and max-height values and rely on Base UI intrinsic sizing and its viewport cap
-- **AND** it SHALL enable the official `showSwipeHandle` option
-- **AND** `DrawerContent`, `DrawerHeader`, and `DrawerTitle` SHALL use their default wrapper chrome without consumer overrides
-- **AND** the content region SHALL use `flex-1 overflow-y-auto p-4` so long detail content remains scrollable
-- **AND** the header SHALL render only the localized `DrawerTitle`
-- **AND** the quick-detail composition SHALL not render `DrawerDescription`, `DrawerFooter`, `DrawerClose`, or footer action buttons
+#### Scenario: Quick-detail shell applies only feature-level layout policy
+- **WHEN** the local entity quick-detail shell is rendered
+- **THEN** it MAY provide documented layout-only direction, width, height, max-height, sticky-header, and scroll constraints at the composition site
+- **AND** `DrawerContent`, `DrawerHeader`, `DrawerTitle`, `DrawerDescription`, and `DrawerClose` retain their default wrapper chrome
+- **AND** a swipe handle is used only for a bottom-sheet placement that supports swipe dismissal
+- **AND** the body remains the single scroll region
 
-#### Scenario: Quick-detail Drawer closes through root dismissal
-- **WHEN** the quick-detail Drawer is dismissed through Base UI swipe, Escape, or outside-click behavior
-- **THEN** the controlled root `onOpenChange` SHALL remain responsible for notifying the feature owner that the Drawer closed
-- **AND** the quick-detail composition SHALL not add a footer close button solely for dismissal
+#### Scenario: Quick-detail header exposes the required local actions
+- **WHEN** the local entity quick-detail shell is rendered
+- **THEN** its sticky header contains the localized title, concise accessible description, visible Close control, and canonical full-detail action
+- **AND** it SHALL NOT use a sticky `DrawerFooter` to duplicate the canonical action
+
+#### Scenario: Quick-detail closes through controlled dismissal
+- **WHEN** the quick-detail Drawer is dismissed through its visible Close control, Base UI swipe, Escape, or outside-click behavior
+- **THEN** the controlled root `onOpenChange` remains responsible for notifying the feature owner that the Drawer closed
+- **AND** the composition restores focus to the activating trigger
 
 #### Scenario: Fullscreen quick-detail preserves the portal extension
 - **WHEN** the quick-detail Drawer is rendered inside a fullscreen market-chart surface
-- **THEN** it SHALL continue using `DrawerInOverlay` and `DrawerContentInOverlay` to target the provided overlay portal container
-- **AND** the extension SHALL not alter the canonical Drawer primitive structure or default Nova chrome
+- **THEN** it continues using `DrawerInOverlay` and `DrawerContentInOverlay` to target the provided overlay portal container
+- **AND** the extension does not alter the canonical Drawer primitive structure or default Nova chrome
 
 ### Requirement: Migration preserves the application visual and workflow contract
 The system SHALL preserve Nova visual chrome and application workflows while allowing intentional Base UI behavior differences.

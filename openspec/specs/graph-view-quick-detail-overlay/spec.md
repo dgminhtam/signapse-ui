@@ -1,7 +1,7 @@
 # graph-view-quick-detail-overlay Specification
 
 ## Purpose
-TBD - created by archiving change add-graph-view-quick-detail-overlay. Update Purpose after archive.
+Defines Graph View's supported entity entry points into the shared Signapse quick-detail policy.
 ## Requirements
 ### Requirement: Graph View supports quick detail for readable entity nodes
 Graph View SHALL allow users to open local quick detail for selected `event` and `news-article` nodes without losing the current graph workspace context.
@@ -37,15 +37,16 @@ The system SHALL keep `/events/{id}` and `/news-articles/{id}` as canonical full
 - **AND** the user remains in the existing Graph View workspace context
 
 ### Requirement: Quick detail uses a focused Drawer reading surface
-The quick detail overlay SHALL use a local shadcn Drawer reading surface with focused entity detail content rather than rendering the full page shell inside the overlay.
+The quick detail overlay SHALL use the shared local shadcn Drawer policy with focused entity-profile content rather than rendering the full page shell inside the overlay.
 
 #### Scenario: Event quick detail is focused
 - **WHEN** an event quick detail Drawer is open
-- **THEN** it shows focused event reading content such as title, status, description or summary, key timestamps, confidence, evidence, linked source context, and an action to open the full detail page
+- **THEN** it shows the Event inspection scan surface with title, status, concise description, key facts, bounded evidence, related assets, and an action to open the full detail page
 
 #### Scenario: News article quick detail is focused
 - **WHEN** a news article quick detail Drawer is open
-- **THEN** it shows focused article reading content such as title, status, publisher/source context, publish time, summary or excerpt, linked event context where available, source link, and an action to open the full detail page
+- **THEN** it shows the Article reader with title, publisher/source context, publish time, full article content, original-source link, and an action to open the full detail page
+- **AND** it does not embed linked-event review context
 
 #### Scenario: Page shell chrome is not duplicated
 - **WHEN** quick detail renders event or news article content

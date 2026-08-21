@@ -117,6 +117,17 @@ App shell giữ cảm giác yên, có khoảng thở và không tạo quá nhi�
 - Mỗi route vẫn phải có đúng một `<h1>` ngữ nghĩa. Heading có thể là `sr-only` khi trùng hoàn toàn với breadcrumb; sau client navigation, focus chuyển đến heading hoặc main content mà không làm cuộn trang bất ngờ.
 - Top loading bar luôn bật cho page transitions.
 
+### Content Width Modes
+
+Content-width policy chỉ áp dụng cho vùng main content của `app/[lang]/(main)`; header và sidebar luôn giữ fluid. Mỗi route có một primary content mode, được chọn theo decision path chính của route thay vì chỉ vì route có table hoặc chart nhúng.
+
+- `fluid` là default: list, table và admin data surface lấp đầy vùng content đã có gutter từ app shell. `fluid` không có nghĩa là full-bleed sát viewport hoặc sidebar.
+- `bounded` dành cho overview và decision surface không cần canvas hoặc data grid cực rộng. Content dùng toàn bộ chiều rộng khả dụng cho tới khi đạt `100rem`, sau đó căn giữa; không dùng breakpoint toggle chỉ để bật/tắt cap. Trading Intelligence Dashboard là ví dụ chuẩn.
+- `canvas` dành cho interactive workbench mà chiều ngang và/hoặc chiều cao là một phần của task, như Graph View, Market Charts và editor. Canvas không có page-level max-width và có thể sở hữu chiều cao theo ngữ cảnh, nhưng không được tạo horizontal page overflow ngoài surface chủ đích.
+- Wide table hoặc chart nhúng không tự đổi mode của page. Trong `bounded`, ưu tiên summary, reflow hoặc horizontal scroll cục bộ trong table surface; không dùng negative margin hay full-bleed escape. Nếu data width là decision path chính, nó thuộc dedicated `fluid` hoặc `canvas` route.
+- Loading, empty, error và permission-denied state kế thừa content mode của route; một inner state panel không tự đổi width mode hoặc hierarchy của page.
+- `100rem` và mode semantics thuộc shared app-level content-width contract. Feature route chỉ chọn mode, không thêm page-level `max-width` tùy ý hoặc tạo giá trị width cạnh tranh.
+
 ### Sidebar And Header
 
 Sidebar là navigation vận hành, không phải brand hero. Cần sạch, ít nhiễu, active state rõ.
@@ -171,6 +182,7 @@ Form cần rõ field, description, validation và pending state.
 Translation:
 
 - Form dùng `AppFormShell`, `AppFormShellBody`, `AppFormShellFooter`; chọn width `sm` cho form đơn giản, `md` cho CRUD phổ biến và `lg` cho form dày.
+- Standalone create, update và profile route dùng `AppFormShell` như primary Form surface: giữ scale `sm`/`md`/`lg` và căn giữa trong content pane. Skeleton mirror cùng alignment; dialog, drawer, side panel và form nhúng giữ local surface pattern, không kế thừa rule này.
 - Body dùng `FieldGroup`, `FieldSet` và `gap-*`; flex/grid layouts dùng `gap-*`, không dùng `space-y-*`.
 - Description dùng muted foreground.
 - Footer tách khỏi body bằng border/subtle background và chứa primary/secondary actions.
@@ -189,6 +201,7 @@ Translation:
 
 - Empty dùng `<Empty>` và nằm đúng surface; phân biệt first-use empty với no-results do filter/search.
 - Loading skeleton bám bố cục thật.
+- Loading, empty, error và permission-denied state giữ content-width mode của route, không tự co hẹp hoặc mở rộng page shell.
 - Error copy tiếng Việt rõ, không kỹ thuật hóa quá mức, nêu recovery action như retry, sửa dữ liệu hoặc mở trợ giúp.
 - Submit hoặc refresh lỗi không xóa input, filter hay context người dùng đang thao tác.
 - Partial, stale hoặc offline state phải chỉ rõ dữ liệu nào chưa khả dụng và thời điểm cập nhật gần nhất; không trình bày dữ liệu cũ như dữ liệu live.
@@ -290,10 +303,43 @@ Delete confirmation tuân theo pattern sau:
 
 ### Quick Detail Overlay
 
-- Quick detail trong Graph View, Market Charts hoặc dense workbench là local overlay do workspace sở hữu qua local state.
-- Open/close overlay không đổi URL và không dùng `router.back()`, `router.push()` hoặc `router.replace()` chỉ để quản lý drawer state.
-- Canonical routes như `/events/{id}` và `/news-articles/{id}` vẫn là full detail pages cho normal link, reload, copied URL, direct navigation và list/detail CRUD.
-- Drawer chứa loading, error/access-denied state bên trong overlay, focused content không embed full page shell và action rõ để mở canonical full detail page.
+Signapse entity quick detail là local, modal reading overlay cho một entity đang được xem; không phải ecommerce “quick view”, không phải global intercepted route và không phải mode mới của shared `Drawer` primitive.
+
+#### Scope And Resolver
+
+- Chỉ `event` và `news-article` có quick detail. Owner được chấp thuận hiện tại là Dashboard, Graph View và Market Charts; màn mới chỉ được thêm owner khi giữ context nền có giá trị rõ ràng, qua design review/proposal riêng.
+- Graph View node inspector vẫn là summary/decision surface. Không gọi Event quick detail là “Inspector” để tránh lẫn với component đó.
+- Mỗi owner có tối đa một entity quick detail đang mở; không nested overlay, không quick-detail back-stack và không thay nội dung bằng entity khác từ cross-entity action.
+- Resolver là policy duy nhất: entity kind chọn profile (`event` → **Event inspection**, `news-article` → **Article reader**); host surface và effective CSS viewport chọn placement. Trigger/caller không tự truyền mode, direction hoặc width tùy ý.
+- Open/close overlay không đổi URL và không dùng `router.back()`, `router.push()` hoặc `router.replace()` chỉ để quản lý drawer state. Canonical routes `/events/{id}` và `/news-articles/{id}` vẫn là full detail pages cho normal link, reload, copied URL, direct navigation và list/detail CRUD.
+
+#### Profiles And Content
+
+- **Event inspection** là scan surface: title, status, concise description, key facts, tối đa bốn evidence và bốn related assets. Không biến nó thành reader/lịch sử đầy đủ; canonical Event page là nơi xem sâu hơn.
+- **Article reader** hiển thị toàn bộ bài theo thứ tự đọc: title, provenance, publication metadata, original-source link, optional feature image và safe Markdown. Không thêm linked-event review, operational panel hay page shell.
+- Article prose luôn dùng readable measure `max-width: 72ch`, dù outer sheet rộng hơn. Image/media có thể rộng theo reader panel; table, code và content intrinsically wide chỉ scroll trong surface chủ đích, không tạo page overflow.
+- Khi Event inspection nằm trong bottom sheet, cụm facts/evidence/asset có `max-width: 64rem` và căn giữa. Cross-entity evidence action đi tới canonical News route trong cùng tab, không mở Article reader lồng bên trong Event inspection.
+- Canonical “Open full event/article” là action internal cùng tab trong sticky header. Original source là action provenance thứ cấp trong Article reader, không thay thế canonical action.
+
+#### Placement And Geometry
+
+| Host và effective CSS viewport | Event inspection | Article reader |
+| --- | --- | --- |
+| Dashboard từ `1440px` | right-side sheet, tối đa `32rem`, cao `100dvh` | right-side sheet, tối đa `44rem`, cao `100dvh` |
+| Dashboard từ `768px` đến dưới `1440px`; Graph View và Market Charts từ `768px` | bottom sheet, content-fit, `max-height: min(60dvh, 36rem)` | bottom sheet, `height: min(72dvh, 48rem)` |
+| Mọi owner dưới `768px` | bottom sheet, content-fit, tối đa `90dvh` | bottom sheet, cao `90dvh` |
+
+- Dashboard right-side sheet bám cạnh phải viewport và không bị giới hạn bởi grid 12 cột hoặc module Latest News/Event Timeline. Ngưỡng `1440px` dựa trên viewport, không đổi theo trạng thái sidebar.
+- Fullscreen Market Charts giữ fullscreen và render overlay trong fullscreen portal container; đây là exception theo host, không phải profile mới.
+- Resize hoặc browser zoom re-resolve placement theo effective CSS viewport, giữ entity, modal focus và vị trí cuộn. Transition không phát lại opening animation và phải tôn trọng `prefers-reduced-motion`.
+
+#### Interaction, State And Accessibility
+
+- Overlay là modal. Header sticky có localized title, mô tả ngắn về entity/state, Close thấy được và canonical action; trên mobile có thể xếp hai hàng. Không dùng sticky footer chỉ để lặp action.
+- Khi mở, focus vào Close; khi đóng bằng Close, Escape, backdrop trên desktop hoặc swipe-down trên mobile, focus trở về đúng trigger. Focus trap, keyboard order và visible focus phải giữ đúng khi placement đổi do resize/zoom.
+- Body là vùng scroll duy nhất. Loading, error, missing và access-denied giữ profile/placement của entity đích; skeleton mirror resolved geometry và overlay không remount/animate lần hai khi dữ liệu về.
+- Mọi state có accessible title và mô tả ngắn; loading được công bố busy, error/access-denied được công bố rõ cho screen reader.
+- Dữ liệu là snapshot trong một lần mở: không tự refetch/reflow nội dung khi người dùng đang đọc; lần mở mới hoặc retry chủ đích mới lấy dữ liệu mới. Đóng rồi mở lại bắt đầu từ đầu nội dung.
 
 ## Content And Language
 
@@ -324,7 +370,11 @@ Khi implement hoặc review UI, kiểm tra các state và breakpoint liên quan:
 
 - Light mode và dark mode.
 - Sidebar mở rộng và collapsed.
-- Desktop, tablet và mobile width.
+- Content-width mode khớp primary task của route: `bounded` chỉ cho overview/decision surface, `fluid` cho list/table/data surface và `canvas` cho interactive workbench.
+- Desktop, tablet và mobile width, bao gồm sidebar mở rộng/collapsed tại 1440, 1920 và 2560px.
+- Entity quick detail: resolver `event`/`news-article`, approved owner, một modal duy nhất, canonical URL không đổi khi mở/đóng, đúng profile content và không nested/back-stack.
+- Entity quick detail placement tại `767px`, `768px`, `1439px`, `1440px`, desktop rộng và zoom `200%`; Dashboard side sheet không phụ thuộc grid/sidebar, Graph/Market giữ canvas-oriented bottom sheet và fullscreen giữ portal cục bộ.
+- Entity quick detail accessibility: sticky header có title/description/Close/canonical action, body là scroll region duy nhất, focus vào Close rồi quay về trigger, dismissal keyboard/pointer/touch, state busy/error/denied được công bố và reduced motion không replay opening animation.
 - List normal state.
 - List empty state.
 - Loading skeleton.
@@ -339,6 +389,7 @@ Khi implement hoặc review UI, kiểm tra các state và breakpoint liên quan:
 - Semantic heading, skip link, route-change focus, focus ring và keyboard navigation.
 - Contrast light/dark, non-color status cues, target size và zoom `200%`.
 - Form labels, announced errors, recovery action, unsaved-change protection và data retention sau lỗi.
+- Bounded content giữ cap và căn giữa; fluid/canvas không bị page-level cap; loading, empty, error và permission-denied state mirror mode của content thật.
 - Horizontal overflow chỉ xuất hiện bên trong surface chủ đích.
 - Không có mojibake.
 - Không có UI copy tiếng Anh mới hướng người dùng, trừ tên riêng hoặc thuật ngữ kỹ thuật cần thiết.

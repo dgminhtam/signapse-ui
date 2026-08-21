@@ -1,7 +1,7 @@
 # market-chart-event-drawer-linking Specification
 
 ## Purpose
-TBD - created by archiving change link-market-chart-annotations-to-event-drawer. Update Purpose after archive.
+Defines Market Charts annotation entry points into the shared Event inspection quick-detail policy.
 ## Requirements
 ### Requirement: Event title links from market chart annotations
 The system SHALL let users open event detail from market chart annotation titles when a safe event route can be resolved, without relying on global intercepted route navigation.
@@ -21,8 +21,8 @@ The system SHALL let users open event detail from market chart annotation titles
 - **WHEN** a market chart annotation popup renders an annotation without a valid event route
 - **THEN** the annotation title is rendered as non-interactive text
 
-### Requirement: Event drawer navigation behavior
-The system SHALL use a local market chart event quick-detail drawer for event title actions from market chart annotations.
+### Requirement: Event inspection navigation behavior
+The system SHALL use a local Market Charts Event inspection quick-detail overlay for event title actions from market chart annotations.
 
 #### Scenario: User opens linked event title
 - **WHEN** a user activates an annotation event title from the market chart popup
@@ -37,7 +37,8 @@ The system SHALL use a local market chart event quick-detail drawer for event ti
 
 #### Scenario: Drawer owns deeper event content
 - **WHEN** the local event quick-detail drawer opens from a market chart annotation title
-- **THEN** deeper event content, related articles, and evidence remain owned by the event detail drawer
+- **THEN** the shared Event inspection profile owns the bounded event facts, evidence, and related assets
+- **AND** related news actions use their canonical article routes rather than nesting Article reader inside Event inspection
 - **AND** the market chart popup does not add article or source-document detail links for this change
 
 #### Scenario: Full detail escalation remains available

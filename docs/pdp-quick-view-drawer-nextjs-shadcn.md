@@ -1,17 +1,17 @@
 # Entity Quick Detail Overlay trong Signapse
 
-Tài liệu này mô tả pattern quick detail hiện hành cho Signapse. Mục tiêu là cho phép người dùng đọc nhanh `event` hoặc `news-article` khi đang làm việc trên các bề mặt phân tích như Graph View và Market Charts, nhưng không biến route detail canonical thành drawer toàn cục.
+Tài liệu này mô tả pattern quick detail hiện hành cho Signapse. Mục tiêu là cho phép người dùng đọc nhanh `event` hoặc `news-article` từ Dashboard, Graph View và Market Charts, nhưng không biến route detail canonical thành drawer toàn cục.
 
 ## Nguyên tắc chính
 
 - `/events/{id}` và `/news-articles/{id}` luôn là full detail page khi user mở link bình thường, reload, paste URL, copy link hoặc đi từ các trang list/detail CRUD.
-- Quick detail trong analytical workspace phải là local overlay do chính workspace sở hữu bằng state cục bộ.
+- Quick detail trong approved owner surface phải là local overlay do chính owner sở hữu bằng state cục bộ.
 - Đóng quick detail chỉ clear state cục bộ; không dùng `router.back()`, `router.push()` hoặc `router.replace()` chỉ để đóng drawer.
 - Drawer local có thể cung cấp action "Mở trang đầy đủ" trỏ tới canonical detail URL.
 - Không dùng global intercepted route làm default pattern cho quick detail trong repo này.
 
 ```text
-Graph View / Market Charts
+Dashboard / Graph View / Market Charts
     |
     | click explicit quick-detail action
     v
@@ -30,7 +30,7 @@ Normal link /events/123
 
 Nên dùng local quick detail khi:
 
-- User đang ở một workspace có context đắt tiền cần giữ lại như graph layout, chart viewport, selected marker, lazy-loaded history hoặc filter state.
+- User đang ở Dashboard hoặc một workspace có context đắt tiền cần giữ lại như graph layout, chart viewport, selected marker, lazy-loaded history hoặc filter state.
 - Nội dung detail là lớp đọc phụ, không phải flow chính của màn hình.
 - User cần xem nhanh bằng chứng, summary hoặc context trước khi quyết định có mở full page hay không.
 
@@ -75,17 +75,23 @@ Với Latest News, nếu article có `featureImage`, dùng `ItemMedia variant="i
 
 ## UI Shell
 
-Quick detail overlay nên dùng shadcn primitive đã wrap trong `@/components/ui`, ví dụ `Drawer` hoặc `Sheet` tùy layout đã được proposal chốt. Với các workspace hiện tại, bottom `Drawer` phù hợp vì giữ được bề mặt đọc rộng mà vẫn không rời khỏi canvas/chart.
+Quick detail overlay dùng shadcn primitive đã wrap trong `@/components/ui`; policy thuộc composition dùng chung, không thêm mode hoặc chrome vào primitive. `event` luôn resolve thành **Event inspection**; `news-article` luôn resolve thành **Article reader**. Caller không tự chọn mode, direction hay width.
 
-Local drawer cần có:
+| Host và effective CSS viewport | Event inspection | Article reader |
+| --- | --- | --- |
+| Dashboard từ `1440px` | right-side sheet, tối đa `32rem`, cao `100dvh` | right-side sheet, tối đa `44rem`, cao `100dvh` |
+| Dashboard từ `768px` đến dưới `1440px`; Graph View/Market Charts từ `768px` | bottom sheet, content-fit, `max-height: min(60dvh, 36rem)` | bottom sheet, `height: min(72dvh, 48rem)` |
+| Mọi owner dưới `768px` | bottom sheet, content-fit, tối đa `90dvh` | bottom sheet, cao `90dvh` |
 
-- Title rõ ràng theo entity đang đọc.
-- Loading state trong drawer body.
-- Access denied state trong drawer body.
-- Error/not-found state gọn trong drawer body.
-- Nội dung focused, không embed full page shell.
-- Footer action mở full detail page bằng canonical link.
-- Nút đóng chỉ clear local state.
+Dashboard side sheet bám cạnh phải viewport, không bị giới hạn bởi cột Latest News/Event Timeline và không đổi mode khi sidebar mở/thu gọn. Graph View và Market Charts giữ bottom sheet để bảo toàn chiều ngang canvas. Market Charts fullscreen phải portal overlay vào fullscreen container mà không tự thoát fullscreen.
+
+Local quick detail cần có:
+
+- Modal sticky header: localized title, mô tả ngắn về entity/state, Close thấy được và canonical action “Mở trang đầy đủ” trong cùng tab. Không dùng sticky footer để lặp action.
+- Một body scroll duy nhất; loading, access denied, error/not-found nằm trong cùng profile/placement và skeleton mirror layout resolved.
+- Khi mở, focus vào Close; Close, Escape, backdrop desktop hoặc swipe-down bottom sheet mobile đóng bằng cách clear local state và trả focus về trigger.
+- Resize/zoom re-resolve placement theo effective CSS viewport, giữ entity/focus/scroll, không replay opening motion và tôn trọng `prefers-reduced-motion`.
+- Dữ liệu là snapshot trong một lần mở; không tự refetch/reflow giữa lúc người dùng đọc. Mở lại hoặc retry mới lấy dữ liệu mới.
 
 ## Nội Dung
 
@@ -95,15 +101,18 @@ Event quick detail nên ưu tiên:
 
 - Tiêu đề, trạng thái, mô tả hoặc summary.
 - Thời gian chính và confidence nếu có.
-- Evidence quan trọng và related articles nếu user có quyền.
+- Tối đa bốn evidence và bốn related assets.
 - Action mở full event detail page.
+
+Khi Event inspection ở bottom sheet, cụm facts/evidence/assets có `max-width: 64rem` và căn giữa. Click news evidence đi tới canonical News page cùng tab, không mở Article reader lồng bên trong Event inspection.
 
 News article quick detail nên ưu tiên:
 
 - Tiêu đề, nguồn tin, thời gian publish.
-- Mô tả, nội dung/excerpt hoặc source context.
-- Linked events nếu user có quyền.
+- Mô tả, nội dung đầy đủ và source context.
 - Action mở full news article detail page.
+
+Article prose luôn có `max-width: 72ch`. Image/media có thể rộng theo panel; table, code hoặc content intrinsically wide chỉ scroll trong surface chủ đích. Original source là link provenance thứ cấp, không thay thế canonical action. Không đưa linked-event review vào Article reader.
 
 Không nên đưa vào quick detail:
 
@@ -122,6 +131,9 @@ Khi implement local quick detail, cần kiểm tra:
 - Link bình thường tới canonical detail page không bị intercept thành drawer.
 - Loading, error, access-denied và missing-entity state nằm trong drawer.
 - Focus, ESC, scroll containment và mobile layout vẫn đúng với shadcn primitive.
+- Profile resolver đúng (`event` → Event inspection, `news-article` → Article reader), placement đúng tại `767px`, `768px`, `1439px`, `1440px`, desktop rộng và zoom `200%`.
+- Header có accessible title/description, Close thấy được, canonical action; state loading công bố busy và error/access denied được thông báo rõ.
+- Không có nested quick detail, quick-detail back-stack hoặc auto refresh thay nội dung trong một lần đọc.
 - Static search không còn active global quick-detail route slot hoặc intercepted quick-detail route nếu không có proposal riêng.
 
 ## Quy Ước Cho Proposal Tương Lai
