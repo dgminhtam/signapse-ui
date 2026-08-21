@@ -23,7 +23,10 @@ test.describe("P0 quick-detail overlay", () => {
     )
     await expect(overlay).toHaveAttribute("data-quick-detail-profile", "event")
     await expect(
-      dialog.getByRole("heading", { name: /Kiểm tra sự kiện/ })
+      dialog.getByRole("heading", {
+        name: "Central bank signals a slower easing path",
+        exact: true,
+      })
     ).toBeVisible()
     await expect(
       dialog.getByRole("button", { name: "Đóng", exact: true })

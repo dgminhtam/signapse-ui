@@ -727,9 +727,6 @@ export const en: Dictionary = {
     loadMore: "Load more",
   },
   quickDetail: {
-    eventProfile: "Event inspection",
-    articleProfile: "Article reader",
-    loadingDescription: "Loading a stable detail snapshot.",
     notFoundTitle: "Detail not found",
     notFoundDescription:
       "The selected content no longer exists or you cannot access it.",
@@ -891,9 +888,6 @@ export const en: Dictionary = {
     readDenied: "You do not have permission to access news article management.",
     detailDenied: "You do not have permission to view news article details.",
     quickAccessDeniedTitle: "No access to this article",
-    quickAccessDeniedDescription:
-      "You cannot view article details from the knowledge graph.",
-    quickDescription: "Article details from the knowledge graph.",
     backToList: "Back to list",
     newest: "Newest",
     oldest: "Oldest",
@@ -984,9 +978,6 @@ export const en: Dictionary = {
     readDenied: "You do not have permission to access event management.",
     detailDenied: "You do not have permission to view event details.",
     quickAccessDeniedTitle: "No access to this event",
-    quickAccessDeniedDescription:
-      "You cannot view event details from the knowledge graph.",
-    quickDescription: "Event details from the knowledge graph.",
     backToList: "Back to list",
     newestOccurred: "Newest occurrence",
     oldest: "Oldest",

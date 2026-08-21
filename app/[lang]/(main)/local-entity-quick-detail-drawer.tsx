@@ -21,7 +21,6 @@ import type { NewsArticleResponse } from "@/app/lib/news-articles/definitions"
 import { AccessDenied } from "@/components/access-denied"
 import { LocalizedLink as Link } from "@/components/localized-link"
 import {
-  DrawerDescription,
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer"
@@ -115,15 +114,6 @@ function useViewportWidth() {
   )
 }
 
-function getProfileLabel(
-  kind: LocalQuickDetailEntity["kind"],
-  dictionary: ReturnType<typeof useLocalization>["dictionary"]
-) {
-  return kind === "event"
-    ? dictionary.quickDetail.eventProfile
-    : dictionary.quickDetail.articleProfile
-}
-
 function getCanonicalHref(entity: LocalQuickDetailEntity) {
   return entity.kind === "event"
     ? `/events/${entity.id}`
@@ -208,24 +198,7 @@ export function LocalEntityQuickDetailDrawer({
             : currentState?.phase === "error"
               ? dictionary.quickDetail.errorTitle
               : dictionary.common.loading
-  const title = entity
-    ? `${getProfileLabel(entity.kind, dictionary)} · ${detailTitle}`
-    : dictionary.common.loading
-  const description = !entity
-    ? dictionary.quickDetail.loadingDescription
-    : !canReadSelectedEntity
-      ? entity.kind === "event"
-        ? dictionary.events.quickAccessDeniedDescription
-        : dictionary.newsArticles.quickAccessDeniedDescription
-      : currentState?.phase === "event"
-        ? dictionary.events.quickDescription
-        : currentState?.phase === "news-article"
-          ? dictionary.newsArticles.quickDescription
-          : currentState?.phase === "missing"
-            ? dictionary.quickDetail.notFoundDescription
-            : currentState?.phase === "error"
-              ? dictionary.quickDetail.errorDescription
-              : dictionary.quickDetail.loadingDescription
+  const title = detailTitle
   const canonicalHref =
     entity &&
     canReadSelectedEntity &&
@@ -402,9 +375,6 @@ export function LocalEntityQuickDetailDrawer({
               <DrawerTitle className="truncate text-base font-semibold">
                 {title}
               </DrawerTitle>
-              <DrawerDescription className="mt-1">
-                {description}
-              </DrawerDescription>
             </div>
             <Button
               ref={closeButtonRef}

@@ -730,9 +730,6 @@ export const vi = {
     loadMore: "Xem thêm",
   },
   quickDetail: {
-    eventProfile: "Kiểm tra sự kiện",
-    articleProfile: "Trình đọc bài viết",
-    loadingDescription: "Đang tải bản chụp chi tiết ổn định.",
     notFoundTitle: "Không tìm thấy chi tiết",
     notFoundDescription:
       "Nội dung được chọn không còn tồn tại hoặc bạn không thể truy cập.",
@@ -890,9 +887,6 @@ export const vi = {
     readDenied: "Bạn không có quyền truy cập khu vực quản lý bài viết tin tức.",
     detailDenied: "Bạn không có quyền xem chi tiết bài viết tin tức.",
     quickAccessDeniedTitle: "Không có quyền xem bài viết",
-    quickAccessDeniedDescription:
-      "Bạn không thể xem chi tiết bài viết từ biểu đồ tri thức.",
-    quickDescription: "Chi tiết bài viết từ biểu đồ tri thức.",
     backToList: "Quay lại danh sách",
     newest: "Mới nhất",
     oldest: "Cũ nhất",
@@ -982,9 +976,6 @@ export const vi = {
     readDenied: "Bạn không có quyền truy cập khu vực quản lý sự kiện.",
     detailDenied: "Bạn không có quyền xem chi tiết sự kiện.",
     quickAccessDeniedTitle: "Không có quyền xem sự kiện",
-    quickAccessDeniedDescription:
-      "Bạn không thể xem chi tiết sự kiện từ biểu đồ tri thức.",
-    quickDescription: "Chi tiết sự kiện từ biểu đồ tri thức.",
     backToList: "Quay lại danh sách",
     newestOccurred: "Mới xảy ra nhất",
     oldest: "Cũ nhất",

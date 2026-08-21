@@ -335,10 +335,10 @@ Signapse entity quick detail là local, modal reading overlay cho một entity �
 
 #### Interaction, State And Accessibility
 
-- Overlay là modal. Header sticky có localized title, mô tả ngắn về entity/state, Close thấy được và canonical action; trên mobile có thể xếp hai hàng. Không dùng sticky footer chỉ để lặp action.
+- Overlay là modal. Header sticky có localized entity/state title, Close thấy được và canonical action; trên mobile có thể xếp hai hàng. Không thêm profile prefix hoặc generic owner/source description chỉ để phân loại overlay. Không dùng sticky footer chỉ để lặp action.
 - Khi mở, focus vào Close; khi đóng bằng Close, Escape, backdrop trên desktop hoặc swipe-down trên mobile, focus trở về đúng trigger. Focus trap, keyboard order và visible focus phải giữ đúng khi placement đổi do resize/zoom.
 - Body là vùng scroll duy nhất. Loading, error, missing và access-denied giữ profile/placement của entity đích; skeleton mirror resolved geometry và overlay không remount/animate lần hai khi dữ liệu về.
-- Mọi state có accessible title và mô tả ngắn; loading được công bố busy, error/access-denied được công bố rõ cho screen reader.
+- Mọi state có accessible title; loading được công bố busy, còn loading/error/missing/access-denied feedback được công bố trong body bằng state-specific text và live-region phù hợp.
 - Dữ liệu là snapshot trong một lần mở: không tự refetch/reflow nội dung khi người dùng đang đọc; lần mở mới hoặc retry chủ đích mới lấy dữ liệu mới. Đóng rồi mở lại bắt đầu từ đầu nội dung.
 
 ## Content And Language
@@ -374,7 +374,7 @@ Khi implement hoặc review UI, kiểm tra các state và breakpoint liên quan:
 - Desktop, tablet và mobile width, bao gồm sidebar mở rộng/collapsed tại 1440, 1920 và 2560px.
 - Entity quick detail: resolver `event`/`news-article`, approved owner, một modal duy nhất, canonical URL không đổi khi mở/đóng, đúng profile content và không nested/back-stack.
 - Entity quick detail placement tại `767px`, `768px`, `1439px`, `1440px`, desktop rộng và zoom `200%`; Dashboard side sheet không phụ thuộc grid/sidebar, Graph/Market giữ canvas-oriented bottom sheet và fullscreen giữ portal cục bộ.
-- Entity quick detail accessibility: sticky header có title/description/Close/canonical action, body là scroll region duy nhất, focus vào Close rồi quay về trigger, dismissal keyboard/pointer/touch, state busy/error/denied được công bố và reduced motion không replay opening animation.
+- Entity quick detail accessibility: sticky header có entity/state title/Close/canonical action, không có profile prefix hoặc generic header description, body là scroll region duy nhất, focus vào Close rồi quay về trigger, dismissal keyboard/pointer/touch, state busy/error/denied được công bố và reduced motion không replay opening animation.
 - List normal state.
 - List empty state.
 - Loading skeleton.

@@ -39,9 +39,6 @@ vi.mock("@/components/ui/drawer", () => ({
   DrawerHeader: ({ children }: { children: ReactNode }) => (
     <header>{children}</header>
   ),
-  DrawerDescription: ({ children }: { children: ReactNode }) => (
-    <p>{children}</p>
-  ),
   DrawerTitle: ({ children }: { children: ReactNode }) => <h2>{children}</h2>,
 }))
 
@@ -133,10 +130,17 @@ describe("LocalEntityQuickDetailDrawer news article reading surface", () => {
       expect(
         screen.getByRole("heading", {
           level: 2,
-          name: new RegExp(article.title),
+          name: article.title,
         })
       ).toBeInTheDocument()
     })
+
+    const heading = screen.getByRole("heading", {
+      level: 2,
+      name: article.title,
+    })
+    expect(heading.closest("header")).not.toBeNull()
+    expect(heading.closest("header")?.querySelector("p")).toBeNull()
 
     expect(screen.getByText(article.description!)).toBeInTheDocument()
     expect(screen.getByText(article.sourceName!)).toBeInTheDocument()
@@ -172,7 +176,7 @@ describe("LocalEntityQuickDetailDrawer news article reading surface", () => {
       expect(
         screen.getByRole("heading", {
           level: 2,
-          name: new RegExp(articleWithoutOptionalRegions.title),
+          name: articleWithoutOptionalRegions.title,
         })
       ).toBeInTheDocument()
     })
@@ -271,7 +275,7 @@ describe("LocalEntityQuickDetailDrawer news article reading surface", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText(viDictionary.quickDetail.loadingDescription)
+        screen.getByText(viDictionary.common.loading, { selector: "span" })
       ).toBeInTheDocument()
     })
     expect(
@@ -324,7 +328,7 @@ describe("LocalEntityQuickDetailDrawer news article reading surface", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText(viDictionary.newsArticles.quickAccessDeniedDescription)
+        screen.getByText(viDictionary.newsArticles.detailDenied, { exact: false })
       ).toBeInTheDocument()
     })
     expect(
