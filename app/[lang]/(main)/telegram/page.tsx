@@ -79,7 +79,8 @@ async function TelegramConfigurationContent({
         .catch(() => ({ data: [], error: true }))
     : Promise.resolve({ data: [], error: false })
 
-  const languagesPromise = sectionAccess.schedules
+  const languagesPromise =
+    sectionAccess.schedules || sectionAccess.featureSettings
     ? getLanguages()
         .then((catalog) => ({ data: catalog.languages, error: false }))
         .catch(() => ({ data: [], error: true }))

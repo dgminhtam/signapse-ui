@@ -88,6 +88,7 @@ export interface TelegramFeatureSettingResponse {
   workspaceName?: string
   enabled: boolean
   destination?: TelegramDestinationResponse
+  outputLanguage?: LanguageResponse
   createdDate?: string
   lastModifiedDate?: string
 }
@@ -117,6 +118,11 @@ export function getUpdateTelegramFeatureSettingSchema() {
     workspaceId: z.coerce.number().int().positive(),
     destinationId: z.coerce.number().int().positive(),
     enabled: z.boolean().optional(),
+    outputLanguageIsoCode: z.preprocess(
+      (value) =>
+        typeof value === "string" && value.trim() ? value.trim() : undefined,
+      z.string().optional()
+    ),
   })
 }
 

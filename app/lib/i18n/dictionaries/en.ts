@@ -2297,6 +2297,7 @@ export const en: Dictionary = {
       featureColumn: "Feature",
       workspaceColumn: "Workspace",
       destinationColumn: "Destination",
+      languageColumn: "Output language",
       enabledColumn: "Sending enabled",
       accessLimited: "No permission to view routing",
       noWorkspaceSelected: "No workspace selected",
@@ -2306,6 +2307,19 @@ export const en: Dictionary = {
       enabledSuccess: "Telegram routing enabled.",
       disabledSuccess: "Telegram routing paused.",
       switchAria: "Toggle route {route}",
+      languageAria: "Choose an output language for {route}",
+      defaultLanguage:
+        "Use the owner's preferred language (or the system default)",
+      languageDescription:
+        "Choose a language supported by the workspace or use the owner's preferred language.",
+      languageCatalogError:
+        "The language list is unavailable; routing changes will preserve the current language.",
+      languageUnavailable: "This language is no longer supported",
+      languageDestinationRequired:
+        "Choose a destination before configuring an output language.",
+      languageNotApplicable: "Not applicable at flow level",
+      languageUpdateSuccess: "Output language updated.",
+      languageClearSuccess: "Output-language override cleared.",
       updateError: "Could not update Telegram routing.",
     },
     schedule: {

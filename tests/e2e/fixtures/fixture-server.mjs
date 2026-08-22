@@ -131,6 +131,7 @@ function createState() {
         workspaceName: primaryWorkspace.name,
         enabled: true,
         destination,
+        outputLanguage: { id: 2, isoCode: "en", name: "English" },
         createdDate: "2025-01-05T08:00:00.000Z",
         lastModifiedDate: NOW,
       },
@@ -141,6 +142,7 @@ function createState() {
         workspaceName: primaryWorkspace.name,
         enabled: false,
         destination,
+        outputLanguage: { id: 1, isoCode: "vi", name: "Tiếng Việt" },
         createdDate: "2025-01-05T08:00:00.000Z",
         lastModifiedDate: NOW,
       },
@@ -151,6 +153,7 @@ function createState() {
         workspaceName: primaryWorkspace.name,
         enabled: true,
         destination,
+        outputLanguage: { id: 2, isoCode: "en", name: "English" },
         createdDate: "2025-01-05T08:00:00.000Z",
         lastModifiedDate: NOW,
       },
@@ -790,6 +793,15 @@ function responseForRoute(state, method, pathname, url, body) {
     if (existing) {
       existing.enabled = body?.enabled ?? existing.enabled
       existing.destination = state.destinations.find((item) => item.id === Number(body?.destinationId))
+      const outputLanguageIsoCode =
+        typeof body?.outputLanguageIsoCode === "string"
+          ? body.outputLanguageIsoCode.trim()
+          : ""
+      existing.outputLanguage = outputLanguageIsoCode
+        ? state.languages.find(
+            (item) => item.isoCode === outputLanguageIsoCode
+          )
+        : undefined
       existing.lastModifiedDate = NOW
       return existing
     }

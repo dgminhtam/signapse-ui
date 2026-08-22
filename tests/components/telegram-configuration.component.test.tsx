@@ -2,6 +2,7 @@
 
 import {
   cleanup,
+  fireEvent,
   render,
   screen,
   waitFor,
@@ -66,6 +67,36 @@ const schedule = {
   asset: { assetId: 9, assetName: "Gold", assetSymbol: "GOLD" },
   status: "ACTIVE" as const,
 }
+
+const featureSettings = [
+  {
+    id: 41,
+    featureKey: "ECONOMIC_CALENDAR_ALERT" as const,
+    workspaceId: 7,
+    workspaceName: "Workspace",
+    enabled: true,
+    destination,
+    outputLanguage: { id: 2, isoCode: "en", name: "English" },
+  },
+  {
+    id: 42,
+    featureKey: "MARKET_NEWS_ALERT" as const,
+    workspaceId: 7,
+    workspaceName: "Workspace",
+    enabled: false,
+    destination,
+    outputLanguage: { id: 1, isoCode: "vi", name: "Tiếng Việt" },
+  },
+  {
+    id: 43,
+    featureKey: "SCHEDULED_MARKET_ANALYSIS" as const,
+    workspaceId: 7,
+    workspaceName: "Workspace",
+    enabled: true,
+    destination,
+    outputLanguage: { id: 2, isoCode: "en", name: "English" },
+  },
+]
 
 const data: TelegramConfigurationData = {
   botConnections: [],
@@ -244,7 +275,11 @@ describe("Telegram schedule destructive actions", () => {
         .closest("tr")
       expect(routeRow).not.toBeNull()
 
-      await user.click(within(routeRow as HTMLElement).getByRole("combobox"))
+      await user.click(
+        within(routeRow as HTMLElement).getByRole("combobox", {
+          name: viDictionary.telegram.routeDefinitions.ECONOMIC_CALENDAR_ALERT.label,
+        })
+      )
       await user.click(
         await screen.findByRole("option", { name: destination.displayLabel })
       )
@@ -255,6 +290,7 @@ describe("Telegram schedule destructive actions", () => {
           workspaceId: 7,
           destinationId: 8,
           enabled: false,
+          outputLanguageIsoCode: undefined,
         })
       })
       await waitFor(() => expect(routerRefresh).toHaveBeenCalledTimes(1))
@@ -262,5 +298,303 @@ describe("Telegram schedule destructive actions", () => {
     } finally {
       consoleError.mockRestore()
     }
+  })
+
+  it("exposes language controls only for effective feature flows", async () => {
+    const user = userEvent.setup()
+    vi.mocked(updateTelegramFeatureSetting).mockResolvedValue({
+      success: true,
+      data: featureSettings[0],
+    })
+
+    renderConfiguration({
+      ...data,
+      featureSettings,
+      manageAccess: {
+        ...data.manageAccess,
+        featureSettings: true,
+      },
+    })
+
+    const calendarRow = screen
+      .getByText(
+        viDictionary.telegram.routeDefinitions.ECONOMIC_CALENDAR_ALERT.label
+      )
+      .closest("tr") as HTMLElement
+    const newsRow = screen
+      .getByText(
+        viDictionary.telegram.routeDefinitions.MARKET_NEWS_ALERT.label
+      )
+      .closest("tr") as HTMLElement
+    const scheduledRow = screen
+      .getByText(
+        viDictionary.telegram.routeDefinitions.SCHEDULED_MARKET_ANALYSIS.label
+      )
+      .closest("tr") as HTMLElement
+
+    const calendarLanguage = within(calendarRow).getByRole("combobox", {
+      name: viDictionary.telegram.routing.languageAria.replace(
+        "{route}",
+        viDictionary.telegram.routeDefinitions.ECONOMIC_CALENDAR_ALERT.label
+      ),
+    })
+    expect(calendarLanguage).toBeEnabled()
+    expect(
+      within(newsRow).getByRole("combobox", {
+        name: viDictionary.telegram.routing.languageAria.replace(
+          "{route}",
+          viDictionary.telegram.routeDefinitions.MARKET_NEWS_ALERT.label
+        ),
+      })
+    ).toBeEnabled()
+    expect(
+      within(newsRow).getByRole("switch", {
+        name: viDictionary.telegram.routing.switchAria.replace(
+          "{route}",
+          viDictionary.telegram.routeDefinitions.MARKET_NEWS_ALERT.label
+        ),
+      })
+    ).toBeEnabled()
+    expect(
+      within(scheduledRow).queryByRole("combobox", {
+        name: viDictionary.telegram.routing.languageAria.replace(
+          "{route}",
+          viDictionary.telegram.routeDefinitions.SCHEDULED_MARKET_ANALYSIS.label
+        ),
+      })
+    ).not.toBeInTheDocument()
+
+    await user.click(calendarLanguage)
+    await user.click(
+      screen.getByRole("option", {
+        name: viDictionary.telegram.routing.defaultLanguage,
+      })
+    )
+
+    await waitFor(() =>
+      expect(updateTelegramFeatureSetting).toHaveBeenCalledWith({
+        featureKey: "ECONOMIC_CALENDAR_ALERT",
+        workspaceId: 7,
+        destinationId: 8,
+        enabled: true,
+        outputLanguageIsoCode: undefined,
+      })
+    )
+  })
+
+  it("preserves a flow language through destination and enabled updates", async () => {
+    const user = userEvent.setup()
+    vi.mocked(updateTelegramFeatureSetting).mockResolvedValue({
+      success: true,
+      data: featureSettings[0],
+    })
+
+    renderConfiguration({
+      ...data,
+      featureSettings,
+      destinations: [destination, { ...destination, id: 9, displayLabel: "Backup" }],
+      manageAccess: {
+        ...data.manageAccess,
+        featureSettings: true,
+      },
+    })
+
+    const calendarRow = screen
+      .getByText(
+        viDictionary.telegram.routeDefinitions.ECONOMIC_CALENDAR_ALERT.label
+      )
+      .closest("tr") as HTMLElement
+
+    await user.click(
+      within(calendarRow).getByRole("combobox", {
+        name: viDictionary.telegram.routeDefinitions.ECONOMIC_CALENDAR_ALERT.label,
+      })
+    )
+    await user.click(screen.getByRole("option", { name: "Backup" }))
+
+    await waitFor(() =>
+      expect(updateTelegramFeatureSetting).toHaveBeenCalledWith(
+        expect.objectContaining({
+          featureKey: "ECONOMIC_CALENDAR_ALERT",
+          destinationId: 9,
+          enabled: true,
+          outputLanguageIsoCode: "en",
+        })
+      )
+    )
+
+    vi.mocked(updateTelegramFeatureSetting).mockClear()
+    const routeSwitch = within(calendarRow).getByRole("switch", {
+      name: viDictionary.telegram.routing.switchAria.replace(
+        "{route}",
+        viDictionary.telegram.routeDefinitions.ECONOMIC_CALENDAR_ALERT.label
+      ),
+    })
+    Object.defineProperty(window, "PointerEvent", {
+      configurable: true,
+      value: MouseEvent,
+    })
+    fireEvent.click(routeSwitch)
+
+    await waitFor(() =>
+      expect(updateTelegramFeatureSetting).toHaveBeenCalledWith(
+        expect.objectContaining({
+          featureKey: "ECONOMIC_CALENDAR_ALERT",
+          destinationId: 9,
+          enabled: false,
+          outputLanguageIsoCode: "en",
+        })
+      )
+    )
+
+    vi.mocked(updateTelegramFeatureSetting).mockClear()
+    const scheduledRow = screen
+      .getByText(
+        viDictionary.telegram.routeDefinitions.SCHEDULED_MARKET_ANALYSIS.label
+      )
+      .closest("tr") as HTMLElement
+    fireEvent.click(
+      within(scheduledRow).getByRole("switch", {
+        name: viDictionary.telegram.routing.switchAria.replace(
+          "{route}",
+          viDictionary.telegram.routeDefinitions.SCHEDULED_MARKET_ANALYSIS.label
+        ),
+      })
+    )
+
+    await waitFor(() =>
+      expect(updateTelegramFeatureSetting).toHaveBeenCalledWith(
+        expect.objectContaining({
+          featureKey: "SCHEDULED_MARKET_ANALYSIS",
+          destinationId: 8,
+          enabled: false,
+          outputLanguageIsoCode: "en",
+        })
+      )
+    )
+  })
+
+  it("keeps existing language visible but disables only its selector when the catalog fails", () => {
+    renderConfiguration({
+      ...data,
+      featureSettings,
+      languageCatalogError: true,
+      manageAccess: {
+        ...data.manageAccess,
+        featureSettings: true,
+      },
+    })
+
+    const calendarRow = screen
+      .getByText(
+        viDictionary.telegram.routeDefinitions.ECONOMIC_CALENDAR_ALERT.label
+      )
+      .closest("tr") as HTMLElement
+
+    expect(
+      within(calendarRow).getByRole("combobox", {
+        name: viDictionary.telegram.routing.languageAria.replace(
+          "{route}",
+          viDictionary.telegram.routeDefinitions.ECONOMIC_CALENDAR_ALERT.label
+        ),
+      })
+    ).toBeDisabled()
+    expect(
+      within(calendarRow).getByRole("switch", {
+        name: viDictionary.telegram.routing.switchAria.replace(
+          "{route}",
+          viDictionary.telegram.routeDefinitions.ECONOMIC_CALENDAR_ALERT.label
+        ),
+      })
+    ).toBeEnabled()
+    expect(
+      within(calendarRow).getByText(
+        viDictionary.telegram.routing.languageCatalogError
+      )
+    ).toBeVisible()
+  })
+
+  it("keeps a persisted language visible when it is no longer in the catalog", () => {
+    renderConfiguration({
+      ...data,
+      featureSettings: [
+        {
+          ...featureSettings[0],
+          outputLanguage: { id: 9, isoCode: "fr", name: "Legacy French" },
+        },
+      ],
+      manageAccess: {
+        ...data.manageAccess,
+        featureSettings: true,
+      },
+    })
+
+    const calendarRow = screen
+      .getByText(
+        viDictionary.telegram.routeDefinitions.ECONOMIC_CALENDAR_ALERT.label
+      )
+      .closest("tr") as HTMLElement
+
+    expect(calendarRow).toHaveTextContent(
+      `Legacy French (fr) — ${viDictionary.telegram.routing.languageUnavailable}`
+    )
+    expect(
+      within(calendarRow).getByRole("combobox", {
+        name: viDictionary.telegram.routing.languageAria.replace(
+          "{route}",
+          viDictionary.telegram.routeDefinitions.ECONOMIC_CALENDAR_ALERT.label
+        ),
+      })
+    ).toBeEnabled()
+  })
+
+  it("disables language configuration without a route destination or update access", () => {
+    const calendarLanguageName = viDictionary.telegram.routing.languageAria.replace(
+      "{route}",
+      viDictionary.telegram.routeDefinitions.ECONOMIC_CALENDAR_ALERT.label
+    )
+
+    renderConfiguration({
+      ...data,
+      featureSettings: [
+        {
+          ...featureSettings[0],
+          destination: undefined,
+        },
+      ],
+      manageAccess: {
+        ...data.manageAccess,
+        featureSettings: true,
+      },
+    })
+
+    const unassignedRow = screen
+      .getByText(
+        viDictionary.telegram.routeDefinitions.ECONOMIC_CALENDAR_ALERT.label
+      )
+      .closest("tr") as HTMLElement
+    expect(within(unassignedRow).getByRole("combobox", { name: calendarLanguageName })).toBeDisabled()
+    expect(
+      within(unassignedRow).getByText(
+        viDictionary.telegram.routing.languageDestinationRequired
+      )
+    ).toBeVisible()
+
+    cleanup()
+    renderConfiguration({
+      ...data,
+      featureSettings,
+      manageAccess: {
+        ...data.manageAccess,
+        featureSettings: false,
+      },
+    })
+
+    const readOnlyRow = screen
+      .getByText(
+        viDictionary.telegram.routeDefinitions.ECONOMIC_CALENDAR_ALERT.label
+      )
+      .closest("tr") as HTMLElement
+    expect(within(readOnlyRow).getByRole("combobox", { name: calendarLanguageName })).toBeDisabled()
   })
 })

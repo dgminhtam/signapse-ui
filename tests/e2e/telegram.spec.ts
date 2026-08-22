@@ -71,5 +71,48 @@ test.describe("P0 Telegram operations", () => {
     await expect(page.getByText("Định tuyến tính năng", { exact: true })).toBeVisible()
     await expect(page.getByText("Lịch gửi phân tích", { exact: true })).toBeVisible()
     await expect(page.getByText("BTC morning analysis", { exact: true })).toBeVisible()
+
+    const calendarRow = page
+      .getByRole("row")
+      .filter({ hasText: "Cảnh báo lịch kinh tế" })
+      .first()
+    const calendarLanguage = calendarRow.getByRole("combobox", {
+      name: "Chọn ngôn ngữ đầu ra cho Cảnh báo lịch kinh tế",
+    })
+    await calendarLanguage.click()
+    await page
+      .getByRole("option", {
+        name: "Theo ngôn ngữ ưu tiên của chủ sở hữu (hoặc mặc định hệ thống)",
+      })
+      .click()
+    await expect(calendarRow.getByText("Theo ngôn ngữ ưu tiên")).toBeVisible()
+
+    const newsRow = page
+      .getByRole("row")
+      .filter({ hasText: "Cảnh báo tin thị trường" })
+      .first()
+    await newsRow
+      .getByRole("combobox", {
+        name: "Chọn ngôn ngữ đầu ra cho Cảnh báo tin thị trường",
+      })
+      .click()
+    await page.getByRole("option", { name: "English (en)", exact: true }).click()
+    await expect(newsRow).toContainText("English (en)")
+    await newsRow
+      .getByRole("switch", {
+        name: "Bật hoặc tắt định tuyến Cảnh báo tin thị trường",
+      })
+      .click()
+    await expect(newsRow).toContainText("English (en)")
+
+    const scheduledRow = page
+      .getByRole("row")
+      .filter({ hasText: "Phân tích thị trường theo lịch" })
+      .first()
+    await expect(
+      scheduledRow.getByRole("combobox", {
+        name: /Chọn ngôn ngữ đầu ra/,
+      })
+    ).toHaveCount(0)
   })
 })

@@ -51,6 +51,7 @@ import {
   deleteTelegramMarketAnalysisSchedule,
   disableTelegramMarketAnalysisSchedule,
   updateTelegramMarketAnalysisSchedule,
+  updateTelegramFeatureSetting,
 } from "@/app/api/telegram/action"
 import { revalidatePath } from "next/cache"
 import type { SaveTelegramMarketAnalysisScheduleRequest } from "@/app/lib/telegram/definitions"
@@ -119,6 +120,60 @@ describe("Telegram scheduled asset analysis actions", () => {
       expect.objectContaining({ method: "PUT" })
     )
     expect(revalidatePath).toHaveBeenCalledWith("/telegram")
+  })
+
+  it("preserves and explicitly clears feature output-language overrides", async () => {
+    const featureResponse = {
+      id: 41,
+      featureKey: "ECONOMIC_CALENDAR_ALERT" as const,
+      workspaceId: 7,
+      enabled: true,
+    }
+    vi.mocked(fetchAuthenticated).mockResolvedValue(featureResponse)
+
+    const preserved = await updateTelegramFeatureSetting({
+      featureKey: "ECONOMIC_CALENDAR_ALERT",
+      workspaceId: 7,
+      destinationId: 8,
+      enabled: true,
+      outputLanguageIsoCode: " en ",
+    })
+
+    expect(preserved).toEqual({ success: true, data: featureResponse })
+    expect(fetchAuthenticated).toHaveBeenLastCalledWith(
+      "/telegram/feature-settings",
+      {
+        method: "PUT",
+        body: JSON.stringify({
+          featureKey: "ECONOMIC_CALENDAR_ALERT",
+          workspaceId: 7,
+          destinationId: 8,
+          enabled: true,
+          outputLanguageIsoCode: "en",
+        }),
+      }
+    )
+
+    await updateTelegramFeatureSetting({
+      featureKey: "ECONOMIC_CALENDAR_ALERT",
+      workspaceId: 7,
+      destinationId: 8,
+      enabled: true,
+      outputLanguageIsoCode: "   ",
+    })
+
+    expect(fetchAuthenticated).toHaveBeenLastCalledWith(
+      "/telegram/feature-settings",
+      {
+        method: "PUT",
+        body: JSON.stringify({
+          featureKey: "ECONOMIC_CALENDAR_ALERT",
+          workspaceId: 7,
+          destinationId: 8,
+          enabled: true,
+        }),
+      }
+    )
   })
 
   it("disables and deletes schedules through their mutation endpoints", async () => {

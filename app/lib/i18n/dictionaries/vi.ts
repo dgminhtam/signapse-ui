@@ -2285,6 +2285,7 @@ export const vi = {
       featureColumn: "Tính năng",
       workspaceColumn: "Không gian",
       destinationColumn: "Điểm nhận",
+      languageColumn: "Ngôn ngữ đầu ra",
       enabledColumn: "Bật gửi",
       accessLimited: "Không có quyền xem định tuyến",
       noWorkspaceSelected: "Chưa chọn không gian",
@@ -2294,6 +2295,19 @@ export const vi = {
       enabledSuccess: "Đã bật định tuyến Telegram.",
       disabledSuccess: "Đã tạm dừng định tuyến Telegram.",
       switchAria: "Bật hoặc tắt định tuyến {route}",
+      languageAria: "Chọn ngôn ngữ đầu ra cho {route}",
+      defaultLanguage:
+        "Theo ngôn ngữ ưu tiên của chủ sở hữu (hoặc mặc định hệ thống)",
+      languageDescription:
+        "Chọn một ngôn ngữ được workspace hỗ trợ hoặc dùng ngôn ngữ ưu tiên của chủ sở hữu.",
+      languageCatalogError:
+        "Không thể tải danh sách ngôn ngữ; các thay đổi định tuyến vẫn giữ ngôn ngữ hiện tại.",
+      languageUnavailable: "Ngôn ngữ hiện không còn trong danh mục hỗ trợ",
+      languageDestinationRequired:
+        "Hãy chọn điểm nhận trước khi cấu hình ngôn ngữ đầu ra.",
+      languageNotApplicable: "Không áp dụng ở cấp luồng",
+      languageUpdateSuccess: "Đã cập nhật ngôn ngữ đầu ra.",
+      languageClearSuccess: "Đã xóa ghi đè ngôn ngữ đầu ra.",
       updateError: "Không thể cập nhật định tuyến Telegram.",
     },
     schedule: {
