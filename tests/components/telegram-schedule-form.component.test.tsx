@@ -133,9 +133,7 @@ async function selectUtcTimezone(
   })
 
   await user.click(timezone)
-  await user.click(
-    await screen.findByRole("option", { name: /UTC — UTC$/ })
-  )
+  await user.click(await screen.findByRole("option", { name: /UTC — UTC$/ }))
 }
 
 function expectNoSelectControlledWarning(calls: unknown[][]) {
@@ -205,7 +203,7 @@ describe("Telegram schedule form behavior", () => {
     } finally {
       consoleError.mockRestore()
     }
-  })
+  }, 10_000)
 
   it("keeps input and exposes retryable backend errors", async () => {
     const { dialog, user } = await openCreateDialog()

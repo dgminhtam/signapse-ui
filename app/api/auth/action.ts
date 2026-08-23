@@ -9,6 +9,17 @@ import {
 } from "@/app/lib/dev-auth-mode"
 import { getDictionary } from "@/app/lib/i18n/dictionaries"
 import { getRequestLocale } from "@/app/lib/i18n/server"
+import {
+  injectTraceContextForBackend,
+  observeServerOperation,
+  type ServerOperationController,
+} from "@/app/lib/observability/server"
+import {
+  normalizeBackendRoute,
+  OBSERVABILITY_OPERATIONS,
+  type ObservabilityErrorType,
+  type ObservabilityOutcome,
+} from "@/app/lib/observability/semantic"
 
 const API_TIMEOUT_MS = 60000
 const TEST_RUN_ID_COOKIE = "signapse_test_run_id"
@@ -39,87 +50,119 @@ async function apiFetch<T>(
   options: RequestInit = {},
   timeoutMs = API_TIMEOUT_MS
 ): Promise<T> {
-  const locale = await getRequestLocale()
-  const dictionary = await getDictionary(locale)
-  const BASE_URL = process.env.API_BASE_URL
-  if (!BASE_URL) {
-    throw new Error(dictionary.errors.missingApiBaseUrl)
-  }
+  const method = (options.method ?? "GET").toUpperCase()
+  const route = normalizeBackendRoute(urlPath)
 
-  const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), timeoutMs)
-  const isFormData = options.body instanceof FormData
-  const hasBody = options.body !== undefined && options.body !== null
-  const defaultHeaders: Record<string, string> = {
-    Accept: "application/json",
-    "Accept-Language": locale,
-    ...(await getFixtureTestRunHeaders()),
-  }
-
-  if (hasBody && !isFormData) {
-    defaultHeaders["Content-Type"] = "application/json"
-  }
-
-  const defaultOptions: RequestInit = {
-    method: "GET",
-    headers: defaultHeaders,
-    cache: "no-store",
-    signal: controller.signal,
-  }
-
-  const finalOptions: RequestInit = {
-    ...defaultOptions,
-    ...options,
-    headers: {
-      ...(defaultOptions.headers as Record<string, string>),
-      ...((options.headers || {}) as Record<string, string>),
-    },
-  }
-
-  const fullUrl = `${BASE_URL}${urlPath}`
-  try {
-    const response = await fetch(fullUrl, finalOptions)
-    clearTimeout(timeout)
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      let errorMessage = dictionary.errors.generic
-      try {
-        if (errorText) {
-          const errorJson = JSON.parse(errorText)
-          errorMessage = errorJson.message || errorMessage
-        }
-      } catch {
-        errorMessage = errorText || errorMessage
+  return observeServerOperation(
+    OBSERVABILITY_OPERATIONS.backendRequest,
+    { feature: "transport", method, route },
+    async (operation) => {
+      const locale = await getRequestLocale()
+      const dictionary = await getDictionary(locale)
+      const baseUrl = process.env.API_BASE_URL
+      if (!baseUrl) {
+        recordTransportFailure(operation, "error", "unknown")
+        throw new Error(dictionary.errors.missingApiBaseUrl)
       }
-      const apiError = new Error(errorMessage) as ApiFetchError
-      apiError.status = response.status
-      throw apiError
-    }
 
-    if (response.status === 204) {
-      return null as T
-    }
+      const abortController = new AbortController()
+      let timedOut = false
+      const timeout = setTimeout(() => {
+        timedOut = true
+        abortController.abort()
+      }, timeoutMs)
+      let failureRecorded = false
 
-    const text = await response.text()
-    if (!text) {
-      return null as T
-    }
+      try {
+        const isFormData = options.body instanceof FormData
+        const hasBody = options.body !== undefined && options.body !== null
+        const defaultHeaders: Record<string, string> = {
+          Accept: "application/json",
+          "Accept-Language": locale,
+          ...(await getFixtureTestRunHeaders()),
+        }
 
-    const data: T = JSON.parse(text)
-    return data
-  } catch (error) {
-    clearTimeout(timeout)
-    const isNotFoundError =
-      error instanceof Error &&
-      ((error as ApiFetchError).status === 404 ||
-        /(?:^|\b)(?:404|not[\s-]?found)(?:\b|$)/i.test(error.message))
-    if (isNotFoundError) {
-      throw error
+        if (hasBody && !isFormData) {
+          defaultHeaders["Content-Type"] = "application/json"
+        }
+
+        const fullUrl = `${baseUrl}${urlPath}`
+        const finalHeaders: Record<string, string> = {
+          ...defaultHeaders,
+          ...((options.headers || {}) as Record<string, string>),
+        }
+        injectTraceContextForBackend(finalHeaders, fullUrl, baseUrl)
+
+        const finalOptions: RequestInit = {
+          method: "GET",
+          cache: "no-store",
+          ...options,
+          headers: finalHeaders,
+          signal: options.signal ?? abortController.signal,
+          opentelemetry: {
+            ignore: true,
+            propagateContext: false,
+          },
+        }
+        const response = await fetch(fullUrl, finalOptions)
+        operation.addAttributes({ "http.status_code": response.status })
+
+        if (!response.ok) {
+          const errorText = await response.text()
+          let errorMessage = dictionary.errors.generic
+          try {
+            if (errorText) {
+              const errorJson: unknown = JSON.parse(errorText)
+              if (
+                typeof errorJson === "object" &&
+                errorJson !== null &&
+                "message" in errorJson &&
+                typeof errorJson.message === "string"
+              ) {
+                errorMessage = errorJson.message
+              }
+            }
+          } catch {
+            errorMessage = errorText || errorMessage
+          }
+          recordTransportFailure(operation, "http_error", "http", {
+            "http.status_code": response.status,
+          })
+          failureRecorded = true
+          const apiError = new Error(errorMessage) as ApiFetchError
+          apiError.status = response.status
+          throw apiError
+        }
+
+        if (response.status === 204) {
+          operation.setOutcome("empty")
+          return null as T
+        }
+
+        const text = await response.text()
+        if (!text) {
+          operation.setOutcome("empty")
+          return null as T
+        }
+
+        try {
+          return JSON.parse(text) as T
+        } catch (error) {
+          recordTransportFailure(operation, "parse_error", "parse")
+          failureRecorded = true
+          throw error
+        }
+      } catch (error) {
+        if (!failureRecorded) {
+          const [outcome, errorType] = classifyTransportFailure(error, timedOut)
+          recordTransportFailure(operation, outcome, errorType)
+        }
+        throw error
+      } finally {
+        clearTimeout(timeout)
+      }
     }
-    console.error("apiFetch error:", error)
-    throw error
-  }
+  )
 }
 
 export async function getClerkToken(): Promise<string> {
@@ -136,16 +179,22 @@ export async function getClerkToken(): Promise<string> {
 }
 
 export async function getBackendAuthHeaders(): Promise<Record<string, string>> {
-  const fixtureHeaders = await getFixtureTestRunHeaders()
-  if (isDevAuthModeEnabled()) {
-    return fixtureHeaders
-  }
+  return observeServerOperation(
+    OBSERVABILITY_OPERATIONS.authResolve,
+    { feature: "auth" },
+    async () => {
+      const fixtureHeaders = await getFixtureTestRunHeaders()
+      if (isDevAuthModeEnabled()) {
+        return fixtureHeaders
+      }
 
-  const token = await getClerkToken()
-  return {
-    ...fixtureHeaders,
-    Authorization: `Bearer ${token}`,
-  }
+      const token = await getClerkToken()
+      return {
+        ...fixtureHeaders,
+        Authorization: `Bearer ${token}`,
+      }
+    }
+  )
 }
 
 export async function fetchAuthenticated<T>(
@@ -170,4 +219,27 @@ export async function fetchPublic<T>(
   options: RequestInit = {}
 ): Promise<T> {
   return apiFetch<T>(urlPath, options)
+}
+
+function recordTransportFailure(
+  operation: ServerOperationController,
+  outcome: ObservabilityOutcome,
+  errorType: ObservabilityErrorType,
+  attributes: Record<string, unknown> = {}
+): void {
+  operation.setOutcome(outcome)
+  operation.reportFailure(errorType, attributes)
+}
+
+function classifyTransportFailure(
+  error: unknown,
+  timedOut: boolean
+): [ObservabilityOutcome, ObservabilityErrorType] {
+  if (timedOut) {
+    return ["timeout", "timeout"]
+  }
+  if (error instanceof DOMException && error.name === "AbortError") {
+    return ["cancelled", "abort"]
+  }
+  return ["network_error", "network"]
 }

@@ -11,6 +11,11 @@ import {
   marketChartLiveSnapshotResponseSchema,
   marketChartLiveStatusResponseSchema,
 } from "@/app/lib/market-charts/definitions"
+import {
+  startClientPerformanceMeasurement,
+  type ClientPerformanceMeasurement,
+} from "@/app/lib/observability/client"
+import { OBSERVABILITY_OPERATIONS } from "@/app/lib/observability/semantic"
 
 type MarketChartLiveStreamHandlers = {
   onCandle: (value: MarketChartLiveCandleResponse) => void
@@ -28,6 +33,8 @@ type OpenMarketChartLiveStreamParams = {
   timeframe: MarketChartTimeframe
 } & MarketChartLiveStreamHandlers
 
+type StartMeasurement = typeof startClientPerformanceMeasurement
+
 function parseEventData(value: MessageEvent) {
   if (!value.data) {
     return null
@@ -36,73 +43,164 @@ function parseEventData(value: MessageEvent) {
   return JSON.parse(String(value.data))
 }
 
-export function openMarketChartLiveStream({
-  assetId,
-  timeframe,
-  onCandle,
-  onErrorEvent,
-  onInvalidEvent,
-  onOpen,
-  onPrice,
-  onSnapshot,
-  onStatus,
-  onTransportError,
-}: OpenMarketChartLiveStreamParams) {
-  const url = new URL("/api/market-charts/live", window.location.origin)
+export function createMarketChartLiveStreamOpener(
+  startMeasurement: StartMeasurement = startClientPerformanceMeasurement
+) {
+  return function openMarketChartLiveStream({
+    assetId,
+    timeframe,
+    onCandle,
+    onErrorEvent,
+    onInvalidEvent,
+    onOpen,
+    onPrice,
+    onSnapshot,
+    onStatus,
+    onTransportError,
+  }: OpenMarketChartLiveStreamParams) {
+    const url = new URL("/api/market-charts/live", window.location.origin)
 
-  url.searchParams.set("assetId", String(assetId))
-  url.searchParams.set("timeframe", timeframe)
+    url.searchParams.set("assetId", String(assetId))
+    url.searchParams.set("timeframe", timeframe)
 
-  const source = new EventSource(url.toString())
+    const source = new EventSource(url.toString())
+    let connectionKind: "initial" | "reconnect" = "initial"
+    let connectMeasurement: ClientPerformanceMeasurement | null =
+      startConnectionMeasurement(
+        startMeasurement,
+        OBSERVABILITY_OPERATIONS.marketChartLiveConnect,
+        connectionKind
+      )
+    let firstDataMeasurement: ClientPerformanceMeasurement | null =
+      startConnectionMeasurement(
+        startMeasurement,
+        OBSERVABILITY_OPERATIONS.marketChartFirstLiveData,
+        connectionKind
+      )
+    let explicitlyClosed = false
 
-  function handleEvent<T>(
-    event: MessageEvent,
-    parse: {
-      safeParse: (
-        value: unknown
-      ) => { success: true; data: T } | { success: false }
-    },
-    onValid: (value: T) => void
-  ) {
-    try {
-      const parsed = parse.safeParse(parseEventData(event))
+    function completeFirstData(eventKind: "snapshot" | "price" | "candle") {
+      firstDataMeasurement?.finish("success", {
+        "market.event_kind": eventKind,
+      })
+      firstDataMeasurement = null
+    }
 
-      if (!parsed.success) {
+    function invalidatePendingMeasurements() {
+      connectMeasurement?.finish("invalid_payload")
+      firstDataMeasurement?.finish("invalid_payload")
+      connectMeasurement = null
+      firstDataMeasurement = null
+    }
+
+    function beginReconnectAttempt() {
+      connectMeasurement?.finish("network_error")
+      firstDataMeasurement?.finish("network_error")
+      connectionKind = "reconnect"
+      connectMeasurement = startConnectionMeasurement(
+        startMeasurement,
+        OBSERVABILITY_OPERATIONS.marketChartLiveConnect,
+        connectionKind
+      )
+      firstDataMeasurement = startConnectionMeasurement(
+        startMeasurement,
+        OBSERVABILITY_OPERATIONS.marketChartFirstLiveData,
+        connectionKind
+      )
+    }
+
+    function handleEvent<T>(
+      event: MessageEvent,
+      parse: {
+        safeParse: (
+          value: unknown
+        ) => { success: true; data: T } | { success: false }
+      },
+      onValid: (value: T) => void,
+      liveEventKind?: "snapshot" | "price" | "candle"
+    ) {
+      try {
+        const parsed = parse.safeParse(parseEventData(event))
+
+        if (!parsed.success) {
+          invalidatePendingMeasurements()
+          onInvalidEvent("Market chart live event payload is invalid.")
+          return
+        }
+
+        onValid(parsed.data)
+        if (liveEventKind) {
+          completeFirstData(liveEventKind)
+        }
+      } catch {
+        invalidatePendingMeasurements()
         onInvalidEvent("Market chart live event payload is invalid.")
+      }
+    }
+
+    source.addEventListener("open", () => {
+      connectMeasurement?.finish("success")
+      connectMeasurement = null
+      onOpen()
+    })
+    source.addEventListener("snapshot", (event) => {
+      handleEvent(
+        event,
+        marketChartLiveSnapshotResponseSchema,
+        onSnapshot,
+        "snapshot"
+      )
+    })
+    source.addEventListener("price", (event) => {
+      handleEvent(event, marketChartLiveQuoteResponseSchema, onPrice, "price")
+    })
+    source.addEventListener("candle", (event) => {
+      handleEvent(
+        event,
+        marketChartLiveCandleResponseSchema,
+        onCandle,
+        "candle"
+      )
+    })
+    source.addEventListener("status", (event) => {
+      handleEvent(event, marketChartLiveStatusResponseSchema, onStatus)
+    })
+    source.addEventListener("error", (event) => {
+      if (event instanceof MessageEvent && event.data) {
+        handleEvent(event, marketChartLiveErrorResponseSchema, onErrorEvent)
         return
       }
 
-      onValid(parsed.data)
-    } catch {
-      onInvalidEvent("Market chart live event payload is invalid.")
+      if (!explicitlyClosed) {
+        beginReconnectAttempt()
+      }
+      onTransportError()
+    })
+
+    return {
+      close() {
+        explicitlyClosed = true
+        connectMeasurement?.finish("closed")
+        firstDataMeasurement?.finish("closed")
+        connectMeasurement = null
+        firstDataMeasurement = null
+        source.close()
+      },
     }
   }
+}
 
-  source.addEventListener("open", onOpen)
-  source.addEventListener("snapshot", (event) => {
-    handleEvent(event, marketChartLiveSnapshotResponseSchema, onSnapshot)
-  })
-  source.addEventListener("price", (event) => {
-    handleEvent(event, marketChartLiveQuoteResponseSchema, onPrice)
-  })
-  source.addEventListener("candle", (event) => {
-    handleEvent(event, marketChartLiveCandleResponseSchema, onCandle)
-  })
-  source.addEventListener("status", (event) => {
-    handleEvent(event, marketChartLiveStatusResponseSchema, onStatus)
-  })
-  source.addEventListener("error", (event) => {
-    if (event instanceof MessageEvent && event.data) {
-      handleEvent(event, marketChartLiveErrorResponseSchema, onErrorEvent)
-      return
-    }
+export const openMarketChartLiveStream = createMarketChartLiveStreamOpener()
 
-    onTransportError()
+function startConnectionMeasurement(
+  startMeasurement: StartMeasurement,
+  operation:
+    | typeof OBSERVABILITY_OPERATIONS.marketChartLiveConnect
+    | typeof OBSERVABILITY_OPERATIONS.marketChartFirstLiveData,
+  connectionKind: "initial" | "reconnect"
+): ClientPerformanceMeasurement {
+  return startMeasurement(operation, {
+    feature: "market_chart",
+    "connection.kind": connectionKind,
   })
-
-  return {
-    close() {
-      source.close()
-    },
-  }
 }

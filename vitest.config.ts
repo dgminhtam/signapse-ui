@@ -15,6 +15,7 @@ export default defineConfig({
     clearMocks: true,
     environment: "node",
     include: ["tests/**/*.test.{ts,tsx}"],
+    maxWorkers: 4,
     restoreMocks: true,
     setupFiles: ["./tests/setup.ts"],
     coverage: {

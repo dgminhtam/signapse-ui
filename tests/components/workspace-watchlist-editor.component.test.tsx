@@ -183,8 +183,8 @@ describe("WorkspaceWatchlistEditor dialog contract", () => {
     expect(
       await screen.findByText(viDictionary.assets.searchLabel)
     ).toBeVisible()
-    expect(screen.getByText(firstAsset.symbol)).toBeVisible()
-    expect(screen.getByText(secondAsset.symbol)).toBeVisible()
+    expect(await screen.findByText(firstAsset.symbol)).toBeVisible()
+    expect(await screen.findByText(secondAsset.symbol)).toBeVisible()
     expect(getWorkspaceWatchlistAssets).toHaveBeenNthCalledWith(2, {
       filter: "",
       page: 1,
@@ -235,7 +235,9 @@ describe("WorkspaceWatchlistEditor dialog contract", () => {
       })
     ).toBeVisible()
 
-    await user.click(screen.getByRole("button", { name: viDictionary.assets.loadMore }))
+    await user.click(
+      screen.getByRole("button", { name: viDictionary.assets.loadMore })
+    )
     await waitFor(() => expect(getAssets).toHaveBeenCalledTimes(3))
     expect(screen.getByText(nextResult.symbol)).toBeVisible()
   })
@@ -290,7 +292,10 @@ describe("WorkspaceWatchlistEditor dialog contract", () => {
     await screen.findByText(removed.symbol)
     await user.click(
       screen.getByRole("button", {
-        name: viDictionary.assets.removeSelected.replace("{symbol}", kept.symbol),
+        name: viDictionary.assets.removeSelected.replace(
+          "{symbol}",
+          kept.symbol
+        ),
       })
     )
     const input = screen.getByRole("combobox")
@@ -309,9 +314,11 @@ describe("WorkspaceWatchlistEditor dialog contract", () => {
     expect(removeAssetFromWorkspaceWatchlist).toHaveBeenCalledTimes(1)
     expect(addAssetsToWorkspaceWatchlist).toHaveBeenCalledTimes(1)
 
-    await user.click(
-      screen.getByRole("button", { name: viDictionary.common.retry })
-    )
+    const retry = screen.getByRole("button", {
+      name: viDictionary.common.retry,
+    })
+    await waitFor(() => expect(retry).toBeEnabled())
+    await user.click(retry)
     await waitFor(() =>
       expect(addAssetsToWorkspaceWatchlist).toHaveBeenCalledTimes(2)
     )

@@ -2,7 +2,7 @@
 
 import { Search } from "lucide-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useState, useTransition } from "react"
+import { useTransition } from "react"
 
 import { useLocalization } from "@/app/lib/i18n/provider"
 import {
@@ -23,11 +23,6 @@ export function UserSearch() {
   const { dictionary } = useLocalization()
   const [isPending, startTransition] = useTransition()
   const currentSearch = searchParams.get(SEARCH_PARAM_KEY)?.toString() || ""
-  const [value, setValue] = useState(currentSearch)
-
-  useEffect(() => {
-    setValue(currentSearch)
-  }, [currentSearch])
 
   function commitSearch(term: string) {
     const params = new URLSearchParams(searchParams)
@@ -62,13 +57,11 @@ export function UserSearch() {
           )}
         </InputGroupAddon>
         <InputGroupInput
+          key={currentSearch}
+          defaultValue={currentSearch}
           id={SEARCH_INPUT_ID}
           type="search"
           placeholder={dictionary.users.searchPlaceholder}
-          value={value}
-          onChange={(event) => {
-            setValue(event.target.value)
-          }}
           onKeyDown={(event) => {
             if (event.key === "Enter") {
               event.preventDefault()

@@ -108,6 +108,7 @@ import {
   splitResponseIntoGraphemes,
   type DemoConversationLabels,
 } from "./history-state"
+import { startAssistantSubmitMeasurement } from "./assistant-observability"
 
 const USER_PREVIEW_LIMIT = 72
 const ASSISTANT_PREVIEW_LIMIT = 160
@@ -446,6 +447,9 @@ export function MarketConversationAssistant({
 
     const requestId = messagesRequestIdRef.current
     let conversation = selectedConversation
+    const performanceMeasurement = startAssistantSubmitMeasurement(
+      conversation ? "existing" : "new"
+    )
     let operation: "create" | "submit" = conversation ? "submit" : "create"
     let submissionSucceeded = false
     setCreateError(null)
@@ -461,10 +465,12 @@ export function MarketConversationAssistant({
         })
 
         if (requestId !== messagesRequestIdRef.current) {
+          performanceMeasurement.finish("stale")
           return
         }
 
         if (!createResult.success) {
+          performanceMeasurement.finish("error")
           setCreateError(createResult.error)
           return
         }
@@ -479,6 +485,7 @@ export function MarketConversationAssistant({
       }
 
       if (!conversation) {
+        performanceMeasurement.finish("error")
         return
       }
 
@@ -491,16 +498,19 @@ export function MarketConversationAssistant({
       )
 
       if (requestId !== messagesRequestIdRef.current) {
+        performanceMeasurement.finish("stale")
         return
       }
 
       if (!submitResult.success) {
+        performanceMeasurement.finish("error")
         setSubmissionError(submitResult.error)
         return
       }
 
       const assistantMessage = submitResult.data.assistantMessage
       const assistantText = getMessageText(assistantMessage)
+      performanceMeasurement.finish("success")
       const shouldReveal =
         assistantMessage.role === "ASSISTANT" &&
         assistantMessage.status === "COMPLETED" &&
@@ -530,6 +540,7 @@ export function MarketConversationAssistant({
       submissionSucceeded = true
     } catch (error) {
       if (requestId === messagesRequestIdRef.current) {
+        performanceMeasurement.finish("error")
         const fallback =
           operation === "create"
             ? labels.createConversationError
@@ -541,6 +552,8 @@ export function MarketConversationAssistant({
         } else {
           setSubmissionError(message)
         }
+      } else {
+        performanceMeasurement.finish("stale")
       }
     } finally {
       if (requestId === messagesRequestIdRef.current) {

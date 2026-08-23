@@ -22,6 +22,7 @@ import {
 } from "@/app/lib/i18n/format"
 import { getRequestLocale } from "@/app/lib/i18n/server"
 import { canAccessMarketChartWorkbench } from "@/app/lib/market-charts/permissions"
+import { observeDashboardLoad } from "@/app/lib/observability/journeys"
 import type { NewsArticleListResponse } from "@/app/lib/news-articles/definitions"
 import { canReadNewsArticles } from "@/app/lib/news-articles/permissions"
 import { hasPermission } from "@/app/lib/permissions"
@@ -110,6 +111,10 @@ export default function Page() {
 }
 
 async function WorkspaceOverview() {
+  return observeDashboardLoad(loadWorkspaceOverview)
+}
+
+async function loadWorkspaceOverview() {
   const [permissions, locale] = await Promise.all([
     getCurrentPermissions(),
     getRequestLocale(),

@@ -102,6 +102,7 @@ describe("market chart candle action", () => {
   })
 
   it("accepts only an exact anchor for terminal empty history", async () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {})
     vi.mocked(fetchAuthenticated).mockResolvedValue({
       ...response,
       from: request.to,
@@ -125,5 +126,10 @@ describe("market chart candle action", () => {
       success: false,
       error: testDictionary.marketCharts.responseInvalid,
     })
+
+    const diagnostic = String(consoleError.mock.calls[0]?.[0])
+    expect(diagnostic).toContain('"outcome":"validation_error"')
+    expect(diagnostic).toContain('"validation.issue_codes":"anchor_mismatch"')
+    expect(diagnostic).not.toMatch(/assetId=7|2026-08-19|XAUUSD/)
   })
 })

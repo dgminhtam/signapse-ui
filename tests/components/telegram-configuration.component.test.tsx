@@ -141,7 +141,9 @@ const data: TelegramConfigurationData = {
 const selectControlledWarning =
   "Base UI: A component is changing the uncontrolled value state of Select to be controlled."
 
-function renderConfiguration(configurationData: TelegramConfigurationData = data) {
+function renderConfiguration(
+  configurationData: TelegramConfigurationData = data
+) {
   return render(
     <LocalizationProvider locale="vi" dictionary={viDictionary}>
       <TelegramConfigurationPage data={configurationData} />
@@ -202,7 +204,7 @@ describe("Telegram schedule destructive actions", () => {
       expect(screen.getByRole("alert")).toHaveTextContent("Delete failed")
     )
     expect(screen.getByRole("alertdialog")).toBeInTheDocument()
-    expect(confirm).toBeEnabled()
+    await waitFor(() => expect(confirm).toBeEnabled())
 
     vi.mocked(deleteTelegramMarketAnalysisSchedule).mockResolvedValueOnce({
       success: true,
@@ -271,13 +273,16 @@ describe("Telegram schedule destructive actions", () => {
       })
 
       const routeRow = screen
-        .getByText(viDictionary.telegram.routeDefinitions.ECONOMIC_CALENDAR_ALERT.label)
+        .getByText(
+          viDictionary.telegram.routeDefinitions.ECONOMIC_CALENDAR_ALERT.label
+        )
         .closest("tr")
       expect(routeRow).not.toBeNull()
 
       await user.click(
         within(routeRow as HTMLElement).getByRole("combobox", {
-          name: viDictionary.telegram.routeDefinitions.ECONOMIC_CALENDAR_ALERT.label,
+          name: viDictionary.telegram.routeDefinitions.ECONOMIC_CALENDAR_ALERT
+            .label,
         })
       )
       await user.click(
@@ -322,9 +327,7 @@ describe("Telegram schedule destructive actions", () => {
       )
       .closest("tr") as HTMLElement
     const newsRow = screen
-      .getByText(
-        viDictionary.telegram.routeDefinitions.MARKET_NEWS_ALERT.label
-      )
+      .getByText(viDictionary.telegram.routeDefinitions.MARKET_NEWS_ALERT.label)
       .closest("tr") as HTMLElement
     const scheduledRow = screen
       .getByText(
@@ -392,7 +395,10 @@ describe("Telegram schedule destructive actions", () => {
     renderConfiguration({
       ...data,
       featureSettings,
-      destinations: [destination, { ...destination, id: 9, displayLabel: "Backup" }],
+      destinations: [
+        destination,
+        { ...destination, id: 9, displayLabel: "Backup" },
+      ],
       manageAccess: {
         ...data.manageAccess,
         featureSettings: true,
@@ -407,10 +413,11 @@ describe("Telegram schedule destructive actions", () => {
 
     await user.click(
       within(calendarRow).getByRole("combobox", {
-        name: viDictionary.telegram.routeDefinitions.ECONOMIC_CALENDAR_ALERT.label,
+        name: viDictionary.telegram.routeDefinitions.ECONOMIC_CALENDAR_ALERT
+          .label,
       })
     )
-    await user.click(screen.getByRole("option", { name: "Backup" }))
+    await user.click(await screen.findByRole("option", { name: "Backup" }))
 
     await waitFor(() =>
       expect(updateTelegramFeatureSetting).toHaveBeenCalledWith(
@@ -434,6 +441,7 @@ describe("Telegram schedule destructive actions", () => {
       configurable: true,
       value: MouseEvent,
     })
+    await waitFor(() => expect(routeSwitch).toBeEnabled())
     fireEvent.click(routeSwitch)
 
     await waitFor(() =>
@@ -549,10 +557,11 @@ describe("Telegram schedule destructive actions", () => {
   })
 
   it("disables language configuration without a route destination or update access", () => {
-    const calendarLanguageName = viDictionary.telegram.routing.languageAria.replace(
-      "{route}",
-      viDictionary.telegram.routeDefinitions.ECONOMIC_CALENDAR_ALERT.label
-    )
+    const calendarLanguageName =
+      viDictionary.telegram.routing.languageAria.replace(
+        "{route}",
+        viDictionary.telegram.routeDefinitions.ECONOMIC_CALENDAR_ALERT.label
+      )
 
     renderConfiguration({
       ...data,
@@ -573,7 +582,11 @@ describe("Telegram schedule destructive actions", () => {
         viDictionary.telegram.routeDefinitions.ECONOMIC_CALENDAR_ALERT.label
       )
       .closest("tr") as HTMLElement
-    expect(within(unassignedRow).getByRole("combobox", { name: calendarLanguageName })).toBeDisabled()
+    expect(
+      within(unassignedRow).getByRole("combobox", {
+        name: calendarLanguageName,
+      })
+    ).toBeDisabled()
     expect(
       within(unassignedRow).getByText(
         viDictionary.telegram.routing.languageDestinationRequired
@@ -595,6 +608,8 @@ describe("Telegram schedule destructive actions", () => {
         viDictionary.telegram.routeDefinitions.ECONOMIC_CALENDAR_ALERT.label
       )
       .closest("tr") as HTMLElement
-    expect(within(readOnlyRow).getByRole("combobox", { name: calendarLanguageName })).toBeDisabled()
+    expect(
+      within(readOnlyRow).getByRole("combobox", { name: calendarLanguageName })
+    ).toBeDisabled()
   })
 })

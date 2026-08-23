@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getBackendAuthHeaders } from "@/app/api/auth/action"
 import { getDictionary } from "@/app/lib/i18n/dictionaries"
 import { getRequestLocale } from "@/app/lib/i18n/server"
+import { injectTraceContextForBackend } from "@/app/lib/observability/server"
 import {
   isMarketChartTimeframe,
   marketChartLiveRequestSchema,
@@ -40,6 +41,7 @@ export async function GET(request: NextRequest) {
 
     url.searchParams.set("assetId", String(parsedRequest.data.assetId))
     url.searchParams.set("timeframe", parsedRequest.data.timeframe)
+    injectTraceContextForBackend(authHeaders, url.toString(), apiBaseUrl)
 
     const response = await fetch(url.toString(), {
       cache: "no-store",
@@ -48,6 +50,10 @@ export async function GET(request: NextRequest) {
         ...authHeaders,
       },
       signal: request.signal,
+      opentelemetry: {
+        ignore: true,
+        propagateContext: false,
+      },
     })
 
     if (!response.ok) {

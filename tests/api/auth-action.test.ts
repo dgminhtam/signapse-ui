@@ -49,6 +49,7 @@ describe("authenticated transport", () => {
   })
 
   it("adds deterministic default headers and parses successful JSON", async () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {})
     fetchMock.mockResolvedValue(
       new Response(JSON.stringify({ enabled: true }), { status: 200 })
     )
@@ -68,6 +69,11 @@ describe("authenticated transport", () => {
       "Accept-Language": "vi",
     })
     expect(options.signal).toBeInstanceOf(AbortSignal)
+    expect(options.opentelemetry).toEqual({
+      ignore: true,
+      propagateContext: false,
+    })
+    expect(consoleError).not.toHaveBeenCalled()
   })
 
   it("handles empty success responses and missing configuration", async () => {
@@ -84,7 +90,7 @@ describe("authenticated transport", () => {
   })
 
   it("preserves localized API error messages and not-found status", async () => {
-    vi.spyOn(console, "error").mockImplementation(() => {})
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {})
     fetchMock.mockResolvedValueOnce(
       new Response(JSON.stringify({ message: "Rejected by backend" }), {
         status: 422,
@@ -100,10 +106,17 @@ describe("authenticated transport", () => {
       message: "Not Found",
       status: 404,
     })
+
+    const diagnostics = consoleError.mock.calls.map(([value]) => String(value))
+    expect(diagnostics).toHaveLength(2)
+    expect(diagnostics.join(" ")).toContain('"outcome":"http_error"')
+    expect(diagnostics.join(" ")).not.toMatch(
+      /Rejected by backend|Not Found|authorization|response.body/
+    )
   })
 
   it("aborts a request after the transport timeout", async () => {
-    vi.spyOn(console, "error").mockImplementation(() => {})
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {})
     vi.useFakeTimers()
     fetchMock.mockImplementation(
       (_input: RequestInfo | URL, options?: RequestInit) =>
@@ -121,6 +134,36 @@ describe("authenticated transport", () => {
     await vi.advanceTimersByTimeAsync(60_000)
 
     await rejection
+    expect(String(consoleError.mock.calls[0]?.[0])).toContain(
+      '"outcome":"timeout"'
+    )
+  })
+
+  it("classifies cancellation, network, and JSON parse failures", async () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {})
+
+    const cancellation = new DOMException("private abort detail", "AbortError")
+    fetchMock.mockRejectedValueOnce(cancellation)
+    await expect(fetchPublic("/cancelled?secret=query-value")).rejects.toBe(
+      cancellation
+    )
+
+    const networkError = new Error("private network detail")
+    fetchMock.mockRejectedValueOnce(networkError)
+    await expect(fetchPublic("/network")).rejects.toBe(networkError)
+
+    fetchMock.mockResolvedValueOnce(new Response("not-json", { status: 200 }))
+    await expect(fetchPublic("/parse")).rejects.toBeInstanceOf(SyntaxError)
+
+    const diagnostics = consoleError.mock.calls.map(([value]) => String(value))
+    expect(diagnostics).toHaveLength(3)
+    expect(diagnostics[0]).toContain('"outcome":"cancelled"')
+    expect(diagnostics[0]).toContain('"route":"/cancelled"')
+    expect(diagnostics[1]).toContain('"outcome":"network_error"')
+    expect(diagnostics[2]).toContain('"outcome":"parse_error"')
+    expect(diagnostics.join(" ")).not.toMatch(
+      /query-value|private abort detail|private network detail|not-json/
+    )
   })
 
   it("requires a Clerk user and token before sending authenticated requests", async () => {

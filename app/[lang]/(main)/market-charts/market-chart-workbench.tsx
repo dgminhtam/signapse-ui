@@ -155,6 +155,7 @@ import {
   deriveMarketChartDisplayedCandleInterval,
 } from "./market-chart-history-helpers"
 import { openMarketChartLiveStream } from "./market-chart-live-stream"
+import { createMarketChartInitialLoadObserver } from "./market-chart-initial-load-observability"
 import { MarketChartSurfaceSkeleton } from "./market-chart-skeleton"
 
 type WorkbenchPhase = "idle" | "loading" | "success" | "error"
@@ -2516,6 +2517,7 @@ export function MarketChartWorkbench({
   const [lastAssetId, setLastAssetId] = useState<string | null>(null)
   const [dataVersion, setDataVersion] = useState(0)
   const loadGenerationRef = useRef(0)
+  const initialLoadObserverRef = useRef(createMarketChartInitialLoadObserver())
   const [annotationLayerEnabled, setAnnotationLayerEnabled] = useState(true)
   const [calendarLayerEnabled, setCalendarLayerEnabled] = useState(true)
   const [selectedCalendarImpacts, setSelectedCalendarImpacts] = useState<
@@ -2562,6 +2564,15 @@ export function MarketChartWorkbench({
   useEffect(() => {
     chartCandlesRef.current = chartData?.candles ?? []
   }, [chartData?.candles])
+  useEffect(() => {
+    if (phase === "success" && loadedData) {
+      initialLoadObserverRef.current.finish(
+        loadGenerationRef.current,
+        "success"
+      )
+    }
+  }, [loadedData, phase])
+  useEffect(() => () => initialLoadObserverRef.current.cancelCurrent(), [])
   const visibleCalendarEvents = useMemo(() => {
     if (!calendarLayerEnabled || !chartData) {
       return []
@@ -2722,6 +2733,7 @@ export function MarketChartWorkbench({
       timeframe: MarketChartTimeframe,
       loadAnnotationData: boolean
     ) {
+      initialLoadObserverRef.current.cancelCurrent()
       const loadGeneration = ++loadGenerationRef.current
       const request = createLatestHistoryRequest({
         assetId: asset.assetId,
@@ -2745,13 +2757,23 @@ export function MarketChartWorkbench({
         return
       }
 
-      const result = await getMarketChartCandles(request)
+      initialLoadObserverRef.current.start(loadGeneration)
+
+      let result: Awaited<ReturnType<typeof getMarketChartCandles>>
+      try {
+        result = await getMarketChartCandles(request)
+      } catch (error) {
+        initialLoadObserverRef.current.finish(loadGeneration, "error")
+        throw error
+      }
 
       if (loadGenerationRef.current !== loadGeneration) {
+        initialLoadObserverRef.current.finish(loadGeneration, "stale")
         return
       }
 
       if (!result.success) {
+        initialLoadObserverRef.current.finish(loadGeneration, "error")
         setData(null)
         setLoadedData(null)
         setPhase("error")
@@ -2767,6 +2789,10 @@ export function MarketChartWorkbench({
       )
 
       if (candles.length > 0 && !displayedInterval) {
+        initialLoadObserverRef.current.finish(
+          loadGeneration,
+          "validation_error"
+        )
         setData(null)
         setLoadedData(null)
         setPhase("error")
@@ -2775,6 +2801,7 @@ export function MarketChartWorkbench({
       }
 
       if (loadGenerationRef.current !== loadGeneration) {
+        initialLoadObserverRef.current.finish(loadGeneration, "stale")
         return
       }
 
@@ -2792,19 +2819,29 @@ export function MarketChartWorkbench({
           }
         : null
 
-      const [annotations, economicCalendarEvents] = await Promise.all([
-        loadAnnotationData && displayedRange
-          ? loadAnnotations(displayedRange)
-          : Promise.resolve([]),
-        calendarLayerEnabledRef.current && displayedRange
-          ? loadEconomicCalendarEvents(
-              displayedRange,
-              selectedCalendarImpactsRef.current
-            )
-          : Promise.resolve([]),
-      ])
+      let annotations: MarketChartAnnotationResponse[]
+      let economicCalendarEvents: MarketChartEconomicCalendarEventResponse[]
+      try {
+        const loadedSupplementalData = await Promise.all([
+          loadAnnotationData && displayedRange
+            ? loadAnnotations(displayedRange)
+            : Promise.resolve([]),
+          calendarLayerEnabledRef.current && displayedRange
+            ? loadEconomicCalendarEvents(
+                displayedRange,
+                selectedCalendarImpactsRef.current
+              )
+            : Promise.resolve([]),
+        ])
+        annotations = loadedSupplementalData[0]
+        economicCalendarEvents = loadedSupplementalData[1]
+      } catch (error) {
+        initialLoadObserverRef.current.finish(loadGeneration, "error")
+        throw error
+      }
 
       if (loadGenerationRef.current !== loadGeneration) {
+        initialLoadObserverRef.current.finish(loadGeneration, "stale")
         return
       }
 
@@ -2988,6 +3025,7 @@ export function MarketChartWorkbench({
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
+      initialLoadObserverRef.current.cancelCurrent()
       loadGenerationRef.current += 1
 
       if (watchlistError) {
@@ -3091,6 +3129,7 @@ export function MarketChartWorkbench({
   ])
 
   function updateRoute(nextSelection: MarketChartSelectionState) {
+    initialLoadObserverRef.current.cancelCurrent()
     loadGenerationRef.current += 1
     setSelection(nextSelection)
     setErrors({})

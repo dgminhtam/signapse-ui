@@ -6,6 +6,8 @@ import { fetchAuthenticated } from "@/app/api/auth/action"
 import { ActionResult } from "@/app/lib/definitions"
 import { getDictionary } from "@/app/lib/i18n/dictionaries"
 import { getRequestLocale } from "@/app/lib/i18n/server"
+import { reportValidationFailure } from "@/app/lib/observability/server"
+import { OBSERVABILITY_OPERATIONS } from "@/app/lib/observability/semantic"
 import {
   MarketChartAnnotationRequest,
   MarketChartAnnotationResponse,
@@ -80,8 +82,9 @@ export async function getMarketChartCandles(
     const parsedResponse = marketChartCandleResponseSchema.safeParse(response)
 
     if (!parsedResponse.success) {
-      console.error(
-        "Market chart candle response validation failed",
+      reportValidationFailure(
+        OBSERVABILITY_OPERATIONS.backendRequest,
+        { feature: "market_chart", route: "/market-charts/candles" },
         parsedResponse.error.issues
       )
       return {
@@ -94,14 +97,10 @@ export async function getMarketChartCandles(
       parsedResponse.data.asset.id !== parsedRequest.data.assetId ||
       parsedResponse.data.timeframe !== parsedRequest.data.timeframe
     ) {
-      console.error(
-        "Market chart candle response identity validation failed",
-        {
-          requestedAssetId: parsedRequest.data.assetId,
-          responseAssetId: parsedResponse.data.asset.id,
-          requestedTimeframe: parsedRequest.data.timeframe,
-          responseTimeframe: parsedResponse.data.timeframe,
-        }
+      reportValidationFailure(
+        OBSERVABILITY_OPERATIONS.backendRequest,
+        { feature: "market_chart", route: "/market-charts/candles" },
+        [{ code: "identity_mismatch", path: ["asset", "id"] }]
       )
       return {
         success: false,
@@ -116,13 +115,10 @@ export async function getMarketChartCandles(
         Date.parse(parsedResponse.data.to) !==
           Date.parse(parsedRequest.data.to))
     ) {
-      console.error(
-        "Market chart candle empty response anchor validation failed",
-        {
-          requestedTo: parsedRequest.data.to,
-          responseFrom: parsedResponse.data.from,
-          responseTo: parsedResponse.data.to,
-        }
+      reportValidationFailure(
+        OBSERVABILITY_OPERATIONS.backendRequest,
+        { feature: "market_chart", route: "/market-charts/candles" },
+        [{ code: "anchor_mismatch", path: ["candles"] }]
       )
       return {
         success: false,
@@ -170,8 +166,9 @@ export async function getMarketChartAnnotations(
       .safeParse(response)
 
     if (!parsedResponse.success) {
-      console.error(
-        "Market chart annotation response validation failed",
+      reportValidationFailure(
+        OBSERVABILITY_OPERATIONS.backendRequest,
+        { feature: "market_chart", route: "/market-charts/annotations" },
         parsedResponse.error.issues
       )
       return {
@@ -222,8 +219,12 @@ export async function getMarketChartEconomicCalendarEvents(
       .safeParse(response)
 
     if (!parsedResponse.success) {
-      console.error(
-        "Market chart economic calendar event response validation failed",
+      reportValidationFailure(
+        OBSERVABILITY_OPERATIONS.backendRequest,
+        {
+          feature: "market_chart",
+          route: "/market-charts/economic-calendar-events",
+        },
         parsedResponse.error.issues
       )
       return {

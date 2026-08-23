@@ -86,26 +86,24 @@ export function BlockSelectionAfterEditable() {
   const inputRef = React.useRef<HTMLInputElement>(null)
   const editorContainerRef = useEditorContainerRef()
   const overlayPortalContainer = useOverlayPortalContainer()
-  const [isMounted, setIsMounted] = React.useState(false)
   const [portalContainer, setPortalContainer] =
     React.useState<HTMLElement | null>(null)
 
   React.useEffect(() => {
-    setIsMounted(true)
     setOption("shadowInputRef", inputRef)
-
-    return () => {
-      setIsMounted(false)
-    }
   }, [setOption])
 
   React.useEffect(() => {
-    const host =
-      overlayPortalContainer ??
-      editorContainerRef.current?.parentElement ??
-      editorContainerRef.current
+    const frameId = window.requestAnimationFrame(() => {
+      const host =
+        overlayPortalContainer ??
+        editorContainerRef.current?.parentElement ??
+        editorContainerRef.current
 
-    setPortalContainer(host)
+      setPortalContainer(host)
+    })
+
+    return () => window.cancelAnimationFrame(frameId)
   }, [editorContainerRef, overlayPortalContainer])
 
   React.useEffect(() => {
@@ -285,7 +283,7 @@ export function BlockSelectionAfterEditable() {
     [editor]
   )
 
-  if (!isMounted || !portalContainer || typeof window === "undefined") {
+  if (!portalContainer || typeof window === "undefined") {
     return null
   }
 

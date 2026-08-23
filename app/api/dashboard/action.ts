@@ -3,6 +3,8 @@
 import { fetchAuthenticated } from "@/app/api/auth/action"
 import { getDictionary } from "@/app/lib/i18n/dictionaries"
 import { getRequestLocale } from "@/app/lib/i18n/server"
+import { reportValidationFailure } from "@/app/lib/observability/server"
+import { OBSERVABILITY_OPERATIONS } from "@/app/lib/observability/semantic"
 import {
   dashboardSummaryResponseSchema,
   type DashboardSummaryResponse,
@@ -14,8 +16,9 @@ export async function getDashboardSummary(): Promise<DashboardSummaryResponse> {
   const parsedResponse = dashboardSummaryResponseSchema.safeParse(response)
 
   if (!parsedResponse.success) {
-    console.error(
-      "Dashboard summary response validation failed",
+    reportValidationFailure(
+      OBSERVABILITY_OPERATIONS.dashboardLoad,
+      { feature: "dashboard", route: "/dashboard/summary" },
       parsedResponse.error.issues
     )
     throw new Error(
