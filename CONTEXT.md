@@ -2,6 +2,24 @@
 
 Signapse manages market intelligence workflows and the channels used to deliver operational notifications.
 
+## Public Web Surfaces
+
+**Coming-soon site**:
+The temporary public announcement surface that represents Signapse before the full public product landing is released.
+_Avoid_: Application landing page, production app
+
+**Application landing page**:
+The localized public product story delivered by the Signapse application and evaluated independently before any public cutover.
+_Avoid_: Coming-soon site, dashboard
+
+**Text-first landing**:
+An application landing-page state that omits product captures when no locale-appropriate capture has been approved, while keeping the complete product story in text.
+_Avoid_: Placeholder mock, synthetic product preview
+
+**Landing release owner**:
+The Signapse Product Owner accountable for approving the public landing cutover after collecting the required product and engineering sign-offs.
+_Avoid_: Mailbox owner, deployment operator
+
 ## Telegram
 
 **Telegram bot connection (Bot Telegram)**:

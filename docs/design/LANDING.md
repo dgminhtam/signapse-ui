@@ -46,6 +46,7 @@ Landing giúp một người chưa biết Signapse hiểu trong một lượt đ
 - Không thêm pricing, testimonial, customer logo, comparison table hoặc performance metric khi chưa có dữ liệu và quyền công khai.
 - Không tạo request-access form, CRM integration hoặc lead-storage workflow trong lần rebuild này.
 - Không biến landing thành tài liệu kỹ thuật về pipeline AI hoặc admin workflow nội bộ.
+- Không sửa drift ngoài landing trong `docs/APIMAPPING.md` hoặc capability spec `market-chart-annotation-popup-surface`; các debt này thuộc change riêng.
 
 ## Audience And Jobs To Be Done
 
@@ -279,12 +280,14 @@ Trust:          #trust
 | Chưa đăng nhập | Hero primary | Yêu cầu truy cập / Request access | Request-access `mailto:` | Cùng destination với header; không tạo funnel thứ hai. |
 | Chưa đăng nhập | Hero secondary | Xem cách hoạt động / See how it works | `#how-it-works` | Cuộn tới user journey. |
 | Chưa đăng nhập | Final CTA | Yêu cầu truy cập / Request access | Request-access `mailto:` | Cùng destination với hero. |
-| Đã đăng nhập | Header, Hero, Final CTA, Footer secondary | Mở bảng điều khiển / Open dashboard | `/{lang}/dashboard` | Thay Sign in trong Footer và mở protected dashboard theo locale. |
+| Đã đăng nhập | Header primary, Hero primary, Final CTA, Footer secondary | Mở bảng điều khiển / Open dashboard | `/{lang}/dashboard` | Thay Sign in trong Footer và mở protected dashboard theo locale. |
+| Đã đăng nhập | Hero secondary | Xem cách hoạt động / See how it works | `#how-it-works` | Giữ điều hướng nội trang như trạng thái chưa đăng nhập. |
 | Mọi người dùng | Footer contact | `request-access@signapse.ai` | Cùng request-access email | Hiển thị địa chỉ email để có thể copy khi máy không cấu hình mail client. |
 
 ### CTA behavior rules
 
 - Microcopy cạnh request-access CTA phải nói rõ link sẽ mở ứng dụng email.
+- Preview và production dùng cùng locked request-access destination; không có test mailbox hoặc CTA override theo environment.
 - Landing không hiển thị success toast hoặc confirmation giả vì nó không biết email đã được gửi hay chưa.
 - Không dùng “Start free”, “Create account”, “Book demo” hoặc “Get started” khi chưa có destination tương ứng.
 - Không thêm form trong landing change. Request form chỉ được đề xuất riêng khi đã chốt data owner, storage, abuse protection, privacy notice và success state.
@@ -356,7 +359,7 @@ Nếu chưa có capture được duyệt, hero phải dùng text-first compositi
 | --- | --- | --- | --- | --- | --- |
 | 1 | `PublicHeader` | `#top` | Nhận diện, điều hướng và access path | Logo; Sản phẩm; Cách hoạt động; Độ tin cậy; locale; auth-aware CTA | Brand asset |
 | 2 | `HeroProductProof` | — | Trả lời ngay đối tượng, outcome và hành động tiếp theo | Locked H1/supporting copy; primary và secondary CTA; trust line ngắn | Approved hero chart capture; nếu chưa có thì text-first |
-| 3 | `AnalysisFlow` | `#how-it-works` | Giải thích hành trình, không giải thích pipeline nội bộ | Theo dõi → Đặt vào bối cảnh → Kiểm chứng → Khám phá | Một relationship line tĩnh; text vẫn tự đủ nghĩa |
+| 3 | `AnalysisFlow` | `#how-it-works` | Giải thích hành trình, không giải thích pipeline nội bộ | Theo dõi → Đặt vào bối cảnh → Kiểm tra → Khám phá | Một relationship line tĩnh; text vẫn tự đủ nghĩa |
 | 4 | `ProductStory` | `#product` | Chứng minh ba giá trị chính bằng ba chương lớn | Event-aware Charts; Reaction & Evidence; Connected Market Graph | Một approved capture cho mỗi chapter khi có |
 | 5 | `WorkspaceAssistantSection` | `#workspace-ai` | Cho thấy lớp ngữ cảnh và cách tiếp tục phân tích | Tracked assets, active workspace, text-only AI conversation/history | Optional approved capture |
 | 6 | `TrustBoundary` | `#trust` | Xây niềm tin bằng traceability và giới hạn rõ | Nguồn tin; optional confidence/outcome; analysis-not-prediction boundary | Text và một evidence example đã duyệt |
@@ -440,6 +443,7 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 - Locale control hiển thị link `Tiếng Việt` và `English` trong một group có localized accessible label.
 - Mỗi link có `lang`, `hreflang`; locale hiện tại có state nhìn thấy được và `aria-current="page"`.
 - Khi đổi locale, chỉ thay segment locale của pathname; giữ query string và hash hợp lệ trong `#top`, `#how-it-works`, `#product`, `#workspace-ai`, `#trust`, `#access`; bỏ hash không được hỗ trợ.
+- Locale segment trong URL là source of truth; locale switch không đọc hoặc ghi `signapse_locale` cookie.
 - Destination được tạo bằng locale routing helper, không hardcode `/vi` hoặc `/en`.
 - Header và Footer dùng cùng behavior; locale switch không làm thay đổi CTA/auth state.
 
@@ -452,13 +456,18 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 
 - Metadata dùng Next.js Metadata API và dictionary hiện hành.
 - Khai báo canonical locale URL và language alternates cho `/vi` và `/en`.
-- Cho tới khi có social artwork riêng được duyệt, Open Graph image chỉ dùng approved brand asset; không dùng product screenshot chưa duyệt.
+- Root `/` giữ locale negotiation hiện hành và fallback `/vi`; metadata alternates dùng root `/` làm `x-default`, còn `/vi` và `/en` self-canonical và alternate cho nhau.
+- Sau cutover, `www.signapse.cloud` redirect vĩnh viễn về cùng path và query trên canonical apex `signapse.cloud`.
+- Trước apex cutover, landing tại `https://dev.signapse.cloud/{lang}` vẫn public để test anonymous, tự canonical theo origin `dev.signapse.cloud`, nhưng phải khai báo `noindex` và không được claim canonical apex. Sau release approval và cutover, canonical chuyển sang `https://signapse.cloud/{lang}` và landing tại apex mới trở thành indexable.
+- Bản phát hành đầu phải có hai Open Graph social card brand-only cho `vi` và `en`, dùng cùng layout, approved logo/brand asset và đúng localized metadata title trong bảng trên; không thêm body copy. Hai card nằm trong cùng landing change, không dùng product screenshot, product mock hoặc claim bổ sung.
 
 ## Performance And Technical Boundaries
 
 - Landing tại `/{lang}` phải thực sự public và không render protected dashboard shell.
 - `/{lang}/dashboard` và các app route khác vẫn protected.
+- Public origin và indexability lấy từ server-side deployment configuration explicit. Deployment non-indexable có origin thiếu hoặc không hợp lệ vẫn render với `noindex` nhưng bỏ canonical/language alternates và không suy luận từ hostname. Deployment indexable phải fail fast nếu origin không đúng chính xác `https://signapse.cloud`.
 - Giữ landing là Server Component mặc định; chỉ thêm client boundary khi native HTML/CSS không đáp ứng interaction bắt buộc.
+- Giữ implementation route-local: `page.tsx` sở hữu metadata/dictionary/auth orchestration; một Server Component sở hữu các named landing sections; một pure access model sở hữu CTA state/destination; locale switch là client island nhỏ duy nhất cần đọc hash/query. Không tạo shared landing framework hoặc tách mỗi section thành một shallow file.
 - Ưu tiên native disclosure cho mobile navigation; không thêm dependency mới.
 - Reuse `Logo`, `Button`, locale routing helpers và shadcn wrappers hiện có.
 - Không thêm shared UI abstraction chỉ phục vụ landing.
@@ -483,7 +492,7 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 - Người chưa đăng nhập mở được `/vi` và `/en` mà không bị chuyển tới sign-in.
 - Dashboard shell không xuất hiện trên landing.
 - Request-access CTA dùng đúng locked `mailto:` destination và có email fallback hiển thị ở footer.
-- Mailbox request-access đã được owner xác nhận provision, nhận external mail và có người theo dõi trước release.
+- Cutover-only: mailbox request-access phải được owner xác nhận provision, nhận external mail và có người theo dõi trước apex release; đây không phải merge/archive acceptance của landing implementation change.
 - Sign-in và dashboard destinations giữ locale.
 - Anonymous và authenticated CTA states đúng với CTA matrix.
 - Locale switch giữ query và supported hash, đánh dấu current locale đúng semantics và không đổi auth state.
@@ -506,10 +515,12 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 
 ### Verification
 
+- OpenSpec được tách thành hai change: change đầu rebuild landing trên application host ở trạng thái public `noindex`; change sau mới thực hiện apex cutover, retire/supersede coming-soon contract và bật indexability.
 - OpenSpec change dùng `MODIFIED`/`REMOVED` để thay requirement cũ, không chồng thêm “V2” requirements.
 - Chạy targeted OpenSpec validation, lint, typecheck và production build.
 - Static search xác nhận old landing keys, old mock components và forbidden claims đã được loại bỏ.
 - Kiểm tra metadata, canonical/alternate locale URLs và mọi CTA/link destination.
+- Apex cutover chỉ được duyệt sau khi automated gates pass và owner xác nhận Clerk thật, mailbox, visual/accessibility VI/EN light/dark/breakpoints, canonical/alternates và hai social card trên preview. Các owner/manual checks này là cutover gates, không phải archive-blocking checkbox của landing implementation change.
 
 ## Deferred Until Explicitly Approved
 
