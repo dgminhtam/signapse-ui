@@ -1,7 +1,4 @@
-import {
-  clerkMiddleware,
-  createRouteMatcher,
-} from "@clerk/nextjs/server"
+import { clerkMiddleware } from "@clerk/nextjs/server"
 import { NextRequest, NextResponse } from "next/server"
 
 import {
@@ -14,6 +11,7 @@ import {
   isDevAuthModeEnabled,
   isP0FixtureModeEnabled,
 } from "@/app/lib/dev-auth-mode"
+import { isPublicLandingPathname } from "@/app/lib/public-landing/public-path"
 
 function getLocaleRedirect(req: NextRequest): NextResponse | null {
   const { pathname } = req.nextUrl
@@ -51,8 +49,6 @@ async function fixtureProxy(req: NextRequest) {
 }
 
 function createAuthenticatedProxy() {
-  const isPublicRoute = createRouteMatcher(["/vi/sign-in(.*)", "/en/sign-in(.*)"])
-
   return clerkMiddleware(async (auth, req) => {
     const localeRedirect = getLocaleRedirect(req)
     if (localeRedirect) {
@@ -63,7 +59,7 @@ function createAuthenticatedProxy() {
     const pathLocale = getPathLocale(pathname)
     const isApi = req.nextUrl.pathname.startsWith("/api") || req.nextUrl.pathname.startsWith("/trpc")
 
-    if (!isDevAuthModeEnabled() && !isPublicRoute(req)) {
+    if (!isDevAuthModeEnabled() && !isPublicLandingPathname(pathname)) {
       await auth.protect(
         isApi
           ? undefined

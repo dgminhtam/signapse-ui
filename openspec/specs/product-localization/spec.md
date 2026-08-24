@@ -3,43 +3,6 @@
 ## Purpose
 TBD - created by archiving change add-product-localization. Update Purpose after archive.
 ## Requirements
-### Requirement: Cookie-Based App Locale
-
-The system SHALL use a cookie-based app locale preference as the source of truth for frontend product language.
-
-#### Scenario: Locale cookie is valid
-
-- **WHEN** the `signapse_locale` cookie contains `vi` or `en`
-- **THEN** the system MUST use that locale for frontend copy, document language metadata, formatting, and backend API language propagation
-
-#### Scenario: Locale cookie is absent or invalid
-
-- **WHEN** the `signapse_locale` cookie is absent, empty, or contains an unsupported value
-- **THEN** the system MUST fall back to Vietnamese (`vi`)
-- **AND** the system MUST NOT expose the unsupported value to UI rendering or backend API requests
-
-#### Scenario: Locale preference is stored
-
-- **WHEN** a user selects a supported language
-- **THEN** the system MUST persist the selected locale in a cookie scoped to `/`
-- **AND** subsequent server-rendered pages and server actions MUST resolve the selected locale from that cookie
-
-### Requirement: Language Selector
-
-The system SHALL provide an authenticated app-shell language selector for Vietnamese and English.
-
-#### Scenario: User changes language
-
-- **WHEN** an authenticated user selects a different supported language from the app shell
-- **THEN** the system MUST update the app locale cookie
-- **AND** refresh the current route so Server Components, Client Components, and backend API calls use the selected locale
-
-#### Scenario: Selector renders current language
-
-- **WHEN** the language selector is visible
-- **THEN** it MUST indicate the active language
-- **AND** it MUST expose accessible labels in the active locale
-
 ### Requirement: Document Language Metadata
 
 The system SHALL reflect the active app locale in document language metadata.
@@ -153,28 +116,30 @@ The system SHALL document the frontend/backend language contract for maintainers
 - **THEN** it MUST describe that frontend backend calls use `Accept-Language` from the active app locale
 - **AND** it MUST note that localized backend errors retain the existing `message` response shape
 
-### Requirement: Landing V2 localized copy parity
-The system SHALL provide English and Vietnamese dictionary copy for every visible or assistive landing V2 string.
-
-#### Scenario: V2 dictionary parity
-- **WHEN** the landing V2 implementation is typechecked
-- **THEN** English and Vietnamese dictionaries expose matching keys for hero, problem, pillars, pipeline, personalization, trust, final CTA, and visual labels
-
-#### Scenario: Landing V2 page uses dictionary copy
-- **WHEN** `app/[lang]/page.tsx` renders visible or assistive landing text
-- **THEN** the text comes from the active locale dictionary except canonical product identifiers, route paths, symbols, and numeric illustrative values
-
 ### Requirement: Landing page dictionary copy
-The system SHALL render landing page user-facing copy from Vietnamese and English frontend dictionaries.
+The system SHALL render all landing-page user-facing and assistive content from Vietnamese and English frontend dictionaries selected by the active locale route. The localized contract SHALL cover headings, body copy, proof points, qualifiers, CTA and navigation labels, email behavior microcopy, locale-control labels, alternative text, document metadata, and social-card titles.
 
 #### Scenario: Vietnamese landing copy
-- **WHEN** a user opens `/vi`
-- **THEN** landing page headings, body copy, CTA labels, navigation labels, feature labels, trust copy, and accessibility labels render in Vietnamese from the dictionary
+- **WHEN** a visitor opens `/vi`
+- **THEN** landing headings, body copy, CTA labels, navigation labels, proof points, trust copy, email microcopy, metadata, social-card title, and accessibility labels render in natural Vietnamese from the selected dictionary
+- **AND** the Analysis Flow uses `Theo dõi → Đặt vào bối cảnh → Kiểm tra → Khám phá`
 
 #### Scenario: English landing copy
-- **WHEN** a user opens `/en`
-- **THEN** landing page headings, body copy, CTA labels, navigation labels, feature labels, trust copy, and accessibility labels render in English from the dictionary
+- **WHEN** a visitor opens `/en`
+- **THEN** landing headings, body copy, CTA labels, navigation labels, proof points, trust copy, email microcopy, metadata, social-card title, and accessibility labels render in English from the selected dictionary
+- **AND** the Analysis Flow uses `Track → Contextualize → Inspect → Explore`
 
 #### Scenario: Dictionary parity includes landing keys
 - **WHEN** the frontend dictionaries are typechecked
-- **THEN** Vietnamese and English dictionaries expose matching landing page message keys
+- **THEN** Vietnamese and English dictionaries expose matching message keys for the canonical eight-part landing story, CTA states, metadata, social artwork, locale navigation, and accessibility labels
+- **AND** obsolete problem, pillars, pipeline, personalization, synthetic-preview, and Market Query landing keys are absent when no runtime caller remains
+
+#### Scenario: Landing copy avoids hardcoded user-facing strings
+- **WHEN** the localized landing implementation is statically inspected
+- **THEN** visible and assistive copy comes from the selected dictionary
+- **AND** only canonical product identifiers, route fragments, the locked request-access address and subject, and other non-translated machine values may remain outside dictionary copy
+
+#### Scenario: Locale-specific media text does not fall back across languages
+- **WHEN** a localized social card or later approved capture contains visible language-dependent text
+- **THEN** the active route uses the corresponding Vietnamese or English asset or generated output
+- **AND** a missing locale-specific product capture causes text-first rendering rather than fallback to the other language
