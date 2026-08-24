@@ -283,8 +283,6 @@ export const en: Dictionary = {
   accountProfile: {
     title: "Account",
     formTitle: "Personal information",
-    formDescription:
-      "Update the profile information used for your Signapse account.",
     avatarLabel: "Avatar",
     avatarDescription: "Current avatar for this account.",
     firstName: "First name",
@@ -293,9 +291,6 @@ export const en: Dictionary = {
     email: "Email address",
     emailReadOnlyDescription: "The sign-in email cannot be edited here.",
     phoneNumber: "Phone number",
-    roleLabel: "Account role",
-    roleReadOnlyDescription: "Your account role is managed by Signapse.",
-    noRole: "No role assigned",
     saveChanges: "Save changes",
     restore: "Restore",
     updatePending: "Saving",

@@ -281,7 +281,6 @@ export const vi = {
   accountProfile: {
     title: "Tài khoản",
     formTitle: "Thông tin cá nhân",
-    formDescription: "Cập nhật thông tin hồ sơ dùng cho tài khoản Signapse.",
     avatarLabel: "Ảnh đại diện",
     avatarDescription: "Ảnh đại diện hiện tại của tài khoản.",
     firstName: "Tên",
@@ -290,9 +289,6 @@ export const vi = {
     email: "Địa chỉ email",
     emailReadOnlyDescription: "Email đăng nhập không thể chỉnh sửa tại đây.",
     phoneNumber: "Số điện thoại",
-    roleLabel: "Vai trò tài khoản",
-    roleReadOnlyDescription: "Vai trò tài khoản được Signapse quản lý.",
-    noRole: "Chưa có vai trò",
     saveChanges: "Lưu thay đổi",
     restore: "Khôi phục",
     updatePending: "Đang lưu",

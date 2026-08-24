@@ -41,7 +41,6 @@ const initialData: AccountProfileInitialData = {
   dateOfBirth: "1990-01-02",
   email: "ada@example.com",
   phoneNumber: "+1 555 0100",
-  roleName: "analyst",
 }
 
 function renderProfile(overrides: Partial<AccountProfileInitialData> = {}) {
@@ -66,7 +65,7 @@ describe("AccountProfileForm", () => {
 
   it("renders a static identity row, read-only account data, and accessible required fields", async () => {
     const user = userEvent.setup()
-    renderProfile({ roleName: "" })
+    renderProfile()
 
     expect(
       screen.getByRole("heading", {
@@ -74,7 +73,10 @@ describe("AccountProfileForm", () => {
       })
     ).toBeVisible()
     expect(screen.getByRole("img", { name: "Miller Ada" })).toBeVisible()
-    expect(screen.getByText(en.accountProfile.noRole)).toBeVisible()
+    expect(
+      screen.queryByText(/profile information used for your Signapse account/i)
+    ).not.toBeInTheDocument()
+    expect(screen.queryByText(/account role/i)).not.toBeInTheDocument()
 
     const email = screen.getByRole("textbox", {
       name: en.accountProfile.email,

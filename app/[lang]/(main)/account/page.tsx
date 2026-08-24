@@ -126,7 +126,6 @@ export default async function AccountPage() {
       profile.phoneNumber,
       profile.mobilePhone
     ),
-    roleName: profile.role_name ?? "",
   }
   return (
     <AccountProfileForm
@@ -137,7 +136,6 @@ export default async function AccountPage() {
         initialData.email,
         initialData.phoneNumber,
         initialData.avatarUrl,
-        initialData.roleName,
       ].join("|")}
       initialData={initialData}
     />

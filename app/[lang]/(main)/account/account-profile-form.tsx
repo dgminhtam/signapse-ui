@@ -17,7 +17,6 @@ import {
   AppFormShellFooter,
 } from "@/components/app-form-shell"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Field,
@@ -25,7 +24,6 @@ import {
   FieldError,
   FieldGroup,
   FieldLabel,
-  FieldTitle,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
@@ -38,7 +36,6 @@ export interface AccountProfileInitialData {
   dateOfBirth: string
   email: string
   phoneNumber: string
-  roleName: string
 }
 
 interface AccountProfileFormProps {
@@ -104,7 +101,6 @@ export function AccountProfileForm({ initialData }: AccountProfileFormProps) {
       .trim() ||
     initialData.email ||
     t.avatarLabel
-  const roleName = initialData.roleName.trim() || t.noRole
   const avatarAlt = displayName || t.avatarLabel
 
   async function onSubmit(values: AccountProfileFormValues) {
@@ -146,12 +142,7 @@ export function AccountProfileForm({ initialData }: AccountProfileFormProps) {
   }
 
   return (
-    <AppFormShell
-      description={t.formDescription}
-      surface="plain"
-      title={t.formTitle}
-      width="lg"
-    >
+    <AppFormShell surface="plain" title={t.formTitle} width="lg">
       <form noValidate onSubmit={form.handleSubmit(onSubmit)}>
         <AppFormShellBody surface="plain">
           <FieldGroup>
@@ -340,20 +331,6 @@ export function AccountProfileForm({ initialData }: AccountProfileFormProps) {
                   </Field>
                 )}
               />
-
-              <Field className="sm:col-span-2">
-                <FieldTitle>{t.roleLabel}</FieldTitle>
-                <div
-                  aria-describedby="account-role-description"
-                  className="flex min-h-9 items-center"
-                  id="account-role"
-                >
-                  <Badge variant="secondary">{roleName}</Badge>
-                </div>
-                <FieldDescription id="account-role-description">
-                  {t.roleReadOnlyDescription}
-                </FieldDescription>
-              </Field>
             </div>
           </FieldGroup>
         </AppFormShellBody>

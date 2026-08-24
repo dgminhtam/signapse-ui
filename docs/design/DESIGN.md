@@ -184,7 +184,7 @@ Translation:
 - Form dùng `AppFormShell`, `AppFormShellBody`, `AppFormShellFooter`; chọn width `sm` cho form đơn giản, `md` cho CRUD phổ biến và `lg` cho form dày.
 - Standalone create, update và profile route dùng `AppFormShell` như primary Form surface: giữ scale `sm`/`md`/`lg` và căn giữa trong content pane. Skeleton mirror cùng alignment; dialog, drawer, side panel và form nhúng giữ local surface pattern, không kế thừa rule này.
 - Account profile có thể chọn `surface="plain"` trên `AppFormShell` để giữ focused-form width lớn và căn giữa theo gutter của app nhưng bỏ outer border, radius, background và shadow; surface card vẫn là mặc định cho các consumer hiện có.
-- Plain profile giữ identity row và grid responsive: avatar/fallback cùng trục nội dung, field pairs dùng hai cột khi đủ rộng và reflow một cột trong container hẹp hoặc zoom; email và Account role chiếm full row.
+- Plain profile giữ identity row và grid responsive: avatar/fallback cùng trục nội dung, field pairs dùng hai cột khi đủ rộng và reflow một cột trong container hẹp hoặc zoom; email chiếm full row.
 - Body dùng `FieldGroup`, `FieldSet` và `gap-*`; flex/grid layouts dùng `gap-*`, không dùng `space-y-*`.
 - Description dùng muted foreground.
 - Footer card tách khỏi body bằng border/subtle background; footer plain dùng top divider trong suốt, không tạo thêm card background, và phải giữ cùng footprint khi pending.

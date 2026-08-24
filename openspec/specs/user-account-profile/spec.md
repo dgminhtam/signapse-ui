@@ -49,7 +49,7 @@ The system SHALL provide a single Account profile editing screen inside the prot
 
 ### Requirement: Personal profile data includes required contact fields
 
-The system SHALL load user profile data with date of birth, phone number, current Account role, and existing identity data.
+The system SHALL load user profile data with date of birth, phone number, and existing identity data for the self-service profile.
 
 #### Scenario: Profile data is requested
 
@@ -57,7 +57,6 @@ The system SHALL load user profile data with date of birth, phone number, curren
 - **THEN** the profile response includes `email`
 - **AND** the profile response includes `birthday` in `yyyy-MM-dd` format
 - **AND** the profile response includes `phone`
-- **AND** the profile response includes `role_name`
 - **AND** the profile response includes the existing profile image data when available
 
 #### Scenario: Existing user lacks required contact data
@@ -66,25 +65,18 @@ The system SHALL load user profile data with date of birth, phone number, curren
 - **THEN** the profile form renders those fields empty
 - **AND** submitting the form requires the user to provide values before saving
 
-#### Scenario: Profile data includes an Account role
-
-- **WHEN** the account page loads the current user profile
-- **THEN** the profile form displays the current user's `role_name` as the read-only Account role
-- **AND** a missing or empty `role_name` uses a localized missing-role fallback
-- **AND** the Account role is not labeled as a package, plan, or subscription tier
-
 ### Requirement: Personal information form edits only editable profile fields
 
-The system SHALL allow users to update first name, last name, date of birth, and phone number while keeping avatar, email, and Account role non-editable.
+The system SHALL allow users to update first name, last name, date of birth, and phone number while keeping avatar and email non-editable.
 
 #### Scenario: User views personal information
 
 - **WHEN** the Account profile form is displayed
-- **THEN** the form displays avatar, last name, first name, date of birth, email, phone number, and Account role
+- **THEN** the form displays avatar, last name, first name, date of birth, email, and phone number
 - **AND** last name and first name are marked and validated as required
 - **AND** date of birth is marked and validated as required
 - **AND** phone number is marked and validated as required
-- **AND** email and Account role are displayed as read-only account information
+- **AND** email is displayed as read-only account information
 
 #### Scenario: User views the current avatar
 
@@ -106,13 +98,6 @@ The system SHALL allow users to update first name, last name, date of birth, and
 - **THEN** the email control is read-only and has no required indicator
 - **AND** the user can focus, select, and copy the email value
 - **AND** localized helper text explains that the sign-in email cannot be edited in the profile form
-
-#### Scenario: User views Account role
-
-- **WHEN** the Account profile form is displayed
-- **THEN** the Account role is read-only
-- **AND** the user cannot change role values through the profile form
-- **AND** no upgrade action is displayed near the role
 
 #### Scenario: User changes a valid editable value
 
@@ -143,7 +128,7 @@ The system SHALL allow users to update first name, last name, date of birth, and
 
 ### Requirement: Account profile UI follows Signapse composition rules
 
-The system SHALL compose the Account profile using the documented cardless focused-form, localization, responsive, and accessibility patterns.
+The system SHALL compose the Account profile using the documented cardless focused-form, localization, responsive, and accessibility patterns without redundant form description or administrative role metadata.
 
 #### Scenario: Cardless profile form is rendered
 
@@ -156,9 +141,16 @@ The system SHALL compose the Account profile using the documented cardless focus
 #### Scenario: Identity and fields are arranged
 
 - **WHEN** the Account profile form has sufficient width
-- **THEN** the static avatar is aligned with the visible profile title and description
+- **THEN** the static avatar is aligned with the visible profile title
 - **AND** related editable fields use a two-column grid
-- **AND** email and Account role use the available full row width
+- **AND** email uses the available full row width
+
+#### Scenario: Self-service profile stays focused on personal information
+
+- **WHEN** an authenticated user views the Account profile
+- **THEN** the form does not render a generic profile description beneath the title
+- **AND** the form does not render an Account role section or role value
+- **AND** role information remains available to the separate admin user-management surface
 
 #### Scenario: Profile form is constrained
 

@@ -33,10 +33,6 @@ export default async function AccountLoading() {
           <Skeleton className="h-9 w-full" />
           <Skeleton className="h-4 w-64 max-w-full" />
         </div>
-        <div className="flex flex-col gap-2 sm:col-span-2">
-          <Skeleton className="h-4 w-28" />
-          <Skeleton className="h-9 w-full max-w-sm" />
-        </div>
       </div>
 
       <div className="flex flex-col-reverse gap-3 border-t py-4 sm:flex-row sm:justify-end">
