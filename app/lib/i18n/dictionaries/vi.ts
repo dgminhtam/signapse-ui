@@ -276,32 +276,25 @@ export const vi = {
     signInRequired: "Vui lòng đăng nhập để xem trang này.",
     signOut: "Đăng xuất",
     account: "Tài khoản",
-    billing: "Thanh toán",
     notifications: "Thông báo",
-    upgrade: "Nâng cấp gói",
   },
   accountProfile: {
     title: "Tài khoản",
-    personalTab: "Thông tin cá nhân",
-    billingTab: "Thông tin thanh toán",
     formTitle: "Thông tin cá nhân",
     formDescription: "Cập nhật thông tin hồ sơ dùng cho tài khoản Signapse.",
     avatarLabel: "Ảnh đại diện",
     avatarDescription: "Ảnh đại diện hiện tại của tài khoản.",
-    uploadAvatar: "Tải ảnh đại diện lên",
-    deleteAvatar: "Xóa ảnh đại diện",
     firstName: "Tên",
-    firstNamePlaceholder: "Nhập tên",
     lastName: "Họ",
-    lastNamePlaceholder: "Nhập họ",
     dateOfBirth: "Ngày sinh",
     email: "Địa chỉ email",
     emailReadOnlyDescription: "Email đăng nhập không thể chỉnh sửa tại đây.",
     phoneNumber: "Số điện thoại",
-    phoneNumberPlaceholder: "Nhập số điện thoại",
-    accountPackage: "Gói tài khoản",
-    upgradeAccount: "Nâng cấp tài khoản",
+    roleLabel: "Vai trò tài khoản",
+    roleReadOnlyDescription: "Vai trò tài khoản được Signapse quản lý.",
+    noRole: "Chưa có vai trò",
     saveChanges: "Lưu thay đổi",
+    restore: "Khôi phục",
     updatePending: "Đang lưu",
     updateSuccess: "Đã cập nhật thông tin cá nhân.",
     updateError: "Không thể cập nhật thông tin cá nhân.",
@@ -309,15 +302,10 @@ export const vi = {
     lastNameRequired: "Vui lòng nhập họ.",
     dateOfBirthRequired: "Vui lòng chọn ngày sinh.",
     dateOfBirthInvalid: "Ngày sinh không hợp lệ.",
-    emailRequired: "Tài khoản chưa có email hợp lệ.",
-    emailInvalid: "Email không hợp lệ.",
     phoneNumberRequired: "Vui lòng nhập số điện thoại.",
-    billingEmptyTitle: "Chưa có nội dung thanh toán",
-    billingEmptyDescription:
-      "Khu vực thanh toán sẽ được bổ sung khi luồng nâng cấp được xác định.",
     errorTitle: "Không thể tải tài khoản",
     errorDescription: "Vui lòng thử lại để tải thông tin tài khoản.",
-    noPackage: "Chưa đăng kí gói",
+    loadingLabel: "Đang tải hồ sơ tài khoản",
   },
   errors: {
     generic: "Đã xảy ra lỗi",
@@ -582,11 +570,14 @@ export const vi = {
       trustNote: "Hỗ trợ phân tích và kiểm tra nguồn, không phải dự báo.",
       proofLabel: "Điều bạn có thể kiểm tra",
       proofOneTitle: "Theo dõi tài sản",
-      proofOneBody: "Chọn các tài sản đang theo dõi để bắt đầu một đường phân tích rõ ràng.",
+      proofOneBody:
+        "Chọn các tài sản đang theo dõi để bắt đầu một đường phân tích rõ ràng.",
       proofTwoTitle: "Đặt vào bối cảnh",
-      proofTwoBody: "Xem nến lịch sử cùng chú thích sự kiện và lịch kinh tế khi dữ liệu khả dụng.",
+      proofTwoBody:
+        "Xem nến lịch sử cùng chú thích sự kiện và lịch kinh tế khi dữ liệu khả dụng.",
       proofThreeTitle: "Kiểm tra nguồn",
-      proofThreeBody: "Mở chi tiết sự kiện, phản ứng và nguồn liên kết để tự đánh giá.",
+      proofThreeBody:
+        "Mở chi tiết sự kiện, phản ứng và nguồn liên kết để tự đánh giá.",
     },
     cta: {
       requestAccess: "Yêu cầu truy cập",
@@ -607,54 +598,69 @@ export const vi = {
       stepOneTitle: "Theo dõi",
       stepOneBody: "Bắt đầu với tài sản và phạm vi đang được quan tâm.",
       stepTwoTitle: "Đặt vào bối cảnh",
-      stepTwoBody: "Đối chiếu diễn biến giá với sự kiện và lịch kinh tế khi dữ liệu khả dụng.",
+      stepTwoBody:
+        "Đối chiếu diễn biến giá với sự kiện và lịch kinh tế khi dữ liệu khả dụng.",
       stepThreeTitle: "Kiểm tra",
-      stepThreeBody: "Đọc phản ứng, chi tiết sự kiện và nguồn liên kết mà không bỏ qua giới hạn dữ liệu.",
+      stepThreeBody:
+        "Đọc phản ứng, chi tiết sự kiện và nguồn liên kết mà không bỏ qua giới hạn dữ liệu.",
       stepFourTitle: "Khám phá",
-      stepFourBody: "Mở rộng sang các quan hệ giữa sự kiện, tài sản, bài viết và narrative.",
+      stepFourBody:
+        "Mở rộng sang các quan hệ giữa sự kiện, tài sản, bài viết và narrative.",
     },
     product: {
       eyebrow: "Câu chuyện sản phẩm",
       heading: "Các bề mặt để đọc một chuyển động.",
       body: "Ba chương chính giữ việc đọc chart, bằng chứng và quan hệ ở gần nhau, với giới hạn rõ ràng khi dữ liệu chưa đủ.",
       chartsTitle: "Biểu đồ theo bối cảnh sự kiện",
-      chartsOutcome: "Nhìn chuyển động giá cùng những gì đang xảy ra xung quanh nó.",
-      chartsBody: "Chọn tài sản đang theo dõi, xem nến lịch sử, chú thích sự kiện và bối cảnh lịch kinh tế. Trạng thái biểu đồ trực tiếp xuất hiện khi dữ liệu khả dụng.",
+      chartsOutcome:
+        "Nhìn chuyển động giá cùng những gì đang xảy ra xung quanh nó.",
+      chartsBody:
+        "Chọn tài sản đang theo dõi, xem nến lịch sử, chú thích sự kiện và bối cảnh lịch kinh tế. Trạng thái biểu đồ trực tiếp xuất hiện khi dữ liệu khả dụng.",
       chartsPointOne: "Tài sản được chọn trong phạm vi theo dõi",
       chartsPointTwo: "Chú thích sự kiện trên trục thời gian",
       chartsPointThree: "Lịch kinh tế và trạng thái trực tiếp khi có dữ liệu",
-      chartsQualifier: "Khoảng thời gian, sự kiện và trạng thái trực tiếp phụ thuộc vào dữ liệu khả dụng; thời điểm gần nhau không chứng minh quan hệ nhân quả.",
+      chartsQualifier:
+        "Khoảng thời gian, sự kiện và trạng thái trực tiếp phụ thuộc vào dữ liệu khả dụng; thời điểm gần nhau không chứng minh quan hệ nhân quả.",
       reactionTitle: "Phản ứng và bằng chứng",
       reactionOutcome: "Đi từ chú thích ngắn đến nguồn cần được kiểm tra.",
-      reactionBody: "Xem bản xem trước chú thích trên biểu đồ, mở chi tiết sự kiện, rồi đọc phản ứng và nguồn liên kết khi có dữ liệu.",
+      reactionBody:
+        "Xem bản xem trước chú thích trên biểu đồ, mở chi tiết sự kiện, rồi đọc phản ứng và nguồn liên kết khi có dữ liệu.",
       reactionPointOne: "Bản xem trước chú thích ngắn gọn",
       reactionPointTwo: "Chi tiết sự kiện và phản ứng tùy dữ liệu",
       reactionPointThree: "Nguồn liên kết để kiểm tra thủ công",
-      reactionQualifier: "Phản ứng hoặc nguồn có thể chưa có; sản phẩm không trình bày kết quả giao dịch được đánh giá.",
+      reactionQualifier:
+        "Phản ứng hoặc nguồn có thể chưa có; sản phẩm không trình bày kết quả giao dịch được đánh giá.",
       graphTitle: "Đồ thị thị trường kết nối",
       graphOutcome: "Khám phá các quan hệ đằng sau một câu chuyện thị trường.",
-      graphBody: "Xem quan hệ giữa sự kiện, tài sản, bài viết tin tức và narrative để mở rộng bối cảnh quanh một chuyển động.",
+      graphBody:
+        "Xem quan hệ giữa sự kiện, tài sản, bài viết tin tức và narrative để mở rộng bối cảnh quanh một chuyển động.",
       graphPointOne: "Quan hệ giữa sự kiện và tài sản",
       graphPointTwo: "Liên kết tới bài viết và narrative",
       graphPointThree: "Bối cảnh mở rộng quanh một chuyển động",
-      graphQualifier: "Các nhãn bối cảnh giúp giải thích quan hệ; chúng không phải một loại thực thể đồ thị riêng.",
+      graphQualifier:
+        "Các nhãn bối cảnh giúp giải thích quan hệ; chúng không phải một loại thực thể đồ thị riêng.",
     },
     workspaceAi: {
       eyebrow: "Workspace và AI Assistant",
       heading: "Hỗ trợ phân tích trong cùng phạm vi làm việc.",
       body: "Workspace giữ các tài sản đang theo dõi và các phiên trò chuyện văn bản đã lưu để bạn có thể quay lại cùng một đường phân tích.",
       trackedAssetsTitle: "Tài sản đang theo dõi",
-      trackedAssetsBody: "Phạm vi chủ động giúp bạn bắt đầu từ những tài sản quan tâm trong workspace hiện tại.",
+      trackedAssetsBody:
+        "Phạm vi chủ động giúp bạn bắt đầu từ những tài sản quan tâm trong workspace hiện tại.",
       conversationsTitle: "Phiên trò chuyện đã lưu",
-      conversationsBody: "AI Assistant giữ lịch sử phiên trò chuyện văn bản để bạn tiếp tục xem lại bối cảnh.",
-      qualifier: "Trải nghiệm hỗ trợ việc kiểm tra và tổng hợp; thông tin chi tiết phụ thuộc vào dữ liệu khả dụng.",
+      conversationsBody:
+        "AI Assistant giữ lịch sử phiên trò chuyện văn bản để bạn tiếp tục xem lại bối cảnh.",
+      qualifier:
+        "Trải nghiệm hỗ trợ việc kiểm tra và tổng hợp; thông tin chi tiết phụ thuộc vào dữ liệu khả dụng.",
     },
     trust: {
       eyebrow: "Ranh giới tin cậy",
       heading: "Phân tích, không phải dự báo.",
       body: "Signapse hỗ trợ đọc bối cảnh và kiểm tra nguồn liên kết. Sản phẩm không thay thế việc tự đánh giá dữ liệu, không đưa ra chỉ dẫn giao dịch và không hứa hẹn kết quả.",
-      pointOne: "Thông tin sự kiện, phản ứng và confidence chỉ xuất hiện khi dữ liệu khả dụng.",
-      pointTwo: "Khoảng cách thời gian không phải bằng chứng cho quan hệ nhân quả.",
+      pointOne:
+        "Thông tin sự kiện, phản ứng và confidence chỉ xuất hiện khi dữ liệu khả dụng.",
+      pointTwo:
+        "Khoảng cách thời gian không phải bằng chứng cho quan hệ nhân quả.",
       pointThree: "Nguồn gốc và giới hạn dữ liệu vẫn cần được kiểm tra.",
     },
     finalCta: {
@@ -663,10 +669,12 @@ export const vi = {
       accessLabel: "Tiếp tục tới Signapse",
     },
     footer: {
-      description: "Phân tích thị trường theo bối cảnh sự kiện và nguồn liên kết khi dữ liệu khả dụng.",
+      description:
+        "Phân tích thị trường theo bối cảnh sự kiện và nguồn liên kết khi dữ liệu khả dụng.",
       requestAccessEmail: "request-access@signapse.ai",
       requestAccessEmailLabel: "Email yêu cầu truy cập",
-      requestAccessEmailNote: "Sao chép địa chỉ hoặc mở ứng dụng email để bắt đầu.",
+      requestAccessEmailNote:
+        "Sao chép địa chỉ hoặc mở ứng dụng email để bắt đầu.",
       signIn: "Đăng nhập",
       openDashboard: "Mở bảng điều khiển",
       brandLabel: "Về Signapse",

@@ -1,18 +1,11 @@
 import { currentUser } from "@clerk/nextjs/server"
 
 import { getMe } from "@/app/api/user/action"
-import { getServerDictionary } from "@/app/lib/i18n/server"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-import { AccountBillingPlaceholder } from "./account-billing-placeholder"
 import {
   AccountProfileForm,
   AccountProfileInitialData,
 } from "./account-profile-form"
-
-interface PageProps {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
-}
 
 function getDisplayName(firstName?: string | null, lastName?: string | null) {
   return [lastName, firstName].filter(Boolean).join(" ").trim()
@@ -102,14 +95,8 @@ function getDateInputValue(...values: unknown[]) {
   return year && month && day ? `${year}-${month}-${day}` : ""
 }
 
-export default async function AccountPage({ searchParams }: PageProps) {
-  const [dictionary, profile, clerkUser, resolvedSearchParams] =
-    await Promise.all([
-      getServerDictionary(),
-      getMe(),
-      currentUser(),
-      searchParams,
-    ])
+export default async function AccountPage() {
+  const [profile, clerkUser] = await Promise.all([getMe(), currentUser()])
   const nameParts = getNameParts(
     profile.firstName,
     profile.lastName,
@@ -141,36 +128,18 @@ export default async function AccountPage({ searchParams }: PageProps) {
     ),
     roleName: profile.role_name ?? "",
   }
-  const activeTab =
-    resolvedSearchParams.tab === "billing" ? "billing" : "personal"
-
   return (
-    <Tabs defaultValue={activeTab} className="mx-auto w-full max-w-3xl">
-      <TabsList>
-        <TabsTrigger value="personal">
-          {dictionary.accountProfile.personalTab}
-        </TabsTrigger>
-        <TabsTrigger value="billing">
-          {dictionary.accountProfile.billingTab}
-        </TabsTrigger>
-      </TabsList>
-      <TabsContent value="personal" className="pt-4">
-        <AccountProfileForm
-          key={[
-            initialData.firstName,
-            initialData.lastName,
-            initialData.dateOfBirth,
-            initialData.email,
-            initialData.phoneNumber,
-            initialData.avatarUrl,
-          ].join("|")}
-          initialData={initialData}
-          upgradeHref="/account?tab=billing"
-        />
-      </TabsContent>
-      <TabsContent value="billing" className="pt-4">
-        <AccountBillingPlaceholder dictionary={dictionary.accountProfile} />
-      </TabsContent>
-    </Tabs>
+    <AccountProfileForm
+      key={[
+        initialData.firstName,
+        initialData.lastName,
+        initialData.dateOfBirth,
+        initialData.email,
+        initialData.phoneNumber,
+        initialData.avatarUrl,
+        initialData.roleName,
+      ].join("|")}
+      initialData={initialData}
+    />
   )
 }

@@ -19,6 +19,6 @@
 
 ## Verify by hand
 
-- Confirm account Personal/Billing tabs switch correctly and preserve the active query-selected tab.
+- Confirm the account route renders one direct cardless profile surface and a legacy `?tab=billing` query still resolves to that profile without a redirect or billing placeholder.
 - Confirm schema Builder/JSON tabs switch correctly and preserve form/editor state.
 - Confirm keyboard tab navigation, focus ring, selected styling, and panel visibility in light and dark themes.

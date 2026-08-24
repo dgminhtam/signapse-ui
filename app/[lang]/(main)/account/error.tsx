@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/empty"
 
 export default function Error({
-  error,
   reset,
 }: {
   error: Error & { digest?: string }
@@ -22,8 +21,11 @@ export default function Error({
   const { dictionary } = useLocalization()
 
   return (
-    <div className="flex h-[400px] w-full items-center justify-center">
-      <Empty>
+    <div
+      className="mx-auto flex min-h-72 w-full max-w-3xl items-center justify-center"
+      role="alert"
+    >
+      <Empty className="w-full">
         <EmptyHeader>
           <EmptyMedia
             variant="icon"
@@ -33,7 +35,7 @@ export default function Error({
           </EmptyMedia>
           <EmptyTitle>{dictionary.accountProfile.errorTitle}</EmptyTitle>
           <EmptyDescription>
-            {error.message || dictionary.accountProfile.errorDescription}
+            {dictionary.accountProfile.errorDescription}
           </EmptyDescription>
         </EmptyHeader>
         <div className="mt-4 flex justify-center">

@@ -278,33 +278,26 @@ export const en: Dictionary = {
     signInRequired: "Please sign in to view this page.",
     signOut: "Sign out",
     account: "Account",
-    billing: "Billing",
     notifications: "Notifications",
-    upgrade: "Upgrade plan",
   },
   accountProfile: {
     title: "Account",
-    personalTab: "Personal information",
-    billingTab: "Billing",
     formTitle: "Personal information",
     formDescription:
       "Update the profile information used for your Signapse account.",
     avatarLabel: "Avatar",
     avatarDescription: "Current avatar for this account.",
-    uploadAvatar: "Upload avatar",
-    deleteAvatar: "Delete avatar",
     firstName: "First name",
-    firstNamePlaceholder: "Enter first name",
     lastName: "Last name",
-    lastNamePlaceholder: "Enter last name",
     dateOfBirth: "Date of birth",
     email: "Email address",
     emailReadOnlyDescription: "The sign-in email cannot be edited here.",
     phoneNumber: "Phone number",
-    phoneNumberPlaceholder: "Enter phone number",
-    accountPackage: "Account package",
-    upgradeAccount: "Upgrade account",
+    roleLabel: "Account role",
+    roleReadOnlyDescription: "Your account role is managed by Signapse.",
+    noRole: "No role assigned",
     saveChanges: "Save changes",
+    restore: "Restore",
     updatePending: "Saving",
     updateSuccess: "Personal information updated.",
     updateError: "Could not update personal information.",
@@ -312,15 +305,10 @@ export const en: Dictionary = {
     lastNameRequired: "Please enter a last name.",
     dateOfBirthRequired: "Please choose a date of birth.",
     dateOfBirthInvalid: "Date of birth is invalid.",
-    emailRequired: "This account does not have a valid email.",
-    emailInvalid: "Email is invalid.",
     phoneNumberRequired: "Please enter a phone number.",
-    billingEmptyTitle: "No billing content yet",
-    billingEmptyDescription:
-      "Billing will be added when the upgrade flow is defined.",
     errorTitle: "Could not load account",
     errorDescription: "Please try again to load account information.",
-    noPackage: "Not registered for a package",
+    loadingLabel: "Loading account profile",
   },
   errors: {
     generic: "Something went wrong",
@@ -581,11 +569,14 @@ export const en: Dictionary = {
       trustNote: "Built for analysis and source inspection, not prediction.",
       proofLabel: "What you can inspect",
       proofOneTitle: "Track assets",
-      proofOneBody: "Choose tracked assets to start from a clear analysis path.",
+      proofOneBody:
+        "Choose tracked assets to start from a clear analysis path.",
       proofTwoTitle: "Contextualize",
-      proofTwoBody: "Read historical candles with event annotations and economic-calendar context when available.",
+      proofTwoBody:
+        "Read historical candles with event annotations and economic-calendar context when available.",
       proofThreeTitle: "Inspect sources",
-      proofThreeBody: "Open event detail, reactions, and linked sources to evaluate them yourself.",
+      proofThreeBody:
+        "Open event detail, reactions, and linked sources to evaluate them yourself.",
     },
     cta: {
       requestAccess: "Request access",
@@ -606,11 +597,14 @@ export const en: Dictionary = {
       stepOneTitle: "Track",
       stepOneBody: "Start with the asset and scope you are monitoring.",
       stepTwoTitle: "Contextualize",
-      stepTwoBody: "Compare price movement with events and economic-calendar context when available.",
+      stepTwoBody:
+        "Compare price movement with events and economic-calendar context when available.",
       stepThreeTitle: "Inspect",
-      stepThreeBody: "Review reactions, event detail, and linked sources without hiding data limits.",
+      stepThreeBody:
+        "Review reactions, event detail, and linked sources without hiding data limits.",
       stepFourTitle: "Explore",
-      stepFourBody: "Follow relationships among events, assets, articles, and narratives.",
+      stepFourBody:
+        "Follow relationships among events, assets, articles, and narratives.",
     },
     product: {
       eyebrow: "Product story",
@@ -618,43 +612,56 @@ export const en: Dictionary = {
       body: "Three primary chapters keep chart context, evidence, and relationships close while making limits clear when data is incomplete.",
       chartsTitle: "Event-aware Charts",
       chartsOutcome: "See a price move alongside what is happening around it.",
-      chartsBody: "Select a tracked asset, inspect historical candles, event annotations, and economic-calendar context. Live chart states appear when data is available.",
+      chartsBody:
+        "Select a tracked asset, inspect historical candles, event annotations, and economic-calendar context. Live chart states appear when data is available.",
       chartsPointOne: "Tracked-asset selection within the monitoring scope",
       chartsPointTwo: "Event annotations on the time axis",
-      chartsPointThree: "Calendar context and live states when data is available",
-      chartsQualifier: "Coverage, timing, and live states depend on available data; temporal proximity does not prove causation.",
+      chartsPointThree:
+        "Calendar context and live states when data is available",
+      chartsQualifier:
+        "Coverage, timing, and live states depend on available data; temporal proximity does not prove causation.",
       reactionTitle: "Reaction & Evidence",
-      reactionOutcome: "Move from a concise annotation to sources worth inspecting.",
-      reactionBody: "Review chart annotation previews, open event detail, and inspect reactions and linked sources when available.",
+      reactionOutcome:
+        "Move from a concise annotation to sources worth inspecting.",
+      reactionBody:
+        "Review chart annotation previews, open event detail, and inspect reactions and linked sources when available.",
       reactionPointOne: "Concise chart annotation previews",
       reactionPointTwo: "Event detail and optional reactions",
       reactionPointThree: "Linked sources for manual inspection",
-      reactionQualifier: "Reactions or sources may be unavailable; the product does not present evaluated trading outcomes.",
+      reactionQualifier:
+        "Reactions or sources may be unavailable; the product does not present evaluated trading outcomes.",
       graphTitle: "Connected Market Graph",
       graphOutcome: "Explore the relationships behind a market narrative.",
-      graphBody: "Follow relationships among events, assets, news articles, and narratives to widen the context around a move.",
+      graphBody:
+        "Follow relationships among events, assets, news articles, and narratives to widen the context around a move.",
       graphPointOne: "Relationships between events and assets",
       graphPointTwo: "Links to articles and narratives",
       graphPointThree: "Expanded context around a market move",
-      graphQualifier: "Context labels explain relationships; they are not a separate graph entity type.",
+      graphQualifier:
+        "Context labels explain relationships; they are not a separate graph entity type.",
     },
     workspaceAi: {
       eyebrow: "Workspace and Assistant support",
       heading: "Analysis support in the same workspace scope.",
       body: "The workspace keeps tracked assets and persisted text conversation sessions so you can return to the same analysis path.",
       trackedAssetsTitle: "Active tracked assets",
-      trackedAssetsBody: "The active scope helps you start from the assets you are monitoring in the current workspace.",
+      trackedAssetsBody:
+        "The active scope helps you start from the assets you are monitoring in the current workspace.",
       conversationsTitle: "Persisted conversations",
-      conversationsBody: "AI Assistant keeps text conversation history so you can revisit context over time.",
-      qualifier: "The Assistant supports inspection and synthesis; details depend on available data.",
+      conversationsBody:
+        "AI Assistant keeps text conversation history so you can revisit context over time.",
+      qualifier:
+        "The Assistant supports inspection and synthesis; details depend on available data.",
     },
     trust: {
       eyebrow: "Trust boundary",
       heading: "Analysis, not prediction.",
       body: "Signapse supports context reading and linked-source inspection. It does not replace your evaluation of the data, provide trading instructions, or promise an outcome.",
-      pointOne: "Event, reaction, and confidence details appear when data is available.",
+      pointOne:
+        "Event, reaction, and confidence details appear when data is available.",
       pointTwo: "Temporal proximity is not evidence of causation.",
-      pointThree: "Source provenance and data limits still require your review.",
+      pointThree:
+        "Source provenance and data limits still require your review.",
     },
     finalCta: {
       heading: "Start with a move you want to understand more clearly.",
@@ -662,10 +669,12 @@ export const en: Dictionary = {
       accessLabel: "Continue to Signapse",
     },
     footer: {
-      description: "Event-aware market analysis and linked-source inspection when data is available.",
+      description:
+        "Event-aware market analysis and linked-source inspection when data is available.",
       requestAccessEmail: "request-access@signapse.ai",
       requestAccessEmailLabel: "Request-access email",
-      requestAccessEmailNote: "Copy the address or open your email application to begin.",
+      requestAccessEmailNote:
+        "Copy the address or open your email application to begin.",
       signIn: "Sign in",
       openDashboard: "Open dashboard",
       brandLabel: "About Signapse",

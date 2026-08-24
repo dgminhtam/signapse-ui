@@ -183,9 +183,11 @@ Translation:
 
 - Form dùng `AppFormShell`, `AppFormShellBody`, `AppFormShellFooter`; chọn width `sm` cho form đơn giản, `md` cho CRUD phổ biến và `lg` cho form dày.
 - Standalone create, update và profile route dùng `AppFormShell` như primary Form surface: giữ scale `sm`/`md`/`lg` và căn giữa trong content pane. Skeleton mirror cùng alignment; dialog, drawer, side panel và form nhúng giữ local surface pattern, không kế thừa rule này.
+- Account profile có thể chọn `surface="plain"` trên `AppFormShell` để giữ focused-form width lớn và căn giữa theo gutter của app nhưng bỏ outer border, radius, background và shadow; surface card vẫn là mặc định cho các consumer hiện có.
+- Plain profile giữ identity row và grid responsive: avatar/fallback cùng trục nội dung, field pairs dùng hai cột khi đủ rộng và reflow một cột trong container hẹp hoặc zoom; email và Account role chiếm full row.
 - Body dùng `FieldGroup`, `FieldSet` và `gap-*`; flex/grid layouts dùng `gap-*`, không dùng `space-y-*`.
 - Description dùng muted foreground.
-- Footer tách khỏi body bằng border/subtle background và chứa primary/secondary actions.
+- Footer card tách khỏi body bằng border/subtle background; footer plain dùng top divider trong suốt, không tạo thêm card background, và phải giữ cùng footprint khi pending.
 - Mỗi input có visible label; placeholder không thay thế label. Required state, helper text và format yêu cầu phải rõ trước khi submit.
 - Dùng semantic input type và `autocomplete` phù hợp để hỗ trợ mobile keyboard và browser autofill.
 - Field error nằm cạnh field, dùng `aria-invalid` và liên kết bằng `aria-describedby`; sau submit lỗi, focus chuyển đến field lỗi đầu tiên hoặc error summary khi có nhiều lỗi.
@@ -201,6 +203,7 @@ Translation:
 
 - Empty dùng `<Empty>` và nằm đúng surface; phân biệt first-use empty với no-results do filter/search.
 - Loading skeleton bám bố cục thật.
+- Account profile loading skeleton và localized error/retry state dùng cùng plain surface, width, identity row, grid và footer alignment với form resolved; error không hiển thị raw exception.
 - Loading, empty, error và permission-denied state giữ content-width mode của route, không tự co hẹp hoặc mở rộng page shell.
 - Error copy tiếng Việt rõ, không kỹ thuật hóa quá mức, nêu recovery action như retry, sửa dữ liệu hoặc mở trợ giúp.
 - Submit hoặc refresh lỗi không xóa input, filter hay context người dùng đang thao tác.

@@ -1,10 +1,4 @@
-# user-account-profile Specification
-
-## Purpose
-
-The Account profile is the authenticated user's self-service surface for viewing and editing personal information supported by the account contract. It presents identity context and editable contact fields without billing, payment, package, plan, subscription, checkout, or upgrade capabilities.
-
-## Requirements
+## ADDED Requirements
 
 ### Requirement: Account profile excludes unsupported commercial capabilities
 
@@ -28,6 +22,8 @@ The system SHALL present the Account profile without billing, payment, package, 
 - **WHEN** an authenticated user opens `/{lang}/account?tab=billing`
 - **THEN** the app renders the normal Account profile
 - **AND** the app does not redirect to another billing destination or show roadmap messaging
+
+## MODIFIED Requirements
 
 ### Requirement: Authenticated users can open the account profile screen
 
@@ -194,3 +190,17 @@ The system SHALL compose the Account profile using the documented cardless focus
 - **THEN** internal navigation preserves the current locale through existing localized helpers
 - **AND** labels, validation, loading, success, error, and recovery copy come from dictionaries
 - **AND** the implementation does not hardcode `/vi` or `/en`
+
+## REMOVED Requirements
+
+### Requirement: Account screen exposes personal and billing tabs
+
+**Reason**: Signapse has no billing, payment, subscription, or checkout capability, and the placeholder tab creates a false product affordance.
+
+**Migration**: Render the existing Account profile form directly. Legacy billing query parameters have no special behavior and resolve to the normal profile page.
+
+### Requirement: Users can start an account upgrade path
+
+**Reason**: An upgrade action implies a commercial package and destination that are not defined by current product or backend contracts.
+
+**Migration**: Keep Account role as read-only authorization information and remove the upgrade action without replacement.

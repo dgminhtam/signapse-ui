@@ -3,6 +3,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 
 type AppFormShellWidth = "sm" | "md" | "lg"
+type AppFormShellSurface = "card" | "plain"
 
 const widthClassName: Record<AppFormShellWidth, string> = {
   sm: "max-w-xl",
@@ -10,10 +11,16 @@ const widthClassName: Record<AppFormShellWidth, string> = {
   lg: "max-w-3xl",
 }
 
+const surfaceClassName: Record<AppFormShellSurface, string> = {
+  card: "overflow-hidden rounded-xl border bg-card shadow-sm",
+  plain: "mx-auto overflow-visible",
+}
+
 function AppFormShell({
   title,
   description,
   width = "md",
+  surface = "card",
   className,
   children,
   ...props
@@ -21,18 +28,26 @@ function AppFormShell({
   title: React.ReactNode
   description?: React.ReactNode
   width?: AppFormShellWidth
+  surface?: AppFormShellSurface
 }) {
   return (
     <section
       data-slot="app-form-shell"
+      data-surface={surface}
       className={cn(
-        "w-full overflow-hidden rounded-xl border bg-card shadow-sm",
+        "w-full",
+        surfaceClassName[surface],
         widthClassName[width],
         className
       )}
       {...props}
     >
-      <header className="flex flex-col gap-2 px-6 pt-6">
+      <header
+        className={cn(
+          "flex flex-col gap-2 px-6 pt-6",
+          surface === "plain" && "px-0"
+        )}
+      >
         <h1 className="text-xl font-semibold tracking-tight text-card-foreground">
           {title}
         </h1>
@@ -48,27 +63,34 @@ function AppFormShell({
 }
 
 function AppFormShellBody({
+  surface = "card",
   className,
   ...props
-}: React.ComponentProps<"div">) {
+}: React.ComponentProps<"div"> & {
+  surface?: AppFormShellSurface
+}) {
   return (
     <div
       data-slot="app-form-shell-body"
-      className={cn("px-6 py-6", className)}
+      className={cn("px-6 py-6", surface === "plain" && "px-0", className)}
       {...props}
     />
   )
 }
 
 function AppFormShellFooter({
+  surface = "card",
   className,
   ...props
-}: React.ComponentProps<"footer">) {
+}: React.ComponentProps<"footer"> & {
+  surface?: AppFormShellSurface
+}) {
   return (
     <footer
       data-slot="app-form-shell-footer"
       className={cn(
         "flex flex-col-reverse gap-3 border-t bg-muted/20 px-6 py-4 sm:flex-row sm:justify-end",
+        surface === "plain" && "bg-transparent px-0",
         className
       )}
       {...props}
@@ -78,17 +100,21 @@ function AppFormShellFooter({
 
 function AppFormShellSkeleton({
   width = "md",
+  surface = "card",
   className,
   children,
   ...props
 }: React.ComponentProps<"section"> & {
   width?: AppFormShellWidth
+  surface?: AppFormShellSurface
 }) {
   return (
     <section
       data-slot="app-form-shell-skeleton"
+      data-surface={surface}
       className={cn(
-        "w-full overflow-hidden rounded-xl border bg-card shadow-sm",
+        "w-full",
+        surfaceClassName[surface],
         widthClassName[width],
         className
       )}

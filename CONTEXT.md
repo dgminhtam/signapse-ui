@@ -2,6 +2,16 @@
 
 Signapse manages market intelligence workflows and the channels used to deliver operational notifications.
 
+## Identity And Access
+
+**Account profile (Hồ sơ tài khoản)**:
+The authenticated user's self-service surface for viewing and editing personal information supported by the account contract.
+_Avoid_: Billing settings, subscription profile, user management
+
+**Account role (Vai trò tài khoản)**:
+The authorization role assigned to a user and exposed as `role_name`; it is not a commercial tier.
+_Avoid_: Package, plan, subscription tier
+
 ## Public Web Surfaces
 
 **Coming-soon site**:

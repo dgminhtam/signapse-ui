@@ -7,9 +7,7 @@ import {
   BellIcon,
   ChevronRightIcon,
   ChevronsUpDownIcon,
-  CreditCardIcon,
   LogOutIcon,
-  SparklesIcon,
 } from "lucide-react"
 import { LocalizedLink as Link } from "@/components/localized-link"
 import { usePathname } from "next/navigation"
@@ -251,7 +249,9 @@ function NavUser({ user, isP0FixtureMode }: NavUserProps) {
                 src={user?.imageUrl ?? ""}
                 alt={user?.fullName ?? ""}
               />
-              <AvatarFallback className="rounded-lg text-foreground">CN</AvatarFallback>
+              <AvatarFallback className="rounded-lg text-foreground">
+                CN
+              </AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-medium">
@@ -276,7 +276,9 @@ function NavUser({ user, isP0FixtureMode }: NavUserProps) {
                       src={user?.imageUrl ?? ""}
                       alt={user?.fullName ?? ""}
                     />
-                    <AvatarFallback className="rounded-lg text-foreground">CN</AvatarFallback>
+                    <AvatarFallback className="rounded-lg text-foreground">
+                      CN
+                    </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-medium">
@@ -291,20 +293,9 @@ function NavUser({ user, isP0FixtureMode }: NavUserProps) {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <SparklesIcon />
-                {dictionary.auth.upgrade}
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
               <DropdownMenuItem render={<Link href="/account" />}>
                 <BadgeCheckIcon />
                 {dictionary.auth.account}
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCardIcon />
-                {dictionary.auth.billing}
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <BellIcon />
