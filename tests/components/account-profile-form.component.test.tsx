@@ -1,6 +1,12 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen, waitFor } from "@testing-library/react"
+import {
+  cleanup,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
@@ -90,7 +96,13 @@ describe("AccountProfileForm", () => {
 
     expect(screen.getByRole("textbox", { name: /Last name/ })).toBeRequired()
     expect(screen.getByRole("textbox", { name: /First name/ })).toBeRequired()
-    expect(screen.getByLabelText(/Date of birth/)).toBeRequired()
+    const dateOfBirth = screen.getByRole("button", {
+      name: /Date of birth.*required.*January 2, 1990/i,
+    })
+    expect(dateOfBirth).toHaveAttribute(
+      "aria-labelledby",
+      "account-date-of-birth-label account-date-of-birth-value"
+    )
     expect(screen.getByRole("textbox", { name: /Phone number/ })).toBeRequired()
     expect(
       screen.queryByRole("button", { name: /upload|delete|replace/i })
@@ -111,14 +123,53 @@ describe("AccountProfileForm", () => {
     )
   })
 
+  it("selects a localized calendar date and submits the canonical value", async () => {
+    const user = userEvent.setup()
+    vi.mocked(updateMyProfile).mockResolvedValue({
+      success: true,
+      data: {} as never,
+    })
+    renderProfile()
+
+    await user.click(
+      screen.getByRole("button", {
+        name: /Date of birth.*January 2, 1990/i,
+      })
+    )
+    const dateCell = screen
+      .getAllByRole("gridcell", { name: "3" })
+      .find((element) => element.getAttribute("data-day") === "1990-01-03")
+    expect(dateCell).toBeDefined()
+    await user.click(within(dateCell!).getByRole("button"))
+
+    const dateOfBirth = screen.getByRole("button", {
+      name: /Date of birth.*January 3, 1990/i,
+    })
+    expect(dateOfBirth).toHaveAttribute("aria-expanded", "false")
+    expect(dateOfBirth).toHaveAccessibleName(
+      /Date of birth.*required.*January 3, 1990/i
+    )
+
+    await user.click(
+      screen.getByRole("button", { name: en.accountProfile.saveChanges })
+    )
+
+    await waitFor(() => expect(updateMyProfile).toHaveBeenCalledTimes(1))
+    expect(updateMyProfile).toHaveBeenCalledWith({
+      firstName: initialData.firstName,
+      lastName: initialData.lastName,
+      birthday: "1990-01-03",
+      phone: initialData.phoneNumber,
+    })
+  })
+
   it("restores dirty edits without mutation and normalizes a successful update", async () => {
     const user = userEvent.setup()
     let resolveUpdate: (() => void) | undefined
     vi.mocked(updateMyProfile).mockImplementation(
       () =>
         new Promise<Awaited<ReturnType<typeof updateMyProfile>>>((resolve) => {
-          resolveUpdate = () =>
-            resolve({ success: true, data: {} as never })
+          resolveUpdate = () => resolve({ success: true, data: {} as never })
         })
     )
     renderProfile()

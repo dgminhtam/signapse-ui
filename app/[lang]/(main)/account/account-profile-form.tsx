@@ -3,7 +3,8 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { RotateCcw, Save } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useEffect, useMemo } from "react"
+import { enUS, vi } from "react-day-picker/locale"
+import { useEffect, useMemo, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import * as z from "zod"
@@ -18,6 +19,7 @@ import {
 } from "@/components/app-form-shell"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
 import {
   Field,
   FieldDescription,
@@ -26,6 +28,11 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { Spinner } from "@/components/ui/spinner"
 
 export interface AccountProfileInitialData {
@@ -42,6 +49,55 @@ interface AccountProfileFormProps {
   initialData: AccountProfileInitialData
 }
 
+const DATE_ONLY_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/
+const DATE_OF_BIRTH_START_YEAR_OFFSET = 120
+
+function parseDateOnly(value: string): Date | undefined {
+  const match = DATE_ONLY_PATTERN.exec(value.trim())
+
+  if (!match) {
+    return undefined
+  }
+
+  const year = Number(match[1])
+  const month = Number(match[2])
+  const day = Number(match[3])
+  const date = new Date(year, month - 1, day)
+
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
+  ) {
+    return undefined
+  }
+
+  return date
+}
+
+function formatDateOnly(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, "0")
+  const day = String(date.getDate()).padStart(2, "0")
+
+  return `${year}-${month}-${day}`
+}
+
+function getTodayDate(): Date {
+  const today = new Date()
+  return new Date(today.getFullYear(), today.getMonth(), today.getDate())
+}
+
+function isDateOfBirthValid(value: string): boolean {
+  const date = parseDateOnly(value)
+
+  if (!date) {
+    return false
+  }
+
+  return date <= getTodayDate()
+}
+
 function getAccountProfileSchema(t: Dictionary["accountProfile"]) {
   return z.object({
     firstName: z.string().trim().min(1, t.firstNameRequired),
@@ -50,7 +106,10 @@ function getAccountProfileSchema(t: Dictionary["accountProfile"]) {
       .string()
       .trim()
       .min(1, t.dateOfBirthRequired)
-      .regex(/^\d{4}-\d{2}-\d{2}$/, t.dateOfBirthInvalid),
+      .refine(
+        (value) => !value || isDateOfBirthValid(value),
+        t.dateOfBirthInvalid
+      ),
     email: z.string().trim(),
     phoneNumber: z.string().trim().min(1, t.phoneNumberRequired),
   })
@@ -62,8 +121,15 @@ type AccountProfileFormValues = z.infer<
 
 export function AccountProfileForm({ initialData }: AccountProfileFormProps) {
   const router = useRouter()
-  const { dictionary } = useLocalization()
+  const { dictionary, formatDate, locale } = useLocalization()
   const t = dictionary.accountProfile
+  const [datePickerOpen, setDatePickerOpen] = useState(false)
+  const today = useMemo(() => getTodayDate(), [])
+  const dateOfBirthStartMonth = useMemo(
+    () => new Date(today.getFullYear() - DATE_OF_BIRTH_START_YEAR_OFFSET, 0, 1),
+    [today]
+  )
+  const calendarLocale = locale === "vi" ? vi : enUS
   const defaultValues: AccountProfileFormValues = useMemo(
     () => ({
       firstName: initialData.firstName,
@@ -138,6 +204,7 @@ export function AccountProfileForm({ initialData }: AccountProfileFormProps) {
   }
 
   function handleRestore() {
+    setDatePickerOpen(false)
     form.reset(defaultValues)
   }
 
@@ -239,36 +306,94 @@ export function AccountProfileForm({ initialData }: AccountProfileFormProps) {
               <Controller
                 name="dateOfBirth"
                 control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="account-date-of-birth">
-                      {t.dateOfBirth}{" "}
-                      <span aria-hidden="true" className="text-destructive">
-                        *
-                      </span>
-                    </FieldLabel>
-                    <Input
-                      {...field}
-                      id="account-date-of-birth"
-                      aria-describedby={
-                        fieldState.invalid
-                          ? "account-date-of-birth-error"
-                          : undefined
-                      }
-                      aria-invalid={fieldState.invalid}
-                      autoComplete="bday"
-                      disabled={isSubmitting}
-                      required
-                      type="date"
-                    />
-                    {fieldState.invalid ? (
-                      <FieldError
-                        id="account-date-of-birth-error"
-                        errors={[fieldState.error]}
-                      />
-                    ) : null}
-                  </Field>
-                )}
+                render={({ field, fieldState }) => {
+                  const selectedDate = parseDateOnly(field.value)
+
+                  return (
+                    <Field
+                      data-disabled={isSubmitting}
+                      data-invalid={fieldState.invalid}
+                    >
+                      <FieldLabel
+                        htmlFor="account-date-of-birth"
+                        id="account-date-of-birth-label"
+                      >
+                        {t.dateOfBirth}{" "}
+                        <span aria-hidden="true" className="text-destructive">
+                          *
+                        </span>
+                        <span className="sr-only">{t.requiredLabel}</span>
+                      </FieldLabel>
+                      <Popover
+                        open={datePickerOpen}
+                        onOpenChange={(open) => {
+                          setDatePickerOpen(open)
+                          if (!open) {
+                            field.onBlur()
+                          }
+                        }}
+                      >
+                        <PopoverTrigger
+                          render={
+                            <Button
+                              ref={field.ref}
+                              aria-describedby={
+                                fieldState.invalid
+                                  ? "account-date-of-birth-error"
+                                  : undefined
+                              }
+                              aria-invalid={fieldState.invalid}
+                              aria-labelledby="account-date-of-birth-label account-date-of-birth-value"
+                              className="w-full justify-start font-normal"
+                              disabled={isSubmitting}
+                              id="account-date-of-birth"
+                              type="button"
+                              variant="outline"
+                            >
+                              <span id="account-date-of-birth-value">
+                                {selectedDate
+                                  ? formatDate(
+                                      selectedDate,
+                                      t.dateOfBirthPlaceholder
+                                    )
+                                  : t.dateOfBirthPlaceholder}
+                              </span>
+                            </Button>
+                          }
+                        />
+                        <PopoverContent
+                          align="start"
+                          className="w-auto overflow-hidden p-0"
+                        >
+                          <Calendar
+                            autoFocus
+                            captionLayout="dropdown"
+                            defaultMonth={selectedDate ?? today}
+                            disabled={{ after: today }}
+                            endMonth={today}
+                            locale={calendarLocale}
+                            mode="single"
+                            navLayout="around"
+                            onSelect={(date) => {
+                              field.onChange(formatDateOnly(date))
+                              field.onBlur()
+                              setDatePickerOpen(false)
+                            }}
+                            required
+                            selected={selectedDate}
+                            startMonth={dateOfBirthStartMonth}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      {fieldState.invalid ? (
+                        <FieldError
+                          id="account-date-of-birth-error"
+                          errors={[fieldState.error]}
+                        />
+                      ) : null}
+                    </Field>
+                  )
+                }}
               />
 
               <Controller

@@ -288,6 +288,8 @@ export const en: Dictionary = {
     firstName: "First name",
     lastName: "Last name",
     dateOfBirth: "Date of birth",
+    dateOfBirthPlaceholder: "Select date",
+    requiredLabel: "required",
     email: "Email address",
     emailReadOnlyDescription: "The sign-in email cannot be edited here.",
     phoneNumber: "Phone number",

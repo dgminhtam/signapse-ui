@@ -162,10 +162,20 @@ The system SHALL compose the Account profile using the documented cardless focus
 #### Scenario: Form controls are exposed accessibly
 
 - **WHEN** the user navigates the Account profile form
-- **THEN** each editable input has a visible localized label, native required state, semantic input type, and appropriate autocomplete metadata
+- **THEN** each editable control has a visible localized label, an appropriate native or composed semantic, and an exposed required state when applicable
+- **AND** native editable inputs use a semantic input type and appropriate autocomplete metadata when applicable
+- **AND** the date-of-birth picker exposes its selected value and required state through its accessible name, keeps validation errors programmatically associated, and remains keyboard operable
 - **AND** validation errors appear beside and are programmatically associated with their fields
 - **AND** keyboard order follows visual order and visible focus is preserved
 - **AND** placeholders do not merely repeat visible labels
+
+#### Scenario: User selects a date of birth
+
+- **WHEN** the user opens the date-of-birth control
+- **THEN** the app displays a single-date calendar with month and year dropdowns
+- **AND** dates after the current day cannot be selected
+- **AND** selecting a date closes the calendar and updates the profile value in `yyyy-MM-dd` format
+- **AND** the displayed value is localized without changing the submitted format
 
 #### Scenario: Account profile is loading
 
