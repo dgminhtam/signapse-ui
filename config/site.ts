@@ -14,6 +14,7 @@ import { NEWS_ARTICLE_NAV_PERMISSIONS } from "@/app/lib/news-articles/permission
 import { NEWS_OUTLET_NAV_PERMISSIONS } from "@/app/lib/news-outlets/permissions"
 import { SYSTEM_PROMPT_NAV_PERMISSIONS } from "@/app/lib/system-prompts/permissions"
 import { TELEGRAM_NAV_PERMISSIONS } from "@/app/lib/telegram/permissions"
+import { FEEDBACK_READ_PERMISSION } from "@/app/lib/feedback/permissions"
 import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
 
 export interface NavSubItem {
@@ -40,13 +41,18 @@ function hasPermissionMatch(
   }
 
   if (typeof requirement === "string") {
-    return permissions.includes(requirement)
+    return permissions.includes("*") || permissions.includes(requirement)
   }
 
-  return requirement.some((permission) => permissions.includes(permission))
+  return requirement.some(
+    (permission) => permissions.includes("*") || permissions.includes(permission)
+  )
 }
 
-export function createSiteConfig(dictionary: Dictionary) {
+export function createSiteConfig(
+  dictionary: Dictionary,
+  options: { isP0FixtureMode?: boolean } = {}
+) {
   return {
     teams: [
       {
@@ -145,6 +151,15 @@ export function createSiteConfig(dictionary: Dictionary) {
             url: "/users",
             permission: "user:update",
           },
+          ...(options.isP0FixtureMode
+            ? [
+                {
+                  title: dictionary.navigation.feedbackModeration,
+                  url: "/feedback-submissions",
+                  permission: FEEDBACK_READ_PERMISSION,
+                },
+              ]
+            : []),
           {
             title: dictionary.navigation.developerToken,
             url: "/developer-token",

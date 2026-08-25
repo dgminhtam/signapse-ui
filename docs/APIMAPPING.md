@@ -2,7 +2,7 @@
 
 Tài liệu này ánh xạ OpenAPI backend dev tại `https://dev-api.signapse.cloud/v3/api-docs` tới các điểm tích hợp frontend hiện tại của repo.
 
-Xác minh lần cuối: ngày 15 tháng 8 năm 2026
+Xác minh lần cuối: ngày 25 tháng 8 năm 2026
 
 ## Cấu hình cơ sở
 
@@ -36,7 +36,7 @@ Xác minh lần cuối: ngày 15 tháng 8 năm 2026
 
 ## Tổng quan thay đổi lớn từ snapshot hiện tại
 
-- Snapshot backend hiện tại gồm `116` operation.
+- Snapshot backend hiện tại gồm `127` operation.
 - Lần đồng bộ live ngày 15/8/2026 xác nhận mapping cần bao phủ thêm `PATCH /me`, `GET /users`, `PATCH /users/{id}`, và `POST /script`; `UserResponse.preferredLanguage` là object `LanguageResponse` nullable, không phải ISO string.
 - Snapshot ngày 11/8 mở rộng `GET /dashboard/summary` thêm hai metric bắt buộc `assetsInFocus` và `marketNarratives`. Backend trả tối đa sáu tài sản và ba luận điểm theo thứ tự authoritative; frontend đã parse/render `recentEvents` và `assetsInFocus`, nhưng chưa parse hoặc render `marketNarratives`.
 - Backend đã chuyển domain nội dung canon từ `sources` / `source-documents` sang `news-outlets` / `news-articles`.
@@ -52,6 +52,7 @@ Xác minh lần cuối: ngày 15 tháng 8 năm 2026
 - Surface workspace dùng chuẩn `set-current`, đồng thời `WorkspaceResponse` dùng field có nghĩa `currentWorkspace`.
 - `roles` và `permissions` hiện đã có action và UI frontend, không còn ở trạng thái "chưa triển khai".
 - Snapshot mới thêm surface `telegram` gồm bot connections, destinations, feature settings, market analysis schedules, và webhook Telegram.
+- Live contract ngày 25/8 thêm surface `feedback` gồm luồng user tự gửi/xem/rút feedback và luồng quản trị đọc, promote, dismiss, tải screenshot, hoặc xóa; frontend hiện chưa có action, DTO, permission helper, route, navigation, hoặc UI tương ứng.
 - Snapshot ngày 14/8 giản lược quản trị bot và destination Telegram: bỏ `PATCH /telegram/bot-connections/{id}` và `PATCH /telegram/destinations/{id}`; `CreateTelegramBotConnectionRequest` chỉ còn field bắt buộc `botToken`. Bản build dev đã khôi phục `POST /telegram/destinations/{destinationId}/test-message` với response `204 No Content`.
 - Snapshot mới thêm credential sub-resource cho `ai-provider-configs` để quản lý nhiều API key theo từng provider config mà không expose full key.
 - Snapshot mới tiếp tục giản lược `ai-provider-configs`: config request/response không còn `name` và top-level `model`; credential dùng field `model` thay cho `label`.
@@ -530,14 +531,40 @@ Ghi chu:
 - Snapshot moi them `outputLanguageIsoCode` trong request feature setting/schedule va `outputLanguage` trong response; FE schedule va Calendar/News feature routing da expose field nay qua catalog `/languages` va giu override khi edit/mutation. Lua chon mac dinh gui omit/undefined de BE xoa override; `SCHEDULED_MARKET_ANALYSIS` van khong co selector cap feature vi scheduled delivery doc `schedule.outputLanguage` truc tiep.
 - Snapshot da bo 152 schema Telegram Bot API tong quat tung duoc import cho webhook va thay bang ba schema toi thieu `TelegramWebhookChat`, `TelegramWebhookMessage`, `TelegramWebhookUpdateRequest`. Day la contract backend-only, khong lam thay doi DTO cua man hinh quan tri Telegram.
 
-### 24. Webhook
+### 24. API feedback
+
+| Phuong thuc | Endpoint backend                                | operationId   | Tich hop frontend | Trang thai       | Ghi chu |
+| ----------- | ----------------------------------------------- | ------------- | ----------------- | ---------------- | ------- |
+| GET         | `/me/feedback-submissions`                      | `list`        | `-`               | Chua trien khai  | Danh sach feedback cua user hien tai; auth `active-user`; OpenAPI danh dau `specification` va `pageable` la query parameter bat buoc. |
+| POST        | `/me/feedback-submissions`                      | `create`      | `-`               | Chua trien khai  | Multipart `submission` bat buoc va `screenshot` binary tuy chon; auth `active-user`; tra `FeedbackDetailResponse`. |
+| GET         | `/me/feedback-submissions/{id}`                 | `get_1`       | `-`               | Chua trien khai  | Doc detail thuoc user hien tai; auth `active-user`. |
+| DELETE      | `/me/feedback-submissions/{id}`                 | `withdraw`    | `-`               | Chua trien khai  | Rut submission cua user; response `200` khong co schema body trong OpenAPI. |
+| GET         | `/me/feedback-submissions/{id}/screenshot`      | `screenshot`  | `-`               | Chua trien khai  | OpenAPI publish `*/*` voi schema `string(byte)`; auth `active-user`. |
+| GET         | `/feedback-submissions`                         | `list_1`      | `-`               | Chua trien khai  | Danh sach quan tri; permission `feedback:read`; cung dung `specification` va `pageable`. |
+| GET         | `/feedback-submissions/{id}`                    | `get_2`       | `-`               | Chua trien khai  | Detail quan tri; permission `feedback:read`. |
+| POST        | `/feedback-submissions/{id}/promote`            | `promote`     | `-`               | Chua trien khai  | Request `FeedbackReviewRequest`; permission `feedback:review`; tra detail da cap nhat. |
+| POST        | `/feedback-submissions/{id}/dismiss`            | `dismiss`     | `-`               | Chua trien khai  | Request `FeedbackReviewRequest`; permission `feedback:review`; tra detail da cap nhat. |
+| GET         | `/feedback-submissions/{id}/screenshot`         | `screenshot_1` | `-`              | Chua trien khai  | Doc screenshot o scope quan tri; permission `feedback:read`. |
+| DELETE      | `/feedback-submissions/{id}`                    | `erase`       | `-`               | Chua trien khai  | Xoa o scope quan tri; permission `feedback:delete`; response `200` khong co schema body trong OpenAPI. |
+
+Ghi chu:
+
+- `FeedbackSubmissionRequest` bat buoc `type`, `title`, `description`, `expectedOutcome`; `type` gom `BUG` / `IDEA`. Do dai: title `5..150`, description `20..5000`, expected outcome `10..3000`, reproduction steps tuy chon `0..5000`.
+- `clientContext` tuy chon va co cac field `pagePath`, `appVersion`, `browserName`, `browserVersion`, `osName`, `osVersion`, `locale`, `observedTime`; OpenAPI khong danh dau field con nao la bat buoc.
+- `FeedbackReviewRequest` bat buoc `reviewMessage` dai `10..1000`; `githubIssueUrl` tuy chon nhung OpenAPI chua publish `format`, pattern, hoac gioi han do dai.
+- Status response gom `PENDING_REVIEW`, `PROMOTED`, `DISMISSED`. Detail co them `description`, `expectedOutcome`, `reproductionSteps`, `clientContext`, `screenshot`, `reviewMessage`, `githubIssueNumber`, va `reporter`; list item chi gom metadata co ban va screenshot metadata.
+- Cac response schema feedback khong co mang `required` va cung khong publish nullable ro rang. Frontend khong nen suy dien field bat buoc hoac nullable ngoai nhung gi live contract xac nhan.
+- `SpecificationFeedbackSubmission` hien la schema rong, nen filter field/operator chua duoc mo ta. Truoc khi lam list search/filter can xac nhan effective runtime query; repo hien dung `$filter`, `page`, `size`, `sort` thay cho object `specification` / `pageable` o cac surface khac.
+- OpenAPI chi publish response `200` cho cac operation nay, khong mo ta error response, state transition guard, ownership failure, gioi han/kieu MIME screenshot, hoac lifecycle cho withdraw/promote/dismiss/erase. Cac diem nay can backend clarification hoac runtime probe truoc khi khoa spec UI.
+
+### 25. Webhook
 
 | Phuong thuc | Endpoint backend                    | operationId            | Tich hop frontend | Trang thai  | Ghi chu                                                     |
 | ----------- | ----------------------------------- | ---------------------- | ----------------- | ----------- | ----------------------------------------------------------- |
 | POST        | `/webhooks/clerk`                   | `handleClerkWebhook`   | `-`               | Chi backend | Khong ky vong co frontend caller.                           |
 | POST        | `/webhooks/telegram/{connectionId}` | `handleTelegramUpdate` | `-`               | Chi backend | Webhook nhan `TelegramWebhookUpdateRequest` tu Telegram, khong ky vong FE caller. |
 
-### 25. Health check
+### 26. Health check
 
 | Phuong thuc | Endpoint backend | operationId   | Tich hop frontend | Trang thai      | Ghi chu               |
 | ----------- | ---------------- | ------------- | ----------------- | --------------- | --------------------- |
@@ -663,6 +690,7 @@ type ActionResult<T = void> =
 | Workspace                                 | `app/api/workspaces/action.ts`, `app/lib/workspaces/definitions.ts`                                                                                             |
 | Watchlists                                | `app/api/watchlists/action.ts`, `app/lib/watchlists/definitions.ts`, `components/workspace-watchlist-editor.tsx`, `components/asset-multi-select-combobox.tsx`  |
 | Telegram                                  | `app/api/telegram/action.ts`, `app/lib/telegram/definitions.ts`, `app/lib/telegram/permissions.ts`, `app/[lang]/(main)/telegram/*`                              |
+| Feedback                                  | `-` (live contract da co endpoint, frontend chua co module)                                                                                                    |
 | Roles va permissions                      | `app/api/roles/action.ts`, `app/lib/roles/definitions.ts`, `app/(main)/roles/*`                                                                                 |
 | Route user cuc bo                         | `app/api/user/route.ts`                                                                                                                                         |
 | Media                                     | `-`                                                                                                                                                             |
@@ -672,6 +700,7 @@ type ActionResult<T = void> =
 ## Cac diem lech contract da biet
 
 - List/search runtime cua frontend dang dung `$filter/page/size/sort`, trong khi OpenAPI tiep tuc mo ta `specification/pageable` o nhieu list endpoint.
+- `feedback`: live contract co 11 operation tren 8 path, nhung FE chua co definitions, schema validation, authenticated actions, permission constants, submission/moderation surface, navigation, i18n, hoac screenshot proxy. Filter contract, response requiredness/nullability, screenshot transport, error/status-transition semantics va ownership guard chua duoc OpenAPI mo ta du de implement ma khong can them clarification.
 - Frontend da migrate route canon sang `/news-outlets*` va `/news-articles*`; `/sources*`, `/news-sources*`, va `/source-documents*` chi con redirect compatibility.
 - `news articles`: `linkedEvents[]` da co `eventStatus` enum moi theo enrichment lifecycle va khong con `eventEnrichmentStatus`; FE giu field trong DTO nhung detail va quick detail khong render linked-event UI hoac event navigation.
 - `events`: backend gate enrich/market reaction operators bang `news-article:analyze`; FE events da gate bang permission canon nay truoc va chi giu `source-document:analyze` nhu alias compatibility tam thoi.

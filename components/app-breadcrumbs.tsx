@@ -31,6 +31,8 @@ function getFriendlySegmentNames(
     "developer-token": dictionary.navigation.developerToken,
     "economic-calendar": dictionary.navigation.economicCalendar,
     events: dictionary.navigation.events,
+    feedback: dictionary.feedback.pageTitle,
+    "feedback-submissions": dictionary.feedback.moderationTitle,
     "graph-view": dictionary.navigation.knowledgeGraph,
     "market-charts": dictionary.navigation.marketCharts,
     "news-articles": dictionary.navigation.newsArticles,

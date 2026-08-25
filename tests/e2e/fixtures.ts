@@ -10,7 +10,16 @@ type FixtureController = {
   reset(): Promise<void>
   setScenario(
     route: string,
-    scenario: "success" | "empty" | "short" | "short-then-empty" | "validation-error" | "timeout" | "outage" | "mutation-failure" | "reconnect",
+    scenario:
+      | "success"
+      | "empty"
+      | "short"
+      | "short-then-empty"
+      | "validation-error"
+      | "timeout"
+      | "outage"
+      | "mutation-failure"
+      | "reconnect",
     method?: string
   ): Promise<void>
   state(): Promise<{
@@ -18,6 +27,11 @@ type FixtureController = {
     violations: Array<Record<string, unknown>>
     streamConnections: number
   }>
+  setFeedbackScenario(
+    scenario: "success" | "pending" | "validation-error" | "mutation-failure",
+    kind?: "feedback" | "compose" | "withdraw" | "promote" | "dismiss" | "erase"
+  ): Promise<void>
+  setFeedbackPermissions(permissions: string[]): Promise<void>
 }
 
 type Fixtures = {
@@ -42,75 +56,103 @@ export const test = base.extend<Fixtures>({
     await use(id)
   },
 
-  fixture: [async ({ page, request: apiRequest, testRunId }, use, testInfo) => {
-    const externalRequests: string[] = []
-    page.on("request", (request) => {
-      try {
-        const url = new URL(request.url())
-        if (!new Set(["127.0.0.1", "localhost"]).has(url.hostname)) {
+  fixture: [
+    async ({ page, request: apiRequest, testRunId }, use, testInfo) => {
+      const externalRequests: string[] = []
+      page.on("request", (request) => {
+        try {
+          const url = new URL(request.url())
+          if (!new Set(["127.0.0.1", "localhost"]).has(url.hostname)) {
+            externalRequests.push(request.url())
+          }
+        } catch {
           externalRequests.push(request.url())
         }
-      } catch {
-        externalRequests.push(request.url())
-      }
-    })
-
-    await page.context().addCookies([
-      {
-        name: testRunCookie,
-        value: testRunId,
-        url: "http://127.0.0.1:3100/",
-      },
-    ])
-    await page.context().setExtraHTTPHeaders({
-      "x-signapse-test-run-id": testRunId,
-    })
-    const postControl = async (path: string, data?: Record<string, unknown>) => {
-      const response = await apiRequest.post(`${fixtureBaseUrl}${path}`, {
-        data,
-        headers: { "x-signapse-test-run-id": testRunId },
       })
-      await expectOk(response)
-      return response
-    }
 
-    const fixture: FixtureController = {
-      async reset() {
-        await postControl("/__test/reset", { testRunId })
-      },
-      async setScenario(route, scenario, method) {
-        await postControl("/__test/scenario", {
-          testRunId,
-          route,
-          scenario,
-          ...(method ? { method } : {}),
+      await page.context().addCookies([
+        {
+          name: testRunCookie,
+          value: testRunId,
+          url: "http://127.0.0.1:3100/",
+        },
+      ])
+      await page.context().setExtraHTTPHeaders({
+        "x-signapse-test-run-id": testRunId,
+      })
+      const postControl = async (
+        path: string,
+        data?: Record<string, unknown>
+      ) => {
+        const response = await apiRequest.post(`${fixtureBaseUrl}${path}`, {
+          data,
+          headers: { "x-signapse-test-run-id": testRunId },
         })
-      },
-      async state() {
-        const response = await apiRequest.get(
-          `${fixtureBaseUrl}/__test/state?testRunId=${encodeURIComponent(testRunId)}`,
-          { headers: { "x-signapse-test-run-id": testRunId } }
-        )
         await expectOk(response)
-        return response.json()
-      },
-    }
+        return response
+      }
 
-    await fixture.reset()
-    await use(fixture)
+      const fixture: FixtureController = {
+        async reset() {
+          await postControl("/__test/reset", { testRunId })
+        },
+        async setScenario(route, scenario, method) {
+          await postControl("/__test/scenario", {
+            testRunId,
+            route,
+            scenario,
+            ...(method ? { method } : {}),
+          })
+        },
+        async state() {
+          const response = await apiRequest.get(
+            `${fixtureBaseUrl}/__test/state?testRunId=${encodeURIComponent(testRunId)}`,
+            { headers: { "x-signapse-test-run-id": testRunId } }
+          )
+          await expectOk(response)
+          return response.json()
+        },
+        async setFeedbackScenario(scenario, kind = "feedback") {
+          await page.evaluate(
+            ({ kind: scenarioKind, scenario: scenarioValue }) => {
+              const target = window as Window & {
+                __SIGNAPSE_FEEDBACK_SCENARIOS__?: Record<string, string>
+              }
+              target.__SIGNAPSE_FEEDBACK_SCENARIOS__ = {
+                ...(target.__SIGNAPSE_FEEDBACK_SCENARIOS__ ?? {}),
+                [scenarioKind]: scenarioValue,
+              }
+            },
+            { kind, scenario }
+          )
+        },
+        async setFeedbackPermissions(permissions) {
+          await page.evaluate((configured) => {
+            const target = window as Window & {
+              __SIGNAPSE_FEEDBACK_PERMISSIONS__?: string[]
+            }
+            target.__SIGNAPSE_FEEDBACK_PERMISSIONS__ = configured
+          }, permissions)
+        },
+      }
 
-    const state = await fixture.state()
-    await testInfo.attach("fixture-state.json", {
-      body: JSON.stringify(state, null, 2),
-      contentType: "application/json",
-    })
-    expect(state.violations, "P0 fixture network violations").toEqual([])
-    await testInfo.attach("external-requests.json", {
-      body: JSON.stringify(externalRequests, null, 2),
-      contentType: "application/json",
-    })
-    expect(externalRequests, "P0 browser external requests").toEqual([])
-  }, { auto: true }],
+      await fixture.reset()
+      await use(fixture)
+
+      const state = await fixture.state()
+      await testInfo.attach("fixture-state.json", {
+        body: JSON.stringify(state, null, 2),
+        contentType: "application/json",
+      })
+      expect(state.violations, "P0 fixture network violations").toEqual([])
+      await testInfo.attach("external-requests.json", {
+        body: JSON.stringify(externalRequests, null, 2),
+        contentType: "application/json",
+      })
+      expect(externalRequests, "P0 browser external requests").toEqual([])
+    },
+    { auto: true },
+  ],
 })
 
 export { expect }

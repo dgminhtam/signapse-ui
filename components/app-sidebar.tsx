@@ -5,15 +5,18 @@ import { SignOutButton } from "@clerk/nextjs"
 import {
   BadgeCheckIcon,
   BellIcon,
+  ClipboardListIcon,
   ChevronRightIcon,
   ChevronsUpDownIcon,
   LogOutIcon,
+  MessageSquareText,
 } from "lucide-react"
 import { LocalizedLink as Link } from "@/components/localized-link"
 import { usePathname } from "next/navigation"
 
 import { useLocalization } from "@/app/lib/i18n/provider"
 import { stripLocaleFromPathname } from "@/app/lib/i18n/routing"
+import { FeedbackComposeDialog } from "@/components/feedback/feedback-compose-dialog"
 import {
   NavItem,
   createSiteConfig,
@@ -81,7 +84,7 @@ export function AppSidebar({
   ...props
 }: AppSidebarProps) {
   const { dictionary } = useLocalization()
-  const localizedSiteConfig = createSiteConfig(dictionary)
+  const localizedSiteConfig = createSiteConfig(dictionary, { isP0FixtureMode })
   const visibleNavItems = filterNavItemsByPermissions(
     localizedSiteConfig.navMain,
     permissions
@@ -230,6 +233,7 @@ interface NavUserProps {
 function NavUser({ user, isP0FixtureMode }: NavUserProps) {
   const { isMobile } = useSidebar()
   const { dictionary } = useLocalization()
+  const [composeOpen, setComposeOpen] = React.useState(false)
 
   return (
     <SidebarMenu>
@@ -302,6 +306,21 @@ function NavUser({ user, isP0FixtureMode }: NavUserProps) {
                 {dictionary.auth.notifications}
               </DropdownMenuItem>
             </DropdownMenuGroup>
+            {isP0FixtureMode ? (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onClick={() => setComposeOpen(true)}>
+                    <MessageSquareText />
+                    {dictionary.feedback.composeAction}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem render={<Link href="/feedback" />}>
+                    <ClipboardListIcon />
+                    {dictionary.feedback.historyAction}
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </>
+            ) : null}
             {isP0FixtureMode ? null : (
               <>
                 <DropdownMenuSeparator />
@@ -319,6 +338,12 @@ function NavUser({ user, isP0FixtureMode }: NavUserProps) {
             )}
           </DropdownMenuContent>
         </DropdownMenu>
+        {isP0FixtureMode ? (
+          <FeedbackComposeDialog
+            open={composeOpen}
+            onOpenChange={setComposeOpen}
+          />
+        ) : null}
       </SidebarMenuItem>
     </SidebarMenu>
   )

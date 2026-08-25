@@ -30,6 +30,32 @@ _Avoid_: Placeholder mock, synthetic product preview
 The Signapse Product Owner accountable for approving the public landing cutover after collecting the required product and engineering sign-offs.
 _Avoid_: Mailbox owner, deployment operator
 
+## Feedback
+
+**Feedback submission (Phản hồi)**:
+A bug report or idea submitted by an authenticated user for review, optionally with a screenshot and technical context.
+_Avoid_: Ticket, yêu cầu hỗ trợ, phiếu phản hồi
+
+**Promoted feedback (Phản hồi đã chuyển xử lý)**:
+A reviewed feedback submission selected for follow-up handling; this outcome does not by itself promise implementation.
+_Avoid_: Phản hồi đã chấp nhận, công việc đã cam kết
+
+**Dismissed feedback (Phản hồi không tiếp nhận)**:
+A reviewed feedback submission not selected for follow-up handling; it is a review outcome, not deletion or user withdrawal.
+_Avoid_: Phản hồi đã xóa, phản hồi đã rút
+
+**Withdrawn feedback (Phản hồi đã rút)**:
+A feedback submission retracted by its reporting user; it is distinct from administrative deletion.
+_Avoid_: Phản hồi không tiếp nhận, phản hồi đã xóa
+
+**Feedback review message (Kết quả xem xét)**:
+A user-visible explanation sent by a reviewer when a feedback submission is moved to follow-up handling or not accepted.
+_Avoid_: Ghi chú nội bộ, admin note, private review note
+
+**Feedback sender (Người gửi phản hồi)**:
+The authenticated user who created a feedback submission.
+_Avoid_: Reporter, tác giả, nhà báo
+
 ## Telegram
 
 **Telegram bot connection (Bot Telegram)**:
