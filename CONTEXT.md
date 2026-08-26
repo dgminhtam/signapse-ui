@@ -26,6 +26,10 @@ _Avoid_: Coming-soon site, dashboard
 An application landing-page state that omits product captures when no locale-appropriate capture has been approved, while keeping the complete product story in text.
 _Avoid_: Placeholder mock, synthetic product preview
 
+**AI-assisted market analysis (Phân tích thị trường có AI hỗ trợ)**:
+The public product positioning in which AI lets users ask market questions and supports synthesis, while price, events, reactions, sources, and relationships remain inspectable Signapse surfaces and the user owns the trading decision.
+_Avoid_: AI trading engine, prediction engine, automated trading, trading signals
+
 **Landing release owner**:
 The Signapse Product Owner accountable for approving the public landing cutover after collecting the required product and engineering sign-offs.
 _Avoid_: Mailbox owner, deployment operator
@@ -45,8 +49,16 @@ A reviewed feedback submission not selected for follow-up handling; it is a revi
 _Avoid_: Phản hồi đã xóa, phản hồi đã rút
 
 **Withdrawn feedback (Phản hồi đã rút)**:
-A feedback submission retracted by its reporting user; it is distinct from administrative deletion.
+A feedback submission retracted by its feedback sender and no longer accessible. Withdrawal is an outcome, not a persisted feedback status, and is distinct from administrative deletion.
 _Avoid_: Phản hồi không tiếp nhận, phản hồi đã xóa
+
+**Pending feedback (Phản hồi chờ xem xét)**:
+A feedback submission awaiting its first review outcome.
+_Avoid_: Phản hồi mới, ticket mở
+
+**Administrative feedback deletion (Xóa phản hồi)**:
+The irreversible removal of an existing feedback submission by an authorized administrator, regardless of review outcome; it is distinct from sender withdrawal and reviewer dismissal.
+_Avoid_: Rút phản hồi, không tiếp nhận, lưu trữ phản hồi
 
 **Feedback review message (Kết quả xem xét)**:
 A user-visible explanation sent by a reviewer when a feedback submission is moved to follow-up handling or not accepted.
@@ -55,6 +67,22 @@ _Avoid_: Ghi chú nội bộ, admin note, private review note
 **Feedback sender (Người gửi phản hồi)**:
 The authenticated user who created a feedback submission.
 _Avoid_: Reporter, tác giả, nhà báo
+
+**Feedback action availability (Khả năng thao tác phản hồi)**:
+Whether a feedback submission may currently be withdrawn, reviewed, or administratively deleted, based on its review state, the action scope, and the actor's permission. The backend remains the final authority when concurrent operations race.
+_Avoid_: Backend capability flag, guaranteed mutation success
+
+**Feedback technical context (Thông tin kỹ thuật của phản hồi)**:
+Optional diagnostic metadata knowingly attached by the feedback sender, limited to the page path without query or fragment, application version, identified browser and operating system, locale, and bug observation time. It excludes page content, form data, raw user-agent, IP address, and device identifiers.
+_Avoid_: Tracking data, page snapshot, telemetry payload
+
+**Feedback screenshot (Ảnh chụp phản hồi)**:
+A single manually selected PNG or JPEG image of at most 5 MiB and 25 megapixels attached to a feedback submission.
+_Avoid_: Automatic capture, attachment, document upload
+
+**Promoted feedback issue reference (Tham chiếu issue của phản hồi đã chuyển xử lý)**:
+A positive GitHub issue number parsed from the configured-repository Issue URL supplied during promotion. It is moderation-only reference data and does not mean Signapse created the issue or promised implementation.
+_Avoid_: Automatic GitHub issue, implementation commitment, personal feedback link
 
 ## Telegram
 

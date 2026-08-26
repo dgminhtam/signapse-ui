@@ -50,10 +50,19 @@ describe("localized landing composition", () => {
     expect((html.match(/<h1/g) ?? []).length).toBe(1)
     expect(html).toContain(sequence)
     expect(html).toContain("AI Assistant")
+    expect(html).toContain(
+      locale === "vi"
+        ? "Biến dữ liệu thị trường thành bối cảnh giao dịch có thể kiểm chứng."
+        : "Turn market data into trading context you can verify."
+    )
     expect(html).not.toContain("Product workspace preview")
     expect(html).not.toContain("Market Query")
     expect(html).not.toContain("82%")
     expect(html).not.toContain("evidence counts")
+    expect(html).toContain('data-landing-visual="context-figure"')
+    expect(html).toContain(
+      locale === "vi" ? "Lớp bối cảnh Signapse" : "Signapse context layer"
+    )
   })
 
   it("renders the three primary English product chapters", () => {

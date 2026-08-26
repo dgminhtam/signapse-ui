@@ -9,7 +9,6 @@ import {
   CalendarClock,
   CheckCircle2,
   CircleX,
-  ExternalLink,
   FileText,
   Image as ImageIcon,
   Info,
@@ -20,12 +19,17 @@ import {
 } from "lucide-react"
 
 import {
+  deleteFeedback,
+  dismissFeedback,
+  promoteFeedback,
+  withdrawFeedback,
+} from "@/app/api/feedback/action"
+import {
   FEEDBACK_DELETE_PERMISSION,
   FEEDBACK_READ_PERMISSION,
   FEEDBACK_REVIEW_PERMISSION,
 } from "@/app/lib/feedback/permissions"
-import { useFeedbackFixture } from "@/app/lib/feedback/fixture-provider"
-import type { FeedbackRecord } from "@/app/lib/feedback/definitions"
+import type { FeedbackDetailViewModel } from "@/app/lib/feedback/mappers"
 import { useLocalization } from "@/app/lib/i18n/provider"
 import { useHasPermission } from "@/components/permission-provider"
 import { AccessDenied } from "@/components/access-denied"
@@ -50,7 +54,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Field, FieldError, FieldLabel } from "@/components/ui/field"
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
 
@@ -61,36 +71,24 @@ import {
 } from "./feedback-presentation"
 
 interface FeedbackDetailPageProps {
-  id: string
+  record: FeedbackDetailViewModel | null
   moderation?: boolean
   backHref?: string
+  initialError?: string
 }
 
 export function FeedbackDetailPage({
-  id,
+  record,
   moderation = false,
   backHref: providedBackHref,
+  initialError,
 }: FeedbackDetailPageProps) {
   const { dictionary, formatDateTime } = useLocalization()
   const t = dictionary.feedback
   const router = useRouter()
-  const {
-    getRecord,
-    withdrawSubmission,
-    promoteSubmission,
-    dismissSubmission,
-    eraseSubmission,
-    getMutationMode,
-    hasFeedbackPermission,
-  } = useFeedbackFixture()
-  const canRead = hasFeedbackPermission(FEEDBACK_READ_PERMISSION)
-  const record = getRecord(id)
-  const canReview =
-    useHasPermission(FEEDBACK_REVIEW_PERMISSION) &&
-    hasFeedbackPermission(FEEDBACK_REVIEW_PERMISSION)
-  const canDelete =
-    useHasPermission(FEEDBACK_DELETE_PERMISSION) &&
-    hasFeedbackPermission(FEEDBACK_DELETE_PERMISSION)
+  const canRead = useHasPermission(FEEDBACK_READ_PERMISSION)
+  const canReview = useHasPermission(FEEDBACK_REVIEW_PERMISSION)
+  const canDelete = useHasPermission(FEEDBACK_DELETE_PERMISSION)
   const [reviewKind, setReviewKind] = React.useState<
     "promote" | "dismiss" | null
   >(null)
@@ -119,7 +117,7 @@ export function FeedbackDetailPage({
           </div>
           <h1 className="text-xl font-semibold">{t.missingTitle}</h1>
           <p className="text-sm text-muted-foreground">
-            {t.missingDescription}
+            {initialError ?? t.missingDescription}
           </p>
           <Link
             href={moderation ? "/feedback-submissions" : "/feedback"}
@@ -142,9 +140,19 @@ export function FeedbackDetailPage({
     }
     setWithdrawError(null)
     setIsWithdrawing(true)
-    const result = await withdrawSubmission(record.id)
+    const result = await withdrawFeedback(Number(record.id))
     setIsWithdrawing(false)
     if (!result.success) {
+      if (result.kind === "lifecycle-conflict" || result.status === 404) {
+        setWithdrawOpen(false)
+        toast.info(
+          result.kind === "lifecycle-conflict"
+            ? t.withdrawStale
+            : t.missingDescription
+        )
+        router.refresh()
+        return
+      }
       setWithdrawError(t.withdrawError)
       return
     }
@@ -159,9 +167,15 @@ export function FeedbackDetailPage({
     }
     setEraseError(null)
     setIsErasing(true)
-    const result = await eraseSubmission(record.id)
+    const result = await deleteFeedback(Number(record.id))
     setIsErasing(false)
     if (!result.success) {
+      if (result.status === 404) {
+        setEraseOpen(false)
+        toast.info(t.eraseMissing)
+        router.push(backHref)
+        return
+      }
       setEraseError(t.eraseError)
       return
     }
@@ -170,10 +184,11 @@ export function FeedbackDetailPage({
     router.push(backHref)
   }
 
-  const showWithdraw = !moderation && record.capabilities.canWithdraw
-  const showPromote = moderation && canReview && record.capabilities.canPromote
-  const showDismiss = moderation && canReview && record.capabilities.canDismiss
-  const showErase = moderation && canDelete && record.capabilities.canErase
+  const isPendingReview = record.status === "PENDING_REVIEW"
+  const showWithdraw = !moderation && isPendingReview
+  const showPromote = moderation && canReview && isPendingReview
+  const showDismiss = moderation && canReview && isPendingReview
+  const showErase = moderation && canDelete
 
   return (
     <div className="flex min-w-0 flex-col gap-6">
@@ -186,7 +201,7 @@ export function FeedbackDetailPage({
           {moderation ? t.moderationBack : t.backToHistory}
         </Link>
         <span className="text-xs text-muted-foreground">
-          {t.moderationFixtureNote}
+          {moderation ? t.moderationContext : t.detailTitle}
         </span>
       </div>
 
@@ -281,7 +296,16 @@ export function FeedbackDetailPage({
               <h2 className="text-base font-semibold">{t.detailScreenshot}</h2>
             </div>
             <div className="mt-4" aria-label={t.accessibilityScreenshot}>
-              <FeedbackScreenshotView screenshot={record.screenshot} />
+              <FeedbackScreenshotView
+                screenshot={record.screenshot}
+                screenshotUrl={
+                  record.screenshot
+                    ? moderation
+                      ? `/api/feedback/moderation/${record.id}/screenshot`
+                      : `/api/feedback/personal/${record.id}/screenshot`
+                    : undefined
+                }
+              />
             </div>
           </section>
 
@@ -297,30 +321,42 @@ export function FeedbackDetailPage({
             </div>
             {record.clientContext ? (
               <dl className="mt-4 grid min-w-0 gap-4 sm:grid-cols-2">
-                <MetaValue
-                  label={t.technicalContextFields.pagePath}
-                  value={record.clientContext.pagePath}
-                />
-                <MetaValue
-                  label={t.technicalContextFields.appVersion}
-                  value={record.clientContext.appVersion}
-                />
-                <MetaValue
-                  label={t.technicalContextFields.browser}
-                  value={record.clientContext.browser}
-                />
-                <MetaValue
-                  label={t.technicalContextFields.operatingSystem}
-                  value={record.clientContext.operatingSystem}
-                />
-                <MetaValue
-                  label={t.technicalContextFields.locale}
-                  value={record.clientContext.locale}
-                />
-                <MetaValue
-                  label={t.technicalContextFields.observedAt}
-                  value={record.clientContext.observedAt}
-                />
+                {record.clientContext.pagePath ? (
+                  <MetaValue
+                    label={t.technicalContextFields.pagePath}
+                    value={record.clientContext.pagePath}
+                  />
+                ) : null}
+                {record.clientContext.appVersion ? (
+                  <MetaValue
+                    label={t.technicalContextFields.appVersion}
+                    value={record.clientContext.appVersion}
+                  />
+                ) : null}
+                {record.clientContext.browserName ? (
+                  <MetaValue
+                    label={t.technicalContextFields.browser}
+                    value={record.clientContext.browserName}
+                  />
+                ) : null}
+                {record.clientContext.osName ? (
+                  <MetaValue
+                    label={t.technicalContextFields.operatingSystem}
+                    value={record.clientContext.osName}
+                  />
+                ) : null}
+                {record.clientContext.locale ? (
+                  <MetaValue
+                    label={t.technicalContextFields.locale}
+                    value={record.clientContext.locale}
+                  />
+                ) : null}
+                {record.clientContext.observedAt ? (
+                  <MetaValue
+                    label={t.technicalContextFields.observedAt}
+                    value={record.clientContext.observedAt}
+                  />
+                ) : null}
               </dl>
             ) : (
               <p className="mt-4 text-sm text-muted-foreground">
@@ -400,16 +436,10 @@ export function FeedbackDetailPage({
 
           <section className="rounded-xl border bg-card p-5">
             <h2 className="text-base font-semibold">{t.githubIssue}</h2>
-            {record.githubIssueUrl ? (
-              <a
-                href={record.githubIssueUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-3 inline-flex max-w-full min-w-0 items-center gap-2 text-sm text-primary underline-offset-4 hover:underline"
-              >
-                <ExternalLink className="size-4 shrink-0" aria-hidden="true" />
-                <span className="truncate">{t.openGithubIssue}</span>
-              </a>
+            {moderation && record.githubIssueNumber ? (
+              <p className="mt-3 text-sm font-medium text-foreground">
+                #{record.githubIssueNumber}
+              </p>
             ) : (
               <p className="mt-3 text-sm text-muted-foreground">
                 {t.noGithubIssue}
@@ -429,10 +459,16 @@ export function FeedbackDetailPage({
               setReviewKind(null)
             }
           }}
-          onSubmit={
-            reviewKind === "promote" ? promoteSubmission : dismissSubmission
+          onSubmit={async (input) =>
+            reviewKind === "promote"
+              ? promoteFeedback(Number(record.id), {
+                  reviewMessage: input.reviewMessage,
+                  githubIssueUrl: input.githubIssueUrl ?? "",
+                })
+              : dismissFeedback(Number(record.id), {
+                  reviewMessage: input.reviewMessage,
+                })
           }
-          mutationMode={getMutationMode(reviewKind)}
         />
       ) : null}
 
@@ -547,55 +583,97 @@ function FeedbackReviewDialog({
   open,
   onOpenChange,
   onSubmit,
-  mutationMode,
 }: {
-  record: FeedbackRecord
+  record: FeedbackDetailViewModel
   kind: "promote" | "dismiss"
   open: boolean
   onOpenChange: (open: boolean) => void
   onSubmit: (input: {
-    id: string
     reviewMessage: string
-  }) => Promise<{ success: boolean; error?: string }>
-  mutationMode: string
+    githubIssueUrl?: string
+  }) => Promise<{
+    success: boolean
+    error?: string
+    code?: string
+    kind?: string
+    status?: number
+  }>
 }) {
   const { dictionary } = useLocalization()
   const t = dictionary.feedback
+  const router = useRouter()
   const [message, setMessage] = React.useState("")
+  const [githubIssueUrl, setGithubIssueUrl] = React.useState("")
   const [error, setError] = React.useState<string | null>(null)
+  const [errorField, setErrorField] = React.useState<
+    "message" | "githubIssueUrl" | null
+  >(null)
   const [pending, setPending] = React.useState(false)
   const fieldRef = React.useRef<HTMLTextAreaElement>(null)
+  const githubUrlRef = React.useRef<HTMLInputElement>(null)
   const isPromote = kind === "promote"
 
-  const schema = React.useMemo(
-    () =>
-      z
-        .string()
-        .trim()
-        .min(1, t.reviewMessageRequired)
-        .min(10, t.reviewMessageTooShort)
-        .max(1000, t.reviewMessageTooLong),
-    [t]
-  )
+  const schema = React.useMemo(() => {
+    const messageSchema = z
+      .string()
+      .trim()
+      .min(1, t.reviewMessageRequired)
+      .min(10, t.reviewMessageTooShort)
+      .max(1000, t.reviewMessageTooLong)
+    const urlSchema = isPromote
+      ? z
+          .string()
+          .trim()
+          .min(1, t.githubIssueUrlRequired)
+          .url(t.githubIssueUrlInvalid)
+      : z.string().optional()
+
+    return z.object({ message: messageSchema, githubIssueUrl: urlSchema })
+  }, [isPromote, t])
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    const parsed = schema.safeParse(message)
+    const parsed = schema.safeParse({ message, githubIssueUrl })
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? t.reviewMessageRequired)
-      fieldRef.current?.focus()
+      const issue = parsed.error.issues[0]
+      setError(issue?.message ?? t.reviewMessageRequired)
+      setErrorField(
+        issue?.path[0] === "githubIssueUrl" ? "githubIssueUrl" : "message"
+      )
+      if (issue?.path[0] === "githubIssueUrl") {
+        githubUrlRef.current?.focus()
+      } else {
+        fieldRef.current?.focus()
+      }
       return
     }
     setError(null)
+    setErrorField(null)
     setPending(true)
-    const result = await onSubmit({ id: record.id, reviewMessage: parsed.data })
+    const result = await onSubmit({
+      reviewMessage: parsed.data.message,
+      ...(isPromote ? { githubIssueUrl: parsed.data.githubIssueUrl } : {}),
+    })
     setPending(false)
     if (!result.success) {
-      setError(t.reviewError)
+      if (result.kind === "lifecycle-conflict" || result.status === 404) {
+        onOpenChange(false)
+        toast.info(
+          result.kind === "lifecycle-conflict"
+            ? t.reviewStale
+            : t.missingDescription
+        )
+        router.refresh()
+        return
+      }
+      const backendValidation = result.status === 400 && isPromote
+      setError(backendValidation ? t.githubIssueUrlRepository : t.reviewError)
+      setErrorField(backendValidation ? "githubIssueUrl" : "message")
       return
     }
     toast.success(isPromote ? t.promoteSuccess : t.dismissSuccess)
     onOpenChange(false)
+    router.refresh()
   }
 
   return (
@@ -624,7 +702,7 @@ function FeedbackReviewDialog({
           </div>
         </DialogHeader>
         <form onSubmit={submit} noValidate>
-          <Field data-invalid={Boolean(error)}>
+          <Field data-invalid={errorField === "message"}>
             <FieldLabel htmlFor={`feedback-review-message-${record.id}`}>
               {t.reviewMessageLabel}
             </FieldLabel>
@@ -635,29 +713,60 @@ function FeedbackReviewDialog({
               onChange={(event) => {
                 setMessage(event.target.value)
                 setError(null)
+                setErrorField(null)
               }}
               placeholder={t.reviewMessagePlaceholder}
               maxLength={1000}
               rows={5}
-              aria-invalid={Boolean(error)}
+              aria-invalid={errorField === "message"}
               aria-describedby={
                 error ? "feedback-review-message-error" : undefined
               }
             />
-            {error ? (
+            {error && errorField === "message" ? (
               <FieldError id="feedback-review-message-error">
                 {error}
               </FieldError>
             ) : null}
           </Field>
+          {isPromote ? (
+            <Field
+              className="mt-4"
+              data-invalid={errorField === "githubIssueUrl"}
+            >
+              <FieldLabel htmlFor={`feedback-review-github-${record.id}`}>
+                {t.githubIssueUrlLabel}
+              </FieldLabel>
+              <Input
+                id={`feedback-review-github-${record.id}`}
+                ref={githubUrlRef}
+                value={githubIssueUrl}
+                onChange={(event) => {
+                  setGithubIssueUrl(event.target.value)
+                setError(null)
+                setErrorField(null)
+                }}
+                placeholder={t.githubIssueUrlPlaceholder}
+                aria-invalid={errorField === "githubIssueUrl"}
+                aria-describedby={
+                  errorField === "githubIssueUrl"
+                    ? "feedback-review-github-error"
+                    : undefined
+                }
+              />
+              <FieldDescription>{t.githubIssueUrlRepository}</FieldDescription>
+              {error && errorField === "githubIssueUrl" ? (
+                <FieldError id="feedback-review-github-error">
+                  {error}
+                </FieldError>
+              ) : null}
+            </Field>
+          ) : null}
           <div className="mt-4 min-h-6" aria-live="polite">
             {pending ? (
               <span className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Spinner /> {t.reviewPending}
               </span>
-            ) : null}
-            {mutationMode === "validation-error" && !pending ? (
-              <span className="sr-only">{t.reviewError}</span>
             ) : null}
           </div>
           <DialogFooter>

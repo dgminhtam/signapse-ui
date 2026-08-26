@@ -5,7 +5,7 @@ import { Plus } from "lucide-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
 import { FEEDBACK_PAGE_SIZE } from "@/app/lib/feedback/definitions"
-import { useFeedbackFixture } from "@/app/lib/feedback/fixture-provider"
+import type { FeedbackListItemViewModel } from "@/app/lib/feedback/mappers"
 import { useLocalization } from "@/app/lib/i18n/provider"
 import { LocalizedLink as Link } from "@/components/localized-link"
 import { FeedbackComposeDialog } from "@/components/feedback/feedback-compose-dialog"
@@ -23,12 +23,10 @@ import {
   Empty,
 } from "@/components/ui/empty"
 import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
@@ -39,31 +37,31 @@ import {
   FeedbackTypeBadge,
 } from "./feedback-presentation"
 
-export function FeedbackListPage() {
+interface FeedbackListPageProps {
+  initialPage: {
+    content: FeedbackListItemViewModel[]
+    totalElements: number
+    totalPages: number
+    number: number
+    size: number
+    numberOfElements: number
+  } | null
+  initialError?: string
+}
+
+export function FeedbackListPage({
+  initialPage,
+  initialError,
+}: FeedbackListPageProps) {
   const { dictionary, formatDateTime } = useLocalization()
-  const { personalRecords } = useFeedbackFixture()
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const router = useRouter()
   const [composeOpen, setComposeOpen] = React.useState(false)
-  const isHydrated = React.useSyncExternalStore(
-    React.useCallback(() => () => undefined, []),
-    () => true,
-    () => false
-  )
-
   const page = Math.max(1, Number(searchParams.get("page")) || 1)
-  const totalPages = Math.max(
-    1,
-    Math.ceil(personalRecords.length / FEEDBACK_PAGE_SIZE)
-  )
-  const visibleRecords = personalRecords.slice(
-    (page - 1) * FEEDBACK_PAGE_SIZE,
-    page * FEEDBACK_PAGE_SIZE
-  )
-  const isEmptyState = searchParams.get("state") === "empty"
-  const hasNoPageResults =
-    personalRecords.length > 0 && visibleRecords.length === 0
+  const records = initialPage?.content ?? []
+  const totalPages = Math.max(1, initialPage?.totalPages ?? 1)
+  const hasNoPageResults = Boolean(initialPage) && records.length === 0 && page > 1
 
   function openCompose() {
     setComposeOpen(true)
@@ -71,10 +69,6 @@ export function FeedbackListPage() {
 
   function retry() {
     router.refresh()
-  }
-
-  if (!isHydrated) {
-    return <FeedbackListSkeleton />
   }
 
   return (
@@ -94,14 +88,14 @@ export function FeedbackListPage() {
         </Button>
       </div>
 
-      {searchParams.get("state") === "error" ? (
+      {initialError ? (
         <EmptyState
           title={dictionary.feedback.historyErrorTitle}
-          description={dictionary.feedback.historyErrorDescription}
+          description={initialError}
           actionLabel={dictionary.feedback.historyRetry}
           onAction={retry}
         />
-      ) : isEmptyState || personalRecords.length === 0 ? (
+      ) : records.length === 0 && !hasNoPageResults ? (
         <EmptyState
           title={dictionary.feedback.historyEmptyTitle}
           description={dictionary.feedback.historyEmptyDescription}
@@ -143,7 +137,7 @@ export function FeedbackListPage() {
                 </AppListTableHeaderRow>
               </TableHeader>
               <TableBody>
-                {visibleRecords.map((record) => (
+                {records.map((record) => (
                   <TableRow key={record.id}>
                     <TableCell className="max-w-0 align-top whitespace-normal">
                       <Link
@@ -182,9 +176,9 @@ export function FeedbackListPage() {
           <AppPaginationControls
             page={{
               number: page - 1,
-              numberOfElements: visibleRecords.length,
-              size: FEEDBACK_PAGE_SIZE,
-              totalElements: personalRecords.length,
+              numberOfElements: initialPage?.numberOfElements ?? records.length,
+              size: initialPage?.size ?? FEEDBACK_PAGE_SIZE,
+              totalElements: initialPage?.totalElements ?? records.length,
               totalPages,
             }}
           />
@@ -220,50 +214,5 @@ function EmptyState({
         {actionLabel}
       </Button>
     </Empty>
-  )
-}
-
-function FeedbackListSkeleton() {
-  const { dictionary } = useLocalization()
-
-  return (
-    <div
-      className="flex min-w-0 flex-col gap-6"
-      role="status"
-      aria-busy="true"
-      aria-label={dictionary.feedback.personalListLoading}
-    >
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex flex-col gap-2">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-4 w-80 max-w-full" />
-        </div>
-        <Skeleton className="h-9 w-36" />
-      </div>
-      <AppListTable>
-        <Table>
-          <TableHeader>
-            <AppListTableHeaderRow>
-              {Array.from({ length: 5 }).map((_, index) => (
-                <TableHead key={index}>
-                  <Skeleton className="h-4 w-24" />
-                </TableHead>
-              ))}
-            </AppListTableHeaderRow>
-          </TableHeader>
-          <TableBody>
-            {Array.from({ length: 5 }).map((_, index) => (
-              <TableRow key={index}>
-                {Array.from({ length: 5 }).map((__, cellIndex) => (
-                  <TableCell key={cellIndex}>
-                    <Skeleton className="h-5 w-full max-w-48" />
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </AppListTable>
-    </div>
   )
 }

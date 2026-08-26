@@ -50,8 +50,7 @@ function hasPermissionMatch(
 }
 
 export function createSiteConfig(
-  dictionary: Dictionary,
-  options: { isP0FixtureMode?: boolean } = {}
+  dictionary: Dictionary
 ) {
   return {
     teams: [
@@ -151,15 +150,11 @@ export function createSiteConfig(
             url: "/users",
             permission: "user:update",
           },
-          ...(options.isP0FixtureMode
-            ? [
-                {
-                  title: dictionary.navigation.feedbackModeration,
-                  url: "/feedback-submissions",
-                  permission: FEEDBACK_READ_PERMISSION,
-                },
-              ]
-            : []),
+          {
+            title: dictionary.navigation.feedbackModeration,
+            url: "/feedback-submissions",
+            permission: FEEDBACK_READ_PERMISSION,
+          },
           {
             title: dictionary.navigation.developerToken,
             url: "/developer-token",

@@ -5,17 +5,17 @@ import { Search, SlidersHorizontal } from "lucide-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
 import {
-  FEEDBACK_PAGE_SIZE,
+  FEEDBACK_MODERATION_PAGE_SIZE_OPTIONS,
   FEEDBACK_STATUSES,
   FEEDBACK_TYPES,
-  type FeedbackStatus,
-  type FeedbackType,
 } from "@/app/lib/feedback/definitions"
-import { FEEDBACK_READ_PERMISSION } from "@/app/lib/feedback/permissions"
-import { useFeedbackFixture } from "@/app/lib/feedback/fixture-provider"
+import type { FeedbackListItemViewModel } from "@/app/lib/feedback/mappers"
+import {
+  parseFeedbackModerationQuery,
+  serializeFeedbackModerationUrlQuery,
+} from "@/app/lib/feedback/query"
 import { useLocalization } from "@/app/lib/i18n/provider"
 import { LocalizedLink as Link } from "@/components/localized-link"
-import { AccessDenied } from "@/components/access-denied"
 import {
   AppListTable,
   AppListTableHead,
@@ -32,11 +32,11 @@ import {
 } from "@/components/app-pagination-controls"
 import { Button } from "@/components/ui/button"
 import {
+  Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-  Empty,
 } from "@/components/ui/empty"
 import { Input } from "@/components/ui/input"
 import {
@@ -47,12 +47,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
@@ -63,77 +61,46 @@ import {
   FeedbackTypeBadge,
 } from "../feedback/feedback-presentation"
 
-const DEFAULT_SORT = "createdAt_desc"
-const PAGE_SIZE_OPTIONS = [10, 20, 50]
+interface FeedbackQueuePageProps {
+  initialPage: {
+    content: FeedbackListItemViewModel[]
+    totalElements: number
+    totalPages: number
+    number: number
+    size: number
+    numberOfElements: number
+  } | null
+  initialError?: string
+}
 
-export function FeedbackQueuePage() {
+export function FeedbackQueuePage({
+  initialPage,
+  initialError,
+}: FeedbackQueuePageProps) {
   const { dictionary, formatDateTime } = useLocalization()
   const t = dictionary.feedback
-  const { moderationRecords, hasFeedbackPermission } = useFeedbackFixture()
   const pathname = usePathname()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const isHydrated = React.useSyncExternalStore(
-    React.useCallback(() => () => undefined, []),
-    () => true,
-    () => false
-  )
-  const [searchValue, setSearchValue] = React.useState(
-    searchParams.get("search") ?? ""
-  )
+  const query = parseFeedbackModerationQuery(searchParams)
+  const [searchValue, setSearchValue] = React.useState(query.search)
+  const records = initialPage?.content ?? []
+  const totalPages = Math.max(1, initialPage?.totalPages ?? 1)
+  const hasNoPageResults =
+    Boolean(initialPage) && records.length === 0 && query.page > 1
+  const canonicalQuery = serializeFeedbackModerationUrlQuery(query)
 
   React.useEffect(() => {
     // URL-backed draft state must follow browser Back/Forward changes.
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setSearchValue(searchParams.get("search") ?? "")
-  }, [searchParams])
+    setSearchValue(query.search)
+  }, [query.search])
 
-  const activeSearch = searchParams.get("search")?.trim().toLowerCase() ?? ""
-  const requestedType = searchParams.get("type")
-  const typeFilter = FEEDBACK_TYPES.includes(requestedType as FeedbackType)
-    ? (requestedType as FeedbackType)
-    : ""
-  const requestedStatus = searchParams.get("status")
-  const statusFilter = FEEDBACK_STATUSES.includes(
-    requestedStatus as FeedbackStatus
-  )
-    ? (requestedStatus as FeedbackStatus)
-    : "PENDING_REVIEW"
-  const sort = searchParams.get("sort") ?? DEFAULT_SORT
-  const pageSize = PAGE_SIZE_OPTIONS.includes(Number(searchParams.get("size")))
-    ? Number(searchParams.get("size"))
-    : FEEDBACK_PAGE_SIZE
-  const page = Math.max(1, Number(searchParams.get("page")) || 1)
-  const state = searchParams.get("state")
-
-  const filteredRecords = React.useMemo(() => {
-    const next = moderationRecords.filter((record) => {
-      const matchesSearch =
-        !activeSearch || record.title.toLowerCase().includes(activeSearch)
-      const matchesType = !typeFilter || record.type === typeFilter
-      const matchesStatus = record.status === statusFilter
-      return matchesSearch && matchesType && matchesStatus
-    })
-
-    return [...next].sort((left, right) => {
-      if (sort === "title_asc") return left.title.localeCompare(right.title)
-      if (sort === "title_desc") return right.title.localeCompare(left.title)
-      const direction = sort === "createdAt_asc" ? 1 : -1
-      return (
-        (new Date(left.createdAt).getTime() -
-          new Date(right.createdAt).getTime()) *
-        direction
-      )
-    })
-  }, [activeSearch, moderationRecords, sort, statusFilter, typeFilter])
-
-  const totalPages = Math.max(1, Math.ceil(filteredRecords.length / pageSize))
-  const visibleRecords = filteredRecords.slice(
-    (page - 1) * pageSize,
-    page * pageSize
-  )
-  const hasNoPageResults =
-    filteredRecords.length > 0 && visibleRecords.length === 0
+  React.useEffect(() => {
+    if (searchParams.toString() !== canonicalQuery) {
+      router.replace(`${pathname}?${canonicalQuery}`)
+    }
+  }, [canonicalQuery, pathname, router, searchParams])
 
   function updateQuery(updates: Record<string, string | null>) {
     const next = new URLSearchParams(searchParams)
@@ -149,18 +116,9 @@ export function FeedbackQueuePage() {
     updateQuery({ search: searchValue.trim() || null, page: "1" })
   }
 
-  if (!isHydrated) {
-    return <FeedbackQueueSkeleton />
-  }
-
-  if (!hasFeedbackPermission(FEEDBACK_READ_PERMISSION)) {
-    return (
-      <AccessDenied
-        description={t.readDenied}
-        permission={FEEDBACK_READ_PERMISSION}
-      />
-    )
-  }
+  const hasFilters = Boolean(
+    query.search || query.type || query.status !== "PENDING_REVIEW"
+  )
 
   return (
     <div className="flex min-w-0 flex-col gap-6">
@@ -170,9 +128,6 @@ export function FeedbackQueuePage() {
         </h1>
         <p className="max-w-3xl text-sm text-muted-foreground">
           {t.moderationDescription}
-        </p>
-        <p className="text-xs text-muted-foreground">
-          {t.moderationFixtureNote}
         </p>
       </div>
 
@@ -206,7 +161,7 @@ export function FeedbackQueuePage() {
         </AppListToolbarLeading>
         <AppListToolbarTrailing>
           <Select
-            value={typeFilter || "ALL"}
+            value={query.type ?? "ALL"}
             onValueChange={(value) =>
               updateQuery({ type: value === "ALL" ? null : value, page: "1" })
             }
@@ -236,9 +191,12 @@ export function FeedbackQueuePage() {
             </SelectContent>
           </Select>
           <Select
-            value={statusFilter}
+            value={query.status}
             onValueChange={(value) =>
-              updateQuery({ status: value || null, page: "1" })
+              updateQuery({
+                status: value === "PENDING_REVIEW" ? null : value,
+                page: "1",
+              })
             }
             items={FEEDBACK_STATUSES.map((status) => ({
               value: status,
@@ -262,15 +220,13 @@ export function FeedbackQueuePage() {
             </SelectContent>
           </Select>
           <Select
-            value={sort}
+            value={query.sort}
             onValueChange={(value) =>
-              updateQuery({ sort: value || DEFAULT_SORT, page: "1" })
+              updateQuery({ sort: value || "createdDate_desc", page: "1" })
             }
             items={[
-              { value: "createdAt_desc", label: t.queueSortNewest },
-              { value: "createdAt_asc", label: t.queueSortOldest },
-              { value: "title_asc", label: t.queueSortTitleAsc },
-              { value: "title_desc", label: t.queueSortTitleDesc },
+              { value: "createdDate_desc", label: t.queueSortNewest },
+              { value: "createdDate_asc", label: t.queueSortOldest },
             ]}
           >
             <SelectTrigger
@@ -281,15 +237,11 @@ export function FeedbackQueuePage() {
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="createdAt_desc">
+                <SelectItem value="createdDate_desc">
                   {t.queueSortNewest}
                 </SelectItem>
-                <SelectItem value="createdAt_asc">
+                <SelectItem value="createdDate_asc">
                   {t.queueSortOldest}
-                </SelectItem>
-                <SelectItem value="title_asc">{t.queueSortTitleAsc}</SelectItem>
-                <SelectItem value="title_desc">
-                  {t.queueSortTitleDesc}
                 </SelectItem>
               </SelectGroup>
             </SelectContent>
@@ -297,32 +249,30 @@ export function FeedbackQueuePage() {
         </AppListToolbarTrailing>
       </AppListToolbar>
 
-      {state === "error" ? (
+      {initialError ? (
         <QueueEmptyState
           title={t.queueErrorTitle}
-          description={t.queueErrorDescription}
+          description={initialError}
           actionLabel={t.queueRetry}
           onAction={() => router.refresh()}
         />
-      ) : state === "empty" || filteredRecords.length === 0 ? (
+      ) : records.length === 0 && !hasNoPageResults ? (
         <QueueEmptyState
-          title={
-            activeSearch || typeFilter || requestedStatus
-              ? t.queueNoResultsTitle
-              : t.queueEmptyTitle
-          }
+          title={hasFilters ? t.queueNoResultsTitle : t.queueEmptyTitle}
           description={
-            activeSearch || typeFilter || requestedStatus
-              ? t.queueNoResultsDescription
-              : t.queueEmptyDescription
+            hasFilters ? t.queueNoResultsDescription : t.queueEmptyDescription
           }
-          actionLabel={
-            activeSearch || typeFilter || requestedStatus
-              ? dictionary.common.reset
-              : t.queueRetry
-          }
+          actionLabel={hasFilters ? dictionary.common.reset : t.queueRetry}
           onAction={() =>
-            updateQuery({ search: null, type: null, status: null, page: "1" })
+            hasFilters
+              ? updateQuery({
+                  search: null,
+                  type: null,
+                  status: null,
+                  sort: null,
+                  page: "1",
+                })
+              : router.refresh()
           }
         />
       ) : hasNoPageResults ? (
@@ -354,7 +304,7 @@ export function FeedbackQueuePage() {
                 </AppListTableHeaderRow>
               </TableHeader>
               <TableBody>
-                {visibleRecords.map((record) => (
+                {records.map((record) => (
                   <TableRow key={record.id}>
                     <TableCell className="align-top">
                       <FeedbackTypeBadge type={record.type} />
@@ -397,8 +347,8 @@ export function FeedbackQueuePage() {
           <div className="flex flex-col gap-3 rounded-xl border border-border/60 bg-muted/20 px-4 py-3 sm:flex-row sm:items-center sm:justify-end">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
               <PaginationPageSizeSelect
-                value={pageSize}
-                options={PAGE_SIZE_OPTIONS}
+                value={query.size}
+                options={[...FEEDBACK_MODERATION_PAGE_SIZE_OPTIONS]}
                 isPending={false}
                 showLabel
                 onValueChange={(value) =>
@@ -406,7 +356,7 @@ export function FeedbackQueuePage() {
                 }
               />
               <PaginationNavigation
-                currentPage={page}
+                currentPage={query.page}
                 totalPageCount={totalPages}
                 isPending={false}
                 onPageChange={(nextPage) =>
@@ -445,53 +395,5 @@ function QueueEmptyState({
         {actionLabel}
       </Button>
     </Empty>
-  )
-}
-
-function FeedbackQueueSkeleton() {
-  const { dictionary } = useLocalization()
-
-  return (
-    <div
-      className="flex min-w-0 flex-col gap-6"
-      role="status"
-      aria-busy="true"
-      aria-label={dictionary.feedback.queueLoading}
-    >
-      <div className="flex flex-col gap-2">
-        <Skeleton className="h-8 w-56" />
-        <Skeleton className="h-4 w-96 max-w-full" />
-      </div>
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <Skeleton className="h-9 flex-1" />
-        <Skeleton className="h-9 w-40" />
-        <Skeleton className="h-9 w-40" />
-        <Skeleton className="h-9 w-40" />
-      </div>
-      <AppListTable>
-        <Table>
-          <TableHeader>
-            <AppListTableHeaderRow>
-              {Array.from({ length: 5 }).map((_, index) => (
-                <TableHead key={index}>
-                  <Skeleton className="h-4 w-24" />
-                </TableHead>
-              ))}
-            </AppListTableHeaderRow>
-          </TableHeader>
-          <TableBody>
-            {Array.from({ length: 6 }).map((_, index) => (
-              <TableRow key={index}>
-                {Array.from({ length: 5 }).map((__, cellIndex) => (
-                  <TableCell key={cellIndex}>
-                    <Skeleton className="h-5 w-full max-w-48" />
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </AppListTable>
-    </div>
   )
 }

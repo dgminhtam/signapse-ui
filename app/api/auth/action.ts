@@ -24,7 +24,11 @@ import {
 const API_TIMEOUT_MS = 60000
 const TEST_RUN_ID_COOKIE = "signapse_test_run_id"
 const TEST_RUN_ID_HEADER = "x-signapse-test-run-id"
-type ApiFetchError = Error & { status?: number }
+export type BackendApiError = Error & {
+  status?: number
+  code?: string
+  timestamp?: string
+}
 
 async function getFixtureTestRunHeaders(): Promise<Record<string, string>> {
   if (!isP0FixtureModeEnabled()) {
@@ -110,6 +114,8 @@ async function apiFetch<T>(
         if (!response.ok) {
           const errorText = await response.text()
           let errorMessage = dictionary.errors.generic
+          let errorCode: string | undefined
+          let errorTimestamp: string | undefined
           try {
             if (errorText) {
               const errorJson: unknown = JSON.parse(errorText)
@@ -121,6 +127,22 @@ async function apiFetch<T>(
               ) {
                 errorMessage = errorJson.message
               }
+              if (
+                typeof errorJson === "object" &&
+                errorJson !== null &&
+                "code" in errorJson &&
+                typeof errorJson.code === "string"
+              ) {
+                errorCode = errorJson.code
+              }
+              if (
+                typeof errorJson === "object" &&
+                errorJson !== null &&
+                "timestamp" in errorJson &&
+                typeof errorJson.timestamp === "string"
+              ) {
+                errorTimestamp = errorJson.timestamp
+              }
             }
           } catch {
             errorMessage = errorText || errorMessage
@@ -129,8 +151,10 @@ async function apiFetch<T>(
             "http.status_code": response.status,
           })
           failureRecorded = true
-          const apiError = new Error(errorMessage) as ApiFetchError
+          const apiError = new Error(errorMessage) as BackendApiError
           apiError.status = response.status
+          apiError.code = errorCode
+          apiError.timestamp = errorTimestamp
           throw apiError
         }
 

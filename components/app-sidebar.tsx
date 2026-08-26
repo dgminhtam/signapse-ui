@@ -84,7 +84,7 @@ export function AppSidebar({
   ...props
 }: AppSidebarProps) {
   const { dictionary } = useLocalization()
-  const localizedSiteConfig = createSiteConfig(dictionary, { isP0FixtureMode })
+  const localizedSiteConfig = createSiteConfig(dictionary)
   const visibleNavItems = filterNavItemsByPermissions(
     localizedSiteConfig.navMain,
     permissions
@@ -306,21 +306,17 @@ function NavUser({ user, isP0FixtureMode }: NavUserProps) {
                 {dictionary.auth.notifications}
               </DropdownMenuItem>
             </DropdownMenuGroup>
-            {isP0FixtureMode ? (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  <DropdownMenuItem onClick={() => setComposeOpen(true)}>
-                    <MessageSquareText />
-                    {dictionary.feedback.composeAction}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem render={<Link href="/feedback" />}>
-                    <ClipboardListIcon />
-                    {dictionary.feedback.historyAction}
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-              </>
-            ) : null}
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuItem onClick={() => setComposeOpen(true)}>
+                <MessageSquareText />
+                {dictionary.feedback.composeAction}
+              </DropdownMenuItem>
+              <DropdownMenuItem render={<Link href="/feedback" />}>
+                <ClipboardListIcon />
+                {dictionary.feedback.historyAction}
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
             {isP0FixtureMode ? null : (
               <>
                 <DropdownMenuSeparator />
@@ -338,12 +334,10 @@ function NavUser({ user, isP0FixtureMode }: NavUserProps) {
             )}
           </DropdownMenuContent>
         </DropdownMenu>
-        {isP0FixtureMode ? (
-          <FeedbackComposeDialog
-            open={composeOpen}
-            onOpenChange={setComposeOpen}
-          />
-        ) : null}
+        <FeedbackComposeDialog
+          open={composeOpen}
+          onOpenChange={setComposeOpen}
+        />
       </SidebarMenuItem>
     </SidebarMenu>
   )

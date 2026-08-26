@@ -6,12 +6,16 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { FileImage, FileQuestion, ImagePlus, X } from "lucide-react"
 
-import { useFeedbackFixture } from "@/app/lib/feedback/fixture-provider"
+import { createFeedbackSubmission } from "@/app/api/feedback/action"
 import type {
-  FeedbackSubmitInput,
   FeedbackTechnicalContext,
   FeedbackType,
 } from "@/app/lib/feedback/definitions"
+import {
+  getFeedbackTechnicalContext,
+  toFeedbackSubmissionContext,
+  validateFeedbackScreenshot,
+} from "@/app/lib/feedback/validation"
 import { useLocalization } from "@/app/lib/i18n/provider"
 import { useLocalizedPath } from "@/components/localized-link"
 import { Button } from "@/components/ui/button"
@@ -71,20 +75,6 @@ const initialValues: ComposeValues = {
   reproductionSteps: "",
 }
 
-function getTechnicalContext(locale: "vi" | "en"): FeedbackTechnicalContext {
-  const userAgent = typeof navigator === "undefined" ? "" : navigator.userAgent
-  const platform = typeof navigator === "undefined" ? "" : navigator.platform
-
-  return {
-    pagePath: typeof window === "undefined" ? "/" : window.location.pathname,
-    appVersion: "fixture-0.1",
-    browser: userAgent || "Unknown browser",
-    operatingSystem: platform || "Unknown operating system",
-    locale,
-    observedAt: new Date().toISOString(),
-  }
-}
-
 function formatFileSize(bytes: number, locale: "vi" | "en") {
   if (bytes < 1024) {
     return `${bytes} B`
@@ -107,7 +97,6 @@ export function FeedbackComposeDialog({
   const t = dictionary.feedback
   const router = useRouter()
   const historyPath = useLocalizedPath("/feedback")
-  const { createSubmission, getMutationMode } = useFeedbackFixture()
   const [values, setValues] = React.useState<ComposeValues>(initialValues)
   const [errors, setErrors] = React.useState<
     Partial<Record<ComposeField, string>>
@@ -116,6 +105,9 @@ export function FeedbackComposeDialog({
   const [technicalContext, setTechnicalContext] =
     React.useState<FeedbackTechnicalContext | null>(null)
   const [screenshot, setScreenshot] = React.useState<SelectedScreenshot | null>(
+    null
+  )
+  const [screenshotError, setScreenshotError] = React.useState<string | null>(
     null
   )
   const [isDiscardOpen, setIsDiscardOpen] = React.useState(false)
@@ -174,8 +166,9 @@ export function FeedbackComposeDialog({
     setValues(initialValues)
     setErrors({})
     setIncludeContext(true)
-    setTechnicalContext(getTechnicalContext(locale))
+    setTechnicalContext(getFeedbackTechnicalContext(locale))
     setScreenshot(null)
+    setScreenshotError(null)
     setIsDiscardOpen(false)
   }, [locale, open])
 
@@ -243,35 +236,36 @@ export function FeedbackComposeDialog({
     }
 
     setIsSubmitting(true)
-    const selectedScreenshot = screenshot
-      ? {
-          name: screenshot.file.name,
-          mimeType: screenshot.file.type || "application/octet-stream",
-          size: screenshot.file.size,
-          previewable: Boolean(screenshot.previewUrl),
-        }
-      : undefined
-    const payload: FeedbackSubmitInput = {
+    const submission = {
       type: parsed.type,
       title: parsed.title,
       description: parsed.description,
       expectedOutcome: parsed.expectedOutcome,
-      reproductionSteps:
-        parsed.type === "BUG" ? parsed.reproductionSteps : undefined,
-      clientContext: includeContext
-        ? (technicalContext ?? undefined)
-        : undefined,
-      screenshot: selectedScreenshot,
+      ...(parsed.type === "BUG" && parsed.reproductionSteps
+        ? { reproductionSteps: parsed.reproductionSteps }
+        : {}),
+      ...(includeContext && technicalContext
+        ? {
+            clientContext: toFeedbackSubmissionContext(
+              technicalContext,
+              parsed.type
+            ),
+          }
+        : {}),
     }
-    const result = await createSubmission(payload)
+    const request = new FormData()
+    request.append(
+      "submission",
+      new Blob([JSON.stringify(submission)], { type: "application/json" })
+    )
+    if (screenshot) {
+      request.append("screenshot", screenshot.file, screenshot.file.name)
+    }
+    const result = await createFeedbackSubmission(request)
     setIsSubmitting(false)
 
     if (!result.success) {
-      toast.error(
-        getMutationMode("compose") === "validation-error"
-          ? t.submitError
-          : localizeMessage(t.submitError, {})
-      )
+      toast.error(localizeMessage(result.error, {}))
       return
     }
 
@@ -284,19 +278,33 @@ export function FeedbackComposeDialog({
     setValues(initialValues)
     setErrors({})
     setScreenshot(null)
+    setScreenshotError(null)
     onOpenChange(false)
+    router.push(`${historyPath}?page=1`)
   }
 
-  function handleScreenshotChange(event: React.ChangeEvent<HTMLInputElement>) {
+  async function handleScreenshotChange(
+    event: React.ChangeEvent<HTMLInputElement>
+  ) {
     const file = event.target.files?.[0]
     event.target.value = ""
     if (!file) {
       return
     }
 
-    const previewUrl = file.type.startsWith("image/")
-      ? URL.createObjectURL(file)
-      : undefined
+    const validationError = await validateFeedbackScreenshot(file, {
+      unsupported: t.screenshotUnsupported,
+      tooLarge: t.screenshotTooLarge,
+      dimensionsTooLarge: t.screenshotDimensionsTooLarge,
+    })
+    if (validationError) {
+      setScreenshot(null)
+      setScreenshotError(validationError)
+      return
+    }
+
+    setScreenshotError(null)
+    const previewUrl = URL.createObjectURL(file)
     setScreenshot({ file, previewUrl })
   }
 
@@ -305,6 +313,7 @@ export function FeedbackComposeDialog({
     setValues(initialValues)
     setErrors({})
     setScreenshot(null)
+    setScreenshotError(null)
     setIncludeContext(true)
     onOpenChange(false)
   }
@@ -545,7 +554,7 @@ export function FeedbackComposeDialog({
                 ) : null}
               </Field>
 
-              <Field>
+              <Field data-invalid={Boolean(screenshotError)}>
                 <FieldLabel htmlFor="feedback-screenshot">
                   {t.screenshotLabel}
                 </FieldLabel>
@@ -561,7 +570,7 @@ export function FeedbackComposeDialog({
                   <Input
                     id="feedback-screenshot"
                     type="file"
-                    accept="image/*,.pdf,.txt"
+                    accept="image/png,image/jpeg"
                     className="sr-only"
                     onChange={handleScreenshotChange}
                   />
@@ -571,6 +580,9 @@ export function FeedbackComposeDialog({
                     </span>
                   ) : null}
                 </div>
+                {screenshotError ? (
+                  <FieldError>{screenshotError}</FieldError>
+                ) : null}
                 {screenshot ? (
                   <div className="mt-3 flex flex-col gap-3 rounded-lg border bg-muted/20 p-3 sm:flex-row sm:items-start">
                     {screenshot.previewUrl ? (

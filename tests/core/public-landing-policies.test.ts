@@ -26,8 +26,8 @@ const accessCopy = {
     requestAccessAria: "Request access to Signapse",
     signInAria: "Sign in to Signapse",
     openDashboardAria: "Open the Signapse dashboard",
-    exploreJourney: "See how it works",
-    exploreJourneyAria: "See how Signapse supports analysis",
+    exploreJourney: "See how Signapse analyzes markets",
+    exploreJourneyAria: "See how Signapse supports market analysis",
     requestAccessNote: "This action opens your email application.",
   },
   footer: {
@@ -113,7 +113,7 @@ describe("landing locale links", () => {
 describe("landing metadata policy", () => {
   const input = {
     locale: "vi" as const,
-    title: "Signapse | Phân tích thị trường theo bối cảnh sự kiện",
+    title: "Signapse | AI cho phân tích giao dịch",
     description: "Localized description",
     socialImageAlt: "Localized social card",
   }

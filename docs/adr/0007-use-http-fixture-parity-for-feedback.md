@@ -1,0 +1,3 @@
+# Use HTTP fixture parity for feedback integration
+
+Feedback P0 coverage and live operation will use the same frontend Server Actions, response parsers, mappers, and screenshot route handlers. P0 will substitute the deterministic local fixture server for the live backend, including multipart upload, binary responses, permissions, failures, and concurrent-state scenarios; it will not substitute an in-memory client provider or add test controls to production requests. This makes the fixture server more involved, but verifies the transport boundary exercised in production and prevents fixture-only behavior from becoming a hidden fallback.

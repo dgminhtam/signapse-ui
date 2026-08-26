@@ -58,6 +58,108 @@ function note(id, title, text) {
   }
 }
 
+const FEEDBACK_OWNER_ID = 9001
+const FEEDBACK_OWNER = {
+  id: FEEDBACK_OWNER_ID,
+  email: "fixture.user@signapse.test",
+  firstName: "Fixture",
+  lastName: "User",
+  active: true,
+}
+const FEEDBACK_SCREENSHOT_BYTES = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+  "base64"
+)
+
+function feedbackRecord(
+  id,
+  type,
+  title,
+  status = "PENDING_REVIEW",
+  options = {}
+) {
+  const screenshot = options.screenshot
+    ? {
+        id: 1000 + id,
+        mimeType: options.mimeType ?? "image/png",
+        size: FEEDBACK_SCREENSHOT_BYTES.length,
+      }
+    : null
+  return {
+    id,
+    ownerId: options.ownerId ?? FEEDBACK_OWNER_ID,
+    type,
+    title,
+    description:
+      options.description ??
+      "The feedback description is long enough for the API contract.",
+    expectedOutcome:
+      options.expectedOutcome ??
+      "The expected outcome is explicit and actionable.",
+    reproductionSteps:
+      type === "BUG"
+        ? options.reproductionSteps ?? "1. Open the affected screen."
+        : undefined,
+    clientContext:
+      options.clientContext === false
+        ? null
+        : {
+            pagePath: "/vi/dashboard",
+            appVersion: "web",
+            browserName: "Chrome",
+            browserVersion: "128",
+            osName: "Windows",
+            osVersion: "11",
+            locale: "vi",
+            ...(type === "BUG"
+              ? { observedTime: "2026-01-15T08:00:00.000Z" }
+              : {}),
+          },
+    screenshot,
+    status,
+    createdDate: options.createdDate ?? NOW,
+    lastModifiedDate: options.lastModifiedDate ?? NOW,
+    reviewMessage: options.reviewMessage ?? null,
+    ...(status === "PROMOTED" && options.githubIssueNumber
+      ? { githubIssueNumber: options.githubIssueNumber }
+      : {}),
+    reporter: FEEDBACK_OWNER,
+  }
+}
+
+function feedbackListItem(record) {
+  return {
+    id: record.id,
+    type: record.type,
+    title: record.title,
+    status: record.status,
+    createdDate: record.createdDate,
+    lastModifiedDate: record.lastModifiedDate,
+    screenshot: record.screenshot,
+  }
+}
+
+function feedbackDetail(record, moderation = false) {
+  const detail = { ...record }
+  if (!moderation) {
+    delete detail.ownerId
+    delete detail.reporter
+    delete detail.githubIssueNumber
+  }
+  return detail
+}
+
+function feedbackRecords() {
+  return [
+    feedbackRecord(1, "BUG", "Biểu đồ không giữ bộ lọc sau khi đổi ngôn ngữ", "PENDING_REVIEW", { screenshot: true, createdDate: "2026-01-15T08:00:00.000Z" }),
+    feedbackRecord(2, "IDEA", "Thêm bộ lọc tài sản yêu thích", "PROMOTED", { githubIssueNumber: 123, clientContext: false, createdDate: "2026-01-14T08:00:00.000Z", reviewMessage: "Đã chuyển xử lý để nhóm sản phẩm xem xét." }),
+    feedbackRecord(3, "BUG", "Thông báo lỗi thiếu hướng dẫn", "DISMISSED", { clientContext: false, createdDate: "2026-01-13T08:00:00.000Z", reviewMessage: "Không phù hợp với phạm vi hiện tại." }),
+    feedbackRecord(4, "IDEA", "Cải thiện trang tổng quan", "PENDING_REVIEW", { ownerId: 9010, createdDate: "2026-01-12T08:00:00.000Z" }),
+    feedbackRecord(5, "BUG", "Ảnh chụp màn hình không hiển thị", "PENDING_REVIEW", { screenshot: true, createdDate: "2026-01-11T08:00:00.000Z" }),
+    feedbackRecord(6, "BUG", "Tín hiệu thị trường cần thêm ngữ cảnh", "PENDING_REVIEW", { screenshot: true, createdDate: "2026-01-10T08:00:00.000Z" }),
+  ]
+}
+
 function createState() {
   const primaryWorkspace = workspace(1, "Workspace Alpha", true)
   const secondaryWorkspace = workspace(2, "Workspace Beta")
@@ -79,6 +181,9 @@ function createState() {
   return {
     workspaces: [primaryWorkspace, secondaryWorkspace],
     notes: [note(31, "Morning brief", "Review the fixture market brief.")],
+    feedback: feedbackRecords(),
+    feedbackPermissions: ["feedback:read", "feedback:review", "feedback:delete"],
+    feedbackScenarios: {},
     assets: [
       {
         id: 101,
@@ -229,7 +334,7 @@ function createState() {
     streamConnections: 0,
     requests: [],
     violations: [],
-    nextIds: { workspace: 3, note: 32, schedule: 52 },
+    nextIds: { workspace: 3, note: 32, schedule: 52, feedback: 7 },
   }
 }
 
@@ -270,13 +375,37 @@ async function readBody(request) {
   for await (const chunk of request) chunks.push(chunk)
   if (chunks.length === 0) return null
 
-  const raw = Buffer.concat(chunks).toString("utf8")
+  const buffer = Buffer.concat(chunks)
+  const contentType = String(request.headers["content-type"] ?? "")
+  if (contentType.startsWith("multipart/form-data;")) {
+    return { __multipart: true, raw: buffer, contentType }
+  }
+
+  const raw = buffer.toString("utf8")
   if (!raw) return null
 
   try {
     return JSON.parse(raw)
   } catch {
     return raw
+  }
+}
+
+function multipartSubmission(body) {
+  if (!body?.__multipart || !Buffer.isBuffer(body.raw)) return null
+  const text = body.raw.toString("utf8")
+  const match = text.match(
+    /name="submission"[^\r\n]*\r\n(?:[^\r\n]*\r\n)*\r\n([\s\S]*?)\r\n--/
+  )
+  let submission = null
+  try {
+    submission = match ? JSON.parse(match[1]) : null
+  } catch {
+    submission = null
+  }
+  return {
+    submission,
+    hasScreenshot: /name="screenshot"/.test(text),
   }
 }
 
@@ -638,7 +767,209 @@ async function streamLive(response, state, url, scenario) {
   setTimeout(() => response.end(), 400)
 }
 
+function feedbackPermission(state, permission) {
+  return state.feedbackPermissions.includes("*") ||
+    state.feedbackPermissions.includes(permission)
+}
+
+function feedbackScenarioFor(state, method, pathname) {
+  if (method === "POST" && pathname === "/me/feedback-submissions") {
+    return state.feedbackScenarios.compose ?? state.feedbackScenarios.feedback
+  }
+  if (pathname.startsWith("/me/feedback-submissions/") && method === "DELETE") {
+    return state.feedbackScenarios.withdraw ?? state.feedbackScenarios.feedback
+  }
+  if (pathname.endsWith("/promote")) {
+    return state.feedbackScenarios.promote ?? state.feedbackScenarios.feedback
+  }
+  if (pathname.endsWith("/dismiss")) {
+    return state.feedbackScenarios.dismiss ?? state.feedbackScenarios.feedback
+  }
+  if (pathname.startsWith("/feedback-submissions/") && method === "DELETE") {
+    return state.feedbackScenarios.erase ?? state.feedbackScenarios.feedback
+  }
+  if (pathname.includes("/screenshot")) {
+    return state.feedbackScenarios.screenshot ?? state.feedbackScenarios.feedback
+  }
+  return state.feedbackScenarios.feedback
+}
+
+function feedbackErrorForScenario(scenario, kind) {
+  if (scenario === "validation-error") {
+    return { __status: 400, payload: errorPayload("Fixture validation failed", "FIXTURE_VALIDATION") }
+  }
+  if (scenario === "payload-too-large") {
+    return { __status: 413, payload: errorPayload("Fixture payload is too large", "FIXTURE_PAYLOAD_TOO_LARGE") }
+  }
+  if (scenario === "storage-failure") {
+    return { __status: 502, payload: errorPayload("Fixture storage unavailable", "FIXTURE_STORAGE_FAILURE") }
+  }
+  if (scenario === "not-found") {
+    return { __status: 404, payload: errorPayload("Feedback not found", "NOT_FOUND") }
+  }
+  if (scenario === "lifecycle-conflict") {
+    const code = kind === "withdraw"
+      ? "FEEDBACK_NO_LONGER_WITHDRAWABLE"
+      : "FEEDBACK_ALREADY_REVIEWED"
+    return { __status: 409, payload: errorPayload("Feedback lifecycle changed", code) }
+  }
+  if (scenario === "malformed") {
+    return { __status: 200, payload: { id: "malformed" } }
+  }
+  return null
+}
+
+function feedbackRouteResult(state, method, pathname, url, body) {
+  const personalDetailMatch = pathname.match(/^\/me\/feedback-submissions\/(\d+)$/)
+  const moderationDetailMatch = pathname.match(/^\/feedback-submissions\/(\d+)$/)
+  const personalScreenshotMatch = pathname.match(/^\/me\/feedback-submissions\/(\d+)\/screenshot$/)
+  const moderationScreenshotMatch = pathname.match(/^\/feedback-submissions\/(\d+)\/screenshot$/)
+  const promoteMatch = pathname.match(/^\/feedback-submissions\/(\d+)\/promote$/)
+  const dismissMatch = pathname.match(/^\/feedback-submissions\/(\d+)\/dismiss$/)
+  const scenario = feedbackScenarioFor(state, method, pathname) ?? "success"
+  const kind = pathname.startsWith("/me/") && method === "DELETE"
+    ? "withdraw"
+    : pathname.endsWith("/promote")
+      ? "promote"
+      : pathname.endsWith("/dismiss")
+        ? "dismiss"
+        : pathname.startsWith("/feedback-submissions/") && method === "DELETE"
+          ? "erase"
+          : "feedback"
+  if (scenario === "timeout") return { __status: 504, payload: errorPayload("Fixture request timed out", "FIXTURE_TIMEOUT") }
+  if (scenario === "outage") return { __status: 503, payload: errorPayload("Fixture backend is unavailable", "FIXTURE_OUTAGE") }
+  if (scenario === "server-failure") return { __status: 500, payload: errorPayload("Fixture server failure", "FIXTURE_SERVER_FAILURE") }
+  if (scenario === "mutation-failure") {
+    return { __status: 409, payload: errorPayload("Fixture mutation failed", kind === "withdraw" ? "FEEDBACK_NO_LONGER_WITHDRAWABLE" : "FEEDBACK_ALREADY_REVIEWED") }
+  }
+  const scenarioError = feedbackErrorForScenario(scenario, kind)
+  if (scenarioError) return scenarioError
+
+  const moderationPath = pathname.startsWith("/feedback-submissions")
+  if (moderationPath && pathname !== "/feedback-submissions" && !feedbackPermission(state, pathname.endsWith("/promote") || pathname.endsWith("/dismiss") ? "feedback:review" : pathname.endsWith("/screenshot") || method === "GET" ? "feedback:read" : "feedback:delete")) {
+    return { __status: 403, payload: errorPayload("Feedback permission denied", "FORBIDDEN") }
+  }
+  if (moderationPath && pathname === "/feedback-submissions" && !feedbackPermission(state, "feedback:read")) {
+    return { __status: 403, payload: errorPayload("Feedback permission denied", "FORBIDDEN") }
+  }
+
+  if (method === "GET" && pathname === "/me/feedback-submissions") {
+    return slicePage(
+      state.feedback.filter((item) => item.ownerId === FEEDBACK_OWNER_ID).map(feedbackListItem),
+      url
+    )
+  }
+  if (method === "GET" && pathname === "/feedback-submissions") {
+    return slicePage(state.feedback.map(feedbackListItem), url)
+  }
+  if (method === "POST" && pathname === "/me/feedback-submissions") {
+    const parsed = multipartSubmission(body)
+    const submission = parsed?.submission
+    if (!submission || !["BUG", "IDEA"].includes(submission.type)) {
+      return { __status: 400, payload: errorPayload("Invalid feedback submission", "FIXTURE_VALIDATION") }
+    }
+    if (
+      submission.type === "IDEA" &&
+      (submission.reproductionSteps || submission.clientContext?.observedTime)
+    ) {
+      return { __status: 400, payload: errorPayload("Invalid conditional feedback fields", "FIXTURE_VALIDATION") }
+    }
+    const created = feedbackRecord(
+      state.nextIds.feedback++,
+      submission.type,
+      submission.title,
+      "PENDING_REVIEW",
+      {
+        description: submission.description,
+        expectedOutcome: submission.expectedOutcome,
+        reproductionSteps: submission.reproductionSteps,
+        clientContext: submission.clientContext ?? false,
+        screenshot: Boolean(parsed?.hasScreenshot),
+      }
+    )
+    state.feedback.unshift(created)
+    return feedbackDetail(created, false)
+  }
+  if (personalDetailMatch) {
+    const id = Number(personalDetailMatch[1])
+    const existing = state.feedback.find((item) => item.id === id && item.ownerId === FEEDBACK_OWNER_ID)
+    if (!existing) return { __status: 404, payload: errorPayload("Feedback not found", "NOT_FOUND") }
+    if (method === "DELETE") {
+      if (existing.status !== "PENDING_REVIEW") {
+        return { __status: 409, payload: errorPayload("Feedback is no longer withdrawable", "FEEDBACK_NO_LONGER_WITHDRAWABLE") }
+      }
+      state.feedback = state.feedback.filter((item) => item.id !== id)
+      return { __status: 204 }
+    }
+    return feedbackDetail(existing, false)
+  }
+  if (personalScreenshotMatch) {
+    const id = Number(personalScreenshotMatch[1])
+    const existing = state.feedback.find((item) => item.id === id && item.ownerId === FEEDBACK_OWNER_ID)
+    if (!existing || !existing.screenshot) return { __status: 404, payload: errorPayload("Feedback screenshot not found", "NOT_FOUND") }
+    return { __binary: FEEDBACK_SCREENSHOT_BYTES, mimeType: existing.screenshot.mimeType }
+  }
+  if (moderationScreenshotMatch) {
+    const existing = state.feedback.find((item) => item.id === Number(moderationScreenshotMatch[1]))
+    if (!existing || !existing.screenshot) return { __status: 404, payload: errorPayload("Feedback screenshot not found", "NOT_FOUND") }
+    return { __binary: FEEDBACK_SCREENSHOT_BYTES, mimeType: existing.screenshot.mimeType }
+  }
+  if (moderationDetailMatch) {
+    const id = Number(moderationDetailMatch[1])
+    const existing = state.feedback.find((item) => item.id === id)
+    if (!existing) return { __status: 404, payload: errorPayload("Feedback not found", "NOT_FOUND") }
+    if (method === "DELETE") {
+      state.feedback = state.feedback.filter((item) => item.id !== id)
+      return { __status: 204 }
+    }
+    return feedbackDetail(existing, true)
+  }
+  if (promoteMatch || dismissMatch) {
+    const id = Number((promoteMatch ?? dismissMatch)[1])
+    const existing = state.feedback.find((item) => item.id === id)
+    if (!existing) return { __status: 404, payload: errorPayload("Feedback not found", "NOT_FOUND") }
+    if (existing.status !== "PENDING_REVIEW") {
+      return { __status: 409, payload: errorPayload("Feedback already reviewed", "FEEDBACK_ALREADY_REVIEWED") }
+    }
+    const parsedBody = body && !body.__multipart ? body : {}
+    if (promoteMatch) {
+      if (
+        typeof parsedBody.githubIssueUrl !== "string" ||
+        !/^https:\/\/github\.com\/signapse\/signapse\/issues\/\d+$/.test(
+          parsedBody.githubIssueUrl
+        )
+      ) {
+        return { __status: 400, payload: errorPayload("Invalid GitHub Issue URL", "FIXTURE_VALIDATION") }
+      }
+    } else if (parsedBody.githubIssueUrl !== undefined) {
+      return { __status: 400, payload: errorPayload("Dismiss does not accept a GitHub Issue URL", "FIXTURE_VALIDATION") }
+    }
+    existing.status = promoteMatch ? "PROMOTED" : "DISMISSED"
+    existing.reviewMessage = parsedBody.reviewMessage ?? null
+    existing.lastModifiedDate = NOW
+    if (promoteMatch) existing.githubIssueNumber = 123
+    return feedbackDetail(existing, true)
+  }
+  return null
+}
+
 function responseForRoute(state, method, pathname, url, body) {
+  if (method === "GET" && pathname === "/me") {
+    return {
+      id: FEEDBACK_OWNER_ID,
+      email: FEEDBACK_OWNER.email,
+      firstName: FEEDBACK_OWNER.firstName,
+      lastName: FEEDBACK_OWNER.lastName,
+      role_name: "Fixture",
+      currentWorkspace: { id: 1, name: "Workspace Alpha" },
+      mainImage: null,
+      permissions: state.feedbackPermissions,
+    }
+  }
+
+  const feedbackResult = feedbackRouteResult(state, method, pathname, url, body)
+  if (feedbackResult) return feedbackResult
+
   if (method === "GET" && pathname === "/me/workspaces") {
     return slicePage(state.workspaces, url)
   }
@@ -898,12 +1229,38 @@ async function handleControl(request, response, url, body) {
     return true
   }
 
+  if (url.pathname === "/__test/feedback-scenario" && request.method === "POST") {
+    const testRunId = body?.testRunId ?? request.headers["x-signapse-test-run-id"]
+    if (!testRunId || typeof body?.scenario !== "string") {
+      sendJson(response, 400, errorPayload("testRunId and scenario are required", "SCENARIO_REQUIRED"))
+      return true
+    }
+    const state = getState(String(testRunId))
+    state.feedbackScenarios[body.kind ?? "feedback"] = body.scenario
+    sendJson(response, 200, { testRunId, kind: body.kind ?? "feedback", scenario: body.scenario })
+    return true
+  }
+
+  if (url.pathname === "/__test/feedback-permissions" && request.method === "POST") {
+    const testRunId = body?.testRunId ?? request.headers["x-signapse-test-run-id"]
+    if (!testRunId || !Array.isArray(body?.permissions)) {
+      sendJson(response, 400, errorPayload("testRunId and permissions are required", "PERMISSIONS_REQUIRED"))
+      return true
+    }
+    const state = getState(String(testRunId))
+    state.feedbackPermissions = body.permissions.map(String)
+    sendJson(response, 200, { testRunId, permissions: state.feedbackPermissions })
+    return true
+  }
+
   if (url.pathname === "/__test/state" && request.method === "GET") {
     const testRunId = request.headers["x-signapse-test-run-id"] ?? url.searchParams.get("testRunId")
     const state = getState(String(testRunId ?? "anonymous"))
     sendJson(response, 200, {
       testRunId,
       scenarios: state.scenarios,
+      feedbackScenarios: state.feedbackScenarios,
+      feedbackPermissions: state.feedbackPermissions,
       streamConnections: state.streamConnections,
       requests: state.requests,
       violations: state.violations,
@@ -974,6 +1331,10 @@ const server = createServer(async (request, response) => {
   }
 
   const scenario = getScenario(state, method, url.pathname)
+  const feedbackScenario = feedbackScenarioFor(state, method, url.pathname)
+  if (feedbackScenario === "pending") {
+    await new Promise((resolve) => setTimeout(resolve, 350))
+  }
   if (scenario === "timeout") {
     await new Promise((resolve) => setTimeout(resolve, 250))
     sendJson(response, 504, errorPayload("Fixture request timed out", "FIXTURE_TIMEOUT"))
@@ -1005,6 +1366,17 @@ const server = createServer(async (request, response) => {
   }
   if (status >= 400) {
     sendJson(response, status, result.payload ?? errorPayload("Fixture route failed"))
+    return
+  }
+  if (result?.__binary) {
+    response.writeHead(200, {
+      "Content-Type": result.mimeType,
+      "Content-Disposition": "inline",
+      "Cache-Control": "private, no-store",
+      "X-Content-Type-Options": "nosniff",
+      "Access-Control-Allow-Origin": "*",
+    })
+    response.end(result.__binary)
     return
   }
   if (scenario === "empty" && method === "GET") {

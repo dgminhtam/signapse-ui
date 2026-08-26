@@ -18,6 +18,7 @@ import {
   createLandingAccessModel,
   type LandingAccessAction,
 } from "./landing-access"
+import styles from "./landing-page.module.css"
 import { LandingLocaleLinks } from "./landing-locale-links"
 import { Logo } from "@/components/logo"
 import { buttonVariants } from "@/components/ui/button"
@@ -106,12 +107,13 @@ function LandingHeader({
       <div className="mx-auto flex min-h-16 w-full max-w-7xl items-center gap-3 px-4 sm:px-6 lg:px-8">
         <Link
           href={withLocalePath("/", locale)}
-          className="flex min-w-0 items-center gap-3 rounded-md font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          aria-label={dictionary.common.appName}
+          className="flex shrink-0 items-center gap-3 rounded-md font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         >
           <span aria-hidden="true">
             <Logo width={32} height={32} />
           </span>
-          <span className="truncate">{dictionary.common.appName}</span>
+          <span className="hidden truncate sm:inline">{dictionary.common.appName}</span>
         </Link>
 
         <nav
@@ -130,23 +132,26 @@ function LandingHeader({
         </nav>
 
         <div className="ml-auto flex items-center gap-1 sm:gap-2 lg:ml-4">
-          <Suspense fallback={<LandingLocaleLinksFallback locale={locale} labels={t.localeControl} />}>
-            <LandingLocaleLinks
-              currentLocale={locale}
-              labels={{
-                group: t.localeControl.label,
-                vi: t.localeControl.vietnamese,
-                en: t.localeControl.english,
-              }}
-            />
-          </Suspense>
+          <div className="hidden sm:block">
+            <Suspense fallback={<LandingLocaleLinksFallback locale={locale} labels={t.localeControl} />}>
+              <LandingLocaleLinks
+                currentLocale={locale}
+                labels={{
+                  group: t.localeControl.label,
+                  vi: t.localeControl.vietnamese,
+                  en: t.localeControl.english,
+                }}
+              />
+            </Suspense>
+          </div>
 
           {access.headerSecondary ? (
-            <LandingActionButton
-              action={access.headerSecondary}
-              className="hidden sm:inline-flex"
-              variant="ghost"
-            />
+            <div className="hidden sm:block">
+              <LandingActionButton
+                action={access.headerSecondary}
+                variant="ghost"
+              />
+            </div>
           ) : null}
           <LandingActionButton action={access.headerPrimary} />
 
@@ -158,6 +163,18 @@ function LandingHeader({
               </span>
             </summary>
             <div className="absolute top-[calc(100%+0.5rem)] right-0 z-20 flex w-[min(19rem,calc(100vw-2rem))] flex-col gap-3 border border-border bg-background p-3 shadow-lg">
+              <div className="border-b border-border pb-3 sm:hidden">
+                <Suspense fallback={<LandingLocaleLinksFallback locale={locale} labels={t.localeControl} />}>
+                  <LandingLocaleLinks
+                    currentLocale={locale}
+                    labels={{
+                      group: t.localeControl.label,
+                      vi: t.localeControl.vietnamese,
+                      en: t.localeControl.english,
+                    }}
+                  />
+                </Suspense>
+              </div>
               <nav
                 aria-label={t.accessibility.headerNavigation}
                 className="flex flex-col gap-1"
@@ -208,17 +225,17 @@ function HeroSection({
       id="top"
       data-landing-section="hero-product-proof"
       aria-labelledby="landing-hero-heading"
-      className="relative overflow-hidden border-b border-border/80"
+      className={`${styles.heroSection} relative overflow-hidden border-b border-border/80`}
     >
-      <div className="mx-auto grid w-full max-w-7xl gap-12 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-[minmax(0,0.95fr)_minmax(20rem,0.8fr)] lg:items-center lg:px-8 lg:py-28">
-        <div className="flex min-w-0 flex-col gap-7">
+      <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[minmax(0,1fr)_minmax(24rem,0.86fr)] lg:items-center lg:gap-14 lg:px-8 lg:py-24">
+        <div className={`${styles.heroCopy} flex min-w-0 flex-col gap-7`}>
           <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
             {t.hero.eyebrow}
           </p>
           <div className="flex max-w-3xl flex-col gap-5">
             <h1
               id="landing-hero-heading"
-              className="text-4xl leading-[1.08] font-semibold tracking-[-0.03em] sm:text-5xl lg:text-6xl"
+              className="text-3xl leading-[1.08] font-semibold tracking-[-0.03em] sm:text-5xl lg:text-6xl"
             >
               {t.hero.title}
             </h1>
@@ -246,12 +263,12 @@ function HeroSection({
               {access.requestAccessNote}
             </p>
           ) : null}
-          <p className="max-w-xl border-l-2 border-border pl-4 text-sm leading-6 text-foreground">
+          <p className="max-w-xl border-l-2 border-chart-2 pl-4 text-sm leading-6 text-foreground">
             {t.hero.trustNote}
           </p>
         </div>
 
-        <div className="flex min-w-0 flex-col gap-6 lg:pl-8">
+        <div className={`${styles.heroVisual} flex min-w-0 flex-col gap-6 lg:pl-4`}>
           <div className="flex flex-col gap-3">
             <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
               {t.hero.sectionLabel}
@@ -260,7 +277,7 @@ function HeroSection({
               {t.hero.proofLabel}
             </h2>
           </div>
-          <RelationshipTreatment />
+          <ContextFigure dictionary={dictionary} />
           <dl className="grid gap-4 border-t border-border pt-5 sm:grid-cols-3 lg:grid-cols-1">
             <ProofPoint title={t.hero.proofOneTitle} body={t.hero.proofOneBody} />
             <ProofPoint title={t.hero.proofTwoTitle} body={t.hero.proofTwoBody} />
@@ -269,6 +286,85 @@ function HeroSection({
         </div>
       </div>
     </section>
+  )
+}
+
+function ContextFigure({ dictionary }: { dictionary: Dictionary }) {
+  const t = dictionary.landing.hero
+
+  return (
+    <figure
+      data-landing-visual="context-figure"
+      aria-labelledby="landing-context-figure-title"
+      aria-describedby="landing-context-figure-description"
+      className={`${styles.contextFigure} min-w-0`}
+    >
+      <figcaption className="mb-4 flex items-center justify-between gap-3">
+        <span
+          id="landing-context-figure-title"
+          className="font-mono text-xs tracking-[0.16em] text-muted-foreground uppercase"
+        >
+          {t.contextFigureTitle}
+        </span>
+        <span className="font-mono text-xs text-muted-foreground" aria-hidden="true">
+          {t.contextMeta}
+        </span>
+        <span id="landing-context-figure-description" className="sr-only">
+          {t.contextFigureDescription}
+        </span>
+      </figcaption>
+
+      <div className="relative isolate min-h-72 overflow-hidden border border-border bg-muted/10 px-4 py-5 sm:min-h-80 sm:px-6 sm:py-6">
+        <div aria-hidden="true" className={styles.contextGrid} />
+        <div aria-hidden="true" className={`${styles.contextLine} ${styles.contextLineTop}`} />
+        <div aria-hidden="true" className={`${styles.contextLine} ${styles.contextLineMiddle}`} />
+        <div aria-hidden="true" className={`${styles.contextLine} ${styles.contextLineBottom}`} />
+        <div aria-hidden="true" className={`${styles.contextDot} ${styles.contextDotTop}`} />
+        <div aria-hidden="true" className={`${styles.contextDot} ${styles.contextDotMiddle}`} />
+        <div aria-hidden="true" className={`${styles.contextDot} ${styles.contextDotBottom}`} />
+
+        <div className="relative z-10 grid min-h-64 grid-cols-[minmax(0,0.85fr)_minmax(6.5rem,1fr)_minmax(0,0.85fr)] items-center gap-3 sm:min-h-72 sm:grid-cols-[minmax(0,0.9fr)_minmax(9rem,1fr)_minmax(0,0.9fr)] sm:gap-6">
+          <div data-context-stage="inputs" className={`${styles.contextStage} flex flex-col gap-2`}>
+            <ContextNode label={t.contextPrice} tone="muted" />
+            <ContextNode label={t.contextEvents} tone="muted" />
+            <ContextNode label={t.contextReactions} tone="muted" />
+            <ContextNode label={t.contextSources} tone="muted" />
+          </div>
+
+          <div
+            data-context-stage="context"
+            className={`${styles.contextStage} flex min-h-28 flex-col items-center justify-center gap-2 border border-chart-2/60 bg-background/90 px-2 text-center shadow-sm sm:min-h-32`}
+          >
+            <BrainCircuitIcon aria-hidden="true" className="size-5 text-chart-2" />
+            <span className="text-sm font-semibold">{t.contextLayer}</span>
+            <span className="font-mono text-[0.65rem] tracking-[0.14em] text-muted-foreground uppercase">
+              {t.contextMode}
+            </span>
+          </div>
+
+          <div data-context-stage="actions" className={`${styles.contextStage} flex flex-col gap-2`}>
+            <ContextNode label={t.contextAsk} tone="accent" />
+            <ContextNode label={t.contextExplore} tone="accent" />
+            <ContextNode label={t.contextInspect} tone="accent" />
+          </div>
+        </div>
+      </div>
+    </figure>
+  )
+}
+
+function ContextNode({ label, tone }: { label: string; tone: "muted" | "accent" }) {
+  return (
+    <span
+      className={`flex min-h-9 items-center border px-2 text-xs font-medium sm:min-h-10 sm:px-3 ${
+        tone === "accent"
+          ? "border-chart-2/50 bg-chart-2/10 text-foreground"
+          : "border-border bg-background/75 text-muted-foreground"
+      }`}
+    >
+      <span aria-hidden="true" className="mr-2 size-1.5 shrink-0 rounded-full bg-chart-2" />
+      {label}
+    </span>
   )
 }
 

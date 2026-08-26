@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation"
 
-import { isP0FixtureModeEnabled } from "@/app/lib/dev-auth-mode"
+import { getModerationFeedbackDetail } from "@/app/api/feedback/action"
 import { FEEDBACK_READ_PERMISSION } from "@/app/lib/feedback/permissions"
+import { mapFeedbackDetail } from "@/app/lib/feedback/mappers"
 import { getServerDictionary } from "@/app/lib/i18n/server"
 import { getCurrentPermissions } from "@/app/lib/permissions-server"
 import { hasPermission } from "@/app/lib/permissions"
@@ -18,10 +19,6 @@ export default async function FeedbackModerationDetailRoute({
   params,
   searchParams,
 }: FeedbackModerationDetailRouteProps) {
-  if (!isP0FixtureModeEnabled()) {
-    notFound()
-  }
-
   const permissions = await getCurrentPermissions()
   const dictionary = await getServerDictionary()
   if (!hasPermission(permissions, FEEDBACK_READ_PERMISSION)) {
@@ -34,6 +31,10 @@ export default async function FeedbackModerationDetailRoute({
   }
 
   const [{ id }, query] = await Promise.all([params, searchParams])
+  const numericId = Number(id)
+  if (!Number.isInteger(numericId) || numericId <= 0) {
+    notFound()
+  }
   const backQuery = new URLSearchParams()
   for (const [key, value] of Object.entries(query)) {
     if (Array.isArray(value)) {
@@ -44,9 +45,17 @@ export default async function FeedbackModerationDetailRoute({
   }
   const queryString = backQuery.toString()
 
+  let record = null
+  try {
+    const response = await getModerationFeedbackDetail(numericId)
+    record = mapFeedbackDetail(response)
+  } catch {
+    record = null
+  }
+
   return (
     <FeedbackDetailPage
-      id={id}
+      record={record}
       moderation
       backHref={
         queryString ? `/feedback-submissions?${queryString}` : undefined

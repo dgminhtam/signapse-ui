@@ -15,7 +15,7 @@ Tài liệu này là nguồn chuẩn cho định vị, nội dung, bố cục, C
 
 Khi các nguồn xung đột, landing chỉ được claim capability đã có surface frontend khả dụng. Backend-only endpoint, code legacy hoặc roadmap không được xem là tính năng công khai. Claim matrix trong tài liệu này phải được cập nhật trước khi landing copy mở rộng theo capability mới.
 
-Trong phạm vi public landing `/{lang}`, tài liệu này override các câu dashboard-scoped trong `docs/design/DESIGN.md` về hero/section composition, việc lặp cùng một primary CTA và background grid. `DESIGN.md` vẫn là nguồn chuẩn cho semantic tokens, Geist typography, shadcn chrome, theme parity, responsive và accessibility. Landing chỉ được dùng một treatment grid/relationship decorative ở cấp page, dùng chung cho Hero và Analysis Flow; không lặp treatment này trong product frame/card và phải ẩn khỏi accessibility tree. Primary CTA chỉ được lặp tại Header, Hero và Final CTA với đúng destination trong CTA Contract.
+Trong phạm vi public landing `/{lang}`, tài liệu này override các câu dashboard-scoped trong `docs/design/DESIGN.md` về hero/section composition, việc lặp cùng một primary CTA và background grid. `DESIGN.md` vẫn là nguồn chuẩn cho semantic tokens, Geist typography, shadcn chrome, theme parity, responsive và accessibility. Landing dùng một conceptual market-context figure có nhãn trong Hero và một relationship treatment decorative ở Analysis Flow; connector/node geometry decorative không được lặp trong product frame/card và phải ẩn khỏi accessibility tree. Conceptual figure có ý nghĩa phải có text summary localized. Primary CTA chỉ được lặp tại Header, Hero và Final CTA với đúng destination trong CTA Contract.
 
 `openspec/specs/public-landing-page/spec.md` hiện là known contract drift, không phải bằng chứng runtime cho claim mới. Các requirement về Market Query như primary pillar, synthetic workspace preview, pipeline nội bộ và workspace-scoped graph phải được `MODIFIED` hoặc `REMOVED` trong OpenSpec proposal trước implementation.
 
@@ -31,7 +31,7 @@ Landing giúp một người chưa biết Signapse hiểu trong một lượt đ
 
 ### Goals
 
-- Định vị Signapse là workspace phân tích thị trường theo bối cảnh sự kiện.
+- Định vị Signapse là workspace phân tích thị trường theo bối cảnh sự kiện có AI hỗ trợ.
 - Chuyển câu chuyện từ danh sách tính năng sang hành trình phân tích có thể truy vết.
 - Dùng product proof thật thay cho mock dashboard hoặc số liệu dựng sẵn.
 - Chuyển khách phù hợp sang một đường dẫn yêu cầu truy cập rõ ràng.
@@ -74,22 +74,22 @@ Landing không được ngầm hứa team collaboration, shared workspace member
 
 ### Category
 
-**Event-aware Market Intelligence Workspace**
+**AI-assisted Event-aware Market Analysis Workspace**
 
-Signapse khác một charting terminal, news reader hoặc chatbot độc lập ở chỗ sản phẩm đặt các surface đó quanh cùng lớp sự kiện và quan hệ thị trường. Landing phải nói về khả năng quan sát, kiểm tra và truy vết; không khẳng định quan hệ nhân quả khi dữ liệu chỉ cho thấy sự liên quan.
+Signapse khác một charting terminal, news reader hoặc chatbot độc lập ở chỗ sản phẩm đặt các surface đó quanh cùng lớp sự kiện và quan hệ thị trường, trong khi Trợ lý AI hỗ trợ đặt câu hỏi và tổng hợp bằng văn bản. Landing phải nói về khả năng quan sát, kiểm tra và truy vết; không khẳng định quan hệ nhân quả khi dữ liệu chỉ cho thấy sự liên quan.
 
 ### Locked first-viewport copy
 
 | Vai trò | Tiếng Việt | English |
 | --- | --- | --- |
-| Eyebrow | Phân tích thị trường theo bối cảnh sự kiện | Event-aware market intelligence |
-| H1 | Không chỉ thấy giá thay đổi. Thấy bối cảnh quanh biến động đó. | See more than a price move. See the market context around it. |
-| Supporting copy | Signapse kết hợp dữ liệu giá với bối cảnh thị trường trong một trải nghiệm phân tích. Bạn có thể theo dõi tài sản trong workspace đang hoạt động, xem các sự kiện, phản ứng và nguồn tin liên quan khi dữ liệu khả dụng, rồi khám phá các mối quan hệ quanh biến động. | Signapse combines price data with market context in one analysis experience. Track assets in your active workspace, inspect related events, reactions, and sources when available, and explore the relationships around a move. |
+| Eyebrow | AI cho phân tích giao dịch | AI-assisted market analysis |
+| H1 | Biến dữ liệu thị trường thành bối cảnh giao dịch có thể kiểm chứng. | Turn market data into trading context you can verify. |
+| Supporting copy | Signapse kết nối giá, sự kiện, phản ứng và nguồn tin liên quan, đồng thời cho phép bạn đặt câu hỏi bằng ngôn ngữ tự nhiên — để đi từ một biến động đến bối cảnh rõ ràng hơn, nhanh hơn. | Signapse connects price, events, market reactions, and related sources, then lets you ask market questions in natural language—so you can move from a market move to clearer context, faster. |
 | Primary CTA | Yêu cầu truy cập | Request access |
-| Hero secondary CTA | Xem cách hoạt động | See how it works |
+| Hero secondary CTA | Xem cách Signapse phân tích | See how Signapse analyzes markets |
 | Signed-in CTA | Mở bảng điều khiển | Open dashboard |
 | Request-access microcopy | Mở ứng dụng email. | Opens your email app. |
-| Trust line | Hỗ trợ phân tích dựa trên dữ liệu và nguồn tin — không phải tư vấn giao dịch hay cam kết dự báo. | Evidence-led analysis support — not trading advice or a guaranteed forecast. |
+| Trust line | AI hỗ trợ tổng hợp và khám phá. Bạn kiểm tra nguồn và tự đưa ra quyết định giao dịch. | AI supports synthesis and exploration. You verify the sources and make the trading decision. |
 
 Implementation dùng các chuỗi trong first viewport và Locked Section Copy làm editorial baseline. Chỉ được sửa lỗi chính tả hoặc ngữ pháp mà không đổi nghĩa; mọi thay đổi về promise, qualifier, capability boundary, hierarchy hoặc CTA phải cập nhật tài liệu này và cả hai locale trong cùng change.
 
@@ -108,7 +108,7 @@ Implementation dùng các chuỗi trong first viewport và Locked Section Copy l
 | Event-aware Charts | Biểu đồ theo bối cảnh sự kiện | Event-aware Charts | Candle chart có event/calendar context khi dữ liệu khả dụng | trading signals |
 | Reaction & Evidence | Phản ứng và bằng chứng | Reaction & Evidence | Chi tiết sự kiện hiển thị nguồn tin và thẻ phản ứng khi dữ liệu khả dụng; chart annotation chỉ cung cấp preview ngắn và đường dẫn tới chi tiết | Market Query evidence sheet; annotation evidence reader; `observedAt` như observed outcome |
 | Connected Market Graph | Đồ thị quan hệ thị trường | Connected Market Graph | Graph của event, asset, news article và narrative | workspace graph slice, Theme node |
-| AI Assistant | Trợ lý AI | AI Assistant | Hội thoại text-only có session/history theo active workspace | Market Query workbench |
+| AI Assistant | Trợ lý AI | AI Assistant | Hội thoại text-only có session/history theo active workspace, hỗ trợ đặt câu hỏi thị trường bằng văn bản | Market Query workbench; structured evidence sheet; prediction engine |
 
 Không dùng chuỗi copy Việt–Anh dày đặc nếu đã có cách diễn đạt tiếng Việt tự nhiên. Tên feature tiếng Anh chỉ xuất hiện như tên sản phẩm hoặc lần giải thích đầu tiên.
 
@@ -278,10 +278,10 @@ Trust:          #trust
 | Chưa đăng nhập | Header secondary | Đăng nhập / Sign in | `/{lang}/sign-in` | Mở Clerk sign-in theo locale. |
 | Chưa đăng nhập | Footer secondary | Đăng nhập / Sign in | `/{lang}/sign-in` | Giữ một đường vào sign-in ở cuối trang. |
 | Chưa đăng nhập | Hero primary | Yêu cầu truy cập / Request access | Request-access `mailto:` | Cùng destination với header; không tạo funnel thứ hai. |
-| Chưa đăng nhập | Hero secondary | Xem cách hoạt động / See how it works | `#how-it-works` | Cuộn tới user journey. |
+| Chưa đăng nhập | Hero secondary | Xem cách Signapse phân tích / See how Signapse analyzes markets | `#how-it-works` | Cuộn tới user journey. |
 | Chưa đăng nhập | Final CTA | Yêu cầu truy cập / Request access | Request-access `mailto:` | Cùng destination với hero. |
 | Đã đăng nhập | Header primary, Hero primary, Final CTA, Footer secondary | Mở bảng điều khiển / Open dashboard | `/{lang}/dashboard` | Thay Sign in trong Footer và mở protected dashboard theo locale. |
-| Đã đăng nhập | Hero secondary | Xem cách hoạt động / See how it works | `#how-it-works` | Giữ điều hướng nội trang như trạng thái chưa đăng nhập. |
+| Đã đăng nhập | Hero secondary | Xem cách Signapse phân tích / See how Signapse analyzes markets | `#how-it-works` | Giữ điều hướng nội trang như trạng thái chưa đăng nhập. |
 | Mọi người dùng | Footer contact | `request-access@signapse.ai` | Cùng request-access email | Hiển thị địa chỉ email để có thể copy khi máy không cấu hình mail client. |
 
 ### CTA behavior rules
@@ -351,14 +351,14 @@ Một product capture chỉ được công khai khi tất cả điều kiện sa
 - Không dùng customer logo, quote, rating hoặc certification khi chưa có quyền bằng văn bản.
 - Không dùng generated image để giả làm screenshot sản phẩm.
 
-Nếu chưa có capture được duyệt, hero phải dùng text-first composition và bỏ media slot. Không dùng placeholder mock để lấp chỗ trống.
+Nếu chưa có capture được duyệt, hero phải dùng text-first composition và conceptual figure có nhãn, không dùng placeholder mock để lấp chỗ trống.
 
 ## Information Architecture
 
 | Thứ tự | Section / route-local component | ID | Mục tiêu | Nội dung chính | Product proof |
 | --- | --- | --- | --- | --- | --- |
 | 1 | `PublicHeader` | `#top` | Nhận diện, điều hướng và access path | Logo; Sản phẩm; Cách hoạt động; Độ tin cậy; locale; auth-aware CTA | Brand asset |
-| 2 | `HeroProductProof` | — | Trả lời ngay đối tượng, outcome và hành động tiếp theo | Locked H1/supporting copy; primary và secondary CTA; trust line ngắn | Approved hero chart capture; nếu chưa có thì text-first |
+| 2 | `HeroProductProof` | — | Trả lời ngay đối tượng, outcome và hành động tiếp theo | AI-assisted H1/supporting copy; primary và secondary CTA; trust line ngắn | Conceptual market-context figure; approved capture chỉ khi được duyệt |
 | 3 | `AnalysisFlow` | `#how-it-works` | Giải thích hành trình, không giải thích pipeline nội bộ | Theo dõi → Đặt vào bối cảnh → Kiểm tra → Khám phá | Một relationship line tĩnh; text vẫn tự đủ nghĩa |
 | 4 | `ProductStory` | `#product` | Chứng minh ba giá trị chính bằng ba chương lớn | Event-aware Charts; Reaction & Evidence; Connected Market Graph | Một approved capture cho mỗi chapter khi có |
 | 5 | `WorkspaceAssistantSection` | `#workspace-ai` | Cho thấy lớp ngữ cảnh và cách tiếp tục phân tích | Tracked assets, active workspace, text-only AI conversation/history | Optional approved capture |
@@ -393,7 +393,7 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 - Giữ Geist và Geist Mono theo stack hiện tại.
 - Dùng semantic tokens, shadcn wrapper chrome và light/dark logic từ `DESIGN.md`; không thêm landing-only raw palette.
 - Dùng một accent có kiểm soát cho primary CTA và tín hiệu nghiệp vụ thật.
-- Chỉ dùng một page-level grid/relationship treatment rất nhẹ, chia sẻ giữa hero và flow; không lặp trong chapter/card và phải decorative đối với assistive technology.
+- Hero dùng một conceptual market-context figure có nhãn localized; Analysis Flow dùng một relationship treatment tĩnh decorative. Connector/grid/node geometry phải nhẹ, không lặp trong chapter/card; conceptual labels và summary phải có nghĩa độc lập với motion.
 - Product capture là visual chính; icon chỉ hỗ trợ scan và dùng Lucide, không dùng emoji.
 - Section rhythm xen kẽ copy/media ở desktop nhưng giữ cùng reading order ở mobile.
 - Không dùng bento wall, testimonial carousel, logo cloud, glassmorphism, purple gradient hoặc AI decoration không có product meaning.
@@ -403,7 +403,8 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 
 | Viewport | Quy tắc |
 | --- | --- |
-| `< 768px` | Một cột; copy trước media; CTA full-width khi cần; mobile navigation dùng native disclosure; touch target ưu tiên tối thiểu 44×44px. |
+| `< 640px` | Một cột; copy trước visual; CTA full-width khi cần; header giữ brand + primary CTA + menu, locale và secondary action nằm trong native disclosure; touch target ưu tiên tối thiểu 44×44px. |
+| `640px–767px` | Một cột; copy trước visual; mobile navigation dùng native disclosure; locale có thể hiển thị khi đủ chỗ; touch target ưu tiên tối thiểu 44×44px. |
 | `768px–1199px` | Hero và product chapters vẫn một cột để product capture có đủ chiều rộng; flow có thể dùng hai cột nếu không làm đứt thứ tự đọc. |
 | `≥ 1200px` | Hero có thể dùng split `5/7`; product chapters xen kẽ copy/media; content measure của body copy giữ khoảng 60–70 ký tự mỗi dòng. |
 | Zoom `200%` | Reflow như narrow viewport; không page-level horizontal overflow; sticky/fixed surface không che focus hoặc heading. |
@@ -422,6 +423,7 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 - Link/button có accessible name trùng hoặc làm rõ visible label; icon decorative dùng `aria-hidden`.
 - Target tối thiểu 24×24 CSS px và ưu tiên 44×44px trên mobile/coarse pointer.
 - Không dùng color làm tín hiệu duy nhất cho direction, confidence, status hoặc graph relation.
+- Conceptual figure có nhãn phải có `<figure>`/caption hoặc text summary localized; connector và node geometry decorative dùng `aria-hidden`.
 - Meaningful image có localized `alt`; decorative image có `alt=""`.
 - Alt text mô tả insight của capture, không liệt kê mọi chữ trong screenshot.
 - Nội dung và hành động không phụ thuộc hover; screenshot không chứa control trông tương tác được nếu nó chỉ là ảnh.
@@ -451,8 +453,8 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 
 | Locale | Title | Description |
 | --- | --- | --- |
-| `vi` | Signapse \| Phân tích thị trường theo bối cảnh sự kiện | Signapse kết hợp dữ liệu giá với sự kiện, phản ứng, nguồn tin và quan hệ thị trường liên quan khi dữ liệu khả dụng. |
-| `en` | Signapse \| Event-aware market intelligence | Signapse brings price data together with related market events, reactions, sources, and relationships when available. |
+| `vi` | Signapse \| AI cho phân tích giao dịch | Signapse kết nối giá, sự kiện, phản ứng và nguồn tin liên quan để hỗ trợ phân tích thị trường bằng AI với bối cảnh có thể kiểm tra. |
+| `en` | Signapse \| AI-assisted market analysis | Signapse connects price, events, market reactions, and related sources to support AI-assisted market analysis with context you can verify. |
 
 - Metadata dùng Next.js Metadata API và dictionary hiện hành.
 - Khai báo canonical locale URL và language alternates cho `/vi` và `/en`.
@@ -467,6 +469,7 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 - `/{lang}/dashboard` và các app route khác vẫn protected.
 - Public origin và indexability lấy từ server-side deployment configuration explicit. Deployment non-indexable có origin thiếu hoặc không hợp lệ vẫn render với `noindex` nhưng bỏ canonical/language alternates và không suy luận từ hostname. Deployment indexable phải fail fast nếu origin không đúng chính xác `https://signapse.cloud`.
 - Giữ landing là Server Component mặc định; chỉ thêm client boundary khi native HTML/CSS không đáp ứng interaction bắt buộc.
+- Hero entrance và conceptual-flow emphasis dùng route-local CSS opacity/transform one-shot; không thêm GSAP, scroll observer hoặc animation dependency. Reduced-motion render ngay trạng thái cuối.
 - Giữ implementation route-local: `page.tsx` sở hữu metadata/dictionary/auth orchestration; một Server Component sở hữu các named landing sections; một pure access model sở hữu CTA state/destination; locale switch là client island nhỏ duy nhất cần đọc hash/query. Không tạo shared landing framework hoặc tách mỗi section thành một shallow file.
 - Ưu tiên native disclosure cho mobile navigation; không thêm dependency mới.
 - Reuse `Logo`, `Button`, locale routing helpers và shadcn wrappers hiện có.
@@ -480,7 +483,7 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 
 ### Product and content
 
-- First viewport hiển thị audience outcome, locked promise, CTA và trust boundary trong một lượt scan.
+- First viewport hiển thị audience outcome, AI-assisted promise, CTA và trust boundary trong một lượt scan.
 - Ba product chapters là Event-aware Charts, Reaction & Evidence và Connected Market Graph.
 - AI Assistant là supporting capability, không phải structured Market Query pillar.
 - Header, từng section, chapter, trust boundary và final CTA dùng Locked Section Copy cho đúng locale.
@@ -500,7 +503,7 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 ### Media
 
 - Chỉ approved brand asset hoặc approved product capture xuất hiện trên trang.
-- Nếu chưa có approved hero capture, hero render text-first và không có synthetic mock.
+- Nếu chưa có approved hero capture, hero render text-first với conceptual figure, không có synthetic mock.
 - Product capture đáp ứng toàn bộ capture approval checklist.
 - Capture có visible UI text dùng đúng asset `vi`/`en`; thiếu một locale thì locale đó dùng text-first, không fallback chéo ngôn ngữ.
 - Không có fake metric, fake control hoặc private/runtime-sensitive data.
@@ -511,6 +514,7 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 - Không có page-level horizontal overflow.
 - Tab order, focus, skip link, nav disclosure và CTA đều dùng được bằng keyboard.
 - Reduced-motion mode không mất nội dung hoặc interaction.
+- Conceptual figure có accessible text summary; decorative geometry không xuất hiện trong accessibility tree.
 - Screenshot alt text và adjacent copy truyền đạt cùng insight chính.
 
 ### Verification

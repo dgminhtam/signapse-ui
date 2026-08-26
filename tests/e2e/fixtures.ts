@@ -28,7 +28,17 @@ type FixtureController = {
     streamConnections: number
   }>
   setFeedbackScenario(
-    scenario: "success" | "pending" | "validation-error" | "mutation-failure",
+    scenario:
+      | "success"
+      | "pending"
+      | "validation-error"
+      | "mutation-failure"
+      | "lifecycle-conflict"
+      | "not-found"
+      | "payload-too-large"
+      | "storage-failure"
+      | "server-failure"
+      | "malformed",
     kind?: "feedback" | "compose" | "withdraw" | "promote" | "dismiss" | "erase"
   ): Promise<void>
   setFeedbackPermissions(permissions: string[]): Promise<void>
@@ -113,26 +123,17 @@ export const test = base.extend<Fixtures>({
           return response.json()
         },
         async setFeedbackScenario(scenario, kind = "feedback") {
-          await page.evaluate(
-            ({ kind: scenarioKind, scenario: scenarioValue }) => {
-              const target = window as Window & {
-                __SIGNAPSE_FEEDBACK_SCENARIOS__?: Record<string, string>
-              }
-              target.__SIGNAPSE_FEEDBACK_SCENARIOS__ = {
-                ...(target.__SIGNAPSE_FEEDBACK_SCENARIOS__ ?? {}),
-                [scenarioKind]: scenarioValue,
-              }
-            },
-            { kind, scenario }
-          )
+          await postControl("/__test/feedback-scenario", {
+            testRunId,
+            kind,
+            scenario,
+          })
         },
         async setFeedbackPermissions(permissions) {
-          await page.evaluate((configured) => {
-            const target = window as Window & {
-              __SIGNAPSE_FEEDBACK_PERMISSIONS__?: string[]
-            }
-            target.__SIGNAPSE_FEEDBACK_PERMISSIONS__ = configured
-          }, permissions)
+          await postControl("/__test/feedback-permissions", {
+            testRunId,
+            permissions,
+          })
         },
       }
 

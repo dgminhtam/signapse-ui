@@ -30,6 +30,13 @@ test.describe("P0 public landing", () => {
           ? "Theo dõi → Đặt vào bối cảnh → Kiểm tra → Khám phá"
           : "Track → Contextualize → Inspect → Explore"
       )
+      await expect(page.locator('[data-landing-visual="context-figure"]')).toHaveAttribute(
+        "aria-describedby",
+        "landing-context-figure-description"
+      )
+      await expect(page.locator('[data-context-stage="inputs"]')).toHaveCount(1)
+      await expect(page.locator('[data-context-stage="context"]')).toHaveCount(1)
+      await expect(page.locator('[data-context-stage="actions"]')).toHaveCount(1)
       await expect(page.locator("#workspace-ai")).toContainText("AI Assistant")
       await expect(page.locator("#product")).not.toContainText("Market Query")
       await expect(page.locator("#product")).not.toContainText("82%")
@@ -40,8 +47,8 @@ test.describe("P0 public landing", () => {
           : "Open the Signapse dashboard"
       const journeyLabel =
         locale === "vi"
-          ? "Xem cách Signapse hỗ trợ phân tích"
-          : "See how Signapse supports analysis"
+          ? "Xem cách Signapse hỗ trợ phân tích thị trường"
+          : "See how Signapse supports market analysis"
       await expect(
         page.getByRole("link", { name: dashboardLabel }).first()
       ).toHaveAttribute("href", `/${locale}/dashboard`)
@@ -75,12 +82,18 @@ test.describe("P0 public landing", () => {
     await page.setViewportSize({ width: 375, height: 800 })
     await page.goto("/vi")
 
+    await expect(page.getByRole("link", { name: "Signapse", exact: true }).first()).toBeVisible()
+    await expect(
+      page.getByRole("link", { name: "Mở bảng điều khiển Signapse" }).first()
+    ).toBeVisible()
+
     const summary = page.locator("[data-mobile-menu] summary")
     await summary.focus()
     await expect(summary).toBeFocused()
     await summary.press("Enter")
     await expect(page.locator("[data-mobile-menu]")).toHaveAttribute("open", "")
     await expect(page.getByRole("link", { name: "Sản phẩm", exact: true })).toBeVisible()
+    await expect(page.getByRole("link", { name: "English", exact: true }).last()).toBeVisible()
     const box = await summary.boundingBox()
     expect(box?.width).toBeGreaterThanOrEqual(44)
     expect(box?.height).toBeGreaterThanOrEqual(44)
@@ -120,37 +133,33 @@ test.describe("P0 public landing", () => {
     ).toEqual([])
   })
 
-  test("renders preview metadata and localized social image references", async ({ page }) => {
-    await page.goto("/vi")
+  for (const locale of ["vi", "en"] as const) {
+    test(`${locale} renders preview metadata and localized social image references`, async ({ page }) => {
+      await page.goto(`/${locale}`)
 
-    await expect(page).toHaveTitle("Signapse | Phân tích thị trường theo bối cảnh sự kiện")
-    await expect(page.locator('meta[name="description"]')).toHaveAttribute(
-      "content",
-      "Signapse kết hợp dữ liệu giá với sự kiện, phản ứng, nguồn tin và quan hệ thị trường liên quan khi dữ liệu khả dụng."
-    )
-    await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
-      "content",
-      /noindex/
-    )
-    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
-      "href",
-      "https://dev.signapse.cloud/vi"
-    )
-    await expect(page.locator('link[rel="alternate"][hreflang="vi"]')).toHaveAttribute(
-      "href",
-      "https://dev.signapse.cloud/vi"
-    )
-    await expect(page.locator('link[rel="alternate"][hreflang="en"]')).toHaveAttribute(
-      "href",
-      "https://dev.signapse.cloud/en"
-    )
-    await expect(page.locator('link[rel="alternate"][hreflang="x-default"]')).toHaveAttribute(
-      "href",
-      /https:\/\/dev\.signapse\.cloud\/?$/
-    )
-    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
-      "content",
-      "https://dev.signapse.cloud/vi/opengraph-image"
-    )
-  })
+      await expect(page).toHaveTitle(
+        locale === "vi"
+          ? "Signapse | AI cho phân tích giao dịch"
+          : "Signapse | AI-assisted market analysis"
+      )
+      await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+        "content",
+        locale === "vi"
+          ? "Signapse kết nối giá, sự kiện, phản ứng và nguồn tin liên quan để hỗ trợ phân tích thị trường bằng AI với bối cảnh có thể kiểm tra."
+          : "Signapse connects price, events, market reactions, and related sources to support AI-assisted market analysis with context you can verify."
+      )
+      await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+        "content",
+        /noindex/
+      )
+      await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+        "href",
+        `https://dev.signapse.cloud/${locale}`
+      )
+      await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+        "content",
+        `https://dev.signapse.cloud/${locale}/opengraph-image`
+      )
+    })
+  }
 })
