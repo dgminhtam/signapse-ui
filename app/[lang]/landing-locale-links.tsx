@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { type MouseEvent, useEffect, useState } from "react"
 import { usePathname, useSearchParams } from "next/navigation"
 
 import type { AppLocale } from "@/app/lib/i18n/config"
@@ -64,6 +64,19 @@ export function LandingLocaleLinks({
   const query = searchParams.toString()
   const buildHref = (locale: AppLocale) =>
     buildLandingLocaleHref(pathname ?? "/", query, hash, locale)
+  const handleLocaleClick = (
+    locale: AppLocale,
+    event: MouseEvent<HTMLAnchorElement>
+  ) => {
+    if (hash) return
+    const currentHash = getSupportedHash()
+    if (!currentHash) return
+
+    event.preventDefault()
+    window.location.assign(
+      buildLandingLocaleHref(pathname ?? "/", query, currentHash, locale)
+    )
+  }
 
   return (
     <nav
@@ -78,6 +91,7 @@ export function LandingLocaleLinks({
         aria-current={currentLocale === "vi" ? "page" : undefined}
         data-current-locale={currentLocale === "vi" ? "true" : "false"}
         data-locale-link="vi"
+        onClick={(event) => handleLocaleClick("vi", event)}
         className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md px-2 py-1 transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
       >
         {labels.vi}
@@ -90,6 +104,7 @@ export function LandingLocaleLinks({
         aria-current={currentLocale === "en" ? "page" : undefined}
         data-current-locale={currentLocale === "en" ? "true" : "false"}
         data-locale-link="en"
+        onClick={(event) => handleLocaleClick("en", event)}
         className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md px-2 py-1 transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
       >
         {labels.en}

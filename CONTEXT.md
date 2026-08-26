@@ -26,6 +26,14 @@ _Avoid_: Coming-soon site, dashboard
 An application landing-page state that omits product captures when no locale-appropriate capture has been approved, while keeping the complete product story in text.
 _Avoid_: Placeholder mock, synthetic product preview
 
+**Interactive market-context figure (Hình bối cảnh thị trường tương tác)**:
+A localized conceptual landing visual that presents the Market Knowledge Graph and price action as complementary views of market context; it is not a product capture and does not imply that the graph generates, predicts, or transforms into market prices.
+_Avoid_: Product demo, live trading chart, graph-generated price, prediction visualization
+
+**Price action (Diễn biến giá)**:
+The conceptual view of observable market-price movement paired with the Market Knowledge Graph in the interactive market-context figure.
+_Avoid_: Live trading chart, trading signal, price forecast, Knowledge Graph output
+
 **AI-assisted market analysis (Phân tích thị trường có AI hỗ trợ)**:
 The public product positioning in which AI lets users ask market questions and supports synthesis, while price, events, reactions, sources, and relationships remain inspectable Signapse surfaces and the user owns the trading decision.
 _Avoid_: AI trading engine, prediction engine, automated trading, trading signals

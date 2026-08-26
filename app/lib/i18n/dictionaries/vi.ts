@@ -780,19 +780,28 @@ export const vi = {
       proofThreeTitle: "Kiểm tra mối liên hệ",
       proofThreeBody:
         "Mở sự kiện, phản ứng, nguồn tin và quan hệ liên quan để tự đánh giá.",
-      contextFigureTitle: "Lớp bối cảnh Signapse",
+      contextFigureTitle: "Hai góc nhìn về bối cảnh thị trường",
       contextFigureDescription:
-        "Sơ đồ khái niệm cho thấy cách Signapse nối dữ liệu giá, sự kiện, phản ứng và nguồn liên quan để hỗ trợ Hỏi, Khám phá và Kiểm tra.",
-      contextPrice: "Giá",
-      contextEvents: "Sự kiện",
-      contextReactions: "Phản ứng",
-      contextSources: "Nguồn liên quan",
-      contextLayer: "Bối cảnh",
-      contextMode: "Có AI hỗ trợ",
-      contextMeta: "01 / 03",
-      contextAsk: "Hỏi",
-      contextExplore: "Khám phá",
-      contextInspect: "Kiểm tra",
+        "Hình minh họa tương tác đặt Đồ thị Tri thức thị trường cạnh Diễn biến giá như hai góc nhìn bổ sung về bối cảnh, không phải phép biến đổi hay dự báo giá.",
+      contextFigureGraphSummary:
+        "Đồ thị Tri thức thị trường kết nối các quan hệ hiện có giữa sự kiện, tài sản, bài viết và mạch diễn giải.",
+      contextFigurePriceSummary:
+        "Diễn biến giá là góc nhìn khái niệm về chuyển động giá quan sát được.",
+      contextFigureGraphMode: "Đồ thị Tri thức thị trường",
+      contextFigurePriceMode: "Diễn biến giá",
+      contextFigureFinePointerHint:
+        "Di chuột để xem diễn biến giá · Nhấp để ghim · Kéo để xoay",
+      contextFigureCoarsePointerHint: "Chạm để chuyển chế độ · Kéo để xoay",
+      contextFigureKeyboardHint:
+        "Enter hoặc Space để chuyển chế độ · Phím mũi tên để xoay",
+      contextFigurePause: "Tạm dừng xoay",
+      contextFigureResume: "Tiếp tục xoay",
+      contextFigureStatusGraph: "Đang hiển thị Đồ thị Tri thức thị trường.",
+      contextFigureStatusPrice: "Đang hiển thị Diễn biến giá.",
+      contextFigureReady:
+        "Sẵn sàng · Di chuột hoặc chạm để chuyển chế độ, kéo hoặc dùng phím mũi tên để xoay.",
+      contextFigureFallback:
+        "Đang hiển thị hình tĩnh; nội dung hai góc nhìn vẫn đầy đủ.",
     },
     cta: {
       requestAccess: "Yêu cầu truy cập",

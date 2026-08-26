@@ -69,8 +69,16 @@ describe("localized landing composition", () => {
     expect(html).not.toContain("evidence counts")
     expect(html).toContain('data-landing-visual="context-figure"')
     expect(html).toContain(
-      locale === "vi" ? "Lớp bối cảnh Signapse" : "Signapse context layer"
+      locale === "vi"
+        ? "Hai góc nhìn về bối cảnh thị trường"
+        : "Two views of market context"
     )
+    expect(html).toContain(
+      locale === "vi" ? "Đồ thị Tri thức thị trường" : "Market Knowledge Graph"
+    )
+    expect(html).toContain(locale === "vi" ? "Diễn biến giá" : "Price action")
+    expect(html).not.toContain("01 / 03")
+    expect(html).not.toContain("graph generates")
   })
 
   it("renders the three primary English product chapters", () => {

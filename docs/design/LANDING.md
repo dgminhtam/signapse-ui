@@ -15,7 +15,7 @@ Tài liệu này là nguồn chuẩn cho định vị, nội dung, bố cục, C
 
 Khi các nguồn xung đột, landing chỉ được claim capability đã có surface frontend khả dụng. Backend-only endpoint, code legacy hoặc roadmap không được xem là tính năng công khai. Claim matrix trong tài liệu này phải được cập nhật trước khi landing copy mở rộng theo capability mới.
 
-Trong phạm vi public landing `/{lang}`, tài liệu này override các câu dashboard-scoped trong `docs/design/DESIGN.md` về hero/section composition, việc lặp cùng một primary CTA và background grid. `DESIGN.md` vẫn là nguồn chuẩn cho semantic tokens, Geist typography, shadcn chrome, theme parity, responsive và accessibility. Landing dùng một conceptual market-context figure có nhãn trong Hero và một relationship treatment decorative ở Analysis Flow; connector/node geometry decorative không được lặp trong product frame/card và phải ẩn khỏi accessibility tree. Conceptual figure có ý nghĩa phải có text summary localized. Primary CTA chỉ được lặp tại Header, Hero và Final CTA với đúng destination trong CTA Contract.
+Trong phạm vi public landing `/{lang}`, tài liệu này override các câu dashboard-scoped trong `docs/design/DESIGN.md` về hero/section composition, việc lặp cùng một primary CTA và background grid. `DESIGN.md` vẫn là nguồn chuẩn cho semantic tokens, Geist typography, shadcn chrome, theme parity, responsive và accessibility. Landing dùng một interactive market-context figure có nhãn trong Hero và một relationship treatment decorative ở Analysis Flow; connector/node geometry decorative không được lặp trong product frame/card và phải ẩn khỏi accessibility tree. Interactive figure là progressive enhancement của static dual-view fallback, trình bày Market Knowledge Graph và price action như hai góc nhìn bổ sung về bối cảnh thị trường; nó không phải product capture và không ngụ ý graph tạo, biến đổi hoặc dự báo giá. Figure có ý nghĩa phải có text summary localized, semantic keyboard behavior và fallback cùng footprint. Primary CTA chỉ được lặp tại Header, Hero và Final CTA với đúng destination trong CTA Contract.
 
 `openspec/specs/public-landing-page/spec.md` hiện là known contract drift, không phải bằng chứng runtime cho claim mới. Các requirement về Market Query như primary pillar, synthetic workspace preview, pipeline nội bộ và workspace-scoped graph phải được `MODIFIED` hoặc `REMOVED` trong OpenSpec proposal trước implementation.
 
@@ -109,7 +109,8 @@ Implementation dùng các chuỗi trong first viewport và Locked Section Copy l
 | Evaluated outcome | diễn biến đã đánh giá | evaluated outcome | Kết quả đánh giá của phản ứng chính trong chart annotation khi dữ liệu khả dụng | `observedAt` như outcome; result; guaranteed impact |
 | Event-aware Charts | Biểu đồ theo bối cảnh sự kiện | Event-aware Charts | Candle chart có event/calendar context khi dữ liệu khả dụng | trading signals |
 | Reaction & Evidence | Phản ứng và bằng chứng | Reaction & Evidence | Chi tiết sự kiện hiển thị nguồn tin và thẻ phản ứng khi dữ liệu khả dụng; chart annotation chỉ cung cấp preview ngắn và đường dẫn tới chi tiết | Market Query evidence sheet; annotation evidence reader; `observedAt` như observed outcome |
-| Market Knowledge Graph | Đồ thị Tri thức thị trường | Market Knowledge Graph | Cấu trúc ngữ cảnh thị trường được xây dựng từ dữ liệu đa nguồn qua tổng hợp, đánh giá và phân tích; cung cấp ngữ cảnh cho Trợ lý AI | Dữ liệu huấn luyện model, prediction engine, trading signals, mọi câu trả lời đều có đủ evidence/source |
+| Market Knowledge Graph | Đồ thị Tri thức thị trường | Market Knowledge Graph | Cấu trúc ngữ cảnh thị trường được xây dựng từ dữ liệu đa nguồn qua tổng hợp, đánh giá và phân tích; cung cấp ngữ cảnh cho Trợ lý AI và là một góc nhìn bổ sung cho price action trong Hero figure | Dữ liệu huấn luyện model, prediction engine, trading-signal generator, graph-generated price, guarantee that every Assistant response exposes complete evidence or sources |
+| Price action | Diễn biến giá | Price action | Góc nhìn khái niệm về chuyển động giá quan sát được, đặt cạnh Market Knowledge Graph trong Hero figure để đọc bối cảnh; không phải dữ liệu live | Live trading chart, trading signal, price forecast, Knowledge Graph output |
 | Connected Market Graph | Đồ thị quan hệ thị trường | Connected Market Graph | Graph của event, asset, news article và narrative | workspace graph slice, Theme node |
 | AI Assistant | Trợ lý AI | AI Assistant | Hội thoại text-only có session/history theo active workspace; nhận ngữ cảnh từ Market Knowledge Graph để hỗ trợ đặt câu hỏi thị trường bằng văn bản | Market Query workbench; structured evidence sheet; prediction engine |
 
@@ -383,7 +384,7 @@ Nếu chưa có capture được duyệt, hero phải dùng text-first compositi
 
 Tên direction: **Evidence-Led Editorial**.
 
-Landing phải gợi cảm giác một market briefing rõ ràng, chính xác và có thể truy vết; không phải một dashboard demo dày đặc hoặc trang AI marketing chung chung. Dấu ấn chính là một mạch đọc liên tục từ biến động → sự kiện → phản ứng/bằng chứng → quan hệ.
+Landing phải gợi cảm giác một market briefing rõ ràng, chính xác và có thể truy vết; không phải một dashboard demo dày đặc hoặc trang AI marketing chung chung. Dấu ấn chính là một mạch đọc liên tục từ biến động → sự kiện → phản ứng/bằng chứng → quan hệ. Hero figure dùng hình học graph-to-price-action trừu tượng để cho thấy hai góc nhìn bổ sung; không dùng ticker, trục, số liệu, dashboard chrome hoặc giá giả.
 
 ### Design dials
 
@@ -396,11 +397,11 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 - Giữ Geist và Geist Mono theo stack hiện tại.
 - Dùng semantic tokens, shadcn wrapper chrome và light/dark logic từ `DESIGN.md`; không thêm landing-only raw palette.
 - Dùng một accent có kiểm soát cho primary CTA và tín hiệu nghiệp vụ thật.
-- Hero dùng một conceptual market-context figure có nhãn localized; Analysis Flow dùng một relationship treatment tĩnh decorative. Connector/grid/node geometry phải nhẹ, không lặp trong chapter/card; conceptual labels và summary phải có nghĩa độc lập với motion.
+- Hero dùng một interactive market-context figure có nhãn localized, static dual-view fallback và route-local WebGL enhancement; Analysis Flow dùng một relationship treatment tĩnh decorative. Connector/grid/node geometry phải nhẹ, không lặp trong chapter/card; conceptual labels và summary phải có nghĩa độc lập với motion.
 - Product capture là visual chính; icon chỉ hỗ trợ scan và dùng Lucide, không dùng emoji.
 - Section rhythm xen kẽ copy/media ở desktop nhưng giữ cùng reading order ở mobile.
 - Không dùng bento wall, testimonial carousel, logo cloud, glassmorphism, purple gradient hoặc AI decoration không có product meaning.
-- Không thêm GSAP hoặc animation dependency. CSS transition `150–250ms` là đủ cho hover/focus/disclosure.
+- Không thêm GSAP hoặc chart engine. Hero figure được phép dùng route-local `three@0.180.0` để tái hiện visual core đã duyệt; renderer phải dynamic-load, capped-pixel-ratio, dừng khi idle/paused/hidden/offscreen, dispose đầy đủ và tôn trọng reduced motion. Các transition UI khác dùng `150–250ms` cho hover/focus/disclosure.
 
 ## Responsive Behavior
 
@@ -426,11 +427,11 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 - Link/button có accessible name trùng hoặc làm rõ visible label; icon decorative dùng `aria-hidden`.
 - Target tối thiểu 24×24 CSS px và ưu tiên 44×44px trên mobile/coarse pointer.
 - Không dùng color làm tín hiệu duy nhất cho direction, confidence, status hoặc graph relation.
-- Conceptual figure có nhãn phải có `<figure>`/caption hoặc text summary localized; connector và node geometry decorative dùng `aria-hidden`.
+- Interactive figure có nhãn phải có `<figure>`/caption hoặc text summary localized; stage là focusable labelled group, không dùng `role="application"`; canvas, connector và node geometry decorative dùng `aria-hidden`. Enter/Space đổi mode, arrow keys xoay, pointer fine có hover preview/click pin, touch phân biệt tap và drag, và Pause/Resume là native button.
 - Meaningful image có localized `alt`; decorative image có `alt=""`.
 - Alt text mô tả insight của capture, không liệt kê mọi chữ trong screenshot.
 - Nội dung và hành động không phụ thuộc hover; screenshot không chứa control trông tương tác được nếu nó chỉ là ảnh.
-- Tôn trọng `prefers-reduced-motion`; trang vẫn đầy đủ ý nghĩa khi tắt toàn bộ motion.
+- Tôn trọng `prefers-reduced-motion`; trang vẫn đầy đủ ý nghĩa khi tắt toàn bộ motion. Reduced-motion bắt đầu không auto-rotate, đổi mode tức thời và chỉ opt-in rotation trong mount hiện tại.
 - Contrast tối thiểu `4.5:1` cho normal text và `3:1` cho large text, focus indicator và component boundary quan trọng trong cả light/dark mode.
 - Trang sử dụng được hoàn toàn bằng keyboard và ở zoom `200%`.
 
@@ -472,8 +473,8 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 - `/{lang}/dashboard` và các app route khác vẫn protected.
 - Public origin và indexability lấy từ server-side deployment configuration explicit. Deployment non-indexable có origin thiếu hoặc không hợp lệ vẫn render với `noindex` nhưng bỏ canonical/language alternates và không suy luận từ hostname. Deployment indexable phải fail fast nếu origin không đúng chính xác `https://signapse.cloud`.
 - Giữ landing là Server Component mặc định; chỉ thêm client boundary khi native HTML/CSS không đáp ứng interaction bắt buộc.
-- Hero entrance và conceptual-flow emphasis dùng route-local CSS opacity/transform one-shot; không thêm GSAP, scroll observer hoặc animation dependency. Reduced-motion render ngay trạng thái cuối.
-- Giữ implementation route-local: `page.tsx` sở hữu metadata/dictionary/auth orchestration; một Server Component sở hữu các named landing sections; một pure access model sở hữu CTA state/destination; locale switch là client island nhỏ duy nhất cần đọc hash/query. Không tạo shared landing framework hoặc tách mỗi section thành một shallow file.
+- Hero entrance và conceptual-flow emphasis dùng route-local CSS opacity/transform one-shot; Hero figure là ngoại lệ hẹp được phép dynamic-load `three@0.180.0` cho visual core đã duyệt, không thêm GSAP/chart engine/scroll observer. Reduced-motion render ngay trạng thái cuối.
+- Giữ implementation route-local: `page.tsx` sở hữu metadata/dictionary/auth orchestration; một Server Component sở hữu các named landing sections; Context figure là client island riêng cho WebGL/interaction; locale switch vẫn là client island nhỏ đọc hash/query; một pure access model sở hữu CTA state/destination. Không tạo shared landing framework hoặc tách mỗi section thành một shallow file.
 - Ưu tiên native disclosure cho mobile navigation; không thêm dependency mới.
 - Reuse `Logo`, `Button`, locale routing helpers và shadcn wrappers hiện có.
 - Không thêm shared UI abstraction chỉ phục vụ landing.

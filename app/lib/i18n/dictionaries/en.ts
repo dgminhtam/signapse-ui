@@ -777,19 +777,28 @@ export const en: Dictionary = {
       proofThreeTitle: "Inspect relationships",
       proofThreeBody:
         "Open related events, reactions, sources, and relationships to evaluate them yourself.",
-      contextFigureTitle: "Signapse context layer",
+      contextFigureTitle: "Two views of market context",
       contextFigureDescription:
-        "A conceptual diagram showing how Signapse connects price, events, reactions, and related sources to support asking, exploring, and inspecting.",
-      contextPrice: "Price",
-      contextEvents: "Events",
-      contextReactions: "Reactions",
-      contextSources: "Related sources",
-      contextLayer: "Context",
-      contextMode: "AI-assisted",
-      contextMeta: "01 / 03",
-      contextAsk: "Ask",
-      contextExplore: "Explore",
-      contextInspect: "Inspect",
+        "An interactive figure places the Market Knowledge Graph alongside price action as two complementary views of context, not a price transformation or forecast.",
+      contextFigureGraphSummary:
+        "The Market Knowledge Graph connects existing relationships among events, assets, articles, and narratives.",
+      contextFigurePriceSummary:
+        "Price action is a conceptual view of observable market-price movement.",
+      contextFigureGraphMode: "Market Knowledge Graph",
+      contextFigurePriceMode: "Price action",
+      contextFigureFinePointerHint:
+        "Hover to preview price action · Click to pin · Drag to rotate",
+      contextFigureCoarsePointerHint: "Tap to switch modes · Drag to rotate",
+      contextFigureKeyboardHint:
+        "Enter or Space to switch modes · Arrow keys to rotate",
+      contextFigurePause: "Pause rotation",
+      contextFigureResume: "Resume rotation",
+      contextFigureStatusGraph: "Showing the Market Knowledge Graph.",
+      contextFigureStatusPrice: "Showing price action.",
+      contextFigureReady:
+        "Ready · Hover or tap to switch modes, drag or use arrow keys to rotate.",
+      contextFigureFallback:
+        "Showing the static figure; both complementary views remain available.",
     },
     cta: {
       requestAccess: "Request access",

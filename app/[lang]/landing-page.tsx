@@ -19,6 +19,7 @@ import {
   type LandingAccessAction,
 } from "./landing-access"
 import styles from "./landing-page.module.css"
+import { LandingContextFigure } from "./landing-context-figure"
 import { LandingLocaleLinks } from "./landing-locale-links"
 import { Logo } from "@/components/logo"
 import { buttonVariants } from "@/components/ui/button"
@@ -277,7 +278,25 @@ function HeroSection({
               {t.hero.proofLabel}
             </h2>
           </div>
-          <ContextFigure dictionary={dictionary} />
+          <LandingContextFigure
+            labels={{
+              title: t.hero.contextFigureTitle,
+              description: t.hero.contextFigureDescription,
+              graphSummary: t.hero.contextFigureGraphSummary,
+              priceSummary: t.hero.contextFigurePriceSummary,
+              graphMode: t.hero.contextFigureGraphMode,
+              priceMode: t.hero.contextFigurePriceMode,
+              finePointerHint: t.hero.contextFigureFinePointerHint,
+              coarsePointerHint: t.hero.contextFigureCoarsePointerHint,
+              keyboardHint: t.hero.contextFigureKeyboardHint,
+              pause: t.hero.contextFigurePause,
+              resume: t.hero.contextFigureResume,
+              statusGraph: t.hero.contextFigureStatusGraph,
+              statusPrice: t.hero.contextFigureStatusPrice,
+              ready: t.hero.contextFigureReady,
+              fallback: t.hero.contextFigureFallback,
+            }}
+          />
           <dl className="grid gap-4 border-t border-border pt-5 sm:grid-cols-3 lg:grid-cols-1">
             <ProofPoint title={t.hero.proofOneTitle} body={t.hero.proofOneBody} />
             <ProofPoint title={t.hero.proofTwoTitle} body={t.hero.proofTwoBody} />
@@ -286,85 +305,6 @@ function HeroSection({
         </div>
       </div>
     </section>
-  )
-}
-
-function ContextFigure({ dictionary }: { dictionary: Dictionary }) {
-  const t = dictionary.landing.hero
-
-  return (
-    <figure
-      data-landing-visual="context-figure"
-      aria-labelledby="landing-context-figure-title"
-      aria-describedby="landing-context-figure-description"
-      className={`${styles.contextFigure} min-w-0`}
-    >
-      <figcaption className="mb-4 flex items-center justify-between gap-3">
-        <span
-          id="landing-context-figure-title"
-          className="font-mono text-xs tracking-[0.16em] text-muted-foreground uppercase"
-        >
-          {t.contextFigureTitle}
-        </span>
-        <span className="font-mono text-xs text-muted-foreground" aria-hidden="true">
-          {t.contextMeta}
-        </span>
-        <span id="landing-context-figure-description" className="sr-only">
-          {t.contextFigureDescription}
-        </span>
-      </figcaption>
-
-      <div className="relative isolate min-h-72 overflow-hidden border border-border bg-muted/10 px-4 py-5 sm:min-h-80 sm:px-6 sm:py-6">
-        <div aria-hidden="true" className={styles.contextGrid} />
-        <div aria-hidden="true" className={`${styles.contextLine} ${styles.contextLineTop}`} />
-        <div aria-hidden="true" className={`${styles.contextLine} ${styles.contextLineMiddle}`} />
-        <div aria-hidden="true" className={`${styles.contextLine} ${styles.contextLineBottom}`} />
-        <div aria-hidden="true" className={`${styles.contextDot} ${styles.contextDotTop}`} />
-        <div aria-hidden="true" className={`${styles.contextDot} ${styles.contextDotMiddle}`} />
-        <div aria-hidden="true" className={`${styles.contextDot} ${styles.contextDotBottom}`} />
-
-        <div className="relative z-10 grid min-h-64 grid-cols-[minmax(0,0.85fr)_minmax(6.5rem,1fr)_minmax(0,0.85fr)] items-center gap-3 sm:min-h-72 sm:grid-cols-[minmax(0,0.9fr)_minmax(9rem,1fr)_minmax(0,0.9fr)] sm:gap-6">
-          <div data-context-stage="inputs" className={`${styles.contextStage} flex flex-col gap-2`}>
-            <ContextNode label={t.contextPrice} tone="muted" />
-            <ContextNode label={t.contextEvents} tone="muted" />
-            <ContextNode label={t.contextReactions} tone="muted" />
-            <ContextNode label={t.contextSources} tone="muted" />
-          </div>
-
-          <div
-            data-context-stage="context"
-            className={`${styles.contextStage} flex min-h-28 flex-col items-center justify-center gap-2 border border-chart-2/60 bg-background/90 px-2 text-center shadow-sm sm:min-h-32`}
-          >
-            <BrainCircuitIcon aria-hidden="true" className="size-5 text-chart-2" />
-            <span className="text-sm font-semibold">{t.contextLayer}</span>
-            <span className="font-mono text-[0.65rem] tracking-[0.14em] text-muted-foreground uppercase">
-              {t.contextMode}
-            </span>
-          </div>
-
-          <div data-context-stage="actions" className={`${styles.contextStage} flex flex-col gap-2`}>
-            <ContextNode label={t.contextAsk} tone="accent" />
-            <ContextNode label={t.contextExplore} tone="accent" />
-            <ContextNode label={t.contextInspect} tone="accent" />
-          </div>
-        </div>
-      </div>
-    </figure>
-  )
-}
-
-function ContextNode({ label, tone }: { label: string; tone: "muted" | "accent" }) {
-  return (
-    <span
-      className={`flex min-h-9 items-center border px-2 text-xs font-medium sm:min-h-10 sm:px-3 ${
-        tone === "accent"
-          ? "border-chart-2/50 bg-chart-2/10 text-foreground"
-          : "border-border bg-background/75 text-muted-foreground"
-      }`}
-    >
-      <span aria-hidden="true" className="mr-2 size-1.5 shrink-0 rounded-full bg-chart-2" />
-      {label}
-    </span>
   )
 }
 
