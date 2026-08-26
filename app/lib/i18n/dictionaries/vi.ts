@@ -771,9 +771,9 @@ export const vi = {
       trustNote:
         "AI hỗ trợ tổng hợp và khám phá. Bạn kiểm tra nguồn và tự đưa ra quyết định giao dịch.",
       proofLabel: "Từ dữ liệu đến bối cảnh giao dịch",
-      proofOneTitle: "Đặt câu hỏi tự nhiên",
+      proofOneTitle: "Trợ lý AI chuyên biệt",
       proofOneBody:
-        "Trò chuyện bằng văn bản với Trợ lý AI trong workspace đang hoạt động.",
+        "Vận hành trên Đồ thị Tri thức, được xây dựng từ dữ liệu thị trường đa nguồn đã qua tổng hợp, đánh giá và phân tích.",
       proofTwoTitle: "Đọc biến động trong bối cảnh",
       proofTwoBody:
         "Đặt diễn biến giá cạnh chú thích sự kiện và lịch kinh tế khi dữ liệu khả dụng.",

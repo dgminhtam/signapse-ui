@@ -55,6 +55,14 @@ describe("localized landing composition", () => {
         ? "Biến dữ liệu thị trường thành bối cảnh giao dịch có thể kiểm chứng."
         : "Turn market data into trading context you can verify."
     )
+    expect(html).toContain(
+      locale === "vi" ? "Trợ lý AI chuyên biệt" : "Specialized AI Assistant"
+    )
+    expect(html).toContain(
+      locale === "vi"
+        ? "Vận hành trên Đồ thị Tri thức, được xây dựng từ dữ liệu thị trường đa nguồn đã qua tổng hợp, đánh giá và phân tích."
+        : "Powered by a Knowledge Graph built from multi-source market data—aggregated, evaluated, and analyzed."
+    )
     expect(html).not.toContain("Product workspace preview")
     expect(html).not.toContain("Market Query")
     expect(html).not.toContain("82%")

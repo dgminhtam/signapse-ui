@@ -30,6 +30,10 @@ _Avoid_: Placeholder mock, synthetic product preview
 The public product positioning in which AI lets users ask market questions and supports synthesis, while price, events, reactions, sources, and relationships remain inspectable Signapse surfaces and the user owns the trading decision.
 _Avoid_: AI trading engine, prediction engine, automated trading, trading signals
 
+**Market Knowledge Graph (Đồ thị Tri thức thị trường)**:
+The market-context structure built from multi-source market data through aggregation, evaluation, and analysis; it provides contextual input to the AI Assistant.
+_Avoid_: Model-training corpus, prediction engine, trading-signal generator, guarantee that every Assistant response exposes complete evidence or sources
+
 **Landing release owner**:
 The Signapse Product Owner accountable for approving the public landing cutover after collecting the required product and engineering sign-offs.
 _Avoid_: Mailbox owner, deployment operator

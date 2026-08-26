@@ -768,9 +768,9 @@ export const en: Dictionary = {
       trustNote:
         "AI supports synthesis and exploration. You verify the sources and make the trading decision.",
       proofLabel: "From data to trading context",
-      proofOneTitle: "Ask natural-language questions",
+      proofOneTitle: "Specialized AI Assistant",
       proofOneBody:
-        "Use text conversation with the AI Assistant in the active workspace.",
+        "Powered by a Knowledge Graph built from multi-source market data—aggregated, evaluated, and analyzed.",
       proofTwoTitle: "Read moves in context",
       proofTwoBody:
         "Place price action alongside event annotations and economic-calendar context when available.",
