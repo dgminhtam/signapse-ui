@@ -28,7 +28,6 @@ type ThemePalette = {
   background: string
   foreground: string
   accent: string
-  border: string
   muted: string
 }
 
@@ -37,18 +36,17 @@ type ThemePaletteFallback = Record<keyof ThemePalette, number>
 const GRAPH_NODE_COUNT = 84
 const CANDLE_COUNT = 12
 const DRAG_THRESHOLD = 5
+const GRAPH_EDGE_OPACITY = 0.8
 const LIGHT_THEME_PALETTE_FALLBACK: ThemePaletteFallback = {
   background: 0xffffff,
   foreground: 0x0a0a0a,
   accent: 0x009689,
-  border: 0xe5e5e5,
   muted: 0x737373,
 }
 const DARK_THEME_PALETTE_FALLBACK: ThemePaletteFallback = {
   background: 0x0a0a0a,
   foreground: 0xfafafa,
   accent: 0x00bc7d,
-  border: 0x232323,
   muted: 0xa3a3a3,
 }
 
@@ -82,7 +80,6 @@ function getThemePalette(): ThemePalette {
     background: resolve("--background"),
     foreground: resolve("--foreground"),
     accent: resolve("--chart-2"),
-    border: resolve("--border"),
     muted: resolve("--muted-foreground"),
   }
   probe.remove()
@@ -385,8 +382,8 @@ export function LandingContextFigure({
           fallback.foreground
         )
         const accent = colorFromCss(three, palette.accent, fallback.accent)
-        const edgeColor = colorFromCss(three, palette.border, fallback.border)
         const muted = colorFromCss(three, palette.muted, fallback.muted)
+        const edgeColor = muted.clone()
 
         scene = new three.Scene()
         const camera = new three.PerspectiveCamera(44, 1, 0.1, 100)
@@ -537,7 +534,7 @@ export function LandingContextFigure({
         edgeMaterial = new three.LineBasicMaterial({
           color: edgeColor,
           transparent: true,
-          opacity: 0.9,
+          opacity: GRAPH_EDGE_OPACITY,
           depthTest: false,
           depthWrite: false,
           fog: false,
@@ -714,11 +711,6 @@ export function LandingContextFigure({
             nextPalette.accent,
             nextFallback.accent
           )
-          const nextBorder = colorFromCss(
-            three,
-            nextPalette.border,
-            nextFallback.border
-          )
           const nextMuted = colorFromCss(
             three,
             nextPalette.muted,
@@ -726,7 +718,7 @@ export function LandingContextFigure({
           )
           renderer?.setClearColor(nextBackground, 0)
           nodeMaterial?.color.copy(nextForeground)
-          edgeColor.copy(nextBorder)
+          edgeColor.copy(nextMuted)
           edgeMaterial?.color.copy(edgeColor)
           candleMaterial?.color.copy(nextMuted)
           priceMaterial?.color.copy(nextForeground)
@@ -809,14 +801,12 @@ export function LandingContextFigure({
           }
           nodeGeometry.attributes.position.needsUpdate = true
           updateEdges()
-          if (edgeMaterial) edgeMaterial.opacity = 0.9 * (1 - morph)
+          if (edgeMaterial)
+            edgeMaterial.opacity = GRAPH_EDGE_OPACITY * (1 - morph)
           if (candleMaterial) candleMaterial.opacity = 0.72 * morph
           if (priceMaterial) priceMaterial.opacity = 0.92 * morph
           if (gridMaterial) gridMaterial.opacity = 0.11 * morph
-          if (nodeMaterial) {
-            nodeMaterial.opacity = 1 - morph
-            nodeMaterial.size = 0.36 - 0.054 * morph
-          }
+          if (nodeMaterial) nodeMaterial.size = 0.36 - 0.054 * morph
           if (autoRotateRef.current && !pointerDown && rootGroup) {
             const graphWeight = 1 - morph
             const chartWeight = morph
