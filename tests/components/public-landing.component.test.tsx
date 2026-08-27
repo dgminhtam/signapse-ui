@@ -82,15 +82,32 @@ describe("localized landing composition", () => {
     expect(html).not.toContain("82%")
     expect(html).not.toContain("evidence counts")
     expect(html).toContain('data-landing-visual="context-figure"')
+    expect(html).toContain('<figcaption class="sr-only">')
+    expect(html).not.toContain(
+      locale === "vi" ? "Bối cảnh có thể kiểm tra" : "Context you can verify"
+    )
+    expect(html).not.toContain(
+      locale === "vi"
+        ? "Từ dữ liệu đến bối cảnh giao dịch"
+        : "From data to trading context"
+    )
     expect(html).toContain(
       locale === "vi"
         ? "Hai góc nhìn về bối cảnh thị trường"
         : "Two views of market context"
     )
-    expect(html).toContain(
-      locale === "vi" ? "Đồ thị Tri thức thị trường" : "Market Knowledge Graph"
+    expect(html).not.toContain(
+      locale === "vi"
+        ? "Đồ thị Tri thức thị trường kết nối các quan hệ hiện có"
+        : "The Market Knowledge Graph connects existing relationships"
     )
-    expect(html).toContain(locale === "vi" ? "Diễn biến giá" : "Price action")
+    expect(html).not.toContain(
+      locale === "vi"
+        ? "Di chuột để xem diễn biến giá · Nhấp để ghim"
+        : "Hover to preview price action · Click to pin"
+    )
+    expect(html).not.toContain(">Pause rotation<")
+    expect(html).not.toContain(">Tạm dừng xoay<")
     expect(html).not.toContain("01 / 03")
     expect(html).not.toContain("graph generates")
   })

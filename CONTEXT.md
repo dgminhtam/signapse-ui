@@ -27,7 +27,7 @@ An application landing-page state that omits product captures when no locale-app
 _Avoid_: Placeholder mock, synthetic product preview
 
 **Interactive market-context figure (Hình bối cảnh thị trường tương tác)**:
-A localized conceptual landing visual that presents the Market Knowledge Graph and price action as complementary views of market context; it is not a product capture and does not imply that the graph generates, predicts, or transforms into market prices.
+A localized conceptual landing visual that presents the Market Knowledge Graph and price action as complementary views of market context. It has no visible control chrome, but supports fine-pointer hover and drag; coarse pointers do not expose a hidden tap mode. It begins once per page view with a brief graph-only rotation that settles automatically, supports nonvisual keyboard exploration with focus feedback, and keeps a silent dual-view fallback with a nonvisual description when rendering is unavailable. It is not a product capture and does not imply that the graph generates, predicts, or transforms into market prices.
 _Avoid_: Product demo, live trading chart, graph-generated price, prediction visualization
 
 **Price action (Diễn biến giá)**:

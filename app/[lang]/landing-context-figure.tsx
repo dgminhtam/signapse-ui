@@ -7,15 +7,7 @@ import styles from "./landing-context-figure.module.css"
 export type LandingContextFigureLabels = {
   title: string
   description: string
-  graphSummary: string
-  priceSummary: string
-  graphMode: string
-  priceMode: string
-  finePointerHint: string
-  coarsePointerHint: string
   keyboardHint: string
-  pause: string
-  resume: string
   statusGraph: string
   statusPrice: string
   ready: string
@@ -36,6 +28,7 @@ type ThemePaletteFallback = Record<keyof ThemePalette, number>
 const GRAPH_NODE_COUNT = 84
 const CANDLE_COUNT = 12
 const DRAG_THRESHOLD = 5
+const INTRO_ROTATION_DURATION = 4000
 const GRAPH_EDGE_OPACITY = 0.8
 const LIGHT_THEME_PALETTE_FALLBACK: ThemePaletteFallback = {
   background: 0xffffff,
@@ -118,27 +111,18 @@ export function LandingContextFigure({
   labels: LandingContextFigureLabels
 }) {
   const stageRef = useRef<HTMLDivElement>(null)
-  const autoRotateRef = useRef(true)
+  const autoRotateRef = useRef(false)
   const rendererReadyRef = useRef(false)
   const modeRef = useRef<FigureMode>("graph")
   const pinnedPriceActionRef = useRef(false)
   const hoveredRef = useRef(false)
   const hoverSuppressedRef = useRef(false)
-  const didDragRef = useRef(false)
   const [mode, setMode] = useState<FigureMode>("graph")
-  const [autoRotate, setAutoRotate] = useState(true)
   const [interactiveReady, setInteractiveReady] = useState(false)
   const [rendererState, setRendererState] = useState<
     "loading" | "ready" | "fallback"
   >("loading")
-  const [pointerCapability, setPointerCapability] = useState<"fine" | "coarse">(
-    "coarse"
-  )
   const [status, setStatus] = useState(labels.ready)
-
-  useEffect(() => {
-    autoRotateRef.current = autoRotate
-  }, [autoRotate])
 
   useEffect(() => {
     const stage = stageRef.current
@@ -162,6 +146,7 @@ export function LandingContextFigure({
     let lastX = 0
     let lastY = 0
     let manualInteractionUntil = 0
+    let introRotationUntil = 0
     const pointerQuery = window.matchMedia("(pointer: fine)")
     let supportsFinePointer = pointerQuery.matches
     const reduceMotionQuery = window.matchMedia(
@@ -225,6 +210,7 @@ export function LandingContextFigure({
 
     const onPointerEnter = () => {
       if (!rendererReadyRef.current || !supportsFinePointer) return
+      autoRotateRef.current = false
       hoveredRef.current = true
       hoverSuppressedRef.current = false
       if (!pinnedPriceActionRef.current && !pointerDown) setFigureMode("price")
@@ -234,6 +220,7 @@ export function LandingContextFigure({
 
     const onPointerLeave = () => {
       if (!rendererReadyRef.current) return
+      autoRotateRef.current = false
       hoveredRef.current = false
       hoverSuppressedRef.current = false
       if (!pinnedPriceActionRef.current && !pointerDown) setFigureMode("graph")
@@ -244,9 +231,9 @@ export function LandingContextFigure({
     const onPointerDown = (event: PointerEvent) => {
       if (!rendererReadyRef.current) return
       if ((event.target as HTMLElement).closest("button")) return
+      autoRotateRef.current = false
       pointerDown = true
       dragging = false
-      didDragRef.current = false
       activePointer = event.pointerId
       startX = lastX = event.clientX
       startY = lastY = event.clientY
@@ -264,7 +251,6 @@ export function LandingContextFigure({
       const totalY = event.clientY - startY
       if (!dragging && Math.hypot(totalX, totalY) >= DRAG_THRESHOLD) {
         dragging = true
-        didDragRef.current = true
       }
       const deltaX = event.clientX - lastX
       const deltaY = event.clientY - lastY
@@ -295,21 +281,9 @@ export function LandingContextFigure({
       scheduleFrame()
     }
 
-    const onClick = (event: MouseEvent) => {
-      if (!rendererReadyRef.current || didDragRef.current) {
-        didDragRef.current = false
-        return
-      }
-      if ((event.target as HTMLElement).closest("button")) return
-      pinnedPriceActionRef.current = !pinnedPriceActionRef.current
-      hoverSuppressedRef.current = !pinnedPriceActionRef.current
-      setFigureMode(pinnedPriceActionRef.current ? "price" : "graph")
-      manualInteractionUntil = performance.now() + 350
-      scheduleFrame()
-    }
-
     const onKeyDown = (event: KeyboardEvent) => {
       if (!rendererReadyRef.current || !rootGroup) return
+      autoRotateRef.current = false
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault()
         pinnedPriceActionRef.current = !pinnedPriceActionRef.current
@@ -348,13 +322,14 @@ export function LandingContextFigure({
 
     const onPointerCapabilityChange = (event: MediaQueryListEvent) => {
       supportsFinePointer = event.matches
-      setPointerCapability(event.matches ? "fine" : "coarse")
     }
 
     const onReducedMotionChange = (event: MediaQueryListEvent) => {
       reduceMotion = event.matches
-      setAutoRotate(!reduceMotion)
-      autoRotateRef.current = !reduceMotion
+      if (reduceMotion) {
+        autoRotateRef.current = false
+        introRotationUntil = 0
+      }
       scheduleFrame()
     }
 
@@ -364,10 +339,10 @@ export function LandingContextFigure({
         if (disposed) return
 
         reduceMotion = reduceMotionQuery.matches
-        if (reduceMotion) {
-          autoRotateRef.current = false
-          setAutoRotate(false)
-        }
+        introRotationUntil = reduceMotion
+          ? 0
+          : performance.now() + INTRO_ROTATION_DURATION
+        autoRotateRef.current = introRotationUntil > 0
 
         const palette = getThemePalette()
         const fallback = getThemePaletteFallback()
@@ -745,12 +720,10 @@ export function LandingContextFigure({
         stage.addEventListener("pointermove", onPointerMove)
         stage.addEventListener("pointerup", onPointerUp)
         stage.addEventListener("pointercancel", onPointerUp)
-        stage.addEventListener("click", onClick)
         stage.addEventListener("keydown", onKeyDown)
         document.addEventListener("visibilitychange", onDocumentVisibility)
         reduceMotionQuery.addEventListener("change", onReducedMotionChange)
         supportsFinePointer = pointerQuery.matches
-        setPointerCapability(supportsFinePointer ? "fine" : "coarse")
         pointerQuery.addEventListener("change", onPointerCapabilityChange)
 
         const resizeObserver = new ResizeObserver(resize)
@@ -774,6 +747,9 @@ export function LandingContextFigure({
           ;(frame as { last?: number }).last = now
           const delta = Math.min(32, now - previous)
           const nextTarget = targetMode() === "price" ? 1 : 0
+          if (autoRotateRef.current && now >= introRotationUntil) {
+            autoRotateRef.current = false
+          }
           const currentMorph = (frame as { morph?: number }).morph ?? 0
           const morph = reduceMotion
             ? nextTarget
@@ -807,7 +783,12 @@ export function LandingContextFigure({
           if (priceMaterial) priceMaterial.opacity = 0.92 * morph
           if (gridMaterial) gridMaterial.opacity = 0.11 * morph
           if (nodeMaterial) nodeMaterial.size = 0.36 - 0.054 * morph
-          if (autoRotateRef.current && !pointerDown && rootGroup) {
+          if (
+            autoRotateRef.current &&
+            nextTarget === 0 &&
+            !pointerDown &&
+            rootGroup
+          ) {
             const graphWeight = 1 - morph
             const chartWeight = morph
             rootGroup.rotation.y +=
@@ -843,7 +824,6 @@ export function LandingContextFigure({
           stage.removeEventListener("pointermove", onPointerMove)
           stage.removeEventListener("pointerup", onPointerUp)
           stage.removeEventListener("pointercancel", onPointerUp)
-          stage.removeEventListener("click", onClick)
           stage.removeEventListener("keydown", onKeyDown)
           document.removeEventListener("visibilitychange", onDocumentVisibility)
           reduceMotionQuery.removeEventListener("change", onReducedMotionChange)
@@ -884,12 +864,6 @@ export function LandingContextFigure({
     }
   }, [labels])
 
-  const modeLabel = mode === "price" ? labels.priceMode : labels.graphMode
-  const hint =
-    pointerCapability === "fine"
-      ? labels.finePointerHint
-      : labels.coarsePointerHint
-
   return (
     <figure
       data-landing-visual="context-figure"
@@ -897,11 +871,8 @@ export function LandingContextFigure({
       aria-describedby="landing-context-figure-description"
       className={styles.figure}
     >
-      <figcaption className={styles.caption}>
-        <span
-          id="landing-context-figure-title"
-          className="font-mono text-xs tracking-[0.16em] text-muted-foreground"
-        >
+      <figcaption className="sr-only">
+        <span id="landing-context-figure-title" className="sr-only">
           {labels.title}
         </span>
         <span id="landing-context-figure-description" className="sr-only">
@@ -943,10 +914,6 @@ export function LandingContextFigure({
                 <span className={styles.graphNode} />
               </div>
             </div>
-            <div className={styles.fallbackLabel}>
-              <strong>{labels.graphMode}</strong>
-              <span>{labels.graphSummary}</span>
-            </div>
           </div>
           <div className={styles.fallbackView}>
             <div className={styles.fallbackPrice} aria-hidden="true">
@@ -954,39 +921,8 @@ export function LandingContextFigure({
                 <span className={styles.priceBar} key={index} />
               ))}
             </div>
-            <div className={styles.fallbackLabel}>
-              <strong>{labels.priceMode}</strong>
-              <span>{labels.priceSummary}</span>
-            </div>
           </div>
         </div>
-
-        {interactiveReady ? (
-          <>
-            <span className={styles.hint} aria-hidden="true">
-              {hint}
-            </span>
-            <button
-              type="button"
-              className={styles.pauseButton}
-              onClick={() => {
-                const next = !autoRotateRef.current
-                autoRotateRef.current = next
-                setAutoRotate(next)
-              }}
-              aria-pressed={!autoRotate}
-            >
-              {autoRotate ? labels.pause : labels.resume}
-            </button>
-            <span className={styles.mode} aria-hidden="true">
-              {modeLabel}
-            </span>
-          </>
-        ) : null}
-
-        {!interactiveReady && status === labels.fallback ? (
-          <span className={styles.fallbackStatus}>{labels.fallback}</span>
-        ) : null}
       </div>
 
       <p id="landing-context-figure-instructions" className="sr-only">

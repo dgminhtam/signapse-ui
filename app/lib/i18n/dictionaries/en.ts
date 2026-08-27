@@ -762,12 +762,10 @@ export const en: Dictionary = {
     },
     hero: {
       eyebrow: "AI-ASSISTED MARKET ANALYSIS",
-      sectionLabel: "Context you can verify",
       title: "Turn market data into trading context you can verify.",
       body: "Signapse connects price, events, market reactions, and related sources, then lets you ask market questions in natural language—so you can move from a market move to clearer context, faster.",
       trustNote:
         "AI supports synthesis and exploration. You verify the sources and make the trading decision.",
-      proofLabel: "From data to trading context",
       proofOneTitle: "Specialized AI Assistant",
       proofOneBody:
         "Powered by a Knowledge Graph built from multi-source market data—aggregated, evaluated, and analyzed.",
@@ -777,23 +775,12 @@ export const en: Dictionary = {
       contextFigureTitle: "Two views of market context",
       contextFigureDescription:
         "An interactive figure places the Market Knowledge Graph alongside price action as two complementary views of context, not a price transformation or forecast.",
-      contextFigureGraphSummary:
-        "The Market Knowledge Graph connects existing relationships among events, assets, articles, and narratives.",
-      contextFigurePriceSummary:
-        "Price action is a conceptual view of observable market-price movement.",
-      contextFigureGraphMode: "Market Knowledge Graph",
-      contextFigurePriceMode: "Price action",
-      contextFigureFinePointerHint:
-        "Hover to preview price action · Click to pin · Drag to rotate",
-      contextFigureCoarsePointerHint: "Tap to switch modes · Drag to rotate",
       contextFigureKeyboardHint:
         "Enter or Space to switch modes · Arrow keys to rotate",
-      contextFigurePause: "Pause rotation",
-      contextFigureResume: "Resume rotation",
       contextFigureStatusGraph: "Showing the Market Knowledge Graph.",
       contextFigureStatusPrice: "Showing price action.",
       contextFigureReady:
-        "Ready · Hover or tap to switch modes, drag or use arrow keys to rotate.",
+        "Ready · Hover to preview price action, drag or use arrow keys to rotate.",
       contextFigureFallback:
         "Showing the static figure; both complementary views remain available.",
     },

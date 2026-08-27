@@ -270,27 +270,11 @@ function HeroSection({
         </div>
 
         <div className={`${styles.heroVisual} flex min-w-0 flex-col gap-6 lg:pl-4`}>
-          <div className="flex flex-col gap-3">
-            <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-              {t.hero.sectionLabel}
-            </p>
-            <h2 className="max-w-xl text-2xl font-semibold tracking-[-0.02em] sm:text-3xl">
-              {t.hero.proofLabel}
-            </h2>
-          </div>
           <LandingContextFigure
             labels={{
               title: t.hero.contextFigureTitle,
               description: t.hero.contextFigureDescription,
-              graphSummary: t.hero.contextFigureGraphSummary,
-              priceSummary: t.hero.contextFigurePriceSummary,
-              graphMode: t.hero.contextFigureGraphMode,
-              priceMode: t.hero.contextFigurePriceMode,
-              finePointerHint: t.hero.contextFigureFinePointerHint,
-              coarsePointerHint: t.hero.contextFigureCoarsePointerHint,
               keyboardHint: t.hero.contextFigureKeyboardHint,
-              pause: t.hero.contextFigurePause,
-              resume: t.hero.contextFigureResume,
               statusGraph: t.hero.contextFigureStatusGraph,
               statusPrice: t.hero.contextFigureStatusPrice,
               ready: t.hero.contextFigureReady,

@@ -34,19 +34,28 @@ test.describe("P0 public landing", () => {
         "aria-describedby",
         "landing-context-figure-description"
       )
+      const figure = page.locator('[data-landing-visual="context-figure"]')
+      const hero = page.locator('[data-landing-section="hero-product-proof"]')
+      const stage = page.locator('[data-context-stage="interactive"]')
+      await expect(figure.locator("figcaption")).toHaveClass(/sr-only/)
+      await expect(figure.locator("[data-context-stage] button")).toHaveCount(0)
+      await expect(figure.locator("[data-figure-fallback]")).toHaveText("")
+      await expect(stage).toHaveText("")
+      await expect(stage).toHaveCSS("border-top-width", "0px")
+      await expect(hero).not.toContainText(
+        locale === "vi" ? "Bối cảnh có thể kiểm tra" : "Context you can verify"
+      )
+      await expect(hero).not.toContainText(
+        locale === "vi"
+          ? "Từ dữ liệu đến bối cảnh giao dịch"
+          : "From data to trading context"
+      )
       await expect(page.locator("#landing-context-figure-title")).toContainText(
         locale === "vi"
           ? "Hai góc nhìn về bối cảnh thị trường"
           : "Two views of market context"
       )
-      await expect(page.locator("[data-figure-fallback]")).toContainText(
-        locale === "vi"
-          ? "Đồ thị Tri thức thị trường"
-          : "Market Knowledge Graph"
-      )
-      await expect(page.locator("[data-figure-fallback]")).toContainText(
-        locale === "vi" ? "Diễn biến giá" : "Price action"
-      )
+      await expect(page.locator("#landing-context-figure-title")).toHaveClass(/sr-only/)
       await expect(page.locator("text=01 / 03")).toHaveCount(0)
       await expect(page.locator("#workspace-ai")).toContainText("AI Assistant")
       await expect(page.locator("#product")).not.toContainText("Market Query")
@@ -176,13 +185,27 @@ test.describe("P0 public landing", () => {
       if ((await stage.getAttribute("data-enhanced")) === "true") {
         await expect(stage).toHaveAttribute("role", "group")
         await expect(page.locator("[data-figure-fallback]")).toBeHidden()
-        await expect(
-          page.getByRole("button", { name: /rotation|xoay/i })
-        ).toBeVisible()
+
+        const box = await stage.boundingBox()
+        expect(box).not.toBeNull()
+        if (!box) return
+        await page.mouse.move(Math.max(0, box.x - 8), Math.max(0, box.y - 8))
+        await expect(stage).toHaveAttribute("data-context-mode", "graph")
+        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+        await expect(stage).toHaveAttribute("data-context-mode", "price")
+        await stage.click()
+        await page.mouse.move(Math.max(0, box.x - 8), Math.max(0, box.y - 8))
+        await expect(stage).toHaveAttribute("data-context-mode", "graph")
+
+        await page.keyboard.press("Tab")
         await stage.focus()
+        await expect(stage).toBeFocused()
+        await expect(stage).toHaveCSS("outline-style", "solid")
         await stage.press("Enter")
         await expect(stage).toHaveAttribute("data-context-mode", "price")
         await stage.press("Enter")
+        await expect(stage).toHaveAttribute("data-context-mode", "graph")
+        await stage.press("ArrowRight")
         await expect(stage).toHaveAttribute("data-context-mode", "graph")
       } else {
         await expect(page.locator("[data-figure-fallback]")).toBeVisible()
@@ -192,6 +215,32 @@ test.describe("P0 public landing", () => {
       }
     })
   }
+
+  test("coarse pointers do not get a hidden tap-to-switch mode", async ({ browser }) => {
+    const context = await browser.newContext({
+      hasTouch: true,
+      viewport: { width: 375, height: 800 },
+    })
+    const coarsePage = await context.newPage()
+
+    try {
+      await coarsePage.goto("http://127.0.0.1:3100/en")
+      await expect
+        .poll(() => coarsePage.evaluate(() => matchMedia("(pointer: coarse)").matches))
+        .toBe(true)
+
+      const stage = coarsePage.locator('[data-context-stage="interactive"]')
+      await expect
+        .poll(() => stage.getAttribute("data-renderer-state"), { timeout: 8000 })
+        .not.toBe("loading")
+      await coarsePage.waitForTimeout(4200)
+      await expect(stage).toHaveAttribute("data-context-mode", "graph")
+      await stage.tap()
+      await expect(stage).toHaveAttribute("data-context-mode", "graph")
+    } finally {
+      await context.close()
+    }
+  })
 
   for (const locale of ["vi", "en"] as const) {
     test(`${locale} renders preview metadata and localized social image references`, async ({ page }) => {
