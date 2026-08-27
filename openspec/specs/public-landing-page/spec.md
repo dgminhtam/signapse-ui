@@ -202,7 +202,7 @@ The text-first Hero SHALL render its market-context figure without visible contr
 - **AND** the Hero does not create horizontal overflow
 
 ### Requirement: Control-free figure interaction and motion
-The market-context figure SHALL retain exploration without visible controls. It SHALL support fine-pointer hover preview, pointer drag rotation, keyboard rotation and mode switching, and localized nonvisual guidance. It SHALL NOT expose click or tap pinning. Its graph-only introductory rotation SHALL run once per page view for no more than four seconds, SHALL NOT replay after viewport re-entry, and SHALL respect reduced-motion preferences.
+The market-context figure SHALL retain exploration without visible controls. It SHALL support fine-pointer hover preview, pointer drag rotation, keyboard rotation and mode switching, and localized nonvisual guidance. It SHALL NOT expose click or tap pinning. For visitors who have not requested reduced motion, its active view SHALL continue rotating while the figure is visible and not being dragged; reduced-motion preferences SHALL disable automatic rotation.
 
 #### Scenario: Fine-pointer hover previews price action
 - **WHEN** a fine-pointer visitor enters the market-context figure without dragging
@@ -227,12 +227,12 @@ The market-context figure SHALL retain exploration without visible controls. It 
 - **AND** Enter and Space switch between graph and price-action views
 - **AND** localized nonvisual name, description, and keyboard guidance are available
 
-#### Scenario: Intro motion is bounded and respects reduced motion
-- **WHEN** a visitor first views the enhanced market-context figure during a page view without reduced motion
-- **THEN** graph-only introductory rotation runs for no more than four seconds and then settles
-- **AND** it does not replay solely because the figure leaves and re-enters the viewport
+#### Scenario: Automatic rotation continues and respects reduced motion
+- **WHEN** a visitor views the enhanced market-context figure without reduced motion
+- **THEN** its active view continues rotating while the figure is visible and not being dragged
+- **AND** rotation pauses during a drag and resumes afterward
 - **WHEN** the visitor prefers reduced motion
-- **THEN** the figure does not start introductory rotation
+- **THEN** the figure does not start or continue automatic rotation
 
 ### Requirement: Landing page visual media readiness
 The landing page SHALL render a text-first composition whenever no locale-appropriate product capture has completed approval. In that state it SHALL render a localized control-free interactive market-context figure as progressive enhancement over a server-rendered silent dual-view fallback, and it MUST NOT render synthetic product UI, a generated image presented as a product screenshot, or an empty media placeholder.
@@ -397,11 +397,10 @@ The landing page SHALL provide equivalent content, navigation, CTA behavior, and
 - **WHEN** the visitor drags beyond the threshold
 - **THEN** the current mode rotates without switching modes
 
-#### Scenario: Introductory rotation is bounded
-- **WHEN** the visitor first views the figure without requesting reduced motion
-- **THEN** the figure performs one graph-only introductory rotation for no more than four seconds
+#### Scenario: Automatic rotation remains control-free
+- **WHEN** the visitor views the figure without requesting reduced motion
+- **THEN** the active view keeps rotating while visible and not being dragged
 - **AND** the figure provides no visible pause or mode control
-- **AND** leaving and re-entering the viewport does not replay the introduction
 
 #### Scenario: Small viewport header preserves primary actions
 - **WHEN** the landing header is viewed at a width where its full navigation and locale controls do not fit
@@ -419,17 +418,17 @@ The landing page SHALL provide equivalent content, navigation, CTA behavior, and
 #### Scenario: Default motion explains the conceptual flow
 - **WHEN** the visitor has not requested reduced motion and the Hero first renders
 - **THEN** copy and Hero entrance emphasis may run once without blocking interaction or changing layout bounds
-- **AND** the interactive figure may perform one graph-only introductory rotation for no more than four seconds
-- **AND** its animation does not replay on scroll or reset the visitor's selected mode or orientation
+- **AND** the interactive figure may keep rotating its active view while visible and not being dragged
+- **AND** its animation does not reset the visitor's selected mode or orientation
 
 #### Scenario: Theme and motion preferences preserve meaning
 - **WHEN** the visitor selects light theme or dark theme
 - **THEN** the figure preserves equivalent hierarchy and contrast through the active visual theme without resetting its in-memory interaction state
 - **WHEN** the visitor has requested reduced motion
-- **THEN** the figure starts without introductory rotation and switches modes immediately without animated morphing
+- **THEN** the figure starts without automatic rotation and switches modes immediately without animated morphing
 - **AND** no required content or action depends on animation, hover, or motion
 
 #### Scenario: Inactive rendering is suspended
-- **WHEN** the figure is outside the active viewport, the document is hidden, or the introductory rotation has settled with no morph or manual interaction in progress
+- **WHEN** the figure is outside the active viewport, the document is hidden, or automatic rotation is disabled by reduced motion with no morph or manual interaction in progress
 - **THEN** ongoing animation work stops
-- **AND** returning the figure to an active state preserves the current in-memory mode and orientation rather than replaying or resetting the introduction
+- **AND** returning the figure to an active state preserves the current in-memory mode and orientation

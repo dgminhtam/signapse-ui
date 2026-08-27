@@ -28,7 +28,6 @@ type ThemePaletteFallback = Record<keyof ThemePalette, number>
 const GRAPH_NODE_COUNT = 84
 const CANDLE_COUNT = 12
 const DRAG_THRESHOLD = 5
-const INTRO_ROTATION_DURATION = 4000
 const GRAPH_EDGE_OPACITY = 0.8
 const LIGHT_THEME_PALETTE_FALLBACK: ThemePaletteFallback = {
   background: 0xffffff,
@@ -146,7 +145,6 @@ export function LandingContextFigure({
     let lastX = 0
     let lastY = 0
     let manualInteractionUntil = 0
-    let introRotationUntil = 0
     const pointerQuery = window.matchMedia("(pointer: fine)")
     let supportsFinePointer = pointerQuery.matches
     const reduceMotionQuery = window.matchMedia(
@@ -210,7 +208,6 @@ export function LandingContextFigure({
 
     const onPointerEnter = () => {
       if (!rendererReadyRef.current || !supportsFinePointer) return
-      autoRotateRef.current = false
       hoveredRef.current = true
       hoverSuppressedRef.current = false
       if (!pinnedPriceActionRef.current && !pointerDown) setFigureMode("price")
@@ -220,7 +217,6 @@ export function LandingContextFigure({
 
     const onPointerLeave = () => {
       if (!rendererReadyRef.current) return
-      autoRotateRef.current = false
       hoveredRef.current = false
       hoverSuppressedRef.current = false
       if (!pinnedPriceActionRef.current && !pointerDown) setFigureMode("graph")
@@ -231,7 +227,6 @@ export function LandingContextFigure({
     const onPointerDown = (event: PointerEvent) => {
       if (!rendererReadyRef.current) return
       if ((event.target as HTMLElement).closest("button")) return
-      autoRotateRef.current = false
       pointerDown = true
       dragging = false
       activePointer = event.pointerId
@@ -283,7 +278,6 @@ export function LandingContextFigure({
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (!rendererReadyRef.current || !rootGroup) return
-      autoRotateRef.current = false
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault()
         pinnedPriceActionRef.current = !pinnedPriceActionRef.current
@@ -326,10 +320,7 @@ export function LandingContextFigure({
 
     const onReducedMotionChange = (event: MediaQueryListEvent) => {
       reduceMotion = event.matches
-      if (reduceMotion) {
-        autoRotateRef.current = false
-        introRotationUntil = 0
-      }
+      autoRotateRef.current = !reduceMotion
       scheduleFrame()
     }
 
@@ -339,10 +330,7 @@ export function LandingContextFigure({
         if (disposed) return
 
         reduceMotion = reduceMotionQuery.matches
-        introRotationUntil = reduceMotion
-          ? 0
-          : performance.now() + INTRO_ROTATION_DURATION
-        autoRotateRef.current = introRotationUntil > 0
+        autoRotateRef.current = !reduceMotion
 
         const palette = getThemePalette()
         const fallback = getThemePaletteFallback()
@@ -747,9 +735,6 @@ export function LandingContextFigure({
           ;(frame as { last?: number }).last = now
           const delta = Math.min(32, now - previous)
           const nextTarget = targetMode() === "price" ? 1 : 0
-          if (autoRotateRef.current && now >= introRotationUntil) {
-            autoRotateRef.current = false
-          }
           const currentMorph = (frame as { morph?: number }).morph ?? 0
           const morph = reduceMotion
             ? nextTarget
@@ -783,12 +768,7 @@ export function LandingContextFigure({
           if (priceMaterial) priceMaterial.opacity = 0.92 * morph
           if (gridMaterial) gridMaterial.opacity = 0.11 * morph
           if (nodeMaterial) nodeMaterial.size = 0.36 - 0.054 * morph
-          if (
-            autoRotateRef.current &&
-            nextTarget === 0 &&
-            !pointerDown &&
-            rootGroup
-          ) {
+          if (autoRotateRef.current && !pointerDown && rootGroup) {
             const graphWeight = 1 - morph
             const chartWeight = morph
             rootGroup.rotation.y +=
