@@ -24,13 +24,6 @@
   min-height: 18rem;
   overflow: hidden;
   border: 1px solid color-mix(in oklab, var(--border) 90%, transparent);
-  background:
-    radial-gradient(
-      circle at 50% 45%,
-      color-mix(in oklab, var(--figure-accent) 15%, transparent),
-      transparent 52%
-    ),
-    color-mix(in oklab, var(--muted) 38%, var(--background));
   cursor: grab;
   touch-action: none;
 }

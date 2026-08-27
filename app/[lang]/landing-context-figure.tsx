@@ -32,13 +32,35 @@ type ThemePalette = {
   muted: string
 }
 
+type ThemePaletteFallback = Record<keyof ThemePalette, number>
+
 const GRAPH_NODE_COUNT = 84
 const CANDLE_COUNT = 12
 const DRAG_THRESHOLD = 5
+const LIGHT_THEME_PALETTE_FALLBACK: ThemePaletteFallback = {
+  background: 0xffffff,
+  foreground: 0x0a0a0a,
+  accent: 0x009689,
+  border: 0xe5e5e5,
+  muted: 0x737373,
+}
+const DARK_THEME_PALETTE_FALLBACK: ThemePaletteFallback = {
+  background: 0x0a0a0a,
+  foreground: 0xfafafa,
+  accent: 0x00bc7d,
+  border: 0x232323,
+  muted: 0xa3a3a3,
+}
 
 function seededRandom(n: number) {
   const value = Math.sin(n * 12.9898 + 78.233) * 43758.5453
   return value - Math.floor(value)
+}
+
+function getThemePaletteFallback(): ThemePaletteFallback {
+  return document.documentElement.classList.contains("dark")
+    ? DARK_THEME_PALETTE_FALLBACK
+    : LIGHT_THEME_PALETTE_FALLBACK
 }
 
 function getThemePalette(): ThemePalette {
@@ -87,8 +109,8 @@ function colorFromCss(
       color.set(value)
     }
   } catch {
-    // Browsers may return an OKLCH value that Three cannot parse. The semantic
-    // CSS variable still drives the DOM; the fallback keeps the renderer safe.
+    // The semantic CSS variable still drives the DOM; the sRGB fallback keeps
+    // Three.js aligned when a browser returns an OKLCH value it cannot parse.
   }
   return color
 }
@@ -351,12 +373,20 @@ export function LandingContextFigure({
         }
 
         const palette = getThemePalette()
-        const background = colorFromCss(three, palette.background, 0xffffff)
-        let backgroundColor = background.clone()
-        const foreground = colorFromCss(three, palette.foreground, 0x252525)
-        const accent = colorFromCss(three, palette.accent, 0x2dd4bf)
-        const edgeColor = colorFromCss(three, palette.border, 0xcbd5e1)
-        const muted = colorFromCss(three, palette.muted, 0x64748b)
+        const fallback = getThemePaletteFallback()
+        const background = colorFromCss(
+          three,
+          palette.background,
+          fallback.background
+        )
+        const foreground = colorFromCss(
+          three,
+          palette.foreground,
+          fallback.foreground
+        )
+        const accent = colorFromCss(three, palette.accent, fallback.accent)
+        const edgeColor = colorFromCss(three, palette.border, fallback.border)
+        const muted = colorFromCss(three, palette.muted, fallback.muted)
 
         scene = new three.Scene()
         const camera = new three.PerspectiveCamera(44, 1, 0.1, 100)
@@ -668,20 +698,32 @@ export function LandingContextFigure({
 
         const applyPalette = () => {
           const nextPalette = getThemePalette()
+          const nextFallback = getThemePaletteFallback()
           const nextBackground = colorFromCss(
             three,
             nextPalette.background,
-            0xffffff
+            nextFallback.background
           )
           const nextForeground = colorFromCss(
             three,
             nextPalette.foreground,
-            0x252525
+            nextFallback.foreground
           )
-          const nextAccent = colorFromCss(three, nextPalette.accent, 0x2dd4bf)
-          const nextBorder = colorFromCss(three, nextPalette.border, 0xcbd5e1)
-          const nextMuted = colorFromCss(three, nextPalette.muted, 0x64748b)
-          backgroundColor = nextBackground
+          const nextAccent = colorFromCss(
+            three,
+            nextPalette.accent,
+            nextFallback.accent
+          )
+          const nextBorder = colorFromCss(
+            three,
+            nextPalette.border,
+            nextFallback.border
+          )
+          const nextMuted = colorFromCss(
+            three,
+            nextPalette.muted,
+            nextFallback.muted
+          )
           renderer?.setClearColor(nextBackground, 0)
           nodeMaterial?.color.copy(nextForeground)
           edgeColor.copy(nextBorder)
@@ -767,12 +809,14 @@ export function LandingContextFigure({
           }
           nodeGeometry.attributes.position.needsUpdate = true
           updateEdges()
-          if (edgeMaterial)
-            edgeMaterial.color.lerpColors(edgeColor, backgroundColor, morph)
+          if (edgeMaterial) edgeMaterial.opacity = 0.9 * (1 - morph)
           if (candleMaterial) candleMaterial.opacity = 0.72 * morph
           if (priceMaterial) priceMaterial.opacity = 0.92 * morph
           if (gridMaterial) gridMaterial.opacity = 0.11 * morph
-          if (nodeMaterial) nodeMaterial.size = 0.36 - 0.054 * morph
+          if (nodeMaterial) {
+            nodeMaterial.opacity = 1 - morph
+            nodeMaterial.size = 0.36 - 0.054 * morph
+          }
           if (autoRotateRef.current && !pointerDown && rootGroup) {
             const graphWeight = 1 - morph
             const chartWeight = morph
