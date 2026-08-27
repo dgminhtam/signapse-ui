@@ -777,9 +777,6 @@ export const vi = {
       proofTwoTitle: "Đọc bối cảnh, không chỉ nhìn nến",
       proofTwoBody:
         "Đọc diễn biến giá trên chart cùng phản ứng thị trường, sự kiện và lịch kinh tế liên quan.",
-      proofThreeTitle: "Kiểm tra mối liên hệ",
-      proofThreeBody:
-        "Mở sự kiện, phản ứng, nguồn tin và quan hệ liên quan để tự đánh giá.",
       contextFigureTitle: "Hai góc nhìn về bối cảnh thị trường",
       contextFigureDescription:
         "Hình minh họa tương tác đặt Đồ thị Tri thức thị trường cạnh Diễn biến giá như hai góc nhìn bổ sung về bối cảnh, không phải phép biến đổi hay dự báo giá.",

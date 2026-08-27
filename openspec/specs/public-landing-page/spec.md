@@ -82,6 +82,20 @@ The landing page SHALL present the second Hero proof as reading chart context ra
 - **THEN** the page continues to qualify information that appears only when data is available
 - **AND** the concise second Hero proof does not imply causal proof, trading signals, or universal data coverage
 
+### Requirement: Two-proof Hero hierarchy
+The landing page SHALL render exactly two Hero proof points: the specialized AI Assistant and chart context. It SHALL NOT render the former relationship-inspection proof in the Hero, while relationship inspection remains part of the detailed product story.
+
+#### Scenario: Hero shows only the two approved proof points
+- **WHEN** a visitor reads the Hero on `/vi` or `/en`
+- **THEN** the proof list contains the localized specialized-AI and chart-context proofs
+- **AND** it does not contain `Kiểm tra mối liên hệ` or `Inspect relationships`
+- **AND** no empty third proof slot is rendered at tablet widths
+
+#### Scenario: Relationship inspection remains in the product story
+- **WHEN** a visitor continues from the Hero to the product-story chapters
+- **THEN** the page still describes inspecting related events, reactions, sources, and relationships within the applicable detailed chapters
+- **AND** the removal does not change the conceptual figure's separate behavior or semantics
+
 ### Requirement: Landing page CTA states
 The landing page SHALL expose a single auth-aware access model across the header, Hero, final CTA, and footer, using only destinations that exist.
 

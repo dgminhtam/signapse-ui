@@ -18,3 +18,9 @@
 - [x] 4.1 Synchronize the approved second Hero proof and its availability-boundary decision across the landing contract and public specification.
 - [x] 4.2 Replace the Vietnamese and English second Hero proof copy with the approved chart-context wording.
 - [x] 4.3 Extend localized Hero coverage and rerun targeted validation.
+
+## 5. Two-proof Hero hierarchy
+
+- [x] 5.1 Synchronize the two-proof hierarchy and relationship-inspection boundary across the change artifacts, landing contract, and public specification.
+- [x] 5.2 Remove the third localized Hero proof and reflow the remaining proof list for two tablet columns.
+- [x] 5.3 Extend localized Hero coverage for the exact two-proof surface and run targeted validation.

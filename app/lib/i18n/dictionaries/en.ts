@@ -774,9 +774,6 @@ export const en: Dictionary = {
       proofTwoTitle: "Read the context, not just the candles",
       proofTwoBody:
         "Read price action alongside market reactions, related events, and economic-calendar context.",
-      proofThreeTitle: "Inspect relationships",
-      proofThreeBody:
-        "Open related events, reactions, sources, and relationships to evaluate them yourself.",
       contextFigureTitle: "Two views of market context",
       contextFigureDescription:
         "An interactive figure places the Market Knowledge Graph alongside price action as two complementary views of context, not a price transformation or forecast.",

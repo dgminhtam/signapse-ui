@@ -95,6 +95,8 @@ Signapse khác một charting terminal, news reader hoặc chatbot độc lập 
 | Hero proof 2 title | Đọc bối cảnh, không chỉ nhìn nến | Read the context, not just the candles |
 | Hero proof 2 body | Đọc diễn biến giá trên chart cùng phản ứng thị trường, sự kiện và lịch kinh tế liên quan. | Read price action alongside market reactions, related events, and economic-calendar context. |
 
+Hero chỉ hiển thị hai proof point trên. Khả năng kiểm tra sự kiện, phản ứng, nguồn tin và quan hệ được trình bày trong các chapter sản phẩm chi tiết, không lặp thành proof point thứ ba.
+
 Implementation dùng các chuỗi trong first viewport và Locked Section Copy làm editorial baseline. Chỉ được sửa lỗi chính tả hoặc ngữ pháp mà không đổi nghĩa; mọi thay đổi về promise, qualifier, capability boundary, hierarchy hoặc CTA phải cập nhật tài liệu này và cả hai locale trong cùng change.
 
 ## Canonical Product Language

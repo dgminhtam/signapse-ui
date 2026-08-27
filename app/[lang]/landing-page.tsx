@@ -297,10 +297,9 @@ function HeroSection({
               fallback: t.hero.contextFigureFallback,
             }}
           />
-          <dl className="grid gap-4 border-t border-border pt-5 sm:grid-cols-3 lg:grid-cols-1">
+          <dl className="grid gap-4 border-t border-border pt-5 sm:grid-cols-2 lg:grid-cols-1">
             <ProofPoint title={t.hero.proofOneTitle} body={t.hero.proofOneBody} />
             <ProofPoint title={t.hero.proofTwoTitle} body={t.hero.proofTwoBody} />
-            <ProofPoint title={t.hero.proofThreeTitle} body={t.hero.proofThreeBody} />
           </dl>
         </div>
       </div>

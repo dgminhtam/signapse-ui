@@ -52,6 +52,19 @@ test.describe("P0 public landing", () => {
       await expect(page.locator("#product")).not.toContainText("Market Query")
       await expect(page.locator("#product")).not.toContainText("82%")
 
+      const heroProofPoints = page.locator(
+        '[data-landing-section="hero-product-proof"] dt'
+      )
+      await expect(heroProofPoints).toHaveCount(2)
+      await expect(heroProofPoints).toHaveText(
+        locale === "vi"
+          ? ["Trợ lý AI chuyên biệt", "Đọc bối cảnh, không chỉ nhìn nến"]
+          : ["Specialized AI Assistant", "Read the context, not just the candles"]
+      )
+      await expect(page.locator('[data-landing-section="hero-product-proof"]')).not.toContainText(
+        locale === "vi" ? "Kiểm tra mối liên hệ" : "Inspect relationships"
+      )
+
       const dashboardLabel =
         locale === "vi"
           ? "Mở bảng điều khiển Signapse"

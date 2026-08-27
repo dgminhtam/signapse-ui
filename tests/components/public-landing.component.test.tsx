@@ -73,6 +73,10 @@ describe("localized landing composition", () => {
         ? "Đọc diễn biến giá trên chart cùng phản ứng thị trường, sự kiện và lịch kinh tế liên quan."
         : "Read price action alongside market reactions, related events, and economic-calendar context."
     )
+    expect((html.match(/<dt\b/g) ?? []).length).toBe(2)
+    expect(html).not.toContain(
+      locale === "vi" ? "Kiểm tra mối liên hệ" : "Inspect relationships"
+    )
     expect(html).not.toContain("Product workspace preview")
     expect(html).not.toContain("Market Query")
     expect(html).not.toContain("82%")
