@@ -34,9 +34,20 @@ test.describe("P0 public landing", () => {
         "aria-describedby",
         "landing-context-figure-description"
       )
-      await expect(page.locator('[data-context-stage="inputs"]')).toHaveCount(1)
-      await expect(page.locator('[data-context-stage="context"]')).toHaveCount(1)
-      await expect(page.locator('[data-context-stage="actions"]')).toHaveCount(1)
+      await expect(page.locator("#landing-context-figure-title")).toContainText(
+        locale === "vi"
+          ? "Hai góc nhìn về bối cảnh thị trường"
+          : "Two views of market context"
+      )
+      await expect(page.locator("[data-figure-fallback]")).toContainText(
+        locale === "vi"
+          ? "Đồ thị Tri thức thị trường"
+          : "Market Knowledge Graph"
+      )
+      await expect(page.locator("[data-figure-fallback]")).toContainText(
+        locale === "vi" ? "Diễn biến giá" : "Price action"
+      )
+      await expect(page.locator("text=01 / 03")).toHaveCount(0)
       await expect(page.locator("#workspace-ai")).toContainText("AI Assistant")
       await expect(page.locator("#product")).not.toContainText("Market Query")
       await expect(page.locator("#product")).not.toContainText("82%")
@@ -132,6 +143,42 @@ test.describe("P0 public landing", () => {
       )
     ).toEqual([])
   })
+
+  for (const locale of ["vi", "en"] as const) {
+    test(`${locale} exposes the figure interaction contract without application semantics`, async ({ page }) => {
+      await page.goto(`/${locale}`)
+
+      const stage = page.locator('[data-context-stage="interactive"]')
+      await expect(stage).toHaveAttribute("data-context-mode", "graph")
+      await expect(stage).not.toHaveAttribute("role", "application")
+      await expect(page.locator("[data-context-status]")).toHaveAttribute(
+        "aria-live",
+        "polite"
+      )
+      await expect
+        .poll(() => stage.getAttribute("data-renderer-state"), {
+          timeout: 8000,
+        })
+        .not.toBe("loading")
+      if ((await stage.getAttribute("data-enhanced")) === "true") {
+        await expect(stage).toHaveAttribute("role", "group")
+        await expect(page.locator("[data-figure-fallback]")).toBeHidden()
+        await expect(
+          page.getByRole("button", { name: /rotation|xoay/i })
+        ).toBeVisible()
+        await stage.focus()
+        await stage.press("Enter")
+        await expect(stage).toHaveAttribute("data-context-mode", "price")
+        await stage.press("Enter")
+        await expect(stage).toHaveAttribute("data-context-mode", "graph")
+      } else {
+        await expect(page.locator("[data-figure-fallback]")).toBeVisible()
+        await expect(page.locator("[data-context-status]")).toContainText(
+          locale === "vi" ? "Đang hiển thị hình tĩnh" : "Showing the static figure"
+        )
+      }
+    })
+  }
 
   for (const locale of ["vi", "en"] as const) {
     test(`${locale} renders preview metadata and localized social image references`, async ({ page }) => {
