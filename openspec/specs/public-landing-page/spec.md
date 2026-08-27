@@ -27,16 +27,25 @@ The system SHALL render a public Signapse application landing page at each suppo
 - **AND** it falls back to Vietnamese when no supported preference is available
 
 ### Requirement: Landing page positioning
-The landing page SHALL position Signapse as an AI-assisted, event-aware market analysis workspace for active and research-oriented traders and people monitoring assets, news, and economic events. It SHALL explain that AI supports natural-language market questions and synthesis while price, events, reactions, sources, and relationships remain inspectable Signapse surfaces and the user owns the trading decision.
+The landing page SHALL position Signapse as a Market Intelligence Platform for active and research-oriented traders and people monitoring assets, news, and economic events. It SHALL explain that the AI Assistant uses contextual market relationships from the Market Knowledge Graph while price, events, reactions, sources, and relationships remain inspectable Signapse surfaces and the user owns the trading decision.
 
-#### Scenario: Product thesis is visible
-- **WHEN** a visitor reads the Hero
-- **THEN** the page explains that Signapse turns price data and related market context into trading context the visitor can verify
+#### Scenario: Vietnamese Market Intelligence Hero renders
+- **WHEN** a visitor reads the Hero on `/vi`
+- **THEN** its eyebrow is `MARKET INTELLIGENCE PLATFORM`
+- **AND** its H1 is `Biến dữ liệu thị trường thành Đồ thị Tri thức.`
+- **AND** its supporting copy is `Signapse tổng hợp, đánh giá và phân tích dữ liệu giá, sự kiện, phản ứng và tin tức từ nhiều nguồn thành các mối liên hệ có thể kiểm tra — tạo ngữ cảnh cho Trợ lý AI khi bạn đặt câu hỏi và đọc từng biến động.`
 - **AND** it identifies the next access action and a short AI-assistance-not-prediction trust boundary in the same scan
+
+#### Scenario: English Market Intelligence Hero renders
+- **WHEN** a visitor reads the Hero on `/en`
+- **THEN** its eyebrow is `MARKET INTELLIGENCE PLATFORM`
+- **AND** its H1 is `Turn market data into a Knowledge Graph.`
+- **AND** its supporting copy is `Signapse aggregates, evaluates, and analyzes multi-source price, event, reaction, and news data into inspectable relationships—giving the AI Assistant context when you ask questions and read market moves.`
+- **AND** the localized message communicates the same Knowledge-Graph context as the Vietnamese copy
 
 #### Scenario: AI role is scoped to supported behavior
 - **WHEN** a visitor reads the Hero proof and conceptual figure
-- **THEN** the page explains that users can ask market questions in natural language and use Signapse surfaces to inspect chart context, events, reactions, sources, and relationships
+- **THEN** the page explains that the AI Assistant uses Market Knowledge Graph context to support natural-language market questions and users can use Signapse surfaces to inspect chart context, events, reactions, sources, and relationships
 - **AND** it does not imply that an Assistant response contains structured evidence, reasoning chains, a source sheet, trading signals, or execution controls
 
 #### Scenario: Claims stay analysis-focused
@@ -167,13 +176,71 @@ The landing page SHALL organize the product story into the canonical sequence: P
 - **THEN** it exposes brand identity, locale links, the request-access email, and the auth-appropriate sign-in or dashboard destination
 - **AND** it does not render Docs, Privacy, Terms, pricing, or integration links unless corresponding destinations exist
 
+### Requirement: Control-free Hero visual chrome
+The text-first Hero SHALL render its market-context figure without visible control chrome. The Hero visual area SHALL NOT display its section label, proof heading, figure caption, hover hint, pause control, mode label, runtime status, fallback labels, or a persistent canvas border. The localized Hero headline, supporting copy, CTA behavior, trust note, and two proof points SHALL remain visible.
+
+#### Scenario: Vietnamese visual chrome is absent
+- **WHEN** a visitor views the text-first Hero on `/vi`
+- **THEN** `Bối cảnh có thể kiểm tra`, `Từ dữ liệu đến bối cảnh giao dịch`, and `Hai góc nhìn về bối cảnh thị trường` are not visibly rendered in the Hero visual area
+- **AND** no visible hint, pause control, mode label, runtime status, fallback label, or persistent canvas border is rendered
+- **AND** the Hero headline, supporting copy, CTA behavior, trust note, and two proof points remain visible
+
+#### Scenario: English visual chrome is absent
+- **WHEN** a visitor views the text-first Hero on `/en`
+- **THEN** `Context you can verify`, `From data to trading context`, and `Two views of market context` are not visibly rendered in the Hero visual area
+- **AND** no visible hint, pause control, mode label, runtime status, fallback label, or persistent canvas border is rendered
+- **AND** the Hero headline, supporting copy, CTA behavior, trust note, and two proof points remain visible
+
+#### Scenario: Canvas reclaims removed visual-copy space
+- **WHEN** a visitor views the text-first Hero at a desktop breakpoint
+- **THEN** the market-context canvas uses the visual space released by the removed heading and caption without materially increasing the Hero footprint
+- **AND** the canvas remains within the Hero layout without horizontal overflow
+
+#### Scenario: Canvas remains viable on narrow viewports
+- **WHEN** a visitor views the text-first Hero on a narrow viewport or at 200% zoom
+- **THEN** the market-context canvas retains its mobile minimum footprint
+- **AND** the Hero does not create horizontal overflow
+
+### Requirement: Control-free figure interaction and motion
+The market-context figure SHALL retain exploration without visible controls. It SHALL support fine-pointer hover preview, pointer drag rotation, keyboard rotation and mode switching, and localized nonvisual guidance. It SHALL NOT expose click or tap pinning. Its graph-only introductory rotation SHALL run once per page view for no more than four seconds, SHALL NOT replay after viewport re-entry, and SHALL respect reduced-motion preferences.
+
+#### Scenario: Fine-pointer hover previews price action
+- **WHEN** a fine-pointer visitor enters the market-context figure without dragging
+- **THEN** the figure previews price action
+- **AND** the figure returns to graph mode when the pointer leaves
+- **AND** no visible control or mode label is required to trigger or explain the preview
+
+#### Scenario: Pointer drag rotates the current view
+- **WHEN** a visitor drags within the market-context figure with a supported pointer
+- **THEN** the current graph or price-action view rotates during the gesture
+- **AND** the gesture does not activate a click or tap pinning mode
+
+#### Scenario: Coarse pointer has no hidden tap mode
+- **WHEN** a coarse-pointer visitor taps the market-context figure without dragging
+- **THEN** the tap does not pin, toggle, or otherwise change the figure mode
+- **AND** a drag gesture remains available for rotation
+
+#### Scenario: Keyboard interaction remains accessible without visible chrome
+- **WHEN** a keyboard visitor focuses the enhanced market-context figure
+- **THEN** a visible focus indicator is shown only while the figure has keyboard focus
+- **AND** Arrow keys rotate the active view
+- **AND** Enter and Space switch between graph and price-action views
+- **AND** localized nonvisual name, description, and keyboard guidance are available
+
+#### Scenario: Intro motion is bounded and respects reduced motion
+- **WHEN** a visitor first views the enhanced market-context figure during a page view without reduced motion
+- **THEN** graph-only introductory rotation runs for no more than four seconds and then settles
+- **AND** it does not replay solely because the figure leaves and re-enters the viewport
+- **WHEN** the visitor prefers reduced motion
+- **THEN** the figure does not start introductory rotation
+
 ### Requirement: Landing page visual media readiness
-The landing page SHALL render a text-first composition whenever no locale-appropriate product capture has completed approval. In that state it SHALL render a localized interactive market-context figure as progressive enhancement over a server-rendered static dual-view fallback, and it MUST NOT render synthetic product UI, a generated image presented as a product screenshot, or an empty media placeholder.
+The landing page SHALL render a text-first composition whenever no locale-appropriate product capture has completed approval. In that state it SHALL render a localized control-free interactive market-context figure as progressive enhancement over a server-rendered silent dual-view fallback, and it MUST NOT render synthetic product UI, a generated image presented as a product screenshot, or an empty media placeholder.
 
 #### Scenario: Screenshot assets are not yet available
 - **WHEN** the landing has no approved capture for the active locale
-- **THEN** the Hero and product chapters render their complete story in localized text and the Hero renders a labelled interactive market-context figure
-- **AND** the page does not render the previous mock workspace, fake chart bars, fake confidence, fake evidence counts, Market Query preview, Theme node, control-looking product decoration, or fake market values
+- **THEN** the Hero and product chapters render their complete story in localized text and the Hero renders a control-free interactive market-context figure
+- **AND** the page does not render the previous mock workspace, fake chart bars, fake confidence, fake evidence counts, Market Query preview, Theme node, visible control-looking product decoration, or fake market values
 
 #### Scenario: Conceptual figure communicates without product mimicry
 - **WHEN** the text-first Hero renders its interactive market-context figure
@@ -182,36 +249,35 @@ The landing page SHALL render a text-first composition whenever no locale-approp
 - **AND** it does not present itself as a live product chart, trading signal, automated-execution surface, or approved product capture
 - **AND** it does not display tickers, prices, axes, metrics, trading controls, dashboard chrome, or data that could be mistaken for live market output
 
-#### Scenario: Localized figure identity renders
-- **WHEN** a visitor reads the interactive market-context figure on `/vi`
-- **THEN** its visible title is `Hai góc nhìn về bối cảnh thị trường`
-- **AND** its visible mode labels are `Đồ thị Tri thức thị trường` and `Diễn biến giá`
-- **AND** all hints, controls, status messages, and accessible descriptions are natural Vietnamese
+#### Scenario: Vietnamese nonvisual figure identity renders
+- **WHEN** a visitor uses assistive technology with the interactive market-context figure on `/vi`
+- **THEN** a natural Vietnamese nonvisual name, description, and keyboard guidance identify the Market Knowledge Graph and price action views
+- **AND** the figure does not visibly render its former title, mode labels, hints, controls, or status messages
 - **AND** the obsolete `01 / 03` metadata is absent
 
-#### Scenario: English figure identity renders
-- **WHEN** a visitor reads the interactive market-context figure on `/en`
-- **THEN** its visible title is `Two views of market context`
-- **AND** its visible mode labels are `Market Knowledge Graph` and `Price action`
-- **AND** all hints, controls, status messages, and accessible descriptions are natural English
+#### Scenario: English nonvisual figure identity renders
+- **WHEN** a visitor uses assistive technology with the interactive market-context figure on `/en`
+- **THEN** a natural English nonvisual name, description, and keyboard guidance identify the Market Knowledge Graph and price action views
+- **AND** the figure does not visibly render its former title, mode labels, hints, controls, or status messages
 - **AND** the obsolete `01 / 03` metadata is absent
 
-#### Scenario: Static fallback preserves the complete figure meaning
+#### Scenario: Static fallback preserves the complete figure meaning without visual copy
 - **WHEN** JavaScript has not hydrated, WebGL cannot initialize, or the interactive renderer loses its graphics context
-- **THEN** the Hero keeps a server-rendered static dual-view figure in the same layout footprint
-- **AND** the fallback communicates both the Market Knowledge Graph and price action through localized adjacent text
-- **AND** unavailable interactive controls are not presented as operable
+- **THEN** the Hero keeps a server-rendered silent dual-view figure in the same layout footprint
+- **AND** the fallback does not visually render labels, controls, or runtime status
+- **AND** a localized nonvisual description communicates the graph and price-action context
 - **AND** a runtime failure returns to the fallback without exposing a technical exception or blocking the landing journey
 
 #### Scenario: Surrounding Hero content remains stable
 - **WHEN** the interactive market-context figure replaces the previous conceptual diagram
-- **THEN** the localized Hero headline, supporting copy, CTA behavior, trust note, proof label, and three proof points remain unchanged
+- **THEN** the localized Hero headline, supporting copy, CTA behavior, trust note, and two proof points remain unchanged
+- **AND** the Hero visual section label and proof heading are absent
 - **AND** the canonical landing section order and all sections outside the figure remain unchanged
 
 #### Scenario: One locale lacks an approved capture
 - **WHEN** a product capture is approved for one locale but not the other
-- **THEN** the locale without an approved asset remains text-first and renders its localized interactive market-context figure
-- **AND** it does not fall back to the other locale's image or visible labels
+- **THEN** the locale without an approved asset remains text-first and renders its localized control-free interactive market-context figure
+- **AND** it does not fall back to the other locale's image or expose the figure's former visible labels
 
 #### Scenario: Screenshot assets become available
 - **WHEN** a locale-appropriate capture passes public-data, privacy, licensing, attribution, claim, localization, intrinsic-size, and performance review
@@ -269,11 +335,11 @@ The landing page SHALL expose semantic Vietnamese and English locale links in th
 ### Requirement: Landing page metadata and social discovery
 The system SHALL produce localized landing metadata from explicit server-side public-origin and indexability configuration, SHALL fail closed for unknown deployment state, and SHALL provide one brand-only social card for each supported locale.
 
-The Vietnamese title SHALL be `Signapse | AI cho phân tích giao dịch` and its description SHALL be `Signapse kết nối giá, sự kiện, phản ứng và nguồn tin liên quan để hỗ trợ phân tích thị trường bằng AI với bối cảnh có thể kiểm tra.` The English title SHALL be `Signapse | AI-assisted market analysis` and its description SHALL be `Signapse connects price, events, market reactions, and related sources to support AI-assisted market analysis with context you can verify.`
+The Vietnamese title SHALL be `Signapse | Market Intelligence Platform` and its description SHALL be `Signapse kết nối giá, sự kiện, phản ứng và nguồn tin liên quan để hỗ trợ phân tích thị trường bằng AI với bối cảnh có thể kiểm tra.` The English title SHALL be `Signapse | Market Intelligence Platform` and its description SHALL be `Signapse connects price, events, market reactions, and related sources to support AI-assisted market analysis with context you can verify.`
 
 #### Scenario: Valid non-indexable preview metadata renders
 - **WHEN** the landing is configured as non-indexable with public origin `https://dev.signapse.cloud`
-- **THEN** `/vi` and `/en` emit the locked localized AI-assisted title and description
+- **THEN** `/vi` and `/en` emit the locked localized Market Intelligence title and description
 - **AND** each locale URL is self-canonical on `dev.signapse.cloud`
 - **AND** the metadata exposes Vietnamese and English language alternates plus root `/` as `x-default`
 - **AND** the page emits `noindex`
@@ -296,7 +362,7 @@ The Vietnamese title SHALL be `Signapse | AI cho phân tích giao dịch` and it
 
 #### Scenario: Localized social cards render
 - **WHEN** a crawler requests the social artwork for `/vi` or `/en`
-- **THEN** it receives a brand-only card using the approved Signapse brand treatment and the corresponding localized AI-assisted metadata title
+- **THEN** it receives a brand-only card using the approved Signapse brand treatment and the corresponding localized Market Intelligence Platform title
 - **AND** the Vietnamese and English cards use the same layout
 - **AND** neither card contains body copy, a product screenshot, a product mock, a metric, or an additional claim
 
@@ -306,40 +372,36 @@ The landing page SHALL provide equivalent content, navigation, CTA behavior, and
 #### Scenario: Semantic page structure renders
 - **WHEN** the landing page is inspected with accessibility semantics
 - **THEN** it contains one H1, ordered H2 and H3 headings, a skip link to the main content, and labelled header navigation
-- **AND** the interactive market-context figure exposes a concise localized text summary and input instructions
+- **AND** the interactive market-context figure exposes a concise localized nonvisual name, description, and input instructions
 - **AND** the interactive stage uses a labelled focusable group rather than application-mode semantics
 - **AND** the canvas and decorative geometry are hidden from the accessibility tree
 - **AND** visible brand text is not redundantly announced through the adjacent logo
 
 #### Scenario: Keyboard navigation works
 - **WHEN** a visitor uses only the keyboard
-- **THEN** the skip link, locale links, mobile navigation disclosure, section links, sign-in or dashboard link, access CTA, interactive figure, and auto-rotation control are operable in logical order
+- **THEN** the skip link, locale links, mobile navigation disclosure, section links, sign-in or dashboard link, access CTA, and interactive figure are operable in logical order
 - **AND** Enter or Space switches between Market Knowledge Graph and price action
 - **AND** the arrow keys rotate the current visual mode without trapping focus
 - **AND** mode changes are announced through a polite status region
 - **AND** every interactive element has a visible focus state
 
-#### Scenario: Fine pointer previews and pins price action
-- **WHEN** a visitor with a fine pointer hovers an unpinned interactive figure
+#### Scenario: Fine pointer previews without click pinning
+- **WHEN** a visitor with a fine pointer enters an interactive figure without dragging
 - **THEN** the figure previews price action
 - **AND** leaving the figure returns to the Market Knowledge Graph
-- **WHEN** the visitor clicks to pin price action
-- **THEN** leaving the figure does not change the pinned mode
-- **AND** clicking again returns to the Market Knowledge Graph
+- **AND** clicking the figure does not pin or toggle its mode
 
-#### Scenario: Touch distinguishes mode switching from rotation
+#### Scenario: Touch preserves rotation without a hidden tap mode
 - **WHEN** a visitor taps the interactive figure without crossing the drag threshold
-- **THEN** the figure switches and pins the complementary mode
+- **THEN** the figure mode does not change or become pinned
 - **WHEN** the visitor drags beyond the threshold
 - **THEN** the current mode rotates without switching modes
-- **AND** releasing the drag resumes auto-rotation when the visitor has not paused it
 
-#### Scenario: Auto-rotation remains controllable
-- **WHEN** the visitor has not requested reduced motion
-- **THEN** the figure begins with bounded auto-rotation and provides a visible localized Pause control
-- **WHEN** the visitor pauses auto-rotation
-- **THEN** automatic rotation stops while hover, tap, click, drag, keyboard rotation, and mode switching remain available
-- **AND** the same control can resume auto-rotation without resetting the current mode or orientation
+#### Scenario: Introductory rotation is bounded
+- **WHEN** the visitor first views the figure without requesting reduced motion
+- **THEN** the figure performs one graph-only introductory rotation for no more than four seconds
+- **AND** the figure provides no visible pause or mode control
+- **AND** leaving and re-entering the viewport does not replay the introduction
 
 #### Scenario: Small viewport header preserves primary actions
 - **WHEN** the landing header is viewed at a width where its full navigation and locale controls do not fit
@@ -357,18 +419,17 @@ The landing page SHALL provide equivalent content, navigation, CTA behavior, and
 #### Scenario: Default motion explains the conceptual flow
 - **WHEN** the visitor has not requested reduced motion and the Hero first renders
 - **THEN** copy and Hero entrance emphasis may run once without blocking interaction or changing layout bounds
-- **AND** the interactive figure may morph and auto-rotate only while it remains active and controllable
+- **AND** the interactive figure may perform one graph-only introductory rotation for no more than four seconds
 - **AND** its animation does not replay on scroll or reset the visitor's selected mode or orientation
 
 #### Scenario: Theme and motion preferences preserve meaning
 - **WHEN** the visitor selects light theme or dark theme
 - **THEN** the figure preserves equivalent hierarchy and contrast through the active visual theme without resetting its in-memory interaction state
 - **WHEN** the visitor has requested reduced motion
-- **THEN** the figure starts without auto-rotation and switches modes immediately without animated morphing
-- **AND** a localized control allows the visitor to opt into auto-rotation for the current page while mode changes remain immediate
+- **THEN** the figure starts without introductory rotation and switches modes immediately without animated morphing
 - **AND** no required content or action depends on animation, hover, or motion
 
 #### Scenario: Inactive rendering is suspended
-- **WHEN** the figure is outside the active viewport, the document is hidden, or auto-rotation is paused with no morph or manual interaction in progress
+- **WHEN** the figure is outside the active viewport, the document is hidden, or the introductory rotation has settled with no morph or manual interaction in progress
 - **THEN** ongoing animation work stops
-- **AND** returning the figure to an active state resumes from the current in-memory mode and orientation rather than resetting the visual
+- **AND** returning the figure to an active state preserves the current in-memory mode and orientation rather than replaying or resetting the introduction

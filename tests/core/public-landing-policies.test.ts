@@ -113,7 +113,7 @@ describe("landing locale links", () => {
 describe("landing metadata policy", () => {
   const input = {
     locale: "vi" as const,
-    title: "Signapse | AI cho phân tích giao dịch",
+    title: "Signapse | Market Intelligence Platform",
     description: "Localized description",
     socialImageAlt: "Localized social card",
   }

@@ -362,7 +362,7 @@ export function LandingContextFigure({
 
         scene = new three.Scene()
         const camera = new three.PerspectiveCamera(44, 1, 0.1, 100)
-        camera.position.set(0, 0.15, 9.1)
+        camera.position.set(0, 0.15, 8.4)
         renderer = new three.WebGLRenderer({
           antialias: true,
           alpha: true,

@@ -247,9 +247,7 @@ test.describe("P0 public landing", () => {
       await page.goto(`/${locale}`)
 
       await expect(page).toHaveTitle(
-        locale === "vi"
-          ? "Signapse | AI cho phân tích giao dịch"
-          : "Signapse | AI-assisted market analysis"
+        "Signapse | Market Intelligence Platform"
       )
       await expect(page.locator('meta[name="description"]')).toHaveAttribute(
         "content",

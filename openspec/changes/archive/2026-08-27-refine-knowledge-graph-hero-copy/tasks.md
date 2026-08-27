@@ -24,3 +24,9 @@
 - [x] 5.1 Synchronize the two-proof hierarchy and relationship-inspection boundary across the change artifacts, landing contract, and public specification.
 - [x] 5.2 Remove the third localized Hero proof and reflow the remaining proof list for two tablet columns.
 - [x] 5.3 Extend localized Hero coverage for the exact two-proof surface and run targeted validation.
+
+## 6. Market Intelligence Hero positioning
+
+- [x] 6.1 Synchronize the approved Market Intelligence Hero message and metadata title across the change artifacts, landing contract, and public specification.
+- [x] 6.2 Replace the localized Hero and metadata titles with the approved Market Intelligence and Knowledge-Graph copy.
+- [x] 6.3 Extend focused coverage and run targeted validation for the approved Hero and metadata titles.

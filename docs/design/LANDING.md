@@ -74,7 +74,7 @@ Landing không được ngầm hứa team collaboration, shared workspace member
 
 ### Category
 
-**AI-assisted Event-aware Market Analysis Workspace**
+**Market Intelligence Platform**
 
 Signapse khác một charting terminal, news reader hoặc chatbot độc lập ở chỗ sản phẩm đặt các surface đó quanh cùng lớp sự kiện và quan hệ thị trường, trong khi Trợ lý AI hỗ trợ đặt câu hỏi và tổng hợp bằng văn bản. Landing phải nói về khả năng quan sát, kiểm tra và truy vết; không khẳng định quan hệ nhân quả khi dữ liệu chỉ cho thấy sự liên quan.
 
@@ -82,9 +82,9 @@ Signapse khác một charting terminal, news reader hoặc chatbot độc lập 
 
 | Vai trò | Tiếng Việt | English |
 | --- | --- | --- |
-| Eyebrow | AI cho phân tích giao dịch | AI-assisted market analysis |
-| H1 | Biến dữ liệu thị trường thành bối cảnh giao dịch có thể kiểm chứng. | Turn market data into trading context you can verify. |
-| Supporting copy | Signapse kết nối giá, sự kiện, phản ứng và nguồn tin liên quan, đồng thời cho phép bạn đặt câu hỏi bằng ngôn ngữ tự nhiên — để đi từ một biến động đến bối cảnh rõ ràng hơn, nhanh hơn. | Signapse connects price, events, market reactions, and related sources, then lets you ask market questions in natural language—so you can move from a market move to clearer context, faster. |
+| Eyebrow | MARKET INTELLIGENCE PLATFORM | MARKET INTELLIGENCE PLATFORM |
+| H1 | Biến dữ liệu thị trường thành Đồ thị Tri thức. | Turn market data into a Knowledge Graph. |
+| Supporting copy | Signapse tổng hợp, đánh giá và phân tích dữ liệu giá, sự kiện, phản ứng và tin tức từ nhiều nguồn thành các mối liên hệ có thể kiểm tra — tạo ngữ cảnh cho Trợ lý AI khi bạn đặt câu hỏi và đọc từng biến động. | Signapse aggregates, evaluates, and analyzes multi-source price, event, reaction, and news data into inspectable relationships—giving the AI Assistant context when you ask questions and read market moves. |
 | Primary CTA | Yêu cầu truy cập | Request access |
 | Hero secondary CTA | Xem cách Signapse phân tích | See how Signapse analyzes markets |
 | Signed-in CTA | Mở bảng điều khiển | Open dashboard |
@@ -461,8 +461,8 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 
 | Locale | Title | Description |
 | --- | --- | --- |
-| `vi` | Signapse \| AI cho phân tích giao dịch | Signapse kết nối giá, sự kiện, phản ứng và nguồn tin liên quan để hỗ trợ phân tích thị trường bằng AI với bối cảnh có thể kiểm tra. |
-| `en` | Signapse \| AI-assisted market analysis | Signapse connects price, events, market reactions, and related sources to support AI-assisted market analysis with context you can verify. |
+| `vi` | Signapse \| Market Intelligence Platform | Signapse kết nối giá, sự kiện, phản ứng và nguồn tin liên quan để hỗ trợ phân tích thị trường bằng AI với bối cảnh có thể kiểm tra. |
+| `en` | Signapse \| Market Intelligence Platform | Signapse connects price, events, market reactions, and related sources to support AI-assisted market analysis with context you can verify. |
 
 - Metadata dùng Next.js Metadata API và dictionary hiện hành.
 - Khai báo canonical locale URL và language alternates cho `/vi` và `/en`.

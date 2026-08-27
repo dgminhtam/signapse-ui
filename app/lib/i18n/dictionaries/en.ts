@@ -761,9 +761,9 @@ export const en: Dictionary = {
       relationshipDecoration: "",
     },
     hero: {
-      eyebrow: "AI-ASSISTED MARKET ANALYSIS",
-      title: "Turn market data into trading context you can verify.",
-      body: "Signapse connects price, events, market reactions, and related sources, then lets you ask market questions in natural language—so you can move from a market move to clearer context, faster.",
+      eyebrow: "MARKET INTELLIGENCE PLATFORM",
+      title: "Turn market data into a Knowledge Graph.",
+      body: "Signapse aggregates, evaluates, and analyzes multi-source price, event, reaction, and news data into inspectable relationships—giving the AI Assistant context when you ask questions and read market moves.",
       trustNote:
         "AI supports synthesis and exploration. You verify the sources and make the trading decision.",
       proofOneTitle: "Specialized AI Assistant",
@@ -886,10 +886,10 @@ export const en: Dictionary = {
       brandLabel: "About Signapse",
     },
     metadata: {
-      title: "Signapse | AI-assisted market analysis",
+      title: "Signapse | Market Intelligence Platform",
       description:
         "Signapse connects price, events, market reactions, and related sources to support AI-assisted market analysis with context you can verify.",
-      socialImageAlt: "Signapse | AI-assisted market analysis",
+      socialImageAlt: "Signapse | Market Intelligence Platform",
     },
   },
   personalNotes: {

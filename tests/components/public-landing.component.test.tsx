@@ -50,10 +50,16 @@ describe("localized landing composition", () => {
     expect((html.match(/<h1/g) ?? []).length).toBe(1)
     expect(html).toContain(sequence)
     expect(html).toContain("AI Assistant")
+    expect(html).toContain("MARKET INTELLIGENCE PLATFORM")
     expect(html).toContain(
       locale === "vi"
-        ? "Biến dữ liệu thị trường thành bối cảnh giao dịch có thể kiểm chứng."
-        : "Turn market data into trading context you can verify."
+        ? "Biến dữ liệu thị trường thành Đồ thị Tri thức."
+        : "Turn market data into a Knowledge Graph."
+    )
+    expect(html).toContain(
+      locale === "vi"
+        ? "Signapse tổng hợp, đánh giá và phân tích dữ liệu giá, sự kiện, phản ứng và tin tức từ nhiều nguồn thành các mối liên hệ có thể kiểm tra — tạo ngữ cảnh cho Trợ lý AI khi bạn đặt câu hỏi và đọc từng biến động."
+        : "Signapse aggregates, evaluates, and analyzes multi-source price, event, reaction, and news data into inspectable relationships—giving the AI Assistant context when you ask questions and read market moves."
     )
     expect(html).toContain(
       locale === "vi" ? "Trợ lý AI chuyên biệt" : "Specialized AI Assistant"

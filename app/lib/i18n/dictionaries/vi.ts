@@ -764,9 +764,9 @@ export const vi = {
       relationshipDecoration: "",
     },
     hero: {
-      eyebrow: "AI CHO PHÂN TÍCH GIAO DỊCH",
-      title: "Biến dữ liệu thị trường thành bối cảnh giao dịch có thể kiểm chứng.",
-      body: "Signapse kết nối giá, sự kiện, phản ứng và nguồn tin liên quan, đồng thời cho phép bạn đặt câu hỏi bằng ngôn ngữ tự nhiên — để đi từ một biến động đến bối cảnh rõ ràng hơn, nhanh hơn.",
+      eyebrow: "MARKET INTELLIGENCE PLATFORM",
+      title: "Biến dữ liệu thị trường thành Đồ thị Tri thức.",
+      body: "Signapse tổng hợp, đánh giá và phân tích dữ liệu giá, sự kiện, phản ứng và tin tức từ nhiều nguồn thành các mối liên hệ có thể kiểm tra — tạo ngữ cảnh cho Trợ lý AI khi bạn đặt câu hỏi và đọc từng biến động.",
       trustNote:
         "AI hỗ trợ tổng hợp và khám phá. Bạn kiểm tra nguồn và tự đưa ra quyết định giao dịch.",
       proofOneTitle: "Trợ lý AI chuyên biệt",
@@ -888,10 +888,10 @@ export const vi = {
       brandLabel: "Về Signapse",
     },
     metadata: {
-      title: "Signapse | AI cho phân tích giao dịch",
+      title: "Signapse | Market Intelligence Platform",
       description:
         "Signapse kết nối giá, sự kiện, phản ứng và nguồn tin liên quan để hỗ trợ phân tích thị trường bằng AI với bối cảnh có thể kiểm tra.",
-      socialImageAlt: "Signapse | AI cho phân tích giao dịch",
+      socialImageAlt: "Signapse | Market Intelligence Platform",
     },
   },
   personalNotes: {

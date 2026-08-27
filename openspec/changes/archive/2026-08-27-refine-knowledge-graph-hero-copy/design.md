@@ -1,6 +1,6 @@
 ## Context
 
-The first Hero proof currently describes a generic text conversation with the AI Assistant. The product owner clarified that the Assistant receives market context from Signapse's Knowledge Graph, which is built from multi-source market data through aggregation, evaluation, and analysis. The owner also finalized the Hero as two proof points: specialized AI and chart context. The former relationship-inspection proof duplicates the deeper product story and must be removed without changing the conceptual figure or product chapters.
+The first Hero proof currently describes a generic text conversation with the AI Assistant. The product owner clarified that the Assistant receives market context from Signapse's Knowledge Graph, which is built from multi-source market data through aggregation, evaluation, and analysis. The owner also finalized the Hero as two proof points: specialized AI and chart context. The former relationship-inspection proof duplicates the deeper product story and must be removed without changing the conceptual figure or product chapters. The Hero's primary message now needs to lead with the approved Market Intelligence Platform category and the Knowledge-Graph product thesis rather than the older AI-assisted-analysis frame.
 
 ## Goals / Non-Goals
 
@@ -11,6 +11,7 @@ The first Hero proof currently describes a generic text conversation with the AI
 - Render exactly two Hero proof points and remove the former relationship-inspection proof from both locale dictionaries.
 - Define the public term and scope for the Market Knowledge Graph so the landing, specification, and glossary describe the same capability.
 - Preserve the analysis-support, source-inspection, and user-decision boundaries of the existing landing.
+- Lead the Hero and localized browser/social title with the approved `Market Intelligence Platform` category and the corresponding Knowledge-Graph message.
 
 **Non-Goals:**
 
@@ -44,6 +45,10 @@ The second Hero proof will use the approved concise copy: it describes reading p
 
 The existing route-local proof list will render only the specialized-AI and chart-context entries. Their tablet layout will change from three to two columns, preventing an empty third slot. The relationship-inspection proof fields will be removed from both dictionaries instead of being left as unused copy. This does not remove relationship inspection from the product-story chapters or change the separate conceptual figure's controls and semantics.
 
+### 7. Lead with Market Intelligence and ground it in the Knowledge Graph
+
+Both locales will use the exact `MARKET INTELLIGENCE PLATFORM` eyebrow so the public category is consistent. The localized H1 and supporting copy will explain that Signapse turns market data into a Knowledge Graph and gives the AI Assistant inspectable market relationships as context for questions and market moves. Browser, Open Graph, Twitter, and social-card titles will use the exact `Signapse | Market Intelligence Platform` value in both locales. The existing localized metadata descriptions remain unchanged because the approved scope changes the category and title, not the SEO description.
+
 ## Risks / Trade-offs
 
 - [“Evaluated” is mistaken for guaranteed trading performance] → Scope it to Market Knowledge Graph data preparation and retain the landing trust boundary that users verify sources and make the decision.
@@ -51,3 +56,4 @@ The existing route-local proof list will render only the specialized-AI and char
 - [The technical distinction makes the Hero too dense] → Keep the copy to a title plus one concise sentence and leave the detailed canonical definition in documentation.
 - [The compact chart proof is mistaken for guaranteed data coverage] → Keep availability qualifiers in detailed chart and product-story copy, and retain the landing's analysis-not-prediction trust boundary.
 - [Removing the relationship proof hides a product capability] → Keep relationship inspection in the dedicated Connected Market Graph and Reaction & Evidence chapters, where it has space for accurate scope and qualifiers.
+- [The category feels abstract in a Vietnamese Hero] → Keep the English category as the approved product label, then immediately ground it in a localized Knowledge-Graph H1 and supporting sentence.

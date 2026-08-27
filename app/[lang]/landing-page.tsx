@@ -228,7 +228,7 @@ function HeroSection({
       aria-labelledby="landing-hero-heading"
       className={`${styles.heroSection} relative overflow-hidden border-b border-border/80`}
     >
-      <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[minmax(0,1fr)_minmax(24rem,0.86fr)] lg:items-center lg:gap-14 lg:px-8 lg:py-24">
+      <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[minmax(0,0.9fr)_minmax(28rem,1.1fr)] lg:items-center lg:gap-14 lg:px-8 lg:py-24">
         <div className={`${styles.heroCopy} flex min-w-0 flex-col gap-7`}>
           <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
             {t.hero.eyebrow}
@@ -269,7 +269,7 @@ function HeroSection({
           </p>
         </div>
 
-        <div className={`${styles.heroVisual} flex min-w-0 flex-col gap-6 lg:pl-4`}>
+        <div className={`${styles.heroVisual} flex min-w-0 flex-col gap-6`}>
           <LandingContextFigure
             labels={{
               title: t.hero.contextFigureTitle,

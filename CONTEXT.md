@@ -34,9 +34,9 @@ _Avoid_: Product demo, live trading chart, graph-generated price, prediction vis
 The conceptual view of observable market-price movement paired with the Market Knowledge Graph in the interactive market-context figure.
 _Avoid_: Live trading chart, trading signal, price forecast, Knowledge Graph output
 
-**AI-assisted market analysis (Phân tích thị trường có AI hỗ trợ)**:
-The public product positioning in which AI lets users ask market questions and supports synthesis, while price, events, reactions, sources, and relationships remain inspectable Signapse surfaces and the user owns the trading decision.
-_Avoid_: AI trading engine, prediction engine, automated trading, trading signals
+**Market Intelligence Platform (Nền tảng Market Intelligence)**:
+The public product category for Signapse, which organizes inspectable price, event, reaction, source, and relationship data into Market Knowledge Graph context for AI-assisted market questions; the user owns the trading decision.
+_Avoid_: AI-assisted market analysis workspace, AI trading engine, prediction engine, automated trading, trading signals
 
 **Market Knowledge Graph (Đồ thị Tri thức thị trường)**:
 The market-context structure built from multi-source market data through aggregation, evaluation, and analysis; it provides contextual input to the AI Assistant.

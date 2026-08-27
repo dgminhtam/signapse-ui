@@ -233,7 +233,7 @@
 
 @media (min-width: 1024px) {
   .stage {
-    height: clamp(22rem, 34vw, 28rem);
+    height: clamp(23rem, 36vw, 30rem);
   }
 }
 

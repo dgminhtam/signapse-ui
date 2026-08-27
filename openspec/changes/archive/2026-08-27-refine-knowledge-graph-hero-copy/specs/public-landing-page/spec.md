@@ -54,6 +54,67 @@ The landing page SHALL render exactly two Hero proof points: the specialized AI 
 
 ## MODIFIED Requirements
 
+### Requirement: Landing page positioning
+The landing page SHALL position Signapse as a Market Intelligence Platform for active and research-oriented traders and people monitoring assets, news, and economic events. It SHALL explain that the AI Assistant uses contextual market relationships from the Market Knowledge Graph while price, events, reactions, sources, and relationships remain inspectable Signapse surfaces and the user owns the trading decision.
+
+#### Scenario: Vietnamese Market Intelligence Hero renders
+- **WHEN** a visitor reads the Hero on `/vi`
+- **THEN** its eyebrow is `MARKET INTELLIGENCE PLATFORM`
+- **AND** its H1 is `Biến dữ liệu thị trường thành Đồ thị Tri thức.`
+- **AND** its supporting copy is `Signapse tổng hợp, đánh giá và phân tích dữ liệu giá, sự kiện, phản ứng và tin tức từ nhiều nguồn thành các mối liên hệ có thể kiểm tra — tạo ngữ cảnh cho Trợ lý AI khi bạn đặt câu hỏi và đọc từng biến động.`
+- **AND** the Hero keeps the next access action and analysis-support trust boundary in the same scan
+
+#### Scenario: English Market Intelligence Hero renders
+- **WHEN** a visitor reads the Hero on `/en`
+- **THEN** its eyebrow is `MARKET INTELLIGENCE PLATFORM`
+- **AND** its H1 is `Turn market data into a Knowledge Graph.`
+- **AND** its supporting copy is `Signapse aggregates, evaluates, and analyzes multi-source price, event, reaction, and news data into inspectable relationships—giving the AI Assistant context when you ask questions and read market moves.`
+- **AND** the localized message communicates the same Knowledge-Graph context as the Vietnamese copy
+
+#### Scenario: Market Intelligence claim remains bounded
+- **WHEN** a visitor reads the primary Hero message
+- **THEN** it presents the Knowledge Graph as analysis context for the AI Assistant rather than model training, prediction performance, trading signals, or automated execution
+- **AND** it does not imply that every AI response exposes a complete graph, evidence sheet, reasoning chain, or source citation
+
+#### Scenario: Claims stay analysis-focused
+- **WHEN** a visitor reads the Hero and primary product chapters
+- **THEN** the page describes how users track assets, inspect related events, reactions, and sources when available, and explore relationships around a move
+- **AND** it does not describe Signapse as an internal admin console, an AI pipeline, a prediction engine, a trading-signal product, or an automated-trading system
+
+### Requirement: Landing page metadata and social discovery
+The system SHALL produce localized landing metadata from explicit server-side public-origin and indexability configuration, SHALL fail closed for unknown deployment state, and SHALL provide one brand-only social card for each supported locale.
+
+The Vietnamese title SHALL be `Signapse | Market Intelligence Platform` and its description SHALL be `Signapse kết nối giá, sự kiện, phản ứng và nguồn tin liên quan để hỗ trợ phân tích thị trường bằng AI với bối cảnh có thể kiểm tra.` The English title SHALL be `Signapse | Market Intelligence Platform` and its description SHALL be `Signapse connects price, events, market reactions, and related sources to support AI-assisted market analysis with context you can verify.`
+
+#### Scenario: Valid non-indexable preview metadata renders
+- **WHEN** the landing is configured as non-indexable with public origin `https://dev.signapse.cloud`
+- **THEN** `/vi` and `/en` emit the locked localized Market Intelligence title and description
+- **AND** each locale URL is self-canonical on `dev.signapse.cloud`
+- **AND** the metadata exposes Vietnamese and English language alternates plus root `/` as `x-default`
+- **AND** the page emits `noindex`
+
+#### Scenario: Invalid non-indexable origin fails closed
+- **WHEN** the landing is configured as non-indexable and the public origin is absent or invalid
+- **THEN** the landing still renders with `noindex`
+- **AND** canonical and language-alternate URLs are omitted
+- **AND** the system does not infer an origin from the request hostname
+
+#### Scenario: Invalid indexable configuration is rejected
+- **WHEN** the landing is configured as indexable with an origin other than exactly `https://signapse.cloud`
+- **THEN** the application fails fast instead of rendering indexable landing metadata
+
+#### Scenario: Indexable apex metadata can be verified before cutover
+- **WHEN** the landing metadata policy is evaluated with indexable origin `https://signapse.cloud`
+- **THEN** `/vi` and `/en` are self-canonical on the apex origin
+- **AND** they expose each other as language alternates plus root `/` as `x-default`
+- **AND** the metadata does not emit `noindex`
+
+#### Scenario: Localized social cards render
+- **WHEN** a crawler requests the social artwork for `/vi` or `/en`
+- **THEN** it receives a brand-only card using the approved Signapse brand treatment and the corresponding localized Market Intelligence Platform title
+- **AND** the Vietnamese and English cards use the same layout
+- **AND** neither card contains body copy, a product screenshot, a product mock, a metric, or an additional claim
+
 ### Requirement: Landing page trust and claim boundaries
 The landing page SHALL present Signapse as analysis support for inspecting market context and linked sources, SHALL qualify optional product data in detailed product descriptions, and MUST NOT imply prediction performance, trading advice, signal generation, or automated execution. A concise Hero proof MAY name high-level chart context without repeating an individual data-availability clause when the detailed landing story retains the applicable qualifier.
 
