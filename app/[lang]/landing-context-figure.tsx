@@ -355,7 +355,7 @@ export function LandingContextFigure({
         let backgroundColor = background.clone()
         const foreground = colorFromCss(three, palette.foreground, 0x252525)
         const accent = colorFromCss(three, palette.accent, 0x2dd4bf)
-        const border = colorFromCss(three, palette.border, 0xcbd5e1)
+        const edgeColor = colorFromCss(three, palette.border, 0xcbd5e1)
         const muted = colorFromCss(three, palette.muted, 0x64748b)
 
         scene = new three.Scene()
@@ -363,11 +363,11 @@ export function LandingContextFigure({
         camera.position.set(0, 0.15, 9.1)
         renderer = new three.WebGLRenderer({
           antialias: true,
-          alpha: false,
+          alpha: true,
           powerPreference: "high-performance",
         })
         renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75))
-        renderer.setClearColor(background, 1)
+        renderer.setClearColor(background, 0)
         renderer.domElement.className = styles.canvas
         renderer.domElement.setAttribute("aria-hidden", "true")
         stage.appendChild(renderer.domElement)
@@ -505,7 +505,7 @@ export function LandingContextFigure({
           new three.BufferAttribute(edgeArray, 3)
         )
         edgeMaterial = new three.LineBasicMaterial({
-          color: border,
+          color: edgeColor,
           transparent: true,
           opacity: 0.9,
           depthTest: false,
@@ -682,9 +682,10 @@ export function LandingContextFigure({
           const nextBorder = colorFromCss(three, nextPalette.border, 0xcbd5e1)
           const nextMuted = colorFromCss(three, nextPalette.muted, 0x64748b)
           backgroundColor = nextBackground
-          renderer?.setClearColor(nextBackground, 1)
+          renderer?.setClearColor(nextBackground, 0)
           nodeMaterial?.color.copy(nextForeground)
-          edgeMaterial?.color.copy(nextBorder)
+          edgeColor.copy(nextBorder)
+          edgeMaterial?.color.copy(edgeColor)
           candleMaterial?.color.copy(nextMuted)
           priceMaterial?.color.copy(nextForeground)
           gridMaterial?.color.copy(nextAccent)
@@ -767,10 +768,7 @@ export function LandingContextFigure({
           nodeGeometry.attributes.position.needsUpdate = true
           updateEdges()
           if (edgeMaterial)
-            edgeMaterial.color.lerp(
-              backgroundColor,
-              morph * 0.015
-            )
+            edgeMaterial.color.lerpColors(edgeColor, backgroundColor, morph)
           if (candleMaterial) candleMaterial.opacity = 0.72 * morph
           if (priceMaterial) priceMaterial.opacity = 0.92 * morph
           if (gridMaterial) gridMaterial.opacity = 0.11 * morph
