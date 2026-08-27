@@ -5,6 +5,7 @@ The first Hero proof currently describes the AI Assistant as a generic text conv
 ## What Changes
 
 - Replace the first Hero proof-point title and supporting copy in both locales with the approved specialized-AI and Knowledge-Graph message.
+- Replace the second Hero proof-point title and supporting copy in both locales with the approved concise chart-context message.
 - Establish the public claim that the market Knowledge Graph is built from multi-source market data through aggregation, evaluation, and analysis, and provides context to the AI Assistant.
 - Synchronize the landing design contract, public-landing specification, and domain glossary with that claim and its boundaries.
 - Add behavior-focused coverage for the localized Hero proof copy.

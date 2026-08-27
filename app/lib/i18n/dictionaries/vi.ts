@@ -774,9 +774,9 @@ export const vi = {
       proofOneTitle: "Trợ lý AI chuyên biệt",
       proofOneBody:
         "Vận hành trên Đồ thị Tri thức, được xây dựng từ dữ liệu thị trường đa nguồn đã qua tổng hợp, đánh giá và phân tích.",
-      proofTwoTitle: "Đọc biến động trong bối cảnh",
+      proofTwoTitle: "Đọc bối cảnh, không chỉ nhìn nến",
       proofTwoBody:
-        "Đặt diễn biến giá cạnh chú thích sự kiện và lịch kinh tế khi dữ liệu khả dụng.",
+        "Đọc diễn biến giá trên chart cùng phản ứng thị trường, sự kiện và lịch kinh tế liên quan.",
       proofThreeTitle: "Kiểm tra mối liên hệ",
       proofThreeBody:
         "Mở sự kiện, phản ứng, nguồn tin và quan hệ liên quan để tự đánh giá.",

@@ -771,9 +771,9 @@ export const en: Dictionary = {
       proofOneTitle: "Specialized AI Assistant",
       proofOneBody:
         "Powered by a Knowledge Graph built from multi-source market data—aggregated, evaluated, and analyzed.",
-      proofTwoTitle: "Read moves in context",
+      proofTwoTitle: "Read the context, not just the candles",
       proofTwoBody:
-        "Place price action alongside event annotations and economic-calendar context when available.",
+        "Read price action alongside market reactions, related events, and economic-calendar context.",
       proofThreeTitle: "Inspect relationships",
       proofThreeBody:
         "Open related events, reactions, sources, and relationships to evaluate them yourself.",

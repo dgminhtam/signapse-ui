@@ -92,6 +92,8 @@ Signapse khác một charting terminal, news reader hoặc chatbot độc lập 
 | Trust line | AI hỗ trợ tổng hợp và khám phá. Bạn kiểm tra nguồn và tự đưa ra quyết định giao dịch. | AI supports synthesis and exploration. You verify the sources and make the trading decision. |
 | Hero proof 1 title | Trợ lý AI chuyên biệt | Specialized AI Assistant |
 | Hero proof 1 body | Vận hành trên Đồ thị Tri thức, được xây dựng từ dữ liệu thị trường đa nguồn đã qua tổng hợp, đánh giá và phân tích. | Powered by a Knowledge Graph built from multi-source market data—aggregated, evaluated, and analyzed. |
+| Hero proof 2 title | Đọc bối cảnh, không chỉ nhìn nến | Read the context, not just the candles |
+| Hero proof 2 body | Đọc diễn biến giá trên chart cùng phản ứng thị trường, sự kiện và lịch kinh tế liên quan. | Read price action alongside market reactions, related events, and economic-calendar context. |
 
 Implementation dùng các chuỗi trong first viewport và Locked Section Copy làm editorial baseline. Chỉ được sửa lỗi chính tả hoặc ngữ pháp mà không đổi nghĩa; mọi thay đổi về promise, qualifier, capability boundary, hierarchy hoặc CTA phải cập nhật tài liệu này và cả hai locale trong cùng change.
 

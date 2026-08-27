@@ -7,12 +7,13 @@ The first Hero proof currently describes a generic text conversation with the AI
 **Goals:**
 
 - Replace only the first localized Hero proof title and body with the approved specialized-AI and Knowledge-Graph message.
+- Replace the second localized Hero proof title and body with the approved concise chart-context message.
 - Define the public term and scope for the Market Knowledge Graph so the landing, specification, and glossary describe the same capability.
 - Preserve the analysis-support, source-inspection, and user-decision boundaries of the existing landing.
 
 **Non-Goals:**
 
-- Changing AI inference, Knowledge Graph construction, APIs, page structure, animation, or the remaining Hero proof points.
+- Changing AI inference, Knowledge Graph construction, APIs, page structure, or animation.
 - Claiming model training or fine-tuning, complete data coverage, prediction accuracy, trading signals, or automated trading.
 - Adding a visible technical diagram, evidence sheet, or source citation to Assistant responses.
 
@@ -34,8 +35,13 @@ The glossary and landing claim matrix will define the Market Knowledge Graph as 
 
 Existing public-landing component coverage will assert the first Hero proof title and body in both locales. Browser coverage remains behavior-focused and will continue to verify that the Hero renders accessibly without binding to layout internals.
 
+### 5. Keep the chart-context proof concise while qualifying detailed data claims elsewhere
+
+The second Hero proof will use the approved concise copy: it describes reading price action alongside reactions, events, and economic-calendar context without repeating a data-availability clause. The chart and product-story descriptions remain the authoritative place for availability qualifiers, so the Hero avoids duplicating caveat text while the page still does not present optional data as guaranteed.
+
 ## Risks / Trade-offs
 
 - [“Evaluated” is mistaken for guaranteed trading performance] → Scope it to Market Knowledge Graph data preparation and retain the landing trust boundary that users verify sources and make the decision.
 - [Knowledge Graph is mistaken for model training] → Use “operates on”/“powered by” wording rather than “trained on” or “fine-tuned on.”
 - [The technical distinction makes the Hero too dense] → Keep the copy to a title plus one concise sentence and leave the detailed canonical definition in documentation.
+- [The compact chart proof is mistaken for guaranteed data coverage] → Keep availability qualifiers in detailed chart and product-story copy, and retain the landing's analysis-not-prediction trust boundary.

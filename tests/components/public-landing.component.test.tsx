@@ -63,6 +63,16 @@ describe("localized landing composition", () => {
         ? "Vận hành trên Đồ thị Tri thức, được xây dựng từ dữ liệu thị trường đa nguồn đã qua tổng hợp, đánh giá và phân tích."
         : "Powered by a Knowledge Graph built from multi-source market data—aggregated, evaluated, and analyzed."
     )
+    expect(html).toContain(
+      locale === "vi"
+        ? "Đọc bối cảnh, không chỉ nhìn nến"
+        : "Read the context, not just the candles"
+    )
+    expect(html).toContain(
+      locale === "vi"
+        ? "Đọc diễn biến giá trên chart cùng phản ứng thị trường, sự kiện và lịch kinh tế liên quan."
+        : "Read price action alongside market reactions, related events, and economic-calendar context."
+    )
     expect(html).not.toContain("Product workspace preview")
     expect(html).not.toContain("Market Query")
     expect(html).not.toContain("82%")

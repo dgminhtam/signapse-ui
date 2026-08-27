@@ -12,3 +12,9 @@
 
 - [x] 3.1 Add behavior-focused component coverage for the localized first Hero proof.
 - [x] 3.2 Run targeted landing tests, typecheck, and strict OpenSpec validation for the change.
+
+## 4. Chart-context Hero proof
+
+- [x] 4.1 Synchronize the approved second Hero proof and its availability-boundary decision across the landing contract and public specification.
+- [x] 4.2 Replace the Vietnamese and English second Hero proof copy with the approved chart-context wording.
+- [x] 4.3 Extend localized Hero coverage and rerun targeted validation.
