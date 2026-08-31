@@ -46,31 +46,53 @@ export function AiProviderModelPickerDialog({
   onOpenChange,
   onConfirm,
 }: AiProviderModelPickerDialogProps) {
-  const contentKey = `${currentModel}:${models.map((model) => model.id).join("|")}`
+  const selectionKey = `${currentModel}:${models.map((model) => model.id).join("|")}`
+  const defaultModel = models.some((model) => model.id === currentModel)
+    ? currentModel
+    : ""
+  const [selection, setSelection] = useState({
+    key: selectionKey,
+    model: defaultModel,
+  })
+  const selectedModel =
+    selection.key === selectionKey ? selection.model : defaultModel
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) {
+          setSelection({ key: selectionKey, model: defaultModel })
+        }
+        onOpenChange(nextOpen)
+      }}
+    >
       <ModelPickerDialogContent
-        key={contentKey}
-        currentModel={currentModel}
         models={models}
-        onConfirm={onConfirm}
+        selectedModel={selectedModel}
+        onSelectedModelChange={(model) =>
+          setSelection({ key: selectionKey, model })
+        }
+        onConfirm={() => onConfirm(selectedModel)}
       />
     </Dialog>
   )
 }
 
 function ModelPickerDialogContent({
-  currentModel,
   models,
+  selectedModel,
+  onSelectedModelChange,
   onConfirm,
-}: Omit<AiProviderModelPickerDialogProps, "open" | "onOpenChange">) {
+}: {
+  models: AiProviderModelOptionResponse[]
+  selectedModel: string
+  onSelectedModelChange: (modelId: string) => void
+  onConfirm: () => void
+}) {
   const modelChoiceId = useId()
   const { dictionary } = useLocalization()
   const t = dictionary.aiProviderConfigs
-  const [selectedModel, setSelectedModel] = useState(
-    models.some((model) => model.id === currentModel) ? currentModel : ""
-  )
 
   return (
     <DialogContent className="flex h-[min(80vh,720px)] flex-col overflow-hidden sm:max-w-[720px]">
@@ -93,7 +115,7 @@ function ModelPickerDialogContent({
         <ScrollArea className="min-h-0 flex-1">
           <RadioGroup
             value={selectedModel}
-            onValueChange={setSelectedModel}
+            onValueChange={onSelectedModelChange}
             className="pr-4"
             aria-label={t.modelListAria}
           >
@@ -125,7 +147,7 @@ function ModelPickerDialogContent({
       <DialogFooter>
         <Button
           type="button"
-          onClick={() => onConfirm(selectedModel)}
+          onClick={onConfirm}
           disabled={!selectedModel || models.length === 0}
         >
           {t.confirm}
