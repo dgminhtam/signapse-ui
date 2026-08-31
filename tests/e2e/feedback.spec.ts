@@ -80,11 +80,11 @@ test.describe("P0 feedback HTTP integration", () => {
     page,
     fixture,
   }) => {
-    await fixture.setFeedbackPermissions([])
+    await fixture.setPermissions([])
     await page.goto("/vi/feedback-submissions")
     await expect(page.getByText("Bạn không có quyền xem phản hồi người dùng.")).toBeVisible()
 
-    await fixture.setFeedbackPermissions(["feedback:read", "feedback:review", "feedback:delete"])
+    await fixture.setPermissions(["feedback:read", "feedback:review", "feedback:delete"])
     await page.goto("/vi/feedback-submissions?status=PENDING_REVIEW&sort=createdDate_desc&page=1&size=10")
     await expect(page.locator("h1")).toHaveText("Phản hồi người dùng")
     await page.getByRole("textbox", { name: "Tìm trong tiêu đề phản hồi" }).fill("Biểu đồ")

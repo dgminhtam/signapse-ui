@@ -57,7 +57,8 @@ export default async function Layout({
       : null
 
   const cookieStore = await cookies()
-  const defaultOpen = cookieStore.get("sidebar_state")?.value === "true"
+  const sidebarState = cookieStore.get("sidebar_state")?.value
+  const defaultOpen = sidebarState === undefined || sidebarState === "true"
   const permissions = await getCurrentPermissions()
   const canReadWorkspace = hasPermission(permissions, "workspace:read")
   const canReadNotes = hasPermission(permissions, PERSONAL_NOTE_READ_PERMISSION)

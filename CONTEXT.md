@@ -12,6 +12,10 @@ _Avoid_: Billing settings, subscription profile, user management
 The authorization role assigned to a user and exposed as `role_name`; it is not a commercial tier.
 _Avoid_: Package, plan, subscription tier
 
+**API access token (Token truy cập API)**:
+A short-lived credential an authenticated user obtains to call Signapse APIs under their own identity and permissions.
+_Avoid_: Developer token, API key, system token, admin token
+
 ## Public Web Surfaces
 
 **Coming-soon site**:

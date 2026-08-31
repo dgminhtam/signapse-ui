@@ -8,8 +8,10 @@ import {
   ClipboardListIcon,
   ChevronRightIcon,
   ChevronsUpDownIcon,
+  KeyRound,
   LogOutIcon,
   MessageSquareText,
+  XIcon,
 } from "lucide-react"
 import { LocalizedLink as Link } from "@/components/localized-link"
 import { usePathname } from "next/navigation"
@@ -19,10 +21,13 @@ import { stripLocaleFromPathname } from "@/app/lib/i18n/routing"
 import { FeedbackComposeDialog } from "@/components/feedback/feedback-compose-dialog"
 import {
   NavItem,
+  NavSection,
   createSiteConfig,
   filterNavItemsByPermissions,
 } from "@/config/site"
 import { Logo } from "@/components/logo"
+import { cn } from "@/lib/utils"
+import { Button } from "./ui/button"
 
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import {
@@ -35,10 +40,11 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuLinkItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu"
-import { DropdownMenuContentInOverlay as DropdownMenuContent } from "./ui/dropdown-menu-content-in-overlay"
+import { DropdownMenuContentInOverlay } from "./ui/dropdown-menu-content-in-overlay"
 import {
   Sidebar,
   SidebarContent,
@@ -59,8 +65,8 @@ import {
 
 const USER_MENU_TRIGGER_ID = "app-sidebar-user-menu-trigger"
 
-function getNavCollapsibleContentId(index: number) {
-  return `app-sidebar-nav-${index}-content`
+function getNavCollapsibleContentId(id: string) {
+  return `app-sidebar-nav-${id}-content`
 }
 
 type SimpleUser = {
@@ -85,18 +91,24 @@ export function AppSidebar({
 }: AppSidebarProps) {
   const { dictionary } = useLocalization()
   const localizedSiteConfig = createSiteConfig(dictionary)
-  const visibleNavItems = filterNavItemsByPermissions(
+  const visibleNavSections = filterNavItemsByPermissions(
     localizedSiteConfig.navMain,
     permissions
   )
 
   return (
-    <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
+    <Sidebar
+      collapsible="icon"
+      mobileTitle={dictionary.navigation.mobileSidebarTitle}
+      mobileDescription={dictionary.navigation.mobileSidebarDescription}
+      {...props}
+    >
+      <SidebarHeader className="relative">
         <SidebarBrand />
+        <MobileSidebarCloseButton />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={visibleNavItems} />
+        <NavMain sections={visibleNavSections} />
       </SidebarContent>
       <SidebarFooter>
         {isAuthenticated && (
@@ -108,8 +120,29 @@ export function AppSidebar({
   )
 }
 
+function MobileSidebarCloseButton() {
+  const { dictionary } = useLocalization()
+  const { isMobile, setOpenMobile } = useSidebar()
+
+  if (!isMobile) return null
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className="absolute top-2 right-2 size-11 focus-visible:ring-sidebar-ring md:hidden"
+      aria-label={dictionary.navigation.closeSidebar}
+      onClick={() => setOpenMobile(false)}
+    >
+      <XIcon />
+      <span className="sr-only">{dictionary.navigation.closeSidebar}</span>
+    </Button>
+  )
+}
+
 function SidebarBrand() {
   const { dictionary } = useLocalization()
+  const { isMobile } = useSidebar()
   const localizedSiteConfig = createSiteConfig(dictionary)
 
   return (
@@ -119,6 +152,7 @@ function SidebarBrand() {
           render={<Link href="/dashboard" />}
           size="lg"
           tooltip={localizedSiteConfig.brand.name}
+          className={cn(isMobile && "pr-10")}
         >
           <Logo width={32} height={32} />
           <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
@@ -135,10 +169,11 @@ function SidebarBrand() {
   )
 }
 
-export function NavMain({ items }: { items: NavItem[] }) {
+export function NavMain({ sections }: { sections: NavSection[] }) {
   const pathname = usePathname()
-  const { dictionary } = useLocalization()
+  const { isMobile, state } = useSidebar()
   const pathWithoutLocale = stripLocaleFromPathname(pathname)
+  const isCollapsedDesktop = state === "collapsed" && !isMobile
 
   const matchesPath = (url: string) => {
     return pathWithoutLocale === url || pathWithoutLocale.startsWith(`${url}/`)
@@ -148,80 +183,187 @@ export function NavMain({ items }: { items: NavItem[] }) {
     return subItems?.some((subItem) => matchesPath(subItem.url)) ?? false
   }
 
-  return (
-    <SidebarGroup>
-      <SidebarGroupLabel>{dictionary.navigation.platform}</SidebarGroupLabel>
+  return sections.map((section) => (
+    <SidebarGroup key={section.id}>
+      <SidebarGroupLabel>{section.title}</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu className="gap-1">
-          {items.map((item, itemIndex) => {
+          {section.items.map((item) => {
             const hasSubItems = (item.items?.length ?? 0) > 0
             const isActive = hasSubItems
               ? hasActiveSubItem(item.items)
               : matchesPath(item.url)
-            const collapsibleContentId = getNavCollapsibleContentId(itemIndex)
-
-            if (!hasSubItems) {
-              return (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    render={<Link href={item.url} />}
-                    tooltip={item.title}
-                    isActive={isActive}
-                    className="h-8 rounded-lg font-medium data-active:bg-sidebar-primary data-active:text-sidebar-primary-foreground data-active:hover:bg-sidebar-primary data-active:hover:text-sidebar-primary-foreground"
-                  >
-                    {item.icon && <item.icon />}
-                    <span>{item.title}</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              )
-            }
 
             return (
-              <Collapsible
-                key={item.title}
-                defaultOpen={item.isActive ?? isActive}
-                className="group/collapsible"
-                render={<SidebarMenuItem />}
-              >
-                <CollapsibleTrigger
-                  aria-controls={collapsibleContentId}
-                  render={
-                    <SidebarMenuButton
-                      tooltip={item.title}
-                      isActive={false}
-                      className="h-8 rounded-lg font-medium"
-                    >
-                      {item.icon && <item.icon />}
-                      <span>{item.title}</span>
-                      <ChevronRightIcon className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                    </SidebarMenuButton>
-                  }
-                />
-                <CollapsibleContent id={collapsibleContentId}>
-                  <SidebarMenuSub className="mr-0 ml-3.5 py-1 pr-0">
-                    {item.items?.map((subItem) => {
-                      const isSubItemActive = matchesPath(subItem.url)
-
-                      return (
-                        <SidebarMenuSubItem key={subItem.title}>
-                          <SidebarMenuSubButton
-                            isActive={isSubItemActive}
-                            render={<Link href={subItem.url} />}
-                            className="h-8 rounded-lg font-medium data-active:bg-sidebar-primary data-active:text-sidebar-primary-foreground data-active:hover:bg-sidebar-primary data-active:hover:text-sidebar-primary-foreground"
-                          >
-                            <span>{subItem.title}</span>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      )
-                    })}
-                  </SidebarMenuSub>
-                </CollapsibleContent>
-              </Collapsible>
+              <NavMainItem
+                key={item.id}
+                item={item}
+                isActive={isActive}
+                isCollapsedDesktop={isCollapsedDesktop}
+                matchesPath={matchesPath}
+              />
             )
           })}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
+  ))
+}
+
+const navMenuButtonClassName =
+  "h-11 rounded-lg font-medium md:h-8 data-active:bg-sidebar-primary data-active:text-sidebar-primary-foreground data-active:hover:bg-sidebar-primary data-active:hover:text-sidebar-primary-foreground"
+
+function NavMainItem({
+  item,
+  isActive,
+  isCollapsedDesktop,
+  matchesPath,
+}: {
+  item: NavItem
+  isActive: boolean
+  isCollapsedDesktop: boolean
+  matchesPath: (url: string) => boolean
+}) {
+  if (!item.items?.length) {
+    return (
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          render={<Link href={item.url} />}
+          tooltip={item.title}
+          isActive={isActive}
+          aria-current={isActive ? "page" : undefined}
+          className={navMenuButtonClassName}
+        >
+          {item.icon && <item.icon />}
+          <span>{item.title}</span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    )
+  }
+
+  return isCollapsedDesktop ? (
+    <CollapsedNavGroup item={item} matchesPath={matchesPath} />
+  ) : (
+    <ExpandedNavGroup
+      item={item}
+      isActive={isActive}
+      matchesPath={matchesPath}
+    />
+  )
+}
+
+function ExpandedNavGroup({
+  item,
+  isActive,
+  matchesPath,
+}: {
+  item: NavItem
+  isActive: boolean
+  matchesPath: (url: string) => boolean
+}) {
+  const collapsibleContentId = getNavCollapsibleContentId(item.id)
+
+  return (
+    <Collapsible
+      defaultOpen={isActive}
+      className="group/collapsible"
+      render={<SidebarMenuItem />}
+    >
+      <CollapsibleTrigger
+        aria-controls={collapsibleContentId}
+        render={
+          <SidebarMenuButton
+            tooltip={item.title}
+            isActive={false}
+            className={navMenuButtonClassName}
+          >
+            {item.icon && <item.icon />}
+            <span>{item.title}</span>
+            <ChevronRightIcon className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+          </SidebarMenuButton>
+        }
+      />
+      <CollapsibleContent id={collapsibleContentId}>
+        <SidebarMenuSub className="mr-0 ml-3.5 py-1 pr-0">
+          {item.items?.map((subItem) => {
+            const isSubItemActive = matchesPath(subItem.url)
+
+            return (
+              <SidebarMenuSubItem key={subItem.id}>
+                <SidebarMenuSubButton
+                  isActive={isSubItemActive}
+                  render={<Link href={subItem.url} />}
+                  aria-current={isSubItemActive ? "page" : undefined}
+                  className={navMenuButtonClassName}
+                >
+                  <span>{subItem.title}</span>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+            )
+          })}
+        </SidebarMenuSub>
+      </CollapsibleContent>
+    </Collapsible>
+  )
+}
+
+function CollapsedNavGroup({
+  item,
+  matchesPath,
+}: {
+  item: NavItem
+  matchesPath: (url: string) => boolean
+}) {
+  return (
+    <SidebarMenuItem>
+      <DropdownMenu modal={false}>
+        <DropdownMenuTrigger
+          render={
+            <SidebarMenuButton
+              tooltip={item.title}
+              aria-haspopup="menu"
+              className={navMenuButtonClassName}
+            />
+          }
+        >
+          {item.icon && <item.icon />}
+          <span>{item.title}</span>
+        </DropdownMenuTrigger>
+        <DropdownMenuContentInOverlay
+          side="right"
+          align="start"
+          sideOffset={8}
+          className="min-w-56"
+        >
+          <DropdownMenuGroup>
+            {item.items?.map((subItem) => {
+              const isSubItemActive = matchesPath(subItem.url)
+
+              return (
+                <DropdownMenuLinkItem
+                  key={subItem.id}
+                  render={
+                    <Link
+                      href={subItem.url}
+                      aria-current={isSubItemActive ? "page" : undefined}
+                    />
+                  }
+                  className={cn(
+                    "focus-visible:ring-2 focus-visible:ring-sidebar-ring",
+                    !isSubItemActive &&
+                      "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus:bg-sidebar-accent focus:text-sidebar-accent-foreground",
+                    isSubItemActive &&
+                      "bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary hover:text-sidebar-primary-foreground focus:bg-sidebar-primary focus:text-sidebar-primary-foreground"
+                  )}
+                >
+                  {subItem.title}
+                </DropdownMenuLinkItem>
+              )
+            })}
+          </DropdownMenuGroup>
+        </DropdownMenuContentInOverlay>
+      </DropdownMenu>
+    </SidebarMenuItem>
   )
 }
 
@@ -265,7 +407,7 @@ function NavUser({ user, isP0FixtureMode }: NavUserProps) {
             </div>
             <ChevronsUpDownIcon className="ml-auto size-4" />
           </DropdownMenuTrigger>
-          <DropdownMenuContent
+          <DropdownMenuContentInOverlay
             className="w-(--anchor-width) min-w-56 rounded-lg"
             side={isMobile ? "bottom" : "right"}
             align="end"
@@ -297,10 +439,14 @@ function NavUser({ user, isP0FixtureMode }: NavUserProps) {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem render={<Link href="/account" />}>
+              <DropdownMenuLinkItem render={<Link href="/account" />}>
                 <BadgeCheckIcon />
                 {dictionary.auth.account}
-              </DropdownMenuItem>
+              </DropdownMenuLinkItem>
+              <DropdownMenuLinkItem render={<Link href="/developer-token" />}>
+                <KeyRound />
+                {dictionary.navigation.apiAccessToken}
+              </DropdownMenuLinkItem>
               <DropdownMenuItem>
                 <BellIcon />
                 {dictionary.auth.notifications}
@@ -312,10 +458,10 @@ function NavUser({ user, isP0FixtureMode }: NavUserProps) {
                 <MessageSquareText />
                 {dictionary.feedback.composeAction}
               </DropdownMenuItem>
-              <DropdownMenuItem render={<Link href="/feedback" />}>
+              <DropdownMenuLinkItem render={<Link href="/feedback" />}>
                 <ClipboardListIcon />
                 {dictionary.feedback.historyAction}
-              </DropdownMenuItem>
+              </DropdownMenuLinkItem>
             </DropdownMenuGroup>
             {isP0FixtureMode ? null : (
               <>
@@ -332,7 +478,7 @@ function NavUser({ user, isP0FixtureMode }: NavUserProps) {
                 </DropdownMenuGroup>
               </>
             )}
-          </DropdownMenuContent>
+          </DropdownMenuContentInOverlay>
         </DropdownMenu>
         <FeedbackComposeDialog
           open={composeOpen}

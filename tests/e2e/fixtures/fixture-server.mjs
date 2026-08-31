@@ -182,7 +182,7 @@ function createState() {
     workspaces: [primaryWorkspace, secondaryWorkspace],
     notes: [note(31, "Morning brief", "Review the fixture market brief.")],
     feedback: feedbackRecords(),
-    feedbackPermissions: ["feedback:read", "feedback:review", "feedback:delete"],
+    permissions: ["*"],
     feedbackScenarios: {},
     assets: [
       {
@@ -767,9 +767,9 @@ async function streamLive(response, state, url, scenario) {
   setTimeout(() => response.end(), 400)
 }
 
-function feedbackPermission(state, permission) {
-  return state.feedbackPermissions.includes("*") ||
-    state.feedbackPermissions.includes(permission)
+function hasFixturePermission(state, permission) {
+  return state.permissions.includes("*") ||
+    state.permissions.includes(permission)
 }
 
 function feedbackScenarioFor(state, method, pathname) {
@@ -846,10 +846,10 @@ function feedbackRouteResult(state, method, pathname, url, body) {
   if (scenarioError) return scenarioError
 
   const moderationPath = pathname.startsWith("/feedback-submissions")
-  if (moderationPath && pathname !== "/feedback-submissions" && !feedbackPermission(state, pathname.endsWith("/promote") || pathname.endsWith("/dismiss") ? "feedback:review" : pathname.endsWith("/screenshot") || method === "GET" ? "feedback:read" : "feedback:delete")) {
+  if (moderationPath && pathname !== "/feedback-submissions" && !hasFixturePermission(state, pathname.endsWith("/promote") || pathname.endsWith("/dismiss") ? "feedback:review" : pathname.endsWith("/screenshot") || method === "GET" ? "feedback:read" : "feedback:delete")) {
     return { __status: 403, payload: errorPayload("Feedback permission denied", "FORBIDDEN") }
   }
-  if (moderationPath && pathname === "/feedback-submissions" && !feedbackPermission(state, "feedback:read")) {
+  if (moderationPath && pathname === "/feedback-submissions" && !hasFixturePermission(state, "feedback:read")) {
     return { __status: 403, payload: errorPayload("Feedback permission denied", "FORBIDDEN") }
   }
 
@@ -963,7 +963,7 @@ function responseForRoute(state, method, pathname, url, body) {
       role_name: "Fixture",
       currentWorkspace: { id: 1, name: "Workspace Alpha" },
       mainImage: null,
-      permissions: state.feedbackPermissions,
+      permissions: state.permissions,
     }
   }
 
@@ -1018,6 +1018,21 @@ function responseForRoute(state, method, pathname, url, body) {
 
   if (method === "GET" && pathname === "/news-articles") {
     return slicePage(state.newsArticles, url)
+  }
+
+  const newsArticleDetailMatch = pathname.match(/^\/news-articles\/(\d+)$/)
+  if (method === "GET" && newsArticleDetailMatch) {
+    const id = Number(newsArticleDetailMatch[1])
+    const article = state.newsArticles.find((item) => item.id === id)
+
+    if (!article) {
+      return {
+        __status: 404,
+        payload: errorPayload("News article not found", "NOT_FOUND"),
+      }
+    }
+
+    return article
   }
 
   if (method === "GET" && pathname === "/events") {
@@ -1241,15 +1256,15 @@ async function handleControl(request, response, url, body) {
     return true
   }
 
-  if (url.pathname === "/__test/feedback-permissions" && request.method === "POST") {
+  if (url.pathname === "/__test/permissions" && request.method === "POST") {
     const testRunId = body?.testRunId ?? request.headers["x-signapse-test-run-id"]
     if (!testRunId || !Array.isArray(body?.permissions)) {
       sendJson(response, 400, errorPayload("testRunId and permissions are required", "PERMISSIONS_REQUIRED"))
       return true
     }
     const state = getState(String(testRunId))
-    state.feedbackPermissions = body.permissions.map(String)
-    sendJson(response, 200, { testRunId, permissions: state.feedbackPermissions })
+    state.permissions = body.permissions.map(String)
+    sendJson(response, 200, { testRunId, permissions: state.permissions })
     return true
   }
 
@@ -1260,7 +1275,7 @@ async function handleControl(request, response, url, body) {
       testRunId,
       scenarios: state.scenarios,
       feedbackScenarios: state.feedbackScenarios,
-      feedbackPermissions: state.feedbackPermissions,
+      permissions: state.permissions,
       streamConnections: state.streamConnections,
       requests: state.requests,
       violations: state.violations,

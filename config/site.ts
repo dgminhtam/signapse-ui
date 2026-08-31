@@ -1,9 +1,14 @@
 import {
+  CalendarClock,
+  CalendarDays,
   ChartCandlestick,
   GalleryVerticalEnd,
   LayoutDashboard,
+  MessageSquareWarning,
   Newspaper,
   Settings2,
+  UsersRound,
+  Waypoints,
 } from "lucide-react"
 
 import { ECONOMIC_CALENDAR_NAV_PERMISSIONS } from "@/app/lib/economic-calendar/permissions"
@@ -18,18 +23,25 @@ import { FEEDBACK_READ_PERMISSION } from "@/app/lib/feedback/permissions"
 import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
 
 export interface NavSubItem {
+  id: string
   title: string
   url: string
   permission?: string | readonly string[]
 }
 
 export interface NavItem {
+  id: string
   title: string
   url: string
   icon?: React.ElementType
-  isActive?: boolean
   permission?: string | readonly string[]
   items?: NavSubItem[]
+}
+
+export interface NavSection {
+  id: string
+  title: string
+  items: NavItem[]
 }
 
 function hasPermissionMatch(
@@ -67,122 +79,171 @@ export function createSiteConfig(
     },
     navMain: [
       {
-        title: dictionary.navigation.dashboard,
-        url: "/dashboard",
-        icon: LayoutDashboard,
-      },
-      {
-        title: dictionary.navigation.knowledgeGraph,
-        url: "/graph-view",
-        icon: LayoutDashboard,
-        permission: GRAPH_VIEW_NAV_PERMISSIONS,
-      },
-      {
-        title: dictionary.navigation.marketCharts,
-        url: "/market-charts",
-        icon: ChartCandlestick,
-        permission: MARKET_CHART_NAV_PERMISSIONS,
-      },
-      {
-        title: dictionary.navigation.content,
-        url: "#",
-        icon: Newspaper,
+        id: "analysis",
+        title: dictionary.navigation.analysis,
         items: [
           {
-            title: dictionary.navigation.newsOutlets,
-            url: "/news-outlets",
-            permission: NEWS_OUTLET_NAV_PERMISSIONS,
+            id: "overview",
+            title: dictionary.navigation.overview,
+            url: "/dashboard",
+            icon: LayoutDashboard,
           },
           {
-            title: dictionary.navigation.newsArticles,
-            url: "/news-articles",
-            permission: NEWS_ARTICLE_NAV_PERMISSIONS,
+            id: "knowledge-graph",
+            title: dictionary.navigation.knowledgeGraph,
+            url: "/graph-view",
+            icon: Waypoints,
+            permission: GRAPH_VIEW_NAV_PERMISSIONS,
           },
           {
+            id: "market-charts",
+            title: dictionary.navigation.marketCharts,
+            url: "/market-charts",
+            icon: ChartCandlestick,
+            permission: MARKET_CHART_NAV_PERMISSIONS,
+          },
+        ],
+      },
+      {
+        id: "data",
+        title: dictionary.navigation.data,
+        items: [
+          {
+            id: "news",
+            title: dictionary.navigation.news,
+            url: "#",
+            icon: Newspaper,
+            items: [
+              {
+                id: "news-articles",
+                title: dictionary.navigation.newsArticles,
+                url: "/news-articles",
+                permission: NEWS_ARTICLE_NAV_PERMISSIONS,
+              },
+              {
+                id: "news-outlets",
+                title: dictionary.navigation.newsOutlets,
+                url: "/news-outlets",
+                permission: NEWS_OUTLET_NAV_PERMISSIONS,
+              },
+              {
+                id: "blogs",
+                title: dictionary.navigation.blogs,
+                url: "/blogs",
+                permission: "blog:read",
+              },
+            ],
+          },
+          {
+            id: "events",
             title: dictionary.navigation.events,
             url: "/events",
+            icon: CalendarDays,
             permission: EVENT_NAV_PERMISSIONS,
           },
           {
+            id: "economic-calendar",
             title: dictionary.navigation.economicCalendar,
             url: "/economic-calendar",
+            icon: CalendarClock,
             permission: ECONOMIC_CALENDAR_NAV_PERMISSIONS,
-          },
-          {
-            title: dictionary.navigation.blogs,
-            url: "/blogs",
-            permission: "blog:read",
           },
         ],
       },
       {
-        title: dictionary.navigation.settings,
-        url: "#",
-        icon: Settings2,
+        id: "administration",
+        title: dictionary.navigation.administration,
         items: [
           {
-            title: dictionary.navigation.telegram,
-            url: "/telegram",
-            permission: TELEGRAM_NAV_PERMISSIONS,
+            id: "system-configuration",
+            title: dictionary.navigation.systemConfiguration,
+            url: "#",
+            icon: Settings2,
+            items: [
+              {
+                id: "ai-providers",
+                title: dictionary.navigation.aiProviders,
+                url: "/ai-provider-configs",
+                permission: "ai-provider-config:read",
+              },
+              {
+                id: "system-prompts",
+                title: dictionary.navigation.systemPrompts,
+                url: "/system-prompts",
+                permission: SYSTEM_PROMPT_NAV_PERMISSIONS,
+              },
+              {
+                id: "cronjobs",
+                title: dictionary.navigation.cronjobs,
+                url: "/cronjobs",
+                permission: "cronjob:read",
+              },
+              {
+                id: "telegram",
+                title: dictionary.navigation.telegram,
+                url: "/telegram",
+                permission: TELEGRAM_NAV_PERMISSIONS,
+              },
+            ],
           },
           {
-            title: dictionary.navigation.aiProviders,
-            url: "/ai-provider-configs",
-            permission: "ai-provider-config:read",
+            id: "users-and-permissions",
+            title: dictionary.navigation.usersAndPermissions,
+            url: "#",
+            icon: UsersRound,
+            items: [
+              {
+                id: "users",
+                title: dictionary.navigation.users,
+                url: "/users",
+                permission: "user:update",
+              },
+              {
+                id: "roles",
+                title: dictionary.navigation.roles,
+                url: "/roles",
+                permission: "role:update",
+              },
+            ],
           },
           {
-            title: dictionary.navigation.systemPrompts,
-            url: "/system-prompts",
-            permission: SYSTEM_PROMPT_NAV_PERMISSIONS,
-          },
-          {
-            title: dictionary.navigation.cronjobs,
-            url: "/cronjobs",
-            permission: "cronjob:read",
-          },
-          {
-            title: dictionary.navigation.roles,
-            url: "/roles",
-            permission: "role:update",
-          },
-          {
-            title: dictionary.navigation.users,
-            url: "/users",
-            permission: "user:update",
-          },
-          {
-            title: dictionary.navigation.feedbackModeration,
+            id: "feedback-review",
+            title: dictionary.navigation.feedbackReview,
             url: "/feedback-submissions",
+            icon: MessageSquareWarning,
             permission: FEEDBACK_READ_PERMISSION,
-          },
-          {
-            title: dictionary.navigation.developerToken,
-            url: "/developer-token",
           },
         ],
       },
-    ] satisfies NavItem[],
+    ] satisfies NavSection[],
   }
 }
 
 export function filterNavItemsByPermissions(
-  items: NavItem[],
+  sections: NavSection[],
   permissions: string[]
-): NavItem[] {
-  return items.flatMap((item) => {
-    const hasDirectPermission = hasPermissionMatch(permissions, item.permission)
-    const filteredSubItems = item.items?.filter((subItem) =>
-      hasPermissionMatch(permissions, subItem.permission)
-    )
+): NavSection[] {
+  return sections.flatMap((section) => {
+    const items = section.items.flatMap((item) => {
+      const hasDirectPermission = hasPermissionMatch(
+        permissions,
+        item.permission
+      )
+      const filteredSubItems = item.items?.filter((subItem) =>
+        hasPermissionMatch(permissions, subItem.permission)
+      )
 
-    if (filteredSubItems) {
-      if (filteredSubItems.length === 0) {
-        return []
+      if (filteredSubItems) {
+        if (!hasDirectPermission || filteredSubItems.length === 0) {
+          return []
+        }
+
+        return [{ ...item, items: filteredSubItems }]
       }
 
-      return [{ ...item, items: filteredSubItems }]
-    }
+      return hasDirectPermission ? [item] : []
+    })
 
-    return hasDirectPermission ? [item] : []
+    return items.length > 0 ? [{ ...section, items }] : []
   })
 }

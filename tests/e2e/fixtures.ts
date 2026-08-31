@@ -41,7 +41,7 @@ type FixtureController = {
       | "malformed",
     kind?: "feedback" | "compose" | "withdraw" | "promote" | "dismiss" | "erase"
   ): Promise<void>
-  setFeedbackPermissions(permissions: string[]): Promise<void>
+  setPermissions(permissions: string[]): Promise<void>
 }
 
 type Fixtures = {
@@ -129,8 +129,8 @@ export const test = base.extend<Fixtures>({
             scenario,
           })
         },
-        async setFeedbackPermissions(permissions) {
-          await postControl("/__test/feedback-permissions", {
+        async setPermissions(permissions) {
+          await postControl("/__test/permissions", {
             testRunId,
             permissions,
           })

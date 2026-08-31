@@ -26,9 +26,9 @@ function getFriendlySegmentNames(
     "ai-provider-configs": dictionary.navigation.aiProviders,
     blogs: dictionary.navigation.blogs,
     cronjobs: dictionary.navigation.cronjobs,
-    dashboard: dictionary.navigation.dashboard,
+    dashboard: dictionary.navigation.overview,
     "dashboard-prototype": dictionary.dashboardPrototype.routeLabel,
-    "developer-token": dictionary.navigation.developerToken,
+    "developer-token": dictionary.navigation.apiAccessToken,
     "economic-calendar": dictionary.navigation.economicCalendar,
     events: dictionary.navigation.events,
     feedback: dictionary.feedback.pageTitle,
@@ -67,7 +67,7 @@ export function AppBreadcrumb() {
   const pathname = usePathname()
   const { dictionary } = useLocalization()
   const segments = stripLocaleFromPathname(pathname).split("/").filter(Boolean)
-  const overviewLabel = dictionary.navigation.dashboard
+  const overviewLabel = dictionary.navigation.overview
   const isDashboardRoute = segments.length === 1 && segments[0] === "dashboard"
   const showOverviewCrumb = !(
     segments.length === 1 && segments[0] === "graph-view"

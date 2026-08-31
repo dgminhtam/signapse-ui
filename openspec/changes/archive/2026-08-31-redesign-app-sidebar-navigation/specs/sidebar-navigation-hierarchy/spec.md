@@ -1,42 +1,4 @@
-# sidebar-navigation-hierarchy Specification
-
-## Purpose
-
-Define the protected app sidebar information architecture, responsive disclosure behavior, permission filtering, and neutral visual hierarchy.
-
-## Requirements
-
-### Requirement: Sidebar primary token remains neutral-consistent
-
-The system SHALL keep sidebar primary tokens consistent with the project's shadcn neutral theme baseline when those tokens are used for selected navigation.
-
-#### Scenario: Dark sidebar primary does not use unrelated chromatic preset color
-
-- **WHEN** the dark theme CSS variables are reviewed
-- **THEN** `--sidebar-primary` is neutral-consistent with the app theme
-- **AND** it does not use the blue/purple preset value `oklch(0.488 0.243 264.376)` for sidebar navigation chrome
-
-#### Scenario: Sidebar primary foreground remains readable
-
-- **WHEN** a current-page sidebar item uses `bg-sidebar-primary`
-- **THEN** its text and icon color use `text-sidebar-primary-foreground`
-- **AND** the foreground/background pairing remains readable in light and dark themes
-
-### Requirement: Sidebar active item uses primary treatment
-
-The system SHALL render only the navigation item representing the current page with `sidebar-primary` and `sidebar-primary-foreground`.
-
-#### Scenario: Top-level route is active
-
-- **WHEN** the current pathname matches a top-level sidebar item without children
-- **THEN** that item uses `bg-sidebar-primary` and `text-sidebar-primary-foreground`
-- **AND** it is visually stronger than hover, open parent, and parent context states
-
-#### Scenario: Child route is active
-
-- **WHEN** the current pathname matches a sidebar child item
-- **THEN** the child item uses `bg-sidebar-primary` and `text-sidebar-primary-foreground`
-- **AND** it is the strongest visual selection within its parent group
+## MODIFIED Requirements
 
 ### Requirement: Sidebar hover and parent context use accent treatment
 
@@ -59,27 +21,6 @@ The system SHALL use `sidebar-accent` only for lightweight hover feedback on ina
 - **WHEN** a sidebar parent contains the active child route
 - **THEN** the parent remains visually secondary without selected background or bold text
 - **AND** the child item remains the only selected surface in that group
-
-### Requirement: Sidebar focus remains an accessibility state
-
-The system SHALL preserve focus-visible behavior as a keyboard accessibility state that uses `sidebar-ring` instead of active colors.
-
-#### Scenario: Keyboard focus moves through sidebar
-
-- **WHEN** keyboard focus is on a sidebar menu item
-- **THEN** the focus-visible indicator uses `sidebar-ring`
-- **AND** the focus indicator does not make the item appear selected unless the item is also the current page
-
-### Requirement: Sidebar density and hierarchy are preserved
-
-The system SHALL preserve the accepted sidebar row density, parent-child spacing, and child indentation while changing color hierarchy.
-
-#### Scenario: Sidebar rows render after color update
-
-- **WHEN** sidebar parent, top-level, and child items render
-- **THEN** their row heights remain aligned with the accepted readable density
-- **AND** child rows keep the accepted left indentation and right-side width expansion
-- **AND** the child list keeps `py-1` breathing room between parent and children
 
 ### Requirement: Sidebar primitive remains unchanged
 
@@ -112,6 +53,45 @@ The system SHALL distinguish localized section labels, grouped parent context, a
 - **WHEN** the current route matches a direct section destination
 - **THEN** that destination uses the neutral selected surface directly
 - **AND** unrelated parents and destinations do not appear selected
+
+### Requirement: Sidebar exposes root overview navigation
+
+The sidebar navigation SHALL expose the protected `/dashboard` route as the first Analysis destination using `Tổng quan` in Vietnamese and `Overview` in English.
+
+#### Scenario: Sidebar renders protected navigation
+
+- **WHEN** an authenticated user opens the protected app sidebar
+- **THEN** the Analysis section starts with the localized overview destination
+- **AND** the destination links to `/dashboard` through locale-aware navigation
+
+#### Scenario: Dashboard overview item is active
+
+- **WHEN** the locale-normalized protected pathname is `/dashboard` or a descendant owned by that destination
+- **THEN** the overview destination is the current item
+- **AND** Market Knowledge Graph and Market Charts are not current
+
+#### Scenario: Non-dashboard route is active
+
+- **WHEN** the current protected pathname matches another canonical destination
+- **THEN** the overview destination is not current
+- **AND** the matching direct or child destination uses the selected treatment
+
+### Requirement: Root overview navigation preserves sidebar behavior
+
+The overview destination SHALL use the shared section-aware configuration, route matching, locale-aware link, tooltip, icon, density, permission, selected-surface, and responsive navigation contracts.
+
+#### Scenario: Sidebar implementation is reviewed
+
+- **WHEN** the overview destination is rendered
+- **THEN** it is derived from the canonical localized navigation configuration
+- **AND** it is not hardcoded into an individual desktop or mobile render branch
+
+#### Scenario: Sidebar is collapsed
+
+- **WHEN** the desktop sidebar is collapsed to icon mode
+- **THEN** the overview destination remains directly reachable with `LayoutDashboard` and a localized tooltip
+
+## ADDED Requirements
 
 ### Requirement: Sidebar uses the canonical localized information architecture
 
@@ -257,3 +237,14 @@ The system SHALL expose the existing API access token route from the authenticat
 - **WHEN** the Administration section is displayed
 - **THEN** it does not include the API access token destination
 
+## REMOVED Requirements
+
+### Requirement: Sidebar active color uses shadcn sidebar accent behavior
+
+**Reason**: This historical requirement conflicts with the accepted neutral `sidebar-primary` selected-surface contract and the current design system.
+**Migration**: Current destinations continue using the `sidebar-primary` selected surface; hover alone uses `sidebar-accent`.
+
+### Requirement: Sidebar behavior remains unchanged
+
+**Reason**: The redesign intentionally changes first-visit default state, collapsed grouped navigation, mobile dismissal, account placement, and section hierarchy.
+**Migration**: Use the explicit expanded, collapsed-flyout, mobile, permission-filtering, and account-menu requirements defined by this change.
