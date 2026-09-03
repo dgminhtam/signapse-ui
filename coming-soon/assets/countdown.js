@@ -1,4 +1,4 @@
-export const LAUNCH_AT = Date.parse("2026-09-01T09:00:00+07:00")
+export const LAUNCH_AT = Date.parse("2026-10-01T09:00:00+07:00")
 
 const COPY = Object.freeze({
   countdownHeading: "Launching in",

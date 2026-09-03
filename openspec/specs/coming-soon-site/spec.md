@@ -90,17 +90,17 @@ The static site SHALL use the approved dark-background Signapse logo variant and
 
 ### Requirement: Fixed launch countdown
 
-The static site SHALL count down to `2026-09-01T09:00:00+07:00` as one absolute instant and SHALL use English countdown labels.
+The static site SHALL count down to `2026-10-01T09:00:00+07:00` as one absolute instant and SHALL use English countdown labels.
 
 #### Scenario: Countdown runs before launch
 
-- **WHEN** the current instant is before `2026-09-01T09:00:00+07:00`
+- **WHEN** the current instant is before `2026-10-01T09:00:00+07:00`
 - **THEN** the page displays non-negative remaining days, hours, minutes, and seconds
 - **AND** it displays the absolute launch date with the `UTC+7` timezone
 
 #### Scenario: Countdown reaches launch
 
-- **WHEN** the current instant reaches or passes `2026-09-01T09:00:00+07:00`
+- **WHEN** the current instant reaches or passes `2026-10-01T09:00:00+07:00`
 - **THEN** the page replaces the countdown with a localized launched state
 - **AND** it does not display negative values or automatically redirect the visitor
 

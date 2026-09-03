@@ -18,7 +18,7 @@
   <circle cx="1088" cy="304" r="11" fill="#12D6B1"/>
   <image href="signapse-logo.svg" x="826" y="221" width="188" height="188"/>
   <text x="92" y="128" fill="#12D6B1" font-family="system-ui, sans-serif" font-size="22" font-weight="700" letter-spacing="7">SIGNAPSE</text>
-  <text x="92" y="282" fill="#EAFDF8" font-family="system-ui, sans-serif" font-size="82" font-weight="650" letter-spacing="-3">01 · 09 · 2026</text>
+  <text x="92" y="282" fill="#EAFDF8" font-family="system-ui, sans-serif" font-size="82" font-weight="650" letter-spacing="-3">01 · 10 · 2026</text>
   <text x="92" y="376" fill="#12D6B1" font-family="system-ui, sans-serif" font-size="62" font-weight="650" letter-spacing="-2">09:00 · UTC+7</text>
   <path d="M92 552H1108" stroke="#3C6A70"/>
   <text x="92" y="594" fill="#A6C4BF" font-family="system-ui, sans-serif" font-size="20" font-weight="600" letter-spacing="2">SIGNAPSE.CLOUD</text>

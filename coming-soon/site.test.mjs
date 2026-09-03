@@ -65,7 +65,7 @@ function createCountdownRoot() {
 }
 
 test("launch instant is the approved UTC+7 timestamp", () => {
-  assert.equal(LAUNCH_AT, Date.UTC(2026, 8, 1, 2, 0, 0))
+  assert.equal(LAUNCH_AT, Date.UTC(2026, 9, 1, 2, 0, 0))
 })
 
 test("countdown decomposes a known pre-launch duration", () => {

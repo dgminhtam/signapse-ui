@@ -26,7 +26,7 @@ node --test coming-soon/site.test.mjs
 ```
 
 Thời điểm ra mắt được cố định trong `assets/countdown.js` là
-`2026-09-01T09:00:00+07:00` (`2026-09-01T02:00:00Z`). Logo triển khai tại
+`2026-10-01T09:00:00+07:00` (`2026-10-01T02:00:00Z`). Logo triển khai tại
 `assets/signapse-logo.svg` là bản sao nguyên byte của
 `public/images/signapse_logo_dark.svg`.
 
