@@ -62,38 +62,30 @@ test.describe("P0 quick-detail overlay", () => {
       page.getByRole("heading", { name: "Biểu đồ tri thức", exact: true })
     ).toBeVisible()
 
-    const canvas = page.locator("canvas").first()
+    const graphCanvas = page.locator('[data-engine-canvas="g6"]')
+    await expect(graphCanvas).toHaveAttribute("data-benchmark-anchor-id", /\S+/)
+    const canvas = graphCanvas.locator("canvas").first()
     await expect(canvas).toBeVisible()
-    const canvasBox = await canvas.boundingBox()
+    const canvasBox = await graphCanvas.boundingBox()
     expect(canvasBox).not.toBeNull()
 
     const openEvent = page.getByRole("button", {
       name: "Đọc sự kiện",
       exact: true,
     })
-    const candidatePoints = [
-      [0.25, 0.25],
-      [0.5, 0.25],
-      [0.75, 0.25],
-      [0.25, 0.5],
-      [0.5, 0.5],
-      [0.75, 0.5],
-      [0.25, 0.75],
-      [0.5, 0.75],
-      [0.75, 0.75],
-    ]
 
-    for (const [xRatio, yRatio] of candidatePoints) {
-      await page.mouse.click(
-        canvasBox!.x + canvasBox!.width * xRatio,
-        canvasBox!.y + canvasBox!.height * yRatio
-      )
+    const anchorX = Number(
+      await graphCanvas.getAttribute("data-benchmark-anchor-x")
+    )
+    const anchorY = Number(
+      await graphCanvas.getAttribute("data-benchmark-anchor-y")
+    )
 
-      if (await openEvent.isVisible()) {
-        break
-      }
+    if (!canvasBox || !Number.isFinite(anchorX) || !Number.isFinite(anchorY)) {
+      throw new Error("Missing G6 benchmark anchor")
     }
 
+    await page.mouse.click(canvasBox.x + anchorX, canvasBox.y + anchorY)
     await expect(openEvent).toBeVisible()
     await openEvent.click()
 

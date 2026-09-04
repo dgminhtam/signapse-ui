@@ -72,6 +72,9 @@ export const test = base.extend<Fixtures>({
       page.on("request", (request) => {
         try {
           const url = new URL(request.url())
+          if (url.protocol === "blob:") {
+            return
+          }
           if (!new Set(["127.0.0.1", "localhost"]).has(url.hostname)) {
             externalRequests.push(request.url())
           }

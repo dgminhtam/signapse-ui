@@ -46,6 +46,12 @@ _Avoid_: AI-assisted market analysis workspace, AI trading engine, prediction en
 The market-context structure built from multi-source market data through aggregation, evaluation, and analysis; it provides contextual input to the AI Assistant.
 _Avoid_: Model-training corpus, prediction engine, trading-signal generator, guarantee that every Assistant response exposes complete evidence or sources
 
+## Knowledge Graph Exploration
+
+**Knowledge Graph demo surface (Bề mặt demo Đồ thị Tri thức)**:
+An internal evaluation surface for comparing ways to browse the Market Knowledge Graph with a fixed representative graph; it is not the production Graph View and does not change the shared graph contract.
+_Avoid_: Production Graph View, backend graph endpoint, product capture
+
 **Landing release owner**:
 The Signapse Product Owner accountable for approving the public landing cutover after collecting the required product and engineering sign-offs.
 _Avoid_: Mailbox owner, deployment operator

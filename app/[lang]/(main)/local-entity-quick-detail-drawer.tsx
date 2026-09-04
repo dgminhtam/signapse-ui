@@ -20,10 +20,7 @@ import { NEWS_ARTICLE_READ_PERMISSIONS } from "@/app/lib/news-articles/permissio
 import type { NewsArticleResponse } from "@/app/lib/news-articles/definitions"
 import { AccessDenied } from "@/components/access-denied"
 import { LocalizedLink as Link } from "@/components/localized-link"
-import {
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer"
+import { DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
 import {
   DrawerContentInOverlay,
   DrawerInOverlay,
@@ -51,6 +48,16 @@ import {
 export type LocalQuickDetailEntity =
   { id: number; kind: "event" } | { id: number; kind: "news-article" }
 
+export type LocalQuickDetailFixture =
+  | {
+      entity: { id: number; kind: "event" }
+      event: EventResponse
+    }
+  | {
+      article: NewsArticleResponse
+      entity: { id: number; kind: "news-article" }
+    }
+
 type DetailSession = {
   entityKey: string
   retryNonce: number
@@ -68,6 +75,7 @@ type DetailState =
 
 interface LocalEntityQuickDetailDrawerProps {
   entity: LocalQuickDetailEntity | null
+  fixture?: LocalQuickDetailFixture | null
   onBeforeClose?: () => void
   onClose: () => void
   owner: LocalQuickDetailOwner
@@ -138,6 +146,7 @@ function getDrawerStyle(
 
 export function LocalEntityQuickDetailDrawer({
   entity,
+  fixture = null,
   onBeforeClose,
   onClose,
   owner,
@@ -157,8 +166,16 @@ export function LocalEntityQuickDetailDrawer({
   const viewportWidth = useViewportWidth()
   const open = Boolean(entity)
   const entityKey = entity ? `${entity.kind}:${entity.id}` : null
-  const canReadSelectedEntity =
-    entity?.kind === "event"
+  const fixtureDetail =
+    entity &&
+    fixture &&
+    fixture.entity.kind === entity.kind &&
+    fixture.entity.id === entity.id
+      ? fixture
+      : null
+  const canReadSelectedEntity = fixtureDetail
+    ? true
+    : entity?.kind === "event"
       ? canReadEvents
       : entity?.kind === "news-article"
         ? canReadNewsArticles
@@ -201,6 +218,7 @@ export function LocalEntityQuickDetailDrawer({
   const title = detailTitle
   const canonicalHref =
     entity &&
+    !fixtureDetail &&
     canReadSelectedEntity &&
     (!currentState ||
       currentState.phase === "loading" ||
@@ -233,6 +251,29 @@ export function LocalEntityQuickDetailDrawer({
       retryNonce,
       sessionId,
     })
+
+    if (fixtureDetail) {
+      if ("event" in fixtureDetail) {
+        setState({
+          entityKey: currentEntityKey,
+          event: fixtureDetail.event,
+          phase: "event",
+          retryNonce,
+          sessionId,
+        })
+      } else {
+        setState({
+          article: fixtureDetail.article,
+          entityKey: currentEntityKey,
+          phase: "news-article",
+          retryNonce,
+          sessionId,
+        })
+      }
+      return () => {
+        isActive = false
+      }
+    }
 
     if (!canReadSelectedEntity) {
       setState({
@@ -317,7 +358,7 @@ export function LocalEntityQuickDetailDrawer({
     return () => {
       isActive = false
     }
-  }, [canReadSelectedEntity, entityKey, retryNonce])
+  }, [canReadSelectedEntity, entityKey, fixtureDetail, retryNonce])
 
   useEffect(() => {
     const body = bodyRef.current

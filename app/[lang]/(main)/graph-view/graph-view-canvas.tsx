@@ -1033,6 +1033,16 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
     const renderGraph = async () => {
       try {
         await graph.render()
+
+        const anchorNodeId = graphModel.nodes[0]?.id
+
+        if (anchorNodeId && !graph.destroyed) {
+          const [x, y] = graph.getElementPosition(anchorNodeId)
+          const [viewportX, viewportY] = graph.getViewportByCanvas([x, y])
+          container.dataset.benchmarkAnchorId = anchorNodeId
+          container.dataset.benchmarkAnchorX = String(viewportX)
+          container.dataset.benchmarkAnchorY = String(viewportY)
+        }
       } catch (error) {
         if (isDisposed || graph.destroyed) {
           return
@@ -1084,13 +1094,15 @@ export function GraphViewCanvas({ graphModel }: { graphModel: GraphModel }) {
 
       destroyGraph()
     }
-  }, [graphData, graphPalette])
+  }, [graphData, graphModel.nodes, graphPalette])
 
   return (
     <div className="relative size-full min-h-[36rem] max-w-full animate-in overflow-hidden duration-500 fade-in">
       <div
         ref={containerRef}
         className="size-full min-h-[36rem] max-w-full cursor-grab active:cursor-grabbing"
+        data-engine-canvas="g6"
+        data-testid="graph-view-engine-canvas"
       />
 
       {selectedNode ? (
