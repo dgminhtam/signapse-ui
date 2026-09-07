@@ -744,9 +744,8 @@ export const en: Dictionary = {
   },
   landing: {
     nav: {
-      flow: "Analysis flow",
-      product: "Product",
-      workspace: "Workspace and Assistant",
+      flow: "How to use",
+      product: "Features",
       trust: "Trust boundary",
       access: "Access",
       requestAccess: "Request access",
@@ -763,20 +762,19 @@ export const en: Dictionary = {
       skipToContent: "Skip navigation and go to main content",
       headerNavigation: "Landing navigation",
       footerNavigation: "Footer navigation",
-      relationshipDecoration: "",
     },
     hero: {
       eyebrow: "MARKET INTELLIGENCE PLATFORM",
-      title: "Turn market data into a Knowledge Graph.",
-      body: "Signapse aggregates, evaluates, and analyzes multi-source price, event, reaction, and news data into inspectable relationships—giving the AI Assistant context when you ask questions and read market moves.",
+      title: "Understand markets through the Knowledge Graph and AI.",
+      body: "Explore relationships, follow live price movements, chat with the AI Assistant, and receive market updates through Telegram.",
       trustNote:
         "AI supports synthesis and exploration. You verify the sources and make the trading decision.",
-      proofOneTitle: "Specialized AI Assistant",
-      proofOneBody:
-        "Powered by a Knowledge Graph built from multi-source market data—aggregated, evaluated, and analyzed.",
-      proofTwoTitle: "Read the context, not just the candles",
-      proofTwoBody:
-        "Read price action alongside market reactions, related events, and economic-calendar context.",
+      featureLinks: {
+        knowledgeGraph: "Knowledge Graph",
+        liveCharts: "Live charts",
+        aiAssistant: "AI Assistant",
+        telegram: "Telegram",
+      },
       contextFigureTitle: "Two views of market context",
       contextFigureDescription:
         "An interactive figure places the Market Knowledge Graph alongside price action as two complementary views of context, not a price transformation or forecast.",
@@ -796,73 +794,53 @@ export const en: Dictionary = {
       requestAccessAria: "Request access to Signapse",
       signInAria: "Sign in to Signapse",
       openDashboardAria: "Open the Signapse dashboard",
-      exploreJourney: "See how Signapse analyzes markets",
-      exploreJourneyAria: "See how Signapse supports market analysis",
+      exploreFeatures: "Explore features",
+      exploreFeaturesAria: "Explore Signapse's main features",
       requestAccessNote: "This action opens your email application.",
     },
     analysisFlow: {
-      eyebrow: "Analysis flow",
-      heading: "Move from a price change to inspectable context.",
-      body: "A short path from a tracked asset to related events, sources, and relationships.",
-      sequence: "Track → Contextualize → Inspect → Explore",
-      stepOneTitle: "Track",
-      stepOneBody: "Start with the asset and scope you are monitoring.",
-      stepTwoTitle: "Contextualize",
+      eyebrow: "HOW TO USE SIGNAPSE",
+      heading: "Start with a market move you want to understand.",
+      stepOneTitle: "Choose an asset, review price action",
+      stepOneBody:
+        "Choose an asset from your tracked list. View price action alongside event markers and the economic calendar.",
+      stepTwoTitle: "Open an event, check the sources",
       stepTwoBody:
-        "Compare price movement with events and economic-calendar context when available.",
-      stepThreeTitle: "Inspect",
+        "Open event details to read market reactions and cross-check them against news sources.",
+      stepThreeTitle: "Analyze with the AI Assistant",
       stepThreeBody:
-        "Review reactions, event detail, and linked sources without hiding data limits.",
-      stepFourTitle: "Explore",
-      stepFourBody:
-        "Follow relationships among events, assets, articles, and narratives.",
+        "The AI Assistant helps you analyze relationships between events, assets, and news to explore related information.",
     },
     product: {
-      eyebrow: "Product story",
-      heading: "Surfaces for reading a market move.",
-      body: "Three primary chapters keep chart context, evidence, and relationships close while making limits clear when data is incomplete.",
-      chartsTitle: "Event-aware Charts",
-      chartsOutcome: "See a price move alongside what is happening around it.",
-      chartsBody:
-        "Select a tracked asset, inspect historical candles, event annotations, and economic-calendar context. Live chart states appear when data is available.",
-      chartsPointOne: "Tracked-asset selection within the monitoring scope",
-      chartsPointTwo: "Event annotations on the time axis",
-      chartsPointThree:
-        "Calendar context and live states when data is available",
-      chartsQualifier:
-        "Coverage, timing, and live states depend on available data; temporal proximity does not prove causation.",
-      reactionTitle: "Reaction & Evidence",
-      reactionOutcome:
-        "Move from a concise annotation to sources worth inspecting.",
-      reactionBody:
-        "Review chart annotation previews, open event detail, and inspect reactions and linked sources when available.",
-      reactionPointOne: "Concise chart annotation previews",
-      reactionPointTwo: "Event detail and optional reactions",
-      reactionPointThree: "Linked sources for manual inspection",
-      reactionQualifier:
-        "Reactions or sources may be unavailable; the product does not present evaluated trading outcomes.",
-      graphTitle: "Connected Market Graph",
-      graphOutcome: "Explore the relationships behind a market narrative.",
-      graphBody:
-        "Follow relationships among events, assets, news articles, and narratives to widen the context around a move.",
-      graphPointOne: "Relationships between events and assets",
-      graphPointTwo: "Links to articles and narratives",
-      graphPointThree: "Expanded context around a market move",
-      graphQualifier:
-        "Context labels explain relationships; they are not a separate graph entity type.",
-    },
-    workspaceAi: {
-      eyebrow: "Workspace and Assistant support",
-      heading: "Analysis support in the same workspace scope.",
-      body: "The workspace keeps tracked assets and persisted text conversation sessions so you can return to the same analysis path.",
-      trackedAssetsTitle: "Active tracked assets",
-      trackedAssetsBody:
-        "The active scope helps you start from the assets you are monitoring in the current workspace.",
-      conversationsTitle: "Persisted conversations",
-      conversationsBody:
-        "AI Assistant keeps text conversation history so you can revisit context over time.",
-      qualifier:
-        "The Assistant supports inspection and synthesis; details depend on available data.",
+      eyebrow: "PRIMARY FEATURES",
+      heading: "Four features for following and analyzing markets.",
+      knowledgeGraphTitle: "Knowledge Graph",
+      knowledgeGraphOutcome: "See how market information connects.",
+      knowledgeGraphBody:
+        "Explore relationships between events, assets, and news on the Knowledge Graph. Follow the links to expand the context around information that interests you.",
+      knowledgeGraphMedia: "Explore relationships between events, assets, and news.",
+      liveChartsTitle: "Live charts",
+      liveChartsOutcome: "Follow markets as prices move.",
+      liveChartsBody:
+        "Follow live price movements alongside event markers and the economic calendar on the chart.",
+      liveChartsDetail:
+        "Open an event marker to review market reactions and check the sources.",
+      liveChartsMedia:
+        "Price movement, event markers, and the economic calendar on one chart.",
+      liveChartsQualifier:
+        "Live states, events, and calendar context depend on available data; temporal proximity does not prove causation.",
+      aiAssistantTitle: "AI Assistant",
+      aiAssistantOutcome: "Ask questions with context from the Knowledge Graph.",
+      aiAssistantBody:
+        "Chat with the AI Assistant to analyze relationships between events, assets, and news. Ask follow-up questions and revisit conversations in your workspace.",
+      aiAssistantMedia: "Continue a text conversation in the active workspace.",
+      telegramTitle: "Telegram",
+      telegramOutcome: "Receive updates and market analysis from Signapse.",
+      telegramBody:
+        "Receive market news alerts, economic-calendar updates, and market analysis from Signapse through Telegram.",
+      telegramSetup:
+        "Link a destination, choose what to receive, and schedule analysis for the assets you track.",
+      telegramMedia: "Receive market updates and analysis through Telegram.",
     },
     trust: {
       eyebrow: "Trust boundary",
@@ -876,12 +854,12 @@ export const en: Dictionary = {
     },
     finalCta: {
       heading: "Start with a move you want to understand more clearly.",
-      body: "Request access to track assets, contextualize a move, and inspect related sources when data is available.",
+      body: "Request access to explore the Knowledge Graph, follow live charts, chat with the AI Assistant, and set up Telegram updates.",
       accessLabel: "Continue to Signapse",
     },
     footer: {
       description:
-        "Event-aware market analysis and linked-source inspection when data is available.",
+        "Knowledge Graph exploration, live charts, AI Assistant conversations, and Telegram market updates.",
       requestAccessEmail: "request-access@signapse.ai",
       requestAccessEmailLabel: "Request-access email",
       requestAccessEmailNote:

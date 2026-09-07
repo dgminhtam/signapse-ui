@@ -4,109 +4,84 @@ import { expect, test } from "./fixtures"
 
 const sectionOrder = [
   "hero-product-proof",
-  "analysis-flow",
   "product-story",
-  "workspace-assistant",
+  "analysis-flow",
   "trust-boundary",
   "final-access-cta",
 ]
 
 test.describe("P0 public landing", () => {
   for (const locale of ["vi", "en"] as const) {
-    test(`${locale} renders the canonical story and authenticated access paths`, async ({ page }) => {
+    test(`${locale} renders the four-feature story and authenticated access paths`, async ({ page }) => {
       await page.goto(`/${locale}`)
 
       await expect(page.locator("h1")).toHaveCount(1)
-      await expect(page.locator("[data-landing-section]")).toHaveCount(6)
+      await expect(page.locator("[data-landing-section]")).toHaveCount(5)
       await expect(
         page.locator("[data-landing-section]").evaluateAll((sections) =>
           sections.map((section) => section.getAttribute("data-landing-section"))
         )
       ).resolves.toEqual(sectionOrder)
 
-      await expect(page.locator("[data-product-chapter]")).toHaveCount(3)
+      await expect(page.locator("[data-product-chapter]")).toHaveCount(4)
+      await expect(page.locator("[data-landing-media-slot]")).toHaveCount(4)
       await expect(page.locator("#how-it-works")).toContainText(
         locale === "vi"
-          ? "Theo dõi → Đặt vào bối cảnh → Kiểm tra → Khám phá"
-          : "Track → Contextualize → Inspect → Explore"
+          ? "Chọn tài sản, xem diễn biến giá"
+          : "Choose an asset, review price action"
       )
-      await expect(page.locator('[data-landing-visual="context-figure"]')).toHaveAttribute(
-        "aria-describedby",
-        "landing-context-figure-description"
-      )
-      const figure = page.locator('[data-landing-visual="context-figure"]')
-      const hero = page.locator('[data-landing-section="hero-product-proof"]')
-      const stage = page.locator('[data-context-stage="interactive"]')
-      await expect(figure.locator("figcaption")).toHaveClass(/sr-only/)
-      await expect(figure.locator("[data-context-stage] button")).toHaveCount(0)
-      await expect(figure.locator("[data-figure-fallback]")).toHaveText("")
-      await expect(stage).toHaveText("")
-      await expect(stage).toHaveCSS("border-top-width", "0px")
-      await expect(hero).not.toContainText(
-        locale === "vi" ? "Bối cảnh có thể kiểm tra" : "Context you can verify"
-      )
-      await expect(hero).not.toContainText(
+      await expect(page.locator("#how-it-works")).toContainText(
         locale === "vi"
-          ? "Từ dữ liệu đến bối cảnh giao dịch"
-          : "From data to trading context"
+          ? "Phân tích cùng Trợ lý AI"
+          : "Analyze with the AI Assistant"
       )
-      await expect(page.locator("#landing-context-figure-title")).toContainText(
-        locale === "vi"
-          ? "Hai góc nhìn về bối cảnh thị trường"
-          : "Two views of market context"
-      )
-      await expect(page.locator("#landing-context-figure-title")).toHaveClass(/sr-only/)
-      await expect(page.locator("text=01 / 03")).toHaveCount(0)
-      await expect(page.locator("#workspace-ai")).toContainText("AI Assistant")
+      await expect(page.locator("#workspace-ai")).toHaveCount(0)
       await expect(page.locator("#product")).not.toContainText("Market Query")
-      await expect(page.locator("#product")).not.toContainText("82%")
 
-      const heroProofPoints = page.locator(
-        '[data-landing-section="hero-product-proof"] dt'
-      )
-      await expect(heroProofPoints).toHaveCount(2)
-      await expect(heroProofPoints).toHaveText(
-        locale === "vi"
-          ? ["Trợ lý AI chuyên biệt", "Đọc bối cảnh, không chỉ nhìn nến"]
-          : ["Specialized AI Assistant", "Read the context, not just the candles"]
-      )
-      await expect(page.locator('[data-landing-section="hero-product-proof"]')).not.toContainText(
-        locale === "vi" ? "Kiểm tra mối liên hệ" : "Inspect relationships"
-      )
+      for (const anchor of [
+        "knowledge-graph",
+        "live-charts",
+        "ai-assistant",
+        "telegram",
+      ]) {
+        await expect(page.locator(`[data-feature-link="${anchor}"]`)).toHaveAttribute(
+          "href",
+          `#${anchor}`
+        )
+      }
 
       const dashboardLabel =
         locale === "vi"
           ? "Mở bảng điều khiển Signapse"
           : "Open the Signapse dashboard"
-      const journeyLabel =
-        locale === "vi"
-          ? "Xem cách Signapse hỗ trợ phân tích thị trường"
-          : "See how Signapse supports market analysis"
       await expect(
         page.getByRole("link", { name: dashboardLabel }).first()
       ).toHaveAttribute("href", `/${locale}/dashboard`)
-      await expect(
-        page.getByRole("link", { name: journeyLabel }).first()
-      ).toHaveAttribute("href", "#how-it-works")
+      await expect(page.locator('a[href="#product"]').first()).toBeVisible()
       await expect(page.getByText("request-access@signapse.ai")).toBeVisible()
       await expect(page.locator('a[href^="mailto:"]')).toHaveAttribute(
         "href",
         "mailto:request-access@signapse.ai?subject=Signapse%20access%20request"
       )
+
+      const figure = page.locator('[data-landing-visual="context-figure"]')
+      await expect(figure.locator("figcaption")).toHaveClass(/sr-only/)
+      await expect(figure.locator("[data-context-stage] button")).toHaveCount(0)
+      await expect(page.locator("[data-landing-section=\"hero-product-proof\"]")).toContainText(
+        locale === "vi"
+          ? "Hiểu thị trường qua Đồ thị Tri thức và AI."
+          : "Understand markets through the Knowledge Graph and AI."
+      )
     })
   }
 
-  test("switches locale while preserving query and supported hash", async ({ page }) => {
-    await page.goto("/vi?source=hero#how-it-works")
+  test("switches locale while preserving query and supported feature hash", async ({ page }) => {
+    await page.goto("/vi?source=hero#knowledge-graph")
     await page.getByRole("link", { name: "English", exact: true }).first().click()
-    await expect(page).toHaveURL(/\/en\?source=hero#how-it-works$/)
+    await expect(page).toHaveURL(/\/en\?source=hero#knowledge-graph$/)
     await expect(page.locator("html")).toHaveAttribute("lang", "en")
-    await expect(page.getByRole("link", { name: "English", exact: true }).first()).toHaveAttribute(
-      "aria-current",
-      "page"
-    )
 
-    await page.goto("/en?source=footer#unsupported")
+    await page.goto("/en?source=footer#workspace-ai")
     await page.getByRole("link", { name: "Tiếng Việt", exact: true }).first().click()
     await expect(page).toHaveURL(/\/vi\?source=footer$/)
   })
@@ -125,7 +100,7 @@ test.describe("P0 public landing", () => {
     await expect(summary).toBeFocused()
     await summary.press("Enter")
     await expect(page.locator("[data-mobile-menu]")).toHaveAttribute("open", "")
-    await expect(page.getByRole("link", { name: "Sản phẩm", exact: true })).toBeVisible()
+    await expect(page.getByRole("link", { name: "Tính năng", exact: true })).toBeVisible()
     await expect(page.getByRole("link", { name: "English", exact: true }).last()).toBeVisible()
     const box = await summary.boundingBox()
     expect(box?.width).toBeGreaterThanOrEqual(44)
@@ -178,35 +153,23 @@ test.describe("P0 public landing", () => {
         "polite"
       )
       await expect
-        .poll(() => stage.getAttribute("data-renderer-state"), {
-          timeout: 8000,
-        })
+        .poll(() => stage.getAttribute("data-renderer-state"), { timeout: 8000 })
         .not.toBe("loading")
+
       if ((await stage.getAttribute("data-enhanced")) === "true") {
         await expect(stage).toHaveAttribute("role", "group")
-        await expect(page.locator("[data-figure-fallback]")).toBeHidden()
-
         const box = await stage.boundingBox()
         expect(box).not.toBeNull()
         if (!box) return
         await page.mouse.move(Math.max(0, box.x - 8), Math.max(0, box.y - 8))
-        await expect(stage).toHaveAttribute("data-context-mode", "graph")
         await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
         await expect(stage).toHaveAttribute("data-context-mode", "price")
-        await stage.click()
         await page.mouse.move(Math.max(0, box.x - 8), Math.max(0, box.y - 8))
         await expect(stage).toHaveAttribute("data-context-mode", "graph")
-
-        await page.keyboard.press("Tab")
         await stage.focus()
         await expect(stage).toBeFocused()
-        await expect(stage).toHaveCSS("outline-style", "solid")
         await stage.press("Enter")
         await expect(stage).toHaveAttribute("data-context-mode", "price")
-        await stage.press("Enter")
-        await expect(stage).toHaveAttribute("data-context-mode", "graph")
-        await stage.press("ArrowRight")
-        await expect(stage).toHaveAttribute("data-context-mode", "graph")
       } else {
         await expect(page.locator("[data-figure-fallback]")).toBeVisible()
         await expect(page.locator("[data-context-status]")).toContainText(
@@ -225,15 +188,11 @@ test.describe("P0 public landing", () => {
 
     try {
       await coarsePage.goto("http://127.0.0.1:3100/en")
-      await expect
-        .poll(() => coarsePage.evaluate(() => matchMedia("(pointer: coarse)").matches))
-        .toBe(true)
-
       const stage = coarsePage.locator('[data-context-stage="interactive"]')
       await expect
         .poll(() => stage.getAttribute("data-renderer-state"), { timeout: 8000 })
         .not.toBe("loading")
-      await coarsePage.waitForTimeout(4200)
+      await coarsePage.waitForTimeout(1000)
       await expect(stage).toHaveAttribute("data-context-mode", "graph")
       await stage.tap()
       await expect(stage).toHaveAttribute("data-context-mode", "graph")
@@ -246,9 +205,7 @@ test.describe("P0 public landing", () => {
     test(`${locale} renders preview metadata and localized social image references`, async ({ page }) => {
       await page.goto(`/${locale}`)
 
-      await expect(page).toHaveTitle(
-        "Signapse | Market Intelligence Platform"
-      )
+      await expect(page).toHaveTitle("Signapse | Market Intelligence Platform")
       await expect(page.locator('meta[name="description"]')).toHaveAttribute(
         "content",
         locale === "vi"

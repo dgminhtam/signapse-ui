@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import {
-  HERO_JOURNEY_HREF,
+  HERO_FEATURES_HREF,
   REQUEST_ACCESS_HREF,
   createLandingAccessModel,
 } from "@/app/[lang]/landing-access"
@@ -26,8 +26,8 @@ const accessCopy = {
     requestAccessAria: "Request access to Signapse",
     signInAria: "Sign in to Signapse",
     openDashboardAria: "Open the Signapse dashboard",
-    exploreJourney: "See how Signapse analyzes markets",
-    exploreJourneyAria: "See how Signapse supports market analysis",
+    exploreFeatures: "Explore features",
+    exploreFeaturesAria: "Explore Signapse's main features",
     requestAccessNote: "This action opens your email application.",
   },
   footer: {
@@ -75,7 +75,7 @@ describe("landing access model", () => {
     expect(model.headerPrimary.href).toBe(REQUEST_ACCESS_HREF)
     expect(model.headerSecondary?.href).toBe("/vi/sign-in")
     expect(model.heroPrimary.href).toBe(REQUEST_ACCESS_HREF)
-    expect(model.heroSecondary.href).toBe(HERO_JOURNEY_HREF)
+    expect(model.heroSecondary.href).toBe(HERO_FEATURES_HREF)
     expect(model.finalCta.href).toBe(REQUEST_ACCESS_HREF)
     expect(model.footerAppEntry.href).toBe("/vi/sign-in")
     expect(model.footerRequestAccess.label).toBe("request-access@signapse.ai")
@@ -87,7 +87,7 @@ describe("landing access model", () => {
     expect(model.headerPrimary.href).toBe("/en/dashboard")
     expect(model.headerSecondary).toBeNull()
     expect(model.heroPrimary.href).toBe("/en/dashboard")
-    expect(model.heroSecondary.href).toBe(HERO_JOURNEY_HREF)
+    expect(model.heroSecondary.href).toBe(HERO_FEATURES_HREF)
     expect(model.finalCta.href).toBe("/en/dashboard")
     expect(model.footerAppEntry.href).toBe("/en/dashboard")
   })
@@ -101,11 +101,17 @@ describe("landing locale links", () => {
     expect(
       buildLandingLocaleHref("/en", "source=footer", "#access", "vi")
     ).toBe("/vi?source=footer#access")
+    expect(
+      buildLandingLocaleHref("/vi", "source=hero", "#knowledge-graph", "en")
+    ).toBe("/en?source=hero#knowledge-graph")
   })
 
   it("drops unsupported hashes while preserving the query", () => {
     expect(
       buildLandingLocaleHref("/vi", "source=hero", "#unsupported", "en")
+    ).toBe("/en?source=hero")
+    expect(
+      buildLandingLocaleHref("/vi", "source=hero", "#workspace-ai", "en")
     ).toBe("/en?source=hero")
   })
 })

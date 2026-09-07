@@ -50,14 +50,14 @@ Alternatives considered:
 
 ### 3. Separate first visibility from layout refinement
 
-On a cache miss, the graph first renders using deterministic seed coordinates. A ForceAtlas2 worker then refines those coordinates without blocking the first visible state. On a cache hit, the cached positions render immediately and automatic refinement is skipped; an explicit `Re-layout` action starts a new worker run and replaces the versioned cache when complete.
+On a cache miss, the graph first renders using deterministic seed coordinates. On a cache hit, the cached positions render immediately. In both cases, a ForceAtlas2 worker then refines the visible coordinates without blocking first paint; a completed refinement replaces the matching versioned cache. An explicit `Re-layout` action starts a new worker run from deterministic seed positions.
 
 Generated layouts are cached by fixture version and layout version. Manual drag positions remain in memory for the current session only and never overwrite the generated cache.
 
 Alternatives considered:
 
 - Waiting for ForceAtlas2 before first render: rejected because it reproduces the current perceived wait.
-- Re-running refinement on every cache hit: rejected because it makes reopening non-deterministic and adds unnecessary work.
+- Waiting for refinement on a cache hit: rejected because it delays reopening. A background refinement keeps the cached layout responsive while preserving the same force behavior as a cold visit.
 - Persisting manual drag positions: rejected because current Graph View positions are client-session state and must not become user data.
 
 ### 4. Use Sigma WebGL with Graphology state

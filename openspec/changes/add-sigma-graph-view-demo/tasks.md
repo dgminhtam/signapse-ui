@@ -8,7 +8,7 @@
 
 - [x] 2.1 Add the protected direct-link-only Sigma demo route with no sidebar navigation entry and no graph-view API request.
 - [x] 2.2 Render the fixture through Sigma WebGL with current Graph View node/edge visuals, light/dark theme support, responsive sizing, and localized surrounding UI.
-- [x] 2.3 Implement deterministic seed-coordinate first visibility, ForceAtlas2 worker refinement on cache miss, warm-cache immediate rendering, explicit `Re-layout`, and stale-worker lifecycle guards.
+- [x] 2.3 Implement deterministic seed-coordinate first visibility, immediate warm-cache rendering with non-blocking ForceAtlas2 refinement, explicit `Re-layout`, and stale-worker lifecycle guards.
 - [x] 2.4 Implement bounded pan, explicit zoom controls with wheel zoom disabled, recenter, node dragging with session-local force reaction, and session-local dropped positions.
 - [x] 2.5 Implement hover spotlight, node/edge selection, background clear, contextual label visibility, metadata inspection, and local hardcoded quick detail for event/news-article nodes.
 - [x] 2.6 Add keyboard-accessible controls and overlays, localized accessible names, and a localized WebGL-unsupported state without a G6 fallback.

@@ -50,7 +50,7 @@ The demo SHALL represent the fixture in a directed multi-edge-capable Graphology
 
 ### Requirement: Demo makes the graph visible before layout refinement completes
 
-The demo SHALL show a usable graph from deterministic seed coordinates without waiting for force layout completion. On a cache miss, a client-side worker MAY refine the seed layout after first visibility. On a valid cache hit, the demo SHALL render from cached coordinates immediately and SHALL NOT automatically rerun refinement.
+The demo SHALL show a usable graph from deterministic seed or cached coordinates without waiting for force layout completion. On a cache miss or valid cache hit, a client-side worker SHALL refine the rendered coordinates after first visibility. Cached coordinates SHALL remain immediately usable while refinement runs in the background.
 
 #### Scenario: First visit uses seed coordinates
 
@@ -62,7 +62,7 @@ The demo SHALL show a usable graph from deterministic seed coordinates without w
 
 - **WHEN** the demo loads with a cache matching the fixture and layout versions
 - **THEN** the graph SHALL render from cached coordinates immediately
-- **AND** automatic layout refinement SHALL remain stopped
+- **AND** a non-blocking client-side layout refinement SHALL start and update the cached layout
 
 #### Scenario: User requests re-layout
 

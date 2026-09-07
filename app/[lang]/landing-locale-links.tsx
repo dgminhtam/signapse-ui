@@ -8,9 +8,12 @@ import { replacePathLocale } from "@/app/lib/i18n/routing"
 
 const SUPPORTED_LANDING_HASHES = new Set([
   "top",
-  "how-it-works",
   "product",
-  "workspace-ai",
+  "knowledge-graph",
+  "live-charts",
+  "ai-assistant",
+  "telegram",
+  "how-it-works",
   "trust",
   "access",
 ])

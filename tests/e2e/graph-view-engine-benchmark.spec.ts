@@ -111,12 +111,94 @@ test.describe("Knowledge Graph engine trial", () => {
     ).toBeVisible({ timeout: 90_000 })
     await expect
       .poll(
-        () => cachedPage.getByTestId("graph-demo-layout-status").textContent(),
+        () =>
+          cachedPage
+            .getByTestId("graph-view-sigma-demo")
+            .getAttribute("data-layout-status"),
         {
-          timeout: 3_000,
+          timeout: 2_000,
         }
       )
-      .toBe("Đang dùng bố cục đã lưu")
+      .toBe("refining")
+    await expect
+      .poll(
+        () => cachedPage.getByTestId("graph-demo-layout-status").textContent(),
+        {
+          timeout: 4_000,
+        }
+      )
+      .toBe("Bố cục sẵn sàng")
+  })
+
+  test("keeps force refinement visible when Sigma starts from cached coordinates", async ({
+    page,
+  }) => {
+    await page.goto(`${ENGINE_ROUTES.sigma}?edges=100`, {
+      waitUntil: "domcontentloaded",
+    })
+    await expect(
+      page.getByTestId("graph-demo-canvas").locator("canvas").first()
+    ).toBeVisible({ timeout: 90_000 })
+    await expect
+      .poll(
+        () =>
+          page
+            .getByTestId("graph-view-sigma-demo")
+            .getAttribute("data-layout-status"),
+        {
+          timeout: 8_000,
+        }
+      )
+      .toBe("ready")
+
+    const cachedPage = await page.context().newPage()
+
+    try {
+      await cachedPage.goto(`${ENGINE_ROUTES.sigma}?edges=100`, {
+        waitUntil: "domcontentloaded",
+      })
+      const cachedCanvas = cachedPage.getByTestId("graph-demo-canvas")
+      await expect(cachedCanvas.locator("canvas").first()).toBeVisible({
+        timeout: 90_000,
+      })
+      await expect
+        .poll(
+          () =>
+            cachedPage
+              .getByTestId("graph-view-sigma-demo")
+              .getAttribute("data-layout-status"),
+          { timeout: 2_000 }
+        )
+        .toBe("refining")
+
+      await expect(cachedCanvas).toHaveAttribute(
+        "data-benchmark-anchor-x",
+        /-?\d+(\.\d+)?/
+      )
+      await expect(cachedCanvas).toHaveAttribute(
+        "data-benchmark-anchor-y",
+        /-?\d+(\.\d+)?/
+      )
+      const initialPosition = await cachedCanvas.evaluate((element) => ({
+        x: Number(element.getAttribute("data-benchmark-anchor-x")),
+        y: Number(element.getAttribute("data-benchmark-anchor-y")),
+      }))
+
+      await cachedPage.waitForTimeout(450)
+
+      const refinedPosition = await cachedCanvas.evaluate((element) => ({
+        x: Number(element.getAttribute("data-benchmark-anchor-x")),
+        y: Number(element.getAttribute("data-benchmark-anchor-y")),
+      }))
+      const movement = Math.hypot(
+        refinedPosition.x - initialPosition.x,
+        refinedPosition.y - initialPosition.y
+      )
+
+      expect(movement).toBeGreaterThan(1)
+    } finally {
+      await cachedPage.close()
+    }
   })
 
   test("keeps the demo behind the graph-view permission", async ({

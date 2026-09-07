@@ -1023,6 +1023,7 @@ export function SigmaGraphViewDemo({
         window.queueMicrotask(() => {
           if (!isDisposed) {
             setLayoutStatus("cached")
+            startLayout(GRAPH_DEMO_LAYOUT_DURATION, true)
           }
         })
       } else {

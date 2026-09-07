@@ -6,9 +6,7 @@ import {
   CalendarClockIcon,
   LineChartIcon,
   NetworkIcon,
-  NewspaperIcon,
   ShieldCheckIcon,
-  SparklesIcon,
 } from "lucide-react"
 
 import type { AppLocale } from "@/app/lib/i18n/config"
@@ -67,9 +65,8 @@ export function LandingPage({
           dictionary={dictionary}
           locale={locale}
         />
-        <AnalysisFlow dictionary={dictionary} />
         <ProductStory dictionary={dictionary} />
-        <WorkspaceAssistant dictionary={dictionary} />
+        <AnalysisFlow dictionary={dictionary} />
         <TrustBoundary dictionary={dictionary} />
         <FinalAccessCta access={access} dictionary={dictionary} />
       </main>
@@ -94,9 +91,8 @@ function LandingHeader({
 }) {
   const t = dictionary.landing
   const sectionLinks = [
-    { href: "#how-it-works", label: t.nav.flow },
     { href: "#product", label: t.nav.product },
-    { href: "#workspace-ai", label: t.nav.workspace },
+    { href: "#how-it-works", label: t.nav.flow },
     { href: "#trust", label: t.nav.trust },
   ]
 
@@ -228,7 +224,7 @@ function HeroSection({
       aria-labelledby="landing-hero-heading"
       className={`${styles.heroSection} relative overflow-hidden border-b border-border/80`}
     >
-      <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[minmax(0,0.9fr)_minmax(28rem,1.1fr)] lg:items-center lg:gap-14 lg:px-8 lg:py-24">
+      <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-14 sm:px-6 sm:py-20 min-[1200px]:grid-cols-[minmax(0,0.9fr)_minmax(28rem,1.1fr)] min-[1200px]:items-center min-[1200px]:gap-14 lg:px-8 lg:py-24">
         <div className={`${styles.heroCopy} flex min-w-0 flex-col gap-7`}>
           <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
             {t.hero.eyebrow}
@@ -281,40 +277,40 @@ function HeroSection({
               fallback: t.hero.contextFigureFallback,
             }}
           />
-          <dl className="grid gap-4 border-t border-border pt-5 sm:grid-cols-2 lg:grid-cols-1">
-            <ProofPoint title={t.hero.proofOneTitle} body={t.hero.proofOneBody} />
-            <ProofPoint title={t.hero.proofTwoTitle} body={t.hero.proofTwoBody} />
-          </dl>
+          <FeatureLinks dictionary={dictionary} />
         </div>
       </div>
     </section>
   )
 }
 
-function ProofPoint({ title, body }: { title: string; body: string }) {
-  return (
-    <div className="flex flex-col gap-1">
-      <dt className="text-sm font-semibold">{title}</dt>
-      <dd className="text-sm leading-6 text-muted-foreground">{body}</dd>
-    </div>
-  )
-}
+function FeatureLinks({ dictionary }: { dictionary: Dictionary }) {
+  const t = dictionary.landing
+  const links = [
+    { href: "#knowledge-graph", label: t.hero.featureLinks.knowledgeGraph },
+    { href: "#live-charts", label: t.hero.featureLinks.liveCharts },
+    { href: "#ai-assistant", label: t.hero.featureLinks.aiAssistant },
+    { href: "#telegram", label: t.hero.featureLinks.telegram },
+  ]
 
-function RelationshipTreatment() {
   return (
-    <div
-      aria-hidden="true"
-      className="relative isolate h-40 overflow-hidden border-y border-border/80 bg-muted/20"
+    <nav
+      aria-label={t.nav.product}
+      className="grid gap-2 border-t border-border pt-5 sm:grid-cols-2"
+      data-feature-links
     >
-      <div className="absolute top-1/2 right-8 left-8 h-px bg-border" />
-      <div className="absolute top-8 bottom-8 left-1/3 w-px bg-border/80" />
-      <div className="absolute top-8 bottom-8 left-2/3 w-px bg-border/80" />
-      <span className="absolute top-1/2 left-[16%] size-3 -translate-y-1/2 rounded-full border-2 border-foreground bg-background" />
-      <span className="absolute top-1/2 left-[34%] size-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-foreground bg-background" />
-      <span className="absolute top-[31%] left-[67%] size-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-foreground bg-background" />
-      <span className="absolute top-[70%] left-[67%] size-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-foreground bg-background" />
-      <span className="absolute top-1/2 right-[13%] size-6 -translate-y-1/2 rounded-full border-2 border-foreground bg-background" />
-    </div>
+      {links.map((link) => (
+        <a
+          key={link.href}
+          href={link.href}
+          className="flex min-h-11 items-center justify-between gap-3 border-b border-border/70 px-1 py-2 text-sm font-medium transition-colors hover:text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          data-feature-link={link.href.slice(1)}
+        >
+          <span>{link.label}</span>
+          <ArrowRightIcon aria-hidden="true" className="size-4" />
+        </a>
+      ))}
+    </nav>
   )
 }
 
@@ -324,7 +320,6 @@ function AnalysisFlow({ dictionary }: { dictionary: Dictionary }) {
     { title: t.stepOneTitle, body: t.stepOneBody },
     { title: t.stepTwoTitle, body: t.stepTwoBody },
     { title: t.stepThreeTitle, body: t.stepThreeBody },
-    { title: t.stepFourTitle, body: t.stepFourBody },
   ]
 
   return (
@@ -334,8 +329,8 @@ function AnalysisFlow({ dictionary }: { dictionary: Dictionary }) {
       aria-labelledby="landing-flow-heading"
       className="border-b border-border/80"
     >
-      <div className="mx-auto grid w-full max-w-7xl gap-12 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-[minmax(16rem,0.65fr)_minmax(0,1.35fr)] lg:px-8">
-        <div className="flex flex-col gap-5">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-10 px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+        <div className="flex max-w-3xl flex-col gap-5">
           <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
             {t.eyebrow}
           </p>
@@ -345,18 +340,13 @@ function AnalysisFlow({ dictionary }: { dictionary: Dictionary }) {
           >
             {t.heading}
           </h2>
-          <p className="max-w-xl leading-7 text-muted-foreground">{t.body}</p>
-          <p className="border-l-2 border-border pl-4 text-base font-medium leading-7">
-            {t.sequence}
-          </p>
-          <RelationshipTreatment />
         </div>
 
-        <ol className="grid min-w-0 gap-0 border-t border-border lg:grid-cols-2 lg:border-t-0">
+        <ol className="grid min-w-0 gap-0 border-y border-border min-[1200px]:grid-cols-3 min-[1200px]:border-y-0 min-[1200px]:border-l">
           {steps.map((step, index) => (
             <li
               key={step.title}
-              className="flex min-w-0 flex-col gap-4 border-b border-border py-6 first:pt-0 last:border-b-0 lg:border-t lg:px-6 lg:py-6 lg:first:border-t-0 lg:first:pt-0 lg:nth-[2]:border-t-0 lg:nth-[2]:pt-0 lg:nth-[3]:border-b-0 lg:nth-[4]:border-b-0"
+              className="flex min-w-0 flex-col gap-4 border-b border-border py-6 last:border-b-0 min-[1200px]:border-r min-[1200px]:border-b-0 min-[1200px]:px-6 min-[1200px]:py-6 min-[1200px]:first:pl-6"
             >
               <span className="font-mono text-xs text-muted-foreground tabular-nums">
                 {String(index + 1).padStart(2, "0")}
@@ -374,11 +364,13 @@ function AnalysisFlow({ dictionary }: { dictionary: Dictionary }) {
 }
 
 type ProductChapter = {
+  id: string
   title: string
   outcome: string
   body: string
-  qualifier: string
-  points: string[]
+  detail?: string
+  qualifier?: string
+  mediaDescription: string
   icon: ElementType
 }
 
@@ -386,28 +378,39 @@ function ProductStory({ dictionary }: { dictionary: Dictionary }) {
   const t = dictionary.landing.product
   const chapters: ProductChapter[] = [
     {
-      title: t.chartsTitle,
-      outcome: t.chartsOutcome,
-      body: t.chartsBody,
-      qualifier: t.chartsQualifier,
-      points: [t.chartsPointOne, t.chartsPointTwo, t.chartsPointThree],
+      id: "knowledge-graph",
+      title: t.knowledgeGraphTitle,
+      outcome: t.knowledgeGraphOutcome,
+      body: t.knowledgeGraphBody,
+      mediaDescription: t.knowledgeGraphMedia,
+      icon: NetworkIcon,
+    },
+    {
+      id: "live-charts",
+      title: t.liveChartsTitle,
+      outcome: t.liveChartsOutcome,
+      body: t.liveChartsBody,
+      detail: t.liveChartsDetail,
+      qualifier: t.liveChartsQualifier,
+      mediaDescription: t.liveChartsMedia,
       icon: LineChartIcon,
     },
     {
-      title: t.reactionTitle,
-      outcome: t.reactionOutcome,
-      body: t.reactionBody,
-      qualifier: t.reactionQualifier,
-      points: [t.reactionPointOne, t.reactionPointTwo, t.reactionPointThree],
-      icon: NewspaperIcon,
+      id: "ai-assistant",
+      title: t.aiAssistantTitle,
+      outcome: t.aiAssistantOutcome,
+      body: t.aiAssistantBody,
+      mediaDescription: t.aiAssistantMedia,
+      icon: BrainCircuitIcon,
     },
     {
-      title: t.graphTitle,
-      outcome: t.graphOutcome,
-      body: t.graphBody,
-      qualifier: t.graphQualifier,
-      points: [t.graphPointOne, t.graphPointTwo, t.graphPointThree],
-      icon: NetworkIcon,
+      id: "telegram",
+      title: t.telegramTitle,
+      outcome: t.telegramOutcome,
+      body: t.telegramBody,
+      detail: t.telegramSetup,
+      mediaDescription: t.telegramMedia,
+      icon: CalendarClockIcon,
     },
   ]
 
@@ -429,110 +432,106 @@ function ProductStory({ dictionary }: { dictionary: Dictionary }) {
           >
             {t.heading}
           </h2>
-          <p className="leading-7 text-muted-foreground">{t.body}</p>
         </div>
 
-        <div className="grid gap-0 border-y border-border lg:grid-cols-3 lg:border-y-0 lg:border-l">
-          {chapters.map((chapter) => {
-            const Icon = chapter.icon
-            return (
-              <article
-                key={chapter.title}
-                data-product-chapter
-                className="flex min-w-0 flex-col gap-6 border-b border-border px-0 py-8 last:border-b-0 lg:border-r lg:border-b-0 lg:px-7 lg:py-0 lg:first:pl-0"
-              >
-                <div className="flex items-center gap-3">
-                  <span
-                    aria-hidden="true"
-                    className="flex size-10 items-center justify-center border border-border bg-muted/30"
-                  >
-                    <Icon className="text-muted-foreground" />
-                  </span>
-                  <h3 className="text-xl font-semibold">{chapter.title}</h3>
-                </div>
-                <p className="text-base font-medium leading-7">{chapter.outcome}</p>
-                <p className="leading-7 text-muted-foreground">{chapter.body}</p>
-                <ul className="flex flex-col gap-3 text-sm leading-6">
-                  {chapter.points.map((point) => (
-                    <li key={point} className="flex items-start gap-2">
-                      <SparklesIcon
-                        aria-hidden="true"
-                        className="mt-1 shrink-0 text-muted-foreground"
-                      />
-                      <span>{point}</span>
-                    </li>
-                  ))}
-                </ul>
-                <p className="mt-auto border-t border-border pt-4 text-xs leading-5 text-muted-foreground">
-                  {chapter.qualifier}
-                </p>
-              </article>
-            )
-          })}
+        <div className="flex flex-col border-y border-border">
+          {chapters.map((chapter, index) => (
+            <FeatureChapter
+              chapter={chapter}
+              index={index}
+              key={chapter.id}
+            />
+          ))}
         </div>
       </div>
     </section>
   )
 }
 
-function WorkspaceAssistant({ dictionary }: { dictionary: Dictionary }) {
-  const t = dictionary.landing.workspaceAi
+function FeatureChapter({
+  chapter,
+  index,
+}: {
+  chapter: ProductChapter
+  index: number
+}) {
+  const Icon = chapter.icon
+  const mediaFirstOnWide = index % 2 === 1
 
   return (
-    <section
-      id="workspace-ai"
-      data-landing-section="workspace-assistant"
-      aria-labelledby="landing-workspace-heading"
-      className="border-b border-border/80"
+    <article
+      id={chapter.id}
+      data-product-chapter
+      className="grid min-w-0 gap-8 border-b border-border py-10 last:border-b-0 min-[1200px]:grid-cols-2 min-[1200px]:gap-14 min-[1200px]:py-14"
     >
-      <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-[minmax(16rem,0.7fr)_minmax(0,1.3fr)] lg:px-8">
-        <div className="flex flex-col gap-5">
-          <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-            {t.eyebrow}
-          </p>
-          <h2
-            id="landing-workspace-heading"
-            className="text-3xl leading-tight font-semibold tracking-[-0.02em] sm:text-4xl"
+      <div
+        className={
+          mediaFirstOnWide
+            ? "order-2 flex min-w-0 flex-col justify-center gap-5 min-[1200px]:order-2"
+            : "order-2 flex min-w-0 flex-col justify-center gap-5 min-[1200px]:order-1"
+        }
+      >
+        <div className="flex items-center gap-3">
+          <span
+            aria-hidden="true"
+            className="flex size-10 items-center justify-center border border-border bg-muted/30"
           >
-            {t.heading}
-          </h2>
-          <p className="leading-7 text-muted-foreground">{t.body}</p>
+            <Icon className="text-muted-foreground" />
+          </span>
+          <h3 className="text-xl font-semibold">{chapter.title}</h3>
         </div>
-        <div className="grid gap-0 border-y border-border sm:grid-cols-2 sm:border-y-0 sm:border-l">
-          <SupportCard
-            icon={CalendarClockIcon}
-            title={t.trackedAssetsTitle}
-            body={t.trackedAssetsBody}
-          />
-          <SupportCard
-            icon={BrainCircuitIcon}
-            title={t.conversationsTitle}
-            body={t.conversationsBody}
-          />
-        </div>
+        <p className="text-xl leading-8 font-medium">{chapter.outcome}</p>
+        <p className="leading-7 text-muted-foreground">{chapter.body}</p>
+        {chapter.detail ? (
+          <p className="border-l-2 border-border pl-4 text-sm leading-6 text-foreground">
+            {chapter.detail}
+          </p>
+        ) : null}
+        {chapter.qualifier ? (
+          <p className="border-t border-border pt-4 text-xs leading-5 text-muted-foreground">
+            {chapter.qualifier}
+          </p>
+        ) : null}
       </div>
-      <p className="mx-auto w-full max-w-7xl px-4 pb-16 text-sm leading-6 text-muted-foreground sm:px-6 sm:pb-24 lg:px-8">
-        {t.qualifier}
-      </p>
-    </section>
+      <FeatureMediaSlot
+        description={chapter.mediaDescription}
+        id={chapter.id}
+        title={chapter.title}
+        className={
+          mediaFirstOnWide
+            ? "order-1 min-[1200px]:order-1"
+            : "order-1 min-[1200px]:order-2"
+        }
+      />
+    </article>
   )
 }
 
-function SupportCard({
-  icon: Icon,
+function FeatureMediaSlot({
+  className,
+  description,
+  id,
   title,
-  body,
 }: {
-  icon: ElementType
+  className?: string
+  description: string
+  id: string
   title: string
-  body: string
 }) {
   return (
-    <article className="flex min-w-0 flex-col gap-4 border-b border-border py-7 sm:border-r sm:border-b-0 sm:px-7 sm:first:pl-0 sm:last:border-r-0">
-      <Icon aria-hidden="true" className="text-muted-foreground" />
-      <h3 className="text-xl font-semibold">{title}</h3>
-      <p className="leading-7 text-muted-foreground">{body}</p>
-    </article>
+    <figure
+      aria-label={title}
+      className={`flex min-h-56 min-w-0 flex-col justify-end border-y border-border bg-muted/20 p-6 sm:min-h-64 sm:p-8 ${className ?? ""}`}
+      data-landing-media-slot={id}
+      data-media-state="text-first"
+    >
+      <figcaption className="flex max-w-md flex-col gap-2">
+        <span className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+          {title}
+        </span>
+        <span className="text-lg leading-7 font-medium">{description}</span>
+      </figcaption>
+    </figure>
   )
 }
 

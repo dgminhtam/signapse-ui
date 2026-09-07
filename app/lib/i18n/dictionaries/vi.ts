@@ -747,9 +747,8 @@ export const vi = {
   },
   landing: {
     nav: {
-      flow: "Hành trình phân tích",
-      product: "Sản phẩm",
-      workspace: "Workspace và trợ lý",
+      flow: "Cách sử dụng",
+      product: "Tính năng",
       trust: "Ranh giới tin cậy",
       access: "Truy cập",
       requestAccess: "Yêu cầu truy cập",
@@ -766,20 +765,19 @@ export const vi = {
       skipToContent: "Bỏ qua điều hướng và tới nội dung chính",
       headerNavigation: "Điều hướng landing",
       footerNavigation: "Điều hướng chân trang",
-      relationshipDecoration: "",
     },
     hero: {
       eyebrow: "MARKET INTELLIGENCE PLATFORM",
-      title: "Biến dữ liệu thị trường thành Đồ thị Tri thức.",
-      body: "Signapse tổng hợp, đánh giá và phân tích dữ liệu giá, sự kiện, phản ứng và tin tức từ nhiều nguồn thành các mối liên hệ có thể kiểm tra — tạo ngữ cảnh cho Trợ lý AI khi bạn đặt câu hỏi và đọc từng biến động.",
+      title: "Hiểu thị trường qua Đồ thị Tri thức và AI.",
+      body: "Khám phá các mối liên hệ, theo dõi biến động giá trực tiếp, trò chuyện với Trợ lý AI và nhận cập nhật thị trường qua Telegram.",
       trustNote:
         "AI hỗ trợ tổng hợp và khám phá. Bạn kiểm tra nguồn và tự đưa ra quyết định giao dịch.",
-      proofOneTitle: "Trợ lý AI chuyên biệt",
-      proofOneBody:
-        "Vận hành trên Đồ thị Tri thức, được xây dựng từ dữ liệu thị trường đa nguồn đã qua tổng hợp, đánh giá và phân tích.",
-      proofTwoTitle: "Đọc bối cảnh, không chỉ nhìn nến",
-      proofTwoBody:
-        "Đọc diễn biến giá trên chart cùng phản ứng thị trường, sự kiện và lịch kinh tế liên quan.",
+      featureLinks: {
+        knowledgeGraph: "Đồ thị Tri thức",
+        liveCharts: "Biểu đồ trực tiếp",
+        aiAssistant: "Trợ lý AI",
+        telegram: "Telegram",
+      },
       contextFigureTitle: "Hai góc nhìn về bối cảnh thị trường",
       contextFigureDescription:
         "Hình minh họa tương tác đặt Đồ thị Tri thức thị trường cạnh Diễn biến giá như hai góc nhìn bổ sung về bối cảnh, không phải phép biến đổi hay dự báo giá.",
@@ -799,72 +797,53 @@ export const vi = {
       requestAccessAria: "Yêu cầu truy cập Signapse",
       signInAria: "Đăng nhập vào Signapse",
       openDashboardAria: "Mở bảng điều khiển Signapse",
-      exploreJourney: "Xem cách Signapse phân tích",
-      exploreJourneyAria: "Xem cách Signapse hỗ trợ phân tích thị trường",
+      exploreFeatures: "Khám phá tính năng",
+      exploreFeaturesAria: "Khám phá các tính năng chính của Signapse",
       requestAccessNote: "Thao tác này sẽ mở ứng dụng email của bạn.",
     },
     analysisFlow: {
-      eyebrow: "Hành trình phân tích",
-      heading: "Từ biến động đến bối cảnh có thể kiểm tra.",
-      body: "Một đường đi ngắn để chuyển từ tài sản đang theo dõi sang các sự kiện, nguồn tin và quan hệ liên quan.",
-      sequence: "Theo dõi → Đặt vào bối cảnh → Kiểm tra → Khám phá",
-      stepOneTitle: "Theo dõi",
-      stepOneBody: "Bắt đầu với tài sản và phạm vi đang được quan tâm.",
-      stepTwoTitle: "Đặt vào bối cảnh",
+      eyebrow: "CÁCH SỬ DỤNG SIGNAPSE",
+      heading: "Bắt đầu từ một biến động bạn muốn hiểu.",
+      stepOneTitle: "Chọn tài sản, xem diễn biến giá",
+      stepOneBody:
+        "Chọn tài sản trong danh sách theo dõi. Xem diễn biến giá cùng các dấu mốc sự kiện và lịch kinh tế.",
+      stepTwoTitle: "Mở sự kiện, kiểm tra nguồn tin",
       stepTwoBody:
-        "Đối chiếu diễn biến giá với sự kiện và lịch kinh tế khi dữ liệu khả dụng.",
-      stepThreeTitle: "Kiểm tra",
+        "Mở chi tiết sự kiện để đọc phản ứng thị trường và đối chiếu với các nguồn tin.",
+      stepThreeTitle: "Phân tích cùng Trợ lý AI",
       stepThreeBody:
-        "Đọc phản ứng, chi tiết sự kiện và nguồn liên kết mà không bỏ qua giới hạn dữ liệu.",
-      stepFourTitle: "Khám phá",
-      stepFourBody:
-        "Mở rộng sang các quan hệ giữa sự kiện, tài sản, bài viết và narrative.",
+        "Trợ lý AI hỗ trợ bạn phân tích quan hệ giữa sự kiện, tài sản và tin tức để tìm hiểu thêm những thông tin liên quan.",
     },
     product: {
-      eyebrow: "Câu chuyện sản phẩm",
-      heading: "Các bề mặt để đọc một chuyển động.",
-      body: "Ba chương chính giữ việc đọc chart, bằng chứng và quan hệ ở gần nhau, với giới hạn rõ ràng khi dữ liệu chưa đủ.",
-      chartsTitle: "Biểu đồ theo bối cảnh sự kiện",
-      chartsOutcome:
-        "Nhìn chuyển động giá cùng những gì đang xảy ra xung quanh nó.",
-      chartsBody:
-        "Chọn tài sản đang theo dõi, xem nến lịch sử, chú thích sự kiện và bối cảnh lịch kinh tế. Trạng thái biểu đồ trực tiếp xuất hiện khi dữ liệu khả dụng.",
-      chartsPointOne: "Tài sản được chọn trong phạm vi theo dõi",
-      chartsPointTwo: "Chú thích sự kiện trên trục thời gian",
-      chartsPointThree: "Lịch kinh tế và trạng thái trực tiếp khi có dữ liệu",
-      chartsQualifier:
-        "Khoảng thời gian, sự kiện và trạng thái trực tiếp phụ thuộc vào dữ liệu khả dụng; thời điểm gần nhau không chứng minh quan hệ nhân quả.",
-      reactionTitle: "Phản ứng và bằng chứng",
-      reactionOutcome: "Đi từ chú thích ngắn đến nguồn cần được kiểm tra.",
-      reactionBody:
-        "Xem bản xem trước chú thích trên biểu đồ, mở chi tiết sự kiện, rồi đọc phản ứng và nguồn liên kết khi có dữ liệu.",
-      reactionPointOne: "Bản xem trước chú thích ngắn gọn",
-      reactionPointTwo: "Chi tiết sự kiện và phản ứng tùy dữ liệu",
-      reactionPointThree: "Nguồn liên kết để kiểm tra thủ công",
-      reactionQualifier:
-        "Phản ứng hoặc nguồn có thể chưa có; sản phẩm không trình bày kết quả giao dịch được đánh giá.",
-      graphTitle: "Đồ thị thị trường kết nối",
-      graphOutcome: "Khám phá các quan hệ đằng sau một câu chuyện thị trường.",
-      graphBody:
-        "Xem quan hệ giữa sự kiện, tài sản, bài viết tin tức và narrative để mở rộng bối cảnh quanh một chuyển động.",
-      graphPointOne: "Quan hệ giữa sự kiện và tài sản",
-      graphPointTwo: "Liên kết tới bài viết và narrative",
-      graphPointThree: "Bối cảnh mở rộng quanh một chuyển động",
-      graphQualifier:
-        "Các nhãn bối cảnh giúp giải thích quan hệ; chúng không phải một loại thực thể đồ thị riêng.",
-    },
-    workspaceAi: {
-      eyebrow: "Workspace và AI Assistant",
-      heading: "Hỗ trợ phân tích trong cùng phạm vi làm việc.",
-      body: "Workspace giữ các tài sản đang theo dõi và các phiên trò chuyện văn bản đã lưu để bạn có thể quay lại cùng một đường phân tích.",
-      trackedAssetsTitle: "Tài sản đang theo dõi",
-      trackedAssetsBody:
-        "Phạm vi chủ động giúp bạn bắt đầu từ những tài sản quan tâm trong workspace hiện tại.",
-      conversationsTitle: "Phiên trò chuyện đã lưu",
-      conversationsBody:
-        "AI Assistant giữ lịch sử phiên trò chuyện văn bản để bạn tiếp tục xem lại bối cảnh.",
-      qualifier:
-        "Trải nghiệm hỗ trợ việc kiểm tra và tổng hợp; thông tin chi tiết phụ thuộc vào dữ liệu khả dụng.",
+      eyebrow: "TÍNH NĂNG CHÍNH",
+      heading: "Bốn tính năng để theo dõi và phân tích thị trường.",
+      knowledgeGraphTitle: "Đồ thị Tri thức",
+      knowledgeGraphOutcome: "Nhìn thấy các mối liên hệ trong thị trường.",
+      knowledgeGraphBody:
+        "Khám phá quan hệ giữa sự kiện, tài sản và tin tức trên Đồ thị Tri thức. Theo dấu các liên kết để mở rộng bối cảnh quanh thông tin bạn đang quan tâm.",
+      knowledgeGraphMedia: "Khám phá quan hệ giữa sự kiện, tài sản và tin tức.",
+      liveChartsTitle: "Biểu đồ trực tiếp",
+      liveChartsOutcome: "Theo dõi thị trường khi giá đang chuyển động.",
+      liveChartsBody:
+        "Theo dõi diễn biến giá cập nhật trực tiếp, cùng các dấu mốc sự kiện và lịch kinh tế trên biểu đồ.",
+      liveChartsDetail:
+        "Mở dấu mốc sự kiện để đọc phản ứng thị trường và đối chiếu với các nguồn tin.",
+      liveChartsMedia:
+        "Diễn biến giá, dấu mốc sự kiện và lịch kinh tế trên cùng một biểu đồ.",
+      liveChartsQualifier:
+        "Trạng thái trực tiếp, sự kiện và lịch kinh tế phụ thuộc vào dữ liệu khả dụng; khoảng cách thời gian không chứng minh quan hệ nhân quả.",
+      aiAssistantTitle: "Trợ lý AI",
+      aiAssistantOutcome: "Đặt câu hỏi với ngữ cảnh từ Đồ thị Tri thức.",
+      aiAssistantBody:
+        "Trò chuyện với Trợ lý AI để phân tích quan hệ giữa sự kiện, tài sản và tin tức. Tiếp tục đặt câu hỏi và xem lại các cuộc trò chuyện trong workspace của bạn.",
+      aiAssistantMedia: "Hội thoại văn bản tiếp tục trong workspace đang hoạt động.",
+      telegramTitle: "Telegram",
+      telegramOutcome: "Nhận cập nhật và bản phân tích từ Signapse.",
+      telegramBody:
+        "Nhận cảnh báo tin thị trường, cập nhật lịch kinh tế và bản phân tích từ Signapse qua Telegram.",
+      telegramSetup:
+        "Liên kết điểm nhận, chọn nội dung nhận và thiết lập lịch nhận phân tích theo tài sản bạn theo dõi.",
+      telegramMedia: "Cập nhật thị trường và bản phân tích được gửi tới Telegram.",
     },
     trust: {
       eyebrow: "Ranh giới tin cậy",
@@ -878,12 +857,12 @@ export const vi = {
     },
     finalCta: {
       heading: "Bắt đầu với một chuyển động bạn muốn hiểu rõ hơn.",
-      body: "Yêu cầu truy cập để theo dõi tài sản, đặt biến động vào bối cảnh và kiểm tra những nguồn liên quan khi dữ liệu khả dụng.",
+      body: "Yêu cầu truy cập để khám phá Đồ thị Tri thức, theo dõi biểu đồ trực tiếp, trò chuyện với Trợ lý AI và thiết lập cập nhật qua Telegram.",
       accessLabel: "Tiếp tục tới Signapse",
     },
     footer: {
       description:
-        "Phân tích thị trường theo bối cảnh sự kiện và nguồn liên kết khi dữ liệu khả dụng.",
+        "Đồ thị Tri thức, biểu đồ trực tiếp, Trợ lý AI và cập nhật thị trường qua Telegram.",
       requestAccessEmail: "request-access@signapse.ai",
       requestAccessEmailLabel: "Email yêu cầu truy cập",
       requestAccessEmailNote:
