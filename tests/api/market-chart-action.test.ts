@@ -8,6 +8,9 @@ const { testDictionary } = vi.hoisted(() => ({
       unsupportedTimeframe: "Timeframe is unsupported",
       toRequired: "To is required",
       toInvalid: "To is invalid",
+      fromRequired: "From is required",
+      fromInvalid: "From is invalid",
+      toAfterFrom: "To must be after from",
       validationInvalid: "Request is invalid",
       responseInvalid: "Response is invalid",
       loadError: "Chart failed to load",
@@ -28,8 +31,14 @@ vi.mock("@/app/lib/i18n/server", () => ({
 }))
 
 import { fetchAuthenticated } from "@/app/api/auth/action"
-import { getMarketChartCandles } from "@/app/api/market-charts/action"
-import type { MarketChartCandleRequest } from "@/app/lib/market-charts/definitions"
+import {
+  getMarketChartCandles,
+  getMarketChartEconomicCalendarEvents,
+} from "@/app/api/market-charts/action"
+import type {
+  MarketChartCandleRequest,
+  MarketChartEconomicCalendarEventRequest,
+} from "@/app/lib/market-charts/definitions"
 
 const request: MarketChartCandleRequest = {
   assetId: 7,
@@ -131,5 +140,47 @@ describe("market chart candle action", () => {
     expect(diagnostic).toContain('"outcome":"validation_error"')
     expect(diagnostic).toContain('"validation.issue_codes":"anchor_mismatch"')
     expect(diagnostic).not.toMatch(/assetId=7|2026-08-19|XAUUSD/)
+  })
+})
+
+describe("market chart economic calendar action", () => {
+  const request: MarketChartEconomicCalendarEventRequest = {
+    assetId: 7,
+    from: "2026-09-08T10:00:00.000Z",
+    to: "2026-09-15T10:00:00.000Z",
+    impact: ["HIGH", "LOW"],
+  }
+
+  beforeEach(() => {
+    vi.mocked(fetchAuthenticated).mockReset()
+  })
+
+  it("serializes a half-open future range and repeats selected impacts", async () => {
+    const response = [
+      {
+        id: 901,
+        assetId: 7,
+        time: "2026-09-08T12:00:00.000Z",
+        status: "PENDING" as const,
+      },
+    ]
+    vi.mocked(fetchAuthenticated).mockResolvedValue(response)
+
+    await expect(
+      getMarketChartEconomicCalendarEvents(request)
+    ).resolves.toEqual({
+      success: true,
+      data: response,
+    })
+    expect(fetchAuthenticated).toHaveBeenCalledWith(
+      "/market-charts/economic-calendar-events?assetId=7&from=2026-09-08T10%3A00%3A00.000Z&to=2026-09-15T10%3A00%3A00.000Z&impact=HIGH&impact=LOW"
+    )
+  })
+
+  it("rejects an empty impact selection before transport", async () => {
+    await expect(
+      getMarketChartEconomicCalendarEvents({ ...request, impact: [] })
+    ).resolves.toMatchObject({ success: false })
+    expect(fetchAuthenticated).not.toHaveBeenCalled()
   })
 })

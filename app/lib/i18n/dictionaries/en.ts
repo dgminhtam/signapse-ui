@@ -168,7 +168,8 @@ export const en: Dictionary = {
     },
     statusDescriptions: {
       PENDING_REVIEW: "Waiting for a review decision.",
-      PROMOTED: "Selected for follow-up handling; implementation is not guaranteed.",
+      PROMOTED:
+        "Selected for follow-up handling; implementation is not guaranteed.",
       DISMISSED: "Not selected for follow-up handling.",
     },
     detailTitle: "Feedback details",
@@ -200,7 +201,8 @@ export const en: Dictionary = {
     withdrawPending: "Withdrawing…",
     withdrawSuccess: "Feedback withdrawn.",
     withdrawError: "Could not withdraw feedback. Try again.",
-    withdrawStale: "This feedback is no longer pending. The latest details are shown.",
+    withdrawStale:
+      "This feedback is no longer pending. The latest details are shown.",
     missingTitle: "Feedback not found",
     missingDescription: "This feedback may have been withdrawn or removed.",
     readDenied: "You do not have permission to view user feedback.",
@@ -221,7 +223,8 @@ export const en: Dictionary = {
     queueEmptyTitle: "No feedback in this queue",
     queueEmptyDescription: "Try another filter or wait for new submissions.",
     queueNoResultsTitle: "No matching feedback",
-    queueNoResultsDescription: "Change the search or filters to see more records.",
+    queueNoResultsDescription:
+      "Change the search or filters to see more records.",
     queueErrorTitle: "Could not load the feedback queue",
     queueErrorDescription: "Try again to restore the moderation queue.",
     queueRetry: "Try again",
@@ -236,21 +239,25 @@ export const en: Dictionary = {
     reviewDialogDescription:
       "Write the user-visible result of this review. It will appear in their feedback details.",
     reviewMessageLabel: "Message sent to the user",
-    reviewMessagePlaceholder: "Explain the review outcome in at least 10 characters",
+    reviewMessagePlaceholder:
+      "Explain the review outcome in at least 10 characters",
     reviewMessageRequired: "Enter a review message.",
     reviewMessageTooShort: "Review message must be at least 10 characters.",
     reviewMessageTooLong: "Review message cannot exceed 1000 characters.",
     githubIssueUrlLabel: "GitHub Issue URL",
-    githubIssueUrlPlaceholder: "https://github.com/signapse/signapse/issues/123",
+    githubIssueUrlPlaceholder:
+      "https://github.com/signapse/signapse/issues/123",
     githubIssueUrlRequired: "Enter the GitHub Issue URL.",
     githubIssueUrlInvalid: "Enter a valid GitHub Issue URL.",
-    githubIssueUrlRepository: "Use an Issue URL from the configured Signapse repository.",
+    githubIssueUrlRepository:
+      "Use an Issue URL from the configured Signapse repository.",
     reviewConfirm: "Confirm review",
     reviewPending: "Saving review…",
     promoteSuccess: "Feedback promoted.",
     dismissSuccess: "Feedback dismissed.",
     reviewError: "Could not save the review. Try again.",
-    reviewStale: "This feedback was already updated. The latest details are shown.",
+    reviewStale:
+      "This feedback was already updated. The latest details are shown.",
     eraseAction: "Delete feedback",
     eraseTitle: "Delete this feedback?",
     eraseDescription:
@@ -818,29 +825,55 @@ export const en: Dictionary = {
       knowledgeGraphOutcome: "See how market information connects.",
       knowledgeGraphBody:
         "Explore relationships between events, assets, and news on the Knowledge Graph. Follow the links to expand the context around information that interests you.",
-      knowledgeGraphMedia: "Explore relationships between events, assets, and news.",
+      knowledgeGraphMediaTitle: "Knowledge Graph capture",
+      knowledgeGraphMediaCaption:
+        "A Graph View capture shows the relationship between an event, a related asset, and a source.",
+      knowledgeGraphMediaAlt:
+        "Knowledge Graph showing an event connected to a related asset and source.",
+      knowledgeGraphAnnotationEvent: "Event being explored",
+      knowledgeGraphAnnotationAsset: "Related asset",
+      knowledgeGraphAnnotationSource: "Related source",
       liveChartsTitle: "Live charts",
       liveChartsOutcome: "Follow markets as prices move.",
       liveChartsBody:
         "Follow live price movements alongside event markers and the economic calendar on the chart.",
       liveChartsDetail:
         "Open an event marker to review market reactions and check the sources.",
-      liveChartsMedia:
-        "Price movement, event markers, and the economic calendar on one chart.",
+      liveChartsMediaTitle: "Live charts capture",
+      liveChartsMediaCaption:
+        "A chart capture shows price movement alongside event markers and the economic calendar.",
+      liveChartsMediaAlt:
+        "Price chart showing related event markers and economic-calendar context.",
       liveChartsQualifier:
         "Live states, events, and calendar context depend on available data; temporal proximity does not prove causation.",
       aiAssistantTitle: "AI Assistant",
-      aiAssistantOutcome: "Ask questions with context from the Knowledge Graph.",
+      aiAssistantOutcome:
+        "Ask questions with context from the Knowledge Graph.",
       aiAssistantBody:
         "Chat with the AI Assistant to analyze relationships between events, assets, and news. Ask follow-up questions and revisit conversations in your workspace.",
-      aiAssistantMedia: "Continue a text conversation in the active workspace.",
+      aiAssistantMediaTitle: "AI Assistant conversation capture",
+      aiAssistantMediaCaption:
+        "A conversation capture shows a question and response in the active workspace.",
+      aiAssistantMediaAlt:
+        "Text conversation with the AI Assistant in the active workspace.",
       telegramTitle: "Telegram",
       telegramOutcome: "Receive updates and market analysis from Signapse.",
       telegramBody:
         "Receive market news alerts, economic-calendar updates, and market analysis from Signapse through Telegram.",
       telegramSetup:
         "Link a destination, choose what to receive, and schedule analysis for the assets you track.",
-      telegramMedia: "Receive market updates and analysis through Telegram.",
+      telegramMediaTitle: "Telegram updates capture",
+      telegramMediaCaption:
+        "A message capture shows market updates and market analysis delivered through Telegram.",
+      telegramMediaAlt:
+        "Telegram message containing market updates and market analysis from Signapse.",
+      media: {
+        enlarge: "View larger image",
+        close: "Close",
+        dialogDescription: "View the product capture at a larger size.",
+        loading: "Loading image…",
+        error: "This image could not be loaded.",
+      },
     },
     trust: {
       eyebrow: "Trust boundary",
@@ -2123,6 +2156,12 @@ export const en: Dictionary = {
     },
     calendar: {
       actual: "Actual",
+      awaitingPublication: "Awaiting publication",
+      awaitingPublicationDescription:
+        "The event time has arrived, but its published result is not available yet.",
+      countdownHours: "{hours}h {minutes}m remaining",
+      countdownHoursOnly: "{hours}h remaining",
+      countdownMinutes: "{minutes}m remaining",
       eventFallback: "Economic calendar event",
       eventMarkers: "{count} calendar events",
       forecast: "Forecast",
@@ -2130,16 +2169,26 @@ export const en: Dictionary = {
       loadingEvents: "Loading calendar",
       loadError: "Could not load economic calendar events.",
       noEvents: "No calendar events in the current range.",
+      noSelectedImpacts: "Select at least one impact level.",
+      nextEvent: "Next event",
+      noNextEvent: "No upcoming event in the selected interval.",
+      openUpcoming: "Open upcoming calendar",
       openMany: "Open {count} calendar events",
       openOne: "Open calendar event {title}",
       previous: "Previous",
       responseInvalid:
         "The backend returned economic calendar events in an unexpected format.",
       revision: "Revision",
+      showOnChart: "Show calendar on chart",
+      stale: "Calendar data may be stale",
       statusLabels: {
         AVAILABLE: "Published",
         PENDING: "Pending",
       },
+      upcoming24Hours: "Next 24 hours",
+      upcoming7Days: "Next 7 days",
+      upcomingTitle: "Upcoming calendar",
+      viewFullCalendar: "Open full Economic Calendar",
     },
     history: {
       loading: "Loading history...",

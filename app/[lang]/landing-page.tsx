@@ -13,11 +13,19 @@ import type { AppLocale } from "@/app/lib/i18n/config"
 import type { Dictionary } from "@/app/lib/i18n/dictionary-types"
 import { withLocalePath } from "@/app/lib/i18n/routing"
 import {
+  getApprovedLandingProductCapture,
+  type LandingProductFeature,
+} from "./landing-product-media"
+import {
   createLandingAccessModel,
   type LandingAccessAction,
 } from "./landing-access"
 import styles from "./landing-page.module.css"
 import { LandingContextFigure } from "./landing-context-figure"
+import {
+  LandingProductCapture,
+  type LandingProductCaptureLabels,
+} from "./landing-product-capture"
 import { LandingLocaleLinks } from "./landing-locale-links"
 import { Logo } from "@/components/logo"
 import { buttonVariants } from "@/components/ui/button"
@@ -53,29 +61,17 @@ export function LandingPage({
         {t.accessibility.skipToContent}
       </a>
 
-      <LandingHeader
-        access={access}
-        dictionary={dictionary}
-        locale={locale}
-      />
+      <LandingHeader access={access} dictionary={dictionary} locale={locale} />
 
       <main id="main-content" tabIndex={-1}>
-        <HeroSection
-          access={access}
-          dictionary={dictionary}
-          locale={locale}
-        />
-        <ProductStory dictionary={dictionary} />
+        <HeroSection access={access} dictionary={dictionary} locale={locale} />
+        <ProductStory dictionary={dictionary} locale={locale} />
         <AnalysisFlow dictionary={dictionary} />
         <TrustBoundary dictionary={dictionary} />
         <FinalAccessCta access={access} dictionary={dictionary} />
       </main>
 
-      <LandingFooter
-        access={access}
-        dictionary={dictionary}
-        locale={locale}
-      />
+      <LandingFooter access={access} dictionary={dictionary} locale={locale} />
     </div>
   )
 }
@@ -110,7 +106,9 @@ function LandingHeader({
           <span aria-hidden="true">
             <Logo width={32} height={32} />
           </span>
-          <span className="hidden truncate sm:inline">{dictionary.common.appName}</span>
+          <span className="hidden truncate sm:inline">
+            {dictionary.common.appName}
+          </span>
         </Link>
 
         <nav
@@ -130,7 +128,14 @@ function LandingHeader({
 
         <div className="ml-auto flex items-center gap-1 sm:gap-2 lg:ml-4">
           <div className="hidden sm:block">
-            <Suspense fallback={<LandingLocaleLinksFallback locale={locale} labels={t.localeControl} />}>
+            <Suspense
+              fallback={
+                <LandingLocaleLinksFallback
+                  locale={locale}
+                  labels={t.localeControl}
+                />
+              }
+            >
               <LandingLocaleLinks
                 currentLocale={locale}
                 labels={{
@@ -161,7 +166,14 @@ function LandingHeader({
             </summary>
             <div className="absolute top-[calc(100%+0.5rem)] right-0 z-20 flex w-[min(19rem,calc(100vw-2rem))] flex-col gap-3 border border-border bg-background p-3 shadow-lg">
               <div className="border-b border-border pb-3 sm:hidden">
-                <Suspense fallback={<LandingLocaleLinksFallback locale={locale} labels={t.localeControl} />}>
+                <Suspense
+                  fallback={
+                    <LandingLocaleLinksFallback
+                      locale={locale}
+                      labels={t.localeControl}
+                    />
+                  }
+                >
                   <LandingLocaleLinks
                     currentLocale={locale}
                     labels={{
@@ -224,7 +236,7 @@ function HeroSection({
       aria-labelledby="landing-hero-heading"
       className={`${styles.heroSection} relative overflow-hidden border-b border-border/80`}
     >
-      <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-14 sm:px-6 sm:py-20 min-[1200px]:grid-cols-[minmax(0,0.9fr)_minmax(28rem,1.1fr)] min-[1200px]:items-center min-[1200px]:gap-14 lg:px-8 lg:py-24">
+      <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-14 min-[1200px]:grid-cols-[minmax(0,0.9fr)_minmax(28rem,1.1fr)] min-[1200px]:items-center min-[1200px]:gap-14 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
         <div className={`${styles.heroCopy} flex min-w-0 flex-col gap-7`}>
           <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
             {t.hero.eyebrow}
@@ -364,17 +376,23 @@ function AnalysisFlow({ dictionary }: { dictionary: Dictionary }) {
 }
 
 type ProductChapter = {
-  id: string
+  id: LandingProductFeature
   title: string
   outcome: string
   body: string
   detail?: string
   qualifier?: string
-  mediaDescription: string
+  media?: LandingProductCaptureLabels
   icon: ElementType
 }
 
-function ProductStory({ dictionary }: { dictionary: Dictionary }) {
+function ProductStory({
+  dictionary,
+  locale,
+}: {
+  dictionary: Dictionary
+  locale: AppLocale
+}) {
   const t = dictionary.landing.product
   const chapters: ProductChapter[] = [
     {
@@ -382,7 +400,21 @@ function ProductStory({ dictionary }: { dictionary: Dictionary }) {
       title: t.knowledgeGraphTitle,
       outcome: t.knowledgeGraphOutcome,
       body: t.knowledgeGraphBody,
-      mediaDescription: t.knowledgeGraphMedia,
+      media: {
+        alt: t.knowledgeGraphMediaAlt,
+        caption: t.knowledgeGraphMediaCaption,
+        dialogDescription: t.media.dialogDescription,
+        dialogTitle: t.knowledgeGraphMediaTitle,
+        enlarge: t.media.enlarge,
+        close: t.media.close,
+        loading: t.media.loading,
+        error: t.media.error,
+        annotations: [
+          t.knowledgeGraphAnnotationEvent,
+          t.knowledgeGraphAnnotationAsset,
+          t.knowledgeGraphAnnotationSource,
+        ],
+      },
       icon: NetworkIcon,
     },
     {
@@ -392,7 +424,16 @@ function ProductStory({ dictionary }: { dictionary: Dictionary }) {
       body: t.liveChartsBody,
       detail: t.liveChartsDetail,
       qualifier: t.liveChartsQualifier,
-      mediaDescription: t.liveChartsMedia,
+      media: {
+        alt: t.liveChartsMediaAlt,
+        caption: t.liveChartsMediaCaption,
+        dialogDescription: t.media.dialogDescription,
+        dialogTitle: t.liveChartsMediaTitle,
+        enlarge: t.media.enlarge,
+        close: t.media.close,
+        loading: t.media.loading,
+        error: t.media.error,
+      },
       icon: LineChartIcon,
     },
     {
@@ -400,7 +441,16 @@ function ProductStory({ dictionary }: { dictionary: Dictionary }) {
       title: t.aiAssistantTitle,
       outcome: t.aiAssistantOutcome,
       body: t.aiAssistantBody,
-      mediaDescription: t.aiAssistantMedia,
+      media: {
+        alt: t.aiAssistantMediaAlt,
+        caption: t.aiAssistantMediaCaption,
+        dialogDescription: t.media.dialogDescription,
+        dialogTitle: t.aiAssistantMediaTitle,
+        enlarge: t.media.enlarge,
+        close: t.media.close,
+        loading: t.media.loading,
+        error: t.media.error,
+      },
       icon: BrainCircuitIcon,
     },
     {
@@ -409,7 +459,16 @@ function ProductStory({ dictionary }: { dictionary: Dictionary }) {
       outcome: t.telegramOutcome,
       body: t.telegramBody,
       detail: t.telegramSetup,
-      mediaDescription: t.telegramMedia,
+      media: {
+        alt: t.telegramMediaAlt,
+        caption: t.telegramMediaCaption,
+        dialogDescription: t.media.dialogDescription,
+        dialogTitle: t.telegramMediaTitle,
+        enlarge: t.media.enlarge,
+        close: t.media.close,
+        loading: t.media.loading,
+        error: t.media.error,
+      },
       icon: CalendarClockIcon,
     },
   ]
@@ -435,11 +494,11 @@ function ProductStory({ dictionary }: { dictionary: Dictionary }) {
         </div>
 
         <div className="flex flex-col border-y border-border">
-          {chapters.map((chapter, index) => (
+          {chapters.map((chapter) => (
             <FeatureChapter
               chapter={chapter}
-              index={index}
               key={chapter.id}
+              locale={locale}
             />
           ))}
         </div>
@@ -450,25 +509,35 @@ function ProductStory({ dictionary }: { dictionary: Dictionary }) {
 
 function FeatureChapter({
   chapter,
-  index,
+  locale,
 }: {
   chapter: ProductChapter
-  index: number
+  locale: AppLocale
 }) {
   const Icon = chapter.icon
-  const mediaFirstOnWide = index % 2 === 1
+  const capture = getApprovedLandingProductCapture(locale, chapter.id)
+  const hasMedia = Boolean(capture && chapter.media)
+  const isKnowledgeGraph = chapter.id === "knowledge-graph"
+  const isAiAssistant = chapter.id === "ai-assistant"
 
   return (
     <article
       id={chapter.id}
       data-product-chapter
-      className="grid min-w-0 gap-8 border-b border-border py-10 last:border-b-0 min-[1200px]:grid-cols-2 min-[1200px]:gap-14 min-[1200px]:py-14"
+      data-media-state={hasMedia ? "approved" : "text-first"}
+      className={
+        isKnowledgeGraph && hasMedia
+          ? "flex min-w-0 flex-col gap-8 border-b border-border py-10 last:border-b-0 min-[1200px]:gap-10 min-[1200px]:py-14"
+          : hasMedia
+            ? "grid min-w-0 gap-8 border-b border-border py-10 last:border-b-0 min-[1200px]:grid-cols-2 min-[1200px]:gap-14 min-[1200px]:py-14"
+            : "flex min-w-0 flex-col gap-5 border-b border-border py-10 last:border-b-0 min-[1200px]:max-w-3xl min-[1200px]:py-14"
+      }
     >
       <div
         className={
-          mediaFirstOnWide
-            ? "order-2 flex min-w-0 flex-col justify-center gap-5 min-[1200px]:order-2"
-            : "order-2 flex min-w-0 flex-col justify-center gap-5 min-[1200px]:order-1"
+          hasMedia && isAiAssistant
+            ? "order-0 flex min-w-0 flex-col justify-center gap-5 min-[1200px]:order-2"
+            : "order-0 flex min-w-0 flex-col justify-center gap-5"
         }
       >
         <div className="flex items-center gap-3">
@@ -478,9 +547,13 @@ function FeatureChapter({
           >
             <Icon className="text-muted-foreground" />
           </span>
-          <h3 className="text-xl font-semibold">{chapter.title}</h3>
+          <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+            {chapter.title}
+          </p>
         </div>
-        <p className="text-xl leading-8 font-medium">{chapter.outcome}</p>
+        <h3 className="max-w-2xl text-2xl leading-tight font-semibold tracking-[-0.02em] sm:text-3xl">
+          {chapter.outcome}
+        </h3>
         <p className="leading-7 text-muted-foreground">{chapter.body}</p>
         {chapter.detail ? (
           <p className="border-l-2 border-border pl-4 text-sm leading-6 text-foreground">
@@ -493,45 +566,18 @@ function FeatureChapter({
           </p>
         ) : null}
       </div>
-      <FeatureMediaSlot
-        description={chapter.mediaDescription}
-        id={chapter.id}
-        title={chapter.title}
-        className={
-          mediaFirstOnWide
-            ? "order-1 min-[1200px]:order-1"
-            : "order-1 min-[1200px]:order-2"
-        }
-      />
+      {capture && chapter.media ? (
+        <div
+          className={
+            isAiAssistant
+              ? "order-0 min-w-0 min-[1200px]:order-1"
+              : "order-0 min-w-0"
+          }
+        >
+          <LandingProductCapture capture={capture} labels={chapter.media} />
+        </div>
+      ) : null}
     </article>
-  )
-}
-
-function FeatureMediaSlot({
-  className,
-  description,
-  id,
-  title,
-}: {
-  className?: string
-  description: string
-  id: string
-  title: string
-}) {
-  return (
-    <figure
-      aria-label={title}
-      className={`flex min-h-56 min-w-0 flex-col justify-end border-y border-border bg-muted/20 p-6 sm:min-h-64 sm:p-8 ${className ?? ""}`}
-      data-landing-media-slot={id}
-      data-media-state="text-first"
-    >
-      <figcaption className="flex max-w-md flex-col gap-2">
-        <span className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-          {title}
-        </span>
-        <span className="text-lg leading-7 font-medium">{description}</span>
-      </figcaption>
-    </figure>
   )
 }
 
@@ -605,7 +651,9 @@ function FinalAccessCta({
         <p className="max-w-2xl leading-7 text-muted-foreground">{t.body}</p>
         <LandingActionButton action={access.finalCta} size="lg" />
         {access.finalCta.kind === "email" ? (
-          <p className="text-sm text-muted-foreground">{access.requestAccessNote}</p>
+          <p className="text-sm text-muted-foreground">
+            {access.requestAccessNote}
+          </p>
         ) : null}
       </div>
     </section>
@@ -646,7 +694,14 @@ function LandingFooter({
           aria-label={t.accessibility.footerNavigation}
           className="flex flex-col items-start gap-4 text-sm sm:items-end"
         >
-          <Suspense fallback={<LandingLocaleLinksFallback locale={locale} labels={t.localeControl} />}>
+          <Suspense
+            fallback={
+              <LandingLocaleLinksFallback
+                locale={locale}
+                labels={t.localeControl}
+              />
+            }
+          >
             <LandingLocaleLinks
               currentLocale={locale}
               labels={{
@@ -686,14 +741,20 @@ function LandingActionButton({
   const content = (
     <>
       {action.label}
-      {showArrow ? <ArrowRightIcon data-icon="inline-end" aria-hidden="true" /> : null}
+      {showArrow ? (
+        <ArrowRightIcon data-icon="inline-end" aria-hidden="true" />
+      ) : null}
     </>
   )
   const classes = buttonVariants({ variant, size, className })
 
   if (action.kind === "internal") {
     return (
-      <Link href={action.href} aria-label={action.ariaLabel} className={classes}>
+      <Link
+        href={action.href}
+        aria-label={action.ariaLabel}
+        className={classes}
+      >
         {content}
       </Link>
     )
@@ -715,7 +776,11 @@ function LandingActionLink({
 }) {
   if (action.kind === "internal") {
     return (
-      <Link href={action.href} aria-label={action.ariaLabel} className={className}>
+      <Link
+        href={action.href}
+        aria-label={action.ariaLabel}
+        className={className}
+      >
         {action.label}
       </Link>
     )
@@ -740,7 +805,10 @@ function LandingLocaleLinksFallback({
   }
 }) {
   return (
-    <nav aria-label={labels.label} className="flex items-center gap-1 text-xs text-muted-foreground">
+    <nav
+      aria-label={labels.label}
+      className="flex items-center gap-1 text-xs text-muted-foreground"
+    >
       <Link
         href={withLocalePath("/", "vi")}
         lang="vi"

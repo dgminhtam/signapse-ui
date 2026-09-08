@@ -5,6 +5,8 @@ import type {
   MarketChartEconomicCalendarEventResponse,
 } from "@/app/lib/market-charts/definitions"
 
+import { getMarketChartCalendarEventTimestamp } from "./market-chart-calendar-helpers"
+
 export type MarketChartEpochMillis = number
 
 export interface MarketChartAnnotationGroup {
@@ -365,7 +367,7 @@ export function createMarketChartEconomicCalendarEventGroups(
   }
 
   for (const event of events.filter(isValidMarketChartEconomicCalendarEvent)) {
-    const eventTime = toMarketChartEpochMillis(event.time)
+    const eventTime = getMarketChartCalendarEventTimestamp(event)
 
     if (eventTime === null) {
       continue

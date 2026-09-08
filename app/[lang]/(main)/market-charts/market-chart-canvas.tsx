@@ -57,6 +57,7 @@ import {
   type MarketChartAnnotationMarkerPoint,
   type MarketChartEconomicCalendarEventGroup,
 } from "./market-chart-annotations"
+import { getMarketChartCalendarEventTimestamp } from "./market-chart-calendar-helpers"
 import {
   createMarketChartDrawingGroupId,
   createMarketChartDrawingMode,
@@ -217,6 +218,7 @@ export function MarketChartCalendarEventList({
     <ScrollArea className="max-h-80 [&>[data-slot=scroll-area-viewport]]:max-h-80">
       <div className="flex flex-col p-1 pr-3">
         {events.map((event, index) => {
+          const eventTimestamp = getMarketChartCalendarEventTimestamp(event)
           const releaseValues = [
             {
               key: "actualValue",
@@ -244,7 +246,7 @@ export function MarketChartCalendarEventList({
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <AppTimeMetadata icon={CalendarClock}>
                     {formatDateTime(
-                      event.time,
+                      eventTimestamp ?? event.time,
                       MARKER_DATE_TIME_OPTIONS,
                       dictionary.marketCharts.format.notAvailable
                     )}

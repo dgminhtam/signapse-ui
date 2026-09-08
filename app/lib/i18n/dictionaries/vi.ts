@@ -198,7 +198,8 @@ export const vi = {
     withdrawPending: "Đang rút…",
     withdrawSuccess: "Đã rút phản hồi.",
     withdrawError: "Không thể rút phản hồi. Hãy thử lại.",
-    withdrawStale: "Phản hồi không còn ở trạng thái chờ. Chi tiết mới nhất đã được tải.",
+    withdrawStale:
+      "Phản hồi không còn ở trạng thái chờ. Chi tiết mới nhất đã được tải.",
     missingTitle: "Không tìm thấy phản hồi",
     missingDescription: "Phản hồi có thể đã được rút hoặc xóa.",
     readDenied: "Bạn không có quyền xem phản hồi người dùng.",
@@ -239,7 +240,8 @@ export const vi = {
     reviewMessageTooShort: "Nội dung xem xét phải có ít nhất 10 ký tự.",
     reviewMessageTooLong: "Nội dung xem xét không được vượt quá 1000 ký tự.",
     githubIssueUrlLabel: "URL GitHub Issue",
-    githubIssueUrlPlaceholder: "https://github.com/signapse/signapse/issues/123",
+    githubIssueUrlPlaceholder:
+      "https://github.com/signapse/signapse/issues/123",
     githubIssueUrlRequired: "Vui lòng nhập URL GitHub Issue.",
     githubIssueUrlInvalid: "Vui lòng nhập URL GitHub Issue hợp lệ.",
     githubIssueUrlRepository:
@@ -249,7 +251,8 @@ export const vi = {
     promoteSuccess: "Đã chuyển xử lý phản hồi.",
     dismissSuccess: "Đã đánh dấu không tiếp nhận.",
     reviewError: "Không thể lưu kết quả xem xét. Hãy thử lại.",
-    reviewStale: "Phản hồi đã được cập nhật trước thao tác này. Chi tiết mới nhất đã được tải.",
+    reviewStale:
+      "Phản hồi đã được cập nhật trước thao tác này. Chi tiết mới nhất đã được tải.",
     eraseAction: "Xóa phản hồi",
     eraseTitle: "Xóa phản hồi này?",
     eraseDescription:
@@ -821,29 +824,54 @@ export const vi = {
       knowledgeGraphOutcome: "Nhìn thấy các mối liên hệ trong thị trường.",
       knowledgeGraphBody:
         "Khám phá quan hệ giữa sự kiện, tài sản và tin tức trên Đồ thị Tri thức. Theo dấu các liên kết để mở rộng bối cảnh quanh thông tin bạn đang quan tâm.",
-      knowledgeGraphMedia: "Khám phá quan hệ giữa sự kiện, tài sản và tin tức.",
+      knowledgeGraphMediaTitle: "Ảnh Đồ thị Tri thức",
+      knowledgeGraphMediaCaption:
+        "Ảnh Graph View cho thấy quan hệ giữa một sự kiện, tài sản liên quan và nguồn tin.",
+      knowledgeGraphMediaAlt:
+        "Đồ thị Tri thức hiển thị một sự kiện nối với tài sản và nguồn tin liên quan.",
+      knowledgeGraphAnnotationEvent: "Sự kiện đang được khám phá",
+      knowledgeGraphAnnotationAsset: "Tài sản liên quan",
+      knowledgeGraphAnnotationSource: "Nguồn tin liên quan",
       liveChartsTitle: "Biểu đồ trực tiếp",
       liveChartsOutcome: "Theo dõi thị trường khi giá đang chuyển động.",
       liveChartsBody:
         "Theo dõi diễn biến giá cập nhật trực tiếp, cùng các dấu mốc sự kiện và lịch kinh tế trên biểu đồ.",
       liveChartsDetail:
         "Mở dấu mốc sự kiện để đọc phản ứng thị trường và đối chiếu với các nguồn tin.",
-      liveChartsMedia:
-        "Diễn biến giá, dấu mốc sự kiện và lịch kinh tế trên cùng một biểu đồ.",
+      liveChartsMediaTitle: "Ảnh biểu đồ trực tiếp",
+      liveChartsMediaCaption:
+        "Ảnh biểu đồ cho thấy diễn biến giá cùng dấu mốc sự kiện và lịch kinh tế.",
+      liveChartsMediaAlt:
+        "Biểu đồ giá hiển thị dấu mốc sự kiện và lịch kinh tế liên quan.",
       liveChartsQualifier:
         "Trạng thái trực tiếp, sự kiện và lịch kinh tế phụ thuộc vào dữ liệu khả dụng; khoảng cách thời gian không chứng minh quan hệ nhân quả.",
       aiAssistantTitle: "Trợ lý AI",
       aiAssistantOutcome: "Đặt câu hỏi với ngữ cảnh từ Đồ thị Tri thức.",
       aiAssistantBody:
         "Trò chuyện với Trợ lý AI để phân tích quan hệ giữa sự kiện, tài sản và tin tức. Tiếp tục đặt câu hỏi và xem lại các cuộc trò chuyện trong workspace của bạn.",
-      aiAssistantMedia: "Hội thoại văn bản tiếp tục trong workspace đang hoạt động.",
+      aiAssistantMediaTitle: "Ảnh hội thoại với Trợ lý AI",
+      aiAssistantMediaCaption:
+        "Ảnh hội thoại cho thấy câu hỏi và phản hồi trong workspace đang hoạt động.",
+      aiAssistantMediaAlt:
+        "Hội thoại văn bản với Trợ lý AI trong workspace đang hoạt động.",
       telegramTitle: "Telegram",
       telegramOutcome: "Nhận cập nhật và bản phân tích từ Signapse.",
       telegramBody:
         "Nhận cảnh báo tin thị trường, cập nhật lịch kinh tế và bản phân tích từ Signapse qua Telegram.",
       telegramSetup:
         "Liên kết điểm nhận, chọn nội dung nhận và thiết lập lịch nhận phân tích theo tài sản bạn theo dõi.",
-      telegramMedia: "Cập nhật thị trường và bản phân tích được gửi tới Telegram.",
+      telegramMediaTitle: "Ảnh cập nhật qua Telegram",
+      telegramMediaCaption:
+        "Ảnh tin nhắn cho thấy các cập nhật thị trường và bản phân tích được gửi tới Telegram.",
+      telegramMediaAlt:
+        "Tin nhắn Telegram chứa cập nhật thị trường và bản phân tích từ Signapse.",
+      media: {
+        enlarge: "Xem ảnh lớn",
+        close: "Đóng",
+        dialogDescription: "Xem ảnh sản phẩm ở kích thước lớn hơn.",
+        loading: "Đang tải ảnh…",
+        error: "Không thể tải ảnh này.",
+      },
     },
     trust: {
       eyebrow: "Ranh giới tin cậy",
@@ -2113,6 +2141,12 @@ export const vi = {
     },
     calendar: {
       actual: "Thực tế",
+      awaitingPublication: "Chờ công bố",
+      awaitingPublicationDescription:
+        "Sự kiện đã đến giờ dự kiến nhưng chưa có kết quả công bố.",
+      countdownHours: "Còn {hours} giờ {minutes} phút",
+      countdownHoursOnly: "Còn {hours} giờ",
+      countdownMinutes: "Còn {minutes} phút",
       eventFallback: "Sự kiện lịch kinh tế",
       eventMarkers: "{count} sự kiện lịch kinh tế",
       forecast: "Dự báo",
@@ -2120,16 +2154,26 @@ export const vi = {
       loadingEvents: "Đang tải lịch kinh tế",
       loadError: "Không thể tải sự kiện lịch kinh tế.",
       noEvents: "Chưa có sự kiện lịch kinh tế trong khoảng hiện tại.",
+      noSelectedImpacts: "Hãy chọn ít nhất một mức ảnh hưởng.",
+      nextEvent: "Sự kiện tiếp theo",
+      noNextEvent: "Chưa có sự kiện sắp diễn ra trong khoảng đã chọn.",
+      openUpcoming: "Mở lịch sắp diễn ra",
       openMany: "Mở {count} sự kiện lịch kinh tế",
       openOne: "Mở sự kiện lịch kinh tế {title}",
       previous: "Trước đó",
       responseInvalid:
         "Backend trả về sự kiện lịch kinh tế không đúng định dạng mong đợi.",
       revision: "Điều chỉnh",
+      showOnChart: "Hiện lịch trên biểu đồ",
+      stale: "Lịch kinh tế có thể đã cũ",
       statusLabels: {
         AVAILABLE: "Đã công bố",
         PENDING: "Đang chờ",
       },
+      upcoming24Hours: "24 giờ tới",
+      upcoming7Days: "7 ngày tới",
+      upcomingTitle: "Lịch sắp diễn ra",
+      viewFullCalendar: "Mở Lịch kinh tế đầy đủ",
     },
     history: {
       loading: "Đang tải lịch sử...",

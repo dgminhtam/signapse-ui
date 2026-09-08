@@ -5,6 +5,11 @@ test.describe("P0 market chart workbench", () => {
     page,
     fixture,
   }) => {
+    await fixture.setScenario(
+      "/market-charts/candles",
+      "short-then-empty-per-timeframe",
+      "GET"
+    )
     await fixture.setScenario("/market-charts/live", "reconnect", "GET")
     await page.goto("/vi/market-charts?assetId=101&timeframe=1h")
 
@@ -56,9 +61,7 @@ test.describe("P0 market chart workbench", () => {
     ).toBeVisible()
 
     await fixture.setScenario("/market-charts/candles", "success", "GET")
-    await page
-      .getByRole("button", { name: "Tải lại dữ liệu mới nhất" })
-      .click()
+    await page.getByRole("button", { name: "Tải lại dữ liệu mới nhất" }).click()
     await expect(page.locator("#market-chart-asset")).toBeVisible()
 
     const state = await fixture.state()
@@ -69,5 +72,37 @@ test.describe("P0 market chart workbench", () => {
 
     expect(String(latestCandleRequest?.query)).toContain("countBack=")
     expect(String(latestCandleRequest?.query)).not.toContain("from=")
+  })
+
+  test("shows the upcoming calendar list through the next-event summary", async ({
+    page,
+    fixture,
+  }) => {
+    await fixture.setScenario(
+      "/market-charts/economic-calendar-events",
+      "calendar-upcoming",
+      "GET"
+    )
+    await page.goto("/vi/market-charts?assetId=101&timeframe=1h")
+
+    const upcomingTrigger = page.getByRole("button", {
+      name: /Mở lịch sắp diễn ra/,
+    })
+    await expect(upcomingTrigger).toBeVisible()
+    await upcomingTrigger.focus()
+    await expect(upcomingTrigger).toBeFocused()
+    await page.keyboard.press("Enter")
+    await expect(
+      page.getByRole("heading", { name: "Fixture inflation release" })
+    ).toBeVisible()
+    await expect(page.getByRole("link", { name: "Chi tiết" })).toBeVisible()
+
+    const state = await fixture.state()
+    const calendarRequest = state.requests.find(
+      (request) => request.path === "/market-charts/economic-calendar-events"
+    )
+    expect(String(calendarRequest?.query)).toContain("impact=HIGH")
+    expect(String(calendarRequest?.query)).toContain("from=")
+    expect(String(calendarRequest?.query)).toContain("to=")
   })
 })

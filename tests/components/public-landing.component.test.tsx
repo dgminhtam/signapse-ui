@@ -2,11 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it, vi } from "vitest"
 
 vi.mock("@/app/[lang]/landing-locale-links", () => ({
-  LandingLocaleLinks: ({
-    labels,
-  }: {
-    labels: { vi: string; en: string }
-  }) => (
+  LandingLocaleLinks: ({ labels }: { labels: { vi: string; en: string } }) => (
     <nav data-locale-links>
       {labels.vi} / {labels.en}
     </nav>
@@ -58,11 +54,21 @@ describe("localized landing composition", () => {
       "telegram",
     ]) {
       expect(html).toContain(`href="#${anchor}"`)
-      expect(html).toContain(`data-landing-media-slot="${anchor}"`)
     }
 
     expect((html.match(/data-product-chapter/g) ?? []).length).toBe(4)
-    expect((html.match(/data-landing-media-slot/g) ?? []).length).toBe(4)
+    expect((html.match(/data-media-state="text-first"/g) ?? []).length).toBe(4)
+    expect((html.match(/data-landing-media-slot/g) ?? []).length).toBe(0)
+    expect(html).toContain(
+      locale === "vi"
+        ? "Nhìn thấy các mối liên hệ trong thị trường."
+        : "See how market information connects."
+    )
+    expect(html).toContain(
+      locale === "vi"
+        ? "Theo dõi thị trường khi giá đang chuyển động."
+        : "Follow markets as prices move."
+    )
     expect(html).toContain(
       locale === "vi"
         ? "Chọn tài sản, xem diễn biến giá"
@@ -84,7 +90,9 @@ describe("localized landing composition", () => {
     expect(html).not.toContain("Biến dữ liệu thị trường thành Đồ thị Tri thức.")
     expect(html).not.toContain("Specialized AI Assistant")
     expect(html).not.toContain("Market Query")
-    expect(html).not.toContain(locale === "vi" ? "kênh công khai" : "public channel")
+    expect(html).not.toContain(
+      locale === "vi" ? "kênh công khai" : "public channel"
+    )
     expect(html).not.toContain(locale === "vi" ? "độc quyền" : "exclusive")
     expect(html).toContain('data-landing-visual="context-figure"')
     expect(html).toContain('<figcaption class="sr-only">')

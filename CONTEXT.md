@@ -30,6 +30,10 @@ _Avoid_: Coming-soon site, dashboard
 An application landing-page state that omits product captures when no locale-appropriate capture has been approved, while keeping the complete product story in text.
 _Avoid_: Placeholder mock, synthetic product preview
 
+**Approved product capture (Ảnh sản phẩm được duyệt)**:
+A static capture of an available Signapse product surface or a real Signapse Telegram message, using demo data approved for public use and with the final image approved by the Product Owner. It illustrates an actual product state, not a conceptual visual or an interactive product demo.
+_Avoid_: Generated product screenshot, private-workspace capture, live demo
+
 **Interactive market-context figure (Hình bối cảnh thị trường tương tác)**:
 A localized conceptual landing visual that presents the Market Knowledge Graph and price action as complementary views of market context. It has no visible control chrome, but supports fine-pointer hover and drag; coarse pointers do not expose a hidden tap mode. It begins once per page view with a brief graph-only rotation that settles automatically, supports nonvisual keyboard exploration with focus feedback, and keeps a silent dual-view fallback with a nonvisual description when rendering is unavailable. It is not a product capture and does not imply that the graph generates, predicts, or transforms into market prices.
 _Avoid_: Product demo, live trading chart, graph-generated price, prediction visualization
@@ -165,6 +169,18 @@ A scheduled asset analysis that no longer runs and cannot be reactivated through
 _Avoid_: Lịch tạm dừng, lịch có thể tiếp tục
 
 ## Market Charts
+
+**Upcoming economic calendar event (Sự kiện lịch kinh tế sắp diễn ra)**:
+A scheduled economic announcement relevant to the selected chart asset whose scheduled time is still ahead of the current time. Its relevance and schedule are independent of whether price candles exist for that time.
+_Avoid_: Market Event annotation, future candle, notification subscription
+
+**Calendar lookahead interval (Khoảng lịch xem trước)**:
+The future time span in which a user reviews scheduled economic calendar events relevant to the selected chart asset.
+_Avoid_: Displayed candle interval, candle timeframe, available provider coverage
+
+**Economic event awaiting publication (Sự kiện chờ công bố)**:
+A scheduled economic announcement whose scheduled time has arrived but whose publication has not yet been confirmed. Leaving the chart's waiting group does not by itself mean the announcement was published or cancelled.
+_Avoid_: Upcoming event, cancelled event, failed announcement
 
 **Available candle (Nến khả dụng)**:
 An actual OHLCV candle available for an asset and timeframe; a gap in provider history is not a candle.

@@ -15,11 +15,16 @@ type FixtureController = {
       | "empty"
       | "short"
       | "short-then-empty"
+      | "short-then-empty-per-timeframe"
       | "validation-error"
       | "timeout"
       | "outage"
       | "mutation-failure"
-      | "reconnect",
+      | "reconnect"
+      | "calendar-empty"
+      | "calendar-upcoming"
+      | "calendar-awaiting"
+      | "calendar-available",
     method?: string
   ): Promise<void>
   state(): Promise<{

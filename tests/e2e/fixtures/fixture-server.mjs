@@ -619,6 +619,39 @@ function marketChartAnnotations(url) {
   ]
 }
 
+function marketChartEconomicCalendarEvents(url, scenario) {
+  if (scenario === "calendar-empty") return []
+
+  const assetId = Number(url.searchParams.get("assetId") ?? 101)
+  const now = Date.now()
+  const eventTime =
+    scenario === "calendar-awaiting" || scenario === "calendar-available"
+      ? now - 30 * 60 * 1000
+      : now + 2 * 60 * 60 * 1000
+  const status = scenario === "calendar-available" ? "AVAILABLE" : "PENDING"
+
+  return [
+    {
+      id: 901,
+      assetId,
+      time: new Date(eventTime).toISOString(),
+      scheduledAt: new Date(eventTime).toISOString(),
+      title: "Fixture inflation release",
+      currencyCode: "USD",
+      type: "INFLATION",
+      impact: "HIGH",
+      forecastValue: "3.0",
+      previousValue: "3.1",
+      actualValue: status === "AVAILABLE" ? "3.0" : null,
+      revision: null,
+      actualBetterWorse: null,
+      revisionBetterWorse: null,
+      description: "Synthetic upcoming calendar event.",
+      status,
+    },
+  ]
+}
+
 function candles(url) {
   const timeframe = url.searchParams.get("timeframe") ?? "1h"
   const assetId = Number(url.searchParams.get("assetId") ?? 101)
@@ -1194,7 +1227,12 @@ function responseForRoute(state, method, pathname, url, body) {
 
   if (method === "GET" && pathname === "/market-charts/candles") return candles(url)
   if (method === "GET" && pathname === "/market-charts/annotations") return marketChartAnnotations(url)
-  if (method === "GET" && pathname === "/market-charts/economic-calendar-events") return []
+  if (method === "GET" && pathname === "/market-charts/economic-calendar-events") {
+    return marketChartEconomicCalendarEvents(
+      url,
+      getScenario(state, method, pathname)
+    )
+  }
 
   return { __status: 404, payload: errorPayload(`Unhandled fixture route: ${method} ${pathname}`, "UNHANDLED_ROUTE") }
 }
@@ -1425,6 +1463,41 @@ const server = createServer(async (request, response) => {
     const candleRequestCount = state.requests.filter(
       (request) => request.path === "/market-charts/candles"
     ).length
+
+    if (candleRequestCount > 1) {
+      const anchor = url.searchParams.get("to") ?? result.to
+      sendJson(response, 200, {
+        ...result,
+        from: anchor,
+        to: anchor,
+        candles: [],
+      })
+    } else {
+      sendJson(response, 200, {
+        ...result,
+        candles: result.candles.slice(-1),
+      })
+    }
+    return
+  }
+
+  if (
+    scenario === "short-then-empty-per-timeframe" &&
+    method === "GET" &&
+    result &&
+    Array.isArray(result.candles)
+  ) {
+    const requestAssetId = url.searchParams.get("assetId")
+    const requestTimeframe = url.searchParams.get("timeframe")
+    const candleRequestCount = state.requests.filter((request) => {
+      if (request.path !== "/market-charts/candles") return false
+
+      const query = new URLSearchParams(request.query)
+      return (
+        query.get("assetId") === requestAssetId &&
+        query.get("timeframe") === requestTimeframe
+      )
+    }).length
 
     if (candleRequestCount > 1) {
       const anchor = url.searchParams.get("to") ?? result.to

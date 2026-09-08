@@ -1,0 +1,32 @@
+## Why
+
+The refocused public landing now names Signapse's four primary features, but its four product chapters still use nearly identical layouts and text-only media placeholders. Visitors cannot yet see credible product evidence, understand the distinctive role of each surface, or inspect detailed captures comfortably on smaller screens.
+
+## What Changes
+
+- Preserve the approved Hero, four-feature order, three-step AnalysisFlow, trust boundary, CTA destinations, and interactive market-context figure behavior.
+- Give Knowledge Graph, Live Charts, AI Assistant, and Telegram feature-specific editorial compositions instead of one repeated two-column treatment.
+- Make each approved outcome statement the chapter heading and treat the feature name as a supporting label.
+- Remove text-only media placeholders; when an active locale lacks an approved capture, render a complete text-first chapter without an empty media surface or enlargement action.
+- Prepare approval-gated Vietnamese and English captures from authorized demo product states, with per-feature provenance, dimensions, localized captions/alternative text, and explicit owner approval status.
+- Add a localized `View larger image` action for each approved capture, opening an accessible static-image dialog with loading/error handling, keyboard dismissal, focus containment, and focus return.
+- Update component and browser coverage for chapter hierarchy, feature-specific responsive composition, locale-aware media states, and the image-enlargement dialog.
+
+## Capabilities
+
+### New Capabilities
+
+None.
+
+### Modified Capabilities
+
+- `public-landing-page`: Refine the four-feature chapter composition, approved-capture fallback behavior, capture governance, and accessible image enlargement.
+- `product-localization`: Add localized capture captions, alternative text, enlargement controls, dialog labels, and loading/error feedback while preserving Vietnamese/English parity.
+
+## Impact
+
+- Updates the localized public landing composition and adds a narrowly scoped client interaction for image enlargement.
+- Updates Vietnamese and English dictionaries and existing component/browser tests.
+- May add approved WebP/AVIF product captures and a non-sensitive approval manifest or equivalent build-time record; no capture is public until its source and final image are approved.
+- Reuses the existing dialog wrapper, Next.js image handling, semantic design tokens, and current landing test seams; no new UI dependency is required.
+- Does not change backend APIs, authentication, permissions, product feature behavior, Telegram routing or delivery, Hero WebGL behavior, deployment policy, or apex cutover.
