@@ -369,7 +369,6 @@ type ProductChapter = {
   outcome: string
   body: string
   detail?: string
-  qualifier?: string
   media?: LandingProductCaptureLabels
   icon: ElementType
 }
@@ -390,12 +389,8 @@ function ProductStory({
       body: t.knowledgeGraphBody,
       media: {
         alt: t.knowledgeGraphMediaAlt,
+        label: t.knowledgeGraphMediaTitle,
         caption: t.knowledgeGraphMediaCaption,
-        dialogDescription: t.media.dialogDescription,
-        dialogTitle: t.knowledgeGraphMediaTitle,
-        enlarge: t.media.enlarge,
-        close: t.media.close,
-        loading: t.media.loading,
         error: t.media.error,
         annotations: [
           t.knowledgeGraphAnnotationEvent,
@@ -411,15 +406,10 @@ function ProductStory({
       outcome: t.liveChartsOutcome,
       body: t.liveChartsBody,
       detail: t.liveChartsDetail,
-      qualifier: t.liveChartsQualifier,
       media: {
         alt: t.liveChartsMediaAlt,
+        label: t.liveChartsMediaTitle,
         caption: t.liveChartsMediaCaption,
-        dialogDescription: t.media.dialogDescription,
-        dialogTitle: t.liveChartsMediaTitle,
-        enlarge: t.media.enlarge,
-        close: t.media.close,
-        loading: t.media.loading,
         error: t.media.error,
       },
       icon: LineChartIcon,
@@ -431,12 +421,8 @@ function ProductStory({
       body: t.aiAssistantBody,
       media: {
         alt: t.aiAssistantMediaAlt,
+        label: t.aiAssistantMediaTitle,
         caption: t.aiAssistantMediaCaption,
-        dialogDescription: t.media.dialogDescription,
-        dialogTitle: t.aiAssistantMediaTitle,
-        enlarge: t.media.enlarge,
-        close: t.media.close,
-        loading: t.media.loading,
         error: t.media.error,
       },
       icon: BrainCircuitIcon,
@@ -449,12 +435,8 @@ function ProductStory({
       detail: t.telegramSetup,
       media: {
         alt: t.telegramMediaAlt,
+        label: t.telegramMediaTitle,
         caption: t.telegramMediaCaption,
-        dialogDescription: t.media.dialogDescription,
-        dialogTitle: t.telegramMediaTitle,
-        enlarge: t.media.enlarge,
-        close: t.media.close,
-        loading: t.media.loading,
         error: t.media.error,
       },
       icon: CalendarClockIcon,
@@ -515,7 +497,7 @@ function FeatureChapter({
       data-media-state={hasMedia ? "approved" : "text-first"}
       className={
         isKnowledgeGraph && hasMedia
-          ? "flex min-w-0 flex-col gap-8 border-b border-border py-10 last:border-b-0 min-[1200px]:gap-10 min-[1200px]:py-14"
+          ? "grid min-w-0 gap-8 border-b border-border py-10 last:border-b-0 min-[1200px]:grid-cols-[minmax(18rem,0.65fr)_minmax(0,1.35fr)] min-[1200px]:items-start min-[1200px]:gap-14 min-[1200px]:py-14"
           : hasMedia
             ? "grid min-w-0 gap-8 border-b border-border py-10 last:border-b-0 min-[1200px]:grid-cols-2 min-[1200px]:gap-14 min-[1200px]:py-14"
             : "flex min-w-0 flex-col gap-5 border-b border-border py-10 last:border-b-0 min-[1200px]:max-w-3xl min-[1200px]:py-14"
@@ -546,11 +528,6 @@ function FeatureChapter({
         {chapter.detail ? (
           <p className="border-l-2 border-border pl-4 text-sm leading-6 text-foreground">
             {chapter.detail}
-          </p>
-        ) : null}
-        {chapter.qualifier ? (
-          <p className="border-t border-border pt-4 text-xs leading-5 text-muted-foreground">
-            {chapter.qualifier}
           </p>
         ) : null}
       </div>

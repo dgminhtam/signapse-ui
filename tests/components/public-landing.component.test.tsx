@@ -60,7 +60,7 @@ describe("localized landing composition", () => {
     expect((html.match(/data-media-state="approved"/g) ?? []).length).toBe(4)
     expect((html.match(/data-media-state="text-first"/g) ?? []).length).toBe(2)
     expect((html.match(/data-landing-media-slot/g) ?? []).length).toBe(2)
-    expect(html).toContain(
+    expect(html).not.toContain(
       locale === "vi" ? "Xem ảnh lớn" : "View larger image"
     )
     expect(html).toContain(

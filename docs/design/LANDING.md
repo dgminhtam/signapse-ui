@@ -6,7 +6,7 @@
 
 Quyết định ngày 2026-09-07: landing tập trung vào bốn tính năng Đồ thị Tri thức, Biểu đồ trực tiếp, Trợ lý AI và Telegram. Nội dung, thứ tự, CTA và phạm vi ảnh bên dưới đã được chốt trong phiên làm rõ requirement; runtime và dictionaries đã bắt đầu triển khai qua change `improve-public-landing-product-proof`, còn ảnh sản phẩm vẫn chờ nguồn demo được phép công khai và Product Owner duyệt.
 
-Quyết định phục hồi Hero ngày 2026-09-08: đưa riêng Hero về baseline trước refocus tại commit `8ae5336` — H1, supporting copy, CTA tới `#how-it-works`, hai proof point và breakpoint `lg`. ProductStory, AnalysisFlow, TrustBoundary, FinalAccessCta, Footer và toàn bộ media giữ nguyên runtime hiện tại. Bố cục chapter theo tính năng, ảnh thật có chú thích và “Xem ảnh lớn” vẫn thuộc refinement đã triển khai.
+Quyết định phục hồi Hero ngày 2026-09-08: đưa riêng Hero về baseline trước refocus tại commit `8ae5336` — H1, supporting copy, CTA tới `#how-it-works`, hai proof point và breakpoint `lg`. ProductStory, AnalysisFlow, TrustBoundary, FinalAccessCta, Footer và toàn bộ media giữ nguyên runtime hiện tại. Bố cục chapter theo tính năng và ảnh thật có chú thích vẫn thuộc refinement đã triển khai.
 
 ## Authority
 
@@ -417,20 +417,19 @@ Nếu chưa có capture được duyệt, hero phải dùng text-first compositi
 
 | Chapter           | Desktop từ `1200px`, khi có ảnh được duyệt                                 | Trọng tâm nội dung                                                                             |
 | ----------------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| Đồ thị Tri thức   | Copy phía trên, ảnh lớn phía dưới trong chiều rộng content                 | Một cụm quan hệ dễ hiểu; 2–3 chú thích giúp đọc sự kiện, tài sản và nguồn tin                  |
+| Đồ thị Tri thức   | Copy trái, ảnh graph phải                                                   | Một cụm quan hệ dễ hiểu; 2–3 chú thích giúp đọc sự kiện, tài sản và nguồn tin                  |
 | Biểu đồ trực tiếp | Copy trái, ảnh chart phải                                                  | Giá đi cùng dấu mốc sự kiện và lịch kinh tế; phản ứng/nguồn tin là nội dung hỗ trợ             |
 | Trợ lý AI         | Ảnh hội thoại trái, copy phải; DOM vẫn copy trước media                    | Câu hỏi và phản hồi thật với ngữ cảnh Market Knowledge Graph; lịch sử hội thoại là lợi ích phụ |
 | Telegram          | Copy trái, tin nhắn mẫu phải; không ép ảnh dọc thành khung dashboard ngang | Nội dung nhận được thuộc ba nhóm đã chốt; thiết lập là dòng hỗ trợ ngắn                        |
 
 Graph là điểm nhấn thị giác đầu tiên nhưng không tạo thêm section hoặc thay đổi vị thế bốn tính năng chính. Hero giữ hai proof point ngắn; điều hướng tới bốn feature thuộc Header và ProductStory, không lặp thành một hàng link trong Hero.
 
-### Product image enlargement
+### Product image presentation
 
-- Mỗi ảnh sản phẩm được duyệt có nút rõ ràng “Xem ảnh lớn” / “View larger image”, mở đúng ảnh đó trong một hộp thoại trên landing. Đây là xem ảnh tĩnh, không phải demo; không có carousel, autoplay, hotspot hoặc tương tác giả với graph/chart/chat.
-- Chú thích và thông tin thiết yếu luôn là text ngoài ảnh, đọc được ngay tại chapter, không bị giấu trong hộp thoại hoặc chỉ xuất hiện khi hover. Caption/alt dựa trên nội dung capture đã duyệt; không khẳng định dữ liệu chưa có trong ảnh.
-- Hộp thoại có tiêu đề theo feature, nút “Đóng” / “Close” nhìn thấy được và tên truy cập phân biệt được ảnh đang mở. Focus chuyển vào hộp thoại, được giữ bên trong khi mở; Escape hoặc nút Đóng kết thúc và trả focus về đúng nút kích hoạt. Mở/đóng không đổi URL và không làm mất vị trí đọc chapter.
-- Ảnh lớn giữ tỷ lệ, không crop thêm hoặc kéo méo; vùng xem cho phép đọc ảnh ở kích thước hữu ích trên mobile. Nếu cần cuộn, chỉ cuộn trong vùng ảnh/hộp thoại, không gây page-level overflow; tiêu đề và nút đóng vẫn truy cập được ở zoom `200%`. Không cần xây công cụ zoom/pan riêng.
-- Khi ảnh lớn đang tải hoặc lỗi, giữ hộp thoại có thể đóng và thông báo trạng thái localized; nội dung giải thích tại chapter vẫn đầy đủ. Chỉ tải tài nguyên ảnh lớn khi người dùng mở; tôn trọng reduced motion và theme parity.
+- Mỗi ảnh sản phẩm được duyệt hiển thị trực tiếp trong chapter, không có nút mở rộng hoặc hộp thoại phụ. Ảnh là product proof tĩnh, không phải demo và không chứa interaction giả với graph/chart/chat.
+- Chú thích, annotation và thông tin thiết yếu luôn là text ngoài ảnh, đọc được ngay tại chapter. Caption/alt dựa trên nội dung capture đã duyệt; không khẳng định dữ liệu chưa có trong ảnh.
+- Ảnh giữ tỷ lệ và intrinsic dimensions, dùng responsive width theo bố cục chapter, không crop thêm hoặc kéo méo. Ở mobile và zoom `200%`, ảnh reflow bên dưới copy và không tạo page-level overflow.
+- Nếu ảnh inline lỗi, chapter vẫn giữ outcome, body, caption và annotation; thông báo lỗi localized không được làm mất nội dung giải thích.
 
 ## Visual Direction
 
@@ -451,7 +450,7 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 - Dùng một accent có kiểm soát cho primary CTA và tín hiệu nghiệp vụ thật.
 - Hero dùng một interactive market-context figure có nhãn localized, static dual-view fallback và route-local WebGL enhancement; Analysis Flow chỉ dùng đường nối thứ tự tĩnh decorative khi cần, theo composition đã chốt trong Locked Section Copy. Connector/grid/node geometry phải nhẹ, không lặp trong chapter/card; conceptual labels và summary phải có nghĩa độc lập với motion.
 - Product capture là visual chính; icon chỉ hỗ trợ scan và dùng Lucide, không dùng emoji.
-- Section rhythm dùng ảnh Graph lớn rồi các chapter copy/media theo Feature-specific composition; giữ copy trước media ở mobile. Không đổi màu thương hiệu, font hoặc làm lại motion Hero chỉ để giống reference.
+- Section rhythm dùng chapter Graph với copy trái và ảnh phải ở desktop, sau đó các chapter copy/media theo Feature-specific composition; giữ copy trước media ở mobile. Không đổi màu thương hiệu, font hoặc làm lại motion Hero chỉ để giống reference.
 - Không dùng bento wall, testimonial carousel, logo cloud, glassmorphism, purple gradient hoặc AI decoration không có product meaning.
 - Không thêm GSAP hoặc chart engine. Hero figure được phép dùng route-local `three@0.180.0` để tái hiện visual core đã duyệt; renderer phải dynamic-load, capped-pixel-ratio, dừng khi idle/paused/hidden/offscreen, dispose đầy đủ và tôn trọng reduced motion. Các transition UI khác dùng `150–250ms` cho hover/focus/disclosure.
 
@@ -462,7 +461,7 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 | `< 640px`      | Một cột; copy trước visual; CTA full-width khi cần; header giữ brand + primary CTA + menu, locale và secondary action nằm trong native disclosure; touch target ưu tiên tối thiểu 44×44px.                         |
 | `640px–767px`  | Một cột; copy trước visual; mobile navigation dùng native disclosure; locale có thể hiển thị khi đủ chỗ; touch target ưu tiên tối thiểu 44×44px.                                                                   |
 | `768px–1199px` | Hero và product chapters vẫn một cột để product capture có đủ chiều rộng; AnalysisFlow ba bước xếp dọc để giữ reading order.                                                                                       |
-| `≥ 1200px`     | Hero có thể dùng split `5/7`; Graph có copy trên/ảnh lớn dưới, Chart/AI/Telegram theo Feature-specific composition; AnalysisFlow ba bước cùng hàng; content measure của body copy giữ khoảng 60–70 ký tự mỗi dòng. |
+| `≥ 1200px`     | Hero có thể dùng split `5/7`; Graph có copy trái/ảnh phải, Chart/AI/Telegram theo Feature-specific composition; AnalysisFlow ba bước cùng hàng; content measure của body copy giữ khoảng 60–70 ký tự mỗi dòng. |
 | Zoom `200%`    | Reflow như narrow viewport; không page-level horizontal overflow; sticky/fixed surface không che focus hoặc heading.                                                                                               |
 
 - Không đặt essential popup/content bằng absolute positioning trên screenshot mock.
@@ -481,7 +480,7 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 - Không dùng color làm tín hiệu duy nhất cho direction, confidence, status hoặc graph relation.
 - Interactive figure có nhãn phải có `<figure>`/caption hoặc text summary localized; stage là focusable labelled group, không dùng `role="application"`; canvas, connector và node geometry decorative dùng `aria-hidden`. Enter/Space đổi mode, arrow keys xoay, pointer fine có hover preview/click pin, touch phân biệt tap và drag, và Pause/Resume là native button.
 - Meaningful image có localized `alt`; decorative image có `alt=""`.
-- Nút “Xem ảnh lớn” và hộp thoại tuân theo Product image enlargement; dùng được bằng keyboard và touch, focus-visible rõ, tên truy cập bao gồm feature tương ứng và giữ nguyên visible label của nút.
+- Ảnh product proof là nội dung tĩnh, có alt localized và caption/annotation đi kèm; không tạo thêm interaction chỉ để phóng to ảnh.
 - Alt text mô tả insight của capture, không liệt kê mọi chữ trong screenshot.
 - Nội dung và hành động không phụ thuộc hover; screenshot không chứa control trông tương tác được nếu nó chỉ là ảnh.
 - Tôn trọng `prefers-reduced-motion`; trang vẫn đầy đủ ý nghĩa khi tắt toàn bộ motion. Reduced-motion bắt đầu không auto-rotate, đổi mode tức thời và chỉ opt-in rotation trong mount hiện tại.
@@ -530,7 +529,7 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 - Giữ implementation route-local: `page.tsx` sở hữu metadata/dictionary/auth orchestration; một Server Component sở hữu các named landing sections; Context figure là client island riêng cho WebGL/interaction; locale switch vẫn là client island nhỏ đọc hash/query; một pure access model sở hữu CTA state/destination. Không tạo shared landing framework hoặc tách mỗi section thành một shallow file.
 - Ưu tiên native disclosure cho mobile navigation; không thêm dependency mới.
 - Reuse `Logo`, `Button`, locale routing helpers và shadcn wrappers hiện có.
-- Hộp thoại xem ảnh lớn là client island hẹp ở landing, compose từ dialog wrapper hiện có; không sửa shared wrapper chrome, thêm thư viện lightbox hoặc chuyển toàn bộ landing sang client rendering.
+- Product capture chỉ là inline media surface với fallback lỗi localized; không thêm dialog, lightbox hoặc client boundary riêng chỉ để phóng to ảnh.
 - Không thêm shared UI abstraction chỉ phục vụ landing.
 - Product images dùng `next/image`, intrinsic dimensions và responsive `sizes`.
 - Hero image được ưu tiên tải chỉ khi asset đã approved; below-fold images lazy-load.
@@ -579,8 +578,8 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 - Reduced-motion mode không mất nội dung hoặc interaction.
 - Conceptual figure có accessible text summary; decorative geometry không xuất hiện trong accessibility tree.
 - Screenshot alt text và adjacent copy truyền đạt cùng insight chính.
-- Graph có ảnh lớn dưới copy; Chart/AI/Telegram theo bố cục riêng; nhãn feature không cạnh tranh với outcome heading. Mobile và zoom giữ copy trước ảnh về cả thứ tự đọc lẫn thứ tự hiển thị.
-- Ảnh approved mở được qua “Xem ảnh lớn”; đúng ảnh/locale, không méo/crop sai, đóng bằng nút hoặc Escape, trả focus đúng trigger, không đổi URL/vị trí đọc. Chú thích luôn đọc được ngoài ảnh; tải/lỗi ảnh không chặn đóng hộp thoại.
+- Graph có copy trái và ảnh phải ở desktop; Chart/AI/Telegram theo bố cục riêng; nhãn feature không cạnh tranh với outcome heading. Mobile và zoom giữ copy trước ảnh về cả thứ tự đọc lẫn thứ tự hiển thị.
+- Ảnh approved hiển thị đúng locale, không méo/crop sai; caption/annotation luôn đọc được ngoài ảnh và lỗi ảnh không làm mất nội dung chapter.
 
 ### Verification
 

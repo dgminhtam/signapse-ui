@@ -1,3 +1,9 @@
+## REMOVED Requirements
+
+### Requirement: Landing product capture enlargement
+**Reason**: The landing now keeps approved captures inline; a separate larger-image dialog adds interaction and visual weight without enough value for this page.
+**Migration**: Remove enlargement buttons, dialog state, dialog-only dictionary keys, and related browser/component coverage. Keep intrinsic image sizing, localized alt/caption text, annotations, and inline failure handling.
+
 ## ADDED Requirements
 
 ### Requirement: Landing feature-specific product proof composition
@@ -5,7 +11,8 @@ The landing page SHALL present Knowledge Graph, Live Charts, AI Assistant, and T
 
 #### Scenario: Knowledge Graph uses a wide evidence composition
 - **WHEN** an approved Knowledge Graph capture exists for the active locale and the viewport is at least 1200 CSS pixels wide
-- **THEN** the chapter presents its copy before a wide capture below it
+- **THEN** the chapter visually presents copy on the left and the wide capture on the right
+- **AND** the DOM retains the copy before the media
 - **AND** two or three adjacent text annotations identify the event, related asset, and source context actually visible in the approved capture
 - **AND** the annotations are not interactive-looking hotspots positioned over the image
 
@@ -60,53 +67,21 @@ The landing build SHALL expose a product capture only when an explicit locale-sp
 - **THEN** the preparation does not send a Telegram message, enable routing, or create a schedule
 - **AND** the Telegram capture remains missing or awaiting approval rather than being simulated as delivered content
 
-### Requirement: Landing product capture enlargement
-Every approved product capture rendered on the landing page SHALL provide a localized visible action that opens that same capture in an accessible static-image dialog. The dialog MUST preserve the visitor's route and reading context and MUST NOT present carousel, autoplay, hotspot, product-control, zoom, or pan behavior.
-
-#### Scenario: Visitor opens the matching larger image
-- **WHEN** a visitor activates `Xem ảnh lớn` on `/vi` or `View larger image` on `/en` for an approved feature capture
-- **THEN** a dialog opens with the same locale-specific capture at a larger responsive size
-- **AND** the dialog has a visible localized feature title and Close control
-- **AND** opening the dialog does not change the current URL
-
-#### Scenario: Keyboard focus is contained and restored
-- **WHEN** a keyboard visitor opens a product capture dialog
-- **THEN** focus moves to the visible Close control and remains within the dialog while it is open
-- **AND** Escape and the Close control dismiss the dialog
-- **AND** focus returns to the exact enlargement trigger that opened it
-
-#### Scenario: Dialog remains usable on constrained viewports
-- **WHEN** the dialog is viewed on a mobile viewport or at 200% zoom
-- **THEN** the image preserves its aspect ratio without stretching or meaning-changing crop
-- **AND** required overflow is confined to the image/dialog content region
-- **AND** the localized title and Close control remain reachable without page-level horizontal overflow
-
-#### Scenario: Large rendition loads on demand
-- **WHEN** an approved inline capture is visible but its enlargement dialog has not been opened
-- **THEN** the larger optimized image rendition is not mounted for loading
-- **WHEN** the visitor opens the dialog
-- **THEN** the dialog exposes localized loading feedback until that rendition resolves
-
-#### Scenario: Enlarged image fails to load
-- **WHEN** the enlarged image cannot be loaded
-- **THEN** the dialog presents localized failure feedback while retaining its title and working Close control
-- **AND** the chapter's adjacent explanation and caption remain available outside the dialog
-
 ## MODIFIED Requirements
 
 ### Requirement: Landing page visual media readiness
-The landing page SHALL render a complete text-first chapter whenever the active locale lacks an approved product capture for that feature. The affected chapter MUST omit its entire media surface, caption, reserved media footprint, and enlargement action rather than render synthetic product UI, generated imagery presented as a product screenshot, a cross-locale image, or a text-only placeholder. The existing localized control-free interactive market-context figure SHALL remain the Hero's conceptual progressive enhancement over its server-rendered silent dual-view fallback.
+The landing page SHALL render a complete text-first chapter whenever the active locale lacks an approved product capture for that feature. The affected chapter MUST omit its entire media surface, caption, and reserved media footprint rather than render synthetic product UI, generated imagery presented as a product screenshot, a cross-locale image, or a text-only placeholder. The existing localized control-free interactive market-context figure SHALL remain the Hero's conceptual progressive enhancement over its server-rendered silent dual-view fallback.
 
 #### Scenario: Feature capture is not approved
 - **WHEN** the active locale has no approved capture for a feature
 - **THEN** the feature chapter renders its complete localized label, outcome heading, explanation, and applicable supporting detail
-- **AND** it renders no media container, image caption, reserved media height, or enlargement trigger for that feature
+- **AND** it renders no media container, image caption, or reserved media height for that feature
 - **AND** the absence is not presented to visitors as an error or unfinished placeholder
 
 #### Scenario: One locale lacks an approved capture
 - **WHEN** a feature capture is approved for one supported locale but not the active locale
 - **THEN** the active locale remains text-first for that feature
-- **AND** it does not render the other locale's image, caption, alternative text, or enlargement action
+- **AND** it does not render the other locale's image, caption, or alternative text
 
 #### Scenario: Approved feature capture renders safely
 - **WHEN** a locale-appropriate approved descriptor is available

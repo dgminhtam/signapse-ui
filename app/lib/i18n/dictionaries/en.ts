@@ -844,8 +844,6 @@ export const en: Dictionary = {
         "A chart capture shows price movement alongside event markers and the economic calendar.",
       liveChartsMediaAlt:
         "Price chart showing related event markers and economic-calendar context.",
-      liveChartsQualifier:
-        "Live states, events, and calendar context depend on available data; temporal proximity does not prove causation.",
       aiAssistantTitle: "AI Assistant",
       aiAssistantOutcome:
         "Ask questions with context from the Knowledge Graph.",
@@ -868,10 +866,6 @@ export const en: Dictionary = {
       telegramMediaAlt:
         "Telegram message containing market updates and market analysis from Signapse.",
       media: {
-        enlarge: "View larger image",
-        close: "Close",
-        dialogDescription: "View the product capture at a larger size.",
-        loading: "Loading image…",
         error: "This image could not be loaded.",
       },
     },

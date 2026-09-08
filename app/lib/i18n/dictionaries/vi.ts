@@ -843,8 +843,6 @@ export const vi = {
         "Ảnh biểu đồ cho thấy diễn biến giá cùng dấu mốc sự kiện và lịch kinh tế.",
       liveChartsMediaAlt:
         "Biểu đồ giá hiển thị dấu mốc sự kiện và lịch kinh tế liên quan.",
-      liveChartsQualifier:
-        "Trạng thái trực tiếp, sự kiện và lịch kinh tế phụ thuộc vào dữ liệu khả dụng; khoảng cách thời gian không chứng minh quan hệ nhân quả.",
       aiAssistantTitle: "Trợ lý AI",
       aiAssistantOutcome: "Đặt câu hỏi với ngữ cảnh từ Đồ thị Tri thức.",
       aiAssistantBody:
@@ -866,10 +864,6 @@ export const vi = {
       telegramMediaAlt:
         "Tin nhắn Telegram chứa cập nhật thị trường và bản phân tích từ Signapse.",
       media: {
-        enlarge: "Xem ảnh lớn",
-        close: "Đóng",
-        dialogDescription: "Xem ảnh sản phẩm ở kích thước lớn hơn.",
-        loading: "Đang tải ảnh…",
         error: "Không thể tải ảnh này.",
       },
     },

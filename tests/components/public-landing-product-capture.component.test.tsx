@@ -1,13 +1,6 @@
 // @vitest-environment jsdom
 
-import {
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  within,
-} from "@testing-library/react"
-import userEvent from "@testing-library/user-event"
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 vi.mock("next/image", () => ({ default: "img" }))
@@ -26,13 +19,9 @@ const capture = {
 
 const labels = {
   alt: "Hội thoại với Trợ lý AI trong workspace đang hoạt động.",
+  label: "Ảnh hội thoại với Trợ lý AI",
   caption:
     "Ảnh hội thoại cho thấy câu hỏi và phản hồi trong workspace đang hoạt động.",
-  dialogDescription: "Xem ảnh sản phẩm ở kích thước lớn hơn.",
-  dialogTitle: "Ảnh hội thoại với Trợ lý AI",
-  enlarge: "Xem ảnh lớn",
-  close: "Đóng",
-  loading: "Đang tải ảnh…",
   error: "Không thể tải ảnh này.",
 }
 
@@ -41,44 +30,23 @@ afterEach(() => {
 })
 
 describe("LandingProductCapture", () => {
-  it("opens the matching image dialog and restores focus to its trigger", async () => {
-    const user = userEvent.setup()
+  it("renders the approved capture without an enlargement interaction", () => {
     render(<LandingProductCapture capture={capture} labels={labels} />)
 
-    const trigger = screen.getByRole("button", { name: labels.enlarge })
-    trigger.focus()
-    await user.click(trigger)
-
-    const dialog = screen.getByRole("dialog")
-    expect(
-      within(dialog).getByRole("heading", { name: labels.dialogTitle })
-    ).toBeVisible()
-    const closeButton = within(dialog).getByRole("button", {
-      name: labels.close,
-    })
-    expect(closeButton).toBeVisible()
-    expect(closeButton).toHaveFocus()
-    expect(within(dialog).getByRole("status")).toHaveTextContent(labels.loading)
-    expect(window.location.hash).toBe("")
-
-    fireEvent.load(within(dialog).getByRole("img"))
-    expect(within(dialog).queryByRole("status")).not.toBeInTheDocument()
-
-    await user.keyboard("{Escape}")
+    expect(screen.getByAltText(labels.alt)).toBeVisible()
+    expect(screen.getByText(labels.caption)).toBeVisible()
+    expect(screen.queryByRole("button")).not.toBeInTheDocument()
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
-    expect(trigger).toHaveFocus()
   })
 
-  it("keeps the dialog dismissible and announces a failed large image", async () => {
-    const user = userEvent.setup()
+  it("keeps an inline image failure understandable", () => {
     render(<LandingProductCapture capture={capture} labels={labels} />)
 
-    await user.click(screen.getByRole("button", { name: labels.enlarge }))
-    const dialog = screen.getByRole("dialog")
-    fireEvent.error(within(dialog).getByRole("img"))
+    fireEvent.error(screen.getByAltText(labels.alt))
 
-    expect(within(dialog).getByRole("alert")).toHaveTextContent(labels.error)
-    await user.click(within(dialog).getByRole("button", { name: labels.close }))
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    expect(screen.getByRole("img", { name: labels.alt })).toHaveTextContent(
+      labels.error
+    )
+    expect(screen.getByText(labels.caption)).toBeVisible()
   })
 })

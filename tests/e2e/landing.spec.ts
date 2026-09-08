@@ -39,11 +39,8 @@ test.describe("P0 public landing", () => {
       await expect(page.locator("[data-landing-media-slot]")).toHaveCount(2)
       await expect(page.locator("[data-landing-media-slot] img")).toHaveCount(2)
       await expect(
-        page.getByRole("button", {
-          name: locale === "vi" ? "Xem ảnh lớn" : "View larger image",
-          exact: true,
-        })
-      ).toHaveCount(2)
+        page.locator("[data-landing-media-slot] button")
+      ).toHaveCount(0)
       await expect(page.locator("[data-product-chapter] h3")).toHaveCount(4)
       await expect(
         page.locator("[data-product-chapter] h3").first()
@@ -53,33 +50,6 @@ test.describe("P0 public landing", () => {
           : "See how market information connects."
       )
 
-      const enlargeButton = page
-        .getByRole("button", {
-          name: locale === "vi" ? "Xem ảnh lớn" : "View larger image",
-          exact: true,
-        })
-        .first()
-      const currentUrl = page.url()
-      await enlargeButton.focus()
-      await enlargeButton.click()
-      const captureDialog = page.getByRole("dialog")
-      await expect(captureDialog).toBeVisible()
-      await expect(
-        captureDialog.getByRole("button", {
-          name: locale === "vi" ? "Đóng" : "Close",
-          exact: true,
-        })
-      ).toBeFocused()
-      await expect(captureDialog.locator("img")).toHaveCount(1)
-      await expect(page).toHaveURL(currentUrl)
-      await captureDialog
-        .getByRole("button", {
-          name: locale === "vi" ? "Đóng" : "Close",
-          exact: true,
-        })
-        .click()
-      await expect(captureDialog).toBeHidden()
-      await expect(enlargeButton).toBeFocused()
       await expect(page.locator("#how-it-works")).toContainText(
         locale === "vi"
           ? "Chọn tài sản, xem diễn biến giá"
@@ -170,7 +140,7 @@ test.describe("P0 public landing", () => {
     expect(graphCopyBox).not.toBeNull()
     expect(graphMediaBox).not.toBeNull()
     if (!graphCopyBox || !graphMediaBox) return
-    expect(graphMediaBox.y).toBeGreaterThan(graphCopyBox.y)
+    expect(graphMediaBox.x).toBeGreaterThan(graphCopyBox.x)
 
     const chartCopy = page.locator("#live-charts > div").nth(0)
     const chartMedia = page.locator("#live-charts > div").nth(1)
@@ -191,6 +161,15 @@ test.describe("P0 public landing", () => {
     expect(mobileChartMediaBox).not.toBeNull()
     if (!mobileChartCopyBox || !mobileChartMediaBox) return
     expect(mobileChartMediaBox.y).toBeGreaterThan(mobileChartCopyBox.y)
+
+    const mobileGraphCopy = page.locator("#knowledge-graph > div").nth(0)
+    const mobileGraphMedia = page.locator("#knowledge-graph > div").nth(1)
+    const mobileGraphCopyBox = await mobileGraphCopy.boundingBox()
+    const mobileGraphMediaBox = await mobileGraphMedia.boundingBox()
+    expect(mobileGraphCopyBox).not.toBeNull()
+    expect(mobileGraphMediaBox).not.toBeNull()
+    if (!mobileGraphCopyBox || !mobileGraphMediaBox) return
+    expect(mobileGraphMediaBox.y).toBeGreaterThan(mobileGraphCopyBox.y)
   })
 
   test("keeps the native mobile disclosure keyboard-operable", async ({
