@@ -93,16 +93,19 @@ test.describe("P0 public landing", () => {
       await expect(page.locator("#workspace-ai")).toHaveCount(0)
       await expect(page.locator("#product")).not.toContainText("Market Query")
 
-      for (const anchor of [
-        "knowledge-graph",
-        "live-charts",
-        "ai-assistant",
-        "telegram",
-      ]) {
-        await expect(
-          page.locator(`[data-feature-link="${anchor}"]`)
-        ).toHaveAttribute("href", `#${anchor}`)
-      }
+      await expect(page.locator("[data-feature-links]")).toHaveCount(0)
+      await expect(
+        page.locator('[data-landing-section="hero-product-proof"]')
+      ).toContainText(
+        locale === "vi" ? "Trợ lý AI chuyên biệt" : "Specialized AI Assistant"
+      )
+      await expect(
+        page.locator('[data-landing-section="hero-product-proof"]')
+      ).toContainText(
+        locale === "vi"
+          ? "Đọc bối cảnh, không chỉ nhìn nến"
+          : "Read the context, not just the candles"
+      )
 
       const dashboardLabel =
         locale === "vi"
@@ -111,7 +114,11 @@ test.describe("P0 public landing", () => {
       await expect(
         page.getByRole("link", { name: dashboardLabel }).first()
       ).toHaveAttribute("href", `/${locale}/dashboard`)
-      await expect(page.locator('a[href="#product"]').first()).toBeVisible()
+      await expect(
+        page
+          .locator('[data-landing-section="hero-product-proof"]')
+          .locator('a[href="#how-it-works"]')
+      ).toBeVisible()
       await expect(page.getByText("request-access@signapse.ai")).toBeVisible()
       await expect(page.locator('a[href^="mailto:"]')).toHaveAttribute(
         "href",
@@ -125,8 +132,8 @@ test.describe("P0 public landing", () => {
         page.locator('[data-landing-section="hero-product-proof"]')
       ).toContainText(
         locale === "vi"
-          ? "Hiểu thị trường qua Đồ thị Tri thức và AI."
-          : "Understand markets through the Knowledge Graph and AI."
+          ? "Biến dữ liệu thị trường thành Đồ thị Tri thức."
+          : "Turn market data into a Knowledge Graph."
       )
     })
   }

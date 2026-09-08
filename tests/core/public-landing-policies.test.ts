@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import {
-  HERO_FEATURES_HREF,
+  HERO_JOURNEY_HREF,
   REQUEST_ACCESS_HREF,
   createLandingAccessModel,
 } from "@/app/[lang]/landing-access"
@@ -26,8 +26,8 @@ const accessCopy = {
     requestAccessAria: "Request access to Signapse",
     signInAria: "Sign in to Signapse",
     openDashboardAria: "Open the Signapse dashboard",
-    exploreFeatures: "Explore features",
-    exploreFeaturesAria: "Explore Signapse's main features",
+    exploreJourney: "See how Signapse analyzes markets",
+    exploreJourneyAria: "See how Signapse supports market analysis",
     requestAccessNote: "This action opens your email application.",
   },
   footer: {
@@ -75,7 +75,7 @@ describe("landing access model", () => {
     expect(model.headerPrimary.href).toBe(REQUEST_ACCESS_HREF)
     expect(model.headerSecondary?.href).toBe("/vi/sign-in")
     expect(model.heroPrimary.href).toBe(REQUEST_ACCESS_HREF)
-    expect(model.heroSecondary.href).toBe(HERO_FEATURES_HREF)
+    expect(model.heroSecondary.href).toBe(HERO_JOURNEY_HREF)
     expect(model.finalCta.href).toBe(REQUEST_ACCESS_HREF)
     expect(model.footerAppEntry.href).toBe("/vi/sign-in")
     expect(model.footerRequestAccess.label).toBe("request-access@signapse.ai")
@@ -87,7 +87,7 @@ describe("landing access model", () => {
     expect(model.headerPrimary.href).toBe("/en/dashboard")
     expect(model.headerSecondary).toBeNull()
     expect(model.heroPrimary.href).toBe("/en/dashboard")
-    expect(model.heroSecondary.href).toBe(HERO_FEATURES_HREF)
+    expect(model.heroSecondary.href).toBe(HERO_JOURNEY_HREF)
     expect(model.finalCta.href).toBe("/en/dashboard")
     expect(model.footerAppEntry.href).toBe("/en/dashboard")
   })

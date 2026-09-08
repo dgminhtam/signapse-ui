@@ -771,16 +771,16 @@ export const vi = {
     },
     hero: {
       eyebrow: "MARKET INTELLIGENCE PLATFORM",
-      title: "Hiểu thị trường qua Đồ thị Tri thức và AI.",
-      body: "Khám phá các mối liên hệ, theo dõi biến động giá trực tiếp, trò chuyện với Trợ lý AI và nhận cập nhật thị trường qua Telegram.",
+      title: "Biến dữ liệu thị trường thành Đồ thị Tri thức.",
+      body: "Signapse tổng hợp, đánh giá và phân tích dữ liệu giá, sự kiện, phản ứng và tin tức từ nhiều nguồn thành các mối liên hệ có thể kiểm tra — tạo ngữ cảnh cho Trợ lý AI khi bạn đặt câu hỏi và đọc từng biến động.",
       trustNote:
         "AI hỗ trợ tổng hợp và khám phá. Bạn kiểm tra nguồn và tự đưa ra quyết định giao dịch.",
-      featureLinks: {
-        knowledgeGraph: "Đồ thị Tri thức",
-        liveCharts: "Biểu đồ trực tiếp",
-        aiAssistant: "Trợ lý AI",
-        telegram: "Telegram",
-      },
+      proofOneTitle: "Trợ lý AI chuyên biệt",
+      proofOneBody:
+        "Vận hành trên Đồ thị Tri thức, được xây dựng từ dữ liệu thị trường đa nguồn đã qua tổng hợp, đánh giá và phân tích.",
+      proofTwoTitle: "Đọc bối cảnh, không chỉ nhìn nến",
+      proofTwoBody:
+        "Đọc diễn biến giá trên chart cùng phản ứng thị trường, sự kiện và lịch kinh tế liên quan.",
       contextFigureTitle: "Hai góc nhìn về bối cảnh thị trường",
       contextFigureDescription:
         "Hình minh họa tương tác đặt Đồ thị Tri thức thị trường cạnh Diễn biến giá như hai góc nhìn bổ sung về bối cảnh, không phải phép biến đổi hay dự báo giá.",
@@ -800,8 +800,8 @@ export const vi = {
       requestAccessAria: "Yêu cầu truy cập Signapse",
       signInAria: "Đăng nhập vào Signapse",
       openDashboardAria: "Mở bảng điều khiển Signapse",
-      exploreFeatures: "Khám phá tính năng",
-      exploreFeaturesAria: "Khám phá các tính năng chính của Signapse",
+      exploreJourney: "Xem cách Signapse phân tích",
+      exploreJourneyAria: "Xem cách Signapse hỗ trợ phân tích thị trường",
       requestAccessNote: "Thao tác này sẽ mở ứng dụng email của bạn.",
     },
     analysisFlow: {

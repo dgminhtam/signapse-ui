@@ -772,16 +772,16 @@ export const en: Dictionary = {
     },
     hero: {
       eyebrow: "MARKET INTELLIGENCE PLATFORM",
-      title: "Understand markets through the Knowledge Graph and AI.",
-      body: "Explore relationships, follow live price movements, chat with the AI Assistant, and receive market updates through Telegram.",
+      title: "Turn market data into a Knowledge Graph.",
+      body: "Signapse aggregates, evaluates, and analyzes multi-source price, event, reaction, and news data into inspectable relationships—giving the AI Assistant context when you ask questions and read market moves.",
       trustNote:
         "AI supports synthesis and exploration. You verify the sources and make the trading decision.",
-      featureLinks: {
-        knowledgeGraph: "Knowledge Graph",
-        liveCharts: "Live charts",
-        aiAssistant: "AI Assistant",
-        telegram: "Telegram",
-      },
+      proofOneTitle: "Specialized AI Assistant",
+      proofOneBody:
+        "Powered by a Knowledge Graph built from multi-source market data—aggregated, evaluated, and analyzed.",
+      proofTwoTitle: "Read the context, not just the candles",
+      proofTwoBody:
+        "Read price action alongside market reactions, related events, and economic-calendar context.",
       contextFigureTitle: "Two views of market context",
       contextFigureDescription:
         "An interactive figure places the Market Knowledge Graph alongside price action as two complementary views of context, not a price transformation or forecast.",
@@ -801,8 +801,8 @@ export const en: Dictionary = {
       requestAccessAria: "Request access to Signapse",
       signInAria: "Sign in to Signapse",
       openDashboardAria: "Open the Signapse dashboard",
-      exploreFeatures: "Explore features",
-      exploreFeaturesAria: "Explore Signapse's main features",
+      exploreJourney: "See how Signapse analyzes markets",
+      exploreJourneyAria: "See how Signapse supports market analysis",
       requestAccessNote: "This action opens your email application.",
     },
     analysisFlow: {

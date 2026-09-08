@@ -4,7 +4,7 @@ The refocused public landing now names Signapse's four primary features, but its
 
 ## What Changes
 
-- Preserve the approved Hero, four-feature order, three-step AnalysisFlow, trust boundary, CTA destinations, and interactive market-context figure behavior.
+- Restore the Hero-only historical `8ae5336` baseline, including its two proof points, `#how-it-works` secondary CTA, and `lg` layout breakpoint; preserve the four-feature order, three-step AnalysisFlow, trust boundary, remaining CTA destinations, and interactive market-context figure behavior.
 - Give Knowledge Graph, Live Charts, AI Assistant, and Telegram feature-specific editorial compositions instead of one repeated two-column treatment.
 - Make each approved outcome statement the chapter heading and treat the feature name as a supporting label.
 - Remove text-only media placeholders; when an active locale lacks an approved capture, render a complete text-first chapter without an empty media surface or enlargement action.

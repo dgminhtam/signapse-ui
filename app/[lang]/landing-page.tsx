@@ -236,7 +236,7 @@ function HeroSection({
       aria-labelledby="landing-hero-heading"
       className={`${styles.heroSection} relative overflow-hidden border-b border-border/80`}
     >
-      <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-14 min-[1200px]:grid-cols-[minmax(0,0.9fr)_minmax(28rem,1.1fr)] min-[1200px]:items-center min-[1200px]:gap-14 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+      <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[minmax(0,0.9fr)_minmax(28rem,1.1fr)] lg:items-center lg:gap-14 lg:px-8 lg:py-24">
         <div className={`${styles.heroCopy} flex min-w-0 flex-col gap-7`}>
           <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
             {t.hero.eyebrow}
@@ -289,40 +289,28 @@ function HeroSection({
               fallback: t.hero.contextFigureFallback,
             }}
           />
-          <FeatureLinks dictionary={dictionary} />
+          <dl className="grid gap-4 border-t border-border pt-5 sm:grid-cols-2 lg:grid-cols-1">
+            <ProofPoint
+              title={t.hero.proofOneTitle}
+              body={t.hero.proofOneBody}
+            />
+            <ProofPoint
+              title={t.hero.proofTwoTitle}
+              body={t.hero.proofTwoBody}
+            />
+          </dl>
         </div>
       </div>
     </section>
   )
 }
 
-function FeatureLinks({ dictionary }: { dictionary: Dictionary }) {
-  const t = dictionary.landing
-  const links = [
-    { href: "#knowledge-graph", label: t.hero.featureLinks.knowledgeGraph },
-    { href: "#live-charts", label: t.hero.featureLinks.liveCharts },
-    { href: "#ai-assistant", label: t.hero.featureLinks.aiAssistant },
-    { href: "#telegram", label: t.hero.featureLinks.telegram },
-  ]
-
+function ProofPoint({ title, body }: { title: string; body: string }) {
   return (
-    <nav
-      aria-label={t.nav.product}
-      className="grid gap-2 border-t border-border pt-5 sm:grid-cols-2"
-      data-feature-links
-    >
-      {links.map((link) => (
-        <a
-          key={link.href}
-          href={link.href}
-          className="flex min-h-11 items-center justify-between gap-3 border-b border-border/70 px-1 py-2 text-sm font-medium transition-colors hover:text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-          data-feature-link={link.href.slice(1)}
-        >
-          <span>{link.label}</span>
-          <ArrowRightIcon aria-hidden="true" className="size-4" />
-        </a>
-      ))}
-    </nav>
+    <div className="flex flex-col gap-1">
+      <dt className="text-sm font-semibold">{title}</dt>
+      <dd className="text-sm leading-6 text-muted-foreground">{body}</dd>
+    </div>
   )
 }
 

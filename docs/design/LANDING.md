@@ -2,11 +2,11 @@
 
 > Trạng thái: Đã chốt cho OpenSpec proposal và implementation  
 > Phạm vi: Landing công khai tại `/vi` và `/en`  
-> Cập nhật gần nhất: 2026-09-07
+> Cập nhật gần nhất: 2026-09-08
 
 Quyết định ngày 2026-09-07: landing tập trung vào bốn tính năng Đồ thị Tri thức, Biểu đồ trực tiếp, Trợ lý AI và Telegram. Nội dung, thứ tự, CTA và phạm vi ảnh bên dưới đã được chốt trong phiên làm rõ requirement; runtime và dictionaries đã bắt đầu triển khai qua change `improve-public-landing-product-proof`, còn ảnh sản phẩm vẫn chờ nguồn demo được phép công khai và Product Owner duyệt.
 
-Quyết định cải thiện tiếp theo, sau khi tham khảo Graphify và chốt requirement: giữ thứ tự section/bốn tính năng, H1, supporting copy, CTA, toàn bộ ba bước AnalysisFlow và hành vi Hero figure hiện tại. Thay bố cục đồng dạng của các chapter bằng cách trình bày riêng theo tính năng, ưu tiên ảnh thật có chú thích và bổ sung “Xem ảnh lớn”. Codex phụ trách chuẩn bị ảnh; Product Owner xác nhận nguồn demo được phép công khai và duyệt ảnh cuối. Đây là yêu cầu cho proposal tiếp theo, chưa phải xác nhận đã triển khai hoặc đã có ảnh được duyệt.
+Quyết định phục hồi Hero ngày 2026-09-08: đưa riêng Hero về baseline trước refocus tại commit `8ae5336` — H1, supporting copy, CTA tới `#how-it-works`, hai proof point và breakpoint `lg`. ProductStory, AnalysisFlow, TrustBoundary, FinalAccessCta, Footer và toàn bộ media giữ nguyên runtime hiện tại. Bố cục chapter theo tính năng, ảnh thật có chú thích và “Xem ảnh lớn” vẫn thuộc refinement đã triển khai.
 
 ## Authority
 
@@ -21,7 +21,7 @@ Khi các nguồn xung đột, landing chỉ được claim capability đã có s
 
 Trong phạm vi public landing `/{lang}`, tài liệu này override các câu dashboard-scoped trong `docs/design/DESIGN.md` về hero/section composition, việc lặp cùng một primary CTA và background grid. `DESIGN.md` vẫn là nguồn chuẩn cho semantic tokens, Geist typography, shadcn chrome, theme parity, responsive và accessibility. Landing dùng một interactive market-context figure có nhãn trong Hero; Analysis Flow có thể dùng đường nối thứ tự decorative giữa ba bước. Connector/node geometry decorative không được lặp trong product frame/card và phải ẩn khỏi accessibility tree. Interactive figure là progressive enhancement của static dual-view fallback, trình bày Market Knowledge Graph và price action như hai góc nhìn bổ sung về bối cảnh thị trường; nó không phải product capture và không ngụ ý graph tạo, biến đổi hoặc dự báo giá. Figure có ý nghĩa phải có text summary localized, semantic keyboard behavior và fallback cùng footprint. Primary CTA chỉ được lặp tại Header, Hero và Final CTA với đúng destination trong CTA Contract.
 
-`openspec/specs/public-landing-page/spec.md` là đầu vào migration cho thay đổi tiếp theo. Các requirement hiện khóa Hero cũ, hai Hero proof points, ba product chapters, AnalysisFlow bốn bước, workspace/AI supporting section và Hero secondary CTA tới `#how-it-works` phải được đồng bộ với quyết định trong tài liệu này. Dùng delta `MODIFIED` hoặc `REMOVED` phù hợp; không giữ hai contract cạnh tranh.
+`openspec/specs/public-landing-page/spec.md` là đầu vào migration cho thay đổi tiếp theo. Các requirement về Hero phải khớp baseline `8ae5336`: hai Hero proof points và Hero secondary CTA tới `#how-it-works`; các requirement về bốn product chapters, AnalysisFlow ba bước, trust, media và CTA còn lại giữ theo runtime hiện tại. Dùng delta `MODIFIED` hoặc `REMOVED` phù hợp; không giữ hai contract cạnh tranh.
 
 ## Purpose
 
@@ -36,7 +36,7 @@ Landing giúp một người chưa biết Signapse hiểu trong một lượt đ
 ### Goals
 
 - Định vị Signapse là Market Intelligence Platform với bốn tính năng chính: Đồ thị Tri thức, Biểu đồ trực tiếp, Trợ lý AI và Telegram.
-- Giúp người đọc nhận ra bốn tính năng ngay từ Hero và điều hướng tính năng, rồi xem lợi ích và product proof của từng tính năng trước hành trình sử dụng.
+- Giúp người đọc nhận ra định vị Knowledge Graph và AI ngay từ Hero, sau đó xem bốn tính năng, lợi ích và product proof trước hành trình sử dụng.
 - Dùng product proof thật thay cho mock dashboard hoặc số liệu dựng sẵn.
 - Chuyển khách phù hợp sang một đường dẫn yêu cầu truy cập rõ ràng.
 - Giữ copy tiếng Việt và tiếng Anh chính xác với runtime hiện tại.
@@ -87,62 +87,62 @@ Thứ tự tính năng: Đồ thị Tri thức → Biểu đồ trực tiếp �
 
 ### Locked first-viewport copy
 
-| Vai trò | Tiếng Việt | English |
-| --- | --- | --- |
-| Eyebrow | MARKET INTELLIGENCE PLATFORM | MARKET INTELLIGENCE PLATFORM |
-| H1 | Hiểu thị trường qua Đồ thị Tri thức và AI. | Understand markets through the Knowledge Graph and AI. |
-| Supporting copy | Khám phá các mối liên hệ, theo dõi biến động giá trực tiếp, trò chuyện với Trợ lý AI và nhận cập nhật thị trường qua Telegram. | Explore relationships, follow live price movements, chat with the AI Assistant, and receive market updates through Telegram. |
-| Primary CTA | Yêu cầu truy cập | Request access |
-| Hero secondary CTA | Khám phá tính năng | Explore features |
-| Signed-in CTA | Mở bảng điều khiển | Open dashboard |
-| Request-access microcopy | Mở ứng dụng email. | Opens your email app. |
-| Trust line | AI hỗ trợ tổng hợp và khám phá. Bạn kiểm tra nguồn và tự đưa ra quyết định giao dịch. | AI supports synthesis and exploration. You verify the sources and make the trading decision. |
-| Feature link 1 | Đồ thị Tri thức | Knowledge Graph |
-| Feature link 2 | Biểu đồ trực tiếp | Live charts |
-| Feature link 3 | Trợ lý AI | AI Assistant |
-| Feature link 4 | Telegram | Telegram |
+| Vai trò                  | Tiếng Việt                                                                                                                                                                                                      | English                                                                                                                                                                                                      |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Eyebrow                  | MARKET INTELLIGENCE PLATFORM                                                                                                                                                                                    | MARKET INTELLIGENCE PLATFORM                                                                                                                                                                                 |
+| H1                       | Biến dữ liệu thị trường thành Đồ thị Tri thức.                                                                                                                                                                  | Turn market data into a Knowledge Graph.                                                                                                                                                                     |
+| Supporting copy          | Signapse tổng hợp, đánh giá và phân tích dữ liệu giá, sự kiện, phản ứng và tin tức từ nhiều nguồn thành các mối liên hệ có thể kiểm tra — tạo ngữ cảnh cho Trợ lý AI khi bạn đặt câu hỏi và đọc từng biến động. | Signapse aggregates, evaluates, and analyzes multi-source price, event, reaction, and news data into inspectable relationships—giving the AI Assistant context when you ask questions and read market moves. |
+| Primary CTA              | Yêu cầu truy cập                                                                                                                                                                                                | Request access                                                                                                                                                                                               |
+| Hero secondary CTA       | Xem cách Signapse phân tích                                                                                                                                                                                     | See how Signapse analyzes markets                                                                                                                                                                            |
+| Signed-in CTA            | Mở bảng điều khiển                                                                                                                                                                                              | Open dashboard                                                                                                                                                                                               |
+| Request-access microcopy | Mở ứng dụng email.                                                                                                                                                                                              | Opens your email app.                                                                                                                                                                                        |
+| Trust line               | AI hỗ trợ tổng hợp và khám phá. Bạn kiểm tra nguồn và tự đưa ra quyết định giao dịch.                                                                                                                           | AI supports synthesis and exploration. You verify the sources and make the trading decision.                                                                                                                 |
+| Hero proof 1 title       | Trợ lý AI chuyên biệt                                                                                                                                                                                           | Specialized AI Assistant                                                                                                                                                                                     |
+| Hero proof 1 body        | Vận hành trên Đồ thị Tri thức, được xây dựng từ dữ liệu thị trường đa nguồn đã qua tổng hợp, đánh giá và phân tích.                                                                                             | Powered by a Knowledge Graph built from multi-source market data—aggregated, evaluated, and analyzed.                                                                                                        |
+| Hero proof 2 title       | Đọc bối cảnh, không chỉ nhìn nến                                                                                                                                                                                | Read the context, not just the candles                                                                                                                                                                       |
+| Hero proof 2 body        | Đọc diễn biến giá trên chart cùng phản ứng thị trường, sự kiện và lịch kinh tế liên quan.                                                                                                                       | Read price action alongside market reactions, related events, and economic-calendar context.                                                                                                                 |
 
-Ngay dưới nội dung Hero là hàng điều hướng ngắn tới bốn chapter theo thứ tự trên: `#knowledge-graph`, `#live-charts`, `#ai-assistant`, `#telegram`. Thay hai proof blocks cũ bằng hàng điều hướng này; nội dung chứng minh chuyển vào chapter tương ứng. Hàng link wrap trên màn hình hẹp, không thành bốn cột chữ hoặc một section giới thiệu lặp lại. Hero giữ visual conceptual hiện có; ảnh sản phẩm nằm trong các chapter.
+Hero giữ visual conceptual hiện có; dưới figure là hai proof block ngắn. Điều hướng tới bốn chapter vẫn thuộc Header và ProductStory; ảnh sản phẩm nằm trong các chapter, không lặp thành một hàng link trong Hero.
 
 Implementation dùng các chuỗi trong first viewport và Locked Section Copy làm editorial baseline. Chỉ được sửa lỗi chính tả hoặc ngữ pháp mà không đổi nghĩa; mọi thay đổi về promise, qualifier, capability boundary, hierarchy hoặc CTA phải cập nhật tài liệu này và cả hai locale trong cùng change.
 
 ## Canonical Product Language
 
-| Khái niệm | Copy tiếng Việt | English | Nghĩa chính xác trên landing | Tránh dùng |
-| --- | --- | --- | --- | --- |
-| Workspace | workspace | workspace | Ngữ cảnh làm việc đang hoạt động của người dùng | shared workspace, team workspace |
-| Tracked assets | danh sách tài sản theo dõi | tracked asset list | Một danh sách asset thuộc active workspace | named watchlists, watchlist groups |
-| Market event | sự kiện thị trường | market event | Sự kiện có thời điểm, asset liên quan và metadata khả dụng | signal, guaranteed catalyst |
-| Market reaction | phản ứng thị trường | market reaction | Đánh giá direction, horizon, confidence và reasoning khi có dữ liệu | prediction, trade setup |
-| Evidence | nguồn tin và bằng chứng | sources and evidence | News article hoặc source context giúp truy vết event | AI proof, guaranteed truth |
-| Narrative | mạch diễn giải thị trường | market narrative | Narrative node hoặc quan hệ narrative đã có trong graph | dedicated narrative workspace |
-| Confidence | độ tin cậy | confidence | Metadata đánh giá của hệ thống, không phải xác suất lợi nhuận hoặc độ chính xác dự báo | win rate, forecast accuracy |
-| Evaluated outcome | diễn biến đã đánh giá | evaluated outcome | Kết quả đánh giá của phản ứng chính trong chart annotation khi dữ liệu khả dụng | `observedAt` như outcome; result; guaranteed impact |
-| Event-aware Charts | Biểu đồ theo bối cảnh sự kiện | Event-aware Charts | Candle chart có event/calendar context khi dữ liệu khả dụng | trading signals |
-| Reaction & Evidence | Phản ứng và bằng chứng | Reaction & Evidence | Chi tiết sự kiện hiển thị nguồn tin và thẻ phản ứng khi dữ liệu khả dụng; chart annotation chỉ cung cấp preview ngắn và đường dẫn tới chi tiết | Market Query evidence sheet; annotation evidence reader; `observedAt` như observed outcome |
-| Market Knowledge Graph | Đồ thị Tri thức thị trường | Market Knowledge Graph | Cấu trúc ngữ cảnh thị trường được xây dựng từ dữ liệu đa nguồn qua tổng hợp, đánh giá và phân tích; cung cấp ngữ cảnh cho Trợ lý AI và là một góc nhìn bổ sung cho price action trong Hero figure | Dữ liệu huấn luyện model, prediction engine, trading-signal generator, graph-generated price, guarantee that every Assistant response exposes complete evidence or sources |
-| Price action | Diễn biến giá | Price action | Góc nhìn khái niệm về chuyển động giá quan sát được, đặt cạnh Market Knowledge Graph trong Hero figure để đọc bối cảnh; không phải dữ liệu live | Live trading chart, trading signal, price forecast, Knowledge Graph output |
-| Connected Market Graph | Đồ thị quan hệ thị trường | Connected Market Graph | Graph của event, asset, news article và narrative | workspace graph slice, Theme node |
-| AI Assistant | Trợ lý AI | AI Assistant | Hội thoại text-only có session/history theo active workspace; nhận ngữ cảnh từ Market Knowledge Graph để hỗ trợ đặt câu hỏi thị trường bằng văn bản | Market Query workbench; structured evidence sheet; prediction engine |
-| Live charts | Biểu đồ trực tiếp | Live charts | Bề mặt biểu đồ giá có cập nhật trực tiếp và bối cảnh sự kiện; dùng làm tên chapter công khai | Cập nhật tức thời mọi dữ liệu; mọi thị trường luôn mở |
-| Signapse market analysis | bản phân tích từ Signapse | market analysis from Signapse | Nội dung phân tích do Signapse tạo, có thể gửi theo lịch qua Telegram | Cam kết độc quyền thương mại; tư vấn mua/bán; kết quả được bảo đảm |
-| Telegram updates | cập nhật qua Telegram | Telegram updates | Cảnh báo tin thị trường, lịch kinh tế và phân tích định kỳ gửi tới điểm nhận đã liên kết và cấu hình | Kênh công khai mặc định; cảnh báo chạm ngưỡng giá; gửi thủ công câu trả lời AI |
+| Khái niệm                | Copy tiếng Việt               | English                       | Nghĩa chính xác trên landing                                                                                                                                                                      | Tránh dùng                                                                                                                                                                 |
+| ------------------------ | ----------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Workspace                | workspace                     | workspace                     | Ngữ cảnh làm việc đang hoạt động của người dùng                                                                                                                                                   | shared workspace, team workspace                                                                                                                                           |
+| Tracked assets           | danh sách tài sản theo dõi    | tracked asset list            | Một danh sách asset thuộc active workspace                                                                                                                                                        | named watchlists, watchlist groups                                                                                                                                         |
+| Market event             | sự kiện thị trường            | market event                  | Sự kiện có thời điểm, asset liên quan và metadata khả dụng                                                                                                                                        | signal, guaranteed catalyst                                                                                                                                                |
+| Market reaction          | phản ứng thị trường           | market reaction               | Đánh giá direction, horizon, confidence và reasoning khi có dữ liệu                                                                                                                               | prediction, trade setup                                                                                                                                                    |
+| Evidence                 | nguồn tin và bằng chứng       | sources and evidence          | News article hoặc source context giúp truy vết event                                                                                                                                              | AI proof, guaranteed truth                                                                                                                                                 |
+| Narrative                | mạch diễn giải thị trường     | market narrative              | Narrative node hoặc quan hệ narrative đã có trong graph                                                                                                                                           | dedicated narrative workspace                                                                                                                                              |
+| Confidence               | độ tin cậy                    | confidence                    | Metadata đánh giá của hệ thống, không phải xác suất lợi nhuận hoặc độ chính xác dự báo                                                                                                            | win rate, forecast accuracy                                                                                                                                                |
+| Evaluated outcome        | diễn biến đã đánh giá         | evaluated outcome             | Kết quả đánh giá của phản ứng chính trong chart annotation khi dữ liệu khả dụng                                                                                                                   | `observedAt` như outcome; result; guaranteed impact                                                                                                                        |
+| Event-aware Charts       | Biểu đồ theo bối cảnh sự kiện | Event-aware Charts            | Candle chart có event/calendar context khi dữ liệu khả dụng                                                                                                                                       | trading signals                                                                                                                                                            |
+| Reaction & Evidence      | Phản ứng và bằng chứng        | Reaction & Evidence           | Chi tiết sự kiện hiển thị nguồn tin và thẻ phản ứng khi dữ liệu khả dụng; chart annotation chỉ cung cấp preview ngắn và đường dẫn tới chi tiết                                                    | Market Query evidence sheet; annotation evidence reader; `observedAt` như observed outcome                                                                                 |
+| Market Knowledge Graph   | Đồ thị Tri thức thị trường    | Market Knowledge Graph        | Cấu trúc ngữ cảnh thị trường được xây dựng từ dữ liệu đa nguồn qua tổng hợp, đánh giá và phân tích; cung cấp ngữ cảnh cho Trợ lý AI và là một góc nhìn bổ sung cho price action trong Hero figure | Dữ liệu huấn luyện model, prediction engine, trading-signal generator, graph-generated price, guarantee that every Assistant response exposes complete evidence or sources |
+| Price action             | Diễn biến giá                 | Price action                  | Góc nhìn khái niệm về chuyển động giá quan sát được, đặt cạnh Market Knowledge Graph trong Hero figure để đọc bối cảnh; không phải dữ liệu live                                                   | Live trading chart, trading signal, price forecast, Knowledge Graph output                                                                                                 |
+| Connected Market Graph   | Đồ thị quan hệ thị trường     | Connected Market Graph        | Graph của event, asset, news article và narrative                                                                                                                                                 | workspace graph slice, Theme node                                                                                                                                          |
+| AI Assistant             | Trợ lý AI                     | AI Assistant                  | Hội thoại text-only có session/history theo active workspace; nhận ngữ cảnh từ Market Knowledge Graph để hỗ trợ đặt câu hỏi thị trường bằng văn bản                                               | Market Query workbench; structured evidence sheet; prediction engine                                                                                                       |
+| Live charts              | Biểu đồ trực tiếp             | Live charts                   | Bề mặt biểu đồ giá có cập nhật trực tiếp và bối cảnh sự kiện; dùng làm tên chapter công khai                                                                                                      | Cập nhật tức thời mọi dữ liệu; mọi thị trường luôn mở                                                                                                                      |
+| Signapse market analysis | bản phân tích từ Signapse     | market analysis from Signapse | Nội dung phân tích do Signapse tạo, có thể gửi theo lịch qua Telegram                                                                                                                             | Cam kết độc quyền thương mại; tư vấn mua/bán; kết quả được bảo đảm                                                                                                         |
+| Telegram updates         | cập nhật qua Telegram         | Telegram updates              | Cảnh báo tin thị trường, lịch kinh tế và phân tích định kỳ gửi tới điểm nhận đã liên kết và cấu hình                                                                                              | Kênh công khai mặc định; cảnh báo chạm ngưỡng giá; gửi thủ công câu trả lời AI                                                                                             |
 
 Không dùng chuỗi copy Việt–Anh dày đặc nếu đã có cách diễn đạt tiếng Việt tự nhiên. Tên feature tiếng Anh chỉ xuất hiện như tên sản phẩm hoặc lần giải thích đầu tiên.
 
 ## Claim Matrix
 
-| Surface | Claim được phép công khai | Qualifier bắt buộc | Không được claim | Runtime evidence |
-| --- | --- | --- | --- | --- |
-| Workspace và tracked assets | Người dùng có thể quản lý danh sách tài sản theo dõi của active workspace; chart chọn asset từ danh sách này. | Chỉ có một tracked-asset list cho active workspace. | Named/grouped/nested watchlists; shared team workspace; watchlist là evidence boundary của AI. | `openspec/specs/workspace-watchlist-management/spec.md`; `openspec/specs/market-chart-candle-workbench/spec.md` |
-| Event-aware Charts | Chart tải historical candles cho asset được chọn từ tracked-asset list và có thể hiển thị market-event annotation cùng economic-calendar event liên quan; live quote hoặc partial candle có thể được cập nhật qua stream. | Annotation và calendar event chỉ xuất hiện khi backend trả dữ liệu phù hợp. Dùng từ “live” riêng cho dữ liệu chart; stream có thể stale, disconnected hoặc market closed, và candle response có thể rỗng. | Real-time intelligence toàn hệ thống; annotation/calendar luôn tồn tại; provider uptime guarantee; arbitrary symbol charting; trade entry/stop/target. | `openspec/specs/market-chart-candle-workbench/spec.md`; `openspec/specs/market-chart-live-sse-stream/spec.md`; `openspec/specs/market-chart-economic-calendar-events/spec.md`; `docs/APIMAPPING.md` mục API market charts |
-| Hot-event annotation preview | Annotation popup có thể hiển thị thời điểm, tiêu đề/tóm tắt, phản ứng dự kiến và diễn biến đã đánh giá của phản ứng chính khi các field đó khả dụng; người dùng có thể mở chi tiết sự kiện tương ứng. | Đây là preview ngắn. Outcome chỉ xuất hiện khi `topMarketReaction.outcome` có dữ liệu; tương quan theo thời gian không chứng minh quan hệ nhân quả. | Rich evidence reader trong popup; reasoning/evidence blocks; toàn bộ phản ứng của sự kiện; outcome luôn tồn tại; guaranteed cause hoặc prediction accuracy. | `docs/APIMAPPING.md` mục API market charts; `app/[lang]/(main)/market-charts/market-chart-workbench.tsx` |
-| Event detail: reaction và evidence | Chi tiết sự kiện có thể hiển thị nguồn tin liên kết và các thẻ phản ứng thị trường gồm asset, direction, horizon, confidence, reasoning và thời điểm ghi nhận khi dữ liệu khả dụng. | Evidence và reaction đều có thể vắng mặt. `observedAt` là thời điểm ghi nhận, không phải observed/evaluated outcome; confidence không phải forecast accuracy. | Event detail có realized return/evaluated outcome; mọi event luôn có evidence hoặc reaction; guaranteed cause; prediction; AI Assistant evidence sheet. | `docs/APIMAPPING.md` mục API events; `openspec/specs/event-market-reactions-ui/spec.md`; `app/[lang]/(main)/events/[id]/page.tsx`; `app/[lang]/(main)/events/event-quick-detail-content.tsx` |
-| Connected Market Graph | Graph giúp khám phá node `event`, `asset`, `news-article`, `narrative` và các quan hệ hiện có giữa chúng. | Theme chỉ là metadata trên event/narrative; graph hiện không nhận workspace/watchlist filter. | Theme hoặc warm-episode node; workspace-focused graph slice; dedicated narrative management. | `docs/APIMAPPING.md` mục API graph view; `openspec/specs/graph-view-backend-contract/spec.md` |
-| AI Assistant | Trợ lý AI có thể được mô tả là chuyên biệt và vận hành trên Market Knowledge Graph, được xây dựng từ dữ liệu thị trường đa nguồn qua tổng hợp, đánh giá và phân tích. | Knowledge Graph cung cấp ngữ cảnh phân tích; không phải claim model training/fine-tuning, dữ liệu bao phủ đầy đủ, hoặc mọi câu trả lời đều hiển thị evidence/source. Submission là synchronous; active workspace scope là conversation state/request scope, không phải cam kết mọi câu trả lời chỉ dùng watchlist evidence. | Streaming tokens; structured analysis workbench; evidence/limitations sheet; attachments; manual Telegram delivery; route Market Query; prediction accuracy, signal generation, automated execution. | Product Owner-approved Market Knowledge Graph context; `openspec/specs/ai-assistant-market-conversations/spec.md`; `docs/APIMAPPING.md` mục API market query |
-| Narratives | Landing có thể nói graph chứa narrative node và quan hệ narrative–event/narrative–asset. | Narrative chỉ được trình bày trong phạm vi graph đang có. | Narrative list/detail, refresh workflow hoặc dedicated narrative workspace. | `docs/APIMAPPING.md` mục API graph view và API narratives |
-| Telegram | Nhận cảnh báo tin thị trường, cập nhật lịch kinh tế và bản phân tích từ Signapse qua điểm nhận Telegram đã liên kết; chọn nội dung nhận và thiết lập lịch phân tích theo tài sản theo dõi. | Cần quyền phù hợp, bot và điểm nhận hoạt động, routing bật; phân tích định kỳ cần lịch đã cấu hình. Một lịch chọn một tài sản, một đến bốn giờ gửi trong ngày và múi giờ. | Kênh công khai mặc định; gửi thủ công câu trả lời AI sang Telegram; cảnh báo chạm ngưỡng giá tùy ý; bảo đảm nhận/đọc tin; độc quyền thương mại chưa được xác định. | `app/[lang]/(main)/telegram/telegram-configuration.tsx`; `openspec/specs/telegram-configuration-ui/spec.md`; `docs/APIMAPPING.md` mục API telegram |
-| Trading outcomes | Signapse hỗ trợ quá trình phân tích và kiểm chứng nguồn. | Trust copy phải xuất hiện trước final CTA hoặc trong cùng trust section. | Buy/sell advice; signal generation; automated execution; P&L; guaranteed forecast; performance return. | Product boundary của landing |
+| Surface                            | Claim được phép công khai                                                                                                                                                                                                 | Qualifier bắt buộc                                                                                                                                                                                                                                                                                                          | Không được claim                                                                                                                                                                                     | Runtime evidence                                                                                                                                                                                                          |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Workspace và tracked assets        | Người dùng có thể quản lý danh sách tài sản theo dõi của active workspace; chart chọn asset từ danh sách này.                                                                                                             | Chỉ có một tracked-asset list cho active workspace.                                                                                                                                                                                                                                                                         | Named/grouped/nested watchlists; shared team workspace; watchlist là evidence boundary của AI.                                                                                                       | `openspec/specs/workspace-watchlist-management/spec.md`; `openspec/specs/market-chart-candle-workbench/spec.md`                                                                                                           |
+| Event-aware Charts                 | Chart tải historical candles cho asset được chọn từ tracked-asset list và có thể hiển thị market-event annotation cùng economic-calendar event liên quan; live quote hoặc partial candle có thể được cập nhật qua stream. | Annotation và calendar event chỉ xuất hiện khi backend trả dữ liệu phù hợp. Dùng từ “live” riêng cho dữ liệu chart; stream có thể stale, disconnected hoặc market closed, và candle response có thể rỗng.                                                                                                                   | Real-time intelligence toàn hệ thống; annotation/calendar luôn tồn tại; provider uptime guarantee; arbitrary symbol charting; trade entry/stop/target.                                               | `openspec/specs/market-chart-candle-workbench/spec.md`; `openspec/specs/market-chart-live-sse-stream/spec.md`; `openspec/specs/market-chart-economic-calendar-events/spec.md`; `docs/APIMAPPING.md` mục API market charts |
+| Hot-event annotation preview       | Annotation popup có thể hiển thị thời điểm, tiêu đề/tóm tắt, phản ứng dự kiến và diễn biến đã đánh giá của phản ứng chính khi các field đó khả dụng; người dùng có thể mở chi tiết sự kiện tương ứng.                     | Đây là preview ngắn. Outcome chỉ xuất hiện khi `topMarketReaction.outcome` có dữ liệu; tương quan theo thời gian không chứng minh quan hệ nhân quả.                                                                                                                                                                         | Rich evidence reader trong popup; reasoning/evidence blocks; toàn bộ phản ứng của sự kiện; outcome luôn tồn tại; guaranteed cause hoặc prediction accuracy.                                          | `docs/APIMAPPING.md` mục API market charts; `app/[lang]/(main)/market-charts/market-chart-workbench.tsx`                                                                                                                  |
+| Event detail: reaction và evidence | Chi tiết sự kiện có thể hiển thị nguồn tin liên kết và các thẻ phản ứng thị trường gồm asset, direction, horizon, confidence, reasoning và thời điểm ghi nhận khi dữ liệu khả dụng.                                       | Evidence và reaction đều có thể vắng mặt. `observedAt` là thời điểm ghi nhận, không phải observed/evaluated outcome; confidence không phải forecast accuracy.                                                                                                                                                               | Event detail có realized return/evaluated outcome; mọi event luôn có evidence hoặc reaction; guaranteed cause; prediction; AI Assistant evidence sheet.                                              | `docs/APIMAPPING.md` mục API events; `openspec/specs/event-market-reactions-ui/spec.md`; `app/[lang]/(main)/events/[id]/page.tsx`; `app/[lang]/(main)/events/event-quick-detail-content.tsx`                              |
+| Connected Market Graph             | Graph giúp khám phá node `event`, `asset`, `news-article`, `narrative` và các quan hệ hiện có giữa chúng.                                                                                                                 | Theme chỉ là metadata trên event/narrative; graph hiện không nhận workspace/watchlist filter.                                                                                                                                                                                                                               | Theme hoặc warm-episode node; workspace-focused graph slice; dedicated narrative management.                                                                                                         | `docs/APIMAPPING.md` mục API graph view; `openspec/specs/graph-view-backend-contract/spec.md`                                                                                                                             |
+| AI Assistant                       | Trợ lý AI có thể được mô tả là chuyên biệt và vận hành trên Market Knowledge Graph, được xây dựng từ dữ liệu thị trường đa nguồn qua tổng hợp, đánh giá và phân tích.                                                     | Knowledge Graph cung cấp ngữ cảnh phân tích; không phải claim model training/fine-tuning, dữ liệu bao phủ đầy đủ, hoặc mọi câu trả lời đều hiển thị evidence/source. Submission là synchronous; active workspace scope là conversation state/request scope, không phải cam kết mọi câu trả lời chỉ dùng watchlist evidence. | Streaming tokens; structured analysis workbench; evidence/limitations sheet; attachments; manual Telegram delivery; route Market Query; prediction accuracy, signal generation, automated execution. | Product Owner-approved Market Knowledge Graph context; `openspec/specs/ai-assistant-market-conversations/spec.md`; `docs/APIMAPPING.md` mục API market query                                                              |
+| Narratives                         | Landing có thể nói graph chứa narrative node và quan hệ narrative–event/narrative–asset.                                                                                                                                  | Narrative chỉ được trình bày trong phạm vi graph đang có.                                                                                                                                                                                                                                                                   | Narrative list/detail, refresh workflow hoặc dedicated narrative workspace.                                                                                                                          | `docs/APIMAPPING.md` mục API graph view và API narratives                                                                                                                                                                 |
+| Telegram                           | Nhận cảnh báo tin thị trường, cập nhật lịch kinh tế và bản phân tích từ Signapse qua điểm nhận Telegram đã liên kết; chọn nội dung nhận và thiết lập lịch phân tích theo tài sản theo dõi.                                | Cần quyền phù hợp, bot và điểm nhận hoạt động, routing bật; phân tích định kỳ cần lịch đã cấu hình. Một lịch chọn một tài sản, một đến bốn giờ gửi trong ngày và múi giờ.                                                                                                                                                   | Kênh công khai mặc định; gửi thủ công câu trả lời AI sang Telegram; cảnh báo chạm ngưỡng giá tùy ý; bảo đảm nhận/đọc tin; độc quyền thương mại chưa được xác định.                                   | `app/[lang]/(main)/telegram/telegram-configuration.tsx`; `openspec/specs/telegram-configuration-ui/spec.md`; `docs/APIMAPPING.md` mục API telegram                                                                        |
+| Trading outcomes                   | Signapse hỗ trợ quá trình phân tích và kiểm chứng nguồn.                                                                                                                                                                  | Trust copy phải xuất hiện trước final CTA hoặc trong cùng trust section.                                                                                                                                                                                                                                                    | Buy/sell advice; signal generation; automated execution; P&L; guaranteed forecast; performance return.                                                                                               | Product boundary của landing                                                                                                                                                                                              |
 
 ### Global claim rules
 
@@ -160,16 +160,16 @@ Các dictionary entry của landing phải bắt đầu từ copy dưới đây.
 
 ### `PublicHeader` And `PublicFooter`
 
-| Vai trò | Tiếng Việt | English |
-| --- | --- | --- |
-| Nav: Product | Tính năng | Features |
-| Nav: How it works | Cách sử dụng | How to use |
-| Nav: Trust | Độ tin cậy | Trust |
-| Sign in | Đăng nhập | Sign in |
-| Locale group label | Chọn ngôn ngữ | Choose language |
-| Vietnamese locale | Tiếng Việt | Tiếng Việt |
-| English locale | English | English |
-| Footer descriptor | Phân tích thị trường theo bối cảnh sự kiện. | Event-aware market intelligence. |
+| Vai trò            | Tiếng Việt                                  | English                          |
+| ------------------ | ------------------------------------------- | -------------------------------- |
+| Nav: Product       | Tính năng                                   | Features                         |
+| Nav: How it works  | Cách sử dụng                                | How to use                       |
+| Nav: Trust         | Độ tin cậy                                  | Trust                            |
+| Sign in            | Đăng nhập                                   | Sign in                          |
+| Locale group label | Chọn ngôn ngữ                               | Choose language                  |
+| Vietnamese locale  | Tiếng Việt                                  | Tiếng Việt                       |
+| English locale     | English                                     | English                          |
+| Footer descriptor  | Phân tích thị trường theo bối cảnh sự kiện. | Event-aware market intelligence. |
 
 CTA label trong Header và email fallback trong Footer dùng đúng CTA Contract, không tạo biến thể copy khác.
 
@@ -177,16 +177,16 @@ CTA label trong Header và email fallback trong Footer dùng đúng CTA Contract
 
 Quyết định nội dung chốt ngày 2026-09-07: chuyển từ bốn bước sang ba bước bên dưới. Đây là baseline cho thay đổi tiếp theo; runtime, dictionary và OpenSpec hiện hành chưa được cập nhật trong phiên chốt nội dung này.
 
-| Vai trò | Tiếng Việt | English |
-| --- | --- | --- |
-| Eyebrow | CÁCH SỬ DỤNG SIGNAPSE | HOW TO USE SIGNAPSE |
-| H2 | Bắt đầu từ một biến động bạn muốn hiểu. | Start with a market move you want to understand. |
-| Step 1 title | Chọn tài sản, xem diễn biến giá | Choose an asset, review price action |
-| Step 1 body | Chọn tài sản trong danh sách theo dõi. Xem diễn biến giá cùng các dấu mốc sự kiện và lịch kinh tế. | Choose an asset from your tracked list. View price action alongside event markers and the economic calendar. |
-| Step 2 title | Mở sự kiện, kiểm tra nguồn tin | Open an event, check the sources |
-| Step 2 body | Mở chi tiết sự kiện để đọc phản ứng thị trường và đối chiếu với các nguồn tin. | Open event details to read market reactions and cross-check them against news sources. |
-| Step 3 title | Phân tích cùng Trợ lý AI | Analyze with the AI Assistant |
-| Step 3 body | Trợ lý AI hỗ trợ bạn phân tích quan hệ giữa sự kiện, tài sản và tin tức để tìm hiểu thêm những thông tin liên quan. | The AI Assistant helps you analyze relationships between events, assets, and news to explore related information. |
+| Vai trò      | Tiếng Việt                                                                                                          | English                                                                                                           |
+| ------------ | ------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Eyebrow      | CÁCH SỬ DỤNG SIGNAPSE                                                                                               | HOW TO USE SIGNAPSE                                                                                               |
+| H2           | Bắt đầu từ một biến động bạn muốn hiểu.                                                                             | Start with a market move you want to understand.                                                                  |
+| Step 1 title | Chọn tài sản, xem diễn biến giá                                                                                     | Choose an asset, review price action                                                                              |
+| Step 1 body  | Chọn tài sản trong danh sách theo dõi. Xem diễn biến giá cùng các dấu mốc sự kiện và lịch kinh tế.                  | Choose an asset from your tracked list. View price action alongside event markers and the economic calendar.      |
+| Step 2 title | Mở sự kiện, kiểm tra nguồn tin                                                                                      | Open an event, check the sources                                                                                  |
+| Step 2 body  | Mở chi tiết sự kiện để đọc phản ứng thị trường và đối chiếu với các nguồn tin.                                      | Open event details to read market reactions and cross-check them against news sources.                            |
+| Step 3 title | Phân tích cùng Trợ lý AI                                                                                            | Analyze with the AI Assistant                                                                                     |
+| Step 3 body  | Trợ lý AI hỗ trợ bạn phân tích quan hệ giữa sự kiện, tài sản và tin tức để tìm hiểu thêm những thông tin liên quan. | The AI Assistant helps you analyze relationships between events, assets, and news to explore related information. |
 
 - Section giúp người mới hình dung hành trình sử dụng: xem giá, kiểm tra nguồn, phân tích với Trợ lý AI. Gộp chọn tài sản và xem bối cảnh biểu đồ vào bước đầu; bước cuối giới thiệu Trợ lý AI thay cho thao tác khám phá Graph View.
 - Chỉ hiển thị eyebrow, H2 và ba bước đánh số `01`–`03`. Bỏ intro, dòng mũi tên lặp tên bước và dòng riêng về Trợ lý AI cuối section.
@@ -197,51 +197,51 @@ Quyết định nội dung chốt ngày 2026-09-07: chuyển từ bốn bước 
 
 ### `ProductStory` — `#product`
 
-| Vai trò | Tiếng Việt | English |
-| --- | --- | --- |
-| H2 | Bốn tính năng để theo dõi và phân tích thị trường. | Four features for following and analyzing markets. |
+| Vai trò | Tiếng Việt                                         | English                                            |
+| ------- | -------------------------------------------------- | -------------------------------------------------- |
+| H2      | Bốn tính năng để theo dõi và phân tích thị trường. | Four features for following and analyzing markets. |
 
 Section không cần intro lặp danh sách bốn tính năng đã hiển thị trong Hero. Bốn chapter đủ rộng, theo thứ tự dưới đây; mỗi chapter có outcome, body ngắn và product proof. Caption/alt phải mô tả đúng ảnh thực tế được duyệt; không viết caption khẳng định dữ liệu chưa xuất hiện trong ảnh.
 
 #### Chapter 1 — Knowledge Graph — `#knowledge-graph`
 
-| Vai trò | Tiếng Việt | English |
-| --- | --- | --- |
-| Eyebrow | Đồ thị Tri thức | Knowledge Graph |
-| H3 | Nhìn thấy các mối liên hệ trong thị trường. | See how market information connects. |
-| Body | Khám phá quan hệ giữa sự kiện, tài sản và tin tức trên Đồ thị Tri thức. Theo dấu các liên kết để mở rộng bối cảnh quanh thông tin bạn đang quan tâm. | Explore relationships between events, assets, and news on the Knowledge Graph. Follow the links to expand the context around information that interests you. |
+| Vai trò | Tiếng Việt                                                                                                                                           | English                                                                                                                                                      |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Eyebrow | Đồ thị Tri thức                                                                                                                                      | Knowledge Graph                                                                                                                                              |
+| H3      | Nhìn thấy các mối liên hệ trong thị trường.                                                                                                          | See how market information connects.                                                                                                                         |
+| Body    | Khám phá quan hệ giữa sự kiện, tài sản và tin tức trên Đồ thị Tri thức. Theo dấu các liên kết để mở rộng bối cảnh quanh thông tin bạn đang quan tâm. | Explore relationships between events, assets, and news on the Knowledge Graph. Follow the links to expand the context around information that interests you. |
 
 Product proof: ảnh Graph View thực tế cho thấy một sự kiện nối với tài sản và bài viết liên quan. Giữ phân biệt bề mặt Graph View có thể khám phá với lớp Market Knowledge Graph cung cấp ngữ cảnh cho AI. Không dùng hình động Hero hoặc Sigma demo để giả làm ảnh sản phẩm. Các giới hạn về node kinds, narrative và workspace filtering trong claim matrix vẫn áp dụng.
 
 #### Chapter 2 — Live Charts — `#live-charts`
 
-| Vai trò | Tiếng Việt | English |
-| --- | --- | --- |
-| Eyebrow | Biểu đồ trực tiếp | Live charts |
-| H3 | Theo dõi thị trường khi giá đang chuyển động. | Follow markets as prices move. |
-| Body | Theo dõi diễn biến giá cập nhật trực tiếp, cùng các dấu mốc sự kiện và lịch kinh tế trên biểu đồ. | Follow live price movements alongside event markers and the economic calendar on the chart. |
-| Supporting detail | Mở dấu mốc sự kiện để xem phản ứng thị trường và kiểm tra nguồn tin. | Open an event marker to review market reactions and check the sources. |
+| Vai trò           | Tiếng Việt                                                                                        | English                                                                                     |
+| ----------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Eyebrow           | Biểu đồ trực tiếp                                                                                 | Live charts                                                                                 |
+| H3                | Theo dõi thị trường khi giá đang chuyển động.                                                     | Follow markets as prices move.                                                              |
+| Body              | Theo dõi diễn biến giá cập nhật trực tiếp, cùng các dấu mốc sự kiện và lịch kinh tế trên biểu đồ. | Follow live price movements alongside event markers and the economic calendar on the chart. |
+| Supporting detail | Mở dấu mốc sự kiện để xem phản ứng thị trường và kiểm tra nguồn tin.                              | Open an event marker to review market reactions and check the sources.                      |
 
 Product proof: ảnh chart thực tế có dữ liệu giá, dấu mốc sự kiện và trạng thái luồng được giữ nguyên. Chú thích là preview và đường dẫn tới chi tiết; không ngụ ý toàn bộ nguồn tin nằm trong popup. Reaction & Evidence được gộp vào phần giải thích Chart, không còn là chapter riêng. Trạng thái dữ liệu cũ, mất kết nối, thị trường đóng cửa và giới hạn dữ liệu phải được giữ trong capture và ghi chú chi tiết phù hợp.
 
 #### Chapter 3 — AI Assistant — `#ai-assistant`
 
-| Vai trò | Tiếng Việt | English |
-| --- | --- | --- |
-| Eyebrow | Trợ lý AI | AI Assistant |
-| H3 | Đặt câu hỏi với ngữ cảnh từ Đồ thị Tri thức. | Ask questions with context from the Knowledge Graph. |
-| Body | Trò chuyện với Trợ lý AI để phân tích quan hệ giữa sự kiện, tài sản và tin tức. Tiếp tục đặt câu hỏi và xem lại các cuộc trò chuyện trong workspace của bạn. | Chat with the AI Assistant to analyze relationships between events, assets, and news. Ask follow-up questions and revisit conversations in your workspace. |
+| Vai trò | Tiếng Việt                                                                                                                                                   | English                                                                                                                                                    |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Eyebrow | Trợ lý AI                                                                                                                                                    | AI Assistant                                                                                                                                               |
+| H3      | Đặt câu hỏi với ngữ cảnh từ Đồ thị Tri thức.                                                                                                                 | Ask questions with context from the Knowledge Graph.                                                                                                       |
+| Body    | Trò chuyện với Trợ lý AI để phân tích quan hệ giữa sự kiện, tài sản và tin tức. Tiếp tục đặt câu hỏi và xem lại các cuộc trò chuyện trong workspace của bạn. | Chat with the AI Assistant to analyze relationships between events, assets, and news. Ask follow-up questions and revisit conversations in your workspace. |
 
 Product proof: ảnh hội thoại thực tế trong workspace demo, thể hiện câu hỏi và phản hồi. Ngữ cảnh từ Market Knowledge Graph là giá trị chính; lịch sử hội thoại là lợi ích hỗ trợ. Không claim chọn node để chat, tự chuyển chart/event đang xem vào hội thoại, hoặc mọi câu trả lời có evidence/source sheet. Bỏ section WorkspaceAssistant riêng; thông tin danh sách theo dõi được giải thích trong Chart, thông tin workspace/history nằm tại đây.
 
 #### Chapter 4 — Telegram — `#telegram`
 
-| Vai trò | Tiếng Việt | English |
-| --- | --- | --- |
-| Eyebrow | Telegram | Telegram |
-| H3 | Nhận cập nhật và bản phân tích từ Signapse. | Receive updates and market analysis from Signapse. |
-| Body | Nhận cảnh báo tin thị trường, cập nhật lịch kinh tế và bản phân tích từ Signapse qua Telegram. Thiết lập lịch nhận phân tích theo tài sản bạn theo dõi. | Receive market news alerts, economic calendar updates, and market analysis from Signapse through Telegram. Schedule analysis for the assets you track. |
-| Setup | Liên kết Telegram, chọn nội dung nhận và thiết lập lịch phân tích theo tài sản. | Link Telegram, choose what to receive, and schedule analysis by asset. |
+| Vai trò | Tiếng Việt                                                                                                                                              | English                                                                                                                                                |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Eyebrow | Telegram                                                                                                                                                | Telegram                                                                                                                                               |
+| H3      | Nhận cập nhật và bản phân tích từ Signapse.                                                                                                             | Receive updates and market analysis from Signapse.                                                                                                     |
+| Body    | Nhận cảnh báo tin thị trường, cập nhật lịch kinh tế và bản phân tích từ Signapse qua Telegram. Thiết lập lịch nhận phân tích theo tài sản bạn theo dõi. | Receive market news alerts, economic calendar updates, and market analysis from Signapse through Telegram. Schedule analysis for the assets you track. |
+| Setup   | Liên kết Telegram, chọn nội dung nhận và thiết lập lịch phân tích theo tài sản.                                                                         | Link Telegram, choose what to receive, and schedule analysis by asset.                                                                                 |
 
 Product proof: ảnh tin nhắn mẫu thực tế được phép công khai, giúp nhận diện cảnh báo tin thị trường, lịch kinh tế và bản phân tích theo lịch. Ưu tiên nội dung nhận được trên Telegram hơn ảnh màn hình quản trị bot. Đợt này bao gồm chuẩn bị bộ minh họa đó; chưa có ảnh hoặc chưa gửi thử thành công không được ghi là đã xác minh delivery.
 
@@ -249,35 +249,35 @@ Luồng tiếp cận đã chốt: sau khi được cấp quyền phù hợp, ng�
 
 ### `TrustBoundary` — `#trust`
 
-| Vai trò | Tiếng Việt | English |
-| --- | --- | --- |
-| H2 | Kiểm tra được nguồn. Nhìn rõ giới hạn. | Inspect the sources. Keep the limits visible. |
-| Intro | Signapse đặt nguồn liên quan và đánh giá của hệ thống cạnh sự kiện khi dữ liệu khả dụng. Độ tin cậy không phải xác suất lợi nhuận; diễn biến gần nhau theo thời gian hoặc được nối trong đồ thị không tự chứng minh quan hệ nhân quả. | Signapse places related sources and system assessments alongside events when data is available. Confidence is not a probability of profit, and temporal proximity or a graph relationship does not by itself prove causation. |
-| Point 1 title | Nguồn liên quan | Related sources |
-| Point 1 body | Mở nguồn đã liên kết để truy vết bối cảnh, khi dữ liệu khả dụng. | Open linked sources to trace the context, when data is available. |
-| Point 2 title | Đánh giá có điều kiện | Qualified assessments |
-| Point 2 body | Hướng phản ứng, khung thời gian, độ tin cậy, lập luận, thời điểm ghi nhận và diễn biến đã đánh giá chỉ xuất hiện ở nơi hỗ trợ chúng và khi dữ liệu khả dụng. | Reaction direction, horizon, confidence, reasoning, recorded time, and evaluated outcome appear only where supported and when data is available. |
-| Point 3 title | Hỗ trợ phân tích | Analysis support |
-| Point 3 body | Dựa trên dữ liệu và nguồn tin — không phải tư vấn giao dịch hay cam kết dự báo. | Evidence-led analysis support — not trading advice or a guaranteed forecast. |
+| Vai trò       | Tiếng Việt                                                                                                                                                                                                                            | English                                                                                                                                                                                                                       |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| H2            | Kiểm tra được nguồn. Nhìn rõ giới hạn.                                                                                                                                                                                                | Inspect the sources. Keep the limits visible.                                                                                                                                                                                 |
+| Intro         | Signapse đặt nguồn liên quan và đánh giá của hệ thống cạnh sự kiện khi dữ liệu khả dụng. Độ tin cậy không phải xác suất lợi nhuận; diễn biến gần nhau theo thời gian hoặc được nối trong đồ thị không tự chứng minh quan hệ nhân quả. | Signapse places related sources and system assessments alongside events when data is available. Confidence is not a probability of profit, and temporal proximity or a graph relationship does not by itself prove causation. |
+| Point 1 title | Nguồn liên quan                                                                                                                                                                                                                       | Related sources                                                                                                                                                                                                               |
+| Point 1 body  | Mở nguồn đã liên kết để truy vết bối cảnh, khi dữ liệu khả dụng.                                                                                                                                                                      | Open linked sources to trace the context, when data is available.                                                                                                                                                             |
+| Point 2 title | Đánh giá có điều kiện                                                                                                                                                                                                                 | Qualified assessments                                                                                                                                                                                                         |
+| Point 2 body  | Hướng phản ứng, khung thời gian, độ tin cậy, lập luận, thời điểm ghi nhận và diễn biến đã đánh giá chỉ xuất hiện ở nơi hỗ trợ chúng và khi dữ liệu khả dụng.                                                                          | Reaction direction, horizon, confidence, reasoning, recorded time, and evaluated outcome appear only where supported and when data is available.                                                                              |
+| Point 3 title | Hỗ trợ phân tích                                                                                                                                                                                                                      | Analysis support                                                                                                                                                                                                              |
+| Point 3 body  | Dựa trên dữ liệu và nguồn tin — không phải tư vấn giao dịch hay cam kết dự báo.                                                                                                                                                       | Evidence-led analysis support — not trading advice or a guaranteed forecast.                                                                                                                                                  |
 
 ### `FinalAccessCta` — `#access`
 
 Anonymous state:
 
-| Vai trò | Tiếng Việt | English |
-| --- | --- | --- |
-| H2 | Xem thị trường trong đúng bối cảnh. | See the market in context. |
-| Body | Yêu cầu truy cập để khám phá Đồ thị Tri thức, theo dõi biểu đồ trực tiếp, trò chuyện với Trợ lý AI và thiết lập cập nhật qua Telegram. | Request access to explore the Knowledge Graph, follow live charts, chat with the AI Assistant, and set up Telegram updates. |
-| CTA | Yêu cầu truy cập | Request access |
-| Microcopy | Liên kết này mở ứng dụng email tới `request-access@signapse.ai`. Nếu không mở được, hãy sao chép địa chỉ trong footer. | This link opens your email app to `request-access@signapse.ai`. If it does not open, copy the address from the footer. |
+| Vai trò   | Tiếng Việt                                                                                                                             | English                                                                                                                     |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| H2        | Xem thị trường trong đúng bối cảnh.                                                                                                    | See the market in context.                                                                                                  |
+| Body      | Yêu cầu truy cập để khám phá Đồ thị Tri thức, theo dõi biểu đồ trực tiếp, trò chuyện với Trợ lý AI và thiết lập cập nhật qua Telegram. | Request access to explore the Knowledge Graph, follow live charts, chat with the AI Assistant, and set up Telegram updates. |
+| CTA       | Yêu cầu truy cập                                                                                                                       | Request access                                                                                                              |
+| Microcopy | Liên kết này mở ứng dụng email tới `request-access@signapse.ai`. Nếu không mở được, hãy sao chép địa chỉ trong footer.                 | This link opens your email app to `request-access@signapse.ai`. If it does not open, copy the address from the footer.      |
 
 Authenticated state:
 
-| Vai trò | Tiếng Việt | English |
-| --- | --- | --- |
-| H2 | Tiếp tục từ workspace đang hoạt động. | Continue from your active workspace. |
-| Body | Mở bảng điều khiển để tiếp tục hành trình phân tích của bạn. | Open the dashboard to continue your analysis. |
-| CTA | Mở bảng điều khiển | Open dashboard |
+| Vai trò | Tiếng Việt                                                   | English                                       |
+| ------- | ------------------------------------------------------------ | --------------------------------------------- |
+| H2      | Tiếp tục từ workspace đang hoạt động.                        | Continue from your active workspace.          |
+| Body    | Mở bảng điều khiển để tiếp tục hành trình phân tích của bạn. | Open the dashboard to continue your analysis. |
+| CTA     | Mở bảng điều khiển                                           | Open dashboard                                |
 
 ## CTA Contract
 
@@ -296,17 +296,17 @@ Telegram:       #telegram
 Trust:          #trust
 ```
 
-| Trạng thái | Vị trí | CTA | Destination | Hành vi |
-| --- | --- | --- | --- | --- |
-| Chưa đăng nhập | Header | Yêu cầu truy cập / Request access | Request-access `mailto:` | Mở email client của người dùng. |
-| Chưa đăng nhập | Header secondary | Đăng nhập / Sign in | `/{lang}/sign-in` | Mở Clerk sign-in theo locale. |
-| Chưa đăng nhập | Footer secondary | Đăng nhập / Sign in | `/{lang}/sign-in` | Giữ một đường vào sign-in ở cuối trang. |
-| Chưa đăng nhập | Hero primary | Yêu cầu truy cập / Request access | Request-access `mailto:` | Cùng destination với header; không tạo funnel thứ hai. |
-| Chưa đăng nhập | Hero secondary | Khám phá tính năng / Explore features | `#product` | Cuộn tới bốn tính năng chính. |
-| Chưa đăng nhập | Final CTA | Yêu cầu truy cập / Request access | Request-access `mailto:` | Cùng destination với hero. |
-| Đã đăng nhập | Header primary, Hero primary, Final CTA, Footer secondary | Mở bảng điều khiển / Open dashboard | `/{lang}/dashboard` | Thay Sign in trong Footer và mở protected dashboard theo locale. |
-| Đã đăng nhập | Hero secondary | Khám phá tính năng / Explore features | `#product` | Giữ điều hướng nội trang như trạng thái chưa đăng nhập. |
-| Mọi người dùng | Footer contact | `request-access@signapse.ai` | Cùng request-access email | Hiển thị địa chỉ email để có thể copy khi máy không cấu hình mail client. |
+| Trạng thái     | Vị trí                                                    | CTA                                   | Destination               | Hành vi                                                                   |
+| -------------- | --------------------------------------------------------- | ------------------------------------- | ------------------------- | ------------------------------------------------------------------------- |
+| Chưa đăng nhập | Header                                                    | Yêu cầu truy cập / Request access     | Request-access `mailto:`  | Mở email client của người dùng.                                           |
+| Chưa đăng nhập | Header secondary                                          | Đăng nhập / Sign in                   | `/{lang}/sign-in`         | Mở Clerk sign-in theo locale.                                             |
+| Chưa đăng nhập | Footer secondary                                          | Đăng nhập / Sign in                   | `/{lang}/sign-in`         | Giữ một đường vào sign-in ở cuối trang.                                   |
+| Chưa đăng nhập | Hero primary                                              | Yêu cầu truy cập / Request access     | Request-access `mailto:`  | Cùng destination với header; không tạo funnel thứ hai.                    |
+| Chưa đăng nhập | Hero secondary                                            | Xem cách Signapse phân tích / See how Signapse analyzes markets | `#how-it-works`         | Cuộn tới hành trình phân tích ba bước.                                    |
+| Chưa đăng nhập | Final CTA                                                 | Yêu cầu truy cập / Request access     | Request-access `mailto:`  | Cùng destination với hero.                                                |
+| Đã đăng nhập   | Header primary, Hero primary, Final CTA, Footer secondary | Mở bảng điều khiển / Open dashboard   | `/{lang}/dashboard`       | Thay Sign in trong Footer và mở protected dashboard theo locale.          |
+| Đã đăng nhập   | Hero secondary                                            | Xem cách Signapse phân tích / See how Signapse analyzes markets | `#how-it-works`         | Giữ điều hướng nội trang như trạng thái chưa đăng nhập.                   |
+| Mọi người dùng | Footer contact                                            | `request-access@signapse.ai`          | Cùng request-access email | Hiển thị địa chỉ email để có thể copy khi máy không cấu hình mail client. |
 
 ### CTA behavior rules
 
@@ -324,12 +324,12 @@ Trust:          #trust
 
 Các asset sau đã nằm trong public runtime và được phép dùng trên landing:
 
-| Asset | Vai trò được phép |
-| --- | --- |
-| `public/favicon.svg` | Favicon và browser identity. |
-| `public/images/signapse_logo_dark.svg` | Logo vector trên nền phù hợp. |
-| `public/images/signapse_logo_light.svg` | Logo vector trên nền phù hợp. |
-| `public/images/signapse_logo_dark_2048x2048.webp` | Raster brand asset hoặc social artwork khi cần. |
+| Asset                                              | Vai trò được phép                               |
+| -------------------------------------------------- | ----------------------------------------------- |
+| `public/favicon.svg`                               | Favicon và browser identity.                    |
+| `public/images/signapse_logo_dark.svg`             | Logo vector trên nền phù hợp.                   |
+| `public/images/signapse_logo_light.svg`            | Logo vector trên nền phù hợp.                   |
+| `public/images/signapse_logo_dark_2048x2048.webp`  | Raster brand asset hoặc social artwork khi cần. |
 | `public/images/signapse_logo_light_2048x2048.webp` | Raster brand asset hoặc social artwork khi cần. |
 
 Ưu tiên SVG cho UI. Hai bản WebP chỉ dùng khi consumer cần raster; không tải file 2048px nếu kích thước hiển thị nhỏ hơn đáng kể.
@@ -338,12 +338,12 @@ Các asset sau đã nằm trong public runtime và được phép dùng trên la
 
 Phạm vi đợt thay đổi này bao gồm chuẩn bị và tích hợp bộ ảnh cho cả bốn tính năng, gồm ảnh từ sản phẩm và tin nhắn Telegram mẫu được phép công khai. Hiện chưa có bộ ảnh được duyệt; các slot dưới đây chỉ chuyển sang trạng thái approved khi có nguồn và đáp ứng checklist ở phần tiếp theo. Chốt phạm vi chuẩn bị ảnh không đồng nghĩa phê duyệt một ảnh hoặc dữ liệu cụ thể.
 
-| Planned asset | Surface được capture | Vị trí | Trạng thái |
-| --- | --- | --- | --- |
-| `public/images/landing/{lang}/knowledge-graph.webp` | Graph View với sự kiện, tài sản và bài viết liên quan | Đồ thị Tri thức | Trong scope; chưa tồn tại/chưa duyệt |
-| `public/images/landing/{lang}/live-market-chart.webp` | Chart với giá, dấu mốc sự kiện, lịch kinh tế và trạng thái luồng thật | Biểu đồ trực tiếp | Trong scope; chưa tồn tại/chưa duyệt |
-| `public/images/landing/{lang}/ai-conversation.webp` | Câu hỏi và phản hồi trong hội thoại AI của workspace demo | Trợ lý AI | Trong scope; chưa tồn tại/chưa duyệt |
-| `public/images/landing/{lang}/telegram-updates.webp` | Tin nhắn mẫu thực tế cho cảnh báo tin, lịch kinh tế và phân tích định kỳ | Telegram | Trong scope; chưa tồn tại/chưa duyệt |
+| Planned asset                                         | Surface được capture                                                     | Vị trí            | Trạng thái                           |
+| ----------------------------------------------------- | ------------------------------------------------------------------------ | ----------------- | ------------------------------------ |
+| `public/images/landing/{lang}/knowledge-graph.webp`   | Graph View với sự kiện, tài sản và bài viết liên quan                    | Đồ thị Tri thức   | Trong scope; chưa tồn tại/chưa duyệt |
+| `public/images/landing/{lang}/live-market-chart.webp` | Chart với giá, dấu mốc sự kiện, lịch kinh tế và trạng thái luồng thật    | Biểu đồ trực tiếp | Trong scope; chưa tồn tại/chưa duyệt |
+| `public/images/landing/{lang}/ai-conversation.webp`   | Câu hỏi và phản hồi trong hội thoại AI của workspace demo                | Trợ lý AI         | Trong scope; chưa tồn tại/chưa duyệt |
+| `public/images/landing/{lang}/telegram-updates.webp`  | Tin nhắn mẫu thực tế cho cảnh báo tin, lịch kinh tế và phân tích định kỳ | Telegram          | Trong scope; chưa tồn tại/chưa duyệt |
 
 `{lang}` là `vi` hoặc `en`. Capture có visible UI text phải có hai asset dùng cùng demo scenario, product state và crop tương đương; text trong ảnh phải khớp locale của route. Asset không có text phụ thuộc ngôn ngữ có thể dùng chung dưới `public/images/landing/shared/` sau khi được duyệt. Nếu asset của một locale chưa tồn tại hoặc chưa approved, locale đó bỏ media slot và dùng text-first composition; không fallback sang ảnh của locale còn lại.
 
@@ -391,15 +391,15 @@ Nếu chưa có capture được duyệt, hero phải dùng text-first compositi
 
 ## Information Architecture
 
-| Thứ tự | Section / route-local component | ID | Mục tiêu | Nội dung chính | Product proof |
-| --- | --- | --- | --- | --- | --- |
-| 1 | `PublicHeader` | — | Nhận diện, điều hướng và access path | Logo; Tính năng; Cách sử dụng; Độ tin cậy; locale; auth-aware CTA | Brand asset |
-| 2 | `HeroProductProof` | `#top` | Cho thấy đủ bốn tính năng và hành động tiếp theo | H1/supporting copy mới; CTA; trust line; hàng link tới bốn chapter | Conceptual market-context figure hiện có |
-| 3 | `ProductStory` | `#product` | Giải thích bốn tính năng chính bằng bốn chapter lớn | Đồ thị Tri thức → Biểu đồ trực tiếp → Trợ lý AI → Telegram | Bộ ảnh bốn tính năng thuộc phạm vi triển khai |
-| 4 | `AnalysisFlow` | `#how-it-works` | Giúp người mới hình dung hành trình sử dụng | Chọn tài sản, xem diễn biến giá → Mở sự kiện, kiểm tra nguồn tin → Phân tích cùng Trợ lý AI | Ba bước bằng text; đường nối thứ tự tĩnh là tùy chọn |
-| 5 | `TrustBoundary` | `#trust` | Xây niềm tin bằng traceability và giới hạn rõ | Nguồn tin; dữ liệu khả dụng; giới hạn phân tích | Text gọn; nguồn được giải thích trong Chart |
-| 6 | `FinalAccessCta` | `#access` | Kết thúc bằng cùng một conversion path | Outcome recap; auth-aware CTA; email behavior microcopy | Không cần media |
-| 7 | `PublicFooter` | — | Cung cấp fallback và locale path | Brand; sign-in hoặc dashboard theo auth state; request-access email; locale | Brand asset |
+| Thứ tự | Section / route-local component | ID              | Mục tiêu                                                  | Nội dung chính                                                                              | Product proof                                        |
+| ------ | ------------------------------- | --------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| 1      | `PublicHeader`                  | —               | Nhận diện, điều hướng và access path                      | Logo; Tính năng; Cách sử dụng; Độ tin cậy; locale; auth-aware CTA                           | Brand asset                                          |
+| 2      | `HeroProductProof`              | `#top`          | Định vị Knowledge Graph/AI và dẫn tới hành động tiếp theo | H1/supporting copy baseline; CTA; trust line; hai proof point                               | Conceptual market-context figure hiện có             |
+| 3      | `ProductStory`                  | `#product`      | Giải thích bốn tính năng chính bằng bốn chapter lớn       | Đồ thị Tri thức → Biểu đồ trực tiếp → Trợ lý AI → Telegram                                  | Bộ ảnh bốn tính năng thuộc phạm vi triển khai        |
+| 4      | `AnalysisFlow`                  | `#how-it-works` | Giúp người mới hình dung hành trình sử dụng               | Chọn tài sản, xem diễn biến giá → Mở sự kiện, kiểm tra nguồn tin → Phân tích cùng Trợ lý AI | Ba bước bằng text; đường nối thứ tự tĩnh là tùy chọn |
+| 5      | `TrustBoundary`                 | `#trust`        | Xây niềm tin bằng traceability và giới hạn rõ             | Nguồn tin; dữ liệu khả dụng; giới hạn phân tích                                             | Text gọn; nguồn được giải thích trong Chart          |
+| 6      | `FinalAccessCta`                | `#access`       | Kết thúc bằng cùng một conversion path                    | Outcome recap; auth-aware CTA; email behavior microcopy                                     | Không cần media                                      |
+| 7      | `PublicFooter`                  | —               | Cung cấp fallback và locale path                          | Brand; sign-in hoặc dashboard theo auth state; request-access email; locale                 | Brand asset                                          |
 
 ### Composition rules
 
@@ -415,14 +415,14 @@ Nếu chưa có capture được duyệt, hero phải dùng text-first compositi
 
 ### Feature-specific composition
 
-| Chapter | Desktop từ `1200px`, khi có ảnh được duyệt | Trọng tâm nội dung |
-| --- | --- | --- |
-| Đồ thị Tri thức | Copy phía trên, ảnh lớn phía dưới trong chiều rộng content | Một cụm quan hệ dễ hiểu; 2–3 chú thích giúp đọc sự kiện, tài sản và nguồn tin |
-| Biểu đồ trực tiếp | Copy trái, ảnh chart phải | Giá đi cùng dấu mốc sự kiện và lịch kinh tế; phản ứng/nguồn tin là nội dung hỗ trợ |
-| Trợ lý AI | Ảnh hội thoại trái, copy phải; DOM vẫn copy trước media | Câu hỏi và phản hồi thật với ngữ cảnh Market Knowledge Graph; lịch sử hội thoại là lợi ích phụ |
-| Telegram | Copy trái, tin nhắn mẫu phải; không ép ảnh dọc thành khung dashboard ngang | Nội dung nhận được thuộc ba nhóm đã chốt; thiết lập là dòng hỗ trợ ngắn |
+| Chapter           | Desktop từ `1200px`, khi có ảnh được duyệt                                 | Trọng tâm nội dung                                                                             |
+| ----------------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Đồ thị Tri thức   | Copy phía trên, ảnh lớn phía dưới trong chiều rộng content                 | Một cụm quan hệ dễ hiểu; 2–3 chú thích giúp đọc sự kiện, tài sản và nguồn tin                  |
+| Biểu đồ trực tiếp | Copy trái, ảnh chart phải                                                  | Giá đi cùng dấu mốc sự kiện và lịch kinh tế; phản ứng/nguồn tin là nội dung hỗ trợ             |
+| Trợ lý AI         | Ảnh hội thoại trái, copy phải; DOM vẫn copy trước media                    | Câu hỏi và phản hồi thật với ngữ cảnh Market Knowledge Graph; lịch sử hội thoại là lợi ích phụ |
+| Telegram          | Copy trái, tin nhắn mẫu phải; không ép ảnh dọc thành khung dashboard ngang | Nội dung nhận được thuộc ba nhóm đã chốt; thiết lập là dòng hỗ trợ ngắn                        |
 
-Graph là điểm nhấn thị giác đầu tiên nhưng không tạo thêm section hoặc thay đổi vị thế bốn tính năng chính. Hàng link bốn feature thuộc Hero, nằm sau nội dung Hero; trên màn hình hẹp wrap và không tạo thêm phần giới thiệu lặp.
+Graph là điểm nhấn thị giác đầu tiên nhưng không tạo thêm section hoặc thay đổi vị thế bốn tính năng chính. Hero giữ hai proof point ngắn; điều hướng tới bốn feature thuộc Header và ProductStory, không lặp thành một hàng link trong Hero.
 
 ### Product image enlargement
 
@@ -457,13 +457,13 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 
 ## Responsive Behavior
 
-| Viewport | Quy tắc |
-| --- | --- |
-| `< 640px` | Một cột; copy trước visual; CTA full-width khi cần; header giữ brand + primary CTA + menu, locale và secondary action nằm trong native disclosure; touch target ưu tiên tối thiểu 44×44px. |
-| `640px–767px` | Một cột; copy trước visual; mobile navigation dùng native disclosure; locale có thể hiển thị khi đủ chỗ; touch target ưu tiên tối thiểu 44×44px. |
-| `768px–1199px` | Hero và product chapters vẫn một cột để product capture có đủ chiều rộng; AnalysisFlow ba bước xếp dọc để giữ reading order. |
-| `≥ 1200px` | Hero có thể dùng split `5/7`; Graph có copy trên/ảnh lớn dưới, Chart/AI/Telegram theo Feature-specific composition; AnalysisFlow ba bước cùng hàng; content measure của body copy giữ khoảng 60–70 ký tự mỗi dòng. |
-| Zoom `200%` | Reflow như narrow viewport; không page-level horizontal overflow; sticky/fixed surface không che focus hoặc heading. |
+| Viewport       | Quy tắc                                                                                                                                                                                                            |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `< 640px`      | Một cột; copy trước visual; CTA full-width khi cần; header giữ brand + primary CTA + menu, locale và secondary action nằm trong native disclosure; touch target ưu tiên tối thiểu 44×44px.                         |
+| `640px–767px`  | Một cột; copy trước visual; mobile navigation dùng native disclosure; locale có thể hiển thị khi đủ chỗ; touch target ưu tiên tối thiểu 44×44px.                                                                   |
+| `768px–1199px` | Hero và product chapters vẫn một cột để product capture có đủ chiều rộng; AnalysisFlow ba bước xếp dọc để giữ reading order.                                                                                       |
+| `≥ 1200px`     | Hero có thể dùng split `5/7`; Graph có copy trên/ảnh lớn dưới, Chart/AI/Telegram theo Feature-specific composition; AnalysisFlow ba bước cùng hàng; content measure của body copy giữ khoảng 60–70 ký tự mỗi dòng. |
+| Zoom `200%`    | Reflow như narrow viewport; không page-level horizontal overflow; sticky/fixed surface không che focus hoặc heading.                                                                                               |
 
 - Không đặt essential popup/content bằng absolute positioning trên screenshot mock.
 - Media giữ aspect ratio, intrinsic dimensions và không làm thay đổi layout khi tải.
@@ -508,10 +508,10 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 
 ### Locked metadata
 
-| Locale | Title | Description |
-| --- | --- | --- |
-| `vi` | Signapse \| Market Intelligence Platform | Signapse kết nối giá, sự kiện, phản ứng và nguồn tin liên quan để hỗ trợ phân tích thị trường bằng AI với bối cảnh có thể kiểm tra. |
-| `en` | Signapse \| Market Intelligence Platform | Signapse connects price, events, market reactions, and related sources to support AI-assisted market analysis with context you can verify. |
+| Locale | Title                                    | Description                                                                                                                                |
+| ------ | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `vi`   | Signapse \| Market Intelligence Platform | Signapse kết nối giá, sự kiện, phản ứng và nguồn tin liên quan để hỗ trợ phân tích thị trường bằng AI với bối cảnh có thể kiểm tra.        |
+| `en`   | Signapse \| Market Intelligence Platform | Signapse connects price, events, market reactions, and related sources to support AI-assisted market analysis with context you can verify. |
 
 - Metadata dùng Next.js Metadata API và dictionary hiện hành.
 - Khai báo canonical locale URL và language alternates cho `/vi` và `/en`.
@@ -544,7 +544,7 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 - First viewport hiển thị audience outcome, AI-assisted promise, CTA và trust boundary trong một lượt scan.
 - Đúng bốn product chapters theo thứ tự Đồ thị Tri thức, Biểu đồ trực tiếp, Trợ lý AI và Telegram; mỗi chapter có outcome và body của locale tương ứng.
 - AI và Telegram là tính năng chính; workspace/history và reaction/evidence là nội dung hỗ trợ tại AI/Chart. Không còn WorkspaceAssistant hoặc Reaction & Evidence chapter riêng.
-- Thứ tự section là Hero → ProductStory → AnalysisFlow → TrustBoundary → FinalAccessCta, với Header/Footer bao quanh. Hàng link bốn tính năng thuộc Hero; AnalysisFlow giữ đúng ba bước và các description đã duyệt.
+- Thứ tự section là Hero → ProductStory → AnalysisFlow → TrustBoundary → FinalAccessCta, với Header/Footer bao quanh. Hero giữ hai proof point; AnalysisFlow giữ đúng ba bước và các description đã duyệt.
 - Telegram mô tả liên kết điểm nhận, chọn nội dung nhận và thiết lập lịch phân tích theo tài sản; dùng “bản phân tích từ Signapse”, không claim kênh chung hoặc độc quyền thương mại.
 - Header, từng section, chapter, trust boundary và final CTA dùng Locked Section Copy cho đúng locale.
 - Mọi copy, metadata, caption và alt text qua claim-matrix review.
@@ -558,7 +558,7 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 - Cutover-only: mailbox request-access phải được owner xác nhận provision, nhận external mail và có người theo dõi trước apex release; đây không phải merge/archive acceptance của landing implementation change.
 - Sign-in và dashboard destinations giữ locale.
 - Anonymous và authenticated CTA states đúng với CTA matrix.
-- Hero secondary của cả hai trạng thái là “Khám phá tính năng” / “Explore features” tới `#product`; navigation “Cách sử dụng” / “How to use” vẫn tới `#how-it-works`. Bốn feature links tới đúng chapter, supported hashes được giữ qua đổi locale.
+- Hero secondary của cả hai trạng thái là “Xem cách Signapse phân tích” / “See how Signapse analyzes markets” tới `#how-it-works`; navigation “Tính năng” / “Features” vẫn tới `#product`. Các chapter anchor và supported hashes được giữ qua đổi locale.
 - Locale switch giữ query và supported hash, đánh dấu current locale đúng semantics và không đổi auth state.
 
 ### Media

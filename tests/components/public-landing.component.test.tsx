@@ -25,8 +25,8 @@ function renderLanding(locale: "vi" | "en") {
 
 describe("localized landing composition", () => {
   it.each([
-    ["vi", "Hiểu thị trường qua Đồ thị Tri thức và AI."],
-    ["en", "Understand markets through the Knowledge Graph and AI."],
+    ["vi", "Biến dữ liệu thị trường thành Đồ thị Tri thức."],
+    ["en", "Turn market data into a Knowledge Graph."],
   ] as const)("renders the four-feature %s story", (locale, heading) => {
     const html = renderLanding(locale)
     const sectionOrder = [
@@ -45,16 +45,16 @@ describe("localized landing composition", () => {
     expect((html.match(/<h1/g) ?? []).length).toBe(1)
     expect(html).toContain(heading)
     expect(html).toContain("MARKET INTELLIGENCE PLATFORM")
-    expect(html).toContain('href="#product"')
-
-    for (const anchor of [
-      "knowledge-graph",
-      "live-charts",
-      "ai-assistant",
-      "telegram",
-    ]) {
-      expect(html).toContain(`href="#${anchor}"`)
-    }
+    expect(html).toContain('href="#how-it-works"')
+    expect(html).not.toContain("data-feature-links")
+    expect(html).toContain(
+      locale === "vi" ? "Trợ lý AI chuyên biệt" : "Specialized AI Assistant"
+    )
+    expect(html).toContain(
+      locale === "vi"
+        ? "Đọc bối cảnh, không chỉ nhìn nến"
+        : "Read the context, not just the candles"
+    )
 
     expect((html.match(/data-product-chapter/g) ?? []).length).toBe(4)
     expect((html.match(/data-media-state="approved"/g) ?? []).length).toBe(4)
@@ -91,8 +91,11 @@ describe("localized landing composition", () => {
     expect(html).not.toContain("workspace-ai")
     expect(html).not.toContain("Reaction &amp; Evidence")
     expect(html).not.toContain("Track → Contextualize → Inspect → Explore")
-    expect(html).not.toContain("Biến dữ liệu thị trường thành Đồ thị Tri thức.")
-    expect(html).not.toContain("Specialized AI Assistant")
+    expect(html).not.toContain(
+      locale === "vi"
+        ? "Hiểu thị trường qua Đồ thị Tri thức và AI."
+        : "Understand markets through the Knowledge Graph and AI."
+    )
     expect(html).not.toContain("Market Query")
     expect(html).not.toContain(
       locale === "vi" ? "kênh công khai" : "public channel"

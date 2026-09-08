@@ -1,6 +1,6 @@
 ## Context
 
-The public landing is a route-local, server-rendered composition with localized dictionaries, an auth-aware access model, a client-only Hero market-context figure, and existing component and Playwright coverage. The preceding `refocus-public-landing-features` change established the four-feature story and must be applied before this refinement. Its current implementation renders four repeated two-column chapters and always-visible text-only media slots; no approved product capture exists under the public asset tree.
+The public landing is a route-local, server-rendered composition with localized dictionaries, an auth-aware access model, a client-only Hero market-context figure, and existing component and Playwright coverage. The preceding `refocus-public-landing-features` change established the four-feature story and must be applied before this refinement. Its current implementation renders four repeated two-column chapters and always-visible text-only media slots; no approved product capture exists under the public asset tree. The Hero is restored separately to the historical `8ae5336` baseline so this refinement does not alter that section while the product-proof chapters evolve.
 
 This change follows the Evidence-Led Editorial direction in the landing design contract and preserves the accepted progressive-WebGL and staged-cutover ADRs. Product captures are public evidence: their demo source and final localized image require Product Owner approval, while their layout, fallback, loading, accessibility, and tests remain implementation-owned.
 
@@ -8,6 +8,7 @@ This change follows the Evidence-Led Editorial direction in the landing design c
 
 **Goals:**
 
+- Restore the Hero to the approved historical baseline from `8ae5336`, including its two proof points, `#how-it-works` secondary CTA, and `lg` layout breakpoint.
 - Give each primary feature a composition suited to its product evidence while preserving the approved story order and copy.
 - Make outcome copy the semantic chapter heading and keep the feature name as a compact label.
 - Replace text-only media placeholders with optional, approval-gated localized captures.
@@ -17,9 +18,9 @@ This change follows the Evidence-Led Editorial direction in the landing design c
 
 **Non-Goals:**
 
-- Rewriting the Hero, four-feature order, AnalysisFlow, trust, CTA, footer, or product claims.
+- Changing ProductStory, AnalysisFlow, trust, CTA, footer, product claims, or approved media outside the Hero restoration.
 - Changing Graph View, Market Charts, AI Assistant, Telegram, authentication, permissions, APIs, or delivery behavior.
-- Rebuilding the Hero figure, adding an interactive product demo, or adding carousel, autoplay, hotspot, zoom, or pan behavior.
+- Rebuilding the Hero figure, or adding an interactive product demo, carousel, autoplay, hotspot, zoom, or pan behavior.
 - Adding pricing, comparisons, testimonials, customer logos, metrics, analytics, deployment, or apex cutover work.
 
 ## Decisions
@@ -86,7 +87,7 @@ Capture approval itself and real Telegram delivery remain Product Owner/manual e
 
 ## Migration Plan
 
-1. Apply or otherwise preserve the effective four-feature landing contract from `refocus-public-landing-features` before implementing this change.
+1. Apply or otherwise preserve the effective four-feature landing contract from `refocus-public-landing-features`, and restore the Hero-only `8ae5336` baseline before implementing this refinement.
 2. Introduce the optional approved-capture descriptor/catalog and localized media/dialog strings.
 3. Refactor ProductStory hierarchy and feature-specific responsive composition; remove text-only media placeholders.
 4. Add the route-local capture renderer and enlargement dialog with text-first behavior when no descriptor is approved.
