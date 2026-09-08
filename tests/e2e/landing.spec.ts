@@ -31,9 +31,19 @@ test.describe("P0 public landing", () => {
 
       await expect(page.locator("[data-product-chapter]")).toHaveCount(4)
       await expect(
+        page.locator('[data-product-chapter][data-media-state="approved"]')
+      ).toHaveCount(2)
+      await expect(
         page.locator('[data-product-chapter][data-media-state="text-first"]')
-      ).toHaveCount(4)
-      await expect(page.locator("[data-landing-media-slot]")).toHaveCount(0)
+      ).toHaveCount(2)
+      await expect(page.locator("[data-landing-media-slot]")).toHaveCount(2)
+      await expect(page.locator("[data-landing-media-slot] img")).toHaveCount(2)
+      await expect(
+        page.getByRole("button", {
+          name: locale === "vi" ? "Xem ảnh lớn" : "View larger image",
+          exact: true,
+        })
+      ).toHaveCount(2)
       await expect(page.locator("[data-product-chapter] h3")).toHaveCount(4)
       await expect(
         page.locator("[data-product-chapter] h3").first()
@@ -42,6 +52,34 @@ test.describe("P0 public landing", () => {
           ? "Nhìn thấy các mối liên hệ trong thị trường."
           : "See how market information connects."
       )
+
+      const enlargeButton = page
+        .getByRole("button", {
+          name: locale === "vi" ? "Xem ảnh lớn" : "View larger image",
+          exact: true,
+        })
+        .first()
+      const currentUrl = page.url()
+      await enlargeButton.focus()
+      await enlargeButton.click()
+      const captureDialog = page.getByRole("dialog")
+      await expect(captureDialog).toBeVisible()
+      await expect(
+        captureDialog.getByRole("button", {
+          name: locale === "vi" ? "Đóng" : "Close",
+          exact: true,
+        })
+      ).toBeFocused()
+      await expect(captureDialog.locator("img")).toHaveCount(1)
+      await expect(page).toHaveURL(currentUrl)
+      await captureDialog
+        .getByRole("button", {
+          name: locale === "vi" ? "Đóng" : "Close",
+          exact: true,
+        })
+        .click()
+      await expect(captureDialog).toBeHidden()
+      await expect(enlargeButton).toBeFocused()
       await expect(page.locator("#how-it-works")).toContainText(
         locale === "vi"
           ? "Chọn tài sản, xem diễn biến giá"
@@ -110,6 +148,42 @@ test.describe("P0 public landing", () => {
       .first()
       .click()
     await expect(page).toHaveURL(/\/vi\?source=footer$/)
+  })
+
+  test("uses the approved graph and chart proof geometry across breakpoints", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto("/en")
+
+    const graphCopy = page.locator("#knowledge-graph > div").nth(0)
+    const graphMedia = page.locator("#knowledge-graph > div").nth(1)
+    const graphCopyBox = await graphCopy.boundingBox()
+    const graphMediaBox = await graphMedia.boundingBox()
+    expect(graphCopyBox).not.toBeNull()
+    expect(graphMediaBox).not.toBeNull()
+    if (!graphCopyBox || !graphMediaBox) return
+    expect(graphMediaBox.y).toBeGreaterThan(graphCopyBox.y)
+
+    const chartCopy = page.locator("#live-charts > div").nth(0)
+    const chartMedia = page.locator("#live-charts > div").nth(1)
+    const chartCopyBox = await chartCopy.boundingBox()
+    const chartMediaBox = await chartMedia.boundingBox()
+    expect(chartCopyBox).not.toBeNull()
+    expect(chartMediaBox).not.toBeNull()
+    if (!chartCopyBox || !chartMediaBox) return
+    expect(chartMediaBox.x).toBeGreaterThan(chartCopyBox.x)
+
+    await page.setViewportSize({ width: 375, height: 900 })
+    await page.goto("/en")
+    const mobileChartCopy = page.locator("#live-charts > div").nth(0)
+    const mobileChartMedia = page.locator("#live-charts > div").nth(1)
+    const mobileChartCopyBox = await mobileChartCopy.boundingBox()
+    const mobileChartMediaBox = await mobileChartMedia.boundingBox()
+    expect(mobileChartCopyBox).not.toBeNull()
+    expect(mobileChartMediaBox).not.toBeNull()
+    if (!mobileChartCopyBox || !mobileChartMediaBox) return
+    expect(mobileChartMediaBox.y).toBeGreaterThan(mobileChartCopyBox.y)
   })
 
   test("keeps the native mobile disclosure keyboard-operable", async ({

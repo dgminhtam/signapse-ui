@@ -24,17 +24,17 @@
 ## 4. Approved Product Captures
 
 - [x] 4.1 Prepare a non-sensitive capture plan and approval record for Knowledge Graph, Live Charts, AI Assistant, and Telegram in Vietnamese and English, including source/demo scenario, intended crop, dimensions, caption/alt draft, and current approval status.
-- [ ] 4.2 Capture and optimize the authorized Knowledge Graph assets for both locales, showing one readable event–asset–source cluster and no unsupported causality or demo-surface claim.
-- [ ] 4.3 Capture and optimize the authorized Live Charts assets for both locales, preserving price, event/economic-calendar context, and applicable stream/data status without presenting the image as currently live.
+- [x] 4.2 Capture and optimize the authorized Knowledge Graph assets for both locales, showing one readable event–asset–source cluster and no unsupported causality or demo-surface claim.
+- [x] 4.3 Capture and optimize the authorized Live Charts assets for both locales, preserving price, event/economic-calendar context, and applicable stream/data status without presenting the image as currently live.
 - [ ] 4.4 Capture and optimize the authorized AI Assistant assets for both locales from a permitted demo conversation without fabricating an answer or implying graph-node or automatic chart-context chat.
 - [ ] 4.5 Capture and optimize the authorized Telegram assets for both locales from permitted real Signapse messages without independently sending messages, enabling routing, or creating schedules.
-- [ ] 4.6 Integrate only captures whose final locale-specific image has Product Owner approval, and leave every unavailable or awaiting-approval entry text-first and explicitly incomplete in the handoff record.
+- [x] 4.6 Integrate only captures whose final locale-specific image has Product Owner approval, and leave every unavailable or awaiting-approval entry text-first and explicitly incomplete in the handoff record.
 
 ## 5. Automated Verification
 
 - [x] 5.1 Update server-rendered landing component tests for semantic heading hierarchy, feature order, complete text-first fallback, approved/partial-locale catalog behavior, and absence of repeated media placeholders.
-- [ ] 5.2 Update Playwright coverage for feature-specific desktop geometry and single-column copy-before-media order at 375, 768, 1024, and 1440 CSS pixels and 200% zoom.
-- [ ] 5.3 Add browser coverage for the localized enlargement trigger, matching image and locale, dialog title/Close, Escape dismissal, focus containment/return, URL stability, aspect ratio, and no page-level overflow.
+- [x] 5.2 Update Playwright coverage for feature-specific desktop geometry and single-column copy-before-media order at 375, 768, 1024, and 1440 CSS pixels and 200% zoom.
+- [x] 5.3 Add browser coverage for the localized enlargement trigger, matching image and locale, dialog title/Close, Escape dismissal, focus containment/return, URL stability, aspect ratio, and no page-level overflow.
 - [x] 5.4 Add deterministic loading and broken-image coverage confirming localized feedback, dismissibility, and continued availability of adjacent chapter content.
 - [x] 5.5 Retain and run landing regression coverage for public routing, auth-aware CTA destinations, locale/hash preservation, Hero figure behavior, reduced motion, light/dark themes, and automated accessibility checks.
 - [ ] 5.6 Run dictionary parity and forbidden-copy/media static searches, targeted tests, lint, typecheck, production build, and strict OpenSpec validation; report any unrelated pre-existing warnings separately.

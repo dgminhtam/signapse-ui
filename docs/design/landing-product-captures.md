@@ -1,6 +1,6 @@
 # Signapse Landing Product Captures
 
-> Trạng thái: Chờ nguồn demo được phép công khai và Product Owner duyệt ảnh cuối  
+> Trạng thái: Đã duyệt một phần; Graph và Chart đã tích hợp, AI và Telegram còn thiếu
 > Phạm vi: `/vi` và `/en` public landing  
 > Cập nhật: 2026-09-07
 
@@ -8,16 +8,16 @@ Tài liệu này theo dõi kịch bản và trạng thái ảnh sản phẩm cho
 
 ## Capture plan
 
-| Feature           | Kịch bản cần capture                  | Nội dung bắt buộc thấy được                                        | Crop / kích thước dự kiến | Locale     | Trạng thái     |
-| ----------------- | ------------------------------------- | ------------------------------------------------------------------ | ------------------------- | ---------- | -------------- |
-| Đồ thị Tri thức   | Graph View với một cụm quan hệ dễ đọc | Sự kiện, tài sản liên quan, nguồn tin; 2–3 chú thích ngoài ảnh     | Landscape, `1600×1000`    | `vi`, `en` | Chờ nguồn demo |
-| Biểu đồ trực tiếp | Chart của tài sản theo dõi            | Diễn biến giá, dấu mốc sự kiện, lịch kinh tế và trạng thái dữ liệu | Landscape, `1600×1000`    | `vi`, `en` | Chờ nguồn demo |
-| Trợ lý AI         | Hội thoại trong workspace demo        | Câu hỏi và phản hồi thực tế dùng ngữ cảnh Đồ thị Tri thức          | Landscape, `1400×1000`    | `vi`, `en` | Chờ nguồn demo |
-| Telegram          | Tin nhắn Signapse được phép công khai | Cảnh báo tin, lịch kinh tế và bản phân tích theo lịch              | Portrait, `1000×1400`     | `vi`, `en` | Chờ nguồn demo |
+| Feature           | Kịch bản cần capture                  | Nội dung bắt buộc thấy được                                        | Crop / kích thước dự kiến | Locale     | Trạng thái           |
+| ----------------- | ------------------------------------- | ------------------------------------------------------------------ | ------------------------- | ---------- | -------------------- |
+| Đồ thị Tri thức   | Graph View với một cụm quan hệ dễ đọc | Sự kiện, tài sản liên quan, nguồn tin; 2–3 chú thích ngoài ảnh     | Landscape, `1600×1000`    | `vi`, `en` | Đã duyệt và tích hợp |
+| Biểu đồ trực tiếp | Chart của tài sản theo dõi            | Diễn biến giá, dấu mốc sự kiện, lịch kinh tế và trạng thái dữ liệu | Landscape, `1600×1000`    | `vi`, `en` | Đã duyệt và tích hợp |
+| Trợ lý AI         | Hội thoại trong workspace demo        | Câu hỏi và phản hồi thực tế dùng ngữ cảnh Đồ thị Tri thức          | Landscape, `1400×1000`    | `vi`, `en` | Chờ nguồn demo       |
+| Telegram          | Tin nhắn Signapse được phép công khai | Cảnh báo tin, lịch kinh tế và bản phân tích theo lịch              | Portrait, `1000×1400`     | `vi`, `en` | Chờ nguồn demo       |
 
 ## Approval record
 
-Hiện chưa có capture nào được phép tích hợp vào `public/`. Khi có nguồn, cập nhật từng dòng với các trường sau:
+Graph và Chart đã được tích hợp vào `public/images/landing/{lang}/` theo crop review. Khi bổ sung AI hoặc Telegram, cập nhật từng dòng với các trường sau:
 
 - Feature và locale.
 - Demo/source reference không chứa credential, private identifier hoặc token.

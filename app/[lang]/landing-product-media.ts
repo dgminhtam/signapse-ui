@@ -26,8 +26,46 @@ export const APPROVED_LANDING_PRODUCT_CAPTURES: Record<
   AppLocale,
   Partial<Record<LandingProductFeature, LandingProductCaptureDescriptor>>
 > = {
-  vi: {},
-  en: {},
+  vi: {
+    "knowledge-graph": {
+      feature: "knowledge-graph",
+      locale: "vi",
+      src: "/images/landing/vi/knowledge-graph.webp",
+      width: 1550,
+      height: 720,
+      sourceRef: "user-capture-2026-09-08-knowledge-graph-vi",
+      approvalStatus: "approved",
+    },
+    "live-charts": {
+      feature: "live-charts",
+      locale: "vi",
+      src: "/images/landing/vi/live-market-chart.webp",
+      width: 1550,
+      height: 742,
+      sourceRef: "user-capture-2026-09-08-live-market-chart-vi",
+      approvalStatus: "approved",
+    },
+  },
+  en: {
+    "knowledge-graph": {
+      feature: "knowledge-graph",
+      locale: "en",
+      src: "/images/landing/en/knowledge-graph.webp",
+      width: 1550,
+      height: 720,
+      sourceRef: "user-capture-2026-09-08-knowledge-graph-en",
+      approvalStatus: "approved",
+    },
+    "live-charts": {
+      feature: "live-charts",
+      locale: "en",
+      src: "/images/landing/en/live-market-chart.webp",
+      width: 1550,
+      height: 742,
+      sourceRef: "user-capture-2026-09-08-live-market-chart-en",
+      approvalStatus: "approved",
+    },
+  },
 }
 
 export function getApprovedLandingProductCapture(
