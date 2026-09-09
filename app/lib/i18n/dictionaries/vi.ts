@@ -775,7 +775,7 @@ export const vi = {
       title: "Biến dữ liệu thị trường thành Đồ thị Tri thức.",
       body: "Signapse tổng hợp, đánh giá và phân tích dữ liệu giá, sự kiện, phản ứng và tin tức từ nhiều nguồn thành các mối liên hệ có thể kiểm tra — tạo ngữ cảnh cho Trợ lý AI khi bạn đặt câu hỏi và đọc từng biến động.",
       trustNote:
-        "AI hỗ trợ tổng hợp và khám phá. Bạn kiểm tra nguồn và tự đưa ra quyết định giao dịch.",
+        "AI hỗ trợ tổng hợp và khám phá, giúp bạn hiểu rõ hơn bối cảnh của các biến động giá trước khi tự đưa ra quyết định giao dịch.",
       proofOneTitle: "Trợ lý AI chuyên biệt",
       proofOneBody:
         "Vận hành trên Đồ thị Tri thức, được xây dựng từ dữ liệu thị trường đa nguồn đã qua tổng hợp, đánh giá và phân tích.",
@@ -797,7 +797,7 @@ export const vi = {
     cta: {
       requestAccess: "Yêu cầu truy cập",
       signIn: "Đăng nhập",
-      openDashboard: "Mở bảng điều khiển",
+      openDashboard: "Truy cập bảng điều khiển",
       requestAccessAria: "Yêu cầu truy cập Signapse",
       signInAria: "Đăng nhập vào Signapse",
       openDashboardAria: "Mở bảng điều khiển Signapse",
@@ -869,8 +869,8 @@ export const vi = {
       pointThree: "Nguồn gốc và giới hạn dữ liệu vẫn cần được kiểm tra.",
     },
     finalCta: {
-      heading: "Bắt đầu với một chuyển động bạn muốn hiểu rõ hơn.",
-      body: "Yêu cầu truy cập để khám phá Đồ thị Tri thức, theo dõi biểu đồ trực tiếp, trò chuyện với Trợ lý AI và thiết lập cập nhật qua Telegram.",
+      heading: "Bạn đang theo dõi mã nào?",
+      body: "Khám phá Đồ thị Tri thức, theo dõi diễn biến thị trường trên biểu đồ và trò chuyện với Trợ lý AI để hiểu rõ hơn về biến động giá và nhận cập nhật về mã bạn quan tâm.",
       accessLabel: "Tiếp tục tới Signapse",
     },
     footer: {

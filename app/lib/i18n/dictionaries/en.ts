@@ -776,7 +776,7 @@ export const en: Dictionary = {
       title: "Turn market data into a Knowledge Graph.",
       body: "Signapse aggregates, evaluates, and analyzes multi-source price, event, reaction, and news data into inspectable relationships—giving the AI Assistant context when you ask questions and read market moves.",
       trustNote:
-        "AI supports synthesis and exploration. You verify the sources and make the trading decision.",
+        "AI supports synthesis and exploration, helping you better understand the context behind price movements before making your own trading decisions.",
       proofOneTitle: "Specialized AI Assistant",
       proofOneBody:
         "Powered by a Knowledge Graph built from multi-source market data—aggregated, evaluated, and analyzed.",
@@ -798,7 +798,7 @@ export const en: Dictionary = {
     cta: {
       requestAccess: "Request access",
       signIn: "Sign in",
-      openDashboard: "Open dashboard",
+      openDashboard: "Access dashboard",
       requestAccessAria: "Request access to Signapse",
       signInAria: "Sign in to Signapse",
       openDashboardAria: "Open the Signapse dashboard",
@@ -871,8 +871,8 @@ export const en: Dictionary = {
         "Source provenance and data limits still require your review.",
     },
     finalCta: {
-      heading: "Start with a move you want to understand more clearly.",
-      body: "Request access to explore the Knowledge Graph, follow live charts, chat with the AI Assistant, and set up Telegram updates.",
+      heading: "Which symbol are you following?",
+      body: "Explore the Knowledge Graph, follow market movements on charts, and chat with the AI Assistant to better understand price movements and receive updates on the symbols you care about.",
       accessLabel: "Continue to Signapse",
     },
     footer: {
