@@ -176,6 +176,24 @@ The landing page SHALL organize the product story into the canonical sequence: P
 - **THEN** it exposes brand identity, locale links, the request-access email, and the auth-appropriate sign-in or dashboard destination
 - **AND** it does not render Docs, Privacy, Terms, pricing, or integration links unless corresponding destinations exist
 
+### Requirement: Decorative OHLCV Hero depth field
+The public landing Hero SHALL render one static, route-local `O/H/L/C/V` glyph field behind its content and market-context figure. The field SHALL use the fixed landing palette, SHALL remain decorative and non-interactive, and SHALL NOT present ticker symbols, prices, percentages, BUY/SELL language, trading signals, candles, or data that could be mistaken for live market output.
+
+#### Scenario: OHLCV depth field renders across locales
+- **WHEN** a visitor views the Hero on `/vi` or `/en`
+- **THEN** one OHLCV glyph field is rendered behind the localized Hero content and market-context figure
+- **AND** the glyph field does not change the Hero copy, CTA destinations, proof points, figure behavior, or canonical section order
+
+#### Scenario: OHLCV depth field remains decorative
+- **WHEN** the Hero is inspected through assistive technology or keyboard navigation
+- **THEN** the OHLCV glyph field is hidden from the accessibility tree
+- **AND** it exposes no accessible name, control, focus target, pointer behavior, or live region
+
+#### Scenario: OHLCV depth field preserves responsive layout
+- **WHEN** the landing renders at a supported viewport, 200% zoom, or with reduced motion enabled
+- **THEN** the static glyph field remains behind the Hero content and figure without page-level horizontal overflow
+- **AND** all localized content and interaction remain available without depending on the decoration
+
 ### Requirement: Control-free Hero visual chrome
 The text-first Hero SHALL render its market-context figure without visible control chrome. The Hero visual area SHALL NOT display its section label, proof heading, figure caption, hover hint, pause control, mode label, runtime status, fallback labels, or a persistent canvas border. The localized Hero headline, supporting copy, CTA behavior, trust note, and two proof points SHALL remain visible.
 

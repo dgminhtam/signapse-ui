@@ -68,10 +68,96 @@
 
 .heroSection {
   background-image:
-    linear-gradient(to right, color-mix(in oklab, var(--border) 34%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in oklab, var(--border) 34%, transparent) 1px, transparent 1px);
-  background-position: center;
-  background-size: 72px 72px;
+    radial-gradient(
+      ellipse 58% 78% at 82% 38%,
+      color-mix(in oklab, var(--landing-mint) 11%, transparent),
+      transparent 72%
+    ),
+    linear-gradient(
+      150deg,
+      var(--landing-navy) 0%,
+      color-mix(in oklab, var(--landing-navy-surface) 72%, var(--landing-navy))
+        62%,
+      var(--landing-navy) 100%
+    );
+}
+
+.heroSection::after {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 62% 76% at 24% 44%,
+    color-mix(in oklab, var(--landing-navy) 98%, transparent) 0%,
+    color-mix(in oklab, var(--landing-navy) 86%, transparent) 38%,
+    transparent 76%
+  );
+  content: "";
+  pointer-events: none;
+}
+
+.heroContent {
+  position: relative;
+  z-index: 2;
+}
+
+.heroOhlcvBackground {
+  position: absolute;
+  z-index: 0;
+  inset: -4% -2%;
+  overflow: hidden;
+  color: var(--landing-mint);
+  pointer-events: none;
+  user-select: none;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 10%,
+    black 82%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 10%,
+    black 82%,
+    transparent 100%
+  );
+}
+
+.heroOhlcvArtwork {
+  display: block;
+  width: 100%;
+  height: 100%;
+  font-family: var(--font-mono), monospace;
+  font-weight: 600;
+  text-anchor: middle;
+}
+
+.heroGlyphsFar {
+  fill: currentColor;
+  opacity: 0.13;
+}
+
+.heroGlyphsNear {
+  fill: var(--landing-off-white);
+  opacity: 0.19;
+}
+
+@media (max-width: 639px) {
+  .heroSection::after {
+    background: radial-gradient(
+      ellipse 112% 58% at 34% 24%,
+      color-mix(in oklab, var(--landing-navy) 98%, transparent) 0%,
+      color-mix(in oklab, var(--landing-navy) 88%, transparent) 48%,
+      transparent 84%
+    );
+  }
+
+  .heroOhlcvBackground {
+    inset: -2% -42%;
+    opacity: 0.72;
+  }
 }
 
 .heroCopy,

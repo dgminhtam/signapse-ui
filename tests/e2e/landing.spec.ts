@@ -64,6 +64,14 @@ test.describe("P0 public landing", () => {
       await expect(page.locator("#product")).not.toContainText("Market Query")
 
       await expect(page.locator("[data-feature-links]")).toHaveCount(0)
+      const heroDecoration = page.locator(
+        '[data-landing-decoration="ohlcv-depth-field"]'
+      )
+      await expect(heroDecoration).toHaveCount(1)
+      await expect(heroDecoration).toHaveAttribute("aria-hidden", "true")
+      await expect(
+        heroDecoration.locator("a, button, input, select, textarea, [tabindex]")
+      ).toHaveCount(0)
       await expect(
         page.locator('[data-landing-section="hero-product-proof"]')
       ).toContainText(

@@ -104,6 +104,13 @@ describe("localized landing composition", () => {
       locale === "vi" ? "kênh công khai" : "public channel"
     )
     expect(html).not.toContain(locale === "vi" ? "độc quyền" : "exclusive")
+    expect(
+      (html.match(/data-landing-decoration="ohlcv-depth-field"/g) ?? []).length
+    ).toBe(1)
+    expect(html).toMatch(
+      /<div aria-hidden="true"[^>]*data-landing-decoration="ohlcv-depth-field"/
+    )
+    expect(html).toContain('focusable="false"')
     expect(html).toContain('data-landing-visual="context-figure"')
     expect(html).toContain('<figcaption class="sr-only">')
   })

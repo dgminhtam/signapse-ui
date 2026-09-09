@@ -18,6 +18,7 @@ import {
   getApprovedLandingProductCapture,
   type LandingProductFeature,
 } from "./landing-product-media"
+import { LandingOhlcvBackground } from "./landing-ohlcv-background"
 import {
   createLandingAccessModel,
   type LandingAccessAction,
@@ -263,7 +264,10 @@ function HeroSection({
       aria-labelledby="landing-hero-heading"
       className={`${styles.darkSurface} ${styles.heroSection} relative overflow-hidden border-b border-border/80 bg-background`}
     >
-      <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[minmax(0,0.9fr)_minmax(28rem,1.1fr)] lg:items-center lg:gap-14 lg:px-8 lg:py-24">
+      <LandingOhlcvBackground />
+      <div
+        className={`${styles.heroContent} mx-auto grid w-full max-w-7xl gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[minmax(0,0.9fr)_minmax(28rem,1.1fr)] lg:items-center lg:gap-14 lg:px-8 lg:py-24`}
+      >
         <div className={`${styles.heroCopy} flex min-w-0 flex-col gap-7`}>
           <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
             {t.hero.eyebrow}

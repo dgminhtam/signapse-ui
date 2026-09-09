@@ -8,6 +8,8 @@ Quyết định ngày 2026-09-09: landing tập trung vào bốn tính năng Đ�
 
 Quyết định visual ngày 2026-09-09: landing dùng fixed branded composition với palette navy/mint đã được duyệt cho Signapse. Quyết định này chỉ áp dụng cho landing; dashboard vẫn phản ứng theo theme preference của người dùng.
 
+Quyết định Hero background ngày 2026-09-09: Hero dùng một trường glyph `O/H/L/C/V` tĩnh, route-local, phía sau copy và market-context figure. Ký hiệu chỉ tạo chiều sâu và nhận diện ngữ cảnh dữ liệu thị trường; chúng không biểu diễn ticker, giá, tín hiệu hoặc dữ liệu live.
+
 Quyết định phục hồi Hero ngày 2026-09-08: đưa riêng Hero về baseline trước refocus tại commit `8ae5336` — H1, supporting copy, CTA tới `#how-it-works`, hai proof point và breakpoint `lg`. ProductStory, AnalysisFlow, TrustBoundary, FinalAccessCta, Footer và toàn bộ media giữ nguyên runtime hiện tại. Bố cục chapter theo tính năng và ảnh thật có chú thích vẫn thuộc refinement đã triển khai.
 
 ## Authority
@@ -382,7 +384,7 @@ Một product capture chỉ được công khai khi tất cả điều kiện sa
 - Không publish `docs/design/design_light.png` hoặc `docs/design/design_dark.png`; đây là design reference, không phải product proof.
 - Không dùng các bản logo trong `docs/design/logo/` làm runtime source khi đã có canonical asset dưới `public/images/`.
 - Không dựng lại synthetic dashboard hiện tại với chart bars, confidence, evidence count hoặc control giả.
-- Không dùng stock trader imagery, AI brain/blob, neon crypto aesthetic, ticker wallpaper hoặc candlestick chỉ để trang trí.
+- Không dùng stock trader imagery, AI brain/blob, neon crypto aesthetic, ticker wallpaper hoặc candlestick chỉ để trang trí. Ngoại lệ hẹp là trường glyph `O/H/L/C/V` tĩnh đã duyệt cho nền Hero; trường này không chứa ticker, giá, phần trăm, BUY/SELL, tín hiệu hoặc candle giả.
 - Không dùng screenshot từ production/private workspace.
 - Không dùng customer logo, quote, rating hoặc certification khi chưa có quyền bằng văn bản.
 - Không dùng generated image để giả làm screenshot sản phẩm.
@@ -451,6 +453,7 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 - Header, Hero, Final CTA và Footer dùng dark surface family. Product Story, Analysis Flow và Trust Boundary dùng off-white surface family. Logo variant chọn theo surface, không theo global `.dark` class.
 - Dùng một accent có kiểm soát cho primary CTA và tín hiệu nghiệp vụ thật.
 - Hero dùng một interactive market-context figure có nhãn localized, static dual-view fallback và route-local WebGL enhancement; Analysis Flow chỉ dùng đường nối thứ tự tĩnh decorative khi cần, theo composition đã chốt trong Locked Section Copy. Connector/grid/node geometry phải nhẹ, không lặp trong chapter/card; conceptual labels và summary phải có nghĩa độc lập với motion.
+- Hero dùng trường glyph `O/H/L/C/V` route-local làm texture thứ cấp phía sau nội dung và figure. Chiều sâu đến từ scale, opacity, navy/mint gradient và mask; lớp này tĩnh, không tương tác, ẩn khỏi accessibility tree và không cạnh tranh với headline hoặc figure.
 - Product capture là visual chính; icon chỉ hỗ trợ scan và dùng Lucide, không dùng emoji.
 - Section rhythm dùng chapter Graph với copy trái và ảnh phải ở desktop, sau đó các chapter copy/media theo Feature-specific composition; giữ copy trước media ở mobile. Không copy giá trị màu hoặc tài sản của Graphify; không đổi geometry, font hoặc motion Hero chỉ để giống reference.
 - Không dùng bento wall, testimonial carousel, logo cloud, glassmorphism, purple gradient hoặc AI decoration không có product meaning.
@@ -527,6 +530,7 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 - `/{lang}/dashboard` và các app route khác vẫn protected.
 - Public origin và indexability lấy từ server-side deployment configuration explicit. Deployment non-indexable có origin thiếu hoặc không hợp lệ vẫn render với `noindex` nhưng bỏ canonical/language alternates và không suy luận từ hostname. Deployment indexable phải fail fast nếu origin không đúng chính xác `https://signapse.cloud`.
 - Giữ landing là Server Component mặc định; chỉ thêm client boundary khi native HTML/CSS không đáp ứng interaction bắt buộc.
+- Trường glyph nền Hero render bằng SVG inline trong Server Component và CSS route-local; không fetch dữ liệu, random runtime, animation loop hoặc dependency mới.
 - Hero entrance và conceptual-flow emphasis dùng route-local CSS opacity/transform one-shot; Hero figure là ngoại lệ hẹp được phép dynamic-load `three@0.180.0` cho visual core đã duyệt, không thêm GSAP/chart engine/scroll observer. Reduced-motion render ngay trạng thái cuối.
 - Giữ implementation route-local: `page.tsx` sở hữu metadata/dictionary/auth orchestration; một Server Component sở hữu các named landing sections; Context figure là client island riêng cho WebGL/interaction; locale switch vẫn là client island nhỏ đọc hash/query; một pure access model sở hữu CTA state/destination. Không tạo shared landing framework hoặc tách mỗi section thành một shallow file.
 - Ưu tiên native disclosure cho mobile navigation; không thêm dependency mới.
@@ -579,6 +583,7 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 - Tab order, focus, skip link, nav disclosure và CTA đều dùng được bằng keyboard.
 - Reduced-motion mode không mất nội dung hoặc interaction.
 - Conceptual figure có accessible text summary; decorative geometry không xuất hiện trong accessibility tree.
+- Trường glyph OHLCV xuất hiện đúng một lần trong Hero, nằm sau content/figure, không thêm accessible name, control hoặc tab stop và không tạo page-level overflow.
 - Screenshot alt text và adjacent copy truyền đạt cùng insight chính.
 - Graph và Chart có copy trái, ảnh phải ở desktop; AI/Telegram text-only; nhãn feature không cạnh tranh với outcome heading. Mobile và zoom giữ copy trước ảnh về cả thứ tự đọc lẫn thứ tự hiển thị.
 - Ảnh approved hiển thị đúng locale, không méo/crop sai; caption/annotation luôn đọc được ngoài ảnh và lỗi ảnh không làm mất nội dung chapter.
