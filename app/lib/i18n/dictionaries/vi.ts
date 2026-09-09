@@ -847,22 +847,12 @@ export const vi = {
       aiAssistantOutcome: "Đặt câu hỏi với ngữ cảnh từ Đồ thị Tri thức.",
       aiAssistantBody:
         "Trò chuyện với Trợ lý AI để phân tích quan hệ giữa sự kiện, tài sản và tin tức. Tiếp tục đặt câu hỏi và xem lại các cuộc trò chuyện trong workspace của bạn.",
-      aiAssistantMediaTitle: "Ảnh hội thoại với Trợ lý AI",
-      aiAssistantMediaCaption:
-        "Ảnh hội thoại cho thấy câu hỏi và phản hồi trong workspace đang hoạt động.",
-      aiAssistantMediaAlt:
-        "Hội thoại văn bản với Trợ lý AI trong workspace đang hoạt động.",
       telegramTitle: "Telegram",
       telegramOutcome: "Nhận cập nhật và bản phân tích từ Signapse.",
       telegramBody:
         "Nhận cảnh báo tin thị trường, cập nhật lịch kinh tế và bản phân tích từ Signapse qua Telegram.",
       telegramSetup:
         "Liên kết điểm nhận, chọn nội dung nhận và thiết lập lịch nhận phân tích theo tài sản bạn theo dõi.",
-      telegramMediaTitle: "Ảnh cập nhật qua Telegram",
-      telegramMediaCaption:
-        "Ảnh tin nhắn cho thấy các cập nhật thị trường và bản phân tích được gửi tới Telegram.",
-      telegramMediaAlt:
-        "Tin nhắn Telegram chứa cập nhật thị trường và bản phân tích từ Signapse.",
       media: {
         error: "Không thể tải ảnh này.",
       },

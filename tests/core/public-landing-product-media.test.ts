@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import {
+  APPROVED_LANDING_PRODUCT_CAPTURES,
   getApprovedLandingProductCapture,
   type LandingProductCaptureDescriptor,
 } from "@/app/[lang]/landing-product-media"
@@ -16,6 +17,17 @@ const approvedViCapture: LandingProductCaptureDescriptor = {
 }
 
 describe("landing product media catalog", () => {
+  it("keeps AI Assistant and Telegram intentionally text-only", () => {
+    for (const locale of ["vi", "en"] as const) {
+      expect(APPROVED_LANDING_PRODUCT_CAPTURES[locale]).not.toHaveProperty(
+        "ai-assistant"
+      )
+      expect(APPROVED_LANDING_PRODUCT_CAPTURES[locale]).not.toHaveProperty(
+        "telegram"
+      )
+    }
+  })
+
   it("returns only an approved capture for the requested locale and feature", () => {
     const catalog = {
       vi: { "knowledge-graph": approvedViCapture },

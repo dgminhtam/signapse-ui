@@ -419,12 +419,6 @@ function ProductStory({
       title: t.aiAssistantTitle,
       outcome: t.aiAssistantOutcome,
       body: t.aiAssistantBody,
-      media: {
-        alt: t.aiAssistantMediaAlt,
-        label: t.aiAssistantMediaTitle,
-        caption: t.aiAssistantMediaCaption,
-        error: t.media.error,
-      },
       icon: BrainCircuitIcon,
     },
     {
@@ -433,12 +427,6 @@ function ProductStory({
       outcome: t.telegramOutcome,
       body: t.telegramBody,
       detail: t.telegramSetup,
-      media: {
-        alt: t.telegramMediaAlt,
-        label: t.telegramMediaTitle,
-        caption: t.telegramMediaCaption,
-        error: t.media.error,
-      },
       icon: CalendarClockIcon,
     },
   ]
@@ -485,10 +473,12 @@ function FeatureChapter({
   locale: AppLocale
 }) {
   const Icon = chapter.icon
-  const capture = getApprovedLandingProductCapture(locale, chapter.id)
+  const capture =
+    chapter.id === "knowledge-graph" || chapter.id === "live-charts"
+      ? getApprovedLandingProductCapture(locale, chapter.id)
+      : null
   const hasMedia = Boolean(capture && chapter.media)
   const isKnowledgeGraph = chapter.id === "knowledge-graph"
-  const isAiAssistant = chapter.id === "ai-assistant"
 
   return (
     <article
@@ -503,13 +493,7 @@ function FeatureChapter({
             : "flex min-w-0 flex-col gap-5 border-b border-border py-10 last:border-b-0 min-[1200px]:max-w-3xl min-[1200px]:py-14"
       }
     >
-      <div
-        className={
-          hasMedia && isAiAssistant
-            ? "order-0 flex min-w-0 flex-col justify-center gap-5 min-[1200px]:order-2"
-            : "order-0 flex min-w-0 flex-col justify-center gap-5"
-        }
-      >
+      <div className="order-0 flex min-w-0 flex-col justify-center gap-5">
         <div className="flex items-center gap-3">
           <span
             aria-hidden="true"
@@ -532,13 +516,7 @@ function FeatureChapter({
         ) : null}
       </div>
       {capture && chapter.media ? (
-        <div
-          className={
-            isAiAssistant
-              ? "order-0 min-w-0 min-[1200px]:order-1"
-              : "order-0 min-w-0"
-          }
-        >
+        <div className="order-0 min-w-0">
           <LandingProductCapture capture={capture} labels={chapter.media} />
         </div>
       ) : null}

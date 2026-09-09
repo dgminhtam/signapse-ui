@@ -3,8 +3,13 @@ import type { AppLocale } from "@/app/lib/i18n/config"
 export type LandingProductFeature =
   "knowledge-graph" | "live-charts" | "ai-assistant" | "telegram"
 
+export type LandingProductMediaFeature = Extract<
+  LandingProductFeature,
+  "knowledge-graph" | "live-charts"
+>
+
 export type LandingProductCaptureDescriptor = {
-  feature: LandingProductFeature
+  feature: LandingProductMediaFeature
   locale: AppLocale
   src: string
   width: number
@@ -24,7 +29,7 @@ export type ApprovedLandingProductCapture = LandingProductCaptureDescriptor & {
  */
 export const APPROVED_LANDING_PRODUCT_CAPTURES: Record<
   AppLocale,
-  Partial<Record<LandingProductFeature, LandingProductCaptureDescriptor>>
+  Partial<Record<LandingProductMediaFeature, LandingProductCaptureDescriptor>>
 > = {
   vi: {
     "knowledge-graph": {
@@ -70,7 +75,7 @@ export const APPROVED_LANDING_PRODUCT_CAPTURES: Record<
 
 export function getApprovedLandingProductCapture(
   locale: AppLocale,
-  feature: LandingProductFeature,
+  feature: LandingProductMediaFeature,
   catalog = APPROVED_LANDING_PRODUCT_CAPTURES
 ): ApprovedLandingProductCapture | null {
   const capture = catalog[locale][feature]

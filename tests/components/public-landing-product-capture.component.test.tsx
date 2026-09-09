@@ -8,9 +8,9 @@ vi.mock("next/image", () => ({ default: "img" }))
 import { LandingProductCapture } from "@/app/[lang]/landing-product-capture"
 
 const capture = {
-  feature: "ai-assistant" as const,
+  feature: "knowledge-graph" as const,
   locale: "vi" as const,
-  src: "/images/landing/vi/ai-conversation.webp",
+  src: "/images/landing/vi/knowledge-graph.webp",
   width: 1200,
   height: 800,
   sourceRef: "fixture:approved-demo",
@@ -18,10 +18,9 @@ const capture = {
 }
 
 const labels = {
-  alt: "Hội thoại với Trợ lý AI trong workspace đang hoạt động.",
-  label: "Ảnh hội thoại với Trợ lý AI",
-  caption:
-    "Ảnh hội thoại cho thấy câu hỏi và phản hồi trong workspace đang hoạt động.",
+  alt: "Đồ thị Tri thức hiển thị sự kiện, tài sản và nguồn tin liên quan.",
+  label: "Ảnh Đồ thị Tri thức",
+  caption: "Ảnh Graph View cho thấy các mối liên hệ trong thị trường.",
   error: "Không thể tải ảnh này.",
 }
 

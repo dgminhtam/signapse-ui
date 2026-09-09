@@ -849,22 +849,12 @@ export const en: Dictionary = {
         "Ask questions with context from the Knowledge Graph.",
       aiAssistantBody:
         "Chat with the AI Assistant to analyze relationships between events, assets, and news. Ask follow-up questions and revisit conversations in your workspace.",
-      aiAssistantMediaTitle: "AI Assistant conversation capture",
-      aiAssistantMediaCaption:
-        "A conversation capture shows a question and response in the active workspace.",
-      aiAssistantMediaAlt:
-        "Text conversation with the AI Assistant in the active workspace.",
       telegramTitle: "Telegram",
       telegramOutcome: "Receive updates and market analysis from Signapse.",
       telegramBody:
         "Receive market news alerts, economic-calendar updates, and market analysis from Signapse through Telegram.",
       telegramSetup:
         "Link a destination, choose what to receive, and schedule analysis for the assets you track.",
-      telegramMediaTitle: "Telegram updates capture",
-      telegramMediaCaption:
-        "A message capture shows market updates and market analysis delivered through Telegram.",
-      telegramMediaAlt:
-        "Telegram message containing market updates and market analysis from Signapse.",
       media: {
         error: "This image could not be loaded.",
       },

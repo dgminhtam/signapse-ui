@@ -2,9 +2,9 @@
 
 > Trạng thái: Đã chốt cho OpenSpec proposal và implementation  
 > Phạm vi: Landing công khai tại `/vi` và `/en`  
-> Cập nhật gần nhất: 2026-09-08
+> Cập nhật gần nhất: 2026-09-09
 
-Quyết định ngày 2026-09-07: landing tập trung vào bốn tính năng Đồ thị Tri thức, Biểu đồ trực tiếp, Trợ lý AI và Telegram. Nội dung, thứ tự, CTA và phạm vi ảnh bên dưới đã được chốt trong phiên làm rõ requirement; runtime và dictionaries đã bắt đầu triển khai qua change `improve-public-landing-product-proof`, còn ảnh sản phẩm vẫn chờ nguồn demo được phép công khai và Product Owner duyệt.
+Quyết định ngày 2026-09-09: landing tập trung vào bốn tính năng Đồ thị Tri thức, Biểu đồ trực tiếp, Trợ lý AI và Telegram. Graph và Chart dùng ảnh sản phẩm đã duyệt; AI Assistant và Telegram là hai chapter text-only hoàn chỉnh, không có hạng mục ảnh còn thiếu.
 
 Quyết định phục hồi Hero ngày 2026-09-08: đưa riêng Hero về baseline trước refocus tại commit `8ae5336` — H1, supporting copy, CTA tới `#how-it-works`, hai proof point và breakpoint `lg`. ProductStory, AnalysisFlow, TrustBoundary, FinalAccessCta, Footer và toàn bộ media giữ nguyên runtime hiện tại. Bố cục chapter theo tính năng và ảnh thật có chú thích vẫn thuộc refinement đã triển khai.
 
@@ -102,7 +102,7 @@ Thứ tự tính năng: Đồ thị Tri thức → Biểu đồ trực tiếp �
 | Hero proof 2 title       | Đọc bối cảnh, không chỉ nhìn nến                                                                                                                                                                                | Read the context, not just the candles                                                                                                                                                                       |
 | Hero proof 2 body        | Đọc diễn biến giá trên chart cùng phản ứng thị trường, sự kiện và lịch kinh tế liên quan.                                                                                                                       | Read price action alongside market reactions, related events, and economic-calendar context.                                                                                                                 |
 
-Hero giữ visual conceptual hiện có; dưới figure là hai proof block ngắn. Điều hướng tới bốn chapter vẫn thuộc Header và ProductStory; ảnh sản phẩm nằm trong các chapter, không lặp thành một hàng link trong Hero.
+Hero giữ visual conceptual hiện có; dưới figure là hai proof block ngắn. Điều hướng tới bốn chapter vẫn thuộc Header và ProductStory; ảnh Graph/Chart nằm trong chapter tương ứng, không lặp thành một hàng link trong Hero.
 
 Implementation dùng các chuỗi trong first viewport và Locked Section Copy làm editorial baseline. Chỉ được sửa lỗi chính tả hoặc ngữ pháp mà không đổi nghĩa; mọi thay đổi về promise, qualifier, capability boundary, hierarchy hoặc CTA phải cập nhật tài liệu này và cả hai locale trong cùng change.
 
@@ -201,7 +201,7 @@ Quyết định nội dung chốt ngày 2026-09-07: chuyển từ bốn bước 
 | ------- | -------------------------------------------------- | -------------------------------------------------- |
 | H2      | Bốn tính năng để theo dõi và phân tích thị trường. | Four features for following and analyzing markets. |
 
-Section không cần intro lặp danh sách bốn tính năng đã hiển thị trong Hero. Bốn chapter đủ rộng, theo thứ tự dưới đây; mỗi chapter có outcome, body ngắn và product proof. Caption/alt phải mô tả đúng ảnh thực tế được duyệt; không viết caption khẳng định dữ liệu chưa xuất hiện trong ảnh.
+Section không cần intro lặp danh sách bốn tính năng đã hiển thị trong Hero. Bốn chapter đủ rộng, theo thứ tự dưới đây; mỗi chapter có outcome và body ngắn. Graph/Chart dùng ảnh làm product proof; AI/Telegram dùng nội dung text-only. Caption/alt phải mô tả đúng ảnh thực tế được duyệt; không viết caption khẳng định dữ liệu chưa xuất hiện trong ảnh.
 
 #### Chapter 1 — Knowledge Graph — `#knowledge-graph`
 
@@ -232,7 +232,7 @@ Product proof: ảnh chart thực tế có dữ liệu giá, dấu mốc sự ki
 | H3      | Đặt câu hỏi với ngữ cảnh từ Đồ thị Tri thức.                                                                                                                 | Ask questions with context from the Knowledge Graph.                                                                                                       |
 | Body    | Trò chuyện với Trợ lý AI để phân tích quan hệ giữa sự kiện, tài sản và tin tức. Tiếp tục đặt câu hỏi và xem lại các cuộc trò chuyện trong workspace của bạn. | Chat with the AI Assistant to analyze relationships between events, assets, and news. Ask follow-up questions and revisit conversations in your workspace. |
 
-Product proof: ảnh hội thoại thực tế trong workspace demo, thể hiện câu hỏi và phản hồi. Ngữ cảnh từ Market Knowledge Graph là giá trị chính; lịch sử hội thoại là lợi ích hỗ trợ. Không claim chọn node để chat, tự chuyển chart/event đang xem vào hội thoại, hoặc mọi câu trả lời có evidence/source sheet. Bỏ section WorkspaceAssistant riêng; thông tin danh sách theo dõi được giải thích trong Chart, thông tin workspace/history nằm tại đây.
+Product proof: chapter text-only giải thích trực tiếp vai trò của ngữ cảnh Market Knowledge Graph và lợi ích của lịch sử hội thoại. Không claim chọn node để chat, tự chuyển chart/event đang xem vào hội thoại, hoặc mọi câu trả lời có evidence/source sheet. Bỏ section WorkspaceAssistant riêng; thông tin danh sách theo dõi được giải thích trong Chart, thông tin workspace/history nằm tại đây.
 
 #### Chapter 4 — Telegram — `#telegram`
 
@@ -243,7 +243,7 @@ Product proof: ảnh hội thoại thực tế trong workspace demo, thể hiệ
 | Body    | Nhận cảnh báo tin thị trường, cập nhật lịch kinh tế và bản phân tích từ Signapse qua Telegram. Thiết lập lịch nhận phân tích theo tài sản bạn theo dõi. | Receive market news alerts, economic calendar updates, and market analysis from Signapse through Telegram. Schedule analysis for the assets you track. |
 | Setup   | Liên kết Telegram, chọn nội dung nhận và thiết lập lịch phân tích theo tài sản.                                                                         | Link Telegram, choose what to receive, and schedule analysis by asset.                                                                                 |
 
-Product proof: ảnh tin nhắn mẫu thực tế được phép công khai, giúp nhận diện cảnh báo tin thị trường, lịch kinh tế và bản phân tích theo lịch. Ưu tiên nội dung nhận được trên Telegram hơn ảnh màn hình quản trị bot. Đợt này bao gồm chuẩn bị bộ minh họa đó; chưa có ảnh hoặc chưa gửi thử thành công không được ghi là đã xác minh delivery.
+Product proof: chapter text-only mô tả ba nhóm nội dung người dùng nhận được và cách thiết lập. Không dùng ảnh tin nhắn hoặc màn hình quản trị bot; việc không có ảnh là bố cục đã chốt, không phải trạng thái thiếu media.
 
 Luồng tiếp cận đã chốt: sau khi được cấp quyền phù hợp, người dùng liên kết điểm nhận Telegram, chọn luồng nội dung và thiết lập lịch phân tích theo tài sản. Sử dụng cấu hình bot/điểm nhận/routing/lịch hiện có, không xây onboarding mới hoặc tạo kênh chung. Không thêm CTA tham gia kênh công khai hay liên kết bot chưa được xác định. Dùng “bản phân tích từ Signapse”; không dùng “độc quyền” để ngụ ý quyền truy cập trả phí, quyền sở hữu hoặc lợi thế thương mại chưa được xác định.
 
@@ -336,28 +336,24 @@ Các asset sau đã nằm trong public runtime và được phép dùng trên la
 
 ### Product captures permitted after review
 
-Phạm vi đợt thay đổi này bao gồm chuẩn bị và tích hợp bộ ảnh cho cả bốn tính năng, gồm ảnh từ sản phẩm và tin nhắn Telegram mẫu được phép công khai. Hiện chưa có bộ ảnh được duyệt; các slot dưới đây chỉ chuyển sang trạng thái approved khi có nguồn và đáp ứng checklist ở phần tiếp theo. Chốt phạm vi chuẩn bị ảnh không đồng nghĩa phê duyệt một ảnh hoặc dữ liệu cụ thể.
+Phạm vi media chỉ gồm ảnh Đồ thị Tri thức và Biểu đồ trực tiếp. Hai feature này đã có asset Việt–Anh được duyệt và tích hợp; AI Assistant và Telegram không có media slot.
 
 | Planned asset                                         | Surface được capture                                                     | Vị trí            | Trạng thái                           |
 | ----------------------------------------------------- | ------------------------------------------------------------------------ | ----------------- | ------------------------------------ |
-| `public/images/landing/{lang}/knowledge-graph.webp`   | Graph View với sự kiện, tài sản và bài viết liên quan                    | Đồ thị Tri thức   | Trong scope; chưa tồn tại/chưa duyệt |
-| `public/images/landing/{lang}/live-market-chart.webp` | Chart với giá, dấu mốc sự kiện, lịch kinh tế và trạng thái luồng thật    | Biểu đồ trực tiếp | Trong scope; chưa tồn tại/chưa duyệt |
-| `public/images/landing/{lang}/ai-conversation.webp`   | Câu hỏi và phản hồi trong hội thoại AI của workspace demo                | Trợ lý AI         | Trong scope; chưa tồn tại/chưa duyệt |
-| `public/images/landing/{lang}/telegram-updates.webp`  | Tin nhắn mẫu thực tế cho cảnh báo tin, lịch kinh tế và phân tích định kỳ | Telegram          | Trong scope; chưa tồn tại/chưa duyệt |
+| `public/images/landing/{lang}/knowledge-graph.webp`   | Graph View với sự kiện, tài sản và bài viết liên quan                 | Đồ thị Tri thức   | Đã duyệt và tích hợp |
+| `public/images/landing/{lang}/live-market-chart.webp` | Chart với giá, dấu mốc sự kiện, lịch kinh tế và trạng thái luồng thật | Biểu đồ trực tiếp | Đã duyệt và tích hợp |
 
 `{lang}` là `vi` hoặc `en`. Capture có visible UI text phải có hai asset dùng cùng demo scenario, product state và crop tương đương; text trong ảnh phải khớp locale của route. Asset không có text phụ thuộc ngôn ngữ có thể dùng chung dưới `public/images/landing/shared/` sau khi được duyệt. Nếu asset của một locale chưa tồn tại hoặc chưa approved, locale đó bỏ media slot và dùng text-first composition; không fallback sang ảnh của locale còn lại.
 
-Text-first là fallback trong khi chuẩn bị/duyệt ảnh, không tự loại hạng mục media khỏi phạm vi đã chốt. Handoff phải nêu rõ slot nào đã có ảnh, nguồn và trạng thái duyệt; slot còn thiếu vẫn được theo dõi. Lựa chọn demo cụ thể, crop, caption và alt dựa trên nội dung thực tế ở bước chuẩn bị asset. Không tự gửi tin ra Telegram trong lúc làm tài liệu hoặc lấy private conversation để tạo ảnh.
+Text-first chỉ là fallback khi Graph hoặc Chart thiếu ảnh đã duyệt cho locale hiện tại. AI Assistant và Telegram luôn là text-only theo thiết kế và không được ghi nhận như media còn thiếu.
 
 ### Capture preparation and ownership
 
-- Codex phụ trách kịch bản chụp, chuẩn bị capture từ surface sản phẩm thực tế, crop, tối ưu ảnh, caption và alt cho cả Việt–Anh. Product Owner xác nhận môi trường/nguồn demo được phép công khai trước khi chụp và duyệt riêng ảnh cuối của từng locale trước khi tích hợp vào public runtime.
-- Đồng ý quy trình không tự cấp quyền dùng một workspace, hội thoại, nguồn dữ liệu hoặc điểm nhận Telegram cụ thể. Khi chưa xác định được nguồn được phép sử dụng, ghi nhận phần chuẩn bị ảnh còn thiếu; vẫn có thể hoàn thiện layout text-first và yêu cầu kịch bản.
+- Codex phụ trách kịch bản chụp, crop, tối ưu, caption và alt cho ảnh Graph/Chart Việt–Anh. Product Owner xác nhận môi trường/nguồn demo được phép công khai và duyệt riêng ảnh cuối của từng locale trước khi tích hợp.
 - Graph ưu tiên một cụm quan hệ dễ đọc gồm sự kiện, tài sản và bài viết liên quan; 2–3 chú thích chỉ rõ điều cần quan sát. Không dùng Sigma demo thay Graph View hoặc diễn đạt đường nối như bằng chứng nhân quả.
 - Chart thể hiện giá, dấu mốc sự kiện, lịch kinh tế và trạng thái dữ liệu thực tế. Có thể dùng thêm crop chi tiết sự kiện khi cần, nhưng phải phân biệt preview với màn chi tiết; ảnh tĩnh không được mô tả như biểu đồ live đang chạy.
-- AI dùng câu hỏi và phản hồi thực tế trong workspace demo đã được phép sử dụng; không tự viết phản hồi giả hoặc ghép graph/chat để ngụ ý chọn node hay tự chuyển ngữ cảnh từ chart vào hội thoại.
-- Telegram ưu tiên tin nhắn thực tế được phép công khai cho ba nhóm nội dung: tin thị trường, lịch kinh tế và phân tích theo lịch. Không tự gửi tin, bật routing hoặc tạo lịch để lấy ảnh; nếu cần thử gửi, phải xin phép riêng cho điểm nhận và nội dung cụ thể.
-- Ghi lại theo từng feature/locale: nguồn và kịch bản, path, dimensions, caption/alt, trạng thái thiếu ảnh/chờ duyệt/đã duyệt, cùng xác nhận của owner. Ảnh đã chụp không đồng nghĩa đã được duyệt; fallback hoạt động không đồng nghĩa hoàn thành media. Không lưu credential hoặc dữ liệu riêng trong hồ sơ này.
+- AI Assistant và Telegram không có capture requirement hoặc media catalog entry.
+- Ghi lại theo Graph/Chart và locale: nguồn và kịch bản, path, dimensions, caption/alt, trạng thái thiếu ảnh/chờ duyệt/đã duyệt, cùng xác nhận của owner. Không lưu credential hoặc dữ liệu riêng trong hồ sơ này.
 
 ### Capture approval checklist
 
@@ -395,7 +391,7 @@ Nếu chưa có capture được duyệt, hero phải dùng text-first compositi
 | ------ | ------------------------------- | --------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
 | 1      | `PublicHeader`                  | —               | Nhận diện, điều hướng và access path                      | Logo; Tính năng; Cách sử dụng; Độ tin cậy; locale; auth-aware CTA                           | Brand asset                                          |
 | 2      | `HeroProductProof`              | `#top`          | Định vị Knowledge Graph/AI và dẫn tới hành động tiếp theo | H1/supporting copy baseline; CTA; trust line; hai proof point                               | Conceptual market-context figure hiện có             |
-| 3      | `ProductStory`                  | `#product`      | Giải thích bốn tính năng chính bằng bốn chapter lớn       | Đồ thị Tri thức → Biểu đồ trực tiếp → Trợ lý AI → Telegram                                  | Bộ ảnh bốn tính năng thuộc phạm vi triển khai        |
+| 3      | `ProductStory`                  | `#product`      | Giải thích bốn tính năng chính bằng bốn chapter lớn       | Đồ thị Tri thức → Biểu đồ trực tiếp → Trợ lý AI → Telegram                                  | Ảnh Graph/Chart; AI/Telegram text-only               |
 | 4      | `AnalysisFlow`                  | `#how-it-works` | Giúp người mới hình dung hành trình sử dụng               | Chọn tài sản, xem diễn biến giá → Mở sự kiện, kiểm tra nguồn tin → Phân tích cùng Trợ lý AI | Ba bước bằng text; đường nối thứ tự tĩnh là tùy chọn |
 | 5      | `TrustBoundary`                 | `#trust`        | Xây niềm tin bằng traceability và giới hạn rõ             | Nguồn tin; dữ liệu khả dụng; giới hạn phân tích                                             | Text gọn; nguồn được giải thích trong Chart          |
 | 6      | `FinalAccessCta`                | `#access`       | Kết thúc bằng cùng một conversion path                    | Outcome recap; auth-aware CTA; email behavior microcopy                                     | Không cần media                                      |
@@ -404,9 +400,9 @@ Nếu chưa có capture được duyệt, hero phải dùng text-first compositi
 ### Composition rules
 
 - Không tạo section riêng chỉ để lặp lại problem statement; hero và `AnalysisFlow` đã sở hữu vấn đề.
-- `ProductStory` dùng bốn chapter editorial theo thứ tự đã chốt, không xếp thành bốn cột chữ nhỏ hoặc ép cả bốn vào cùng một khung hai cột. Bố cục desktop theo bảng bên dưới; mọi chapter trên màn hình hẹp đều đọc copy trước ảnh.
+- `ProductStory` dùng bốn chapter editorial theo thứ tự đã chốt, không xếp thành bốn cột chữ nhỏ. Bố cục desktop theo bảng bên dưới; Graph/Chart trên màn hình hẹp luôn đọc copy trước ảnh.
 - Tên feature là nhãn nhỏ; câu lợi ích đã duyệt là heading `h3` chính của chapter, nổi bật hơn body. Không lặp tên/mô tả trong một khung media chỉ chứa chữ. Chỉ thêm supporting detail có giá trị, tối đa ba proof points; không điền đủ bullet chỉ để cân số lượng. Không lặp phần giới thiệu bốn tính năng giữa Hero và ProductStory.
-- Khi chưa có ảnh được duyệt cho locale hiện tại, bỏ toàn bộ media surface và nút xem ảnh lớn, không giữ cột rỗng hoặc chiều cao placeholder. Copy vẫn đầy đủ, có measure dễ đọc và không bị kéo giãn để lấp chỗ trống.
+- Khi Graph hoặc Chart chưa có ảnh được duyệt cho locale hiện tại, bỏ toàn bộ media surface, không giữ cột rỗng hoặc chiều cao placeholder. AI Assistant và Telegram luôn text-only với measure dễ đọc.
 - WorkspaceAssistant riêng được gộp vào chapter AI; Reaction & Evidence được gộp vào Chart. Xóa section/copy/helper cũ không còn caller khi triển khai; không thêm chapter thứ năm cho hai nhóm thông tin hỗ trợ này.
 - Essential text đứng ngoài screenshot; screenshot không phải tài liệu đọc duy nhất.
 - Header, Hero và Final CTA dùng cùng một primary destination.
@@ -419,8 +415,8 @@ Nếu chưa có capture được duyệt, hero phải dùng text-first compositi
 | ----------------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
 | Đồ thị Tri thức   | Copy trái, ảnh graph phải                                                   | Một cụm quan hệ dễ hiểu; 2–3 chú thích giúp đọc sự kiện, tài sản và nguồn tin                  |
 | Biểu đồ trực tiếp | Copy trái, ảnh chart phải                                                  | Giá đi cùng dấu mốc sự kiện và lịch kinh tế; phản ứng/nguồn tin là nội dung hỗ trợ             |
-| Trợ lý AI         | Ảnh hội thoại trái, copy phải; DOM vẫn copy trước media                    | Câu hỏi và phản hồi thật với ngữ cảnh Market Knowledge Graph; lịch sử hội thoại là lợi ích phụ |
-| Telegram          | Copy trái, tin nhắn mẫu phải; không ép ảnh dọc thành khung dashboard ngang | Nội dung nhận được thuộc ba nhóm đã chốt; thiết lập là dòng hỗ trợ ngắn                        |
+| Trợ lý AI         | Text-only, measure tối đa `3xl`                                              | Ngữ cảnh Market Knowledge Graph và lịch sử hội thoại                                          |
+| Telegram          | Text-only, measure tối đa `3xl`                                              | Ba nhóm nội dung nhận được và thiết lập                                                        |
 
 Graph là điểm nhấn thị giác đầu tiên nhưng không tạo thêm section hoặc thay đổi vị thế bốn tính năng chính. Hero giữ hai proof point ngắn; điều hướng tới bốn feature thuộc Header và ProductStory, không lặp thành một hàng link trong Hero.
 
@@ -461,7 +457,7 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 | `< 640px`      | Một cột; copy trước visual; CTA full-width khi cần; header giữ brand + primary CTA + menu, locale và secondary action nằm trong native disclosure; touch target ưu tiên tối thiểu 44×44px.                         |
 | `640px–767px`  | Một cột; copy trước visual; mobile navigation dùng native disclosure; locale có thể hiển thị khi đủ chỗ; touch target ưu tiên tối thiểu 44×44px.                                                                   |
 | `768px–1199px` | Hero và product chapters vẫn một cột để product capture có đủ chiều rộng; AnalysisFlow ba bước xếp dọc để giữ reading order.                                                                                       |
-| `≥ 1200px`     | Hero có thể dùng split `5/7`; Graph có copy trái/ảnh phải, Chart/AI/Telegram theo Feature-specific composition; AnalysisFlow ba bước cùng hàng; content measure của body copy giữ khoảng 60–70 ký tự mỗi dòng. |
+| `≥ 1200px`     | Hero có thể dùng split `5/7`; Graph và Chart có copy trái/ảnh phải; AI/Telegram text-only; AnalysisFlow ba bước cùng hàng; content measure của body copy giữ khoảng 60–70 ký tự mỗi dòng. |
 | Zoom `200%`    | Reflow như narrow viewport; không page-level horizontal overflow; sticky/fixed surface không che focus hoặc heading.                                                                                               |
 
 - Không đặt essential popup/content bằng absolute positioning trên screenshot mock.
@@ -565,10 +561,10 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 - Chỉ approved brand asset hoặc approved product capture xuất hiện trên trang.
 - Nếu chưa có approved hero capture, hero render text-first với conceptual figure, không có synthetic mock.
 - Product capture đáp ứng toàn bộ capture approval checklist.
-- Chuẩn bị bộ ảnh thực tế cho cả bốn tính năng thuộc scope: Graph View, live chart, hội thoại AI và tin nhắn Telegram mẫu. Ghi rõ nguồn/locale/trạng thái duyệt của từng slot; không đánh dấu hoàn thành media chỉ vì fallback text-first hoạt động.
+- Chỉ Graph View và live chart có ảnh sản phẩm. Ghi rõ nguồn, locale và trạng thái duyệt của hai slot này; AI Assistant và Telegram là text-only theo thiết kế.
 - Capture có visible UI text dùng đúng asset `vi`/`en`; thiếu một locale thì locale đó dùng text-first, không fallback chéo ngôn ngữ.
 - Không có fake metric, fake control hoặc private/runtime-sensitive data.
-- Có hồ sơ nguồn/demo approval và duyệt ảnh cuối theo feature/locale. Thiếu ảnh thì bỏ media surface, không giữ text placeholder; báo rõ media chưa hoàn tất, không đánh dấu hoàn thành bằng fallback.
+- Có hồ sơ nguồn/demo approval và duyệt ảnh cuối cho Graph/Chart theo locale. Thiếu ảnh ở hai feature này thì bỏ media surface, không giữ text placeholder.
 
 ### Layout and accessibility
 
@@ -578,7 +574,7 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 - Reduced-motion mode không mất nội dung hoặc interaction.
 - Conceptual figure có accessible text summary; decorative geometry không xuất hiện trong accessibility tree.
 - Screenshot alt text và adjacent copy truyền đạt cùng insight chính.
-- Graph có copy trái và ảnh phải ở desktop; Chart/AI/Telegram theo bố cục riêng; nhãn feature không cạnh tranh với outcome heading. Mobile và zoom giữ copy trước ảnh về cả thứ tự đọc lẫn thứ tự hiển thị.
+- Graph và Chart có copy trái, ảnh phải ở desktop; AI/Telegram text-only; nhãn feature không cạnh tranh với outcome heading. Mobile và zoom giữ copy trước ảnh về cả thứ tự đọc lẫn thứ tự hiển thị.
 - Ảnh approved hiển thị đúng locale, không méo/crop sai; caption/annotation luôn đọc được ngoài ảnh và lỗi ảnh không làm mất nội dung chapter.
 
 ### Verification
@@ -588,8 +584,8 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 - Chạy targeted OpenSpec validation, lint, typecheck và production build.
 - Static search xác nhận old landing keys, old mock components và forbidden claims đã được loại bỏ.
 - Kiểm tra metadata, canonical/alternate locale URLs và mọi CTA/link destination.
-- Với thay đổi bốn tính năng: kiểm tra thứ tự section/chapter, copy VI/EN, ba bước AnalysisFlow, CTA và feature-anchor/locale behavior; kiểm tra asset path, dimensions, locale và accessibility text khi ảnh sẵn sàng. Duyệt nội dung ảnh và xác nhận gửi Telegram thực tế được ghi thành User-owned manual QA, không tự thêm checkbox archive-blocking; delivery chưa kiểm chứng phải được nêu đúng trạng thái.
-- Với đợt cải thiện bố cục/media: automated checks từ repo kiểm tra heading hierarchy, text-first bỏ media/nút khi thiếu ảnh, bố cục chapter và thứ tự mobile, trigger/đúng ảnh/locale, mở–đóng/Escape/focus-return và trạng thái tải/lỗi của hộp thoại. Kiểm tra bằng fixture không được ghi thành xác nhận ảnh thật hoặc delivery; owner approval vẫn được ghi rõ riêng, không thêm checkbox manual QA archive-blocking.
+- Với thay đổi bốn tính năng: kiểm tra thứ tự section/chapter, copy VI/EN, ba bước AnalysisFlow, CTA và feature-anchor/locale behavior; kiểm tra Graph/Chart asset path, dimensions, locale và accessibility text. AI/Telegram phải không có media surface hoặc trạng thái thiếu ảnh.
+- Với đợt cải thiện bố cục/media: automated checks từ repo kiểm tra heading hierarchy, text-first fallback cho Graph/Chart, bố cục chapter, thứ tự mobile, đúng ảnh/locale và trạng thái lỗi inline. Owner approval của Graph/Chart vẫn được ghi rõ riêng.
 - Apex cutover chỉ được duyệt sau khi automated gates pass và owner xác nhận Clerk thật, mailbox, visual/accessibility VI/EN light/dark/breakpoints, canonical/alternates và hai social card trên preview. Các owner/manual checks này là cutover gates, không phải archive-blocking checkbox của landing implementation change.
 
 ## Deferred Until Explicitly Approved

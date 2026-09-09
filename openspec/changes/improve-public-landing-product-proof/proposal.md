@@ -1,6 +1,6 @@
 ## Why
 
-The refocused public landing now names Signapse's four primary features, but its four product chapters still use nearly identical layouts and text-only media placeholders. Visitors cannot yet see credible product evidence, understand the distinctive role of each surface, or inspect detailed captures comfortably on smaller screens.
+The refocused public landing names Signapse's four primary features, but the chapters need a clearer evidence hierarchy. Knowledge Graph and Live Charts benefit from approved product captures, while AI Assistant and Telegram communicate their value more clearly through concise text.
 
 ## What Changes
 
@@ -8,7 +8,8 @@ The refocused public landing now names Signapse's four primary features, but its
 - Give Knowledge Graph, Live Charts, AI Assistant, and Telegram feature-specific editorial compositions instead of one repeated two-column treatment.
 - Make each approved outcome statement the chapter heading and treat the feature name as a supporting label.
 - Remove text-only media placeholders; when an active locale lacks an approved capture, render a complete text-first chapter without an empty media surface.
-- Prepare approval-gated Vietnamese and English captures from authorized demo product states, with per-feature provenance, dimensions, localized captions/alternative text, and explicit owner approval status.
+- Use approved Vietnamese and English captures only for Knowledge Graph and Live Charts, with per-feature provenance, dimensions, localized captions/alternative text, and explicit owner approval status.
+- Keep AI Assistant and Telegram intentionally text-only; their lack of media is the approved composition rather than an incomplete capture state.
 - Render each approved capture inline with localized alt text, captions, and Knowledge Graph annotations where applicable; keep inline image failures subordinate to chapter copy.
 - Update component and browser coverage for chapter hierarchy, feature-specific responsive composition, locale-aware media states, and the absence of enlargement controls.
 

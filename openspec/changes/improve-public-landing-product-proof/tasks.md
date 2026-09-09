@@ -8,8 +8,8 @@
 
 - [x] 2.1 Refactor chapter semantics so each approved outcome is the `h3`, the feature name is a supporting label, and essential text remains outside media.
 - [x] 2.2 Implement the Knowledge Graph copy-left/capture-right composition at the wide breakpoint with two or three adjacent annotation slots populated only from approved image-specific localized content.
-- [x] 2.3 Implement wide desktop copy-left/capture-right compositions for Live Charts and Telegram while preserving the Telegram message aspect ratio.
-- [x] 2.4 Implement the wide desktop AI capture-left/copy-right visual composition while keeping copy before media in DOM order.
+- [x] 2.3 Implement the wide desktop copy-left/capture-right composition for Live Charts.
+- [x] 2.4 Implement complete bounded text-only compositions for AI Assistant and Telegram without media surfaces or reserved media space.
 - [x] 2.5 Implement the single-column copy-before-media composition below 1200 CSS pixels and under 200% zoom reflow without page-level overflow.
 - [x] 2.6 Remove the repeated text-only media frames; omit the complete media surface, caption, and reserved height whenever the active locale lacks an approved descriptor.
 
@@ -23,12 +23,12 @@
 
 ## 4. Approved Product Captures
 
-- [x] 4.1 Prepare a non-sensitive capture plan and approval record for Knowledge Graph, Live Charts, AI Assistant, and Telegram in Vietnamese and English, including source/demo scenario, intended crop, dimensions, caption/alt draft, and current approval status.
+- [x] 4.1 Prepare a non-sensitive capture plan and approval record for Knowledge Graph and Live Charts in Vietnamese and English, and record AI Assistant and Telegram as intentionally text-only.
 - [x] 4.2 Capture and optimize the authorized Knowledge Graph assets for both locales, showing one readable event–asset–source cluster and no unsupported causality or demo-surface claim.
 - [x] 4.3 Capture and optimize the authorized Live Charts assets for both locales, preserving price, event/economic-calendar context, and applicable stream/data status without presenting the image as currently live.
-- [ ] 4.4 Capture and optimize the authorized AI Assistant assets for both locales from a permitted demo conversation without fabricating an answer or implying graph-node or automatic chart-context chat.
-- [ ] 4.5 Capture and optimize the authorized Telegram assets for both locales from permitted real Signapse messages without independently sending messages, enabling routing, or creating schedules.
-- [x] 4.6 Integrate only captures whose final locale-specific image has Product Owner approval, and leave every unavailable or awaiting-approval entry text-first and explicitly incomplete in the handoff record.
+- [x] 4.4 Confirm AI Assistant is intentionally text-only in both locales and remove its capture keys and catalog path.
+- [x] 4.5 Confirm Telegram is intentionally text-only in both locales and remove its capture keys and catalog path.
+- [x] 4.6 Integrate only approved Knowledge Graph and Live Charts captures; treat their missing locale states as text-first fallbacks without marking AI Assistant or Telegram incomplete.
 
 ## 5. Automated Verification
 
@@ -37,6 +37,6 @@
 - [x] 5.3 Add browser coverage for feature-specific responsive geometry, matching image and locale, inline captions/annotations, absence of enlargement controls, and no page-level overflow.
 - [x] 5.4 Add deterministic broken-image coverage confirming localized inline feedback and continued availability of adjacent chapter content.
 - [x] 5.5 Retain and run landing regression coverage for public routing, auth-aware CTA destinations, locale/hash preservation, Hero figure behavior, reduced motion, light/dark themes, and automated accessibility checks.
-- [ ] 5.6 Run dictionary parity and forbidden-copy/media static searches, targeted tests, lint, typecheck, production build, and strict OpenSpec validation; report any unrelated pre-existing warnings separately.
+- [x] 5.6 Run dictionary parity and forbidden-copy/media static searches, targeted tests, lint, typecheck, production build, and strict OpenSpec validation; report any unrelated pre-existing warnings separately.
 
 User-owned manual QA: the Product Owner confirms that each demo source may be public and approves each final locale-specific capture. Real Telegram delivery, final visual quality, and release/cutover approval remain manual evidence and are not represented as automated or archive-blocking checkboxes.

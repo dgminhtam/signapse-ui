@@ -1,6 +1,6 @@
 ## Context
 
-The public landing is a route-local, server-rendered composition with localized dictionaries, an auth-aware access model, a client-only Hero market-context figure, and existing component and Playwright coverage. The preceding `refocus-public-landing-features` change established the four-feature story and must be applied before this refinement. Its current implementation renders four repeated two-column chapters and always-visible text-only media slots; no approved product capture exists under the public asset tree. The Hero is restored separately to the historical `8ae5336` baseline so this refinement does not alter that section while the product-proof chapters evolve.
+The public landing is a route-local, server-rendered composition with localized dictionaries, an auth-aware access model, a client-only Hero market-context figure, and existing component and Playwright coverage. The preceding `refocus-public-landing-features` change established the four-feature story. Knowledge Graph and Live Charts now have approved localized captures; AI Assistant and Telegram are intentionally text-only. The Hero is restored separately to the historical `8ae5336` baseline so this refinement does not alter that section while the product-proof chapters evolve.
 
 This change follows the Evidence-Led Editorial direction in the landing design contract and preserves the accepted progressive-WebGL and staged-cutover ADRs. Product captures are public evidence: their demo source and final localized image require Product Owner approval, while their layout, fallback, loading, accessibility, and tests remain implementation-owned. Approved captures render inline; the landing does not provide a separate image-enlargement interaction.
 
@@ -11,7 +11,8 @@ This change follows the Evidence-Led Editorial direction in the landing design c
 - Restore the Hero to the approved historical baseline from `8ae5336`, including its two proof points, `#how-it-works` secondary CTA, and `lg` layout breakpoint.
 - Give each primary feature a composition suited to its product evidence while preserving the approved story order and copy.
 - Make outcome copy the semantic chapter heading and keep the feature name as a compact label.
-- Replace text-only media placeholders with optional, approval-gated localized captures.
+- Use approval-gated localized captures for Knowledge Graph and Live Charts.
+- Keep AI Assistant and Telegram as complete text-only chapters without media placeholders or pending-capture status.
 - Present approved captures inline with localized captions, alternative text, and annotations where applicable.
 - Keep text-first chapters complete when an approved asset is unavailable for the active locale.
 - Record enough non-sensitive capture provenance and approval state to prevent drafts or cross-locale fallbacks from shipping as product proof.
@@ -27,7 +28,7 @@ This change follows the Evidence-Led Editorial direction in the landing design c
 
 ### 1. Use feature-specific chapter composition with one semantic reading order
 
-The Knowledge Graph chapter uses copy-left/capture-right at or above 1200 CSS pixels, matching the Live Charts and Telegram evidence composition. AI Assistant visually places the capture left and copy right at that breakpoint. Every chapter keeps feature label, outcome `h3`, body, supporting detail, caption/annotations, and media in logical copy-before-media DOM order; CSS changes only wide visual placement. Below 1200 pixels and at reflow caused by 200% zoom, every chapter is a single copy-before-media column.
+Knowledge Graph and Live Charts use copy-left/capture-right at or above 1200 CSS pixels. AI Assistant and Telegram remain text-only with a readable bounded measure. Every chapter keeps feature label, outcome `h3`, body, and supporting detail in logical order; media-enabled chapters place caption/annotations after the image. Below 1200 pixels and at reflow caused by 200% zoom, media-enabled chapters become a single copy-before-media column.
 
 The Knowledge Graph capture may have two or three adjacent annotation items naming the event, related asset, and source context shown in the approved image. These are ordinary text outside the image, not positioned hotspots.
 
@@ -39,7 +40,7 @@ Alternatives considered:
 
 ### 2. Treat approved captures as optional build-time content
 
-A route-local typed capture catalog maps feature and locale to an optional approved asset descriptor. A descriptor contains the public asset reference, intrinsic dimensions, localized caption/alternative-text dictionary keys, optional Knowledge Graph annotation keys, a non-sensitive source/demo identifier, and an explicit approved status. Rendering code consumes only approved descriptors. Draft assets or records remain absent from the public catalog and cannot produce a media surface.
+A route-local typed capture catalog maps only Knowledge Graph and Live Charts plus locale to an optional approved asset descriptor. A descriptor contains the public asset reference, intrinsic dimensions, localized caption/alternative-text dictionary keys, optional Knowledge Graph annotation keys, a non-sensitive source/demo identifier, and an explicit approved status. Rendering code consumes only approved descriptors. The type excludes AI Assistant and Telegram so media cannot be added to those chapters without an explicit requirement change.
 
 When no approved descriptor exists for the active locale, the chapter renders complete text without a media container, reserved media height, or caption. An approved image for the other locale is not a fallback. Product Owner approval is an input to the catalog update, not a runtime workflow or an approval UI.
 
@@ -66,7 +67,6 @@ Capture approval itself and real Telegram delivery remain Product Owner/manual e
 
 ## Risks / Trade-offs
 
-- [Risk] The full media set cannot be completed until an authorized demo source is identified → Keep capture tasks and approval state explicit; text-first is a valid runtime fallback but not evidence that media preparation is complete.
 - [Risk] Screenshots become stale as product UI changes → Store source/demo context with each approved descriptor and review captures as release content when affected surfaces change.
 - [Risk] A dense screenshot is still unreadable on mobile → Use a responsive copy-before-media flow, preserve intrinsic ratio, and put essential meaning in adjacent text.
 - [Risk] Visual CSS ordering diverges from semantic order → Keep copy before media in DOM and assert both DOM and computed visual order at supported breakpoints.
@@ -78,11 +78,11 @@ Capture approval itself and real Telegram delivery remain Product Owner/manual e
 2. Introduce the optional approved-capture descriptor/catalog and localized media strings.
 3. Refactor ProductStory hierarchy and feature-specific responsive composition; remove text-only media placeholders.
 4. Add the route-local capture renderer with inline error handling and text-first behavior when no descriptor is approved.
-5. Prepare authorized localized captures and provenance records as approval becomes available; integrate only the approved entries.
+5. Integrate the approved Knowledge Graph and Live Charts captures and record AI Assistant and Telegram as intentionally text-only.
 6. Update component and browser coverage, then run localization, static policy, accessibility, lint, typecheck, build, and OpenSpec validation.
 
 Rollback removes approved catalog entries and returns affected chapters to text-first without changing feature copy, routing, or backend state. The broader layout change can be reverted independently because it has no data migration.
 
 ## Open Questions
 
-None for implementation. The exact demo workspace/destination, captured values, crops, captions, and Product Owner approvals are release-content inputs governed by the approved-capture checklist rather than unresolved product requirements.
+None for implementation.

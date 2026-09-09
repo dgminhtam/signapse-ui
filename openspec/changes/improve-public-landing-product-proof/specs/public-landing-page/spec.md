@@ -21,16 +21,14 @@ The landing page SHALL present Knowledge Graph, Live Charts, AI Assistant, and T
 - **THEN** the chapter visually presents copy on the left and the chart capture on the right
 - **AND** the adjacent content explains price movement with event markers and economic-calendar context without presenting the static capture as a currently updating chart
 
-#### Scenario: AI Assistant gives conversation evidence visual priority
-- **WHEN** an approved AI Assistant capture exists for the active locale and the viewport is at least 1200 CSS pixels wide
-- **THEN** the chapter visually presents the conversation capture on the left and copy on the right
-- **AND** the DOM retains the feature label, outcome heading, and explanation before the media
+#### Scenario: AI Assistant remains text-only
+- **WHEN** a visitor reads the AI Assistant chapter
+- **THEN** the chapter presents the feature label, outcome heading, and explanation without a media surface or reserved media space
 - **AND** the chapter does not imply graph-node chat or automatic chart-context handoff
 
-#### Scenario: Telegram prioritizes received content
-- **WHEN** an approved Telegram capture exists for the active locale and the viewport is at least 1200 CSS pixels wide
-- **THEN** the chapter visually presents copy on the left and a proportionally sized message capture on the right
-- **AND** the capture emphasizes approved received content rather than a bot-administration screen
+#### Scenario: Telegram remains text-only
+- **WHEN** a visitor reads the Telegram chapter
+- **THEN** the chapter presents the feature label, outcome heading, explanation, and setup detail without a media surface or reserved media space
 - **AND** it does not imply a public channel, unconfigured delivery, or guaranteed receipt
 
 #### Scenario: Feature chapters reflow with semantic order
@@ -45,7 +43,7 @@ The landing page SHALL present Knowledge Graph, Live Charts, AI Assistant, and T
 - **AND** the page does not repeat the feature name and description inside a text-only media frame
 
 ### Requirement: Approved product capture governance
-The landing build SHALL expose a product capture only when an explicit locale-specific approved descriptor references an available Signapse product surface or real Signapse Telegram message prepared from a demo source authorized for public use. The descriptor MUST record a non-sensitive source/demo identifier, intrinsic dimensions, localized content references, and final Product Owner approval state without storing credentials or private data.
+The landing build SHALL expose a Knowledge Graph or Live Charts capture only when an explicit locale-specific approved descriptor references an available Signapse product surface prepared from a demo source authorized for public use. The descriptor MUST record a non-sensitive source/demo identifier, intrinsic dimensions, localized content references, and final Product Owner approval state without storing credentials or private data. AI Assistant and Telegram MUST be excluded from the capture catalog.
 
 #### Scenario: Approved descriptor enables a capture
 - **WHEN** a capture file and its locale-specific descriptor have passed public-data, privacy, licensing, attribution, product-claim, localization, dimensions, and Product Owner review
@@ -62,18 +60,18 @@ The landing build SHALL expose a product capture only when an explicit locale-sp
 - **THEN** it contains no account credential, bot token, private destination identifier, private workspace identity, or private conversation content
 - **AND** it is sufficient to distinguish missing, awaiting-approval, and approved capture work outside the runtime UI
 
-#### Scenario: Telegram capture preparation has no unauthorized side effect
-- **WHEN** the Telegram proof asset is being prepared without separate authorization for a specific destination and message
-- **THEN** the preparation does not send a Telegram message, enable routing, or create a schedule
-- **AND** the Telegram capture remains missing or awaiting approval rather than being simulated as delivered content
+#### Scenario: Text-only features cannot acquire media implicitly
+- **WHEN** the landing media catalog is inspected or extended
+- **THEN** its feature type accepts only Knowledge Graph and Live Charts
+- **AND** adding AI Assistant or Telegram media requires an explicit requirement and type change
 
 ## MODIFIED Requirements
 
 ### Requirement: Landing page visual media readiness
-The landing page SHALL render a complete text-first chapter whenever the active locale lacks an approved product capture for that feature. The affected chapter MUST omit its entire media surface, caption, and reserved media footprint rather than render synthetic product UI, generated imagery presented as a product screenshot, a cross-locale image, or a text-only placeholder. The existing localized control-free interactive market-context figure SHALL remain the Hero's conceptual progressive enhancement over its server-rendered silent dual-view fallback.
+The landing page SHALL render a complete text-first chapter whenever the active locale lacks an approved product capture for a media-enabled feature. The affected chapter MUST omit its entire media surface, caption, and reserved media footprint rather than render synthetic product UI, generated imagery presented as a product screenshot, a cross-locale image, or a text-only placeholder. AI Assistant and Telegram SHALL always use this complete text-only presentation. The existing localized control-free interactive market-context figure SHALL remain the Hero's conceptual progressive enhancement over its server-rendered silent dual-view fallback.
 
 #### Scenario: Feature capture is not approved
-- **WHEN** the active locale has no approved capture for a feature
+- **WHEN** the active locale has no approved capture for Knowledge Graph or Live Charts
 - **THEN** the feature chapter renders its complete localized label, outcome heading, explanation, and applicable supporting detail
 - **AND** it renders no media container, image caption, or reserved media height for that feature
 - **AND** the absence is not presented to visitors as an error or unfinished placeholder
