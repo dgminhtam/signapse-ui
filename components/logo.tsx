@@ -5,9 +5,28 @@ interface LogoProps {
   height?: number
   className?: string
   variant?: "icon" | "full"
+  colorScheme?: "auto" | "light" | "dark"
 }
 
-export function Logo({ width = 40, height = 40, className = "" }: LogoProps) {
+export function Logo({
+  width = 40,
+  height = 40,
+  className = "",
+  colorScheme = "auto",
+}: LogoProps) {
+  const lightClassName =
+    colorScheme === "dark"
+      ? "hidden"
+      : colorScheme === "light"
+        ? ""
+        : "dark:hidden"
+  const darkClassName =
+    colorScheme === "dark"
+      ? ""
+      : colorScheme === "light"
+        ? "hidden"
+        : "hidden dark:block"
+
   return (
     <>
       <Image
@@ -15,7 +34,7 @@ export function Logo({ width = 40, height = 40, className = "" }: LogoProps) {
         alt="Signapse Logo"
         width={width}
         height={height}
-        className={`object-contain dark:hidden ${className}`}
+        className={`object-contain ${lightClassName} ${className}`}
         priority
       />
       <Image
@@ -23,7 +42,7 @@ export function Logo({ width = 40, height = 40, className = "" }: LogoProps) {
         alt="Signapse Logo"
         width={width}
         height={height}
-        className={`hidden object-contain dark:block ${className}`}
+        className={`object-contain ${darkClassName} ${className}`}
         priority
       />
     </>

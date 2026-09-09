@@ -16,30 +16,24 @@ export type LandingContextFigureLabels = {
 
 type FigureMode = "graph" | "price"
 
-type ThemePalette = {
+type LandingPalette = {
   background: string
   foreground: string
   accent: string
   muted: string
 }
 
-type ThemePaletteFallback = Record<keyof ThemePalette, number>
+type LandingPaletteFallback = Record<keyof LandingPalette, number>
 
 const GRAPH_NODE_COUNT = 84
 const CANDLE_COUNT = 12
 const DRAG_THRESHOLD = 5
 const GRAPH_EDGE_OPACITY = 0.8
-const LIGHT_THEME_PALETTE_FALLBACK: ThemePaletteFallback = {
-  background: 0xffffff,
-  foreground: 0x0a0a0a,
-  accent: 0x009689,
-  muted: 0x737373,
-}
-const DARK_THEME_PALETTE_FALLBACK: ThemePaletteFallback = {
-  background: 0x0a0a0a,
-  foreground: 0xfafafa,
-  accent: 0x00bc7d,
-  muted: 0xa3a3a3,
+const LANDING_PALETTE_FALLBACK: LandingPaletteFallback = {
+  background: 0x03141d,
+  foreground: 0xeafdf8,
+  accent: 0x12d6b1,
+  muted: 0xa6c4bf,
 }
 
 function seededRandom(n: number) {
@@ -47,13 +41,11 @@ function seededRandom(n: number) {
   return value - Math.floor(value)
 }
 
-function getThemePaletteFallback(): ThemePaletteFallback {
-  return document.documentElement.classList.contains("dark")
-    ? DARK_THEME_PALETTE_FALLBACK
-    : LIGHT_THEME_PALETTE_FALLBACK
+function getLandingPaletteFallback(): LandingPaletteFallback {
+  return LANDING_PALETTE_FALLBACK
 }
 
-function getThemePalette(): ThemePalette {
+function getLandingPalette(root: HTMLElement): LandingPalette {
   const probe = document.createElement("span")
   probe.setAttribute("aria-hidden", "true")
   probe.style.position = "absolute"
@@ -61,7 +53,7 @@ function getThemePalette(): ThemePalette {
   probe.style.height = "0"
   probe.style.overflow = "hidden"
   probe.style.color = "var(--foreground)"
-  document.body.appendChild(probe)
+  root.appendChild(probe)
 
   const resolve = (variable: string) => {
     probe.style.color = `var(${variable})`
@@ -126,6 +118,10 @@ export function LandingContextFigure({
   useEffect(() => {
     const stage = stageRef.current
     if (!stage) return
+    const paletteRoot =
+      stage.closest<HTMLElement>("[data-landing-surface]") ??
+      stage.closest<HTMLElement>("[data-landing-theme]") ??
+      stage
 
     let disposed = false
     let frameId = 0
@@ -164,7 +160,6 @@ export function LandingContextFigure({
     let gridMaterial: import("three").LineBasicMaterial | null = null
     let graphPairs: Array<[number, number]> = []
     let intersectionObserver: IntersectionObserver | null = null
-    let themeObserver: MutationObserver | null = null
 
     const setFigureMode = (next: FigureMode, announce = true) => {
       modeRef.current = next
@@ -332,8 +327,8 @@ export function LandingContextFigure({
         reduceMotion = reduceMotionQuery.matches
         autoRotateRef.current = !reduceMotion
 
-        const palette = getThemePalette()
-        const fallback = getThemePaletteFallback()
+        const palette = getLandingPalette(paletteRoot)
+        const fallback = getLandingPaletteFallback()
         const background = colorFromCss(
           three,
           palette.background,
@@ -656,39 +651,6 @@ export function LandingContextFigure({
           edgeGeometry.attributes.position.needsUpdate = true
         }
 
-        const applyPalette = () => {
-          const nextPalette = getThemePalette()
-          const nextFallback = getThemePaletteFallback()
-          const nextBackground = colorFromCss(
-            three,
-            nextPalette.background,
-            nextFallback.background
-          )
-          const nextForeground = colorFromCss(
-            three,
-            nextPalette.foreground,
-            nextFallback.foreground
-          )
-          const nextAccent = colorFromCss(
-            three,
-            nextPalette.accent,
-            nextFallback.accent
-          )
-          const nextMuted = colorFromCss(
-            three,
-            nextPalette.muted,
-            nextFallback.muted
-          )
-          renderer?.setClearColor(nextBackground, 0)
-          nodeMaterial?.color.copy(nextForeground)
-          edgeColor.copy(nextMuted)
-          edgeMaterial?.color.copy(edgeColor)
-          candleMaterial?.color.copy(nextMuted)
-          priceMaterial?.color.copy(nextForeground)
-          gridMaterial?.color.copy(nextAccent)
-          scheduleFrame()
-        }
-
         const onContextLost = (event: Event) => {
           event.preventDefault()
           removeRenderer()
@@ -721,12 +683,6 @@ export function LandingContextFigure({
           if (visible) scheduleFrame()
         })
         intersectionObserver.observe(stage)
-        themeObserver = new MutationObserver(applyPalette)
-        themeObserver.observe(document.documentElement, {
-          attributes: true,
-          attributeFilter: ["class", "data-theme"],
-        })
-
         frame = (now) => {
           frameId = 0
           if (disposed || !renderer || !scene || !rootGroup || !nodeGeometry)
@@ -795,9 +751,7 @@ export function LandingContextFigure({
         const cleanup = () => {
           resizeObserver.disconnect()
           intersectionObserver?.disconnect()
-          themeObserver?.disconnect()
           intersectionObserver = null
-          themeObserver = null
           stage.removeEventListener("pointerenter", onPointerEnter)
           stage.removeEventListener("pointerleave", onPointerLeave)
           stage.removeEventListener("pointerdown", onPointerDown)

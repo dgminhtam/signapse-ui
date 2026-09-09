@@ -29,6 +29,9 @@ describe("localized landing composition", () => {
     ["en", "Turn market data into a Knowledge Graph."],
   ] as const)("renders the four-feature %s story", (locale, heading) => {
     const html = renderLanding(locale)
+    expect(html).toContain('data-landing-theme="fixed-signapse"')
+    expect((html.match(/data-landing-surface="dark"/g) ?? []).length).toBe(4)
+    expect((html.match(/data-landing-surface="light"/g) ?? []).length).toBe(3)
     const sectionOrder = [
       "hero-product-proof",
       "product-story",

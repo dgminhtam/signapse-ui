@@ -127,6 +127,116 @@ test.describe("P0 public landing", () => {
     await expect(page).toHaveURL(/\/vi\?source=footer$/)
   })
 
+  test("keeps a fixed landing palette across global themes", async ({ page }) => {
+    const palettes = []
+
+    for (const colorScheme of ["light", "dark"] as const) {
+      await page.emulateMedia({ colorScheme })
+      await page.goto("/en")
+      palettes.push(
+        await page
+          .locator('[data-landing-theme="fixed-signapse"]')
+          .evaluate((root) => {
+            const read = (selector: string, property: string) => {
+              const element = root.querySelector(selector)
+              if (!(element instanceof HTMLElement)) {
+                throw new Error(`Missing landing surface: ${selector}`)
+              }
+              return getComputedStyle(element).getPropertyValue(property).trim()
+            }
+
+            return {
+              navy: getComputedStyle(root)
+                .getPropertyValue("--landing-navy")
+                .trim(),
+              mint: getComputedStyle(root)
+                .getPropertyValue("--landing-mint")
+                .trim(),
+              darkBackground: read('[data-landing-surface="dark"]', "--background"),
+              darkForeground: read('[data-landing-surface="dark"]', "--foreground"),
+              lightBackground: read(
+                '[data-landing-surface="light"]',
+                "--background"
+              ),
+              lightForeground: read(
+                '[data-landing-surface="light"]',
+                "--foreground"
+              ),
+              figureBackground: read(
+                '[data-context-stage="interactive"]',
+                "--background"
+              ),
+            }
+          })
+      )
+    }
+
+    expect(palettes[0]).toEqual(palettes[1])
+    expect(palettes[0]).toMatchObject({
+      navy: "#03141d",
+      mint: "#12d6b1",
+      darkBackground: "#03141d",
+      lightBackground: "#eafdf8",
+      figureBackground: "#03141d",
+    })
+    await expect(
+      page.locator('[data-landing-part="header"] img[src*="signapse_logo_dark.svg"]')
+    ).toBeVisible()
+  })
+
+  test("preserves the dashboard theme preference after viewing landing", async ({
+    page,
+  }) => {
+    await page.goto("/en")
+    await page.evaluate(() => localStorage.setItem("theme", "dark"))
+    await page.reload()
+
+    await expect(page.locator("html")).toHaveClass(/dark/)
+    await expect(
+      page.locator('[data-landing-theme="fixed-signapse"]')
+    ).toBeVisible()
+    await expect(page.evaluate(() => localStorage.getItem("theme"))).resolves.toBe(
+      "dark"
+    )
+  })
+
+  test("keeps approved product captures native inside landing frames", async ({
+    page,
+  }) => {
+    await page.goto("/en")
+
+    const images = page.locator("[data-landing-media-slot] img")
+    await expect(images).toHaveCount(2)
+    const imageStyles = await images.evaluateAll((elements) =>
+      elements.map((element) => {
+        const style = getComputedStyle(element)
+        return {
+          src: element.getAttribute("src"),
+          filter: style.filter,
+          mixBlendMode: style.mixBlendMode,
+          opacity: style.opacity,
+        }
+      })
+    )
+
+    expect(imageStyles).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          src: expect.stringContaining("knowledge-graph.webp"),
+          filter: "none",
+          mixBlendMode: "normal",
+          opacity: "1",
+        }),
+        expect.objectContaining({
+          src: expect.stringContaining("live-market-chart.webp"),
+          filter: "none",
+          mixBlendMode: "normal",
+          opacity: "1",
+        }),
+      ])
+    )
+  })
+
   test("uses the approved graph and chart proof geometry across breakpoints", async ({
     page,
   }) => {

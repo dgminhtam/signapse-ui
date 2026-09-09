@@ -1,3 +1,71 @@
+.landingRoot {
+  --landing-navy: #03141d;
+  --landing-navy-surface: #08232e;
+  --landing-mint: #12d6b1;
+  --landing-mint-strong: #006f66;
+  --landing-off-white: #eafdf8;
+  --landing-muted: #a6c4bf;
+  --landing-boundary: #3c6a70;
+  --landing-light-muted-surface: #d8f2ec;
+  --landing-light-muted-foreground: #315c5f;
+  --landing-dark-muted-surface: #123d43;
+
+  --background: var(--landing-off-white);
+  --foreground: var(--landing-navy);
+  --card: var(--landing-off-white);
+  --card-foreground: var(--landing-navy);
+  --popover: var(--landing-off-white);
+  --popover-foreground: var(--landing-navy);
+  --primary: var(--landing-navy);
+  --primary-foreground: var(--landing-off-white);
+  --secondary: var(--landing-light-muted-surface);
+  --secondary-foreground: var(--landing-navy);
+  --muted: var(--landing-light-muted-surface);
+  --muted-foreground: var(--landing-light-muted-foreground);
+  --accent: var(--landing-light-muted-surface);
+  --accent-foreground: var(--landing-navy);
+  --border: var(--landing-boundary);
+  --input: var(--landing-boundary);
+  --ring: var(--landing-mint-strong);
+  --chart-1: var(--landing-mint-strong);
+  --chart-2: var(--landing-mint-strong);
+  --chart-3: var(--landing-boundary);
+  --chart-4: var(--landing-mint);
+  --chart-5: var(--landing-muted);
+}
+
+.darkSurface {
+  color-scheme: dark;
+  color: var(--foreground);
+  --background: var(--landing-navy);
+  --foreground: var(--landing-off-white);
+  --card: var(--landing-navy-surface);
+  --card-foreground: var(--landing-off-white);
+  --popover: var(--landing-navy-surface);
+  --popover-foreground: var(--landing-off-white);
+  --primary: var(--landing-off-white);
+  --primary-foreground: var(--landing-navy);
+  --secondary: var(--landing-dark-muted-surface);
+  --secondary-foreground: var(--landing-off-white);
+  --muted: var(--landing-dark-muted-surface);
+  --muted-foreground: var(--landing-muted);
+  --accent: var(--landing-dark-muted-surface);
+  --accent-foreground: var(--landing-off-white);
+  --border: var(--landing-boundary);
+  --input: var(--landing-boundary);
+  --ring: var(--landing-mint);
+  --chart-1: var(--landing-mint);
+  --chart-2: var(--landing-mint);
+  --chart-3: var(--landing-muted);
+  --chart-4: var(--landing-mint);
+  --chart-5: var(--landing-muted);
+}
+
+.lightSurface {
+  color-scheme: light;
+  color: var(--foreground);
+}
+
 .heroSection {
   background-image:
     linear-gradient(to right, color-mix(in oklab, var(--border) 34%, transparent) 1px, transparent 1px),

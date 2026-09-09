@@ -56,7 +56,10 @@ export function LandingPage({
   const access = createLandingAccessModel(locale, isAuthenticated, t)
 
   return (
-    <div className="min-h-svh overflow-x-clip bg-background text-foreground">
+    <div
+      data-landing-theme="fixed-signapse"
+      className={`${styles.landingRoot} min-h-svh overflow-x-clip bg-background text-foreground`}
+    >
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:font-medium focus:text-foreground focus:ring-2 focus:ring-ring"
@@ -101,7 +104,8 @@ function LandingHeader({
   return (
     <header
       data-landing-part="header"
-      className="border-b border-border/80 bg-background/95"
+      data-landing-surface="dark"
+      className={`${styles.darkSurface} border-b border-border/80 bg-background/95`}
     >
       <div className="mx-auto flex min-h-16 w-full max-w-7xl items-center gap-3 px-4 sm:px-6 lg:px-8">
         <Link
@@ -110,7 +114,7 @@ function LandingHeader({
           className="flex shrink-0 items-center gap-3 rounded-md font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         >
           <span aria-hidden="true">
-            <Logo width={32} height={32} />
+            <Logo width={32} height={32} colorScheme="dark" />
           </span>
           <span className="hidden truncate sm:inline">
             {dictionary.common.appName}
@@ -255,8 +259,9 @@ function HeroSection({
     <section
       id="top"
       data-landing-section="hero-product-proof"
+      data-landing-surface="dark"
       aria-labelledby="landing-hero-heading"
-      className={`${styles.heroSection} relative overflow-hidden border-b border-border/80`}
+      className={`${styles.darkSurface} ${styles.heroSection} relative overflow-hidden border-b border-border/80 bg-background`}
     >
       <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[minmax(0,0.9fr)_minmax(28rem,1.1fr)] lg:items-center lg:gap-14 lg:px-8 lg:py-24">
         <div className={`${styles.heroCopy} flex min-w-0 flex-col gap-7`}>
@@ -348,8 +353,9 @@ function AnalysisFlow({ dictionary }: { dictionary: Dictionary }) {
     <section
       id="how-it-works"
       data-landing-section="analysis-flow"
+      data-landing-surface="light"
       aria-labelledby="landing-flow-heading"
-      className="border-b border-border/80"
+      className={`${styles.lightSurface} border-b border-border/80 bg-background`}
     >
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-10 px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
         <div className="flex max-w-3xl flex-col gap-5">
@@ -457,8 +463,9 @@ function ProductStory({
     <section
       id="product"
       data-landing-section="product-story"
+      data-landing-surface="light"
       aria-labelledby="landing-product-heading"
-      className="border-b border-border/80"
+      className={`${styles.lightSurface} border-b border-border/80 bg-background`}
     >
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-12 px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
         <div className="flex max-w-3xl flex-col gap-5">
@@ -553,8 +560,9 @@ function TrustBoundary({ dictionary }: { dictionary: Dictionary }) {
     <section
       id="trust"
       data-landing-section="trust-boundary"
+      data-landing-surface="light"
       aria-labelledby="landing-trust-heading"
-      className="border-b border-border/80"
+      className={`${styles.lightSurface} border-b border-border/80 bg-background`}
     >
       <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-[auto_minmax(0,1fr)] lg:gap-10 lg:px-8">
         <div
@@ -600,8 +608,9 @@ function FinalAccessCta({
     <section
       id="access"
       data-landing-section="final-access-cta"
+      data-landing-surface="dark"
       aria-labelledby="landing-access-heading"
-      className="border-b border-border/80"
+      className={`${styles.darkSurface} border-b border-border/80 bg-background`}
     >
       <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-6 px-4 py-20 text-center sm:px-6 sm:py-28">
         <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
@@ -637,7 +646,11 @@ function LandingFooter({
   const t = dictionary.landing
 
   return (
-    <footer data-landing-part="footer" className="bg-muted/20">
+    <footer
+      data-landing-part="footer"
+      data-landing-surface="dark"
+      className={`${styles.darkSurface} bg-background`}
+    >
       <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:px-8">
         <div className="flex max-w-md flex-col gap-4">
           <Link
@@ -646,7 +659,7 @@ function LandingFooter({
             className="flex w-fit items-center gap-3 rounded-md font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
           >
             <span aria-hidden="true">
-              <Logo width={28} height={28} />
+              <Logo width={28} height={28} colorScheme="dark" />
             </span>
             <span>{dictionary.common.appName}</span>
           </Link>

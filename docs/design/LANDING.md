@@ -6,6 +6,8 @@
 
 Quyết định ngày 2026-09-09: landing tập trung vào bốn tính năng Đồ thị Tri thức, Biểu đồ trực tiếp, Trợ lý AI và Telegram. Graph và Chart dùng ảnh sản phẩm đã duyệt; AI Assistant và Telegram là hai chapter text-only hoàn chỉnh, không có hạng mục ảnh còn thiếu.
 
+Quyết định visual ngày 2026-09-09: landing dùng fixed branded composition với palette navy/mint đã được duyệt cho Signapse. Quyết định này chỉ áp dụng cho landing; dashboard vẫn phản ứng theo theme preference của người dùng.
+
 Quyết định phục hồi Hero ngày 2026-09-08: đưa riêng Hero về baseline trước refocus tại commit `8ae5336` — H1, supporting copy, CTA tới `#how-it-works`, hai proof point và breakpoint `lg`. ProductStory, AnalysisFlow, TrustBoundary, FinalAccessCta, Footer và toàn bộ media giữ nguyên runtime hiện tại. Bố cục chapter theo tính năng và ảnh thật có chú thích vẫn thuộc refinement đã triển khai.
 
 ## Authority
@@ -13,13 +15,13 @@ Quyết định phục hồi Hero ngày 2026-09-08: đưa riêng Hero về basel
 Tài liệu này là nguồn chuẩn cho định vị, nội dung, bố cục, CTA, claim và media của public landing page Signapse.
 
 - `docs/design/LANDING.md` sở hữu product story và page-specific design direction của landing.
-- `docs/design/DESIGN.md` vẫn sở hữu shared tokens, typography, theme parity, component chrome và accessibility conventions.
+- `docs/design/DESIGN.md` vẫn sở hữu global shared tokens, typography, component chrome và accessibility conventions. Fixed branded palette và theme-boundary exception của landing thuộc tài liệu này.
 - Runtime frontend, OpenSpec capability specs và `docs/APIMAPPING.md` sở hữu sự thật về tính năng đang khả dụng.
 - OpenSpec change của landing sở hữu các requirement có thể kiểm chứng và kế hoạch triển khai.
 
 Khi các nguồn xung đột, landing chỉ được claim capability đã có surface frontend khả dụng. Backend-only endpoint, code legacy hoặc roadmap không được xem là tính năng công khai. Claim matrix trong tài liệu này phải được cập nhật trước khi landing copy mở rộng theo capability mới.
 
-Trong phạm vi public landing `/{lang}`, tài liệu này override các câu dashboard-scoped trong `docs/design/DESIGN.md` về hero/section composition, việc lặp cùng một primary CTA và background grid. `DESIGN.md` vẫn là nguồn chuẩn cho semantic tokens, Geist typography, shadcn chrome, theme parity, responsive và accessibility. Landing dùng một interactive market-context figure có nhãn trong Hero; Analysis Flow có thể dùng đường nối thứ tự decorative giữa ba bước. Connector/node geometry decorative không được lặp trong product frame/card và phải ẩn khỏi accessibility tree. Interactive figure là progressive enhancement của static dual-view fallback, trình bày Market Knowledge Graph và price action như hai góc nhìn bổ sung về bối cảnh thị trường; nó không phải product capture và không ngụ ý graph tạo, biến đổi hoặc dự báo giá. Figure có ý nghĩa phải có text summary localized, semantic keyboard behavior và fallback cùng footprint. Primary CTA chỉ được lặp tại Header, Hero và Final CTA với đúng destination trong CTA Contract.
+Trong phạm vi public landing `/{lang}`, tài liệu này override các câu dashboard-scoped trong `docs/design/DESIGN.md` về hero/section composition, việc lặp cùng một primary CTA, background grid và theme parity của landing. `DESIGN.md` vẫn là nguồn chuẩn cho global semantic tokens, Geist typography, shadcn chrome, responsive và accessibility. Landing dùng một route-scoped semantic palette cố định; không sửa `:root`, `.dark`, `components.json` hoặc token của dashboard. Landing dùng một interactive market-context figure có nhãn trong Hero; Analysis Flow có thể dùng đường nối thứ tự decorative giữa ba bước. Connector/node geometry decorative không được lặp trong product frame/card và phải ẩn khỏi accessibility tree. Interactive figure là progressive enhancement của static dual-view fallback, trình bày Market Knowledge Graph và price action như hai góc nhìn bổ sung về bối cảnh thị trường; nó không phải product capture và không ngụ ý graph tạo, biến đổi hoặc dự báo giá. Figure có ý nghĩa phải có text summary localized, semantic keyboard behavior và fallback cùng footprint. Primary CTA chỉ được lặp tại Header, Hero và Final CTA với đúng destination trong CTA Contract.
 
 `openspec/specs/public-landing-page/spec.md` là đầu vào migration cho thay đổi tiếp theo. Các requirement về Hero phải khớp baseline `8ae5336`: hai Hero proof points và Hero secondary CTA tới `#how-it-works`; các requirement về bốn product chapters, AnalysisFlow ba bước, trust, media và CTA còn lại giữ theo runtime hiện tại. Dùng delta `MODIFIED` hoặc `REMOVED` phù hợp; không giữ hai contract cạnh tranh.
 
@@ -444,11 +446,13 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 ### Visual rules
 
 - Giữ Geist và Geist Mono theo stack hiện tại.
-- Dùng semantic tokens, shadcn wrapper chrome và light/dark logic từ `DESIGN.md`; không thêm landing-only raw palette.
+- Dùng route-scoped semantic landing tokens cùng shadcn wrapper chrome hiện có; global neutral tokens trong `DESIGN.md` không thay đổi. Landing giữ một fixed branded composition dưới cả global light và dark theme.
+- Palette anchor của landing là navy `#03141D`, navy surface `#08232E`, mint `#12D6B1`, off-white `#EAFDF8`, muted `#A6C4BF` và boundary `#3C6A70`. Có thể dẫn xuất shade cùng hue family để đạt hierarchy và WCAG AA.
+- Header, Hero, Final CTA và Footer dùng dark surface family. Product Story, Analysis Flow và Trust Boundary dùng off-white surface family. Logo variant chọn theo surface, không theo global `.dark` class.
 - Dùng một accent có kiểm soát cho primary CTA và tín hiệu nghiệp vụ thật.
 - Hero dùng một interactive market-context figure có nhãn localized, static dual-view fallback và route-local WebGL enhancement; Analysis Flow chỉ dùng đường nối thứ tự tĩnh decorative khi cần, theo composition đã chốt trong Locked Section Copy. Connector/grid/node geometry phải nhẹ, không lặp trong chapter/card; conceptual labels và summary phải có nghĩa độc lập với motion.
 - Product capture là visual chính; icon chỉ hỗ trợ scan và dùng Lucide, không dùng emoji.
-- Section rhythm dùng chapter Graph với copy trái và ảnh phải ở desktop, sau đó các chapter copy/media theo Feature-specific composition; giữ copy trước media ở mobile. Không đổi màu thương hiệu, font hoặc làm lại motion Hero chỉ để giống reference.
+- Section rhythm dùng chapter Graph với copy trái và ảnh phải ở desktop, sau đó các chapter copy/media theo Feature-specific composition; giữ copy trước media ở mobile. Không copy giá trị màu hoặc tài sản của Graphify; không đổi geometry, font hoặc motion Hero chỉ để giống reference.
 - Không dùng bento wall, testimonial carousel, logo cloud, glassmorphism, purple gradient hoặc AI decoration không có product meaning.
 - Không thêm GSAP hoặc chart engine. Hero figure được phép dùng route-local `three@0.180.0` để tái hiện visual core đã duyệt; renderer phải dynamic-load, capped-pixel-ratio, dừng khi idle/paused/hidden/offscreen, dispose đầy đủ và tôn trọng reduced motion. Các transition UI khác dùng `150–250ms` cho hover/focus/disclosure.
 
@@ -482,7 +486,7 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 - Alt text mô tả insight của capture, không liệt kê mọi chữ trong screenshot.
 - Nội dung và hành động không phụ thuộc hover; screenshot không chứa control trông tương tác được nếu nó chỉ là ảnh.
 - Tôn trọng `prefers-reduced-motion`; trang vẫn đầy đủ ý nghĩa khi tắt toàn bộ motion. Reduced-motion bắt đầu không auto-rotate, đổi mode tức thời và chỉ opt-in rotation trong mount hiện tại.
-- Contrast tối thiểu `4.5:1` cho normal text và `3:1` cho large text, focus indicator và component boundary quan trọng trong cả light/dark mode.
+- Contrast tối thiểu `4.5:1` cho normal text và `3:1` cho large text, focus indicator và component boundary quan trọng khi landing hiển thị dưới cả global light và dark theme.
 - Trang sử dụng được hoàn toàn bằng keyboard và ở zoom `200%`.
 
 ## Localization And Copy Rules
