@@ -60,3 +60,16 @@ The system SHALL render market chart loading skeletons that reserve the always-p
 - **WHEN** a market chart skeleton includes a status rail cue
 - **THEN** the cue represents a leading event-status area and a trailing update-time area
 
+### Requirement: Status rail consolidates chart metadata
+The system SHALL render event counts, legend access, live status, and update metadata in one compact bottom status rail.
+
+#### Scenario: Legend is available
+- **WHEN** annotation or calendar markers are available
+- **THEN** the rail exposes one keyboard-accessible legend action
+- **AND** opening it reveals the active marker meanings and aggregate counts
+- **AND** the workbench does not render a second legend footer row
+
+#### Scenario: Narrow chart surface prioritizes live state
+- **WHEN** the chart surface is narrower than the compact desktop layout
+- **THEN** the rail keeps live status and update time visible
+- **AND** event counts remain available through the Events or legend disclosure

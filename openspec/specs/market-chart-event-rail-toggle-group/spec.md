@@ -3,45 +3,42 @@
 ## Purpose
 TBD - created by archiving change refine-market-chart-loading-and-event-toggle. Update Purpose after archive.
 ## Requirements
-### Requirement: Event rail ToggleGroup selection
-The system SHALL use shadcn ToggleGroup semantics for bottom event rail milestone selection.
+### Requirement: Event rail ToggleGroup selection is removed
+The system SHALL NOT use a bottom event rail ToggleGroup for annotation milestone selection.
 
 #### Scenario: Annotation milestones are available
 - **WHEN** the market chart has loaded annotation groups
-- **THEN** the bottom event rail renders the milestones in a single-selection `ToggleGroup`
-- **AND** each milestone is rendered as a `ToggleGroupItem`
-- **AND** each milestone uses the annotation group id as its selection value
+- **THEN** the single status rail renders compact annotation metadata
+- **AND** no `ToggleGroup` or `ToggleGroupItem` is rendered for annotation milestones
 
 #### Scenario: Milestone selection changes
 - **WHEN** the user selects a different milestone
-- **THEN** the selected ToggleGroup value updates to the corresponding annotation group id
-- **AND** the existing annotation popup selection behavior is preserved
+- **THEN** no bottom-rail selection value changes
+- **AND** existing chart marker selection behavior remains available
 
 #### Scenario: Milestone represents multiple annotations
 - **WHEN** a milestone represents more than one annotation
-- **THEN** the milestone displays a secondary count badge without breaking ToggleGroup item layout
+- **THEN** the status rail or legend disclosure communicates the aggregate count without a ToggleGroup item
 
 ### Requirement: Event rail focus and active feedback
-The system SHALL provide clear event milestone active and focus feedback without unwanted rail scroll artifacts.
+The system SHALL keep focus and active feedback on the chart markers and legend disclosure without introducing milestone controls in the status rail.
 
 #### Scenario: Milestone is selected
 - **WHEN** an event milestone is selected
-- **THEN** the selected item uses ToggleGroup selected state semantics
-- **AND** the selected item is visually distinct from unselected milestones
-- **AND** the selected item does not use an unrelated filled primary action treatment
+- **THEN** the selected chart marker uses its existing selection semantics
+- **AND** the status rail does not expose a duplicate selected item
 
-#### Scenario: Milestone receives focus
-- **WHEN** an event milestone receives keyboard focus
+-#### Scenario: Chart marker or legend disclosure receives focus
+- **WHEN** a chart event marker or legend disclosure receives keyboard focus
 - **THEN** the focus indicator remains visible
-- **AND** the event rail does not show a vertical scrollbar because of the focus indicator
+- **AND** the status rail does not show a vertical scrollbar because of the focus indicator
 
-#### Scenario: Milestone is activated by pointer
-- **WHEN** a user clicks or presses an event milestone
+#### Scenario: Chart marker is activated by pointer
+- **WHEN** a user clicks or presses a chart event marker
 - **THEN** active feedback is visible
-- **AND** the event rail does not show a vertical scrollbar because of active-state movement or focus ring bounds
+- **AND** the status rail does not show a vertical scrollbar because of active-state movement or focus ring bounds
 
-#### Scenario: Milestones overflow horizontally
-- **WHEN** there are more milestones than the rail width can display
-- **THEN** the rail allows horizontal scrolling
-- **AND** the rail avoids accidental vertical scrolling for milestone focus or active states
-
+#### Scenario: Status rail avoids milestone overflow
+- **WHEN** annotation groups exceed the available width
+- **THEN** the status rail keeps its compact layout and exposes the meanings through the legend disclosure
+- **AND** the rail does not create horizontal page overflow

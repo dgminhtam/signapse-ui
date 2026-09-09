@@ -23,6 +23,7 @@ function MarketChartToolbarSkeleton() {
           <Skeleton className="h-7 w-24 rounded-lg" />
           <Skeleton className="h-7 w-24 rounded-lg" />
           <Skeleton className="h-7 w-28 rounded-lg" />
+          <Skeleton className="h-7 w-32 rounded-lg" />
         </div>
       </div>
     </div>
@@ -71,9 +72,10 @@ function MarketChartVolumeSkeleton() {
 
 function MarketChartStatusRailSkeleton() {
   return (
-    <div className="border-t bg-muted/10 p-3">
-      <div className="flex min-h-4 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+    <div className="border-t bg-muted/10 px-3 py-1.5">
+      <div className="flex min-h-7 items-center gap-2">
         <Skeleton className="h-3 w-32 rounded-full" />
+        <Skeleton className="h-7 w-20 rounded-lg" />
         <Skeleton className="h-3 w-40 rounded-full" />
       </div>
     </div>
@@ -97,19 +99,6 @@ function MarketChartSkeletonContent({ className }: { className?: string }) {
   )
 }
 
-function MarketChartLegendSkeleton() {
-  return (
-    <div className="border-t bg-muted/5 px-3 py-2">
-      <div className="flex flex-wrap gap-4">
-        <Skeleton className="h-3 w-20 rounded-full" />
-        <Skeleton className="h-3 w-20 rounded-full" />
-        <Skeleton className="h-3 w-24 rounded-full" />
-        <Skeleton className="h-3 w-20 rounded-full" />
-      </div>
-    </div>
-  )
-}
-
 function MarketChartSurfaceSkeleton({
   className,
   embedded = false,
@@ -126,25 +115,20 @@ function MarketChartSurfaceSkeleton({
   return (
     <section
       className={cn(
-        "flex h-[calc(100svh-8.5rem)] max-h-[58rem] min-h-[36rem] flex-col overflow-hidden rounded-xl border border-border bg-card",
+        "flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card",
         className
       )}
     >
       <MarketChartToolbarSkeleton />
       <div
         className={cn(
-          "min-h-0 flex-1 bg-card p-2",
+          "min-h-[20rem] flex-1 bg-card p-2",
           showStatusRail ? "rounded-t-xl" : "rounded-xl"
         )}
       >
         <MarketChartSkeletonContent />
       </div>
-      {showStatusRail ? (
-        <>
-          <MarketChartLegendSkeleton />
-          <MarketChartStatusRailSkeleton />
-        </>
-      ) : null}
+      {showStatusRail ? <MarketChartStatusRailSkeleton /> : null}
     </section>
   )
 }

@@ -214,11 +214,14 @@ The system SHALL size the mounted market chart reading area from the available w
 
 #### Scenario: Short desktop viewport
 - **WHEN** the market chart workbench is displayed on a shorter desktop viewport
-- **THEN** the chart surface keeps a usable minimum height without overflowing the app layout unexpectedly
+- **THEN** the chart surface keeps a usable minimum plot height of approximately `20rem`
+- **AND** the page may scroll when the toolbar and chart chrome cannot fit beside that minimum
+- **AND** the app does not force the chart into an unreadably short plot area
 
 #### Scenario: Chart container resizes
 - **WHEN** the workspace size changes due to window resize, sidebar state, or full-screen state
 - **THEN** the chart resizes to the current container without requiring a data reset
+- **AND** a normal viewport uses the available flex workspace without a fixed maximum canvas height
 
 ### Requirement: Live candle updates preserve user viewport
 The system SHALL apply incoming live candle updates without resetting the chart dataset or stealing the user's visible chart range.

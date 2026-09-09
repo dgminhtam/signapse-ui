@@ -10,7 +10,7 @@ export function FixedToolbar(props: React.ComponentProps<typeof Toolbar>) {
       {...props}
       orientation="vertical"
       className={cn(
-        "sticky top-0 left-0 z-50 w-full flex-col items-stretch overflow-x-hidden rounded-t-lg border-b border-b-border bg-background/95 p-1 backdrop-blur-sm empty:hidden supports-backdrop-blur:bg-background/60",
+        "sticky top-0 left-0 z-50 w-full shrink-0 flex-col items-stretch overflow-x-hidden rounded-t-lg border-b border-b-border bg-background/95 p-1 backdrop-blur-sm empty:hidden supports-backdrop-blur:bg-background/60",
         props.className
       )}
     />

@@ -4,18 +4,29 @@
 TBD - created by archiving change refine-market-chart-control-toolbar. Update Purpose after archive.
 ## Requirements
 ### Requirement: Market chart controls use a compact toolbar
-The system SHALL render market chart asset, timeframe, annotation visibility, indicator, screenshot, and fullscreen controls as a compact toolbar without a surrounding card-like surface.
+The system SHALL render market chart asset, timeframe, event settings, next-event summary, indicator, screenshot, and fullscreen controls as a compact toolbar without a surrounding card-like surface.
 
 #### Scenario: Controls are displayed on desktop
 - **WHEN** the user opens `/market-charts` on a desktop viewport
 - **THEN** the asset selector is shown as the primary leading control
 - **AND** timeframe, annotation visibility, indicator, screenshot, and fullscreen controls are grouped as toolbar commands
+- **AND** the next-event summary is a trailing toolbar control that opens the upcoming calendar list
 - **AND** the control group is not wrapped in a bordered or muted card surface
 
 #### Scenario: Controls are displayed on mobile
 - **WHEN** the user opens `/market-charts` on a narrow viewport
 - **THEN** the controls remain usable without page-level horizontal overflow
 - **AND** the asset selector can take full available width before secondary controls wrap or use contained overflow
+- **AND** the next-event summary keeps a compact title/countdown presentation without page-level horizontal overflow
+
+#### Scenario: Next-event summary is responsive
+- **WHEN** the toolbar is rendered with an upcoming economic calendar event
+- **THEN** a wide toolbar exposes the event identity, scheduled time, impact, and countdown
+- **AND** a constrained toolbar exposes a truncated identity and countdown while its accessible name and popover retain the full metadata
+
+#### Scenario: Next-event summary remains available without an upcoming event
+- **WHEN** no selected-impact event qualifies as the next event
+- **THEN** the toolbar still exposes an accessible action for the upcoming calendar list
 
 ### Requirement: Market chart toolbar preserves accessible labels
 The system SHALL keep accessible labels for market chart toolbar controls while avoiding redundant visible form labels.
@@ -28,21 +39,21 @@ The system SHALL keep accessible labels for market chart toolbar controls while 
 - **WHEN** a sighted user scans the market chart toolbar
 - **THEN** selected values, placeholders, button text, and command icons provide enough context without visible stacked field labels
 
-### Requirement: Chart surface shows instrument freshness context
-The system SHALL render the selected instrument, timeframe, and latest update timestamp inside the chart surface as a concise chart-context label.
+### Requirement: Chart surface keeps identity and freshness outside the plot
+The system SHALL keep chart identity and freshness metadata outside the plot area, with freshness owned by the bottom status rail.
 
 #### Scenario: Chart data is loaded
 - **WHEN** the chart has loaded data for a selected asset and timeframe
-- **THEN** the chart surface shows a label formatted with the asset symbol, timeframe label, and latest update timestamp
-- **AND** the label follows the pattern `XAU/USD - 1 giờ - Cập nhật 10:17 07/05/2026`
+- **THEN** the toolbar and chart context identify the selected asset and timeframe through their existing controls
+- **AND** the bottom status rail shows the latest update timestamp when available
 
 #### Scenario: Chart data is loading or unavailable
 - **WHEN** the chart has not loaded a latest timestamp yet
-- **THEN** the chart context label avoids showing stale or misleading update time
+- **THEN** the status rail omits stale or misleading update-time text
 - **AND** the toolbar does not render a separate freshness text beside the controls
 
-### Requirement: Chart context label avoids duplicate identity
-The system SHALL avoid rendering duplicate visible chart identity text when adding the Signapse-owned chart context label.
+### Requirement: Chart plot avoids duplicate identity
+The system SHALL avoid rendering duplicate visible chart identity text inside the chart plot.
 
 #### Scenario: Native chart title is visible
 - **WHEN** KLineChart renders its own visible symbol and period title
@@ -50,7 +61,7 @@ The system SHALL avoid rendering duplicate visible chart identity text when addi
 
 #### Scenario: Chart engine changes later
 - **WHEN** the chart engine internals change in a later migration
-- **THEN** the market chart context label remains owned by Signapse UI code rather than relying on vendor tooltip or title copy
+- **THEN** the toolbar and status rail remain owned by Signapse UI code rather than relying on vendor tooltip or title copy
 
 ### Requirement: Market chart toolbar exposes chart commands
 The system SHALL provide chart workbench commands for indicators, screenshot export, and fullscreen without leaking raw chart vendor APIs into the surrounding workbench.
@@ -235,7 +246,13 @@ The system SHALL provide one localized Events command whose popover controls the
 - **THEN** the event is classified into the corresponding canonical impact level
 - **AND** a null, empty, or unrecognized value matches no available impact selection
 
-#### Scenario: Keep settings session-local
+#### Scenario: Keep event settings session-local
 - **WHEN** a user changes an event setting
-- **THEN** the workbench does not add URL parameters or persistent storage for that setting
+- **THEN** the workbench does not add URL parameters or persistent storage for annotation visibility, impact filters, or calendar lookahead
 - **AND** changing only an impact checkbox does not call a backend API
+
+#### Scenario: Persist calendar marker visibility as a display preference
+- **WHEN** a user changes the Economic Calendar visibility setting
+- **THEN** the workbench stores that visibility preference in browser `localStorage`
+- **AND** the preference is shared across assets, timeframes, and workspaces on that browser
+- **AND** the preference does not add a URL parameter

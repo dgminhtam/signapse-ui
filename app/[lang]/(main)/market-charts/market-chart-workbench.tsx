@@ -106,6 +106,56 @@ import {
 import { PopoverContentInOverlay } from "@/components/ui/popover-content-in-overlay"
 import { cn } from "@/lib/utils"
 
+const MARKET_CHART_CALENDAR_VISIBILITY_STORAGE_KEY =
+  "signapse:market-charts:calendar-layer:v1"
+const MARKET_CHART_COMPACT_WIDTH_PX = 768
+const MARKET_CHART_COMPACT_HEIGHT_PX = 720
+
+function readStoredMarketChartCalendarVisibility(): boolean | null {
+  if (typeof window === "undefined") {
+    return null
+  }
+
+  try {
+    const value = window.localStorage.getItem(
+      MARKET_CHART_CALENDAR_VISIBILITY_STORAGE_KEY
+    )
+
+    return value === "true" ? true : value === "false" ? false : null
+  } catch {
+    return null
+  }
+}
+
+function getAdaptiveMarketChartCalendarVisibility() {
+  if (typeof window === "undefined") {
+    return true
+  }
+
+  return (
+    window.innerWidth >= MARKET_CHART_COMPACT_WIDTH_PX &&
+    window.innerHeight >= MARKET_CHART_COMPACT_HEIGHT_PX
+  )
+}
+
+function getInitialMarketChartCalendarVisibility() {
+  return (
+    readStoredMarketChartCalendarVisibility() ??
+    getAdaptiveMarketChartCalendarVisibility()
+  )
+}
+
+function writeStoredMarketChartCalendarVisibility(checked: boolean) {
+  try {
+    window.localStorage.setItem(
+      MARKET_CHART_CALENDAR_VISIBILITY_STORAGE_KEY,
+      String(checked)
+    )
+  } catch {
+    // Storage can be unavailable in privacy-restricted browser contexts.
+  }
+}
+
 import {
   createMarketChartAnnotationGroups,
   createMarketChartEconomicCalendarEventGroups,
@@ -651,6 +701,14 @@ function MarketChartTopToolbar({
   timeframeLabels,
   watchlistAssets,
   watchlistError,
+  calendarEvents,
+  calendarLoadError,
+  calendarLoadedAt,
+  calendarLoading,
+  calendarLookaheadDays,
+  currentCalendarTimestamp,
+  onCalendarLookaheadDaysChange,
+  onCalendarRetry,
   onAnnotationLayerChange,
   onCalendarLayerChange,
   onCalendarImpactChange,
@@ -676,6 +734,16 @@ function MarketChartTopToolbar({
   timeframeLabels: Record<MarketChartTimeframe, string>
   watchlistAssets: WorkspaceWatchlistAssetListItemResponse[]
   watchlistError: string | null
+  calendarEvents: MarketChartEconomicCalendarEventResponse[]
+  calendarLoadError: string | null
+  calendarLoadedAt: string | null
+  calendarLoading: boolean
+  calendarLookaheadDays: MarketChartCalendarLookaheadDays
+  currentCalendarTimestamp: number
+  onCalendarLookaheadDaysChange: (
+    days: MarketChartCalendarLookaheadDays
+  ) => void
+  onCalendarRetry: () => void
   onAnnotationLayerChange: (checked: boolean) => void
   onCalendarLayerChange: (checked: boolean) => void
   onCalendarImpactChange: (
@@ -1025,6 +1093,19 @@ function MarketChartTopToolbar({
                   : dictionary.marketCharts.controls.fullscreenLabel}
               </TooltipContentInOverlay>
             </Tooltip>
+
+            <MarketChartUpcomingCalendar
+              calendarEvents={calendarEvents}
+              calendarLoadError={calendarLoadError}
+              calendarLoadedAt={calendarLoadedAt}
+              calendarLoading={calendarLoading}
+              calendarLookaheadDays={calendarLookaheadDays}
+              compact
+              currentTimestamp={currentCalendarTimestamp}
+              onLookaheadDaysChange={onCalendarLookaheadDaysChange}
+              onRetry={onCalendarRetry}
+              selectedImpactCount={selectedCalendarImpacts.length}
+            />
           </div>
         </div>
       </div>
@@ -1390,7 +1471,7 @@ function ChartSurface({
     <section
       ref={setSurfaceRef}
       data-fullscreen={isFullscreen}
-      className="flex h-[calc(100svh-8.5rem)] max-h-[58rem] min-h-[36rem] flex-col overflow-hidden rounded-xl border border-border bg-card data-[fullscreen=true]:mt-0 data-[fullscreen=true]:h-screen data-[fullscreen=true]:max-h-none data-[fullscreen=true]:min-h-0 data-[fullscreen=true]:rounded-none data-[fullscreen=true]:border-0"
+      className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card data-[fullscreen=true]:mt-0 data-[fullscreen=true]:h-screen data-[fullscreen=true]:min-h-0 data-[fullscreen=true]:rounded-none data-[fullscreen=true]:border-0"
     >
       <OverlayPortalContainerProvider
         value={isFullscreen ? surfaceElement : null}
@@ -1412,6 +1493,14 @@ function ChartSurface({
           timeframeLabels={timeframeLabels}
           watchlistAssets={watchlistAssets}
           watchlistError={watchlistError}
+          calendarEvents={calendarEvents}
+          calendarLoadError={calendarLoadError}
+          calendarLoadedAt={calendarLoadedAt}
+          calendarLoading={calendarLoading}
+          calendarLookaheadDays={calendarLookaheadDays}
+          currentCalendarTimestamp={currentCalendarTimestamp}
+          onCalendarLookaheadDaysChange={onCalendarLookaheadDaysChange}
+          onCalendarRetry={onCalendarRetry}
           onAnnotationLayerChange={onAnnotationLayerChange}
           onCalendarLayerChange={onCalendarLayerChange}
           onCalendarImpactChange={onCalendarImpactChange}
@@ -1427,20 +1516,9 @@ function ChartSurface({
             onTimeframeChange(value)
           }}
         />
-        <MarketChartUpcomingCalendar
-          calendarEvents={calendarEvents}
-          calendarLoadError={calendarLoadError}
-          calendarLoadedAt={calendarLoadedAt}
-          calendarLoading={calendarLoading}
-          calendarLookaheadDays={calendarLookaheadDays}
-          currentTimestamp={currentCalendarTimestamp}
-          onLookaheadDaysChange={onCalendarLookaheadDaysChange}
-          onRetry={onCalendarRetry}
-          selectedImpactCount={selectedCalendarImpacts.length}
-        />
         <div
           data-fullscreen={isFullscreen}
-          className="relative min-h-0 flex-1 overflow-hidden bg-card"
+          className="relative min-h-[20rem] min-w-0 flex-1 overflow-hidden bg-card data-[fullscreen=true]:min-h-0"
         >
           {/* Canvas: always mounted when there's a selected asset */}
           {selectedAsset ? (
@@ -1654,13 +1732,6 @@ function ChartSurface({
             </div>
           ) : null}
         </div>
-
-        <MarketChartAnnotationLegend
-          annotationLayerEnabled={annotationLayerEnabled}
-          calendarEventCount={calendarMarkerEvents.length}
-          calendarLayerEnabled={calendarLayerEnabled}
-          groups={annotationGroups}
-        />
 
         <MarketChartAnnotationControls
           annotationLayerEnabled={annotationLayerEnabled}
@@ -1951,7 +2022,7 @@ function MarketChartAnnotationLegend({
   calendarLayerEnabled: boolean
   groups: MarketChartAnnotationGroup[]
 }) {
-  const { dictionary } = useLocalization()
+  const { dictionary, formatMessage, formatNumber } = useLocalization()
   const showAnnotationLegend = annotationLayerEnabled && groups.length > 0
   const showCalendarLegend = calendarLayerEnabled && calendarEventCount > 0
 
@@ -1960,37 +2031,76 @@ function MarketChartAnnotationLegend({
   }
 
   return (
-    <div className="border-t bg-muted/5 px-3 py-2">
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-medium text-muted-foreground">
-        <span className="sr-only">
-          {dictionary.marketCharts.annotations.legendLabel}
-        </span>
-        {showAnnotationLegend
-          ? MARKET_CHART_ANNOTATION_LEGEND_DIRECTIONS.map((direction) => {
-              const colorClassNames =
-                getMarketChartAnnotationColorClassNames(direction)
+    <Popover>
+      <PopoverTrigger
+        render={
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="shrink-0"
+            aria-label={dictionary.marketCharts.annotations.legendLabel}
+          />
+        }
+      >
+        {dictionary.marketCharts.annotations.legendLabel}
+      </PopoverTrigger>
+      <PopoverContentInOverlay
+        align="end"
+        className="w-[min(20rem,calc(100vw_-_1.5rem))]"
+      >
+        <PopoverHeader>
+          <PopoverTitle>
+            {dictionary.marketCharts.annotations.legendLabel}
+          </PopoverTitle>
+        </PopoverHeader>
+        <div className="space-y-3 text-xs text-muted-foreground">
+          {showAnnotationLegend ? (
+            <p className="font-medium text-foreground">
+              {formatMessage(dictionary.marketCharts.annotations.eventMarkers, {
+                count: formatNumber(groups.length),
+              })}
+            </p>
+          ) : null}
+          {showCalendarLegend ? (
+            <p className="font-medium text-foreground">
+              {formatMessage(dictionary.marketCharts.calendar.eventMarkers, {
+                count: formatNumber(calendarEventCount),
+              })}
+            </p>
+          ) : null}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            {showAnnotationLegend
+              ? MARKET_CHART_ANNOTATION_LEGEND_DIRECTIONS.map((direction) => {
+                  const colorClassNames =
+                    getMarketChartAnnotationColorClassNames(direction)
 
-              return (
-                <span
-                  key={direction}
-                  className="inline-flex items-center gap-2"
-                >
-                  <span
-                    className={cn("size-2 rounded-full", colorClassNames.dot)}
-                  />
-                  {dictionary.marketCharts.directions[direction]}
-                </span>
-              )
-            })
-          : null}
-        {showCalendarLegend ? (
-          <span className="inline-flex items-center gap-2">
-            <span className="size-2 rounded-full bg-sky-500" />
-            {dictionary.marketCharts.calendar.legendLabel}
-          </span>
-        ) : null}
-      </div>
-    </div>
+                  return (
+                    <span
+                      key={direction}
+                      className="inline-flex items-center gap-2"
+                    >
+                      <span
+                        className={cn(
+                          "size-2 rounded-full",
+                          colorClassNames.dot
+                        )}
+                      />
+                      {dictionary.marketCharts.directions[direction]}
+                    </span>
+                  )
+                })
+              : null}
+            {showCalendarLegend ? (
+              <span className="inline-flex items-center gap-2">
+                <span className="size-2 rounded-full bg-sky-500" />
+                {dictionary.marketCharts.calendar.legendLabel}
+              </span>
+            ) : null}
+          </div>
+        </div>
+      </PopoverContentInOverlay>
+    </Popover>
   )
 }
 
@@ -2414,6 +2524,7 @@ function MarketChartUpcomingCalendar({
   calendarLoadedAt,
   calendarLoading,
   calendarLookaheadDays,
+  compact = false,
   currentTimestamp,
   onLookaheadDaysChange,
   onRetry,
@@ -2424,6 +2535,7 @@ function MarketChartUpcomingCalendar({
   calendarLoadedAt: string | null
   calendarLoading: boolean
   calendarLookaheadDays: MarketChartCalendarLookaheadDays
+  compact?: boolean
   currentTimestamp: number
   onLookaheadDaysChange: (days: MarketChartCalendarLookaheadDays) => void
   onRetry: () => void
@@ -2462,13 +2574,42 @@ function MarketChartUpcomingCalendar({
         dictionary.marketCharts.format.notAvailable
       )
     : null
+  const nextEventImpact = nextEvent
+    ? ECONOMIC_CALENDAR_IMPACT_LEVELS.find((impact) =>
+        isEconomicCalendarImpactSelected(nextEvent.impact, [impact])
+      )
+    : null
+  const nextEventImpactLabel = nextEventImpact
+    ? dictionary.marketCharts.controls.impactOptionLabels[nextEventImpact]
+    : null
+  const countdownLabel =
+    nextEventTimestamp && currentTimestamp > 0
+      ? formatCalendarCountdown(
+          nextEventTimestamp - currentTimestamp,
+          localization
+        )
+      : null
   const summaryLabel = nextEvent
     ? `${nextEventTitle}${nextEventTime ? ` · ${nextEventTime}` : ""}`
     : dictionary.marketCharts.calendar.noNextEvent
+  const fullSummaryLabel = nextEvent
+    ? [nextEventTitle, nextEventTime, nextEventImpactLabel, countdownLabel]
+        .filter(Boolean)
+        .join(" · ")
+    : summaryLabel
+  const compactSummaryLabel = nextEvent
+    ? [nextEventTitle, countdownLabel].filter(Boolean).join(" · ")
+    : summaryLabel
   const stale = !!calendarLoadedAt && !!calendarLoadError
 
   return (
-    <div className="border-b bg-muted/10 px-3 py-2">
+    <div
+      className={cn(
+        compact
+          ? "min-w-0 flex-1 basis-full lg:max-w-[min(24rem,35%)] lg:basis-auto"
+          : "border-b bg-muted/10 px-3 py-2"
+      )}
+    >
       <Popover>
         <PopoverTrigger
           render={
@@ -2476,22 +2617,25 @@ function MarketChartUpcomingCalendar({
               type="button"
               variant="ghost"
               size="sm"
-              className="h-auto min-h-8 w-full justify-start gap-2 px-2 text-left"
-              aria-label={`${dictionary.marketCharts.calendar.openUpcoming}: ${summaryLabel}`}
+              className={cn(
+                compact
+                  ? "max-w-full min-w-0 justify-start gap-1.5 text-left"
+                  : "h-auto min-h-8 w-full justify-start gap-2 px-2 text-left"
+              )}
+              aria-label={`${dictionary.marketCharts.calendar.openUpcoming}: ${fullSummaryLabel}`}
             />
           }
         >
           <CalendarClock data-icon="inline-start" />
           <span className="min-w-0 truncate" aria-live="polite">
             <span className="font-semibold">
-              {dictionary.marketCharts.calendar.nextEvent}: {summaryLabel}
+              {dictionary.marketCharts.calendar.nextEvent}:
+              <span className="hidden xl:inline">{fullSummaryLabel}</span>
+              <span className="xl:hidden">{compactSummaryLabel}</span>
             </span>
-            {nextEventTimestamp && currentTimestamp > 0 ? (
+            {!compact && countdownLabel ? (
               <span className="ml-2 text-muted-foreground">
-                {formatCalendarCountdown(
-                  nextEventTimestamp - currentTimestamp,
-                  localization
-                )}
+                {countdownLabel}
               </span>
             ) : null}
           </span>
@@ -2644,45 +2788,61 @@ function MarketChartAnnotationControls({
   )
 
   return (
-    <div className="border-t bg-muted/10 p-3">
-      <div className="flex min-h-4 flex-col gap-2 text-xs font-medium text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+    <div className="border-t bg-muted/10 px-3 py-1.5">
+      <div className="flex min-h-7 min-w-0 items-center gap-2 text-xs font-medium text-muted-foreground">
         {label || calendarLabel ? (
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            {label ? (
-              <span className="flex items-center gap-2">
-                <span
-                  className={cn(
-                    "size-2 rounded-full",
-                    hasEvents
-                      ? eventColorClassNames.dot
-                      : "bg-muted-foreground/40"
-                  )}
-                />
-                {label}
-              </span>
-            ) : null}
-            {calendarLabel ? (
-              <span className="flex items-center gap-2">
-                <span
-                  aria-hidden="true"
-                  className={cn(
-                    "size-2 rounded-full",
-                    calendarLoadError
-                      ? "bg-destructive"
-                      : calendarEventCount > 0
-                        ? "bg-sky-500"
+          <>
+            <div
+              className={cn(
+                "min-w-0 flex-1 flex-wrap items-center gap-x-4 gap-y-1",
+                calendarLoadError ? "flex" : "hidden sm:flex"
+              )}
+            >
+              {label ? (
+                <span className="flex items-center gap-2">
+                  <span
+                    className={cn(
+                      "size-2 rounded-full",
+                      hasEvents
+                        ? eventColorClassNames.dot
                         : "bg-muted-foreground/40"
-                  )}
-                />
-                {calendarLabel}
-              </span>
-            ) : null}
-          </div>
+                    )}
+                  />
+                  {label}
+                </span>
+              ) : null}
+              {calendarLabel ? (
+                <span className="flex items-center gap-2">
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      "size-2 rounded-full",
+                      calendarLoadError
+                        ? "bg-destructive"
+                        : calendarEventCount > 0
+                          ? "bg-sky-500"
+                          : "bg-muted-foreground/40"
+                    )}
+                  />
+                  {calendarLabel}
+                </span>
+              ) : null}
+            </div>
+            <span className="sr-only sm:hidden">
+              {[label, calendarLabel].filter(Boolean).join(" · ")}
+            </span>
+          </>
         ) : (
-          <span aria-hidden="true" />
+          <span aria-hidden="true" className="min-w-0 flex-1" />
         )}
+        <MarketChartAnnotationLegend
+          annotationLayerEnabled={annotationLayerEnabled}
+          calendarEventCount={calendarEventCount}
+          calendarLayerEnabled={calendarLayerEnabled}
+          groups={groups}
+        />
         {freshnessLabel || liveStatusLabel ? (
-          <div className="flex flex-wrap items-center gap-3 sm:justify-end sm:text-right">
+          <div className="ml-auto flex min-w-0 shrink-0 flex-wrap items-center justify-end gap-x-3 gap-y-1 text-right">
             {liveStatusLabel ? (
               <span className="flex items-center gap-2">
                 <span
@@ -2739,7 +2899,12 @@ export function MarketChartWorkbench({
   const loadGenerationRef = useRef(0)
   const initialLoadObserverRef = useRef(createMarketChartInitialLoadObserver())
   const [annotationLayerEnabled, setAnnotationLayerEnabled] = useState(true)
-  const [calendarLayerEnabled, setCalendarLayerEnabled] = useState(true)
+  const [calendarLayerPreference, setCalendarLayerPreference] = useState<
+    boolean | null
+  >(() => readStoredMarketChartCalendarVisibility())
+  const [calendarLayerEnabled, setCalendarLayerEnabled] = useState(
+    getInitialMarketChartCalendarVisibility
+  )
   const [selectedCalendarImpacts, setSelectedCalendarImpacts] = useState<
     EconomicCalendarImpactLevel[]
   >(() => ["HIGH"])
@@ -2867,6 +3032,22 @@ export function MarketChartWorkbench({
 
     return () => window.clearInterval(intervalId)
   }, [])
+
+  useEffect(() => {
+    if (calendarLayerPreference !== null) {
+      return
+    }
+
+    function updateAdaptiveCalendarVisibility() {
+      setCalendarLayerEnabled(getAdaptiveMarketChartCalendarVisibility())
+    }
+
+    window.addEventListener("resize", updateAdaptiveCalendarVisibility)
+
+    return () =>
+      window.removeEventListener("resize", updateAdaptiveCalendarVisibility)
+  }, [calendarLayerPreference])
+
   const selectedAnnotationGroup =
     [...annotationGroups, ...warmAnnotationGroups].find(
       (group) => group.id === selectedAnnotationGroupId
@@ -3587,7 +3768,9 @@ export function MarketChartWorkbench({
   }
 
   function handleCalendarLayerChange(checked: boolean) {
+    setCalendarLayerPreference(checked)
     setCalendarLayerEnabled(checked)
+    writeStoredMarketChartCalendarVisibility(checked)
   }
 
   function handleCalendarImpactChange(
@@ -3766,7 +3949,7 @@ export function MarketChartWorkbench({
   }
 
   return (
-    <div className="w-full" aria-busy={isBusy}>
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col" aria-busy={isBusy}>
       {errors.form ? (
         <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-3 text-sm text-destructive">
           {errors.form}

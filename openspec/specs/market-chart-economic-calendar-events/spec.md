@@ -5,12 +5,18 @@ Define how Market Charts loads and displays asset-relevant economic calendar eve
 ## Requirements
 
 ### Requirement: Calendar layer control
-The system SHALL provide a default-enabled chart-marker visibility control for economic calendar events, independent from the existing Events annotation layer and independent from upcoming calendar data availability.
+The system SHALL provide an adaptive chart-marker visibility control for economic calendar events, independent from the existing Events annotation layer and independent from upcoming calendar data availability.
 
-#### Scenario: Calendar markers default to enabled
-- **WHEN** a user opens the Market Charts workbench for a selected watchlist asset and timeframe
-- **THEN** economic calendar markers are enabled by default
+#### Scenario: Calendar markers use the adaptive default
+- **WHEN** a user opens the Market Charts workbench without a stored calendar visibility preference
+- **THEN** economic calendar markers are enabled when the effective CSS viewport is at least `768px` wide and `720px` high
+- **AND** economic calendar markers are disabled when either dimension is below that threshold
 - **AND** the system requests future economic calendar events for the selected asset and selected impact levels regardless of marker visibility
+
+#### Scenario: Calendar visibility preference overrides the adaptive default
+- **WHEN** a user has previously changed the Economic Calendar visibility setting in the same browser
+- **THEN** the workbench restores that stored visibility preference across assets, timeframes, and workspaces
+- **AND** the adaptive viewport default does not replace the stored preference
 
 #### Scenario: Toggle calendar markers
 - **WHEN** a user toggles the localized Show calendar on chart control
@@ -267,7 +273,7 @@ The system SHALL distinguish calendar markers from existing event annotation mar
 
 #### Scenario: Calendar legend point
 - **WHEN** the Calendar layer is enabled and calendar events are available
-- **THEN** the workbench displays a legend point labeled `Economic calendar` in English and `Lịch kinh tế` in Vietnamese
+- **THEN** the workbench exposes a compact accessible legend action that opens a legend containing `Economic calendar` in English and `Lịch kinh tế` in Vietnamese
 - **AND** the legend point uses a calendar-specific color distinct from bullish, bearish, neutral, and mixed annotation colors
 
 #### Scenario: Impact styling

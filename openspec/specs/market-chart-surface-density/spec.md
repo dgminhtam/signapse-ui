@@ -64,9 +64,9 @@ The system SHALL use the available market chart workspace height for the primary
 
 #### Scenario: Annotation legend is displayed
 - **WHEN** the annotation legend is displayed below the chart
-- **THEN** it remains compact and does not compete with the chart canvas
+- **THEN** it is exposed through a compact accessible legend action in the single bottom status rail
+- **AND** opening the action reveals the annotation and calendar legend meanings without adding a second footer row
 
 #### Scenario: Supporting metadata is displayed
 - **WHEN** live status, update time, or annotation count metadata is displayed below the chart
-- **THEN** it remains in the compact footer area rather than reintroducing a side summary panel or verbose description copy
-
+- **THEN** it remains in one compact bottom status rail rather than reintroducing a side summary panel, second footer row, or verbose description copy

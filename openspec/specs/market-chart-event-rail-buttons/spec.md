@@ -3,36 +3,35 @@
 ## Purpose
 TBD - created by archiving change refine-market-chart-event-rail-buttons. Update Purpose after archive.
 ## Requirements
-### Requirement: Event rail milestone buttons
-The system SHALL render market chart bottom event rail milestones as shadcn-aligned outline button controls.
+### Requirement: Event rail milestone buttons are removed
+The system SHALL NOT render annotation milestone buttons in the market chart bottom rail; annotation groups are represented by status metadata and the accessible legend action.
 
 #### Scenario: Annotation groups are available
 - **WHEN** the market chart has loaded one or more annotation groups
-- **THEN** each bottom rail milestone is rendered as a clickable outline button control
-- **AND** the milestone displays the annotation group time
-- **AND** the milestone retains the event dot indicator
+- **THEN** the bottom rail displays compact annotation status metadata
+- **AND** the rail does not render clickable milestone buttons
 
 #### Scenario: Milestone has multiple annotations
 - **WHEN** a bottom rail milestone represents more than one annotation
-- **THEN** the milestone displays a secondary count badge inside the outline button
+- **THEN** the aggregate annotation count is available through the status metadata or legend disclosure
 
 #### Scenario: Milestone is selected
 - **WHEN** a user selects a bottom rail milestone
-- **THEN** the selected milestone exposes pressed state with `aria-pressed`
-- **AND** the selected milestone remains visually identifiable without using a filled primary button treatment
+- **THEN** the existing marker interaction remains available on the chart
+- **AND** the bottom rail does not introduce a second selection control
 
 #### Scenario: Milestone is activated
 - **WHEN** a user clicks a bottom rail milestone
-- **THEN** the system selects the corresponding annotation group
-- **AND** the chart annotation popup behavior remains available for that group
+- **THEN** no milestone activation is available
+- **AND** users continue to open annotation details from the chart marker
 
 ### Requirement: Compact event rail surface
-The system SHALL keep the bottom event rail compact and visually subordinate to the market chart.
+The system SHALL keep the single bottom status rail compact and visually subordinate to the market chart.
 
 #### Scenario: Event rail renders with milestones
 - **WHEN** annotation groups are available
 - **THEN** the rail displays a subdued leading event count
-- **AND** the rail displays milestone buttons in a horizontally scrollable action row
+- **AND** the rail does not display a horizontally scrollable milestone action row
 - **AND** the rail does not introduce a custom timeline scrubber or mini chart
 
 #### Scenario: Event rail is loading
@@ -41,6 +40,5 @@ The system SHALL keep the bottom event rail compact and visually subordinate to 
 
 #### Scenario: Event rail is empty
 - **WHEN** no annotation groups are available in the current range
-- **THEN** the rail displays a single subdued Vietnamese empty message
-- **AND** the rail does not render placeholder buttons
-
+- **THEN** the rail displays concise empty metadata when applicable
+- **AND** the rail does not render placeholder milestone buttons

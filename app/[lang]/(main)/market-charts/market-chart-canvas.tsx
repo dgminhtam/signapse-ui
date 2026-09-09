@@ -932,8 +932,7 @@ export const MarketChartCanvas = forwardRef<
 
     return (
       (chart.getOverlays({ id })[0] as
-        | Overlay<MarketChartDrawingMetadata>
-        | undefined) ?? null
+        Overlay<MarketChartDrawingMetadata> | undefined) ?? null
     )
   }
 
@@ -1673,14 +1672,14 @@ export const MarketChartCanvas = forwardRef<
         ref={containerRef}
         className={cn(
           "absolute inset-x-0 top-0",
-          showCalendarLane ? "bottom-8" : "bottom-0"
+          showCalendarLane ? "bottom-7" : "bottom-0"
         )}
       />
       {activeCalendarGuideX !== null ? (
         <div
           className={cn(
             "pointer-events-none absolute top-0 z-[2] w-px bg-destructive/80",
-            showCalendarLane ? "bottom-8" : "bottom-0"
+            showCalendarLane ? "bottom-7" : "bottom-0"
           )}
           style={{ left: activeCalendarGuideX }}
         />
@@ -1697,7 +1696,7 @@ export const MarketChartCanvas = forwardRef<
         />
       ) : null}
       {showCalendarLane ? (
-        <div className="absolute inset-x-0 bottom-0 z-[4] h-8">
+        <div className="absolute inset-x-0 bottom-0 z-[4] h-7">
           {calendarMarkerPositions.map(({ group, x }) => {
             const count = group.events.length
             const emphasized = group.priority === "high"

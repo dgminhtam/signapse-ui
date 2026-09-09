@@ -4,15 +4,15 @@
 TBD - created by archiving change refine-market-chart-toolbar-metadata-and-price-marks. Update Purpose after archive.
 ## Requirements
 ### Requirement: Toolbar freshness metadata
-The system SHALL show market chart freshness metadata outside the chart plot area.
+The system SHALL show market chart freshness metadata in the bottom status rail outside the chart plot area.
 
 #### Scenario: Successful chart data has update time
 - **WHEN** the market chart has successfully loaded candle data with a valid response `to` time
-- **THEN** the system displays freshness metadata in the trailing toolbar near the refresh action
+- **THEN** the system displays freshness metadata in the trailing side of the bottom status rail
 - **AND** the metadata text uses professional Vietnamese copy such as `Cập nhật 10:17 07/05/2026`
 
 #### Scenario: Avoid duplicated chart identity
-- **WHEN** the system displays freshness metadata in the toolbar
+- **WHEN** the system displays freshness metadata in the status rail
 - **THEN** the metadata does not repeat the selected symbol
 - **AND** the metadata does not repeat the selected timeframe
 
@@ -69,4 +69,3 @@ The system SHALL render market chart drawing overlays with a dedicated chart-too
 - **WHEN** drawing overlay colors are adjusted
 - **THEN** the implementation changes only the market chart KLineChart style helper
 - **AND** global shadcn theme tokens and shared UI wrappers remain unchanged
-
