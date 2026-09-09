@@ -973,6 +973,18 @@ function MarketChartTopToolbar({
               </PopoverContentInOverlay>
             </Popover>
 
+            <MarketChartUpcomingCalendar
+              calendarEvents={calendarEvents}
+              calendarLoadError={calendarLoadError}
+              calendarLoadedAt={calendarLoadedAt}
+              calendarLoading={calendarLoading}
+              calendarLookaheadDays={calendarLookaheadDays}
+              currentTimestamp={currentCalendarTimestamp}
+              onLookaheadDaysChange={onCalendarLookaheadDaysChange}
+              onRetry={onCalendarRetry}
+              selectedImpactCount={selectedCalendarImpacts.length}
+            />
+
             <Popover>
               <PopoverTrigger
                 render={
@@ -1093,19 +1105,6 @@ function MarketChartTopToolbar({
                   : dictionary.marketCharts.controls.fullscreenLabel}
               </TooltipContentInOverlay>
             </Tooltip>
-
-            <MarketChartUpcomingCalendar
-              calendarEvents={calendarEvents}
-              calendarLoadError={calendarLoadError}
-              calendarLoadedAt={calendarLoadedAt}
-              calendarLoading={calendarLoading}
-              calendarLookaheadDays={calendarLookaheadDays}
-              compact
-              currentTimestamp={currentCalendarTimestamp}
-              onLookaheadDaysChange={onCalendarLookaheadDaysChange}
-              onRetry={onCalendarRetry}
-              selectedImpactCount={selectedCalendarImpacts.length}
-            />
           </div>
         </div>
       </div>
@@ -2524,7 +2523,6 @@ function MarketChartUpcomingCalendar({
   calendarLoadedAt,
   calendarLoading,
   calendarLookaheadDays,
-  compact = false,
   currentTimestamp,
   onLookaheadDaysChange,
   onRetry,
@@ -2535,7 +2533,6 @@ function MarketChartUpcomingCalendar({
   calendarLoadedAt: string | null
   calendarLoading: boolean
   calendarLookaheadDays: MarketChartCalendarLookaheadDays
-  compact?: boolean
   currentTimestamp: number
   onLookaheadDaysChange: (days: MarketChartCalendarLookaheadDays) => void
   onRetry: () => void
@@ -2543,6 +2540,38 @@ function MarketChartUpcomingCalendar({
 }) {
   const localization = useLocalization()
   const { dictionary, formatDateTime } = localization
+  const summaryContainerRef = useRef<HTMLDivElement | null>(null)
+  const [summaryWidth, setSummaryWidth] = useState<number | null>(null)
+  const [summaryMode, setSummaryMode] = useState<"compact" | "full">("compact")
+
+  useEffect(() => {
+    const element = summaryContainerRef.current
+
+    if (!element) {
+      return
+    }
+
+    function updateSummaryWidth(width: number) {
+      setSummaryWidth(width)
+      setSummaryMode((current) => {
+        if (current === "full") {
+          return width < 380 ? "compact" : current
+        }
+
+        return width >= 420 ? "full" : current
+      })
+    }
+
+    const observer = new ResizeObserver(([entry]) => {
+      updateSummaryWidth(entry.contentRect.width)
+    })
+
+    updateSummaryWidth(element.getBoundingClientRect().width)
+    observer.observe(element)
+
+    return () => observer.disconnect()
+  }, [])
+
   const upcomingEvents = getUpcomingMarketChartCalendarEvents({
     currentTimestamp,
     events: calendarEvents,
@@ -2598,14 +2627,14 @@ function MarketChartUpcomingCalendar({
         .join(" · ")
     : summaryLabel
   const stale = !!calendarLoadedAt && !!calendarLoadError
+  const showCompactCountdown = summaryWidth === null || summaryWidth >= 220
+  const showCompactIconOnly = summaryWidth !== null && summaryWidth < 180
+  const showFullSummary = summaryMode === "full"
 
   return (
     <div
-      className={cn(
-        compact
-          ? "min-w-0 flex-1 basis-full lg:max-w-[min(32rem,100%)] lg:basis-auto"
-          : "border-b bg-muted/10 px-3 py-2"
-      )}
+      ref={summaryContainerRef}
+      className="order-none min-w-0 flex-1 basis-full lg:order-last lg:ml-auto lg:max-w-[min(32rem,100%)] lg:basis-auto"
     >
       <Popover>
         <PopoverTrigger
@@ -2613,43 +2642,56 @@ function MarketChartUpcomingCalendar({
             <Button
               type="button"
               variant="ghost"
-              size="sm"
+              size={showCompactIconOnly ? "icon-sm" : "sm"}
               className={cn(
-                compact
-                  ? "max-w-full min-w-0 justify-start gap-1.5 text-left"
-                  : "h-auto min-h-8 w-full justify-start gap-2 px-2 text-left"
+                "max-w-full min-w-0 justify-start gap-1.5 text-left",
+                showCompactIconOnly && "justify-center"
               )}
+              title={showCompactIconOnly ? fullSummaryLabel : undefined}
               aria-label={`${dictionary.marketCharts.calendar.openUpcoming}: ${fullSummaryLabel}`}
             />
           }
         >
           <CalendarClock data-icon="inline-start" />
-          <span
-            className="flex min-w-0 items-baseline gap-1.5"
-            aria-live="polite"
-          >
-            <span className="shrink-0 font-semibold">
-              {dictionary.marketCharts.calendar.nextEvent}:
+          {showFullSummary ? (
+            <span
+              className="flex min-w-0 items-baseline gap-1.5"
+              aria-live="polite"
+            >
+              <span className="shrink-0 font-semibold">
+                {dictionary.marketCharts.calendar.nextEvent}:
+              </span>
+              <span className="min-w-0 truncate font-semibold">
+                {nextEvent ? nextEventTitle : summaryLabel}
+              </span>
+              {nextEventTime ? (
+                <span className="shrink-0 text-muted-foreground">
+                  {nextEventTime}
+                </span>
+              ) : null}
+              {countdownLabel ? (
+                <span className="shrink-0 text-muted-foreground">
+                  {countdownLabel}
+                </span>
+              ) : null}
             </span>
-            <span className="min-w-0 truncate font-semibold">
-              {nextEvent ? nextEventTitle : summaryLabel}
+          ) : (
+            <span
+              className="flex min-w-0 items-center gap-1.5"
+              aria-live="polite"
+            >
+              {!showCompactIconOnly ? (
+                <span className="shrink-0 font-semibold">
+                  {dictionary.marketCharts.calendar.nextEvent}
+                </span>
+              ) : null}
+              {showCompactCountdown && countdownLabel ? (
+                <span className="min-w-0 truncate text-muted-foreground">
+                  {countdownLabel}
+                </span>
+              ) : null}
             </span>
-            {nextEventTime ? (
-              <span className="shrink-0 text-muted-foreground">
-                {nextEventTime}
-              </span>
-            ) : null}
-            {nextEventImpactLabel ? (
-              <span className="hidden shrink-0 text-muted-foreground xl:inline">
-                {nextEventImpactLabel}
-              </span>
-            ) : null}
-            {countdownLabel ? (
-              <span className="shrink-0 text-muted-foreground">
-                {countdownLabel}
-              </span>
-            ) : null}
-          </span>
+          )}
         </PopoverTrigger>
         <PopoverContentInOverlay
           align="start"

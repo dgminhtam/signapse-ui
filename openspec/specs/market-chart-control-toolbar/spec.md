@@ -21,8 +21,10 @@ The system SHALL render market chart asset, timeframe, event settings, next-even
 
 #### Scenario: Next-event summary is responsive
 - **WHEN** the toolbar is rendered with an upcoming economic calendar event
-- **THEN** a wide toolbar exposes the event identity, scheduled time, impact, and countdown
-- **AND** a constrained toolbar keeps the scheduled time and countdown visible while only an overlong event identity may truncate
+- **THEN** a Next event slot at least `420px` wide exposes the event identity, scheduled time, and countdown inline
+- **AND** a slot below `420px` exposes a compact `Next event` trigger instead of forcing the full summary into the toolbar
+- **AND** a compact slot at least `220px` wide may include the countdown, while a slot below `180px` may use an icon-only trigger
+- **AND** the trigger accessible name and popover retain the full event identity, scheduled time, impact, and countdown
 
 #### Scenario: Next-event summary remains available without an upcoming event
 - **WHEN** no selected-impact event qualifies as the next event
