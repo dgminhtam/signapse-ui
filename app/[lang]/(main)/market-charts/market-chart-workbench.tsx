@@ -2603,7 +2603,7 @@ function MarketChartUpcomingCalendar({
     <div
       className={cn(
         compact
-          ? "min-w-0 flex-1 basis-full lg:max-w-[min(24rem,35%)] lg:basis-auto"
+          ? "min-w-0 flex-1 basis-full lg:max-w-[min(32rem,100%)] lg:basis-auto"
           : "border-b bg-muted/10 px-3 py-2"
       )}
     >
