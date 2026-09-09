@@ -162,9 +162,9 @@ Các dictionary entry của landing phải bắt đầu từ copy dưới đây.
 
 | Vai trò            | Tiếng Việt                                  | English                          |
 | ------------------ | ------------------------------------------- | -------------------------------- |
-| Nav: Product       | Tính năng                                   | Features                         |
-| Nav: How it works  | Cách sử dụng                                | How to use                       |
-| Nav: Trust         | Độ tin cậy                                  | Trust                            |
+| Nav: Product       | Sản phẩm                                    | Product                          |
+| Nav: Overview      | Tổng quan                                   | Overview                         |
+| Nav: How it works  | Cách hoạt động                              | How it works                     |
 | Sign in            | Đăng nhập                                   | Sign in                          |
 | Locale group label | Chọn ngôn ngữ                               | Choose language                  |
 | Vietnamese locale  | Tiếng Việt                                  | Tiếng Việt                       |
@@ -172,6 +172,8 @@ Các dictionary entry của landing phải bắt đầu từ copy dưới đây.
 | Footer descriptor  | Phân tích thị trường theo bối cảnh sự kiện. | Event-aware market intelligence. |
 
 CTA label trong Header và email fallback trong Footer dùng đúng CTA Contract, không tạo biến thể copy khác.
+
+Header chỉ hiển thị nhóm Sản phẩm, locale và auth-aware CTA. Desktop dùng disclosure chứa Tổng quan (`#product`), bốn chapter theo thứ tự tính năng và Cách hoạt động (`#how-it-works`). Mobile hiển thị cùng danh sách trong menu, không có submenu bay ngang. Menu đóng khi chọn link, Escape hoặc bấm ngoài; Escape trả focus về trigger. Blog, Tài liệu và dropdown Hỗ trợ chưa hiển thị; tài liệu người dùng sẽ được xây dựng sau. Trust vẫn là section của landing, liên hệ vẫn ở Footer.
 
 ### `AnalysisFlow` — `#how-it-works`
 
@@ -389,7 +391,7 @@ Nếu chưa có capture được duyệt, hero phải dùng text-first compositi
 
 | Thứ tự | Section / route-local component | ID              | Mục tiêu                                                  | Nội dung chính                                                                              | Product proof                                        |
 | ------ | ------------------------------- | --------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| 1      | `PublicHeader`                  | —               | Nhận diện, điều hướng và access path                      | Logo; Tính năng; Cách sử dụng; Độ tin cậy; locale; auth-aware CTA                           | Brand asset                                          |
+| 1      | `PublicHeader`                  | —               | Nhận diện, điều hướng và access path                      | Logo; Sản phẩm (Tổng quan, bốn tính năng, Cách hoạt động); locale; auth-aware CTA            | Brand asset                                          |
 | 2      | `HeroProductProof`              | `#top`          | Định vị Knowledge Graph/AI và dẫn tới hành động tiếp theo | H1/supporting copy baseline; CTA; trust line; hai proof point                               | Conceptual market-context figure hiện có             |
 | 3      | `ProductStory`                  | `#product`      | Giải thích bốn tính năng chính bằng bốn chapter lớn       | Đồ thị Tri thức → Biểu đồ trực tiếp → Trợ lý AI → Telegram                                  | Ảnh Graph/Chart; AI/Telegram text-only               |
 | 4      | `AnalysisFlow`                  | `#how-it-works` | Giúp người mới hình dung hành trình sử dụng               | Chọn tài sản, xem diễn biến giá → Mở sự kiện, kiểm tra nguồn tin → Phân tích cùng Trợ lý AI | Ba bước bằng text; đường nối thứ tự tĩnh là tùy chọn |
@@ -553,7 +555,7 @@ Landing phải gợi cảm giác một market briefing rõ ràng, chính xác v�
 - Cutover-only: mailbox request-access phải được owner xác nhận provision, nhận external mail và có người theo dõi trước apex release; đây không phải merge/archive acceptance của landing implementation change.
 - Sign-in và dashboard destinations giữ locale.
 - Anonymous và authenticated CTA states đúng với CTA matrix.
-- Hero secondary của cả hai trạng thái là “Xem cách Signapse phân tích” / “See how Signapse analyzes markets” tới `#how-it-works`; navigation “Tính năng” / “Features” vẫn tới `#product`. Các chapter anchor và supported hashes được giữ qua đổi locale.
+- Hero secondary của cả hai trạng thái là “Xem cách Signapse phân tích” / “See how Signapse analyzes markets” tới `#how-it-works`; navigation “Tổng quan” / “Overview” trong nhóm Sản phẩm tới `#product`. Các chapter anchor và supported hashes được giữ qua đổi locale.
 - Locale switch giữ query và supported hash, đánh dấu current locale đúng semantics và không đổi auth state.
 
 ### Media

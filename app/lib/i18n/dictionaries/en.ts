@@ -751,8 +751,9 @@ export const en: Dictionary = {
   },
   landing: {
     nav: {
-      flow: "How to use",
-      product: "Features",
+      flow: "How it works",
+      product: "Product",
+      overview: "Overview",
       trust: "Trust boundary",
       access: "Access",
       requestAccess: "Request access",

@@ -4,7 +4,9 @@ import {
   ArrowRightIcon,
   BrainCircuitIcon,
   CalendarClockIcon,
+  ChevronDownIcon,
   LineChartIcon,
+  MenuIcon,
   NetworkIcon,
   ShieldCheckIcon,
 } from "lucide-react"
@@ -27,6 +29,7 @@ import {
   type LandingProductCaptureLabels,
 } from "./landing-product-capture"
 import { LandingLocaleLinks } from "./landing-locale-links"
+import { LandingNavigationDisclosure } from "./landing-navigation-disclosure"
 import { Logo } from "@/components/logo"
 import { buttonVariants } from "@/components/ui/button"
 
@@ -87,9 +90,12 @@ function LandingHeader({
 }) {
   const t = dictionary.landing
   const sectionLinks = [
-    { href: "#product", label: t.nav.product },
+    { href: "#product", label: t.nav.overview },
+    { href: "#knowledge-graph", label: t.product.knowledgeGraphTitle },
+    { href: "#live-charts", label: t.product.liveChartsTitle },
+    { href: "#ai-assistant", label: t.product.aiAssistantTitle },
+    { href: "#telegram", label: t.product.telegramTitle },
     { href: "#how-it-works", label: t.nav.flow },
-    { href: "#trust", label: t.nav.trust },
   ]
 
   return (
@@ -115,15 +121,27 @@ function LandingHeader({
           aria-label={t.accessibility.headerNavigation}
           className="ml-auto hidden items-center gap-5 text-sm text-muted-foreground lg:flex"
         >
-          {sectionLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="rounded-md px-2 py-2 transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-            >
-              {link.label}
-            </a>
-          ))}
+          <LandingNavigationDisclosure className="group relative">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-md px-3 py-2 font-medium text-foreground hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring [&::-webkit-details-marker]:hidden">
+              {t.nav.product}
+              <ChevronDownIcon
+                aria-hidden="true"
+                className="size-4 group-open:rotate-180"
+              />
+            </summary>
+            <ul className="absolute top-[calc(100%+0.5rem)] right-0 z-20 flex w-64 flex-col gap-1 rounded-lg border border-border bg-background p-2 shadow-lg">
+              {sectionLinks.map((link) => (
+                <li key={link.href}>
+                  <a
+                    href={link.href}
+                    className="flex min-h-11 items-center rounded-md px-3 py-2 text-sm text-foreground hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </LandingNavigationDisclosure>
         </nav>
 
         <div className="ml-auto flex items-center gap-1 sm:gap-2 lg:ml-4">
@@ -157,14 +175,15 @@ function LandingHeader({
           ) : null}
           <LandingActionButton action={access.headerPrimary} />
 
-          <details className="relative lg:hidden" data-mobile-menu>
+          <LandingNavigationDisclosure
+            className="relative lg:hidden"
+            data-mobile-menu
+          >
             <summary className="flex min-h-11 min-w-11 cursor-pointer list-none items-center justify-center rounded-md border border-border bg-background text-foreground transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring [&::-webkit-details-marker]:hidden">
               <span className="sr-only">{t.nav.openMenu}</span>
-              <span aria-hidden="true" className="text-lg leading-none">
-                ≡
-              </span>
+              <MenuIcon aria-hidden="true" className="size-5" />
             </summary>
-            <div className="absolute top-[calc(100%+0.5rem)] right-0 z-20 flex w-[min(19rem,calc(100vw-2rem))] flex-col gap-3 border border-border bg-background p-3 shadow-lg">
+            <div className="absolute top-[calc(100%+0.5rem)] right-0 z-20 flex max-h-[calc(100dvh-5rem)] w-[min(19rem,calc(100vw-2rem))] flex-col gap-3 overflow-y-auto border border-border bg-background p-3 shadow-lg">
               <div className="border-b border-border pb-3 sm:hidden">
                 <Suspense
                   fallback={
@@ -188,6 +207,9 @@ function LandingHeader({
                 aria-label={t.accessibility.headerNavigation}
                 className="flex flex-col gap-1"
               >
+                <p className="px-3 py-2 text-xs font-semibold text-muted-foreground">
+                  {t.nav.product}
+                </p>
                 {sectionLinks.map((link) => (
                   <a
                     key={link.href}
@@ -212,7 +234,7 @@ function LandingHeader({
                 />
               ) : null}
             </div>
-          </details>
+          </LandingNavigationDisclosure>
         </div>
       </div>
     </header>

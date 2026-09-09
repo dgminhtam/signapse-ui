@@ -750,8 +750,9 @@ export const vi = {
   },
   landing: {
     nav: {
-      flow: "Cách sử dụng",
-      product: "Tính năng",
+      flow: "Cách hoạt động",
+      product: "Sản phẩm",
+      overview: "Tổng quan",
       trust: "Ranh giới tin cậy",
       access: "Truy cập",
       requestAccess: "Yêu cầu truy cập",

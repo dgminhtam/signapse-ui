@@ -191,7 +191,7 @@ test.describe("P0 public landing", () => {
     await summary.press("Enter")
     await expect(page.locator("[data-mobile-menu]")).toHaveAttribute("open", "")
     await expect(
-      page.getByRole("link", { name: "Tính năng", exact: true })
+      page.getByRole("link", { name: "Tổng quan", exact: true })
     ).toBeVisible()
     await expect(
       page.getByRole("link", { name: "English", exact: true }).last()
