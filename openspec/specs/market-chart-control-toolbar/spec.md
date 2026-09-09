@@ -22,7 +22,7 @@ The system SHALL render market chart asset, timeframe, event settings, next-even
 #### Scenario: Next-event summary is responsive
 - **WHEN** the toolbar is rendered with an upcoming economic calendar event
 - **THEN** a wide toolbar exposes the event identity, scheduled time, impact, and countdown
-- **AND** a constrained toolbar exposes a truncated identity and countdown while its accessible name and popover retain the full metadata
+- **AND** a constrained toolbar keeps the scheduled time and countdown visible while only an overlong event identity may truncate
 
 #### Scenario: Next-event summary remains available without an upcoming event
 - **WHEN** no selected-impact event qualifies as the next event

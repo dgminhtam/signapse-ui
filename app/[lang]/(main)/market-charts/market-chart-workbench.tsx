@@ -2597,9 +2597,6 @@ function MarketChartUpcomingCalendar({
         .filter(Boolean)
         .join(" · ")
     : summaryLabel
-  const compactSummaryLabel = nextEvent
-    ? [nextEventTitle, countdownLabel].filter(Boolean).join(" · ")
-    : summaryLabel
   const stale = !!calendarLoadedAt && !!calendarLoadError
 
   return (
@@ -2627,14 +2624,28 @@ function MarketChartUpcomingCalendar({
           }
         >
           <CalendarClock data-icon="inline-start" />
-          <span className="min-w-0 truncate" aria-live="polite">
-            <span className="font-semibold">
+          <span
+            className="flex min-w-0 items-baseline gap-1.5"
+            aria-live="polite"
+          >
+            <span className="shrink-0 font-semibold">
               {dictionary.marketCharts.calendar.nextEvent}:
-              <span className="hidden xl:inline">{fullSummaryLabel}</span>
-              <span className="xl:hidden">{compactSummaryLabel}</span>
             </span>
-            {!compact && countdownLabel ? (
-              <span className="ml-2 text-muted-foreground">
+            <span className="min-w-0 truncate font-semibold">
+              {nextEvent ? nextEventTitle : summaryLabel}
+            </span>
+            {nextEventTime ? (
+              <span className="shrink-0 text-muted-foreground">
+                {nextEventTime}
+              </span>
+            ) : null}
+            {nextEventImpactLabel ? (
+              <span className="hidden shrink-0 text-muted-foreground xl:inline">
+                {nextEventImpactLabel}
+              </span>
+            ) : null}
+            {countdownLabel ? (
+              <span className="shrink-0 text-muted-foreground">
                 {countdownLabel}
               </span>
             ) : null}
