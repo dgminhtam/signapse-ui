@@ -117,7 +117,7 @@ The system SHALL serialize moderation queue controls through `$filter`, zero-bas
 
 #### Scenario: Opening the default queue
 - **WHEN** moderation opens without valid query state
-- **THEN** the request explicitly sends `status eq PENDING_REVIEW`, creation time descending, identifier descending, and the accepted UI page size
+- **THEN** the request explicitly sends `status eq 'PENDING_REVIEW'`, creation time descending, identifier descending, and the accepted UI page size
 
 #### Scenario: Combining queue controls
 - **WHEN** title, type, and status controls are set

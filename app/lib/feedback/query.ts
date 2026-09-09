@@ -78,7 +78,7 @@ export function buildFeedbackFilter(query: FeedbackModerationQuery): string {
     filters.push(`type eq ${query.type}`)
   }
   if (query.status) {
-    filters.push(`status eq ${query.status}`)
+    filters.push(`status eq '${query.status}'`)
   }
   return filters.join(" and ")
 }

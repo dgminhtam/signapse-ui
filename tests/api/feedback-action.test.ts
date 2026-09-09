@@ -95,7 +95,7 @@ describe("Feedback authenticated actions", () => {
       size: 20,
     })
     expect(fetchAuthenticated).toHaveBeenLastCalledWith(
-      "/feedback-submissions?%24filter=containsIgnoreCase%28title%2C%27chart%27%29+and+type+eq+BUG+and+status+eq+PENDING_REVIEW&page=1&size=20&sort=createdDate%2Cdesc&sort=id%2Cdesc"
+      "/feedback-submissions?%24filter=containsIgnoreCase%28title%2C%27chart%27%29+and+type+eq+BUG+and+status+eq+%27PENDING_REVIEW%27&page=1&size=20&sort=createdDate%2Cdesc&sort=id%2Cdesc"
     )
   })
 

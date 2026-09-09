@@ -166,7 +166,7 @@ describe("feedback query contract", () => {
     const params = new URLSearchParams(serialized)
 
     expect(params.get("$filter")).toBe(
-      "containsIgnoreCase(title,'O''Reilly') and type eq BUG and status eq PENDING_REVIEW"
+      "containsIgnoreCase(title,'O''Reilly') and type eq BUG and status eq 'PENDING_REVIEW'"
     )
     expect(params.get("page")).toBe("1")
     expect(params.get("size")).toBe("20")
