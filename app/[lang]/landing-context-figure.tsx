@@ -385,16 +385,14 @@ export function LandingContextFigure({
         const current = new Float32Array(GRAPH_NODE_COUNT * 3)
 
         for (let index = 0; index < GRAPH_NODE_COUNT; index += 1) {
-          const u = seededRandom(index + 1)
-          const v = seededRandom(index + 43)
-          const w = seededRandom(index + 91)
-          const theta = u * Math.PI * 2
-          const phi = Math.acos(2 * v - 1)
-          const radius = 1.45 + w * 1.65
+          // Evenly distribute nodes across a sphere using the golden angle.
+          const theta = index * Math.PI * (3 - Math.sqrt(5))
+          const phi = Math.acos(1 - (2 * (index + 0.5)) / GRAPH_NODE_COUNT)
+          const radius = 2.2
           const position = new three.Vector3(
-            Math.sin(phi) * Math.cos(theta) * radius * 1.15,
-            Math.cos(phi) * radius * 0.72,
-            Math.sin(phi) * Math.sin(theta) * radius * 0.72
+            Math.sin(phi) * Math.cos(theta) * radius,
+            Math.cos(phi) * radius,
+            Math.sin(phi) * Math.sin(theta) * radius
           )
           graph.push(position)
           current[index * 3] = position.x
@@ -941,7 +939,7 @@ export function LandingContextFigure({
             const graphWeight = 1 - morph
             const chartWeight = morph
             rootGroup.rotation.y +=
-              (0.0017 * graphWeight + 0.00045 * chartWeight) * (delta / 16.67)
+              (0.0034 * graphWeight + 0.00045 * chartWeight) * (delta / 16.67)
           }
           renderer.render(scene, camera)
 
