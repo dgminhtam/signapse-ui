@@ -42,9 +42,9 @@
   inset: 0 0 auto;
   background: linear-gradient(
     to bottom,
-    var(--background),
-    color-mix(in oklab, var(--background) 94%, transparent) 55%,
-    color-mix(in oklab, var(--background) 78%, transparent)
+    color-mix(in oklab, var(--landing-mint) 18%, var(--background)),
+    color-mix(in oklab, var(--landing-mint) 7%, var(--background)) 55%,
+    var(--background)
   );
   backdrop-filter: blur(16px);
 }
